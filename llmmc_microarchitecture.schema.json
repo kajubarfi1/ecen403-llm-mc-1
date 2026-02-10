@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/ddr3_microarchitecture.schema.json",
+  "title": "DDR3 Memory Controller Microarchitecture Definition",
+  "type": "object",
+  "required": [
+    "memory_geometry",
+    "timing_model",
+    "clocking_model",
+    "controller_architecture",
+    "implementation_targets"
+  ],
+  "properties": {
+
+    "memory_geometry": {
+      "type": "object",
+      "required": [
+        "row_bits",
+        "column_bits",
+        "bank_bits",
+        "ranks",
+        "burst_length",
+        "device_width_bits",
+        "byte_lanes",
+        "address_mapping"
+      ],
+      "properties": {
+        "row_bits": { "type": "integer", "minimum": 12, "maximum": 16 },
+        "column_bits": { "type": "integer", "minimum": 10, "maximum": 12 },
+        "bank_bits": { "type": "integer", "const": 3 },
+        "ranks": { "type": "integer", "minimum": 1 },
+        "burst_length": { "type": "integer", "enum": [4, 8] },
+        "device_width_bits": { "type": "integer", "enum": [8, 16] },
+        "byte_lanes": { "type": "integer", "minimum": 1 },
+        "address_mapping": {
+          "type": "string",
+          "enum": ["row-bank-column", "bank-row-column"]
+        }
+      }
+    },
+
+    "timing_model": {
+      "type": "object",
+      "required": [
+        "tRCD", "tRP", "tRAS", "tRC",
+        "tRFC", "tFAW", "tRRD",
+        "tWR", "tWTR", "tRTP",
+        "tCCD", "tREFI",
+        "CAS_latency",
+        "CAS_write_latency"
+      ],
+      "properties": {
+        "tRCD": { "type": "integer", "minimum": 0 },
+        "tRP": { "type": "integer", "minimum": 0 },
+        "tRAS": { "type": "integer", "minimum": 0 },
+        "tRC": { "type": "integer", "minimum": 0 },
+        "tRFC": { "type": "integer", "minimum": 0 },
+        "tFAW": { "type": "integer", "minimum": 0 },
+        "tRRD": { "type": "integer", "minimum": 0 },
+        "tWR": { "type": "integer", "minimum": 0 },
+        "tWTR": { "type": "integer", "minimum": 0 },
+        "tRTP": { "type": "integer", "minimum": 0 },
+        "tCCD": { "type": "integer", "minimum": 0 },
+        "tREFI": { "type": "integer", "minimum": 0 },
+        "CAS_latency": { "type": "integer", "minimum": 0 },
+        "CAS_write_latency": { "type": "integer", "minimum": 0 }
+      }
+    },
+
+    "clocking_model": {
+      "type": "object",
+      "required": [
+        "controller_clock_period_ps",
+        "ddr_clock_period_ps",
+        "clock_ratio",
+        "pipeline_latency_cycles"
+      ],
+      "properties": {
+        "controller_clock_period_ps": {
+          "type": "integer",
+          "minimum": 1000
+        },
+        "ddr_clock_period_ps": {
+          "type": "integer",
+          "minimum": 1000
+        },
+        "clock_ratio": {
+          "type": "integer",
+          "const": 4
+        },
+        "pipeline_latency_cycles": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+
+    "controller_architecture": {
+      "type": "object",
+      "required": [
+        "num_ports",
+        "scheduler_policy",
+        "row_policy",
+        "command_queue_depth",
+        "lookahead_depth",
+        "ecc_mode",
+        "self_refresh_mode"
+      ],
+      "properties": {
+        "num_ports": { "type": "integer", "minimum": 1 },
+
+        "scheduler_policy": {
+          "type": "string",
+          "enum": ["in_order", "fr_fcfs"]
+        },
+
+        "row_policy": {
+          "type": "string",
+          "enum": ["open_page", "close_page"]
+        },
+
+        "command_queue_depth": {
+          "type": "integer",
+          "minimum": 1
+        },
+
+        "lookahead_depth": {
+          "type": "integer",
+          "minimum": 0
+        },
+
+        "ecc_mode": {
+          "type": "integer",
+          "enum": [0, 1, 2, 3]
+        },
+
+        "self_refresh_mode": {
+          "type": "string",
+          "enum": ["disabled", "manual", "auto"]
+        },
+
+        "enable_bist": { "type": "boolean" },
+        "enable_second_wishbone": { "type": "boolean" },
+        "aux_width": { "type": "integer", "minimum": 4 }
+      }
+    },
+
+    "implementation_targets": {
+      "type": "object",
+      "required": [
+        "target_frequency_mhz",
+        "area_optimization_goal",
+        "power_optimization_goal"
+      ],
+      "properties": {
+        "target_frequency_mhz": {
+          "type": "number",
+          "minimum": 1
+        },
+        "area_optimization_goal": {
+          "type": "string",
+          "enum": ["area", "balanced", "performance"]
+        },
+        "power_optimization_goal": {
+          "type": "string",
+          "enum": ["low_power", "balanced", "performance"]
+        }
+      }
+    }
+  }
+}
