@@ -1,0 +1,210 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 800">
+  <defs>
+    <style>
+      .fa-box { fill: #4A90E2; stroke: #2E5C8A; stroke-width: 2; }
+      .wire { fill: none; stroke: #333; stroke-width: 2; }
+      .carry-wire { fill: none; stroke: #E94B3C; stroke-width: 2.5; }
+      .input-wire { fill: none; stroke: #50C878; stroke-width: 2; }
+      .output-wire { fill: none; stroke: #9B59B6; stroke-width: 2; }
+      .label { font-family: Arial, sans-serif; font-size: 12px; fill: #333; }
+      .label-white { font-family: Arial, sans-serif; font-size: 11px; fill: white; font-weight: bold; }
+      .title { font-family: Arial, sans-serif; font-size: 18px; fill: #2E5C8A; font-weight: bold; }
+      .port-label { font-family: Arial, sans-serif; font-size: 10px; fill: #333; }
+      .bit-label { font-family: Arial, sans-serif; font-size: 11px; fill: #555; font-weight: bold; }
+      .signal-box { fill: #F5F5F5; stroke: #999; stroke-width: 1.5; }
+    </style>
+
+    <!-- Arrow marker for carry chain -->
+    <marker id="arrowhead-red" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#E94B3C" />
+    </marker>
+    <marker id="arrowhead-green" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#50C878" />
+    </marker>
+    <marker id="arrowhead-purple" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#9B59B6" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="700" y="30" class="title" text-anchor="middle">8-Bit Ripple Carry Adder Architecture</text>
+
+  <!-- Full Adder Bit 0 (LSB) -->
+  <rect x="50" y="350" width="120" height="100" class="fa-box" rx="5"/>
+  <text x="110" y="375" class="label-white" text-anchor="middle">Full Adder</text>
+  <text x="110" y="390" class="bit-label" text-anchor="middle" fill="white">Bit 0 (LSB)</text>
+  <text x="55" y="385" class="port-label">A[0]</text>
+  <text x="55" y="400" class="port-label">B[0]</text>
+  <text x="55" y="415" class="port-label">Cin</text>
+  <text x="145" y="385" class="port-label" text-anchor="end">S[0]</text>
+  <text x="145" y="430" class="port-label" text-anchor="end">Cout</text>
+
+  <!-- Full Adder Bit 1 -->
+  <rect x="220" y="350" width="120" height="100" class="fa-box" rx="5"/>
+  <text x="280" y="375" class="label-white" text-anchor="middle">Full Adder</text>
+  <text x="280" y="390" class="bit-label" text-anchor="middle" fill="white">Bit 1</text>
+  <text x="225" y="385" class="port-label">A[1]</text>
+  <text x="225" y="400" class="port-label">B[1]</text>
+  <text x="225" y="415" class="port-label">Cin</text>
+  <text x="315" y="385" class="port-label" text-anchor="end">S[1]</text>
+  <text x="315" y="430" class="port-label" text-anchor="end">Cout</text>
+
+  <!-- Full Adder Bit 2 -->
+  <rect x="390" y="350" width="120" height="100" class="fa-box" rx="5"/>
+  <text x="450" y="375" class="label-white" text-anchor="middle">Full Adder</text>
+  <text x="450" y="390" class="bit-label" text-anchor="middle" fill="white">Bit 2</text>
+  <text x="395" y="385" class="port-label">A[2]</text>
+  <text x="395" y="400" class="port-label">B[2]</text>
+  <text x="395" y="415" class="port-label">Cin</text>
+  <text x="485" y="385" class="port-label" text-anchor="end">S[2]</text>
+  <text x="485" y="430" class="port-label" text-anchor="end">Cout</text>
+
+  <!-- Full Adder Bit 3 -->
+  <rect x="560" y="350" width="120" height="100" class="fa-box" rx="5"/>
+  <text x="620" y="375" class="label-white" text-anchor="middle">Full Adder</text>
+  <text x="620" y="390" class="bit-label" text-anchor="middle" fill="white">Bit 3</text>
+  <text x="565" y="385" class="port-label">A[3]</text>
+  <text x="565" y="400" class="port-label">B[3]</text>
+  <text x="565" y="415" class="port-label">Cin</text>
+  <text x="655" y="385" class="port-label" text-anchor="end">S[3]</text>
+  <text x="655" y="430" class="port-label" text-anchor="end">Cout</text>
+
+  <!-- Full Adder Bit 4 -->
+  <rect x="730" y="350" width="120" height="100" class="fa-box" rx="5"/>
+  <text x="790" y="375" class="label-white" text-anchor="middle">Full Adder</text>
+  <text x="790" y="390" class="bit-label" text-anchor="middle" fill="white">Bit 4</text>
+  <text x="735" y="385" class="port-label">A[4]</text>
+  <text x="735" y="400" class="port-label">B[4]</text>
+  <text x="735" y="415" class="port-label">Cin</text>
+  <text x="825" y="385" class="port-label" text-anchor="end">S[4]</text>
+  <text x="825" y="430" class="port-label" text-anchor="end">Cout</text>
+
+  <!-- Full Adder Bit 5 -->
+  <rect x="900" y="350" width="120" height="100" class="fa-box" rx="5"/>
+  <text x="960" y="375" class="label-white" text-anchor="middle">Full Adder</text>
+  <text x="960" y="390" class="bit-label" text-anchor="middle" fill="white">Bit 5</text>
+  <text x="905" y="385" class="port-label">A[5]</text>
+  <text x="905" y="400" class="port-label">B[5]</text>
+  <text x="905" y="415" class="port-label">Cin</text>
+  <text x="995" y="385" class="port-label" text-anchor="end">S[5]</text>
+  <text x="995" y="430" class="port-label" text-anchor="end">Cout</text>
+
+  <!-- Full Adder Bit 6 -->
+  <rect x="1070" y="350" width="120" height="100" class="fa-box" rx="5"/>
+  <text x="1130" y="375" class="label-white" text-anchor="middle">Full Adder</text>
+  <text x="1130" y="390" class="bit-label" text-anchor="middle" fill="white">Bit 6</text>
+  <text x="1075" y="385" class="port-label">A[6]</text>
+  <text x="1075" y="400" class="port-label">B[6]</text>
+  <text x="1075" y="415" class="port-label">Cin</text>
+  <text x="1165" y="385" class="port-label" text-anchor="end">S[6]</text>
+  <text x="1165" y="430" class="port-label" text-anchor="end">Cout</text>
+
+  <!-- Full Adder Bit 7 (MSB) -->
+  <rect x="1240" y="350" width="120" height="100" class="fa-box" rx="5"/>
+  <text x="1300" y="375" class="label-white" text-anchor="middle">Full Adder</text>
+  <text x="1300" y="390" class="bit-label" text-anchor="middle" fill="white">Bit 7 (MSB)</text>
+  <text x="1245" y="385" class="port-label">A[7]</text>
+  <text x="1245" y="400" class="port-label">B[7]</text>
+  <text x="1245" y="415" class="port-label">Cin</text>
+  <text x="1335" y="385" class="port-label" text-anchor="end">S[7]</text>
+  <text x="1335" y="430" class="port-label" text-anchor="end">Cout</text>
+
+  <!-- Top-level Input A[7:0] -->
+  <rect x="50" y="100" width="100" height="40" class="signal-box" rx="3"/>
+  <text x="100" y="125" class="label" text-anchor="middle" font-weight="bold">A[7:0]</text>
+
+  <!-- Top-level Input B[7:0] -->
+  <rect x="50" y="170" width="100" height="40" class="signal-box" rx="3"/>
+  <text x="100" y="195" class="label" text-anchor="middle" font-weight="bold">B[7:0]</text>
+
+  <!-- Top-level Input Cin -->
+  <rect x="50" y="500" width="100" height="40" class="signal-box" rx="3"/>
+  <text x="100" y="525" class="label" text-anchor="middle" font-weight="bold">Cin</text>
+
+  <!-- Top-level Output S[7:0] -->
+  <rect x="1250" y="100" width="100" height="40" class="signal-box" rx="3"/>
+  <text x="1300" y="125" class="label" text-anchor="middle" font-weight="bold">S[7:0]</text>
+
+  <!-- Top-level Output Cout -->
+  <rect x="1250" y="500" width="100" height="40" class="signal-box" rx="3"/>
+  <text x="1300" y="525" class="label" text-anchor="middle" font-weight="bold">Cout</text>
+
+  <!-- Input A wires (green) -->
+  <path d="M 100 140 L 100 250 L 110 250 L 110 350" class="input-wire" marker-end="url(#arrowhead-green)"/>
+  <path d="M 100 250 L 280 250 L 280 350" class="input-wire" marker-end="url(#arrowhead-green)"/>
+  <path d="M 100 250 L 450 250 L 450 350" class="input-wire" marker-end="url(#arrowhead-green)"/>
+  <path d="M 100 250 L 620 250 L 620 350" class="input-wire" marker-end="url(#arrowhead-green)"/>
+  <path d="M 100 250 L 790 250 L 790 350" class="input-wire" marker-end="url(#arrowhead-green)"/>
+  <path d="M 100 250 L 960 250 L 960 350" class="input-wire" marker-end="url(#arrowhead-green)"/>
+  <path d="M 100 250 L 1130 250 L 1130 350" class="input-wire" marker-end="url(#arrowhead-green)"/>
+  <path d="M 100 250 L 1300 250 L 1300 350" class="input-wire" marker-end="url(#arrowhead-green)"/>
+
+  <!-- Input B wires (green) -->
+  <path d="M 100 210 L 100 280 L 110 280 L 110 350" class="input-wire" marker-end="url(#arrowhead-green)"/>
+  <path d="M 100 280 L 280 280 L 280 350" class="input-wire" marker-end="url(#arrowhead-green)"/>
+  <path d="M 100 280 L 450 280 L 450 350" class="input-wire" marker-end="url(#arrowhead-green)"/>
+  <path d="M 100 280 L 620 280 L 620 350" class="input-wire" marker-end="url(#arrowhead-green)"/>
+  <path d="M 100 280 L 790 280 L 790 350" class="input-wire" marker-end="url(#arrowhead-green)"/>
+  <path d="M 100 280 L 960 280 L 960 350" class="input-wire" marker-end="url(#arrowhead-green)"/>
+  <path d="M 100 280 L 1130 280 L 1130 350" class="input-wire" marker-end="url(#arrowhead-green)"/>
+  <path d="M 100 280 L 1300 280 L 1300 350" class="input-wire" marker-end="url(#arrowhead-green)"/>
+
+  <!-- Carry chain (red) - The critical path -->
+  <path d="M 100 500 L 100 465 L 110 465 L 110 450" class="carry-wire" marker-end="url(#arrowhead-red)"/>
+  <text x="100" y="490" class="label" font-size="10" fill="#E94B3C">carry[0]</text>
+
+  <path d="M 170 425 L 190 425 L 190 465 L 280 465 L 280 450" class="carry-wire" marker-end="url(#arrowhead-red)"/>
+  <text x="200" y="475" class="label" font-size="10" fill="#E94B3C">carry[1]</text>
+
+  <path d="M 340 425 L 360 425 L 360 465 L 450 465 L 450 450" class="carry-wire" marker-end="url(#arrowhead-red)"/>
+  <text x="370" y="475" class="label" font-size="10" fill="#E94B3C">carry[2]</text>
+
+  <path d="M 510 425 L 530 425 L 530 465 L 620 465 L 620 450" class="carry-wire" marker-end="url(#arrowhead-red)"/>
+  <text x="540" y="475" class="label" font-size="10" fill="#E94B3C">carry[3]</text>
+
+  <path d="M 680 425 L 700 425 L 700 465 L 790 465 L 790 450" class="carry-wire" marker-end="url(#arrowhead-red)"/>
+  <text x="710" y="475" class="label" font-size="10" fill="#E94B3C">carry[4]</text>
+
+  <path d="M 850 425 L 870 425 L 870 465 L 960 465 L 960 450" class="carry-wire" marker-end="url(#arrowhead-red)"/>
+  <text x="880" y="475" class="label" font-size="10" fill="#E94B3C">carry[5]</text>
+
+  <path d="M 1020 425 L 1040 425 L 1040 465 L 1130 465 L 1130 450" class="carry-wire" marker-end="url(#arrowhead-red)"/>
+  <text x="1050" y="475" class="label" font-size="10" fill="#E94B3C">carry[6]</text>
+
+  <path d="M 1190 425 L 1210 425 L 1210 465 L 1300 465 L 1300 450" class="carry-wire" marker-end="url(#arrowhead-red)"/>
+  <text x="1220" y="475" class="label" font-size="10" fill="#E94B3C">carry[7]</text>
+
+  <path d="M 1360 425 L 1380 425 L 1380 520 L 1350 520" class="carry-wire" marker-end="url(#arrowhead-red)"/>
+  <text x="1370" y="445" class="label" font-size="10" fill="#E94B3C">Cout</text>
+
+  <!-- Output S wires (purple) -->
+  <path d="M 170 370 L 180 370 L 180 180 L 1300 180 L 1300 140" class="output-wire" marker-end="url(#arrowhead-purple)"/>
+  <path d="M 340 370 L 350 370 L 350 180" class="output-wire"/>
+  <path d="M 510 370 L 520 370 L 520 180" class="output-wire"/>
+  <path d="M 680 370 L 690 370 L 690 180" class="output-wire"/>
+  <path d="M 850 370 L 860 370 L 860 180" class="output-wire"/>
+  <path d="M 1020 370 L 1030 370 L 1030 180" class="output-wire"/>
+  <path d="M 1190 370 L 1200 370 L 1200 180" class="output-wire"/>
+  <path d="M 1360 370 L 1370 370 L 1370 180" class="output-wire"/>
+
+  <!-- Legend -->
+  <rect x="50" y="600" width="300" height="150" fill="white" stroke="#999" stroke-width="2" rx="5"/>
+  <text x="200" y="625" class="label" text-anchor="middle" font-weight="bold" font-size="14">Legend</text>
+
+  <line x1="70" y1="645" x2="120" y2="645" class="input-wire"/>
+  <text x="130" y="650" class="label">Input signals (A, B)</text>
+
+  <line x1="70" y1="670" x2="120" y2="670" class="carry-wire"/>
+  <text x="130" y="675" class="label">Carry chain (critical path)</text>
+
+  <line x1="70" y1="695" x2="120" y2="695" class="output-wire"/>
+  <text x="130" y="700" class="label">Sum output signals (S)</text>
+
+  <text x="70" y="725" class="label" font-size="10" fill="#666">• Carry ripples from LSB (Bit 0) to MSB (Bit 7)</text>
+  <text x="70" y="740" class="label" font-size="10" fill="#666">• Critical path: Cin → carry[0] → ... → carry[7] → Cout</text>
+
+  <!-- Design notes -->
+  <text x="700" y="730" class="label" text-anchor="middle" font-size="11" fill="#666">8-bit Ripple Carry Adder | Cin enabled | Cout enabled | No overflow detection</text>
+  <text x="700" y="750" class="label" text-anchor="middle" font-size="11" fill="#666">Total propagation delay: 8 × t_FA (worst case)</text>
+  <text x="700" y="770" class="label" text-anchor="middle" font-size="11" fill="#666">Maximum frequency limited by carry chain propagation</text>
+</svg>
