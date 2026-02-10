@@ -8,6 +8,9 @@
     "timing_model",
     "clocking_model",
     "controller_architecture",
+    "initialization_sequence",
+    "calibration",
+    "host_interface",
     "implementation_targets"
   ],
   "properties": {
@@ -142,6 +145,272 @@
         "enable_bist": { "type": "boolean" },
         "enable_second_wishbone": { "type": "boolean" },
         "aux_width": { "type": "integer", "minimum": 4 }
+      }
+    },
+
+    "initialization_sequence": {
+      "type": "object",
+      "description": "DDR3 JEDEC-mandated initialization and mode register programming",
+      "required": [
+        "reset_hold_us",
+        "cke_delay_us",
+        "mode_registers"
+      ],
+      "properties": {
+        "reset_hold_us": {
+          "type": "integer",
+          "minimum": 200,
+          "description": "Duration to hold RESET# low after power stable (JEDEC min 200us)"
+        },
+        "cke_delay_us": {
+          "type": "integer",
+          "minimum": 500,
+          "description": "Delay after RESET# deassert before CKE goes high (JEDEC min 500us)"
+        },
+        "tXPR_cycles": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Cycles to wait after CKE high before first MRS (max of tRFC+10ns, 5 nCK)"
+        },
+        "mode_registers": {
+          "type": "object",
+          "required": ["MR0", "MR1", "MR2", "MR3"],
+          "properties": {
+            "MR0": {
+              "type": "object",
+              "description": "Mode Register 0: burst length, CAS latency, DLL reset, write recovery",
+              "required": ["burst_length", "cas_latency", "dll_reset", "write_recovery"],
+              "properties": {
+                "burst_length": {
+                  "type": "string",
+                  "enum": ["fixed_8", "on_the_fly_4_8"],
+                  "description": "BL: fixed BL8 or on-the-fly BL4/BL8 switching"
+                },
+                "cas_latency": {
+                  "type": "integer",
+                  "minimum": 5,
+                  "maximum": 14,
+                  "description": "CAS latency (CL) in clock cycles"
+                },
+                "dll_reset": {
+                  "type": "boolean",
+                  "description": "Assert DLL reset during init (typically true)"
+                },
+                "write_recovery": {
+                  "type": "integer",
+                  "minimum": 5,
+                  "maximum": 16,
+                  "description": "Write recovery for auto-precharge (cycles)"
+                },
+                "precharge_pd_mode": {
+                  "type": "string",
+                  "enum": ["slow_exit", "fast_exit"],
+                  "description": "Precharge power-down DLL usage"
+                }
+              }
+            },
+            "MR1": {
+              "type": "object",
+              "description": "Mode Register 1: DLL enable, drive strength, ODT, write leveling, AL",
+              "required": ["dll_enable", "output_drive_strength", "rtt_nom", "additive_latency"],
+              "properties": {
+                "dll_enable": {
+                  "type": "boolean",
+                  "description": "DLL enabled (true for normal operation)"
+                },
+                "output_drive_strength": {
+                  "type": "string",
+                  "enum": ["RZQ_6", "RZQ_7"],
+                  "description": "Output driver impedance: RZQ/6 (40ohm) or RZQ/7 (34ohm)"
+                },
+                "rtt_nom": {
+                  "type": "string",
+                  "enum": ["disabled", "RZQ_4", "RZQ_2", "RZQ_6", "RZQ_12", "RZQ_8"],
+                  "description": "Nominal on-die termination value"
+                },
+                "additive_latency": {
+                  "type": "string",
+                  "enum": ["disabled", "CL_minus_1", "CL_minus_2"],
+                  "description": "Additive latency (AL) for posted CAS"
+                },
+                "write_leveling_enable": {
+                  "type": "boolean",
+                  "description": "Enable write leveling mode"
+                }
+              }
+            },
+            "MR2": {
+              "type": "object",
+              "description": "Mode Register 2: CAS write latency, dynamic ODT, self-refresh temp",
+              "required": ["cas_write_latency", "rtt_wr"],
+              "properties": {
+                "cas_write_latency": {
+                  "type": "integer",
+                  "minimum": 5,
+                  "maximum": 12,
+                  "description": "CAS write latency (CWL) in clock cycles"
+                },
+                "rtt_wr": {
+                  "type": "string",
+                  "enum": ["disabled", "RZQ_4", "RZQ_2"],
+                  "description": "Dynamic ODT value during writes"
+                },
+                "self_refresh_temperature": {
+                  "type": "string",
+                  "enum": ["normal", "extended"],
+                  "description": "Self-refresh temperature range"
+                },
+                "auto_self_refresh": {
+                  "type": "boolean",
+                  "description": "Enable automatic self-refresh rate adjustment"
+                }
+              }
+            },
+            "MR3": {
+              "type": "object",
+              "description": "Mode Register 3: MPR control",
+              "properties": {
+                "mpr_enable": {
+                  "type": "boolean",
+                  "description": "Enable Multi-Purpose Register readout (used for read leveling)"
+                },
+                "mpr_read_function": {
+                  "type": "integer",
+                  "enum": [0],
+                  "description": "MPR read type: 0 = predefined pattern"
+                }
+              }
+            }
+          }
+        },
+        "zq_calibration_on_init": {
+          "type": "boolean",
+          "description": "Issue ZQCL (long calibration) command during initialization"
+        },
+        "tZQinit_cycles": {
+          "type": "integer",
+          "minimum": 512,
+          "description": "Cycles for initial ZQ calibration (JEDEC min 512 nCK)"
+        }
+      }
+    },
+
+    "calibration": {
+      "type": "object",
+      "description": "Read/write calibration and training parameters",
+      "required": [
+        "enable_write_leveling",
+        "enable_read_leveling",
+        "enable_bitslip_training"
+      ],
+      "properties": {
+        "enable_write_leveling": {
+          "type": "boolean",
+          "description": "Enable DQS-to-CK write leveling calibration"
+        },
+        "enable_read_leveling": {
+          "type": "boolean",
+          "description": "Enable DQ-to-DQS read leveling (gate training)"
+        },
+        "enable_bitslip_training": {
+          "type": "boolean",
+          "description": "Enable bitslip alignment for ISERDES data capture"
+        },
+        "read_delay_scan_range": {
+          "type": "object",
+          "description": "Tap range for read delay sweep during calibration",
+          "properties": {
+            "min_taps": { "type": "integer", "minimum": 0 },
+            "max_taps": { "type": "integer", "minimum": 1 },
+            "step": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "write_delay_scan_range": {
+          "type": "object",
+          "description": "Tap range for write delay sweep during calibration",
+          "properties": {
+            "min_taps": { "type": "integer", "minimum": 0 },
+            "max_taps": { "type": "integer", "minimum": 1 },
+            "step": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "training_pattern": {
+          "type": "string",
+          "enum": ["mpr_predefined", "walking_ones", "lfsr", "custom"],
+          "description": "Data pattern used during read/write training"
+        },
+        "calibration_retry_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of retries if calibration fails before reporting error"
+        },
+        "periodic_recalibration_enable": {
+          "type": "boolean",
+          "description": "Enable periodic ZQ calibration during normal operation"
+        },
+        "periodic_zqcs_interval_cycles": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Interval between periodic ZQCS commands (0 = disabled)"
+        }
+      }
+    },
+
+    "host_interface": {
+      "type": "object",
+      "description": "Wishbone bus interface definition for host-side connectivity",
+      "required": [
+        "data_width_bits",
+        "address_width_bits",
+        "granularity_bits",
+        "interface_type"
+      ],
+      "properties": {
+        "data_width_bits": {
+          "type": "integer",
+          "enum": [32, 64, 128],
+          "description": "Wishbone data bus width"
+        },
+        "address_width_bits": {
+          "type": "integer",
+          "minimum": 20,
+          "maximum": 32,
+          "description": "Wishbone address bus width"
+        },
+        "granularity_bits": {
+          "type": "integer",
+          "enum": [8, 16, 32],
+          "description": "Smallest addressable unit (byte granularity = 8)"
+        },
+        "interface_type": {
+          "type": "string",
+          "enum": ["wishbone_classic", "wishbone_pipelined"],
+          "description": "Wishbone bus mode"
+        },
+        "burst_type": {
+          "type": "string",
+          "enum": ["none", "linear", "wrap"],
+          "description": "Wishbone burst transfer type"
+        },
+        "max_burst_length": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum burst length in bus words"
+        },
+        "read_buffer_depth": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Depth of read data return buffer (entries)"
+        },
+        "write_buffer_depth": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Depth of write data staging buffer (entries)"
+        },
+        "enable_data_mask": {
+          "type": "boolean",
+          "description": "Enable per-byte write data masking (DM signals)"
+        }
       }
     },
 
