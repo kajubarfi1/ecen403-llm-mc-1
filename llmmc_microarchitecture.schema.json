@@ -1,6 +1,28 @@
 {
-  "$comment": "DDR3-1600K (11-11-11-28) — 2Gb x8 device, single rank, JEDEC-compliant default configuration",
+  "$comment": "DDR3-1600K (11-11-11-28) — Golden microarchitecture instance. Command timing values are in *ns* (JEDEC). CL/CWL are in cycles and must be interpreted with tCK_ns.",
   "$schema": "https://example.com/ddr3_microarchitecture.schema.json",
+
+  "schema_version": "1.0.0",
+  "design_id": "ddr3_mc_core_v1",
+  "revision": "golden_ddr3_1600k_x16_1r",
+
+  "validation_scopes": [
+    "config_regs",
+    "arbiter",
+    "scheduler",
+    "timing",
+    "init_sequence",
+    "full_controller"
+  ],
+
+  "memory_model_boundary": {
+    "boundary_type": "abstract_cmd_data",
+    "phy_modeled": false,
+    "supports_training": false,
+    "supports_mpr": false,
+    "read_data_model": "fixed_latency_from_CL",
+    "notes": "No pin-accurate PHY. Validation is at host+controller-command layer with abstract DRAM command/data boundary."
+  },
 
   "memory_geometry": {
     "row_bits": 14,
@@ -13,58 +35,76 @@
     "address_mapping": "row-bank-column",
 
     "$derived": {
-      "device_density": "2Gb (2^14 rows × 2^10 cols × 8 banks × 8 bits = 2,147,483,648 bits)",
-      "page_size_bytes": "1 KB (2^10 cols × 8 bits / 8 = 1024 bytes per device)",
-      "total_data_width_bits": 16,
-      "burst_transfer_bytes": 16,
-      "channel_bandwidth_MBps": "12800 (1600 MT/s × 2 bytes)"
-    }
-  },
-
-  "timing_model": {
-    "$comment_speed_bin": "DDR3-1600K speed bin. All values in nCK (controller clock cycles at 800 MHz). tCK = 1.25 ns.",
-
-    "tRCD": 11,
-    "tRP": 11,
-    "tRAS": 28,
-    "tRC": 39,
-    "tRFC": 128,
-    "tFAW": 32,
-    "tRRD": 6,
-    "tWR": 12,
-    "tWTR": 6,
-    "tRTP": 6,
-    "tCCD": 4,
-    "tREFI": 6240,
-    "CAS_latency": 11,
-    "CAS_write_latency": 8,
-
-    "$jedec_compliance_checks": {
-      "tRC_rule": "tRC >= tRAS + tRP → 39 >= 28 + 11 = 39 ✓",
-      "tRAS_rule": "tRAS >= CL + tRCD + tRP - 1 → 28 >= 11 + 11 + 11 - 1 = 32 — NOTE: JEDEC minimum tRAS is 35ns = 28 nCK at 800MHz. tRAS here is the JEDEC spec value, not the overclocking formula.",
-      "tFAW_rule": "tFAW >= 4 × tRRD → 32 >= 4 × 6 = 24 ✓ (JEDEC min 40ns = 32 nCK for 1KB page)",
-      "tRFC_rule": "tRFC = 160ns for 2Gb density → 160ns / 1.25ns = 128 nCK ✓",
-      "tREFI_rule": "tREFI = 7.8us / 1.25ns = 6240 nCK ✓ (JEDEC standard refresh interval)",
-      "tWR_rule": "tWR = 15ns → ceil(15 / 1.25) = 12 nCK ✓",
-      "tRTP_rule": "tRTP = max(4 nCK, 7.5ns) → max(4, 6) = 6 nCK ✓",
-      "tWTR_rule": "tWTR = max(4 nCK, 7.5ns) → max(4, 6) = 6 nCK ✓",
-      "tRRD_rule": "tRRD = max(4 nCK, 7.5ns) for 1KB page → max(4, 6) = 6 nCK ✓",
-      "tCCD_rule": "tCCD = 4 nCK (BL8, always 4 for DDR3) ✓",
-      "CWL_rule": "CWL = 8 for DDR3-1600 (tCK 1.25ns bin) per JEDEC table ✓"
+      "device_density_bits": 2147483648,
+      "device_density_bytes": 268435456,
+      "channel_data_width_bits": 16,
+      "channel_data_width_bytes": 2,
+      "page_size_bytes_per_device": 1024,
+      "page_size_bytes_channel": 2048,
+      "channel_capacity_bytes": 536870912,
+      "channel_capacity_MB": 512,
+      "burst_transfer_bytes_on_dq": 16,
+      "peak_channel_bandwidth_MBps": 3200
     }
   },
 
   "clocking_model": {
-    "controller_clock_period_ps": 5000,
-    "ddr_clock_period_ps": 1250,
-    "clock_ratio": 4,
+    "controller_clock_period_ns": 5.0,
+    "ddr_clock_period_ns": 1.25,
+    "clock_ratio_ddr_to_controller": 4,
     "pipeline_latency_cycles": 2,
 
     "$derived": {
-      "controller_frequency_mhz": "200 MHz (1 / 5000ps)",
-      "ddr_clock_frequency_mhz": "800 MHz (1 / 1250ps)",
-      "data_rate_mt_s": "1600 MT/s (DDR = 2 × 800 MHz)",
-      "ratio_check": "ddr_clock / controller_clock = 5000 / 1250 = 4 ✓"
+      "controller_frequency_MHz": 200.0,
+      "ddr_clock_frequency_MHz": 800.0,
+      "data_rate_MTps": 1600.0,
+      "period_ratio_check": "controller_period_ns / ddr_period_ns = 5.0 / 1.25 = 4 ✓",
+      "tCK_ns": 1.25
+    }
+  },
+
+  "timing_model": {
+    "units": "ns",
+    "tCK_ns": 1.25,
+    "speed_bin": "DDR3-1600K (11-11-11)",
+
+    "tRCD": 13.75,
+    "tRP": 13.75,
+    "tRAS": 35.0,
+    "tRC": 48.75,
+
+    "tRFC": 160.0,
+    "tFAW": 40.0,
+    "tRRD": 7.5,
+
+    "tWR": 15.0,
+    "tWTR": 7.5,
+    "tRTP": 7.5,
+
+    "tCCD": 5.0,
+    "tREFI": 7800.0,
+
+    "CL_cycles": 11,
+    "CWL_cycles": 8,
+
+    "$derived": {
+      "CL_ns": 13.75,
+      "CWL_ns": 10.0,
+      "tCCD_cycles": 4,
+      "tFAW_cycles": 32,
+      "tRFC_cycles": 128,
+      "tREFI_cycles": 6240
+    },
+
+    "$consistency_checks": {
+      "tRC_rule": "tRC == tRAS + tRP → 48.75 == 35.0 + 13.75 ✓",
+      "tRRD_rule": "tRRD >= max(4*tCK, 7.5ns) → 7.5 >= max(5.0, 7.5) ✓",
+      "tWTR_rule": "tWTR >= max(4*tCK, 7.5ns) → 7.5 >= max(5.0, 7.5) ✓",
+      "tRTP_rule": "tRTP >= max(4*tCK, 7.5ns) → 7.5 >= max(5.0, 7.5) ✓",
+      "tWR_rule": "tWR = 15ns ✓",
+      "tRFC_rule": "tRFC = 160ns for 2Gb density ✓",
+      "tREFI_rule": "tREFI = 7.8us = 7800ns ✓",
+      "tCCD_rule": "tCCD = 4*tCK = 5.0ns ✓"
     }
   },
 
@@ -76,21 +116,33 @@
     "lookahead_depth": 8,
     "ecc_mode": 0,
     "self_refresh_mode": "auto",
+
     "enable_bist": true,
     "enable_second_wishbone": false,
-    "aux_width": 4
+    "aux_width": 4,
+
+    "$alignment": {
+      "bank_count": 8,
+      "supports_refresh": true,
+      "supports_self_refresh": true,
+      "supports_zqcs": true
+    }
   },
 
   "initialization_sequence": {
     "reset_hold_us": 200,
     "cke_delay_us": 500,
-    "tXPR_cycles": 136,
+
+    "tXPR_ns": 170.0,
+    "zq_calibration_on_init": true,
+    "tZQinit_ns": 640.0,
+
     "mode_registers": {
       "MR0": {
         "burst_length": "fixed_8",
-        "cas_latency": 11,
+        "cas_latency_cycles": 11,
         "dll_reset": true,
-        "write_recovery": 12,
+        "write_recovery_ns": 15.0,
         "precharge_pd_mode": "fast_exit"
       },
       "MR1": {
@@ -101,7 +153,7 @@
         "write_leveling_enable": false
       },
       "MR2": {
-        "cas_write_latency": 8,
+        "cas_write_latency_cycles": 8,
         "rtt_wr": "RZQ_4",
         "self_refresh_temperature": "normal",
         "auto_self_refresh": false
@@ -111,65 +163,118 @@
         "mpr_read_function": 0
       }
     },
-    "zq_calibration_on_init": true,
-    "tZQinit_cycles": 512,
 
-    "$jedec_compliance_checks": {
-      "reset_hold": "200us meets JEDEC minimum 200us ✓",
-      "cke_delay": "500us meets JEDEC minimum 500us after RESET# deassert ✓",
-      "tXPR": "max(5 nCK, tRFC+10ns) = max(5, 128+ceil(10/1.25)) = max(5, 136) = 136 nCK ✓",
-      "MR0_WR_match": "MR0.write_recovery (12) matches timing_model.tWR (12) ✓",
-      "MR0_CL_match": "MR0.cas_latency (11) matches timing_model.CAS_latency (11) ✓",
-      "MR2_CWL_match": "MR2.cas_write_latency (8) matches timing_model.CAS_write_latency (8) ✓",
-      "tZQinit": "512 nCK meets JEDEC minimum 512 nCK ✓",
-      "init_sequence_order": "RESET# → wait 200us → CKE high → wait 500us → tXPR → MR2 → MR3 → MR1 → MR0(DLL reset) → ZQCL ✓"
+    "$derived": {
+      "tXPR_reason": "tXPR = max(5*tCK, tRFC+10ns) = max(6.25ns, 160ns+10ns) = 170ns",
+      "tZQinit_reason": "tZQinit = 512*tCK = 512*1.25ns = 640ns",
+      "MR0_WR_matches_tWR": "MR0.write_recovery_ns (15.0) matches timing_model.tWR (15.0) ✓",
+      "MR0_CL_matches_timing": "MR0.cas_latency_cycles (11) matches timing_model.CL_cycles (11) ✓",
+      "MR2_CWL_matches_timing": "MR2.cas_write_latency_cycles (8) matches timing_model.CWL_cycles (8) ✓",
+      "init_sequence_order": "RESET# low → wait reset_hold_us → RESET# high → wait cke_delay_us → CKE high → wait tXPR → MR2 → MR3 → MR1 → MR0(DLL reset) → ZQCL"
     }
   },
 
   "calibration": {
-    "enable_write_leveling": true,
-    "enable_read_leveling": true,
-    "enable_bitslip_training": true,
-    "read_delay_scan_range": {
-      "min_taps": 0,
-      "max_taps": 31,
-      "step": 1
-    },
-    "write_delay_scan_range": {
-      "min_taps": 0,
-      "max_taps": 31,
-      "step": 1
-    },
-    "training_pattern": "mpr_predefined",
-    "calibration_retry_count": 3,
+    "enable_write_leveling": false,
+    "enable_read_leveling": false,
+    "enable_bitslip_training": false,
+    "calibration_retry_count": 0,
     "periodic_recalibration_enable": true,
-    "periodic_zqcs_interval_cycles": 512000,
+    "periodic_zqcs_interval_ns": 640000.0,
 
-    "$derived": {
-      "zqcs_interval_ns": "512000 × 1.25ns = 640us (well within JEDEC 128ms max interval for ZQCS)"
-    }
+    "$comment": "PHY not modeled, so leveling/bitslip training is out of scope. Periodic ZQCS is modeled as a command-scheduling requirement only."
   },
 
   "host_interface": {
-    "data_width_bits": 32,
-    "address_width_bits": 27,
-    "granularity_bits": 8,
     "interface_type": "wishbone_pipelined",
+    "addressing": "byte",
+    "data_width_bits": 32,
+    "address_width_bits": 29,
+    "granularity_bits": 8,
+
     "burst_type": "linear",
     "max_burst_length": 8,
+
     "read_buffer_depth": 16,
     "write_buffer_depth": 16,
+
     "enable_data_mask": true,
 
     "$derived": {
-      "addressable_space_bytes": "2^27 = 128 MB (matches 2Gb device / 8 bits × 1 rank × 2 byte_lanes ÷ some overhead for ECC=0)",
-      "burst_transfer_bytes": "32 bits × 8 words / 8 = 32 bytes per burst"
+      "addressable_space_bytes": 536870912,
+      "addressable_space_MB": 512,
+      "host_burst_transfer_bytes": 32,
+      "note": "Host is 32-bit; DDR channel is 16-bit. Controller packs/unpacks host words across the DDR datapath."
     }
+  },
+
+  "data_path_mapping": {
+    "ddr_channel_width_bits": 16,
+    "host_width_bits": 32,
+    "pack_mode": "pack_32_to_16",
+    "alignment_bytes_required": 4,
+    "endianness": "little",
+    "byte_enable_semantics": "wishbone_sel_per_byte"
+  },
+
+  "phy_interface": {
+    "mode": "abstract",
+    "dq_width_bits": 16,
+    "dqs_count": 2,
+    "dm_enabled": true,
+    "ck_pair_present": true,
+    "notes": "Abstracted DRAM boundary. No DQS training/leveling validation; only command/data transaction semantics."
+  },
+
+  "observability": {
+    "debug_interface_name": "mc_debug_if",
+    "required_signals_by_scope": {
+      "config_regs": [
+        "reg_addr",
+        "reg_we",
+        "reg_re",
+        "reg_wdata",
+        "reg_rdata",
+        "reg_ack"
+      ],
+      "arbiter": [
+        "port_req_vec",
+        "port_grant_vec",
+        "port_sel_id"
+      ],
+      "scheduler": [
+        "cmd_valid",
+        "cmd_type",
+        "cmd_rank",
+        "cmd_bank",
+        "cmd_row",
+        "cmd_col",
+        "cmd_auto_precharge"
+      ],
+      "timing": [
+        "bank_state",
+        "bank_last_cmd_time_ns_or_ticks",
+        "refresh_pending"
+      ],
+      "init_sequence": [
+        "init_state",
+        "mrs_issue",
+        "zq_issue",
+        "init_done"
+      ]
+    },
+    "$comment": "Expose via a stable interface or stable signal names; do not rely on hierarchy paths."
   },
 
   "implementation_targets": {
     "target_frequency_mhz": 200,
     "area_optimization_goal": "balanced",
-    "power_optimization_goal": "balanced"
+    "power_optimization_goal": "balanced",
+
+    "$alignment": {
+      "constraints_clock_name": "clk_ctrl",
+      "reset_name": "rst_n",
+      "reset_polarity": "active_low"
+    }
   }
 }
