@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DDR3 Memory Controller — Block Diagram v2</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body, #root { height: 100%; width: 100%; overflow: hidden; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+// ─── All constants from golden_microarch_v2.json ───
+const SPEC = {
+  ROW_BITS: 14, COL_BITS: 10, BANK_BITS: 3, RANKS: 1,
+  DATA_WIDTH: 32, ADDR_WIDTH: 29, BYTE_LANES: 2,
+  CMD_QUEUE_DEPTH: 16, LOOKAHEAD: 8,
+  DEVICE_WIDTH: 8, BURST_LEN: 8, AUX_WIDTH: 4,
+  DDR_ADDR_BITS: 14, DDR_DATA_WIDTH: 16,
+  DDR_DM_WIDTH: 2, DDR_DQS_WIDTH: 2,
+  CSR_ADDR_BITS: 8, CSR_DATA_BITS: 32, CSR_NUM_REGS: 11,
+  MAX_POSTPONE: 8, URGENT_THRESH: 6,
+  SCHED_POLICY: "fr_fcfs", ROW_POLICY: "open_page",
+};
+
+const blocks = [
+  {
+    id: "wb_port", label: "Wishbone Port\nInterface", file: "wb_port.sv",
+    x: 60, y: 30, w: 200, h: 120, color: "#FFF3E0", border: "#FB8C00",
+    goal: "Accept host read/write requests over pipelined Wishbone bus and translate them into internal request descriptors for the command queue.",
+    ports: {
+      external_in: [
+        { name: "wb_cyc_i", width: 1, desc: "Bus cycle active" },
+        { name: "wb_stb_i", width: 1, desc: "Strobe / valid" },
+        { name: "wb_we_i", width: 1, desc: "Write enable" },
+        { name: "wb_adr_i", width: SPEC.ADDR_WIDTH, desc: "Byte address" },
+        { name: "wb_dat_i", width: SPEC.DATA_WIDTH, desc: "Write data" },
+        { name: "wb_sel_i", width: SPEC.DATA_WIDTH / 8, desc: "Byte lane select" },
+        { name: "wb_bte_i", width: 2, desc: "Burst type extension" },
+        { name: "wb_cti_i", width: 3, desc: "Cycle type identifier" },
+      ],
+      external_out: [
+        { name: "wb_ack_o", width: 1, desc: "Acknowledge" },
+        { name: "wb_dat_o", width: SPEC.DATA_WIDTH, desc: "Read data" },
+        { name: "wb_stall_o", width: 1, desc: "Pipeline stall (backpressure)" },
+        { name: "wb_err_o", width: 1, desc: "Error response" },
+      ],
+      internal_out: [
+        { name: "req_valid", width: 1, desc: "Request valid" },
+        { name: "req_we", width: 1, desc: "Write enable" },
+        { name: "req_addr", width: SPEC.ADDR_WIDTH, desc: "Byte address" },
+        { name: "req_wdata", width: SPEC.DATA_WIDTH, desc: "Write data" },
+        { name: "req_wmask", width: SPEC.DATA_WIDTH / 8, desc: "Write byte mask" },
+        { name: "req_aux", width: SPEC.AUX_WIDTH, desc: "Auxiliary tag" },
+      ],
+      internal_in: [
+        { name: "req_ready", width: 1, desc: "Backpressure from queue" },
+        { name: "rsp_valid", width: 1, desc: "Read response valid" },
+        { name: "rsp_rdata", width: SPEC.DATA_WIDTH, desc: "Read response data" },
+        { name: "rsp_aux", width: SPEC.AUX_WIDTH, desc: "Response tag" },
+      ],
+    }
+  },
+  {
+    id: "addr_decoder", label: "Address\nDecoder", file: "addr_decoder.sv",
+    x: 60, y: 200, w: 200, h: 100, color: "#FFF9C4", border: "#F9A825",
+    goal: "Combinationally split host byte address into row, bank, column, and rank fields per the address_mapping policy (row-bank-column).",
+    ports: {
+      internal_in: [
+        { name: "req_addr", width: SPEC.ADDR_WIDTH, desc: "Host byte address" },
+      ],
+      internal_out: [
+        { name: "dec_row", width: SPEC.ROW_BITS, desc: "Row address" },
+        { name: "dec_col", width: SPEC.COL_BITS, desc: "Column address" },
+        { name: "dec_bank", width: SPEC.BANK_BITS, desc: "Bank address" },
+        { name: "dec_rank", width: 1, desc: "Rank select" },
+      ],
+    }
+  },
+  {
+    id: "cmd_queue", label: "Command\nQueue", file: "cmd_queue.sv",
+    x: 60, y: 350, w: 200, h: 120, color: "#E3F2FD", border: "#1E88E5",
+    goal: `Store up to ${SPEC.CMD_QUEUE_DEPTH} pending requests in a FIFO/CAM structure. Expose all entries to scheduler for out-of-order selection. Dequeue on scheduler grant.`,
+    ports: {
+      internal_in: [
+        { name: "enq_valid", width: 1, desc: "Enqueue valid" },
+        { name: "enq_we", width: 1, desc: "Write enable" },
+        { name: "enq_row", width: SPEC.ROW_BITS, desc: "Row address" },
+        { name: "enq_col", width: SPEC.COL_BITS, desc: "Column address" },
+        { name: "enq_bank", width: SPEC.BANK_BITS, desc: "Bank address" },
+        { name: "enq_rank", width: 1, desc: "Rank select" },
+        { name: "enq_wdata", width: SPEC.DATA_WIDTH, desc: "Write data" },
+        { name: "enq_wmask", width: SPEC.DATA_WIDTH / 8, desc: "Write byte mask" },
+        { name: "enq_aux", width: SPEC.AUX_WIDTH, desc: "Auxiliary tag" },
+      ],
+      internal_out: [
+        { name: "enq_ready", width: 1, desc: "Queue not full" },
+        { name: "entries", width: `${SPEC.CMD_QUEUE_DEPTH}×entry_t`, desc: "All entries to scheduler" },
+        { name: "entry_valid", width: SPEC.CMD_QUEUE_DEPTH, desc: "Per-entry valid bits" },
+        { name: "queue_count", width: 5, desc: "Occupancy count" },
+      ],
+    }
+  },
+  {
+    id: "bank_tracker", label: "Bank Status\nTracker", file: "bank_tracker.sv",
+    x: 310, y: 200, w: 200, h: 120, color: "#E8F5E9", border: "#43A047",
+    goal: "Track per-bank state (IDLE/ACTIVE/PRECHARGING), active row, and all 14 timing counters. 8 independent bank machines. Enforce tRCD, tRP, tRAS, tRC, tRRD, tFAW, tWTR, tWR, tRTP, tCCD, tRFC constraints.",
+    ports: {
+      internal_in: [
+        { name: "cmd_issued", width: 1, desc: "Command was issued" },
+        { name: "cmd_type", width: 3, desc: "ACT/RD/WR/PRE/REF/NOP" },
+        { name: "cmd_bank", width: SPEC.BANK_BITS, desc: "Target bank" },
+        { name: "cmd_row", width: SPEC.ROW_BITS, desc: "Target row" },
+        { name: "cmd_rank", width: 1, desc: "Target rank" },
+        { name: "cfg_timing", width: "timing_t", desc: "Timing params from CSR" },
+      ],
+      internal_out: [
+        { name: "bank_state", width: "8×state_t", desc: "Per-bank state" },
+        { name: "bank_open_row", width: `8×${SPEC.ROW_BITS}`, desc: "Open row per bank" },
+        { name: "act_allowed", width: 8, desc: "ACTIVATE allowed" },
+        { name: "rd_allowed", width: 8, desc: "READ allowed" },
+        { name: "wr_allowed", width: 8, desc: "WRITE allowed" },
+        { name: "pre_allowed", width: 8, desc: "PRECHARGE allowed" },
+        { name: "faw_count", width: 3, desc: "ACTs in tFAW window" },
+      ],
+    }
+  },
+  {
+    id: "scheduler", label: "FR-FCFS\nScheduler", file: "scheduler.sv",
+    x: 310, y: 370, w: 200, h: 120, color: "#F3E5F5", border: "#8E24AA",
+    goal: `First-Ready First-Come-First-Served scheduler with ${SPEC.LOOKAHEAD}-deep lookahead. Prioritize row hits over misses, then FCFS. Handle refresh urgency (preempt at postpone≥${SPEC.URGENT_THRESH}). Configurable open_page/close_page via CSR.`,
+    ports: {
+      internal_in: [
+        { name: "entries", width: `${SPEC.CMD_QUEUE_DEPTH}×entry_t`, desc: "Queue entries" },
+        { name: "entry_valid", width: SPEC.CMD_QUEUE_DEPTH, desc: "Valid bits" },
+        { name: "bank_state", width: "8×state_t", desc: "Per-bank state" },
+        { name: "bank_open_row", width: `8×${SPEC.ROW_BITS}`, desc: "Open row per bank" },
+        { name: "act_allowed", width: 8, desc: "ACT timing clear" },
+        { name: "rd_allowed", width: 8, desc: "RD timing clear" },
+        { name: "wr_allowed", width: 8, desc: "WR timing clear" },
+        { name: "pre_allowed", width: 8, desc: "PRE timing clear" },
+        { name: "ref_pending", width: 1, desc: "Refresh pending" },
+        { name: "ref_urgent", width: 1, desc: "Refresh urgent (≥threshold)" },
+        { name: "cfg_sched_policy", width: 1, desc: "0=in_order, 1=fr_fcfs" },
+        { name: "cfg_row_policy", width: 1, desc: "0=open_page, 1=close_page" },
+      ],
+      internal_out: [
+        { name: "sel_valid", width: 1, desc: "Selected command valid" },
+        { name: "sel_idx", width: 4, desc: "Queue index" },
+        { name: "sel_cmd", width: 3, desc: "Command type" },
+        { name: "sel_bank", width: SPEC.BANK_BITS, desc: "Target bank" },
+        { name: "sel_row", width: SPEC.ROW_BITS, desc: "Target row" },
+        { name: "sel_col", width: SPEC.COL_BITS, desc: "Target column" },
+        { name: "sel_we", width: 1, desc: "Read/write" },
+        { name: "ref_ack", width: 1, desc: "Refresh acknowledged" },
+      ],
+    }
+  },
+  {
+    id: "refresh_ctrl", label: "Refresh\nController", file: "refresh_ctrl.sv",
+    x: 560, y: 200, w: 200, h: 110, color: "#E0F7FA", border: "#00ACC1",
+    goal: `Generate periodic refresh requests every tREFI (6240 nCK). Track postponed refreshes (max ${SPEC.MAX_POSTPONE}). Assert urgent when count ≥ ${SPEC.URGENT_THRESH}. Force precharge-all on starvation. Support forced refresh via CSR.`,
+    ports: {
+      internal_in: [
+        { name: "ref_ack", width: 1, desc: "Refresh issued by scheduler" },
+        { name: "cfg_trefi", width: 24, desc: "tREFI from CSR (nCK)" },
+        { name: "cfg_max_postpone", width: 4, desc: "Max postpone count" },
+        { name: "cfg_urgent_thresh", width: 4, desc: "Urgent threshold" },
+        { name: "force_refresh", width: 1, desc: "CSR force refresh" },
+      ],
+      internal_out: [
+        { name: "ref_pending", width: 1, desc: "Refresh needed" },
+        { name: "ref_urgent", width: 1, desc: "Refresh critical" },
+        { name: "ref_count", width: 4, desc: "Pending count (0–8)" },
+        { name: "ref_starve_flag", width: 1, desc: "Starvation occurred" },
+      ],
+    }
+  },
+  {
+    id: "cmd_gen", label: "Command\nGenerator", file: "cmd_gen.sv",
+    x: 560, y: 360, w: 200, h: 130, color: "#FCE4EC", border: "#E53935",
+    goal: "Encode scheduler decisions and init FSM commands into DDR3 pin-level signals (CS#, RAS#, CAS#, WE#, address, bank). Mux between init_fsm and scheduler based on init_done.",
+    ports: {
+      internal_in: [
+        { name: "init_done", width: 1, desc: "Init complete flag" },
+        { name: "init_cmd_valid", width: 1, desc: "Init command valid" },
+        { name: "init_cmd", width: 3, desc: "Init command type" },
+        { name: "init_addr", width: SPEC.DDR_ADDR_BITS, desc: "Init MR address" },
+        { name: "init_ba", width: SPEC.BANK_BITS, desc: "Init bank address" },
+        { name: "sel_valid", width: 1, desc: "Scheduler command valid" },
+        { name: "sel_cmd", width: 3, desc: "Scheduler command type" },
+        { name: "sel_bank", width: SPEC.BANK_BITS, desc: "Bank" },
+        { name: "sel_row", width: SPEC.ROW_BITS, desc: "Row" },
+        { name: "sel_col", width: SPEC.COL_BITS, desc: "Column" },
+      ],
+      ddr_out: [
+        { name: "ddr3_cs_n", width: SPEC.RANKS, desc: "Chip select" },
+        { name: "ddr3_ras_n", width: 1, desc: "Row address strobe" },
+        { name: "ddr3_cas_n", width: 1, desc: "Column address strobe" },
+        { name: "ddr3_we_n", width: 1, desc: "Write enable" },
+        { name: "ddr3_addr", width: SPEC.DDR_ADDR_BITS, desc: "Muxed row/col address" },
+        { name: "ddr3_ba", width: SPEC.BANK_BITS, desc: "Bank address" },
+        { name: "ddr3_odt", width: SPEC.RANKS, desc: "On-die termination" },
+        { name: "ddr3_cke", width: SPEC.RANKS, desc: "Clock enable" },
+        { name: "ddr3_reset_n", width: 1, desc: "Reset (active low)" },
+      ],
+    }
+  },
+  {
+    id: "data_path", label: "Data Path &\nAlignment", file: "data_path.sv",
+    x: 560, y: 540, w: 200, h: 120, color: "#FFF3E0", border: "#FF6F00",
+    goal: "Serialize 32-bit host words to 16-bit DDR bus (pack_32_to_16). Deserialize read data. Align CL/CWL timing. Handle byte masks → DM signals. Little-endian.",
+    ports: {
+      internal_in: [
+        { name: "wr_valid", width: 1, desc: "Write data valid" },
+        { name: "wr_data", width: SPEC.DATA_WIDTH, desc: "Write data" },
+        { name: "wr_mask", width: SPEC.DATA_WIDTH / 8, desc: "Write byte mask" },
+        { name: "rd_latency_cnt", width: 5, desc: "Cycles until read data" },
+      ],
+      internal_out: [
+        { name: "rsp_valid", width: 1, desc: "Read data valid to host" },
+        { name: "rsp_rdata", width: SPEC.DATA_WIDTH, desc: "Read data to host" },
+        { name: "rsp_aux", width: SPEC.AUX_WIDTH, desc: "Response tag" },
+      ],
+      ddr_out: [
+        { name: "ddr3_dq_o", width: SPEC.DDR_DATA_WIDTH, desc: "Write data" },
+        { name: "ddr3_dq_oe", width: 1, desc: "DQ output enable" },
+        { name: "ddr3_dm", width: SPEC.DDR_DM_WIDTH, desc: "Data mask" },
+        { name: "ddr3_dqs_o", width: SPEC.DDR_DQS_WIDTH, desc: "Write strobe" },
+        { name: "ddr3_dqs_oe", width: 1, desc: "DQS output enable" },
+      ],
+      ddr_in: [
+        { name: "ddr3_dq_i", width: SPEC.DDR_DATA_WIDTH, desc: "Read data" },
+        { name: "ddr3_dqs_i", width: SPEC.DDR_DQS_WIDTH, desc: "Read strobe" },
+      ],
+    }
+  },
+  {
+    id: "init_fsm", label: "Init / Reset\nFSM", file: "init_fsm.sv",
+    x: 310, y: 30, w: 200, h: 100, color: "#EFEBE9", border: "#795548",
+    goal: "Execute JEDEC init sequence: RESET# low (200µs) → RESET# high → CKE high (500µs) → tXPR wait → MR2 → MR3 → MR1 → MR0 (DLL reset) → ZQCL (512nCK). Assert init_done. Signal init_fail on timeout.",
+    ports: {
+      internal_out: [
+        { name: "init_done", width: 1, desc: "Init complete" },
+        { name: "init_fail", width: 1, desc: "Init failed" },
+        { name: "init_cmd_valid", width: 1, desc: "Init command valid" },
+        { name: "init_cmd", width: 3, desc: "Command type" },
+        { name: "init_addr", width: SPEC.DDR_ADDR_BITS, desc: "MR data / address" },
+        { name: "init_ba", width: SPEC.BANK_BITS, desc: "MR select" },
+        { name: "init_cke", width: 1, desc: "CKE control" },
+        { name: "init_reset_n", width: 1, desc: "RESET# control" },
+      ],
+      internal_in: [
+        { name: "cmd_gen_ready", width: 1, desc: "Command generator ready" },
+      ],
+    }
+  },
+  {
+    id: "config_regs", label: "Config / CSR\nRegisters", file: "config_regs.sv",
+    x: 560, y: 30, w: 200, h: 120, color: "#F1F8E9", border: "#7CB342",
+    goal: `Implement ${SPEC.CSR_NUM_REGS} registers (46 fields) at ${SPEC.CSR_ADDR_BITS}-bit address space. Registers: CTRL_STATUS(RO), CTRL_CONFIG(RW), TIMING_0/1/2/3(RW), REFRESH_CONFIG(RW), ERROR_STATUS(RW1C), BIST_CONFIG(RW), BIST_ADDR_START/END(RW). Provide cfg_* outputs to all modules.`,
+    ports: {
+      external_in: [
+        { name: "csr_cyc_i", width: 1, desc: "CSR bus cycle" },
+        { name: "csr_stb_i", width: 1, desc: "CSR strobe" },
+        { name: "csr_we_i", width: 1, desc: "CSR write enable" },
+        { name: "csr_adr_i", width: SPEC.CSR_ADDR_BITS, desc: "Register address" },
+        { name: "csr_dat_i", width: SPEC.CSR_DATA_BITS, desc: "Write data" },
+      ],
+      external_out: [
+        { name: "csr_ack_o", width: 1, desc: "CSR acknowledge" },
+        { name: "csr_dat_o", width: SPEC.CSR_DATA_BITS, desc: "Read data" },
+      ],
+      internal_out: [
+        { name: "cfg_timing", width: "timing_t", desc: "14 timing params (nCK)" },
+        { name: "cfg_sched_policy", width: 1, desc: "0=in_order, 1=fr_fcfs" },
+        { name: "cfg_row_policy", width: 1, desc: "0=open_page, 1=close_page" },
+        { name: "cfg_self_refresh", width: 2, desc: "Self-refresh mode" },
+        { name: "cfg_max_postpone", width: 4, desc: "Refresh max postpone" },
+        { name: "cfg_urgent_thresh", width: 4, desc: "Refresh urgent threshold" },
+        { name: "cfg_bist_start", width: 1, desc: "BIST start trigger" },
+        { name: "cfg_bist_pattern", width: 3, desc: "BIST pattern select" },
+        { name: "cfg_force_refresh", width: 1, desc: "Force refresh pulse" },
+      ],
+      internal_in: [
+        { name: "status_init_done", width: 1, desc: "Init done for STATUS reg" },
+        { name: "status_cal_done", width: 1, desc: "Cal done for STATUS reg" },
+        { name: "status_bist_done", width: 1, desc: "BIST done for STATUS reg" },
+        { name: "status_bist_fail", width: 1, desc: "BIST fail for STATUS reg" },
+        { name: "error_flags", width: 3, desc: "ecc_ue, ref_starve, init_fail" },
+      ],
+    }
+  },
+  {
+    id: "calibration", label: "Calibration /\nZQCS", file: "calibration.sv",
+    x: 310, y: 550, w: 200, h: 100, color: "#E8EAF6", border: "#5C6BC0",
+    goal: "PHY training (disabled for abstract mode). Issue periodic ZQCS commands at 640µs interval. Report cal_done/cal_fail status.",
+    ports: {
+      internal_in: [
+        { name: "init_done", width: 1, desc: "Init complete" },
+      ],
+      internal_out: [
+        { name: "cal_done", width: 1, desc: "Calibration complete" },
+        { name: "cal_fail", width: 1, desc: "Calibration failed" },
+        { name: "zqcs_req", width: 1, desc: "Periodic ZQCS request" },
+      ],
+    }
+  },
+];
+
+const connections = [
+  { from: "wb_port", to: "addr_decoder", signals: "req_addr", color: "#FB8C00" },
+  { from: "wb_port", to: "cmd_queue", signals: "req_valid, req_we, req_wdata", color: "#FB8C00" },
+  { from: "addr_decoder", to: "cmd_queue", signals: "dec_row, dec_col, dec_bank", color: "#F9A825" },
+  { from: "cmd_queue", to: "scheduler", signals: "entries, entry_valid", color: "#1E88E5" },
+  { from: "bank_tracker", to: "scheduler", signals: "bank_state, *_allowed", color: "#43A047" },
+  { from: "refresh_ctrl", to: "scheduler", signals: "ref_pending, ref_urgent", color: "#00ACC1" },
+  { from: "scheduler", to: "cmd_gen", signals: "sel_valid, sel_cmd", color: "#8E24AA" },
+  { from: "scheduler", to: "refresh_ctrl", signals: "ref_ack", color: "#8E24AA" },
+  { from: "scheduler", to: "bank_tracker", signals: "cmd_issued, cmd_type", color: "#8E24AA" },
+  { from: "cmd_queue", to: "data_path", signals: "wr_valid, wr_data", color: "#1E88E5" },
+  { from: "data_path", to: "wb_port", signals: "rsp_valid, rsp_rdata", color: "#FF6F00" },
+  { from: "init_fsm", to: "cmd_gen", signals: "init_cmd_valid, init_addr", color: "#795548" },
+  { from: "config_regs", to: "bank_tracker", signals: "cfg_timing", color: "#7CB342" },
+  { from: "config_regs", to: "scheduler", signals: "cfg_sched_policy", color: "#7CB342" },
+  { from: "config_regs", to: "refresh_ctrl", signals: "cfg_max_postpone", color: "#7CB342" },
+  { from: "init_fsm", to: "calibration", signals: "init_done", color: "#795548" },
+];
+
+function PortGroup({ title, ports, color }) {
+  return (
+    <div style={{ marginBottom: 10 }}>
+      <div style={{
+        fontSize: 10, fontWeight: 700, color: color || "#555",
+        textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4,
+        borderBottom: `1px solid ${color || "#ddd"}33`, paddingBottom: 2
+      }}>{title}</div>
+      {ports.map((p, i) => (
+        <div key={i} style={{
+          display: "flex", justifyContent: "space-between", alignItems: "baseline",
+          fontSize: 11, padding: "2px 0", fontFamily: "'Courier New', monospace"
+        }}>
+          <span style={{ color: "#f0f6fc", fontWeight: 500 }}>{p.name}</span>
+          <span style={{ color: "#888", fontSize: 10, marginLeft: 8, flexShrink: 0 }}>
+            [{typeof p.width === "number" ? p.width : p.width}]
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function App() {
+  const [selected, setSelected] = useState(null);
+  const [hoveredBlock, setHoveredBlock] = useState(null);
+  const selectedBlock = blocks.find(b => b.id === selected);
+
+  return (
+    <div style={{
+      display: "flex", gap: 0, height: "100vh", width: "100%",
+      background: "#0d1117", fontFamily: "system-ui, sans-serif", overflow: "hidden"
+    }}>
+      {/* Left: SVG diagram */}
+      <div style={{
+        flex: "1 1 60%", display: "flex", flexDirection: "column",
+        borderRight: "1px solid #21262d"
+      }}>
+        <div style={{
+          padding: "12px 16px", borderBottom: "1px solid #21262d",
+          display: "flex", justifyContent: "space-between", alignItems: "center"
+        }}>
+          <div>
+            <span style={{ color: "#f0f6fc", fontWeight: 700, fontSize: 15 }}>
+              DDR3-1600 Memory Controller
+            </span>
+            <span style={{ color: "#8b949e", fontSize: 12, marginLeft: 8 }}>
+              Block Architecture v2
+            </span>
+          </div>
+          <span style={{
+            fontSize: 10, color: "#58a6ff", background: "#161b22",
+            padding: "2px 8px", borderRadius: 10, border: "1px solid #30363d"
+          }}>
+            {blocks.length} modules • click to inspect
+          </span>
+        </div>
+        <div style={{ flex: 1, overflow: "auto", padding: 8 }}>
+          <svg viewBox="0 0 830 700" style={{ width: "100%", maxHeight: "calc(100vh - 52px)" }}>
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 7" refX="9" refY="3.5"
+                markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#8b949e" />
+              </marker>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="2" result="blur" />
+                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+            </defs>
+            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#161b22" strokeWidth="0.5" />
+            </pattern>
+            <rect width="830" height="700" fill="url(#grid)" />
+
+            {/* External labels */}
+            <g>
+              <rect x="15" y="55" width="30" height="80" rx="4" fill="#161b22" stroke="#30363d" />
+              <text x="30" y="85" textAnchor="middle" fill="#58a6ff" fontSize="7" fontWeight="600"
+                transform="rotate(-90, 30, 85)">HOST</text>
+              <line x1="45" y1="70" x2="60" y2="70" stroke="#58a6ff" strokeWidth="2" markerEnd="url(#arrow)" />
+              <line x1="60" y1="110" x2="45" y2="110" stroke="#58a6ff" strokeWidth="2" markerEnd="url(#arrow)" />
+
+              <rect x="785" y="390" width="30" height="130" rx="4" fill="#161b22" stroke="#30363d" />
+              <text x="800" y="450" textAnchor="middle" fill="#da3633" fontSize="7" fontWeight="600"
+                transform="rotate(-90, 800, 450)">DDR3 SDRAM</text>
+              <line x1="760" y1="420" x2="785" y2="420" stroke="#da3633" strokeWidth="2" markerEnd="url(#arrow)" />
+              <line x1="785" y1="480" x2="760" y2="480" stroke="#da3633" strokeWidth="2" markerEnd="url(#arrow)" />
+
+              <rect x="785" y="55" width="30" height="80" rx="4" fill="#161b22" stroke="#30363d" />
+              <text x="800" y="85" textAnchor="middle" fill="#7CB342" fontSize="7" fontWeight="600"
+                transform="rotate(-90, 800, 85)">CSR BUS</text>
+              <line x1="785" y1="70" x2="760" y2="70" stroke="#7CB342" strokeWidth="2" markerEnd="url(#arrow)" />
+              <line x1="760" y1="110" x2="785" y2="110" stroke="#7CB342" strokeWidth="2" markerEnd="url(#arrow)" />
+            </g>
+
+            {/* Connections */}
+            {connections.map((c, i) => {
+              const from = blocks.find(b => b.id === c.from);
+              const to = blocks.find(b => b.id === c.to);
+              const fx = from.x + from.w / 2, fy = from.y + from.h / 2;
+              const tx = to.x + to.w / 2, ty = to.y + to.h / 2;
+              const dx = tx - fx, dy = ty - fy;
+              let path;
+              if (Math.abs(dx) > Math.abs(dy)) {
+                const mx = fx + dx / 2;
+                path = `M${fx + (dx > 0 ? from.w/2 : -from.w/2)},${fy} C${mx},${fy} ${mx},${ty} ${tx + (dx > 0 ? -to.w/2 : to.w/2)},${ty}`;
+              } else {
+                const my = fy + dy / 2;
+                path = `M${fx},${fy + (dy > 0 ? from.h/2 : -from.h/2)} C${fx},${my} ${tx},${my} ${tx},${ty + (dy > 0 ? -to.h/2 : to.h/2)}`;
+              }
+              const hl = hoveredBlock && (c.from === hoveredBlock || c.to === hoveredBlock);
+              return (
+                <path key={i} d={path} fill="none" stroke={hl ? c.color : "#30363d"}
+                  strokeWidth={hl ? 2 : 1} strokeDasharray={hl ? "none" : "4,2"}
+                  markerEnd="url(#arrow)" opacity={hl ? 1 : 0.5}
+                  style={{ transition: "all 0.2s" }} />
+              );
+            })}
+
+            {/* Blocks */}
+            {blocks.map(b => {
+              const isSel = selected === b.id;
+              const isHov = hoveredBlock === b.id;
+              return (
+                <g key={b.id}
+                  onClick={() => setSelected(selected === b.id ? null : b.id)}
+                  onMouseEnter={() => setHoveredBlock(b.id)}
+                  onMouseLeave={() => setHoveredBlock(null)}
+                  style={{ cursor: "pointer" }}>
+                  <rect x={b.x} y={b.y} width={b.w} height={b.h} rx={6}
+                    fill={isSel ? b.border + "22" : "#161b22"}
+                    stroke={isSel || isHov ? b.border : "#30363d"}
+                    strokeWidth={isSel ? 2.5 : isHov ? 2 : 1}
+                    filter={isSel ? "url(#glow)" : "none"}
+                    style={{ transition: "all 0.15s" }} />
+                  <rect x={b.x} y={b.y} width={b.w} height={3} rx={2} fill={b.border} opacity={0.8} />
+                  <text x={b.x + b.w / 2} y={b.y + b.h / 2 - 6}
+                    textAnchor="middle" fill="#f0f6fc" fontSize="11" fontWeight="600">
+                    {b.label.split("\n")[0]}
+                  </text>
+                  <text x={b.x + b.w / 2} y={b.y + b.h / 2 + 8}
+                    textAnchor="middle" fill="#f0f6fc" fontSize="11" fontWeight="600">
+                    {b.label.split("\n")[1]}
+                  </text>
+                  <text x={b.x + b.w / 2} y={b.y + b.h - 10}
+                    textAnchor="middle" fill="#8b949e" fontSize="8" fontStyle="italic">
+                    {b.file}
+                  </text>
+                </g>
+              );
+            })}
+
+            {/* Legend */}
+            <g transform="translate(15, 665)">
+              <text x="0" y="0" fill="#8b949e" fontSize="8" fontWeight="600">SIGNAL FLOW:</text>
+              {[
+                { label: "Host bus", color: "#58a6ff" },
+                { label: "Request path", color: "#FB8C00" },
+                { label: "Scheduling", color: "#8E24AA" },
+                { label: "DDR3 PHY", color: "#da3633" },
+                { label: "Config", color: "#7CB342" },
+              ].map((l, i) => (
+                <g key={i} transform={`translate(${i * 130 + 80}, -4)`}>
+                  <line x1="0" y1="0" x2="20" y2="0" stroke={l.color} strokeWidth="2" />
+                  <text x="25" y="3" fill="#8b949e" fontSize="8">{l.label}</text>
+                </g>
+              ))}
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      {/* Right panel */}
+      <div style={{ flex: "0 0 370px", overflow: "auto", background: "#161b22" }}>
+        {selectedBlock ? (
+          <div>
+            <div style={{
+              padding: "12px 14px", borderBottom: "1px solid #21262d",
+              background: selectedBlock.border + "15", position: "sticky", top: 0, zIndex: 1
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                <div style={{ width: 10, height: 10, borderRadius: 2, background: selectedBlock.border }} />
+                <span style={{ color: "#f0f6fc", fontWeight: 700, fontSize: 14 }}>
+                  {selectedBlock.label.replace("\n", " ")}
+                </span>
+              </div>
+              <div style={{ fontSize: 10, color: "#58a6ff", fontFamily: "monospace", marginBottom: 6 }}>
+                {selectedBlock.file}
+              </div>
+              <div style={{
+                fontSize: 11, color: "#c9d1d9", lineHeight: 1.5,
+                background: "#0d111799", padding: "8px 10px", borderRadius: 4,
+                borderLeft: `3px solid ${selectedBlock.border}`
+              }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: "#8b949e", textTransform: "uppercase", letterSpacing: "0.5px" }}>Goal: </span>
+                {selectedBlock.goal}
+              </div>
+            </div>
+            <div style={{ padding: "8px 14px" }}>
+              {selectedBlock.ports.external_in && <PortGroup title="⬇ External Inputs" ports={selectedBlock.ports.external_in} color="#58a6ff" />}
+              {selectedBlock.ports.external_out && <PortGroup title="⬆ External Outputs" ports={selectedBlock.ports.external_out} color="#58a6ff" />}
+              {selectedBlock.ports.internal_in && <PortGroup title="← Internal Inputs" ports={selectedBlock.ports.internal_in} color="#c9d1d9" />}
+              {selectedBlock.ports.internal_out && <PortGroup title="→ Internal Outputs" ports={selectedBlock.ports.internal_out} color="#c9d1d9" />}
+              {selectedBlock.ports.ddr_out && <PortGroup title="⬆ DDR3 Outputs" ports={selectedBlock.ports.ddr_out} color="#da3633" />}
+              {selectedBlock.ports.ddr_in && <PortGroup title="⬇ DDR3 Inputs" ports={selectedBlock.ports.ddr_in} color="#da3633" />}
+            </div>
+          </div>
+        ) : (
+          <div style={{
+            padding: 24, display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center", height: "100%",
+            color: "#8b949e", textAlign: "center"
+          }}>
+            <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.3 }}>◧</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "#c9d1d9", marginBottom: 8 }}>
+              Port Inspector
+            </div>
+            <div style={{ fontSize: 11, lineHeight: 1.5, maxWidth: 240, marginBottom: 16 }}>
+              Click any module to view ports and goal functionality.
+            </div>
+            <div style={{
+              padding: "10px 12px", background: "#0d1117",
+              borderRadius: 6, border: "1px solid #21262d", fontSize: 10, width: "100%", maxWidth: 280
+            }}>
+              <div style={{ fontWeight: 600, color: "#c9d1d9", marginBottom: 6 }}>
+                {blocks.length} Modules — golden_microarch_v2
+              </div>
+              {blocks.map(b => (
+                <div key={b.id} style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  padding: "3px 0", cursor: "pointer"
+                }} onClick={() => setSelected(b.id)}>
+                  <div style={{ width: 6, height: 6, borderRadius: 1, background: b.border, flexShrink: 0 }} />
+                  <span style={{ color: "#8b949e", fontSize: 10, flex: 1 }}>{b.file}</span>
+                  <span style={{ color: "#484f58", fontSize: 9 }}>
+                    {Object.values(b.ports).flat().length} ports
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

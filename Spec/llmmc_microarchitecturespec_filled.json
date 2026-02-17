@@ -1,0 +1,612 @@
+{
+  "$comment": "DDR3-1600K (11-11-11-28) — Golden microarchitecture contract v2. All timing in ns. All teams reference this single file.",
+  "$schema": "https://example.com/ddr3_microarchitecture.schema.json",
+
+  "schema_version": "2.0.0",
+  "design_id": "ddr3_mc_core_v2",
+  "revision": "golden_ddr3_1600k_x8_2lane_1rank",
+
+  "conversion_rules": {
+    "timing_ns_to_nCK": "ceil(param_ns / tCK_ns)",
+    "conversion_owner": "microarchitecture_agent",
+    "rounding_rule": "ceiling"
+  },
+
+  "validation_scopes": [
+    "config_regs",
+    "arbiter",
+    "scheduler",
+    "timing",
+    "init_sequence",
+    "calibration",
+    "refresh",
+    "data_path",
+    "full_controller"
+  ],
+
+  "memory_model_boundary": {
+    "boundary_type": "abstract_cmd_data",
+    "phy_modeled": false,
+    "supports_training": false,
+    "supports_mpr": false,
+    "read_data_model": "fixed_latency_from_CL",
+    "notes": "No pin-accurate PHY. Validation is at host+controller command layer with abstract DRAM command/data boundary."
+  },
+
+  "memory_geometry": {
+    "row_bits": 14,
+    "column_bits": 10,
+    "bank_bits": 3,
+    "ranks": 1,
+    "burst_length": 8,
+    "device_width_bits": 8,
+    "byte_lanes": 2,
+    "address_mapping": "row-bank-column",
+
+    "$derived": {
+      "device_density_bits": 2147483648,
+      "device_density_label": "2Gb",
+      "channel_data_width_bits": 16,
+      "page_size_bytes_per_device": 1024,
+      "page_size_bytes_channel": 2048,
+      "channel_capacity_bytes": 536870912,
+      "channel_capacity_MB": 512,
+      "burst_transfer_bytes_on_dq": 16,
+      "peak_channel_bandwidth_MBps": 3200
+    }
+  },
+
+  "clocking_model": {
+    "controller_clock_period_ns": 5.0,
+    "ddr_clock_period_ns": 1.25,
+    "clock_ratio_ddr_to_controller": 4,
+    "pipeline_latency_cycles": 2,
+
+    "$derived": {
+      "controller_frequency_MHz": 200.0,
+      "ddr_clock_frequency_MHz": 800.0,
+      "data_rate_MTps": 1600.0,
+      "tCK_ns": 1.25,
+      "period_ratio_check": "5.0 / 1.25 = 4 ✓"
+    }
+  },
+
+  "timing_model": {
+    "units": "ns",
+    "tCK_ns": 1.25,
+    "speed_bin": "DDR3-1600K (11-11-11)",
+
+    "tRCD": 13.75,
+    "tRP": 13.75,
+    "tRAS": 35.0,
+    "tRC": 48.75,
+
+    "tRFC": 160.0,
+    "tFAW": 40.0,
+    "tRRD": 7.5,
+
+    "tWR": 15.0,
+    "tWTR": 7.5,
+    "tRTP": 7.5,
+
+    "tCCD": 5.0,
+    "tREFI": 7800.0,
+
+    "CL_cycles": 11,
+    "CWL_cycles": 8,
+
+    "$derived_cycles": {
+      "$comment": "All computed via ceil(param_ns / 1.25). These are authoritative for RTL.",
+      "tRCD_nCK": 11,
+      "tRP_nCK": 11,
+      "tRAS_nCK": 28,
+      "tRC_nCK": 39,
+      "tRFC_nCK": 128,
+      "tFAW_nCK": 32,
+      "tRRD_nCK": 6,
+      "tWR_nCK": 12,
+      "tWTR_nCK": 6,
+      "tRTP_nCK": 6,
+      "tCCD_nCK": 4,
+      "tREFI_nCK": 6240,
+      "CL_ns": 13.75,
+      "CWL_ns": 10.0
+    },
+
+    "$consistency_checks": {
+      "tRC_rule": "tRC == tRAS + tRP → 48.75 == 35.0 + 13.75 ✓",
+      "tRRD_rule": "tRRD >= max(4*tCK, 7.5ns) → 7.5 >= max(5.0, 7.5) ✓",
+      "tWTR_rule": "tWTR >= max(4*tCK, 7.5ns) → 7.5 >= max(5.0, 7.5) ✓",
+      "tRTP_rule": "tRTP >= max(4*tCK, 7.5ns) → 7.5 >= max(5.0, 7.5) ✓",
+      "tFAW_rule": "tFAW >= 4*tRRD → 40.0 >= 4*7.5 = 30.0 ✓ (JEDEC min 40ns for 1KB page)",
+      "tWR_rule": "tWR = 15ns (JEDEC fixed) ✓",
+      "tRFC_rule": "tRFC = 160ns for 2Gb density ✓",
+      "tREFI_rule": "tREFI = 7.8us = 7800ns ✓",
+      "tCCD_rule": "tCCD = 4*tCK = 5.0ns ✓",
+      "CWL_rule": "CWL = 8 for tCK=1.25ns per JEDEC table ✓",
+      "tCK_match": "timing_model.tCK_ns (1.25) == clocking_model.ddr_clock_period_ns (1.25) ✓"
+    }
+  },
+
+  "controller_architecture": {
+    "num_ports": 1,
+    "arbiter_policy": "round_robin",
+    "scheduler_policy": "fr_fcfs",
+    "row_policy": "open_page",
+    "command_queue_depth": 16,
+    "lookahead_depth": 8,
+    "ecc_mode": 0,
+    "self_refresh_mode": "auto",
+
+    "refresh_policy": {
+      "max_postpone_count": 8,
+      "refresh_priority": "urgent_preempt",
+      "urgent_threshold": 6
+    },
+
+    "bist_config": {
+      "enable": true,
+      "pattern": "all_patterns",
+      "address_mode": "sequential",
+      "address_range": {
+        "start": 0,
+        "end": 536870911
+      }
+    },
+
+    "error_handling": {
+      "on_ecc_correctable": "correct_and_continue",
+      "on_ecc_uncorrectable": "poison_data",
+      "on_refresh_starvation": "force_precharge_all",
+      "on_init_failure": "halt_and_signal"
+    },
+
+    "enable_second_wishbone": false,
+    "aux_width": 4,
+
+    "$derived": {
+      "bank_count": 8,
+      "queue_index_bits": 4,
+      "lookahead_index_bits": 3
+    }
+  },
+
+  "initialization_sequence": {
+    "reset_hold_us": 200,
+    "cke_delay_us": 500,
+    "tXPR_ns": 170.0,
+    "zq_calibration_on_init": true,
+    "tZQinit_ns": 640.0,
+
+    "mode_registers": {
+      "MR0": {
+        "burst_length": "fixed_8",
+        "cas_latency_cycles": 11,
+        "dll_reset": true,
+        "write_recovery_ns": 15.0,
+        "precharge_pd_mode": "fast_exit"
+      },
+      "MR1": {
+        "dll_enable": true,
+        "output_drive_strength": "RZQ_6",
+        "rtt_nom": "RZQ_4",
+        "additive_latency": "disabled",
+        "write_leveling_enable": false
+      },
+      "MR2": {
+        "cas_write_latency_cycles": 8,
+        "rtt_wr": "RZQ_4",
+        "self_refresh_temperature": "normal",
+        "auto_self_refresh": false
+      },
+      "MR3": {
+        "mpr_enable": false,
+        "mpr_read_function": 0
+      }
+    },
+
+    "$derived": {
+      "tXPR_reason": "max(5*tCK, tRFC+10ns) = max(6.25, 170.0) = 170.0ns",
+      "tZQinit_reason": "512*tCK = 512*1.25 = 640.0ns",
+      "tXPR_nCK": 136,
+      "tZQinit_nCK": 512,
+      "init_sequence_order": "RESET# low → wait 200us → RESET# high → wait 500us → CKE high → wait tXPR → MR2 → MR3 → MR1 → MR0(DLL reset) → ZQCL → init_done"
+    },
+
+    "$cross_checks": {
+      "MR0_CL_match": "MR0.cas_latency_cycles (11) == timing_model.CL_cycles (11) ✓",
+      "MR0_WR_match": "MR0.write_recovery_ns (15.0) == timing_model.tWR (15.0) ✓",
+      "MR2_CWL_match": "MR2.cas_write_latency_cycles (8) == timing_model.CWL_cycles (8) ✓"
+    }
+  },
+
+  "calibration": {
+    "enable_write_leveling": false,
+    "enable_read_leveling": false,
+    "enable_bitslip_training": false,
+    "calibration_retry_count": 0,
+    "periodic_recalibration_enable": true,
+    "periodic_zqcs_interval_ns": 640000.0,
+
+    "$comment": "PHY not modeled, so leveling/bitslip training is out of scope. Periodic ZQCS is modeled as a command-scheduling requirement only.",
+    "$derived": {
+      "periodic_zqcs_interval_nCK": 512000
+    }
+  },
+
+  "host_interface": {
+    "interface_type": "wishbone_pipelined",
+    "addressing": "byte",
+    "data_width_bits": 32,
+    "address_width_bits": 29,
+    "granularity_bits": 8,
+    "burst_type": "linear",
+    "max_burst_length": 8,
+    "read_buffer_depth": 16,
+    "write_buffer_depth": 16,
+    "enable_data_mask": true,
+
+    "$derived": {
+      "addressable_space_bytes": 536870912,
+      "addressable_space_MB": 512,
+      "host_burst_transfer_bytes": 32,
+      "sel_width_bits": 4
+    }
+  },
+
+  "data_path_mapping": {
+    "ddr_channel_width_bits": 16,
+    "host_width_bits": 32,
+    "pack_mode": "pack_32_to_16",
+    "alignment_bytes_required": 4,
+    "endianness": "little",
+    "byte_enable_semantics": "wishbone_sel_per_byte"
+  },
+
+  "phy_interface": {
+    "mode": "abstract",
+    "dq_width_bits": 16,
+    "dqs_count": 2,
+    "dm_enabled": true,
+    "ck_pair_present": true,
+    "notes": "Abstracted DRAM boundary. No DQS training/leveling validation; only command/data transaction semantics."
+  },
+
+  "csr_register_map": {
+    "base_address": "0x00000000",
+    "address_width_bits": 8,
+    "data_width_bits": 32,
+    "registers": [
+      {
+        "name": "CTRL_STATUS",
+        "offset": "0x00",
+        "access": "RO",
+        "reset_value": "0x00000000",
+        "fields": [
+          { "name": "init_done",      "bits": "0",    "access": "RO", "reset_value": 0, "description": "1 when init sequence complete" },
+          { "name": "cal_done",       "bits": "1",    "access": "RO", "reset_value": 0, "description": "1 when calibration complete" },
+          { "name": "cal_fail",       "bits": "2",    "access": "RO", "reset_value": 0, "description": "1 if calibration failed" },
+          { "name": "bist_done",      "bits": "3",    "access": "RO", "reset_value": 0, "description": "1 when BIST complete" },
+          { "name": "bist_fail",      "bits": "4",    "access": "RO", "reset_value": 0, "description": "1 if BIST failed" },
+          { "name": "ref_pending_cnt","bits": "7:5",  "access": "RO", "reset_value": 0, "description": "Pending refresh count (0-8)" },
+          { "name": "self_refresh_active","bits": "8","access": "RO", "reset_value": 0, "description": "1 when in self-refresh" },
+          { "name": "reserved",       "bits": "31:9", "access": "RO", "reset_value": 0, "description": "Reserved" }
+        ]
+      },
+      {
+        "name": "CTRL_CONFIG",
+        "offset": "0x04",
+        "access": "RW",
+        "reset_value": "0x00000009",
+        "fields": [
+          { "name": "sched_policy",   "bits": "0",     "access": "RW", "reset_value": 1, "description": "0=in_order, 1=fr_fcfs" },
+          { "name": "row_policy",     "bits": "1",     "access": "RW", "reset_value": 0, "description": "0=open_page, 1=close_page" },
+          { "name": "self_ref_mode",  "bits": "3:2",   "access": "RW", "reset_value": 2, "description": "0=disabled, 1=manual, 2=auto" },
+          { "name": "ecc_enable",     "bits": "4",     "access": "RW", "reset_value": 0, "description": "ECC mode enable" },
+          { "name": "bist_start",     "bits": "5",     "access": "WO", "reset_value": 0, "description": "Write 1 to start BIST" },
+          { "name": "force_refresh",  "bits": "6",     "access": "WO", "reset_value": 0, "description": "Write 1 to force immediate refresh" },
+          { "name": "force_self_ref", "bits": "7",     "access": "WO", "reset_value": 0, "description": "Write 1 to enter self-refresh (manual mode)" },
+          { "name": "reserved",       "bits": "31:8",  "access": "RO", "reset_value": 0, "description": "Reserved" }
+        ]
+      },
+      {
+        "name": "TIMING_0",
+        "offset": "0x08",
+        "access": "RW",
+        "reset_value": "0x271C0B0B",
+        "fields": [
+          { "name": "tRCD_nCK",   "bits": "7:0",   "access": "RW", "reset_value": 11, "description": "RAS-to-CAS delay in nCK" },
+          { "name": "tRP_nCK",    "bits": "15:8",  "access": "RW", "reset_value": 11, "description": "Row precharge in nCK" },
+          { "name": "tRAS_nCK",   "bits": "23:16", "access": "RW", "reset_value": 28, "description": "Row active time in nCK" },
+          { "name": "tRC_nCK",    "bits": "31:24", "access": "RW", "reset_value": 39, "description": "Row cycle time in nCK" }
+        ]
+      },
+      {
+        "name": "TIMING_1",
+        "offset": "0x0C",
+        "access": "RW",
+        "reset_value": "0x80200606",
+        "fields": [
+          { "name": "tRRD_nCK",   "bits": "7:0",   "access": "RW", "reset_value": 6,   "description": "Row-to-row delay in nCK" },
+          { "name": "tWTR_nCK",   "bits": "15:8",  "access": "RW", "reset_value": 6,   "description": "Write-to-read turnaround in nCK" },
+          { "name": "tFAW_nCK",   "bits": "23:16", "access": "RW", "reset_value": 32,  "description": "Four-activate window in nCK" },
+          { "name": "tRFC_nCK",   "bits": "31:24", "access": "RW", "reset_value": 128, "description": "Refresh cycle time in nCK" }
+        ]
+      },
+      {
+        "name": "TIMING_2",
+        "offset": "0x10",
+        "access": "RW",
+        "reset_value": "0x080B060C",
+        "fields": [
+          { "name": "tWR_nCK",    "bits": "7:0",   "access": "RW", "reset_value": 12, "description": "Write recovery in nCK" },
+          { "name": "tRTP_nCK",   "bits": "15:8",  "access": "RW", "reset_value": 6,  "description": "Read-to-precharge in nCK" },
+          { "name": "CL_nCK",     "bits": "23:16", "access": "RW", "reset_value": 11, "description": "CAS latency in nCK" },
+          { "name": "CWL_nCK",    "bits": "31:24", "access": "RW", "reset_value": 8,  "description": "CAS write latency in nCK" }
+        ]
+      },
+      {
+        "name": "TIMING_3",
+        "offset": "0x14",
+        "access": "RW",
+        "reset_value": "0x00186004",
+        "fields": [
+          { "name": "tCCD_nCK",    "bits": "7:0",   "access": "RW", "reset_value": 4,    "description": "CAS-to-CAS delay in nCK" },
+          { "name": "tREFI_nCK",   "bits": "31:8",  "access": "RW", "reset_value": 6240, "description": "Refresh interval in nCK (24-bit)" }
+        ]
+      },
+      {
+        "name": "REFRESH_CONFIG",
+        "offset": "0x18",
+        "access": "RW",
+        "reset_value": "0x00000168",
+        "fields": [
+          { "name": "max_postpone",    "bits": "3:0",   "access": "RW", "reset_value": 8, "description": "Max postponed refreshes (0-8)" },
+          { "name": "urgent_threshold","bits": "7:4",   "access": "RW", "reset_value": 6, "description": "Postpone count to trigger urgent refresh" },
+          { "name": "ref_priority",    "bits": "8",     "access": "RW", "reset_value": 1, "description": "0=normal, 1=urgent_preempt" },
+          { "name": "reserved",        "bits": "31:9",  "access": "RO", "reset_value": 0, "description": "Reserved" }
+        ]
+      },
+      {
+        "name": "ERROR_STATUS",
+        "offset": "0x1C",
+        "access": "RW1C",
+        "reset_value": "0x00000000",
+        "fields": [
+          { "name": "ecc_ce_count",  "bits": "15:0",  "access": "RO",   "reset_value": 0, "description": "Correctable ECC error count" },
+          { "name": "ecc_ue_flag",   "bits": "16",    "access": "RW1C", "reset_value": 0, "description": "Uncorrectable ECC error occurred. Write 1 to clear." },
+          { "name": "ref_starve_flag","bits": "17",    "access": "RW1C", "reset_value": 0, "description": "Refresh starvation occurred. Write 1 to clear." },
+          { "name": "init_fail_flag", "bits": "18",    "access": "RW1C", "reset_value": 0, "description": "Init/cal failure occurred. Write 1 to clear." },
+          { "name": "bist_fail_addr", "bits": "31:19", "access": "RO",   "reset_value": 0, "description": "Upper bits of first BIST failure address" }
+        ]
+      },
+      {
+        "name": "BIST_CONFIG",
+        "offset": "0x20",
+        "access": "RW",
+        "reset_value": "0x00000000",
+        "fields": [
+          { "name": "bist_pattern",   "bits": "2:0",  "access": "RW", "reset_value": 0, "description": "0=walking_ones, 1=walking_zeros, 2=checkerboard, 3=lfsr, 4=all" },
+          { "name": "bist_addr_mode", "bits": "3",    "access": "RW", "reset_value": 0, "description": "0=sequential, 1=random_lfsr" },
+          { "name": "reserved",       "bits": "31:4", "access": "RO", "reset_value": 0, "description": "Reserved" }
+        ]
+      },
+      {
+        "name": "BIST_ADDR_START",
+        "offset": "0x24",
+        "access": "RW",
+        "reset_value": "0x00000000",
+        "fields": [
+          { "name": "start_addr", "bits": "28:0", "access": "RW", "reset_value": 0, "description": "BIST start byte address (29 bits)" },
+          { "name": "reserved",   "bits": "31:29","access": "RO", "reset_value": 0, "description": "Reserved" }
+        ]
+      },
+      {
+        "name": "BIST_ADDR_END",
+        "offset": "0x28",
+        "access": "RW",
+        "reset_value": "0x1FFFFFFF",
+        "fields": [
+          { "name": "end_addr",  "bits": "28:0", "access": "RW", "reset_value": 536870911, "description": "BIST end byte address (29 bits)" },
+          { "name": "reserved",  "bits": "31:29","access": "RO", "reset_value": 0, "description": "Reserved" }
+        ]
+      }
+    ]
+  },
+
+  "latency_model": {
+    "$comment": "All formulas in DDR clock cycles (nCK). pipeline_latency is in controller cycles, so multiply by clock_ratio for nCK.",
+    "read_hit_latency_nCK": "pipeline_latency*4 + CL + BL/2 + 2 = 2*4 + 11 + 4 + 2 = 25 nCK",
+    "read_empty_latency_nCK": "pipeline_latency*4 + tRCD + CL + BL/2 + 2 = 2*4 + 11 + 11 + 4 + 2 = 36 nCK",
+    "read_miss_latency_nCK": "pipeline_latency*4 + tRP + tRCD + CL + BL/2 + 2 = 2*4 + 11 + 11 + 11 + 4 + 2 = 47 nCK",
+    "write_hit_latency_nCK": "pipeline_latency*4 + CWL + BL/2 + tWR = 2*4 + 8 + 4 + 12 = 32 nCK",
+    "write_to_read_turnaround_nCK": "CWL + BL/2 + tWTR = 8 + 4 + 6 = 18 nCK",
+    "read_to_write_turnaround_nCK": "CL + tCCD + 2 - CWL = 11 + 4 + 2 - 8 = 9 nCK"
+  },
+
+  "observability": {
+    "debug_interface_name": "mc_debug_if",
+    "required_signals_by_scope": {
+      "config_regs": [
+        "csr_addr", "csr_we", "csr_re", "csr_wdata", "csr_rdata", "csr_ack"
+      ],
+      "arbiter": [
+        "port_req_vec", "port_grant_vec", "port_sel_id"
+      ],
+      "scheduler": [
+        "cmd_valid", "cmd_type", "cmd_rank", "cmd_bank", "cmd_row", "cmd_col",
+        "cmd_auto_precharge", "queue_occupancy"
+      ],
+      "timing": [
+        "bank_state", "bank_open_row", "act_allowed", "rd_allowed", "wr_allowed",
+        "pre_allowed", "faw_count"
+      ],
+      "init_sequence": [
+        "init_state", "mrs_issue", "zq_issue", "init_done", "init_fail"
+      ],
+      "refresh": [
+        "ref_pending", "ref_urgent", "ref_count", "ref_ack"
+      ],
+      "data_path": [
+        "wr_valid", "wr_data", "rd_valid", "rd_data", "rd_latency_cnt"
+      ],
+      "calibration": [
+        "cal_state", "cal_done", "cal_fail", "zqcs_issued"
+      ]
+    }
+  },
+
+  "failure_taxonomy": {
+    "categories": [
+      {
+        "id": "TIMING_001",
+        "name": "tRCD violation",
+        "severity": "critical",
+        "description": "READ or WRITE issued before tRCD elapsed after ACTIVATE to same bank.",
+        "scope": "timing"
+      },
+      {
+        "id": "TIMING_002",
+        "name": "tRP violation",
+        "severity": "critical",
+        "description": "ACTIVATE issued before tRP elapsed after PRECHARGE to same bank.",
+        "scope": "timing"
+      },
+      {
+        "id": "TIMING_003",
+        "name": "tRAS violation",
+        "severity": "critical",
+        "description": "PRECHARGE issued before tRAS elapsed after ACTIVATE to same bank.",
+        "scope": "timing"
+      },
+      {
+        "id": "TIMING_004",
+        "name": "tRC violation",
+        "severity": "critical",
+        "description": "ACTIVATE issued before tRC elapsed after previous ACTIVATE to same bank.",
+        "scope": "timing"
+      },
+      {
+        "id": "TIMING_005",
+        "name": "tRRD violation",
+        "severity": "critical",
+        "description": "ACTIVATE to different bank before tRRD elapsed.",
+        "scope": "timing"
+      },
+      {
+        "id": "TIMING_006",
+        "name": "tFAW violation",
+        "severity": "critical",
+        "description": "5th ACTIVATE within tFAW window.",
+        "scope": "timing"
+      },
+      {
+        "id": "TIMING_007",
+        "name": "tWTR violation",
+        "severity": "critical",
+        "description": "READ issued before tWTR elapsed after last WRITE data burst.",
+        "scope": "timing"
+      },
+      {
+        "id": "TIMING_008",
+        "name": "tWR violation",
+        "severity": "critical",
+        "description": "PRECHARGE issued before tWR elapsed after last WRITE data burst.",
+        "scope": "timing"
+      },
+      {
+        "id": "TIMING_009",
+        "name": "tRTP violation",
+        "severity": "critical",
+        "description": "PRECHARGE issued before tRTP elapsed after READ command.",
+        "scope": "timing"
+      },
+      {
+        "id": "TIMING_010",
+        "name": "tCCD violation",
+        "severity": "critical",
+        "description": "CAS-to-CAS (READ-READ or WRITE-WRITE) within tCCD.",
+        "scope": "timing"
+      },
+      {
+        "id": "TIMING_011",
+        "name": "tRFC violation",
+        "severity": "critical",
+        "description": "Command issued before tRFC elapsed after REFRESH.",
+        "scope": "timing"
+      },
+      {
+        "id": "REF_001",
+        "name": "Refresh starvation",
+        "severity": "critical",
+        "description": "Refresh postpone count exceeded max_postpone_count.",
+        "scope": "refresh"
+      },
+      {
+        "id": "REF_002",
+        "name": "Refresh during active bank",
+        "severity": "major",
+        "description": "REFRESH issued while one or more banks are still active (not precharged).",
+        "scope": "refresh"
+      },
+      {
+        "id": "INIT_001",
+        "name": "Init sequence order violation",
+        "severity": "critical",
+        "description": "Mode register commands issued out of JEDEC-mandated order.",
+        "scope": "init_sequence"
+      },
+      {
+        "id": "INIT_002",
+        "name": "Init timing violation",
+        "severity": "critical",
+        "description": "Insufficient delay between init sequence steps (tXPR, tZQinit, etc.).",
+        "scope": "init_sequence"
+      },
+      {
+        "id": "PROTO_001",
+        "name": "Command to idle bank",
+        "severity": "major",
+        "description": "READ/WRITE issued to a bank that has no active row.",
+        "scope": "scheduler"
+      },
+      {
+        "id": "PROTO_002",
+        "name": "Double activate",
+        "severity": "critical",
+        "description": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE.",
+        "scope": "scheduler"
+      },
+      {
+        "id": "DATA_001",
+        "name": "Read data mismatch",
+        "severity": "critical",
+        "description": "Read data returned to host does not match expected value from reference model.",
+        "scope": "data_path"
+      },
+      {
+        "id": "DATA_002",
+        "name": "Read latency violation",
+        "severity": "major",
+        "description": "Read data arrived outside expected latency window per latency_model.",
+        "scope": "data_path"
+      },
+      {
+        "id": "CSR_001",
+        "name": "CSR access violation",
+        "severity": "minor",
+        "description": "Write to read-only register or read from write-only register.",
+        "scope": "config_regs"
+      }
+    ]
+  },
+
+  "implementation_targets": {
+    "target_frequency_mhz": 200,
+    "area_optimization_goal": "balanced",
+    "power_optimization_goal": "balanced",
+    "clock_name": "clk_ctrl",
+    "reset_name": "rst_n",
+    "reset_polarity": "active_low"
+  }
+}
