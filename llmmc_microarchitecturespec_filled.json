@@ -297,7 +297,7 @@
         "name": "CTRL_CONFIG",
         "offset": "0x04",
         "access": "RW",
-        "reset_value": "0x00000012",
+        "reset_value": "0x00000009",
         "fields": [
           { "name": "sched_policy",   "bits": "0",     "access": "RW", "reset_value": 1, "description": "0=in_order, 1=fr_fcfs" },
           { "name": "row_policy",     "bits": "1",     "access": "RW", "reset_value": 0, "description": "0=open_page, 1=close_page" },
@@ -313,7 +313,7 @@
         "name": "TIMING_0",
         "offset": "0x08",
         "access": "RW",
-        "reset_value": "0x0B0B1C27",
+        "reset_value": "0x271C0B0B",
         "fields": [
           { "name": "tRCD_nCK",   "bits": "7:0",   "access": "RW", "reset_value": 11, "description": "RAS-to-CAS delay in nCK" },
           { "name": "tRP_nCK",    "bits": "15:8",  "access": "RW", "reset_value": 11, "description": "Row precharge in nCK" },
@@ -349,7 +349,7 @@
         "name": "TIMING_3",
         "offset": "0x14",
         "access": "RW",
-        "reset_value": "0x00041860",
+        "reset_value": "0x00186004",
         "fields": [
           { "name": "tCCD_nCK",    "bits": "7:0",   "access": "RW", "reset_value": 4,    "description": "CAS-to-CAS delay in nCK" },
           { "name": "tREFI_nCK",   "bits": "31:8",  "access": "RW", "reset_value": 6240, "description": "Refresh interval in nCK (24-bit)" }
@@ -359,7 +359,7 @@
         "name": "REFRESH_CONFIG",
         "offset": "0x18",
         "access": "RW",
-        "reset_value": "0x00060608",
+        "reset_value": "0x00000168",
         "fields": [
           { "name": "max_postpone",    "bits": "3:0",   "access": "RW", "reset_value": 8, "description": "Max postponed refreshes (0-8)" },
           { "name": "urgent_threshold","bits": "7:4",   "access": "RW", "reset_value": 6, "description": "Postpone count to trigger urgent refresh" },

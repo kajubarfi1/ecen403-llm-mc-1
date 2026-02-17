@@ -1,0 +1,93 @@
+{
+  "vector_schema": [
+    "a",
+    "b",
+    "cin",
+    "exp_sum",
+    "exp_cout"
+  ],
+  "vectors": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      1,
+      0
+    ],
+    [
+      1,
+      2,
+      0,
+      3,
+      0
+    ],
+    [
+      7,
+      1,
+      0,
+      8,
+      0
+    ],
+    [
+      4,
+      5,
+      1,
+      10,
+      0
+    ],
+    [
+      8,
+      7,
+      0,
+      15,
+      0
+    ],
+    [
+      8,
+      8,
+      0,
+      0,
+      1
+    ],
+    [
+      9,
+      7,
+      1,
+      1,
+      1
+    ],
+    [
+      15,
+      15,
+      0,
+      14,
+      1
+    ],
+    [
+      15,
+      15,
+      1,
+      15,
+      1
+    ]
+  ],
+  "rationale": [
+    "Test adding all zeros.",
+    "Test adding zero with only a carry-in.",
+    "Simple addition with no carries involved.",
+    "Test carry propagation across multiple bits (0111 + 0001).",
+    "Simple addition with carry-in, no carry-out.",
+    "Test addition resulting in max sum (15) without carry-out.",
+    "Test generating a carry-out from the MSB without a carry-in.",
+    "Test generating a carry-out from the MSB with a carry-in.",
+    "Test maximum input values without a carry-in, causing a carry-out.",
+    "Test maximum possible input values (all ones), causing a carry-out."
+  ]
+}
