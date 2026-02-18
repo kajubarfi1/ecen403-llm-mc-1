@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DDR3 Memory Controller — Block Diagram v2</title>
+<title>DDR3 Memory Controller — Block Diagram v3</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
@@ -19,11 +19,11 @@ const { useState } = React;
 
 // ─── All constants from golden_microarch_v2.json ───
 const SPEC = {
-  ROW_BITS: 14, COL_BITS: 10, BANK_BITS: 3, RANKS: 1,
+  ROW_BITS: 15, COL_BITS: 10, BANK_BITS: 3, RANKS: 1,
   DATA_WIDTH: 32, ADDR_WIDTH: 29, BYTE_LANES: 2,
   CMD_QUEUE_DEPTH: 16, LOOKAHEAD: 8,
   DEVICE_WIDTH: 8, BURST_LEN: 8, AUX_WIDTH: 4,
-  DDR_ADDR_BITS: 14, DDR_DATA_WIDTH: 16,
+  DDR_ADDR_BITS: 15, DDR_DATA_WIDTH: 16,
   DDR_DM_WIDTH: 2, DDR_DQS_WIDTH: 2,
   CSR_ADDR_BITS: 8, CSR_DATA_BITS: 32, CSR_NUM_REGS: 11,
   MAX_POSTPONE: 8, URGENT_THRESH: 6,
@@ -111,7 +111,7 @@ const blocks = [
   {
     id: "bank_tracker", label: "Bank Status\nTracker", file: "bank_tracker.sv",
     x: 310, y: 200, w: 200, h: 120, color: "#E8F5E9", border: "#43A047",
-    goal: "Track per-bank state (IDLE/ACTIVE/PRECHARGING), active row, and all 14 timing counters. 8 independent bank machines. Enforce tRCD, tRP, tRAS, tRC, tRRD, tFAW, tWTR, tWR, tRTP, tCCD, tRFC constraints.",
+    goal: "Track per-bank state (IDLE/ACTIVE/PRECHARGING), active row, and all 14 timing counters. 8 independent bank machines. Enforce tRCD, tRP, tRAS, tRC, tRRD, tFAW, tWTR, tWR, tRTP, tCCD, tRFC constraints. Row address is 15 bits (4Gb device density).",
     ports: {
       internal_in: [
         { name: "cmd_issued", width: 1, desc: "Command was issued" },
@@ -381,7 +381,7 @@ function App() {
               DDR3-1600 Memory Controller
             </span>
             <span style={{ color: "#8b949e", fontSize: 12, marginLeft: 8 }}>
-              Block Architecture v2
+              Block Architecture v3
             </span>
           </div>
           <span style={{
@@ -559,7 +559,7 @@ function App() {
               borderRadius: 6, border: "1px solid #21262d", fontSize: 10, width: "100%", maxWidth: 280
             }}>
               <div style={{ fontWeight: 600, color: "#c9d1d9", marginBottom: 6 }}>
-                {blocks.length} Modules — golden_microarch_v2
+                {blocks.length} Modules — golden_microarch_v3 (ROW=15)
               </div>
               {blocks.map(b => (
                 <div key={b.id} style={{
