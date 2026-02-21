@@ -1,0 +1,307 @@
+{
+  "module_name": "config_regs",
+  "file": "config_regs.sv",
+  "phase": 1,
+  "agent": "config_regs_agent",
+  "spec_version": "2.0.0",
+  "design_id": "ddr3_mc_core_v2",
+
+  "parameters": {
+    "CSR_ADDR_W": 8,
+    "CSR_DATA_W": 32,
+    "NUM_REGS": 11,
+    "TOTAL_FIELDS": 46
+  },
+  "ports": {
+    "clock_reset": [
+      {
+        "name": "clk",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "rst_n",
+        "width": 1,
+        "dir": "input"
+      }
+    ],
+    "csr_bus_in": [
+      {
+        "name": "csr_cyc_i",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "csr_stb_i",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "csr_we_i",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "csr_adr_i",
+        "width": 8,
+        "dir": "input"
+      },
+      {
+        "name": "csr_dat_i",
+        "width": 32,
+        "dir": "input"
+      },
+      {
+        "name": "csr_sel_i",
+        "width": 4,
+        "dir": "input"
+      }
+    ],
+    "csr_bus_out": [
+      {
+        "name": "csr_ack_o",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "csr_dat_o",
+        "width": 32,
+        "dir": "output"
+      },
+      {
+        "name": "csr_err_o",
+        "width": 1,
+        "dir": "output"
+      }
+    ],
+    "status_in": [
+      {
+        "name": "sts_init_done",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "sts_cal_done",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "sts_cal_fail",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "sts_bist_done",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "sts_bist_fail",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "sts_ref_pending_cnt",
+        "width": 3,
+        "dir": "input"
+      },
+      {
+        "name": "sts_self_refresh_active",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "sts_ecc_ce_count",
+        "width": 16,
+        "dir": "input"
+      },
+      {
+        "name": "sts_ecc_ue_event",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "sts_ref_starve_event",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "sts_init_fail_event",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "sts_bist_fail_addr",
+        "width": 13,
+        "dir": "input"
+      }
+    ],
+    "config_out": [
+      {
+        "name": "cfg_tRCD_nCK",
+        "width": 8,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_tRP_nCK",
+        "width": 8,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_tRAS_nCK",
+        "width": 8,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_tRC_nCK",
+        "width": 8,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_tRRD_nCK",
+        "width": 8,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_tWTR_nCK",
+        "width": 8,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_tFAW_nCK",
+        "width": 8,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_tRFC_nCK",
+        "width": 8,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_tWR_nCK",
+        "width": 8,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_tRTP_nCK",
+        "width": 8,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_CL_nCK",
+        "width": 8,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_CWL_nCK",
+        "width": 8,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_tCCD_nCK",
+        "width": 8,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_tREFI_nCK",
+        "width": 24,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_sched_policy",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_row_policy",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_self_ref_mode",
+        "width": 2,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_ecc_enable",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_bist_start",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_force_refresh",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_force_self_ref",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_max_postpone",
+        "width": 4,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_urgent_threshold",
+        "width": 4,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_ref_priority",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_bist_pattern",
+        "width": 3,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_bist_addr_mode",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_bist_addr_start",
+        "width": 29,
+        "dir": "output"
+      },
+      {
+        "name": "cfg_bist_addr_end",
+        "width": 29,
+        "dir": "output"
+      }
+    ]
+  },
+  "assertions": [
+    {
+      "name": "p_rw_retain",
+      "check": "CA-001"
+    },
+    {
+      "name": "p_ro_ignore",
+      "check": "CA-002"
+    },
+    {
+      "name": "p_wo_clear",
+      "check": "CA-003"
+    },
+    {
+      "name": "p_bad_addr",
+      "check": "CA-004"
+    }
+  ],
+  "coverage_points": [
+    "cp_write",
+    "cp_read",
+    "cp_err",
+    "cp_bist_go",
+    "cp_fref"
+  ]
+}
