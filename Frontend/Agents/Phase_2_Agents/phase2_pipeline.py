@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
 """
 ╔══════════════════════════════════════════════════════════════════════╗
-║        DDR3 MEMORY CONTROLLER — LANGGRAPH PIPELINE                   ║
+║        DDR3 MEMORY CONTROLLER — PHASE 2 LANGGRAPH PIPELINE           ║
 ║                                                                      ║
 ║  Flow:                                                               ║
-║    3 Phase 1 agents (parallel)                                       ║
+║    4 Phase 2 agents (parallel)                                       ║
 ║        ↓                                                             ║
-║    Validation (94 checks: timing, RTL, JEDEC, clocking)             ║
+║    Phase 2 Validation (~80 checks: addr, bank, refresh, cal, xmod)  ║
 ║        ↓                                                             ║
 ║    ✓ PASS → Done                                                     ║
 ║    ✗ FAIL → Route failures back to RTL agents (max 4 retries)       ║
 ║    ✗ FAIL after 4 → Error report with what failed                   ║
 ║                                                                      ║
+║  Dependency: Phase 1 must complete first (needs init_fsm.sv,         ║
+║             config_regs.sv, wb_port.sv in the output directory)      ║
+║                                                                      ║
 ║  Requirements: pip install langgraph                                 ║
-║  Usage:        python3 langgraph_pipeline.py                         ║
+║  Usage:        python3 phase2_pipeline.py                            ║
 ╚══════════════════════════════════════════════════════════════════════╝
 """
 
@@ -26,16 +29,21 @@ from pathlib import Path
 from datetime import datetime
 
 # Add agents folder to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "Agents", "Phase_1_Agents"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "Agents", "Phase_2_Agents"))
+sys.path.insert(0, os.path.dirname(__file__))
 
 from langgraph.graph import StateGraph, END
-from bad_wb_port_agent import WishbonePortAgent  # BAD FOR TESTING
-from bad_config_regs_agent import ConfigRegsAgent  # BAD FOR TESTING
-from bad_init_fsm_agent import InitFsmAgent  # BAD FOR TESTING
-from Frontend.Agents.Phase_1_Agents.validation_agent import ValidationAgent
+from addr_decoder_agent import AddrDecoderAgent
+from bank_tracker_agent import BankTrackerAgent
+from refresh_ctrl_agent import RefreshCtrlAgent
+from calibration_agent import CalibrationAgent
+from Frontend.Agents.Phase_2_Agents.phase2_validation_agent import Phase2ValidationAgent
 
 
 MAX_RETRIES = 4
+
+# Phase 1 modules that must exist before Phase 2 can run
+PHASE1_PREREQUISITES = ["init_fsm.sv", "config_regs.sv", "wb_port.sv"]
 
 
 # ═════════════════════════════════════════════════════════════
@@ -44,100 +52,138 @@ MAX_RETRIES = 4
 class GraphState(TypedDict):
     spec_path: str
     output_dir: str
-    modules: Annotated[dict, operator.or_]       # module_name → manifest
-    rtl_files: Annotated[dict, operator.or_]      # module_name → sv path
-    attempt: int                                   # current attempt (1-based)
-    validation_result: dict                        # full validation report
-    failed_modules: list                           # which modules failed
+    modules: Annotated[dict, operator.or_]           # module_name → manifest
+    rtl_files: Annotated[dict, operator.or_]          # module_name → sv path
+    attempt: int                                       # current attempt (1-based)
+    validation_result: dict                            # full validation report
+    failed_modules: list                               # which modules failed
     retry_instructions: Annotated[dict, operator.or_]  # module_name → error details
-    history: Annotated[list, operator.add]         # log of all attempts
+    history: Annotated[list, operator.add]             # log of all attempts
 
 
 # ═════════════════════════════════════════════════════════════
-# PHASE 1 — RTL GENERATION (parallel)
+# PHASE 1 DEPENDENCY CHECK
+# ═════════════════════════════════════════════════════════════
+def check_phase1_prerequisites(output_dir: str) -> list:
+    """Return list of missing Phase 1 files."""
+    missing = []
+    for f in PHASE1_PREREQUISITES:
+        if not (Path(output_dir) / f).exists():
+            missing.append(f)
+    return missing
+
+
+# ═════════════════════════════════════════════════════════════
+# PHASE 2 — RTL GENERATION (parallel)
 # Each agent checks retry_instructions for fix guidance
 # ═════════════════════════════════════════════════════════════
-def gen_wb_port(state: GraphState) -> dict:
+def gen_addr_decoder(state: GraphState) -> dict:
     attempt = state.get("attempt", 1)
-    instructions = state.get("retry_instructions", {}).get("wb_port")
+    instructions = state.get("retry_instructions", {}).get("addr_decoder")
 
     if instructions:
-        print(f"\n  ┌─ [Attempt {attempt}] REGENERATING wb_port")
+        print(f"\n  ┌─ [Attempt {attempt}] REGENERATING addr_decoder")
         print(f"  │  Fix needed: {len(instructions['failed_checks'])} checks failed")
         for chk in instructions["failed_checks"]:
             print(f"  │    ✗ [{chk['id']}] {chk['name']}: expected {chk['expected']}, got {chk['actual']}")
     else:
-        print(f"\n  ┌─ [Attempt {attempt}] Generating wb_port")
+        print(f"\n  ┌─ [Attempt {attempt}] Generating addr_decoder")
 
-    r = WishbonePortAgent(state["spec_path"], state["output_dir"]).run()
+    r = AddrDecoderAgent(state["spec_path"], state["output_dir"]).run()
+    sv_path = str(Path(state["output_dir"]) / "addr_decoder.sv")
     return {
-        "modules": {"wb_port": r["manifest"]},
-        "rtl_files": {"wb_port": r["rtl_path"]},
+        "modules": {"addr_decoder": r.get("manifest", {})},
+        "rtl_files": {"addr_decoder": sv_path},
     }
 
 
-def gen_config_regs(state: GraphState) -> dict:
+def gen_bank_tracker(state: GraphState) -> dict:
     attempt = state.get("attempt", 1)
-    instructions = state.get("retry_instructions", {}).get("config_regs")
+    instructions = state.get("retry_instructions", {}).get("bank_tracker")
 
     if instructions:
-        print(f"\n  ┌─ [Attempt {attempt}] REGENERATING config_regs")
+        print(f"\n  ┌─ [Attempt {attempt}] REGENERATING bank_tracker")
         print(f"  │  Fix needed: {len(instructions['failed_checks'])} checks failed")
         for chk in instructions["failed_checks"]:
             print(f"  │    ✗ [{chk['id']}] {chk['name']}: expected {chk['expected']}, got {chk['actual']}")
     else:
-        print(f"\n  ┌─ [Attempt {attempt}] Generating config_regs")
+        print(f"\n  ┌─ [Attempt {attempt}] Generating bank_tracker")
 
-    r = ConfigRegsAgent(state["spec_path"], state["output_dir"]).run()
+    r = BankTrackerAgent(state["spec_path"], state["output_dir"]).run()
+    sv_path = str(Path(state["output_dir"]) / "bank_tracker.sv")
     return {
-        "modules": {"config_regs": r["manifest"]},
-        "rtl_files": {"config_regs": r["rtl_path"]},
+        "modules": {"bank_tracker": r.get("manifest", {})},
+        "rtl_files": {"bank_tracker": sv_path},
     }
 
 
-def gen_init_fsm(state: GraphState) -> dict:
+def gen_refresh_ctrl(state: GraphState) -> dict:
     attempt = state.get("attempt", 1)
-    instructions = state.get("retry_instructions", {}).get("init_fsm")
+    instructions = state.get("retry_instructions", {}).get("refresh_ctrl")
 
     if instructions:
-        print(f"\n  ┌─ [Attempt {attempt}] REGENERATING init_fsm")
+        print(f"\n  ┌─ [Attempt {attempt}] REGENERATING refresh_ctrl")
         print(f"  │  Fix needed: {len(instructions['failed_checks'])} checks failed")
         for chk in instructions["failed_checks"]:
             print(f"  │    ✗ [{chk['id']}] {chk['name']}: expected {chk['expected']}, got {chk['actual']}")
     else:
-        print(f"\n  ┌─ [Attempt {attempt}] Generating init_fsm")
+        print(f"\n  ┌─ [Attempt {attempt}] Generating refresh_ctrl")
 
-    r = InitFsmAgent(state["spec_path"], state["output_dir"]).run()
+    r = RefreshCtrlAgent(state["spec_path"], state["output_dir"]).run()
+    sv_path = str(Path(state["output_dir"]) / "refresh_ctrl.sv")
     return {
-        "modules": {"init_fsm": r["manifest"]},
-        "rtl_files": {"init_fsm": r["rtl_path"]},
+        "modules": {"refresh_ctrl": r.get("manifest", {})},
+        "rtl_files": {"refresh_ctrl": sv_path},
+    }
+
+
+def gen_calibration(state: GraphState) -> dict:
+    attempt = state.get("attempt", 1)
+    instructions = state.get("retry_instructions", {}).get("calibration")
+
+    if instructions:
+        print(f"\n  ┌─ [Attempt {attempt}] REGENERATING calibration")
+        print(f"  │  Fix needed: {len(instructions['failed_checks'])} checks failed")
+        for chk in instructions["failed_checks"]:
+            print(f"  │    ✗ [{chk['id']}] {chk['name']}: expected {chk['expected']}, got {chk['actual']}")
+    else:
+        print(f"\n  ┌─ [Attempt {attempt}] Generating calibration")
+
+    r = CalibrationAgent(state["spec_path"], state["output_dir"]).run()
+    sv_path = str(Path(state["output_dir"]) / "calibration.sv")
+    return {
+        "modules": {"calibration": r.get("manifest", {})},
+        "rtl_files": {"calibration": sv_path},
     }
 
 
 # ═════════════════════════════════════════════════════════════
 # VALIDATION NODE
 # ═════════════════════════════════════════════════════════════
+RETRYABLE_MODULES = ("addr_decoder", "bank_tracker", "refresh_ctrl", "calibration")
+
+
 def validate(state: GraphState) -> dict:
     attempt = state.get("attempt", 1)
 
     print(f"\n{'━' * 62}")
-    print(f"  VALIDATION — Attempt {attempt} of {MAX_RETRIES}")
+    print(f"  PHASE 2 VALIDATION — Attempt {attempt} of {MAX_RETRIES}")
     print(f"{'━' * 62}")
 
-    va = ValidationAgent(state["spec_path"], state["output_dir"], state["output_dir"],
-                         attempt=attempt, max_retries=MAX_RETRIES,
-                         history=state.get("history", []))
+    va = Phase2ValidationAgent(state["spec_path"], state["output_dir"], state["output_dir"],
+                               attempt=attempt, max_retries=MAX_RETRIES,
+                               history=state.get("history", []))
     result = va.run()
 
     # Identify which modules failed
     failed_modules = []
     retry_instructions = {}
-    all_failed_checks = []  # for history
+    all_failed_checks = []
 
     for mod_name, mod_result in result["modules"].items():
         if mod_result["status"] != "PASS":
-            # Only retry RTL modules, not clocking (clocking is spec-level)
-            if mod_name in ("init_fsm", "config_regs", "wb_port"):
+            # Only retry RTL modules, not cross_module (that's derived)
+            if mod_name in RETRYABLE_MODULES:
                 failed_modules.append(mod_name)
                 failed_checks = [c for c in mod_result["checks"] if not c["pass"]]
                 all_failed_checks.extend(failed_checks)
@@ -148,7 +194,7 @@ def validate(state: GraphState) -> dict:
                     "message": f"{len(failed_checks)} checks failed — regenerate {mod_name}",
                 }
 
-    # Build history entry (includes failed checks for the report)
+    # Build history entry
     history_entry = {
         "attempt": attempt,
         "timestamp": datetime.now().isoformat(),
@@ -228,7 +274,7 @@ def success(state: GraphState) -> dict:
     overall = result.get("overall", {})
 
     print(f"\n{'═' * 62}")
-    print(f"  ✓ ALL VALIDATION PASSED")
+    print(f"  ✓ PHASE 2 VALIDATION PASSED")
     print(f"{'═' * 62}")
     print(f"  Attempt:  {attempt} of {MAX_RETRIES}")
     print(f"  Checks:   {overall.get('total_passed', '?')}/{overall.get('total_checks', '?')}")
@@ -236,7 +282,6 @@ def success(state: GraphState) -> dict:
     for name, path in sorted(state.get("rtl_files", {}).items()):
         print(f"    ✓ {name}: {path}")
 
-    # Print attempt history
     history = state.get("history", [])
     if len(history) > 1:
         print(f"\n  Retry history:")
@@ -245,9 +290,10 @@ def success(state: GraphState) -> dict:
                   f"{' — failed: ' + ', '.join(h['failed_modules']) if h['failed_modules'] else ''}")
 
     # Save final report
-    report_path = Path(state["output_dir"]) / "final_report.json"
+    report_path = Path(state["output_dir"]) / "phase2_final_report.json"
     report = {
         "status": "PASS",
+        "phase": 2,
         "attempts": attempt,
         "max_retries": MAX_RETRIES,
         "total_checks": overall.get("total_checks"),
@@ -271,7 +317,7 @@ def final_failure(state: GraphState) -> dict:
     history = state.get("history", [])
 
     print(f"\n{'═' * 62}")
-    print(f"  ✗ PIPELINE FAILED — MAX RETRIES ({MAX_RETRIES}) EXHAUSTED")
+    print(f"  ✗ PHASE 2 PIPELINE FAILED — MAX RETRIES ({MAX_RETRIES}) EXHAUSTED")
     print(f"{'═' * 62}")
     print(f"")
     print(f"  The following modules could not pass validation")
@@ -289,7 +335,6 @@ def final_failure(state: GraphState) -> dict:
         print(f"  ╚{'═' * 50}")
         print(f"")
 
-    # Print full retry history
     print(f"  Retry history:")
     for h in history:
         status_sym = "✓" if h["overall"] == "PASS" else "✗"
@@ -302,12 +347,12 @@ def final_failure(state: GraphState) -> dict:
     print(f"    1. Check the microarchitecture spec for inconsistencies")
     print(f"    2. Review the failing checks above")
     print(f"    3. Manually inspect the generated .sv files in {state['output_dir']}/")
-    print(f"    4. Run validation_agent.py standalone for detailed diagnostics")
+    print(f"    4. Run phase2_validation_agent.py standalone for detailed diagnostics")
 
-    # Save error report
-    report_path = Path(state["output_dir"]) / "error_report.json"
+    report_path = Path(state["output_dir"]) / "phase2_error_report.json"
     report = {
         "status": "FAIL",
+        "phase": 2,
         "attempts": MAX_RETRIES,
         "max_retries": MAX_RETRIES,
         "failed_modules": failed,
@@ -333,23 +378,26 @@ def build_graph():
     graph = StateGraph(GraphState)
 
     # Nodes
-    graph.add_node("gen_wb_port", gen_wb_port)
-    graph.add_node("gen_config_regs", gen_config_regs)
-    graph.add_node("gen_init_fsm", gen_init_fsm)
+    graph.add_node("gen_addr_decoder", gen_addr_decoder)
+    graph.add_node("gen_bank_tracker", gen_bank_tracker)
+    graph.add_node("gen_refresh_ctrl", gen_refresh_ctrl)
+    graph.add_node("gen_calibration", gen_calibration)
     graph.add_node("validate", validate)
     graph.add_node("increment_and_retry", increment_and_retry)
     graph.add_node("success", success)
     graph.add_node("final_failure", final_failure)
 
-    # Entry: 3 agents start in parallel
-    graph.set_entry_point("gen_wb_port")
-    graph.set_entry_point("gen_config_regs")
-    graph.set_entry_point("gen_init_fsm")
+    # Entry: 4 agents start in parallel
+    graph.set_entry_point("gen_addr_decoder")
+    graph.set_entry_point("gen_bank_tracker")
+    graph.set_entry_point("gen_refresh_ctrl")
+    graph.set_entry_point("gen_calibration")
 
-    # All 3 converge into validation
-    graph.add_edge("gen_wb_port", "validate")
-    graph.add_edge("gen_config_regs", "validate")
-    graph.add_edge("gen_init_fsm", "validate")
+    # All 4 converge into validation
+    graph.add_edge("gen_addr_decoder", "validate")
+    graph.add_edge("gen_bank_tracker", "validate")
+    graph.add_edge("gen_refresh_ctrl", "validate")
+    graph.add_edge("gen_calibration", "validate")
 
     # Conditional routing after validation
     graph.add_conditional_edges(
@@ -362,10 +410,11 @@ def build_graph():
         },
     )
 
-    # Retry loops back to all 3 generators (parallel again)
-    graph.add_edge("increment_and_retry", "gen_wb_port")
-    graph.add_edge("increment_and_retry", "gen_config_regs")
-    graph.add_edge("increment_and_retry", "gen_init_fsm")
+    # Retry loops back to all 4 generators (parallel again)
+    graph.add_edge("increment_and_retry", "gen_addr_decoder")
+    graph.add_edge("increment_and_retry", "gen_bank_tracker")
+    graph.add_edge("increment_and_retry", "gen_refresh_ctrl")
+    graph.add_edge("increment_and_retry", "gen_calibration")
 
     # Terminal nodes
     graph.add_edge("success", END)
@@ -379,8 +428,8 @@ def build_graph():
 # ═════════════════════════════════════════════════════════════
 if __name__ == "__main__":
     print("╔══════════════════════════════════════════════════════╗")
-    print("║   DDR3 Controller — LangGraph Pipeline              ║")
-    print("║   Phase 1 (parallel) + Validation (max 4 retries)  ║")
+    print("║   DDR3 Controller — Phase 2 LangGraph Pipeline      ║")
+    print("║   4 agents (parallel) + Validation (max 4 retries)  ║")
     print("╚══════════════════════════════════════════════════════╝")
     print()
 
@@ -392,11 +441,20 @@ if __name__ == "__main__":
     out = input("Output dir (Enter for ./output): ").strip() or "./output"
     os.makedirs(out, exist_ok=True)
 
-    # Clean attempt trackers from previous runs
-    for tracker in [".init_fsm_attempt", ".config_regs_attempt", ".wb_port_attempt"]:
-        tf = Path(out) / tracker
-        if tf.exists():
-            tf.unlink()
+    # Check Phase 1 prerequisites
+    missing = check_phase1_prerequisites(out)
+    if missing:
+        print(f"\n  ✗ PHASE 1 PREREQUISITES MISSING:")
+        for f in missing:
+            print(f"    ✗ {out}/{f}")
+        print(f"\n  Phase 1 must complete successfully before Phase 2 can run.")
+        print(f"  Run: python3 langgraph_pipeline.py")
+        sys.exit(1)
+    else:
+        print(f"  ✓ Phase 1 prerequisites satisfied:")
+        for f in PHASE1_PREREQUISITES:
+            print(f"    ✓ {out}/{f}")
+        print()
 
     app = build_graph()
 

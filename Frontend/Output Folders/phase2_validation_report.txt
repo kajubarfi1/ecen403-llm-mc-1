@@ -1,0 +1,565 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║              DDR3 PHASE 2 VALIDATION REPORT                        ║
+║  Generated: 2026-02-24 16:09:59                                    ║
+║  Spec:      /Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Spec/ll║
+║  RTL Dir:   /Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Fronten║
+║  Attempt:   1 of 4                                                ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+  OVERALL: PASS  (99/99 checks)
+  Attempt: 1 of 4
+
+══════════════════════════════════════════════════════════════════════
+  ✓ ADDR_DECODER  —  PASS  (14/14)
+══════════════════════════════════════════════════════════════════════
+
+  ── ADDRESS DECODING ──
+
+    [V-AD-01] Parameter ADDR_WIDTH = 29
+      Status:   ✓ PASS
+      Expected: 29
+      Actual:   29
+
+    [V-AD-01] Parameter ROW_BITS = 15
+      Status:   ✓ PASS
+      Expected: 15
+      Actual:   15
+
+    [V-AD-01] Parameter COL_BITS = 10
+      Status:   ✓ PASS
+      Expected: 10
+      Actual:   10
+
+    [V-AD-01] Parameter BANK_BITS = 3
+      Status:   ✓ PASS
+      Expected: 3
+      Actual:   3
+
+    [V-AD-02] Output dec_row declared
+      Status:   ✓ PASS
+      Expected: output logic ... dec_row
+      Actual:   found
+
+    [V-AD-02] Output dec_bank declared
+      Status:   ✓ PASS
+      Expected: output logic ... dec_bank
+      Actual:   found
+
+    [V-AD-02] Output dec_col declared
+      Status:   ✓ PASS
+      Expected: output logic ... dec_col
+      Actual:   found
+
+    [V-AD-02] Output dec_rank declared
+      Status:   ✓ PASS
+      Expected: output logic ... dec_rank
+      Actual:   found
+
+    [V-AD-03] Input req_addr declared
+      Status:   ✓ PASS
+      Expected: input logic ... req_addr
+      Actual:   found
+
+    [V-AD-04] Burst offset = 4 bits (BL8)
+      Status:   ✓ PASS
+      Expected: bits [3:0] = burst offset
+      Actual:   bit slicing found
+
+    [V-AD-05] Address mapping order: row-bank-column
+      Status:   ✓ PASS
+      Expected: col < bank < row bit positions
+      Actual:   col@10, bank@13, row@28
+
+    [V-AD-06] Purely combinational (no clock)
+      Status:   ✓ PASS
+      Expected: no clk input
+      Actual:   no clk
+
+    [V-AD-07] Single rank: dec_rank = 0
+      Status:   ✓ PASS
+      Expected: dec_rank = 0
+      Actual:   found
+
+    [V-AD-08] Bit budget: 15+3+7+4 = 29
+      Status:   ✓ PASS
+      Expected: 29
+      Actual:   29
+
+
+══════════════════════════════════════════════════════════════════════
+  ✓ BANK_TRACKER  —  PASS  (37/37)
+══════════════════════════════════════════════════════════════════════
+
+  ── BANK TRACKING ──
+
+    [V-BT-01] Parameter NUM_BANKS = 8
+      Status:   ✓ PASS
+      Expected: 8
+      Actual:   8
+
+    [V-BT-01] Parameter BANK_BITS = 3
+      Status:   ✓ PASS
+      Expected: 3
+      Actual:   3
+
+    [V-BT-01] Parameter ROW_BITS = 15
+      Status:   ✓ PASS
+      Expected: 15
+      Actual:   15
+
+    [V-BT-02] Output bank_is_active
+      Status:   ✓ PASS
+      Expected: output ... bank_is_active
+      Actual:   found
+
+    [V-BT-02] Output bank_open_row
+      Status:   ✓ PASS
+      Expected: output ... bank_open_row
+      Actual:   found
+
+    [V-BT-02] Output bank_act_allowed
+      Status:   ✓ PASS
+      Expected: output ... bank_act_allowed
+      Actual:   found
+
+    [V-BT-02] Output bank_rd_allowed
+      Status:   ✓ PASS
+      Expected: output ... bank_rd_allowed
+      Actual:   found
+
+    [V-BT-02] Output bank_wr_allowed
+      Status:   ✓ PASS
+      Expected: output ... bank_wr_allowed
+      Actual:   found
+
+    [V-BT-02] Output bank_pre_allowed
+      Status:   ✓ PASS
+      Expected: output ... bank_pre_allowed
+      Actual:   found
+
+    [V-BT-03] Output all_banks_idle
+      Status:   ✓ PASS
+      Expected: output logic all_banks_idle
+      Actual:   found
+
+    [V-BT-03] Output faw_allows_act
+      Status:   ✓ PASS
+      Expected: output logic faw_allows_act
+      Actual:   found
+
+    [V-BT-04] Input cmd_act_valid
+      Status:   ✓ PASS
+      Expected: input logic cmd_act_valid
+      Actual:   found
+
+    [V-BT-04] Input cmd_pre_valid
+      Status:   ✓ PASS
+      Expected: input logic cmd_pre_valid
+      Actual:   found
+
+    [V-BT-04] Input cmd_rd_valid
+      Status:   ✓ PASS
+      Expected: input logic cmd_rd_valid
+      Actual:   found
+
+    [V-BT-04] Input cmd_wr_valid
+      Status:   ✓ PASS
+      Expected: input logic cmd_wr_valid
+      Actual:   found
+
+    [V-BT-04] Input cmd_ref_valid
+      Status:   ✓ PASS
+      Expected: input logic cmd_ref_valid
+      Actual:   found
+
+    [V-BT-05] Config input cfg_tRCD_nCK
+      Status:   ✓ PASS
+      Expected: input ... cfg_tRCD_nCK
+      Actual:   found
+
+    [V-BT-05] Config input cfg_tRP_nCK
+      Status:   ✓ PASS
+      Expected: input ... cfg_tRP_nCK
+      Actual:   found
+
+    [V-BT-05] Config input cfg_tRAS_nCK
+      Status:   ✓ PASS
+      Expected: input ... cfg_tRAS_nCK
+      Actual:   found
+
+    [V-BT-05] Config input cfg_tRC_nCK
+      Status:   ✓ PASS
+      Expected: input ... cfg_tRC_nCK
+      Actual:   found
+
+    [V-BT-05] Config input cfg_tRRD_nCK
+      Status:   ✓ PASS
+      Expected: input ... cfg_tRRD_nCK
+      Actual:   found
+
+    [V-BT-05] Config input cfg_tWTR_nCK
+      Status:   ✓ PASS
+      Expected: input ... cfg_tWTR_nCK
+      Actual:   found
+
+    [V-BT-05] Config input cfg_tFAW_nCK
+      Status:   ✓ PASS
+      Expected: input ... cfg_tFAW_nCK
+      Actual:   found
+
+    [V-BT-05] Config input cfg_tRFC_nCK
+      Status:   ✓ PASS
+      Expected: input ... cfg_tRFC_nCK
+      Actual:   found
+
+    [V-BT-05] Config input cfg_tWR_nCK
+      Status:   ✓ PASS
+      Expected: input ... cfg_tWR_nCK
+      Actual:   found
+
+    [V-BT-05] Config input cfg_tRTP_nCK
+      Status:   ✓ PASS
+      Expected: input ... cfg_tRTP_nCK
+      Actual:   found
+
+    [V-BT-05] Config input cfg_tCCD_nCK
+      Status:   ✓ PASS
+      Expected: input ... cfg_tCCD_nCK
+      Actual:   found
+
+    [V-BT-06] Bank state: IDLE
+      Status:   ✓ PASS
+      Expected: IDLE in FSM
+      Actual:   found
+
+    [V-BT-06] Bank state: ACTIVE
+      Status:   ✓ PASS
+      Expected: ACTIVE in FSM
+      Actual:   found
+
+    [V-BT-06] Bank state: PRECHARGING
+      Status:   ✓ PASS
+      Expected: PRECHARGING in FSM
+      Actual:   found
+
+    [V-BT-07] Timing counter: tRCD
+      Status:   ✓ PASS
+      Expected: counter for tRCD
+      Actual:   found
+
+    [V-BT-07] Timing counter: tRP
+      Status:   ✓ PASS
+      Expected: counter for tRP
+      Actual:   found
+
+    [V-BT-07] Timing counter: tRAS
+      Status:   ✓ PASS
+      Expected: counter for tRAS
+      Actual:   found
+
+    [V-BT-07] Timing counter: tRC
+      Status:   ✓ PASS
+      Expected: counter for tRC
+      Actual:   found
+
+    [V-BT-08] tFAW window tracking
+      Status:   ✓ PASS
+      Expected: FAW tracking logic
+      Actual:   found
+
+    [V-BT-09] Clock and reset
+      Status:   ✓ PASS
+      Expected: clk, rst_n
+      Actual:   clk rst_n
+
+    [V-BT-10] Refresh → all banks idle
+      Status:   ✓ PASS
+      Expected: refresh resets bank state
+      Actual:   found
+
+
+══════════════════════════════════════════════════════════════════════
+  ✓ REFRESH_CTRL  —  PASS  (18/18)
+══════════════════════════════════════════════════════════════════════
+
+  ── REFRESH CONTROL ──
+
+    [V-RF-01] Signal ref_required (output)
+      Status:   ✓ PASS
+      Expected: output ... ref_required
+      Actual:   found
+
+    [V-RF-01] Signal ref_urgent (output)
+      Status:   ✓ PASS
+      Expected: output ... ref_urgent
+      Actual:   found
+
+    [V-RF-01] Signal ref_ack (input)
+      Status:   ✓ PASS
+      Expected: input ... ref_ack
+      Actual:   found
+
+    [V-RF-01] Signal ref_pending_cnt (output)
+      Status:   ✓ PASS
+      Expected: output ... ref_pending_cnt
+      Actual:   found
+
+    [V-RF-01] Signal ref_starve_flag (output)
+      Status:   ✓ PASS
+      Expected: output ... ref_starve_flag
+      Actual:   found
+
+    [V-RF-02] Config input cfg_tREFI_nCK
+      Status:   ✓ PASS
+      Expected: input ... cfg_tREFI_nCK
+      Actual:   found
+
+    [V-RF-02] Config input cfg_max_postpone
+      Status:   ✓ PASS
+      Expected: input ... cfg_max_postpone
+      Actual:   found
+
+    [V-RF-02] Config input cfg_urgent_threshold
+      Status:   ✓ PASS
+      Expected: input ... cfg_urgent_threshold
+      Actual:   found
+
+    [V-RF-02] Config input cfg_ref_priority
+      Status:   ✓ PASS
+      Expected: input ... cfg_ref_priority
+      Actual:   found
+
+    [V-RF-03] tREFI interval counter
+      Status:   ✓ PASS
+      Expected: counter for tREFI interval
+      Actual:   found
+
+    [V-RF-04] REFI_CTR_W=13 >= 13 (for tREFI=6240)
+      Status:   ✓ PASS
+      Expected: >= 13
+      Actual:   13
+
+    [V-RF-05] Postpone counter
+      Status:   ✓ PASS
+      Expected: postpone tracking
+      Actual:   found
+
+    [V-RF-06] max_postpone limit enforced
+      Status:   ✓ PASS
+      Expected: reference to max_postpone
+      Actual:   found
+
+    [V-RF-07] Urgent threshold comparison
+      Status:   ✓ PASS
+      Expected: reference to urgent_threshold
+      Actual:   found
+
+    [V-RF-08] Starvation detection logic
+      Status:   ✓ PASS
+      Expected: starvation detection
+      Actual:   found
+
+    [V-RF-09] Gated by init_done
+      Status:   ✓ PASS
+      Expected: no refresh before init_done
+      Actual:   found
+
+    [V-RF-10] CSR force_refresh support
+      Status:   ✓ PASS
+      Expected: cfg_force_refresh input
+      Actual:   found
+
+    [V-RF-11] Clock and reset
+      Status:   ✓ PASS
+      Expected: clk, rst_n
+      Actual:   clk rst_n
+
+
+══════════════════════════════════════════════════════════════════════
+  ✓ CALIBRATION  —  PASS  (11/11)
+══════════════════════════════════════════════════════════════════════
+
+  ── CALIBRATION ──
+
+    [V-CL-01] Output cal_done declared
+      Status:   ✓ PASS
+      Expected: output logic cal_done
+      Actual:   found
+
+    [V-CL-02] Output cal_fail declared
+      Status:   ✓ PASS
+      Expected: output logic cal_fail
+      Actual:   found
+
+    [V-CL-03] cal_fail always 0 (abstract PHY)
+      Status:   ✓ PASS
+      Expected: cal_fail = 0
+      Actual:   found
+
+    [V-CL-04] Input init_done
+      Status:   ✓ PASS
+      Expected: input logic init_done
+      Actual:   found
+
+    [V-CL-05] cal_done depends on init_done
+      Status:   ✓ PASS
+      Expected: cal_done after init_done
+      Actual:   found
+
+    [V-CL-06] Output zqcs_req
+      Status:   ✓ PASS
+      Expected: output logic zqcs_req
+      Actual:   found
+
+    [V-CL-07] Input zqcs_ack
+      Status:   ✓ PASS
+      Expected: input logic zqcs_ack
+      Actual:   found
+
+    [V-CL-08] ZQCS_WAIT = 128000 ctrl cycles
+      Status:   ✓ PASS
+      Expected: 128000
+      Actual:   128000
+
+    [V-CL-09] Periodic ZQCS counter
+      Status:   ✓ PASS
+      Expected: ZQCS interval counter
+      Actual:   found
+
+    [V-CL-10] Clock and reset
+      Status:   ✓ PASS
+      Expected: clk, rst_n
+      Actual:   clk rst_n
+
+    [V-CL-11] Write leveling disabled (per spec)
+      Status:   ✓ PASS
+      Expected: no WL FSM
+      Actual:   none
+
+
+══════════════════════════════════════════════════════════════════════
+  ✓ CROSS_MODULE  —  PASS  (19/19)
+══════════════════════════════════════════════════════════════════════
+
+  ── CROSS-MODULE INTERFACE ──
+
+    [V-XM-01] ADDR_WIDTH consistent (wb_port ↔ addr_decoder)
+      Status:   ✓ PASS
+      Expected: 29
+      Actual:   29
+
+    [V-XM-02] ROW_BITS consistent (addr_decoder ↔ bank_tracker)
+      Status:   ✓ PASS
+      Expected: 15
+      Actual:   15
+
+    [V-XM-02] BANK_BITS consistent (addr_decoder ↔ bank_tracker)
+      Status:   ✓ PASS
+      Expected: 3
+      Actual:   3
+
+    [V-XM-03] refresh_ctrl receives init_done
+      Status:   ✓ PASS
+      Expected: input init_done
+      Actual:   found
+
+    [V-XM-04] calibration receives init_done
+      Status:   ✓ PASS
+      Expected: input init_done
+      Actual:   found
+
+    [V-XM-05] bank_tracker.cfg_tRFC_nCK ← config_regs
+      Status:   ✓ PASS
+      Expected: cfg_tRFC_nCK in config_regs
+      Actual:   found
+
+    [V-XM-05] bank_tracker.cfg_tRC_nCK ← config_regs
+      Status:   ✓ PASS
+      Expected: cfg_tRC_nCK in config_regs
+      Actual:   found
+
+    [V-XM-05] bank_tracker.cfg_tWTR_nCK ← config_regs
+      Status:   ✓ PASS
+      Expected: cfg_tWTR_nCK in config_regs
+      Actual:   found
+
+    [V-XM-05] bank_tracker.cfg_tWR_nCK ← config_regs
+      Status:   ✓ PASS
+      Expected: cfg_tWR_nCK in config_regs
+      Actual:   found
+
+    [V-XM-05] bank_tracker.cfg_tRCD_nCK ← config_regs
+      Status:   ✓ PASS
+      Expected: cfg_tRCD_nCK in config_regs
+      Actual:   found
+
+    [V-XM-05] bank_tracker.cfg_tRTP_nCK ← config_regs
+      Status:   ✓ PASS
+      Expected: cfg_tRTP_nCK in config_regs
+      Actual:   found
+
+    [V-XM-05] bank_tracker.cfg_tRRD_nCK ← config_regs
+      Status:   ✓ PASS
+      Expected: cfg_tRRD_nCK in config_regs
+      Actual:   found
+
+    [V-XM-05] bank_tracker.cfg_tCCD_nCK ← config_regs
+      Status:   ✓ PASS
+      Expected: cfg_tCCD_nCK in config_regs
+      Actual:   found
+
+    [V-XM-05] bank_tracker.cfg_tRP_nCK ← config_regs
+      Status:   ✓ PASS
+      Expected: cfg_tRP_nCK in config_regs
+      Actual:   found
+
+    [V-XM-05] bank_tracker.cfg_tFAW_nCK ← config_regs
+      Status:   ✓ PASS
+      Expected: cfg_tFAW_nCK in config_regs
+      Actual:   found
+
+    [V-XM-05] bank_tracker.cfg_tRAS_nCK ← config_regs
+      Status:   ✓ PASS
+      Expected: cfg_tRAS_nCK in config_regs
+      Actual:   found
+
+    [V-XM-06] refresh_ctrl.cfg_tREFI_nCK ← config_regs
+      Status:   ✓ PASS
+      Expected: cfg_tREFI_nCK in config_regs
+      Actual:   found
+
+    [V-XM-06] refresh_ctrl.cfg_max_postpone ← config_regs
+      Status:   ✓ PASS
+      Expected: cfg_max_postpone in config_regs
+      Actual:   found
+
+    [V-XM-06] refresh_ctrl.cfg_urgent_threshold ← config_regs
+      Status:   ✓ PASS
+      Expected: cfg_urgent_threshold in config_regs
+      Actual:   found
+
+
+══════════════════════════════════════════════════════════════════════
+  SUMMARY TABLE
+══════════════════════════════════════════════════════════════════════
+  Module               Status   Passed   Total    Rate    
+  ────────────────────────────────────────────────────
+  addr_decoder         PASS     14       14       100%    
+  bank_tracker         PASS     37       37       100%    
+  refresh_ctrl         PASS     18       18       100%    
+  calibration          PASS     11       11       100%    
+  cross_module         PASS     19       19       100%    
+  ────────────────────────────────────────────────────
+  TOTAL                PASS     99       99       100%    
+
+  Category             Pass     Fail     Total   
+  ────────────────────────────────────────────
+  Addr Decode          14       0        14      
+  Bank Track           37       0        37      
+  Calibration          11       0        11      
+  Cross-Module         19       0        19      
+  Refresh              18       0        18      
+
+══════════════════════════════════════════════════════════════════════
+  ✓ ALL 99 CHECKS PASSED — NO FAILURES
+══════════════════════════════════════════════════════════════════════
