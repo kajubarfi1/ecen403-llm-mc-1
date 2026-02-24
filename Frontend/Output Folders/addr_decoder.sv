@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    addr_decoder
 // File:      addr_decoder.sv
-// Generated: 2026-02-24 16:09:52
+// Generated: 2026-02-24 16:51:35
 // Agent:     Address Decoder Agent (Phase 2)
 // Spec:      ddr3_mc_core_v2 rev golden_ddr3_1600k_x8_2lane_1rank
 //

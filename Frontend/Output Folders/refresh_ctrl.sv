@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    refresh_ctrl
 // File:      refresh_ctrl.sv
-// Generated: 2026-02-24 16:09:52
+// Generated: 2026-02-24 16:51:35
 // Agent:     Refresh Controller Agent (Phase 2)
 // Spec:      ddr3_mc_core_v2 rev golden_ddr3_1600k_x8_2lane_1rank
 //
