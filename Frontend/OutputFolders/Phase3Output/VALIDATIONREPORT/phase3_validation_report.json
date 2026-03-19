@@ -1,0 +1,934 @@
+{
+  "timestamp": "2026-03-19T12:01:05.473095",
+  "spec": "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Spec/llmmc_microarchitecturespec_filled.json",
+  "phase": 3,
+  "modules": {
+    "cmd_queue": {
+      "status": "PASS",
+      "passed": 28,
+      "total": 28,
+      "checks": [
+        {
+          "id": "V-CQ-01",
+          "name": "Module declared",
+          "pass": true,
+          "expected": "module cmd_queue",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-02",
+          "name": "DEPTH=16",
+          "pass": true,
+          "expected": "16",
+          "actual": "16"
+        },
+        {
+          "id": "V-CQ-03",
+          "name": "ROW_BITS=15",
+          "pass": true,
+          "expected": "15",
+          "actual": "15"
+        },
+        {
+          "id": "V-CQ-04",
+          "name": "COL_BITS=10",
+          "pass": true,
+          "expected": "10",
+          "actual": "10"
+        },
+        {
+          "id": "V-CQ-05",
+          "name": "BANK_BITS=3",
+          "pass": true,
+          "expected": "3",
+          "actual": "3"
+        },
+        {
+          "id": "V-CQ-06",
+          "name": "clk and rst_n",
+          "pass": true,
+          "expected": "input clk,rst_n",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-07",
+          "name": "Port enq_valid",
+          "pass": true,
+          "expected": "enq_valid",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-07",
+          "name": "Port enq_ready",
+          "pass": true,
+          "expected": "enq_ready",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-07",
+          "name": "Port enq_row",
+          "pass": true,
+          "expected": "enq_row",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-07",
+          "name": "Port enq_col",
+          "pass": true,
+          "expected": "enq_col",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-07",
+          "name": "Port enq_bank",
+          "pass": true,
+          "expected": "enq_bank",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-07",
+          "name": "Port enq_we",
+          "pass": true,
+          "expected": "enq_we",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-07",
+          "name": "Port enq_aux",
+          "pass": true,
+          "expected": "enq_aux",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-08",
+          "name": "Port deq_grant",
+          "pass": true,
+          "expected": "deq_grant",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-08",
+          "name": "Port deq_idx",
+          "pass": true,
+          "expected": "deq_idx",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-09",
+          "name": "Lookahead entry_valid",
+          "pass": true,
+          "expected": "output entry_valid",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-09",
+          "name": "Lookahead entry_row",
+          "pass": true,
+          "expected": "output entry_row",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-09",
+          "name": "Lookahead entry_col",
+          "pass": true,
+          "expected": "output entry_col",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-09",
+          "name": "Lookahead entry_bank",
+          "pass": true,
+          "expected": "output entry_bank",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-09",
+          "name": "Lookahead entry_we",
+          "pass": true,
+          "expected": "output entry_we",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-09",
+          "name": "Lookahead entry_aux",
+          "pass": true,
+          "expected": "output entry_aux",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-10",
+          "name": "Status queue_full",
+          "pass": true,
+          "expected": "output queue_full",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-10",
+          "name": "Status queue_empty",
+          "pass": true,
+          "expected": "output queue_empty",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-10",
+          "name": "Status queue_count",
+          "pass": true,
+          "expected": "output queue_count",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-11",
+          "name": "always_ff",
+          "pass": true,
+          "expected": "sequential",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-12",
+          "name": "always_comb",
+          "pass": true,
+          "expected": "combinational lookahead",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-13",
+          "name": "mem_valid storage",
+          "pass": true,
+          "expected": "per-entry valid bits",
+          "actual": "found"
+        },
+        {
+          "id": "V-CQ-14",
+          "name": "endmodule",
+          "pass": true,
+          "expected": "endmodule",
+          "actual": "found"
+        }
+      ]
+    },
+    "scheduler": {
+      "status": "PASS",
+      "passed": 40,
+      "total": 40,
+      "checks": [
+        {
+          "id": "V-SC-01",
+          "name": "Module declared",
+          "pass": true,
+          "expected": "module scheduler",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-02",
+          "name": "DEPTH=16",
+          "pass": true,
+          "expected": "16",
+          "actual": "16"
+        },
+        {
+          "id": "V-SC-03",
+          "name": "NUM_BANKS=8",
+          "pass": true,
+          "expected": "8",
+          "actual": "8"
+        },
+        {
+          "id": "V-SC-04",
+          "name": "ROW_BITS=15",
+          "pass": true,
+          "expected": "15",
+          "actual": "15"
+        },
+        {
+          "id": "V-SC-05",
+          "name": "clk and rst_n",
+          "pass": true,
+          "expected": "input clk,rst_n",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-06",
+          "name": "Queue input q_valid",
+          "pass": true,
+          "expected": "input q_valid",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-06",
+          "name": "Queue input q_row",
+          "pass": true,
+          "expected": "input q_row",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-06",
+          "name": "Queue input q_col",
+          "pass": true,
+          "expected": "input q_col",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-06",
+          "name": "Queue input q_bank",
+          "pass": true,
+          "expected": "input q_bank",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-06",
+          "name": "Queue input q_we",
+          "pass": true,
+          "expected": "input q_we",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-06",
+          "name": "Queue input q_aux",
+          "pass": true,
+          "expected": "input q_aux",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-07",
+          "name": "Bank input bank_is_active",
+          "pass": true,
+          "expected": "input bank_is_active",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-07",
+          "name": "Bank input bank_open_row",
+          "pass": true,
+          "expected": "input bank_open_row",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-07",
+          "name": "Bank input bank_act_allowed",
+          "pass": true,
+          "expected": "input bank_act_allowed",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-07",
+          "name": "Bank input bank_rd_allowed",
+          "pass": true,
+          "expected": "input bank_rd_allowed",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-07",
+          "name": "Bank input bank_wr_allowed",
+          "pass": true,
+          "expected": "input bank_wr_allowed",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-07",
+          "name": "Bank input bank_pre_allowed",
+          "pass": true,
+          "expected": "input bank_pre_allowed",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-08",
+          "name": "Refresh ref_required",
+          "pass": true,
+          "expected": "ref_required",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-08",
+          "name": "Refresh ref_urgent",
+          "pass": true,
+          "expected": "ref_urgent",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-08",
+          "name": "Refresh ref_ack",
+          "pass": true,
+          "expected": "ref_ack",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-09",
+          "name": "Dequeue deq_grant",
+          "pass": true,
+          "expected": "output deq_grant",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-09",
+          "name": "Dequeue deq_idx",
+          "pass": true,
+          "expected": "output deq_idx",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-10",
+          "name": "Command cmd_valid",
+          "pass": true,
+          "expected": "output cmd_valid",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-10",
+          "name": "Command cmd_type",
+          "pass": true,
+          "expected": "output cmd_type",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-10",
+          "name": "Command cmd_row",
+          "pass": true,
+          "expected": "output cmd_row",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-10",
+          "name": "Command cmd_col",
+          "pass": true,
+          "expected": "output cmd_col",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-10",
+          "name": "Command cmd_bank",
+          "pass": true,
+          "expected": "output cmd_bank",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-10",
+          "name": "Command cmd_we",
+          "pass": true,
+          "expected": "output cmd_we",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-10",
+          "name": "Command cmd_aux",
+          "pass": true,
+          "expected": "output cmd_aux",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-11",
+          "name": "Policy 'fr_fcfs' reflected",
+          "pass": true,
+          "expected": "FR-FCFS logic",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-12",
+          "name": "Row policy 'open_page'",
+          "pass": true,
+          "expected": "open-page logic",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-13",
+          "name": "Urgent refresh preemption",
+          "pass": true,
+          "expected": "ref_urgent check",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-14",
+          "name": "Encoding CMD_ACT",
+          "pass": true,
+          "expected": "CMD_ACT",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-14",
+          "name": "Encoding CMD_RD",
+          "pass": true,
+          "expected": "CMD_RD",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-14",
+          "name": "Encoding CMD_WR",
+          "pass": true,
+          "expected": "CMD_WR",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-14",
+          "name": "Encoding CMD_PRE",
+          "pass": true,
+          "expected": "CMD_PRE",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-14",
+          "name": "Encoding CMD_REF",
+          "pass": true,
+          "expected": "CMD_REF",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-15",
+          "name": "always_ff",
+          "pass": true,
+          "expected": "registered output",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-16",
+          "name": "always_comb",
+          "pass": true,
+          "expected": "comb selection",
+          "actual": "found"
+        },
+        {
+          "id": "V-SC-17",
+          "name": "endmodule",
+          "pass": true,
+          "expected": "endmodule",
+          "actual": "found"
+        }
+      ]
+    },
+    "cmd_gen": {
+      "status": "PASS",
+      "passed": 42,
+      "total": 42,
+      "checks": [
+        {
+          "id": "V-CG-01",
+          "name": "Module declared",
+          "pass": true,
+          "expected": "module cmd_gen",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-02",
+          "name": "DDR_ADDR_W=15",
+          "pass": true,
+          "expected": "15",
+          "actual": "15"
+        },
+        {
+          "id": "V-CG-03",
+          "name": "DDR_BANK_W=3",
+          "pass": true,
+          "expected": "3",
+          "actual": "3"
+        },
+        {
+          "id": "V-CG-04",
+          "name": "ROW_BITS=15",
+          "pass": true,
+          "expected": "15",
+          "actual": "15"
+        },
+        {
+          "id": "V-CG-05",
+          "name": "clk and rst_n",
+          "pass": true,
+          "expected": "input clk,rst_n",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-06",
+          "name": "Sched input sched_valid",
+          "pass": true,
+          "expected": "input sched_valid",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-06",
+          "name": "Sched input sched_type",
+          "pass": true,
+          "expected": "input sched_type",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-06",
+          "name": "Sched input sched_row",
+          "pass": true,
+          "expected": "input sched_row",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-06",
+          "name": "Sched input sched_col",
+          "pass": true,
+          "expected": "input sched_col",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-06",
+          "name": "Sched input sched_bank",
+          "pass": true,
+          "expected": "input sched_bank",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-06",
+          "name": "Sched input sched_we",
+          "pass": true,
+          "expected": "input sched_we",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-06",
+          "name": "Sched input sched_aux",
+          "pass": true,
+          "expected": "input sched_aux",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-07",
+          "name": "DDR output ddr_cmd",
+          "pass": true,
+          "expected": "output ddr_cmd",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-07",
+          "name": "DDR output ddr_addr",
+          "pass": true,
+          "expected": "output ddr_addr",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-07",
+          "name": "DDR output ddr_bank",
+          "pass": true,
+          "expected": "output ddr_bank",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-07",
+          "name": "DDR output ddr_cke",
+          "pass": true,
+          "expected": "output ddr_cke",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-07",
+          "name": "DDR output ddr_reset_n",
+          "pass": true,
+          "expected": "output ddr_reset_n",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-07",
+          "name": "DDR output ddr_odt",
+          "pass": true,
+          "expected": "output ddr_odt",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-08",
+          "name": "Feedback fb_act_valid",
+          "pass": true,
+          "expected": "output fb_act_valid",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-08",
+          "name": "Feedback fb_act_bank",
+          "pass": true,
+          "expected": "output fb_act_bank",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-08",
+          "name": "Feedback fb_act_row",
+          "pass": true,
+          "expected": "output fb_act_row",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-08",
+          "name": "Feedback fb_pre_valid",
+          "pass": true,
+          "expected": "output fb_pre_valid",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-08",
+          "name": "Feedback fb_pre_bank",
+          "pass": true,
+          "expected": "output fb_pre_bank",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-08",
+          "name": "Feedback fb_rd_valid",
+          "pass": true,
+          "expected": "output fb_rd_valid",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-08",
+          "name": "Feedback fb_rd_bank",
+          "pass": true,
+          "expected": "output fb_rd_bank",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-08",
+          "name": "Feedback fb_wr_valid",
+          "pass": true,
+          "expected": "output fb_wr_valid",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-08",
+          "name": "Feedback fb_wr_bank",
+          "pass": true,
+          "expected": "output fb_wr_bank",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-08",
+          "name": "Feedback fb_ref_valid",
+          "pass": true,
+          "expected": "output fb_ref_valid",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-09",
+          "name": "Passthrough cmd_out_valid",
+          "pass": true,
+          "expected": "output cmd_out_valid",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-09",
+          "name": "Passthrough cmd_out_we",
+          "pass": true,
+          "expected": "output cmd_out_we",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-09",
+          "name": "Passthrough cmd_out_aux",
+          "pass": true,
+          "expected": "output cmd_out_aux",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-10",
+          "name": "Encoding DDR_NOP",
+          "pass": true,
+          "expected": "DDR_NOP",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-10",
+          "name": "Encoding DDR_ACT",
+          "pass": true,
+          "expected": "DDR_ACT",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-10",
+          "name": "Encoding DDR_RD",
+          "pass": true,
+          "expected": "DDR_RD",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-10",
+          "name": "Encoding DDR_WR",
+          "pass": true,
+          "expected": "DDR_WR",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-10",
+          "name": "Encoding DDR_PRE",
+          "pass": true,
+          "expected": "DDR_PRE",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-10",
+          "name": "Encoding DDR_REF",
+          "pass": true,
+          "expected": "DDR_REF",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-11",
+          "name": "NOP=4'b0111",
+          "pass": true,
+          "expected": "4'b0111",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-12",
+          "name": "ACT=4'b0011",
+          "pass": true,
+          "expected": "4'b0011",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-13",
+          "name": "always_ff",
+          "pass": true,
+          "expected": "registered",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-14",
+          "name": "ODT for writes",
+          "pass": true,
+          "expected": "ODT asserted on WR",
+          "actual": "found"
+        },
+        {
+          "id": "V-CG-15",
+          "name": "endmodule",
+          "pass": true,
+          "expected": "endmodule",
+          "actual": "found"
+        }
+      ]
+    },
+    "cross_module": {
+      "status": "PASS",
+      "passed": 17,
+      "total": 17,
+      "checks": [
+        {
+          "id": "V-XM3-01",
+          "name": "CQ entry_valid \u2192 SC q_valid",
+          "pass": true,
+          "expected": "matching signal names",
+          "actual": "found"
+        },
+        {
+          "id": "V-XM3-02",
+          "name": "CQ entry_row \u2192 SC q_row",
+          "pass": true,
+          "expected": "matching signal names",
+          "actual": "found"
+        },
+        {
+          "id": "V-XM3-03",
+          "name": "CQ entry_bank \u2192 SC q_bank",
+          "pass": true,
+          "expected": "matching signal names",
+          "actual": "found"
+        },
+        {
+          "id": "V-XM3-04",
+          "name": "SC deq_grant \u2192 CQ deq_grant",
+          "pass": true,
+          "expected": "deq_grant both sides",
+          "actual": "found"
+        },
+        {
+          "id": "V-XM3-05",
+          "name": "SC deq_idx \u2192 CQ deq_idx",
+          "pass": true,
+          "expected": "deq_idx both sides",
+          "actual": "found"
+        },
+        {
+          "id": "V-XM3-06",
+          "name": "SC cmd_valid \u2192 CG sched_valid",
+          "pass": true,
+          "expected": "valid signal",
+          "actual": "found"
+        },
+        {
+          "id": "V-XM3-07",
+          "name": "SC cmd_type \u2192 CG sched_type",
+          "pass": true,
+          "expected": "type signal",
+          "actual": "found"
+        },
+        {
+          "id": "V-XM3-08",
+          "name": "SC cmd_row \u2192 CG sched_row",
+          "pass": true,
+          "expected": "row signal",
+          "actual": "found"
+        },
+        {
+          "id": "V-XM3-09",
+          "name": "SC cmd_bank \u2192 CG sched_bank",
+          "pass": true,
+          "expected": "bank signal",
+          "actual": "found"
+        },
+        {
+          "id": "V-XM3-10",
+          "name": "CG fb_act_valid (\u2192 bank_tracker cmd_act_valid)",
+          "pass": true,
+          "expected": "feedback output",
+          "actual": "found"
+        },
+        {
+          "id": "V-XM3-11",
+          "name": "CG fb_ref_valid (\u2192 bank_tracker cmd_ref_valid)",
+          "pass": true,
+          "expected": "feedback output",
+          "actual": "found"
+        },
+        {
+          "id": "V-XM3-12",
+          "name": "ROW_BITS consistent (15)",
+          "pass": true,
+          "expected": "consistent",
+          "actual": "15"
+        },
+        {
+          "id": "V-XM3-12",
+          "name": "COL_BITS consistent (10)",
+          "pass": true,
+          "expected": "consistent",
+          "actual": "10"
+        },
+        {
+          "id": "V-XM3-12",
+          "name": "BANK_BITS consistent (3)",
+          "pass": true,
+          "expected": "consistent",
+          "actual": "3"
+        },
+        {
+          "id": "V-XM3-12",
+          "name": "AUX_WIDTH consistent (4)",
+          "pass": true,
+          "expected": "consistent",
+          "actual": "4"
+        },
+        {
+          "id": "V-XM3-12",
+          "name": "DEPTH consistent (16)",
+          "pass": true,
+          "expected": "consistent",
+          "actual": "16"
+        },
+        {
+          "id": "V-XM3-12",
+          "name": "IDX_BITS consistent (4)",
+          "pass": true,
+          "expected": "consistent",
+          "actual": "4"
+        }
+      ]
+    }
+  },
+  "overall": {
+    "status": "PASS",
+    "total_passed": 127,
+    "total_checks": 127
+  },
+  "testbenches": [
+    "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/Output_Folders/Phase3Output/VALIDATIONREPORT/cmd_queue_tb.sv",
+    "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/Output_Folders/Phase3Output/VALIDATIONREPORT/scheduler_tb.sv",
+    "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/Output_Folders/Phase3Output/VALIDATIONREPORT/cmd_gen_tb.sv"
+  ]
+}

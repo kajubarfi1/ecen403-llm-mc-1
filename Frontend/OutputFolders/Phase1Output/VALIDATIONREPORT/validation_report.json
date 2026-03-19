@@ -1,0 +1,702 @@
+{
+  "timestamp": "2026-03-19T12:18:40.340359",
+  "spec": "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Spec/llmmc_microarchitecturespec_filled.json",
+  "modules": {
+    "init_fsm": {
+      "status": "PASS",
+      "passed": 11,
+      "total": 11,
+      "checks": [
+        {
+          "id": "V-TIM-01",
+          "name": "Reset hold >= 200\u00b5s",
+          "pass": true,
+          "expected": ">= 40000 cycles (200\u00b5s)",
+          "actual": "40000 cycles"
+        },
+        {
+          "id": "V-TIM-02",
+          "name": "CKE delay >= 500\u00b5s",
+          "pass": true,
+          "expected": ">= 100000 cycles (500\u00b5s)",
+          "actual": "100000 cycles"
+        },
+        {
+          "id": "V-TIM-03",
+          "name": "tXPR wait period",
+          "pass": true,
+          "expected": ">= 34 cycles (170.0ns)",
+          "actual": "34 cycles"
+        },
+        {
+          "id": "V-TIM-04",
+          "name": "tZQinit wait",
+          "pass": true,
+          "expected": ">= 128 cycles (640.0ns)",
+          "actual": "128 cycles"
+        },
+        {
+          "id": "V-JED-01",
+          "name": "MR program order (JEDEC \u00a74.6.1)",
+          "pass": true,
+          "expected": "MR2 \u2192 MR3 \u2192 MR1 \u2192 MR0",
+          "actual": "MR2 \u2192 MR3 \u2192 MR1 \u2192 MR0"
+        },
+        {
+          "id": "V-JED-02",
+          "name": "MR0 encoding (CL=11, BL=8, DLL reset)",
+          "pass": true,
+          "expected": "0x1D34",
+          "actual": "0x1D34"
+        },
+        {
+          "id": "V-JED-03",
+          "name": "MR2 encoding (CWL=8)",
+          "pass": true,
+          "expected": "0x0218",
+          "actual": "0x0218"
+        },
+        {
+          "id": "V-RTL-01",
+          "name": "init_done output declared",
+          "pass": true,
+          "expected": "output logic init_done",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-02",
+          "name": "init_done asserted in done state",
+          "pass": true,
+          "expected": "init_done driven in S_DONE",
+          "actual": "3 assignment(s) found"
+        },
+        {
+          "id": "V-RTL-03",
+          "name": "ZQCL command with A10=1",
+          "pass": true,
+          "expected": "ZQCL state in FSM",
+          "actual": "found"
+        },
+        {
+          "id": "V-JED-04",
+          "name": "DDR address width",
+          "pass": true,
+          "expected": "15",
+          "actual": "15"
+        }
+      ]
+    },
+    "config_regs": {
+      "status": "PASS",
+      "passed": 48,
+      "total": 48,
+      "checks": [
+        {
+          "id": "V-RTL-10",
+          "name": "Register CTRL_STATUS @ 0x00",
+          "pass": true,
+          "expected": "offset 0x00 in address decode",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-10",
+          "name": "Register CTRL_CONFIG @ 0x04",
+          "pass": true,
+          "expected": "offset 0x04 in address decode",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-10",
+          "name": "Register TIMING_0 @ 0x08",
+          "pass": true,
+          "expected": "offset 0x08 in address decode",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-10",
+          "name": "Register TIMING_1 @ 0x0C",
+          "pass": true,
+          "expected": "offset 0x0C in address decode",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-10",
+          "name": "Register TIMING_2 @ 0x10",
+          "pass": true,
+          "expected": "offset 0x10 in address decode",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-10",
+          "name": "Register TIMING_3 @ 0x14",
+          "pass": true,
+          "expected": "offset 0x14 in address decode",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-10",
+          "name": "Register REFRESH_CONFIG @ 0x18",
+          "pass": true,
+          "expected": "offset 0x18 in address decode",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-10",
+          "name": "Register ERROR_STATUS @ 0x1C",
+          "pass": true,
+          "expected": "offset 0x1C in address decode",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-10",
+          "name": "Register BIST_CONFIG @ 0x20",
+          "pass": true,
+          "expected": "offset 0x20 in address decode",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-10",
+          "name": "Register BIST_ADDR_START @ 0x24",
+          "pass": true,
+          "expected": "offset 0x24 in address decode",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-10",
+          "name": "Register BIST_ADDR_END @ 0x28",
+          "pass": true,
+          "expected": "offset 0x28 in address decode",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-11",
+          "name": "Reset value CTRL_CONFIG = 0x00000009",
+          "pass": true,
+          "expected": "0x00000009",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-11",
+          "name": "Reset value TIMING_0 = 0x271C0B0B",
+          "pass": true,
+          "expected": "0x271C0B0B",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-11",
+          "name": "Reset value TIMING_1 = 0x80200606",
+          "pass": true,
+          "expected": "0x80200606",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-11",
+          "name": "Reset value TIMING_2 = 0x080B060C",
+          "pass": true,
+          "expected": "0x080B060C",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-11",
+          "name": "Reset value TIMING_3 = 0x00186004",
+          "pass": true,
+          "expected": "0x00186004",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-11",
+          "name": "Reset value REFRESH_CONFIG = 0x00000168",
+          "pass": true,
+          "expected": "0x00000168",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-11",
+          "name": "Reset value BIST_ADDR_END = 0x1FFFFFFF",
+          "pass": true,
+          "expected": "0x1FFFFFFF",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-12",
+          "name": "Access type RO implemented",
+          "pass": true,
+          "expected": "RO logic in RTL",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-12",
+          "name": "Access type RW implemented",
+          "pass": true,
+          "expected": "RW logic in RTL",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-12",
+          "name": "Access type RW1C implemented",
+          "pass": true,
+          "expected": "RW1C logic in RTL",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-13",
+          "name": "Output port cfg_tRCD_nCK",
+          "pass": true,
+          "expected": "output logic ... cfg_tRCD_nCK",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-13",
+          "name": "Output port cfg_tRP_nCK",
+          "pass": true,
+          "expected": "output logic ... cfg_tRP_nCK",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-13",
+          "name": "Output port cfg_tRAS_nCK",
+          "pass": true,
+          "expected": "output logic ... cfg_tRAS_nCK",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-13",
+          "name": "Output port cfg_tRC_nCK",
+          "pass": true,
+          "expected": "output logic ... cfg_tRC_nCK",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-13",
+          "name": "Output port cfg_tRRD_nCK",
+          "pass": true,
+          "expected": "output logic ... cfg_tRRD_nCK",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-13",
+          "name": "Output port cfg_tWTR_nCK",
+          "pass": true,
+          "expected": "output logic ... cfg_tWTR_nCK",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-13",
+          "name": "Output port cfg_tFAW_nCK",
+          "pass": true,
+          "expected": "output logic ... cfg_tFAW_nCK",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-13",
+          "name": "Output port cfg_tRFC_nCK",
+          "pass": true,
+          "expected": "output logic ... cfg_tRFC_nCK",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-13",
+          "name": "Output port cfg_tWR_nCK",
+          "pass": true,
+          "expected": "output logic ... cfg_tWR_nCK",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-13",
+          "name": "Output port cfg_tRTP_nCK",
+          "pass": true,
+          "expected": "output logic ... cfg_tRTP_nCK",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-13",
+          "name": "Output port cfg_CL_nCK",
+          "pass": true,
+          "expected": "output logic ... cfg_CL_nCK",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-13",
+          "name": "Output port cfg_CWL_nCK",
+          "pass": true,
+          "expected": "output logic ... cfg_CWL_nCK",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-13",
+          "name": "Output port cfg_tCCD_nCK",
+          "pass": true,
+          "expected": "output logic ... cfg_tCCD_nCK",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-13",
+          "name": "Output port cfg_tREFI_nCK",
+          "pass": true,
+          "expected": "output logic ... cfg_tREFI_nCK",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-14",
+          "name": "Invalid address error handling",
+          "pass": true,
+          "expected": "Error response on invalid address",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-15",
+          "name": "CSR data width = 32",
+          "pass": true,
+          "expected": "32",
+          "actual": "32"
+        },
+        {
+          "id": "V-JED-10",
+          "name": "Bit fields fit in 32b: CTRL_STATUS (32b)",
+          "pass": true,
+          "expected": "<= 32 bits",
+          "actual": "32 bits"
+        },
+        {
+          "id": "V-JED-10",
+          "name": "Bit fields fit in 32b: CTRL_CONFIG (32b)",
+          "pass": true,
+          "expected": "<= 32 bits",
+          "actual": "32 bits"
+        },
+        {
+          "id": "V-JED-10",
+          "name": "Bit fields fit in 32b: TIMING_0 (32b)",
+          "pass": true,
+          "expected": "<= 32 bits",
+          "actual": "32 bits"
+        },
+        {
+          "id": "V-JED-10",
+          "name": "Bit fields fit in 32b: TIMING_1 (32b)",
+          "pass": true,
+          "expected": "<= 32 bits",
+          "actual": "32 bits"
+        },
+        {
+          "id": "V-JED-10",
+          "name": "Bit fields fit in 32b: TIMING_2 (32b)",
+          "pass": true,
+          "expected": "<= 32 bits",
+          "actual": "32 bits"
+        },
+        {
+          "id": "V-JED-10",
+          "name": "Bit fields fit in 32b: TIMING_3 (32b)",
+          "pass": true,
+          "expected": "<= 32 bits",
+          "actual": "32 bits"
+        },
+        {
+          "id": "V-JED-10",
+          "name": "Bit fields fit in 32b: REFRESH_CONFIG (32b)",
+          "pass": true,
+          "expected": "<= 32 bits",
+          "actual": "32 bits"
+        },
+        {
+          "id": "V-JED-10",
+          "name": "Bit fields fit in 32b: ERROR_STATUS (32b)",
+          "pass": true,
+          "expected": "<= 32 bits",
+          "actual": "32 bits"
+        },
+        {
+          "id": "V-JED-10",
+          "name": "Bit fields fit in 32b: BIST_CONFIG (32b)",
+          "pass": true,
+          "expected": "<= 32 bits",
+          "actual": "32 bits"
+        },
+        {
+          "id": "V-JED-10",
+          "name": "Bit fields fit in 32b: BIST_ADDR_START (32b)",
+          "pass": true,
+          "expected": "<= 32 bits",
+          "actual": "32 bits"
+        },
+        {
+          "id": "V-JED-10",
+          "name": "Bit fields fit in 32b: BIST_ADDR_END (32b)",
+          "pass": true,
+          "expected": "<= 32 bits",
+          "actual": "32 bits"
+        }
+      ]
+    },
+    "wb_port": {
+      "status": "PASS",
+      "passed": 22,
+      "total": 22,
+      "checks": [
+        {
+          "id": "V-RTL-20",
+          "name": "WB signal wb_cyc_i (input)",
+          "pass": true,
+          "expected": "input ... wb_cyc_i",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-20",
+          "name": "WB signal wb_stb_i (input)",
+          "pass": true,
+          "expected": "input ... wb_stb_i",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-20",
+          "name": "WB signal wb_we_i (input)",
+          "pass": true,
+          "expected": "input ... wb_we_i",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-20",
+          "name": "WB signal wb_adr_i (input)",
+          "pass": true,
+          "expected": "input ... wb_adr_i",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-20",
+          "name": "WB signal wb_dat_i (input)",
+          "pass": true,
+          "expected": "input ... wb_dat_i",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-20",
+          "name": "WB signal wb_sel_i (input)",
+          "pass": true,
+          "expected": "input ... wb_sel_i",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-20",
+          "name": "WB signal wb_ack_o (output)",
+          "pass": true,
+          "expected": "output ... wb_ack_o",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-20",
+          "name": "WB signal wb_dat_o (output)",
+          "pass": true,
+          "expected": "output ... wb_dat_o",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-20",
+          "name": "WB signal wb_stall_o (output)",
+          "pass": true,
+          "expected": "output ... wb_stall_o",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-20",
+          "name": "WB signal wb_err_o (output)",
+          "pass": true,
+          "expected": "output ... wb_err_o",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-21",
+          "name": "Address width matches spec",
+          "pass": true,
+          "expected": "29",
+          "actual": "29"
+        },
+        {
+          "id": "V-RTL-22",
+          "name": "Data width matches spec",
+          "pass": true,
+          "expected": "32",
+          "actual": "32"
+        },
+        {
+          "id": "V-RTL-23",
+          "name": "Stall backpressure logic",
+          "pass": true,
+          "expected": "wb_stall_o driven",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-24",
+          "name": "Burst support (BL8)",
+          "pass": true,
+          "expected": "Burst counter or CTI/BTE handling",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-25",
+          "name": "Internal output req_valid",
+          "pass": true,
+          "expected": "output ... req_valid",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-25",
+          "name": "Internal output req_we",
+          "pass": true,
+          "expected": "output ... req_we",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-25",
+          "name": "Internal output req_addr",
+          "pass": true,
+          "expected": "output ... req_addr",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-25",
+          "name": "Internal output req_wdata",
+          "pass": true,
+          "expected": "output ... req_wdata",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-26",
+          "name": "SEL width = DATA_WIDTH/8",
+          "pass": true,
+          "expected": "4",
+          "actual": "4"
+        },
+        {
+          "id": "V-RTL-27",
+          "name": "Clock (clk) and reset (rst_n)",
+          "pass": true,
+          "expected": "input clk, input rst_n",
+          "actual": "found"
+        },
+        {
+          "id": "V-RTL-28",
+          "name": "ACK gated by CYC & STB (WB rule 3.35)",
+          "pass": true,
+          "expected": "ack depends on cyc & stb",
+          "actual": "found"
+        },
+        {
+          "id": "V-TIM-20",
+          "name": "Pipeline latency matches spec",
+          "pass": true,
+          "expected": "2",
+          "actual": "0"
+        }
+      ]
+    },
+    "clocking": {
+      "status": "PASS",
+      "passed": 13,
+      "total": 13,
+      "checks": [
+        {
+          "id": "V-CLK-01",
+          "name": "Controller frequency = 200 MHz",
+          "pass": true,
+          "expected": "200.0 MHz",
+          "actual": "200.0 MHz"
+        },
+        {
+          "id": "V-CLK-02",
+          "name": "Controller period = 5.0 ns",
+          "pass": true,
+          "expected": "5.0 ns",
+          "actual": "5.0 ns"
+        },
+        {
+          "id": "V-CLK-03",
+          "name": "DDR clock = 800 MHz (DDR3-1600)",
+          "pass": true,
+          "expected": "800.0 MHz",
+          "actual": "800.0 MHz"
+        },
+        {
+          "id": "V-CLK-04",
+          "name": "Clock ratio DDR:controller = 4:1",
+          "pass": true,
+          "expected": "4",
+          "actual": "4"
+        },
+        {
+          "id": "V-CLK-05",
+          "name": "Period ratio consistent (5.0/1.25=4)",
+          "pass": true,
+          "expected": "4",
+          "actual": "4.0"
+        },
+        {
+          "id": "V-CLK-06",
+          "name": "Data rate = 1600 MT/s",
+          "pass": true,
+          "expected": "1600.0 MT/s",
+          "actual": "1600.0 MT/s"
+        },
+        {
+          "id": "V-TIM-30",
+          "name": "WAIT_RESET = 200\u00b5s / 5.0ns = 40000",
+          "pass": true,
+          "expected": "40000",
+          "actual": "40000"
+        },
+        {
+          "id": "V-TIM-31",
+          "name": "WAIT_CKE = 500\u00b5s / 5.0ns = 100000",
+          "pass": true,
+          "expected": "100000",
+          "actual": "100000"
+        },
+        {
+          "id": "V-TIM-32",
+          "name": "tRC(39) >= tRAS(28) + tRP(11) JEDEC invariant",
+          "pass": true,
+          "expected": ">= 39",
+          "actual": "39"
+        },
+        {
+          "id": "V-TIM-33",
+          "name": "tRCD_nCK=11 nCK \u2192 3 ctrl cycles @ 200MHz",
+          "pass": true,
+          "expected": "> 0 controller cycles",
+          "actual": "3 cycles (11 \u00d7 1.25ns / 5.0ns)"
+        },
+        {
+          "id": "V-TIM-33",
+          "name": "tRP_nCK=11 nCK \u2192 3 ctrl cycles @ 200MHz",
+          "pass": true,
+          "expected": "> 0 controller cycles",
+          "actual": "3 cycles (11 \u00d7 1.25ns / 5.0ns)"
+        },
+        {
+          "id": "V-TIM-33",
+          "name": "tRAS_nCK=28 nCK \u2192 7 ctrl cycles @ 200MHz",
+          "pass": true,
+          "expected": "> 0 controller cycles",
+          "actual": "7 cycles (28 \u00d7 1.25ns / 5.0ns)"
+        },
+        {
+          "id": "V-TIM-33",
+          "name": "tRC_nCK=39 nCK \u2192 10 ctrl cycles @ 200MHz",
+          "pass": true,
+          "expected": "> 0 controller cycles",
+          "actual": "10 cycles (39 \u00d7 1.25ns / 5.0ns)"
+        }
+      ]
+    }
+  },
+  "overall": {
+    "status": "PASS",
+    "total_passed": 94,
+    "total_checks": 94
+  },
+  "testbenches": [
+    "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/Phase1Output/VALIDATIONREPORT/init_fsm_tb.sv",
+    "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/Phase1Output/VALIDATIONREPORT/config_regs_tb.sv",
+    "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/Phase1Output/VALIDATIONREPORT/wb_port_tb.sv"
+  ]
+}
