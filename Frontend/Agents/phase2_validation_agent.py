@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """
-╔══════════════════════════════════════════════════════════════════════╗
-║              PHASE 2 VALIDATION AGENT                                ║
-║  Static validation + SystemVerilog testbench generation              ║
-║  Modules: addr_decoder, bank_tracker, refresh_ctrl, calibration      ║
-║  Checks: V-AD, V-BT, V-RF, V-CL, V-XM                              ║
-║  Output: validation_report + 4 testbenches + Makefile.sim            ║
-╚══════════════════════════════════════════════════════════════════════╝
++======================================================================+
+|              PHASE 2 VALIDATION AGENT                                |
+|  Static validation + SystemVerilog testbench generation              |
+|  Modules: addr_decoder, bank_tracker, refresh_ctrl, calibration      |
+|  Checks: V-AD, V-BT, V-RF, V-CL, V-XM                              |
+|  Output: validation_report + 4 testbenches + Makefile.sim            |
++======================================================================+
 """
 import json, os, sys, re, math, time
 from pathlib import Path
 from datetime import datetime
 
 def print_check(check, index=0, total=0):
-    sym = "\033[92m✓ PASS\033[0m" if check["pass"] else "\033[91m✗ FAIL\033[0m"
+    sym = "\033[92m+ PASS\033[0m" if check["pass"] else "\033[91mx FAIL\033[0m"
     counter = f"[{index}/{total}]" if total > 0 else ""
     sys.stdout.write(f"  {counter:>8s}  Running {check['id']}: {check['name']}...")
     sys.stdout.flush(); time.sleep(0.04)
@@ -25,7 +25,7 @@ def print_check(check, index=0, total=0):
 
 def _print_mod(name, status, passed, total):
     c = "\033[92m" if status == "PASS" else "\033[91m"
-    s = "✓" if status == "PASS" else "✗"
+    s = "+" if status == "PASS" else "x"
     print(f"\n  {c}  {s} {name}: {status} ({passed}/{total})\033[0m\n")
 
 def _finalize(checks):
@@ -34,6 +34,15 @@ def _finalize(checks):
     status = "PASS" if passed == total else "FAIL"
     for i, c in enumerate(checks, 1): print_check(c, i, total)
     return {"status": status, "passed": passed, "total": total, "checks": checks}
+
+def _strip_translate_off(sv_text):
+    """Remove content between translate_off / translate_on guards.
+    This prevents SVA assertions from triggering false positives
+    in structural checks like 'no always_ff'."""
+    result = re.sub(
+        r'//\s*(?:synopsys|synthesis)\s+translate_off.*?//\s*(?:synopsys|synthesis)\s+translate_on',
+        '', sv_text, flags=re.DOTALL)
+    return result
 
 class Phase2ValidationAgent:
     def __init__(self, spec_path, rtl_dir, output_dir=None,
@@ -57,7 +66,7 @@ class Phase2ValidationAgent:
         self.results = {"timestamp": datetime.now().isoformat(), "spec": spec_path, "phase": 2, "modules": {}}
         self.generated_tb_paths = []
 
-    # ── ADDR_DECODER ──
+    # -- ADDR_DECODER --
     def validate_addr_decoder(self):
         checks = []
         sv_path = self.rtl_dir / "addr_decoder.sv"
@@ -65,6 +74,8 @@ class Phase2ValidationAgent:
             return {"status":"ERROR","passed":0,"total":1,
                     "checks":[{"id":"V-AD-00","pass":False,"name":"File exists","expected":str(sv_path),"actual":"missing"}]}
         sv = sv_path.read_text()
+        # Strip SVA translate_off blocks for structural checks
+        sv_rtl = _strip_translate_off(sv)
         def chk(cid,name,p,exp,act): checks.append({"id":cid,"name":name,"pass":p,"expected":exp,"actual":act})
         chk("V-AD-01","Module declared","module addr_decoder" in sv,"module addr_decoder","found" if "module addr_decoder" in sv else "missing")
         m=re.search(r"ADDR_WIDTH\s*=\s*(\d+)",sv); aw=int(m.group(1)) if m else 0; ea=self.host["address_width_bits"]
@@ -78,7 +89,8 @@ class Phase2ValidationAgent:
         chk("V-AD-06","Input req_addr","req_addr" in sv and "input" in sv,"input req_addr","found" if "req_addr" in sv else "missing")
         for p in ["dec_row","dec_bank","dec_col","dec_rank"]:
             chk("V-AD-07",f"Output {p}",p in sv,f"output {p}","found" if p in sv else "missing")
-        chk("V-AD-11","Combinational (no always_ff)","always_ff" not in sv,"no always_ff","clean" if "always_ff" not in sv else "has always_ff")
+        # FIX: check against sv_rtl (SVA stripped) instead of full sv
+        chk("V-AD-11","Combinational (no always_ff)","always_ff" not in sv_rtl,"no always_ff","clean" if "always_ff" not in sv_rtl else "has always_ff")
         chk("V-AD-12","No clock port",not re.search(r"input\s+logic\s+clk",sv),"no clk","clean" if not re.search(r"input\s+logic\s+clk",sv) else "has clk")
         mapping=self.geo["address_mapping"]
         chk("V-AD-13",f"Mapping '{mapping}'",mapping.replace("-","") in sv.replace("-","").replace("_","").lower() or "row" in sv.lower(),mapping,"found")
@@ -89,7 +101,7 @@ class Phase2ValidationAgent:
         chk("V-AD-17","assign statements",sv.count("assign")>=3,">=3 assigns",f"{sv.count('assign')} assigns")
         result=_finalize(checks); _print_mod("addr_decoder",result["status"],result["passed"],result["total"]); return result
 
-    # ── BANK_TRACKER ──
+    # -- BANK_TRACKER --
     def validate_bank_tracker(self):
         checks = []
         sv_path = self.rtl_dir / "bank_tracker.sv"
@@ -123,7 +135,7 @@ class Phase2ValidationAgent:
         chk("V-BT-15","endmodule","endmodule" in sv,"endmodule","found" if "endmodule" in sv else "missing")
         result=_finalize(checks); _print_mod("bank_tracker",result["status"],result["passed"],result["total"]); return result
 
-    # ── REFRESH_CTRL ──
+    # -- REFRESH_CTRL --
     def validate_refresh_ctrl(self):
         checks = []
         sv_path = self.rtl_dir / "refresh_ctrl.sv"
@@ -158,7 +170,7 @@ class Phase2ValidationAgent:
         chk("V-RF-17","endmodule","endmodule" in sv,"endmodule","found" if "endmodule" in sv else "missing")
         result=_finalize(checks); _print_mod("refresh_ctrl",result["status"],result["passed"],result["total"]); return result
 
-    # ── CALIBRATION ──
+    # -- CALIBRATION --
     def validate_calibration(self):
         checks = []
         sv_path = self.rtl_dir / "calibration.sv"
@@ -187,7 +199,7 @@ class Phase2ValidationAgent:
         chk("V-CL-14","endmodule","endmodule" in sv,"endmodule","found" if "endmodule" in sv else "missing")
         result=_finalize(checks); _print_mod("calibration",result["status"],result["passed"],result["total"]); return result
 
-    # ── CROSS-MODULE ──
+    # -- CROSS-MODULE --
     def validate_cross_module(self):
         checks = []
         svs = {}
@@ -217,7 +229,7 @@ class Phase2ValidationAgent:
             chk("V-XM-07","BANK_BITS consistent",bt_v==ad_v,str(ad_v),str(bt_v))
         result=_finalize(checks); _print_mod("cross_module",result["status"],result["passed"],result["total"]); return result
 
-    # ── TESTBENCH GENERATORS ──
+    # -- TESTBENCH GENERATORS --
     def generate_addr_decoder_tb(self):
         rb=self.geo["row_bits"]; cb=self.geo["column_bits"]; bb=self.geo["bank_bits"]; aw=self.host["address_width_bits"]
         max_row=2**rb-1; row_msb_val=2**(rb-1)
@@ -261,10 +273,8 @@ module addr_decoder_tb;
         req_addr={aw}'h0|(1<<{aw-1}); check("BitMSB",{row_msb_val},0,0,0);
         req_addr=build(0,7,127,0); check("MaxCol+Bank",0,7,{{7'd127,3'b000}},0);
         req_addr={aw}'h10; check("Addr16",0,0,{{7'd1,3'b000}},0);
-        // Extra: walking bank bits
         req_addr={aw}'h0|(1<<12); check("Bank bit1",0,2,0,0);
         req_addr={aw}'h0|(1<<13); check("Bank bit2",0,4,0,0);
-        // Power of 2
         req_addr={aw}'h4000; check("Addr 0x4000",req_addr[{aw-1}:14],req_addr[13:11],{{req_addr[10:4],3'b000}},0);
         req_addr=build(16384,4,64,0); check("Mid all",16384,4,{{7'd64,3'b000}},0);
         req_addr=build({max_row},7,127,15); check("All max",{max_row},7,{{7'h7F,3'b000}},0);
@@ -484,43 +494,41 @@ clean: ; rm -rf $(WORK)
 """)
         print(f"  V Makefile.sim -> {p}")
 
-    # ── RUN ──
+    # -- RUN --
     def run(self):
         hdr = "=" * 62
         print(f"\n\033[1m{hdr}\033[0m")
-        print(f"\033[1m  PHASE 2 VALIDATION AGENT — TEST RUNNER\033[0m")
+        print(f"\033[1m  PHASE 2 VALIDATION AGENT -- TEST RUNNER\033[0m")
         print(f"  Spec: {self.spec_path}")
         print(f"  RTL:  {self.rtl_dir}")
         print(f"  Out:  {self.output_dir}")
         print(f"\033[1m{hdr}\033[0m")
         start = time.time()
 
-        print(f"\n\033[1m  ── ADDR_DECODER TESTBENCH ({'─' * 35})\033[0m")
+        print(f"\n\033[1m  -- ADDR_DECODER TESTBENCH ({'=' * 35})\033[0m")
         print(f"  Loading addr_decoder.sv...")
         self.results["modules"]["addr_decoder"] = self.validate_addr_decoder()
 
-        print(f"\033[1m  ── BANK_TRACKER TESTBENCH ({'─' * 35})\033[0m")
+        print(f"\033[1m  -- BANK_TRACKER TESTBENCH ({'=' * 35})\033[0m")
         print(f"  Loading bank_tracker.sv...")
         self.results["modules"]["bank_tracker"] = self.validate_bank_tracker()
 
-        print(f"\033[1m  ── REFRESH_CTRL TESTBENCH ({'─' * 35})\033[0m")
+        print(f"\033[1m  -- REFRESH_CTRL TESTBENCH ({'=' * 35})\033[0m")
         print(f"  Loading refresh_ctrl.sv...")
         self.results["modules"]["refresh_ctrl"] = self.validate_refresh_ctrl()
 
-        print(f"\033[1m  ── CALIBRATION TESTBENCH ({'─' * 36})\033[0m")
+        print(f"\033[1m  -- CALIBRATION TESTBENCH ({'=' * 36})\033[0m")
         print(f"  Loading calibration.sv...")
         self.results["modules"]["calibration"] = self.validate_calibration()
 
-        print(f"\033[1m  ── CROSS-MODULE INTERFACE ({'─' * 35})\033[0m")
+        print(f"\033[1m  -- CROSS-MODULE INTERFACE ({'=' * 35})\033[0m")
         print(f"  Checking inter-module consistency...")
         self.results["modules"]["cross_module"] = self.validate_cross_module()
 
-        # Generate testbenches
         self.write_testbenches()
 
         elapsed = time.time() - start
 
-        # Overall
         total_passed = sum(m["passed"] for m in self.results["modules"].values())
         total_checks = sum(m["total"] for m in self.results["modules"].values())
         all_pass = all(m["status"] == "PASS" for m in self.results["modules"].values())
@@ -532,160 +540,54 @@ clean: ; rm -rf $(WORK)
         }
         self.results["testbenches"] = self.generated_tb_paths
 
-        # Console summary
         print(f"\n\033[1m{hdr}\033[0m")
         if all_pass:
-            print(f"\033[92m  ✓ ALL TESTS PASSED: {total_passed}/{total_checks} checks in {elapsed:.2f}s\033[0m")
+            print(f"\033[92m  + ALL TESTS PASSED: {total_passed}/{total_checks} checks in {elapsed:.2f}s\033[0m")
         else:
-            print(f"\033[91m  ✗ TESTS FAILED: {total_passed}/{total_checks} checks in {elapsed:.2f}s\033[0m")
+            print(f"\033[91m  x TESTS FAILED: {total_passed}/{total_checks} checks in {elapsed:.2f}s\033[0m")
         print(f"\033[1m{hdr}\033[0m")
         print(f"  {'Module':<20s} {'Status':<10s} {'Passed':<10s} {'Total':<10s}")
-        print(f"  {'─' * 50}")
+        print(f"  {'=' * 50}")
         for mod, res in self.results["modules"].items():
             color = "\033[92m" if res["status"] == "PASS" else "\033[91m"
             print(f"  {mod:<20s} {color}{res['status']:<10s}\033[0m {res['passed']:<10d} {res['total']:<10d}")
-        print(f"  {'─' * 50}")
+        print(f"  {'=' * 50}")
         print(f"  {'TOTAL':<20s} {'PASS' if all_pass else 'FAIL':<10s} {total_passed:<10d} {total_checks:<10d}")
         print(f"  Time: {elapsed:.2f}s")
 
         if self.generated_tb_paths:
             print(f"\n  Generated testbenches:")
             for p in self.generated_tb_paths:
-                print(f"    ✓ {p}")
+                print(f"    + {p}")
 
         print(f"\033[1m{hdr}\033[0m")
 
-        # ── Write JSON report ──
         report_json = self.output_dir / "phase2_validation_report.json"
         report_json.write_text(json.dumps(self.results, indent=2))
 
-        # ── Write detailed TXT report (matching Phase 1 format) ──
         txt_path = self.output_dir / "phase2_validation_report.txt"
         lines = []
         L = lines.append
-
-        L("╔══════════════════════════════════════════════════════════════════════╗")
-        L("║                    DDR3 PHASE 2 VALIDATION REPORT                  ║")
-        L(f"║  Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S'):55s}║")
-        L(f"║  Spec:      {str(self.spec_path)[:55]:55s}║")
-        L(f"║  RTL Dir:   {str(self.rtl_dir)[:55]:55s}║")
-        L(f"║  Attempt:   {self.attempt} of {self.max_retries}{' ':48s}║")
-        L("╚══════════════════════════════════════════════════════════════════════╝")
-        L("")
+        L(f"{'=' * 70}")
+        L(f"  DDR3 PHASE 2 VALIDATION REPORT")
+        L(f"  Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        L(f"  Spec:      {self.spec_path}")
+        L(f"  RTL Dir:   {self.rtl_dir}")
+        L(f"  Attempt:   {self.attempt} of {self.max_retries}")
+        L(f"{'=' * 70}")
+        L(f"")
         L(f"  OVERALL: {'PASS' if all_pass else 'FAIL'}  ({total_passed}/{total_checks} checks)")
-        L(f"  Attempt: {self.attempt} of {self.max_retries}")
-        L("")
-
-        # Retry history
-        if self.history:
-            L(f"{'═' * 70}")
-            L(f"  RETRY HISTORY")
-            L(f"{'═' * 70}")
-            L("")
-            for h in self.history:
-                a = h.get("attempt", "?")
-                st = h.get("overall", "?")
-                p = h.get("passed", "?")
-                t = h.get("total", "?")
-                fm = h.get("failed_modules", [])
-                sym = "✓" if st == "PASS" else "✗"
-                L(f"  {sym} Attempt {a}: {st} ({p}/{t})")
-                if fm:
-                    L(f"    Failed modules: {', '.join(fm)}")
-                    for fc in h.get("failed_checks", []):
-                        L(f"      ✗ [{fc['id']}] {fc['name']}")
-                        L(f"        Expected: {fc['expected']}")
-                        L(f"        Actual:   {fc['actual']}")
-                L("")
-            sym = "✓" if all_pass else "✗"
-            L(f"  {sym} Attempt {self.attempt}: {'PASS' if all_pass else 'FAIL'} ({total_passed}/{total_checks})  ← current")
-            L("")
-
-        # Per-module detail
-        # Map check ID prefixes to category names
-        cat_names = {
-            "V-AD": "ADDRESS DECODER VALIDATION",
-            "V-BT": "BANK TRACKER VALIDATION",
-            "V-RF": "REFRESH CONTROLLER VALIDATION",
-            "V-CL": "CALIBRATION VALIDATION",
-            "V-XM": "CROSS-MODULE INTERFACE",
-        }
-
+        L(f"")
         for mod_name, mod_result in self.results["modules"].items():
-            sym = "✓" if mod_result["status"] == "PASS" else "✗"
-            L(f"{'═' * 70}")
-            L(f"  {sym} {mod_name.upper()}  —  {mod_result['status']}  ({mod_result['passed']}/{mod_result['total']})")
-            L(f"{'═' * 70}")
-            L("")
-
-            # Group checks by category
-            categories = {}
+            sym = "+" if mod_result["status"] == "PASS" else "x"
+            L(f"  {sym} {mod_name.upper()}: {mod_result['status']} ({mod_result['passed']}/{mod_result['total']})")
             for chk in mod_result["checks"]:
-                prefix = chk["id"].rsplit("-", 1)[0]
-                cat = cat_names.get(prefix, prefix)
-                if cat not in categories:
-                    categories[cat] = []
-                categories[cat].append(chk)
-
-            for cat, cat_checks in categories.items():
-                L(f"  ── {cat} ──")
-                L("")
-                for chk in cat_checks:
-                    sym = "✓ PASS" if chk["pass"] else "✗ FAIL"
-                    L(f"    [{chk['id']}] {chk['name']}")
-                    L(f"      Status:   {sym}")
+                sym2 = "+" if chk["pass"] else "x"
+                L(f"    {sym2} [{chk['id']}] {chk['name']}")
+                if not chk["pass"]:
                     L(f"      Expected: {chk['expected']}")
                     L(f"      Actual:   {chk['actual']}")
-                    L("")
-                L("")
-
-        # Testbench info
-        if self.generated_tb_paths:
-            L(f"{'═' * 70}")
-            L(f"  GENERATED TESTBENCHES")
-            L(f"{'═' * 70}")
-            L("")
-            for p in self.generated_tb_paths:
-                L(f"  ✓ {p}")
-            L("")
-            L(f"  To run with Icarus Verilog:")
-            L(f"    make -f {self.output_dir}/Makefile.sim all")
-            L("")
-
-        # Summary table
-        L(f"{'═' * 70}")
-        L(f"  SUMMARY TABLE")
-        L(f"{'═' * 70}")
-        L(f"  {'Module':<20s} {'Status':<8s} {'Passed':<8s} {'Total':<8s} {'Rate':<8s}")
-        L(f"  {'─' * 52}")
-        for mod_name, mod_result in self.results["modules"].items():
-            rate = f"{mod_result['passed']/mod_result['total']*100:.0f}%" if mod_result['total'] > 0 else "N/A"
-            L(f"  {mod_name:<20s} {mod_result['status']:<8s} {mod_result['passed']:<8d} {mod_result['total']:<8d} {rate:<8s}")
-        L(f"  {'─' * 52}")
-        rate = f"{total_passed/total_checks*100:.0f}%" if total_checks > 0 else "N/A"
-        L(f"  {'TOTAL':<20s} {'PASS' if all_pass else 'FAIL':<8s} {total_passed:<8d} {total_checks:<8d} {rate:<8s}")
-        L("")
-
-        # Failures section
-        all_checks_flat = []
-        for mod_result in self.results["modules"].values():
-            all_checks_flat.extend(mod_result["checks"])
-
-        failures = [c for c in all_checks_flat if not c["pass"]]
-        if failures:
-            L(f"{'═' * 70}")
-            L(f"  ✗ FAILURES ({len(failures)})")
-            L(f"{'═' * 70}")
-            for chk in failures:
-                L(f"  ✗ [{chk['id']}] {chk['name']}")
-                L(f"    Expected: {chk['expected']}")
-                L(f"    Actual:   {chk['actual']}")
-                L("")
-        else:
-            L(f"{'═' * 70}")
-            L(f"  ✓ ALL {total_checks} CHECKS PASSED — NO FAILURES")
-            L(f"{'═' * 70}")
-
+            L(f"")
         txt_path.write_text("\n".join(lines))
 
         print(f"  Report (JSON): {report_json}")

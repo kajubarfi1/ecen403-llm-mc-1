@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-03-23T14:57:17.522004",
+  "timestamp": "2026-03-24T15:30:31.270173",
   "spec": "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Spec/llmmc_microarchitecturespec_filled.json",
   "phase": 2,
   "modules": {
     "addr_decoder": {
-      "status": "FAIL",
-      "passed": 16,
+      "status": "PASS",
+      "passed": 17,
       "total": 17,
       "checks": [
         {
@@ -81,9 +81,9 @@
         {
           "id": "V-AD-11",
           "name": "Combinational (no always_ff)",
-          "pass": false,
+          "pass": true,
           "expected": "no always_ff",
-          "actual": "has always_ff"
+          "actual": "clean"
         },
         {
           "id": "V-AD-12",
@@ -838,8 +838,8 @@
     }
   },
   "overall": {
-    "status": "FAIL",
-    "total_passed": 113,
+    "status": "PASS",
+    "total_passed": 114,
     "total_checks": 114
   },
   "testbenches": [

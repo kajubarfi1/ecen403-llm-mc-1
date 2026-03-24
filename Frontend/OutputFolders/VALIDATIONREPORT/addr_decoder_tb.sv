@@ -38,10 +38,8 @@ module addr_decoder_tb;
         req_addr=29'h0|(1<<28); check("BitMSB",16384,0,0,0);
         req_addr=build(0,7,127,0); check("MaxCol+Bank",0,7,{7'd127,3'b000},0);
         req_addr=29'h10; check("Addr16",0,0,{7'd1,3'b000},0);
-        // Extra: walking bank bits
         req_addr=29'h0|(1<<12); check("Bank bit1",0,2,0,0);
         req_addr=29'h0|(1<<13); check("Bank bit2",0,4,0,0);
-        // Power of 2
         req_addr=29'h4000; check("Addr 0x4000",req_addr[28:14],req_addr[13:11],{req_addr[10:4],3'b000},0);
         req_addr=build(16384,4,64,0); check("Mid all",16384,4,{7'd64,3'b000},0);
         req_addr=build(32767,7,127,15); check("All max",32767,7,{7'h7F,3'b000},0);

@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 //==============================================================
 // config_regs_tb.sv -- Enhanced testbench (36 tests)
-// Generated: 2026-03-23 14:56:02
+// Generated: 2026-03-24 15:19:18
 // Agent:     Config/CSR Registers Agent (Phase 1)
 //
 // Sections:
