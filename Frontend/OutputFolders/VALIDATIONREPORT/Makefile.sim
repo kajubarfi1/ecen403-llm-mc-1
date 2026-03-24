@@ -1,0 +1,12 @@
+# Phase 2 Simulation Makefile
+RTL_DIR=/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/PHASE2RTL
+TB_DIR=/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/VALIDATIONREPORT
+WORK=$(TB_DIR)/sim_work
+.PHONY: all clean addr_decoder bank_tracker refresh_ctrl calibration
+all: addr_decoder bank_tracker refresh_ctrl calibration
+$(WORK): ; mkdir -p $(WORK)
+addr_decoder: $(WORK) ; iverilog -g2012 -o $(WORK)/addr_decoder_tb $(RTL_DIR)/addr_decoder.sv $(TB_DIR)/addr_decoder_tb.sv && vvp $(WORK)/addr_decoder_tb
+bank_tracker: $(WORK) ; iverilog -g2012 -o $(WORK)/bank_tracker_tb $(RTL_DIR)/bank_tracker.sv $(TB_DIR)/bank_tracker_tb.sv && vvp $(WORK)/bank_tracker_tb
+refresh_ctrl: $(WORK) ; iverilog -g2012 -o $(WORK)/refresh_ctrl_tb $(RTL_DIR)/refresh_ctrl.sv $(TB_DIR)/refresh_ctrl_tb.sv && vvp $(WORK)/refresh_ctrl_tb
+calibration: $(WORK) ; iverilog -g2012 -o $(WORK)/calibration_tb $(RTL_DIR)/calibration.sv $(TB_DIR)/calibration_tb.sv && vvp $(WORK)/calibration_tb
+clean: ; rm -rf $(WORK)

@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """
-╔══════════════════════════════════════════════════════════════════════╗
-║        DDR3 MEMORY CONTROLLER — PHASE 1 PIPELINE                     ║
-║                                                                      ║
-║  Flow:                                                               ║
-║    3 agents (parallel) → Validation (94 checks + TB gen)            ║
-║        → Lint Gate → retry loop (max 4)                              ║
-║                                                                      ║
-║  Output:                                                             ║
-║    PHASE1RTL/          .sv + _manifest.json per module               ║
-║    VALIDATIONREPORT/   _tb.sv + validation reports + lint report     ║
-║                                                                      ║
-║  Modules: init_fsm, config_regs, wb_port                            ║
-╚══════════════════════════════════════════════════════════════════════╝
++======================================================================+
+|        DDR3 MEMORY CONTROLLER -- PHASE 1 PIPELINE                    |
+|                                                                      |
+|  Flow:                                                               |
+|    3 agents (parallel) -> Validation (94 checks + TB gen)            |
+|        -> Lint Gate -> retry loop (max 4)                            |
+|                                                                      |
+|  Output:                                                             |
+|    PHASE1RTL/          .sv + _tb.sv + _manifest.json per module      |
+|    VALIDATIONREPORT/   validation reports + lint report (NO TBs)     |
+|                                                                      |
+|  Modules: init_fsm, config_regs, wb_port                            |
++======================================================================+
 """
-import json, os, sys, shutil, operator
+import json, os, sys, shutil, operator, glob
 from typing import TypedDict, Annotated, Literal
 from pathlib import Path
 from datetime import datetime
@@ -63,16 +63,16 @@ class GraphState(TypedDict):
     pipeline_status: str
 
 
-# ═══════════════════════════════════════════
+# ===================================================
 # RTL GENERATION (3 agents, parallel)
-# ═══════════════════════════════════════════
+# ===================================================
 def _log_gen(mod, attempt, instr):
     if instr:
-        print(f"\n  ┌─ [P1 Attempt {attempt}] REGENERATING {mod}")
+        print(f"\n  +- [P1 Attempt {attempt}] REGENERATING {mod}")
         for chk in instr.get("failed_checks", [])[:5]:
-            print(f"  │    ✗ [{chk['id']}] {chk['name']}")
+            print(f"  |    x [{chk['id']}] {chk['name']}")
     else:
-        print(f"\n  ┌─ [P1 Attempt {attempt}] Generating {mod}")
+        print(f"\n  +- [P1 Attempt {attempt}] Generating {mod}")
 
 
 def gen_init_fsm(state: GraphState) -> dict:
@@ -96,15 +96,32 @@ def gen_wb_port(state: GraphState) -> dict:
             "rtl_files": {"wb_port": r.get("rtl_path", str(Path(state["phase1_rtl_dir"]) / "wb_port.sv"))}}
 
 
-# ═══════════════════════════════════════════
+# ===================================================
 # VALIDATION (94 static checks + TB gen)
-# ═══════════════════════════════════════════
+# ===================================================
+def _remove_validation_tbs(validation_dir: str):
+    """Remove testbench .sv files from VALIDATIONREPORT/.
+    RTL agents now generate TBs directly into PHASE1RTL/,
+    so the validation agent's TBs are redundant."""
+    removed = []
+    for tb_file in glob.glob(os.path.join(validation_dir, "*_tb.sv")):
+        os.remove(tb_file)
+        removed.append(os.path.basename(tb_file))
+    # Also remove Makefile.sim if the validation agent generated one
+    makefile = os.path.join(validation_dir, "Makefile.sim")
+    if os.path.isfile(makefile):
+        os.remove(makefile)
+        removed.append("Makefile.sim")
+    if removed:
+        print(f"  Cleaned {len(removed)} redundant file(s) from {VALIDATION_DIR}/: {', '.join(removed)}")
+
+
 def validate_p1(state: GraphState) -> dict:
     attempt = state.get("attempt", 1)
-    print(f"\n{'━' * 62}")
-    print(f"  PHASE 1 VALIDATION — Attempt {attempt} of {MAX_RETRIES}")
+    print(f"\n{'=' * 62}")
+    print(f"  PHASE 1 VALIDATION -- Attempt {attempt} of {MAX_RETRIES}")
     print(f"  (94 static checks + testbench generation)")
-    print(f"{'━' * 62}")
+    print(f"{'=' * 62}")
 
     # RTL read from phase1_rtl_dir, TBs + reports written to validation_dir
     va = Phase1ValidationAgent(
@@ -112,6 +129,9 @@ def validate_p1(state: GraphState) -> dict:
         attempt=attempt, max_retries=MAX_RETRIES,
         history=[h for h in state.get("history", [])])
     result = va.run()
+
+    # Remove TBs from VALIDATIONREPORT -- agents generate them into PHASE1RTL now
+    _remove_validation_tbs(state["validation_dir"])
 
     failed_modules, retry_instructions, all_failed = [], {}, []
     for mod, mr in result["modules"].items():
@@ -136,20 +156,20 @@ def validate_p1(state: GraphState) -> dict:
     }
 
     # Print summary
-    print(f"\n  ┌─ PHASE 1 ATTEMPT {attempt} RESULTS:")
+    print(f"\n  +- PHASE 1 ATTEMPT {attempt} RESULTS:")
     for mod, mr in result["modules"].items():
-        sym = "✓" if mr["status"] == "PASS" else "✗"
-        print(f"  │  {sym} {mod:20s} {mr['status']}  ({mr['passed']}/{mr['total']})")
+        sym = "OK" if mr["status"] == "PASS" else "FAIL"
+        print(f"  |  {sym:4s} {mod:20s} {mr['status']}  ({mr['passed']}/{mr['total']})")
     if failed_modules:
-        print(f"  │\n  │  FAILURES:")
+        print(f"  |\n  |  FAILURES:")
         for mod in failed_modules:
             for chk in retry_instructions[mod]["failed_checks"][:5]:
-                print(f"  │    ✗ [{chk['id']}] {chk['name']}")
+                print(f"  |    x [{chk['id']}] {chk['name']}")
         if attempt < MAX_RETRIES:
-            print(f"  │  → Routing {len(failed_modules)} module(s) back")
+            print(f"  |  -> Routing {len(failed_modules)} module(s) back")
         else:
-            print(f"  │  ✗ MAX RETRIES EXHAUSTED")
-    print(f"  └─{'─' * 50}")
+            print(f"  |  x MAX RETRIES EXHAUSTED")
+    print(f"  +{'=' * 50}")
 
     return {
         "validation_result": result,
@@ -159,9 +179,9 @@ def validate_p1(state: GraphState) -> dict:
     }
 
 
-# ═══════════════════════════════════════════
+# ===================================================
 # ROUTING + RETRY
-# ═══════════════════════════════════════════
+# ===================================================
 def route_after_validation(state: GraphState) -> Literal[
     "p1_increment_retry", "lint_gate", "final_failure"
 ]:
@@ -177,26 +197,26 @@ def route_after_validation(state: GraphState) -> Literal[
 
 def p1_increment_retry(state: GraphState) -> dict:
     n = state.get("attempt", 1) + 1
-    print(f"\n  ↻ Phase 1: Incrementing to attempt {n}...")
+    print(f"\n  -> Phase 1: Incrementing to attempt {n}...")
     return {"attempt": n}
 
 
-# ═══════════════════════════════════════════
+# ===================================================
 # LINT GATE (Phase 1 only)
-# ═══════════════════════════════════════════
+# ===================================================
 def lint_gate(state: GraphState) -> dict:
-    print(f"\n{'━' * 62}")
-    print(f"  LINT AGENT — Phase 1 Port Consistency")
-    print(f"{'━' * 62}")
+    print(f"\n{'=' * 62}")
+    print(f"  LINT AGENT -- Phase 1 Port Consistency")
+    print(f"{'=' * 62}")
 
     # Lint reads manifests from PHASE1RTL/
     lint = LintAgent(state["phase1_rtl_dir"], state["validation_dir"])
     result = lint.run()
 
     if result["status"] == "PASS":
-        print(f"\n  \033[92m✓ LINT PASSED — Phase 1 pipeline complete\033[0m")
+        print(f"\n  OK: LINT PASSED -- Phase 1 pipeline complete")
     else:
-        print(f"\n  \033[91m✗ LINT FAILED — {result['summary']['errors']} errors\033[0m")
+        print(f"\n  FAIL: LINT FAILED -- {result['summary']['errors']} errors")
 
     return {"lint_result": result}
 
@@ -205,16 +225,16 @@ def route_after_lint(state: GraphState) -> Literal["success", "final_failure"]:
     return "success" if state.get("lint_result", {}).get("status") == "PASS" else "final_failure"
 
 
-# ═══════════════════════════════════════════
+# ===================================================
 # TERMINAL NODES
-# ═══════════════════════════════════════════
+# ===================================================
 def success(state: GraphState) -> dict:
     history = state.get("history", [])
     lint = state.get("lint_result", {})
 
-    print(f"\n{'═' * 62}")
-    print(f"  ✓ PHASE 1 PIPELINE — ALL CHECKS PASSED")
-    print(f"{'═' * 62}\n")
+    print(f"\n{'=' * 62}")
+    print(f"  PHASE 1 PIPELINE -- ALL CHECKS PASSED")
+    print(f"{'=' * 62}\n")
 
     if history:
         last = history[-1]
@@ -230,21 +250,21 @@ def success(state: GraphState) -> dict:
     rd = Path(state["phase1_rtl_dir"])
     vd = Path(state["validation_dir"])
     for mod in P1_MODULES:
-        sv_ok = "✓" if (rd / f"{mod}.sv").exists() else "✗"
-        tb_ok = "✓" if (vd / f"{mod}_tb.sv").exists() else "✗"
-        mf_ok = "✓" if (rd / f"{mod}_manifest.json").exists() else "✗"
+        sv_ok = "OK" if (rd / f"{mod}.sv").exists() else "--"
+        tb_ok = "OK" if (rd / f"{mod}_tb.sv").exists() else "--"
+        mf_ok = "OK" if (rd / f"{mod}_manifest.json").exists() else "--"
         print(f"    {sv_ok} {mod}.sv  {tb_ok} {mod}_tb.sv  {mf_ok} {mod}_manifest.json")
 
     vr = vd / "validation_report.json"
-    print(f"    {'✓' if vr.exists() else '✗'} validation_report.json")
+    print(f"    {'OK' if vr.exists() else '--'} validation_report.json")
 
     if len(history) > 1:
         print(f"\n  Retry history:")
         for h in history:
-            sym = "✓" if h["overall"] == "PASS" else "✗"
+            sym = "OK" if h["overall"] == "PASS" else "FAIL"
             fails = ", ".join(h["failed_modules"]) if h["failed_modules"] else "none"
             print(f"    {sym} Attempt {h['attempt']}: "
-                  f"{h['overall']} ({h['passed']}/{h['total']}) — failed: {fails}")
+                  f"{h['overall']} ({h['passed']}/{h['total']}) -- failed: {fails}")
 
     report = {
         "status": "PASS", "pipeline": "phase1",
@@ -254,7 +274,7 @@ def success(state: GraphState) -> dict:
         "outputs": {
             mod: {
                 "sv": str(rd / f"{mod}.sv"),
-                "tb": str(vd / f"{mod}_tb.sv"),
+                "tb": str(rd / f"{mod}_tb.sv"),
                 "manifest": str(rd / f"{mod}_manifest.json"),
             }
             for mod in P1_MODULES
@@ -265,7 +285,7 @@ def success(state: GraphState) -> dict:
     rp = vd / "phase1_final_report.json"
     rp.write_text(json.dumps(report, indent=2))
     print(f"\n  Report: {rp}")
-    print(f"{'═' * 62}")
+    print(f"{'=' * 62}")
     return {"pipeline_status": "pass"}
 
 
@@ -275,32 +295,32 @@ def final_failure(state: GraphState) -> dict:
     lint = state.get("lint_result", {})
     ri = state.get("retry_instructions", {})
 
-    print(f"\n{'═' * 62}")
-    print(f"  ✗ PHASE 1 PIPELINE FAILED")
-    print(f"{'═' * 62}")
+    print(f"\n{'=' * 62}")
+    print(f"  PHASE 1 PIPELINE FAILED")
+    print(f"{'=' * 62}")
 
     if lint and lint.get("status") == "FAIL":
         print(f"\n  Failed at: LINT GATE")
         for e in lint.get("errors", []):
-            print(f"    ✗ [{e['check']}] {e['message']}")
+            print(f"    x [{e['check']}] {e['message']}")
     elif failed:
         print(f"\n  Failed at: Validation (max retries)")
         for mod in failed:
             instr = ri.get(mod, {})
-            print(f"\n  ╔═ {mod} ═══════════════════════════════════")
+            print(f"\n  == {mod} ==============================")
             for chk in instr.get("failed_checks", [])[:5]:
-                print(f"  ║  ✗ [{chk['id']}] {chk['name']}")
-                print(f"  ║    Expected: {chk['expected']}")
-                print(f"  ║    Actual:   {chk['actual']}")
-            print(f"  ╚{'═' * 50}")
+                print(f"  |  x [{chk['id']}] {chk['name']}")
+                print(f"  |    Expected: {chk['expected']}")
+                print(f"  |    Actual:   {chk['actual']}")
+            print(f"  {'=' * 50}")
 
     if history:
         print(f"\n  Retry history:")
         for h in history:
-            sym = "✓" if h["overall"] == "PASS" else "✗"
+            sym = "OK" if h["overall"] == "PASS" else "FAIL"
             fails = ", ".join(h["failed_modules"]) if h["failed_modules"] else "none"
             print(f"    {sym} Attempt {h['attempt']}: "
-                  f"{h['overall']} ({h['passed']}/{h['total']}) — failed: {fails}")
+                  f"{h['overall']} ({h['passed']}/{h['total']}) -- failed: {fails}")
 
     print(f"\n  Actions:")
     print(f"    1. Review failing checks above")
@@ -317,13 +337,13 @@ def final_failure(state: GraphState) -> dict:
     rp = Path(state["validation_dir"]) / "phase1_error_report.json"
     rp.write_text(json.dumps(report, indent=2))
     print(f"\n  Error report: {rp}")
-    print(f"{'═' * 62}")
+    print(f"{'=' * 62}")
     return {"pipeline_status": "fail"}
 
 
-# ═══════════════════════════════════════════
+# ===================================================
 # BUILD GRAPH
-# ═══════════════════════════════════════════
+# ===================================================
 def build_graph():
     g = StateGraph(GraphState)
 
@@ -352,12 +372,12 @@ def build_graph():
          "p1_increment_retry": "p1_increment_retry",
          "final_failure": "final_failure"})
 
-    # Retry → back to generators
+    # Retry -> back to generators
     g.add_edge("p1_increment_retry", "gen_init_fsm")
     g.add_edge("p1_increment_retry", "gen_config_regs")
     g.add_edge("p1_increment_retry", "gen_wb_port")
 
-    # Lint → success or failure
+    # Lint -> success or failure
     g.add_conditional_edges("lint_gate", route_after_lint,
         {"success": "success", "final_failure": "final_failure"})
 
@@ -367,16 +387,16 @@ def build_graph():
     return g.compile()
 
 
-# ═══════════════════════════════════════════
+# ===================================================
 # MAIN
-# ═══════════════════════════════════════════
+# ===================================================
 if __name__ == "__main__":
-    print("╔══════════════════════════════════════════════════════════╗")
-    print("║   DDR3 Controller — Phase 1 Pipeline                     ║")
-    print("║                                                          ║")
-    print("║   3 agents → Validate (94 checks + TB) → Lint Gate      ║")
-    print("║   Outputs: .sv, _tb.sv, _manifest.json, reports          ║")
-    print("╚══════════════════════════════════════════════════════════╝\n")
+    print("+========================================================+")
+    print("|   DDR3 Controller -- Phase 1 Pipeline                   |")
+    print("|                                                         |")
+    print("|   3 agents -> Validate (94 checks) -> Lint Gate         |")
+    print("|   Outputs: .sv, _tb.sv, _manifest.json, reports         |")
+    print("+========================================================+\n")
 
     spec = input("Spec JSON path: ").strip()
     if not os.path.isfile(spec):
@@ -388,8 +408,8 @@ if __name__ == "__main__":
 
     print(f"\n  Output layout:")
     print(f"    {out}/")
-    print(f"    ├── {PHASE1_RTL_DIR}/          ← .sv + _manifest.json")
-    print(f"    └── {VALIDATION_DIR}/  ← _tb.sv + reports + lint")
+    print(f"    +-- {PHASE1_RTL_DIR}/          <- .sv + _tb.sv + _manifest.json")
+    print(f"    +-- {VALIDATION_DIR}/  <- reports + lint (NO testbenches)")
     print()
 
     app = build_graph()
