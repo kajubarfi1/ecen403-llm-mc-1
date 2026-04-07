@@ -3,7 +3,7 @@
 ╔══════════════════════════════════════════════════════════════════════╗
 ║        DDR3 MEMORY CONTROLLER — PHASE 3 PIPELINE                     ║
 ║                                                                      ║
-║  Input:  Phase 1 output (PHASE1RTL/) + Phase 2 output (PHASE2RTL/)  ║
+║  Input:  Phase 1 output (PHASE1RTL/) + Phase 2 output (PHASE2RTL/)   ║
 ║                                                                      ║
 ║  Flow:                                                               ║
 ║    3 agents (parallel) → Validation (port checks + TB gen)           ║

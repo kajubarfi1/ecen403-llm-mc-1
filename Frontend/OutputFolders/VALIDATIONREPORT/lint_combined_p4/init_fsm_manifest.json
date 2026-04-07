@@ -1,0 +1,111 @@
+{
+  "module_name": "init_fsm",
+  "file": "init_fsm.sv",
+  "phase": 1,
+  "agent": "init_fsm_agent",
+  "spec_version": "2.0.0",
+  "design_id": "ddr3_mc_core_v2",
+  "parameters": {
+    "DDR_ADDR_W": 15,
+    "DDR_BANK_W": 3,
+    "CTR_WIDTH": 17,
+    "RESET_HOLD_CYC": 40000,
+    "CKE_DELAY_CYC": 100000,
+    "tXPR_CYC": 34,
+    "tZQinit_CYC": 128
+  },
+  "ports": {
+    "clock_reset": [
+      {
+        "name": "clk",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "rst_n",
+        "width": 1,
+        "dir": "input"
+      }
+    ],
+    "control": [
+      {
+        "name": "enable",
+        "width": 1,
+        "dir": "input"
+      }
+    ],
+    "status_out": [
+      {
+        "name": "init_done",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "init_fail",
+        "width": 1,
+        "dir": "output"
+      }
+    ],
+    "ddr_cmd_out": [
+      {
+        "name": "init_cmd_valid",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "init_cmd",
+        "width": 4,
+        "dir": "output"
+      },
+      {
+        "name": "init_addr",
+        "width": 15,
+        "dir": "output"
+      },
+      {
+        "name": "init_bank",
+        "width": 3,
+        "dir": "output"
+      }
+    ],
+    "ddr_ctrl_out": [
+      {
+        "name": "init_cke",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "init_reset_n",
+        "width": 1,
+        "dir": "output"
+      }
+    ],
+    "debug": [
+      {
+        "name": "init_state",
+        "width": 4,
+        "dir": "output"
+      }
+    ]
+  },
+  "assertions": [
+    {
+      "name": "p_cke_low_during_reset",
+      "check": "IN-002"
+    },
+    {
+      "name": "p_done_only_in_done",
+      "check": "IN-005"
+    },
+    {
+      "name": "p_zqcl_a10",
+      "check": "IN-010"
+    }
+  ],
+  "coverage_points": [
+    "cp_state",
+    "cp_mr_cmd",
+    "cp_zq_cmd",
+    "cp_done"
+  ]
+}

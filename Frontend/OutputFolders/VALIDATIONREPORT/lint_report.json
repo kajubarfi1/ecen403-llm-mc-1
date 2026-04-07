@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-03-24T15:31:22.289268",
-  "manifest_dir": "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p3",
+  "timestamp": "2026-04-03T13:22:58.681644",
+  "manifest_dir": "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4",
   "modules_checked": [
     "addr_decoder",
     "bank_tracker",
@@ -8,12 +8,13 @@
     "cmd_gen",
     "cmd_queue",
     "config_regs",
+    "data_path",
     "init_fsm",
     "refresh_ctrl",
     "scheduler",
     "wb_port"
   ],
-  "connections_checked": 44,
+  "connections_checked": 52,
   "status": "PASS",
   "errors": [],
   "warnings": [
@@ -100,16 +101,6 @@
     {
       "check": "L-006",
       "severity": "WARNING",
-      "message": "Dangling output: cmd_gen.fb_rd_valid (w=1) \u2014 not consumed by any module"
-    },
-    {
-      "check": "L-006",
-      "severity": "WARNING",
-      "message": "Dangling output: cmd_gen.fb_wr_valid (w=1) \u2014 not consumed by any module"
-    },
-    {
-      "check": "L-006",
-      "severity": "WARNING",
       "message": "Dangling output: cmd_gen.fb_ref_valid (w=1) \u2014 not consumed by any module"
     },
     {
@@ -146,16 +137,6 @@
       "check": "L-006",
       "severity": "WARNING",
       "message": "Dangling output: config_regs.csr_err_o (w=1) \u2014 not consumed by any module"
-    },
-    {
-      "check": "L-006",
-      "severity": "WARNING",
-      "message": "Dangling output: config_regs.cfg_CL_nCK (w=8) \u2014 not consumed by any module"
-    },
-    {
-      "check": "L-006",
-      "severity": "WARNING",
-      "message": "Dangling output: config_regs.cfg_CWL_nCK (w=8) \u2014 not consumed by any module"
     },
     {
       "check": "L-006",
@@ -206,6 +187,51 @@
       "check": "L-006",
       "severity": "WARNING",
       "message": "Dangling output: config_regs.cfg_bist_addr_end (w=29) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: data_path.wr_data_ready (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: data_path.rd_rsp_valid (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: data_path.rd_rsp_data (w=32) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: data_path.rd_rsp_aux (w=4) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: data_path.ddr_dq_o (w=32) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: data_path.ddr_dq_oe (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: data_path.ddr_dm_o (w=4) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: data_path.ddr_dqs_o (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: data_path.ddr_dqs_oe (w=1) \u2014 not consumed by any module"
     },
     {
       "check": "L-006",
@@ -295,21 +321,6 @@
     {
       "check": "L-006",
       "severity": "WARNING",
-      "message": "Dangling output: wb_port.req_valid (w=1) \u2014 not consumed by any module"
-    },
-    {
-      "check": "L-006",
-      "severity": "WARNING",
-      "message": "Dangling output: wb_port.req_wdata (w=32) \u2014 not consumed by any module"
-    },
-    {
-      "check": "L-006",
-      "severity": "WARNING",
-      "message": "Dangling output: wb_port.req_wmask (w=4) \u2014 not consumed by any module"
-    },
-    {
-      "check": "L-006",
-      "severity": "WARNING",
       "message": "Dangling output: wb_port.req_aux (w=4) \u2014 not consumed by any module"
     },
     {
@@ -343,6 +354,14 @@
     "L-001 OK: cmd_queue.enq_col <- addr_decoder.dec_col (w=10)",
     "L-001 OK: cmd_queue.enq_bank <- addr_decoder.dec_bank (w=3)",
     "L-001 OK: cmd_queue.enq_we <- wb_port.req_we (w=1)",
+    "L-001 OK: data_path.cmd_wr_valid <- cmd_gen.fb_wr_valid (w=1)",
+    "L-001 OK: data_path.cmd_rd_valid <- cmd_gen.fb_rd_valid (w=1)",
+    "L-001 OK: data_path.cmd_aux <- scheduler.cmd_aux (w=4)",
+    "L-001 OK: data_path.wr_data_valid <- wb_port.req_valid (w=1)",
+    "L-001 OK: data_path.wr_data <- wb_port.req_wdata (w=32)",
+    "L-001 OK: data_path.wr_mask <- wb_port.req_wmask (w=4)",
+    "L-001 OK: data_path.cfg_CL_nCK <- config_regs.cfg_CL_nCK (w=8)",
+    "L-001 OK: data_path.cfg_CWL_nCK <- config_regs.cfg_CWL_nCK (w=8)",
     "L-001 OK: refresh_ctrl.init_done <- init_fsm.init_done (w=1)",
     "L-001 OK: refresh_ctrl.cfg_force_refresh <- config_regs.cfg_force_refresh (w=1)",
     "L-001 OK: refresh_ctrl.cfg_tREFI_nCK <- config_regs.cfg_tREFI_nCK (w=24)",
@@ -367,16 +386,16 @@
     "L-003 OK: ADDR_WIDTH=29 consistent across ['addr_decoder', 'wb_port']",
     "L-003 OK: BANK_BITS=3 consistent across ['addr_decoder', 'bank_tracker', 'cmd_gen', 'cmd_queue', 'scheduler']",
     "L-003 OK: COL_BITS=10 consistent across ['addr_decoder', 'cmd_gen', 'cmd_queue', 'scheduler']",
-    "L-003 OK: AUX_WIDTH=4 consistent across ['cmd_gen', 'cmd_queue', 'scheduler', 'wb_port']",
+    "L-003 OK: AUX_WIDTH=4 consistent across ['cmd_gen', 'cmd_queue', 'data_path', 'scheduler', 'wb_port']",
     "L-003 OK: DDR_ADDR_W=15 consistent across ['cmd_gen', 'init_fsm']",
     "L-003 OK: DDR_BANK_W=3 consistent across ['cmd_gen', 'init_fsm']",
-    "L-003 OK: DATA_WIDTH=32 consistent across ['cmd_queue', 'wb_port']",
-    "L-003 OK: SEL_WIDTH=4 consistent across ['wb_port']",
+    "L-003 OK: DATA_WIDTH=32 consistent across ['cmd_queue', 'data_path', 'wb_port']",
+    "L-003 OK: SEL_WIDTH=4 consistent across ['data_path', 'wb_port']",
     "L-005 OK: No dependency cycles"
   ],
   "summary": {
     "errors": 0,
-    "warnings": 60,
-    "passed": 54
+    "warnings": 62,
+    "passed": 62
   }
 }

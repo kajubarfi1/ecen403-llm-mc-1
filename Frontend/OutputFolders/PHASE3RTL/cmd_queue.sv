@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    cmd_queue
-// Generated: 2026-03-24 15:31:16
+// Generated: 2026-04-03 13:01:31
 // Agent:     Command Queue Agent (Phase 3)
 //
 // 16-deep command queue. Accepts decoded requests from addr_decoder,

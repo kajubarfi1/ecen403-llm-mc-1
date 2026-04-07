@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    config_regs
 // File:      config_regs.sv
-// Generated: 2026-03-24 15:19:18
+// Generated: 2026-04-03 12:54:28
 // Agent:     Config/CSR Registers Agent (Phase 1)
 // Spec:      ddr3_mc_core_v2 rev golden_ddr3_1600k_x8_2lane_1rank
 // Schema:    2.0.0

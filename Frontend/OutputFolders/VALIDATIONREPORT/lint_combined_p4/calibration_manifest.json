@@ -1,0 +1,61 @@
+{
+  "module_name": "calibration",
+  "file": "calibration.sv",
+  "phase": 2,
+  "agent": "calibration_agent",
+  "dependencies": [
+    "init_fsm"
+  ],
+  "parameters": {
+    "ZQCS_CTR_W": 17,
+    "ZQCS_CTRL_CYC": 128000,
+    "tZQCS_CYC": 16,
+    "PERIODIC_ZQCS": true
+  },
+  "ports": {
+    "clock_reset": [
+      {
+        "name": "clk",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "rst_n",
+        "width": 1,
+        "dir": "input"
+      }
+    ],
+    "control": [
+      {
+        "name": "init_done",
+        "width": 1,
+        "dir": "input",
+        "source": "init_fsm.init_done"
+      }
+    ],
+    "status_out": [
+      {
+        "name": "cal_done",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "cal_fail",
+        "width": 1,
+        "dir": "output"
+      }
+    ],
+    "zqcs_if": [
+      {
+        "name": "zqcs_req",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "zqcs_ack",
+        "width": 1,
+        "dir": "input"
+      }
+    ]
+  }
+}
