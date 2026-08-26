@@ -1,0 +1,885 @@
+{
+  "scope": "path_12_csr_timing_to_scheduling",
+  "generator": "vector_gen_agent_llm",
+  "spec_source": "llmmc_microarchitecturespec_filled.json",
+  "generated_at": "2026-04-14T12:55:05.650020",
+  "vector_count": 175,
+  "hex_format": "unknown",
+  "vectors": [
+    {
+      "hex_line": "00 00000000 00000000 00000000",
+      "op": 0,
+      "comment": "Full system reset to initialize all CSR, bank tracker, and scheduler state"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Allow reset to propagate through all pipeline stages"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify quiescent state after reset - no pending acks, no commands issued"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify default timing parameters match DDR3-1600K spec after reset"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify default scheduler/policy config registers are zero after reset"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Signal that init and calibration are complete so controller is operational"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Let init_done propagate"
+    },
+    {
+      "hex_line": "01 00000000 00000007 00000001",
+      "op": 1,
+      "comment": "Write CL=11 to CSR register 0 (cfg_CL_nCK)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for CSR write acknowledge"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CSR write to CL register should be acknowledged without error"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Bus turnaround cycle"
+    },
+    {
+      "hex_line": "01 00000000 00000027 00000001",
+      "op": 1,
+      "comment": "Write CWL=8 to CSR register 1 (cfg_CWL_nCK)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for CSR ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify CWL write acknowledged and output updated"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Bus turnaround"
+    },
+    {
+      "hex_line": "01 00000000 00000047 00000001",
+      "op": 1,
+      "comment": "Write tREFI=6240 cycles to CSR register 2"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify tREFI written correctly"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Bus turnaround"
+    },
+    {
+      "hex_line": "01 00000000 00000067 00000001",
+      "op": 1,
+      "comment": "Write scheduler policy = 1 (e.g. FR-FCFS) to policy register"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler policy updated to FR-FCFS"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Bus turnaround"
+    },
+    {
+      "hex_line": "01 00000000 00000087 00000001",
+      "op": 1,
+      "comment": "Write row_policy = 1 (open-page) to row policy register"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Row policy updated to open-page"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR bus"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow config to propagate to bank tracker and scheduler"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Issue ACTIVATE to bank 0, row 100 - bank tracker should start tRCD countdown"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock in the activate command"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert activate"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler should not issue column command yet - tRCD not elapsed (11 cycles)"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Wait 5 cycles, still within tRCD=11"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Present a read request to bank 0 row 100 in request queue (page hit)"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "tRCD still not elapsed (only 6 of 11 cycles), scheduler must wait"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Complete remaining tRCD cycles (total now 11)"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "After tRCD=11 cycles, scheduler issues READ command to bank 0 (cmd_type=1 for READ)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock the read command through"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Acknowledge read command was sent on DRAM interface"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Bank tracker records read issued, starts tRTP/tCCD counters"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert read and queue valid"
+    },
+    {
+      "hex_line": "03 00000004 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tCCD=4 cycles before next column command is allowed"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Present a write request to same bank 0 row 100 (page hit, different column)"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow scheduler to evaluate - read-to-write turnaround may apply"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler issues WRITE to bank 0 after proper CL+tCCD delay"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Acknowledge write on DRAM interface"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Bank tracker updates write-active state"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert write and queue"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "ACTIVATE bank 1, row 200 - test inter-bank scheduling"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock activate"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert activate"
+    },
+    {
+      "hex_line": "03 00000006 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRRD=6 cycles before another bank can be activated"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "ACTIVATE bank 2 after tRRD elapsed - test tRRD enforcement"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock activate"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert activate"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Allow bank tracker to register"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "ACTIVATE bank 3"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock activate"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000006 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for tRRD between banks 2 and 3"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "ACTIVATE bank 4 - this is the 5th activate, tFAW window should be checked (4 ACTs in tFAW=32)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock activate"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 0000000F 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for tFAW window to partially clear"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Signal non-urgent refresh required"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow scheduler to see refresh request"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler may defer non-urgent refresh if commands pending under FR-FCFS policy"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Elevate to urgent refresh - scheduler must prioritize"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Allow scheduler to precharge open banks and issue refresh"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler acknowledges urgent refresh, begins tRFC countdown"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Confirm refresh command issued on DRAM bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock refresh"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert refresh signals"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC=128 cycles - all banks locked during refresh"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "During tRFC no commands should be issued"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "A few more cycles after tRFC to ensure banks are available again"
+    },
+    {
+      "hex_line": "01 00000000 00000007 00000001",
+      "op": 1,
+      "comment": "Boundary: Write CL=0 (invalid/minimum) to test boundary condition"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CSR accepts write even for boundary value 0"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Turnaround"
+    },
+    {
+      "hex_line": "01 00000000 00000007 00000001",
+      "op": 1,
+      "comment": "Boundary: Write max 32-bit value (0xFFFFFFFF) to CL register - overflow test"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CSR write completes - bank tracker must handle large timing value gracefully"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Turnaround"
+    },
+    {
+      "hex_line": "01 00000000 00000007 00000001",
+      "op": 1,
+      "comment": "Restore CL=11 to valid value"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CL restored to spec value"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Turnaround"
+    },
+    {
+      "hex_line": "01 00000000 00000003 00000001",
+      "op": 1,
+      "comment": "CSR read-back of CL register to verify written value"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Read-back CL=11 matches what was written"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Turnaround"
+    },
+    {
+      "hex_line": "01 00000000 00000027 00000001",
+      "op": 1,
+      "comment": "Back-to-back CSR write 1: Change CWL to 10"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Ack cycle"
+    },
+    {
+      "hex_line": "01 00000000 00000040 00000000",
+      "op": 1,
+      "comment": "Back-to-back CSR write 2: Change tREFI to 3120 (halved) without deasserting cyc"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Ack cycle for second write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Both back-to-back writes took effect"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End back-to-back burst"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow new timing to propagate to bank tracker"
+    },
+    {
+      "hex_line": "01 00000000 00000027 00000001",
+      "op": 1,
+      "comment": "Restore CWL=8"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Ack"
+    },
+    {
+      "hex_line": "01 00000000 00000040 00000000",
+      "op": 1,
+      "comment": "Restore tREFI=6240"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Ack"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation delay"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Activate bank 5 with max row address (2^15 - 1) - boundary test"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock activate"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 00000000",
+      "op": 3,
+      "comment": "Wait full tRCD=11 cycles"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Read request to bank 5, max row, max column (1023) - boundary address"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow scheduler to evaluate and issue"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler issues READ at boundary addresses"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Ack read on DRAM bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock read ack"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000006 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRTP=6 cycles before precharge of bank 5 is allowed"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Precharge bank 5 after tRTP elapsed"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock precharge"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert precharge"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRP=11 cycles for bank to become idle"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Re-activate bank 5 with row 0 - verify bank became idle after precharge+tRP"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock activate"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRCD"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Write request to bank 5 row 0 col 0 - verify reactivated bank accepts writes"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler evaluation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Write command issued to reactivated bank 5"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Ack write"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock write ack"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000006 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tWTR=6 before read can follow write to same bank"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Precharge ALL banks - state transition test for all bank trackers"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock precharge all"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRP for all banks to close"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "All banks idle, no pending commands, scheduler quiescent"
+    },
+    {
+      "hex_line": "01 00000000 000000A7 00000001",
+      "op": 1,
+      "comment": "Write cfg_max_postpone=8 to test refresh postponement limit"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Max postpone threshold set to 8"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Turnaround"
+    },
+    {
+      "hex_line": "01 00000000 000000C7 00000001",
+      "op": 1,
+      "comment": "Write cfg_urgent_threshold=4 for refresh urgency"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Urgent threshold configured"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Turnaround"
+    },
+    {
+      "hex_line": "01 00000000 000000E7 00000001",
+      "op": 1,
+      "comment": "Write cfg_ref_priority=1 to elevate refresh priority in scheduler"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Refresh priority enabled"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow config propagation"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Activate bank 0 for conflict test"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRCD"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Read to bank 0 but DIFFERENT row 999 (row miss) - requires precharge+activate cycle"
+    },
+    {
+      "hex_line": "03 00000003 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler should detect row conflict and initiate precharge"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler issues PRECHARGE for bank 0 due to row conflict"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRP after precharge"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler issues ACTIVATE for new row"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRCD after activate"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Finally scheduler issues READ after precharge+tRP+activate+tRCD"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Ack read"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert all"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Final settling period"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Final state check - system quiescent, no errors accumulated"
+    }
+  ]
+}

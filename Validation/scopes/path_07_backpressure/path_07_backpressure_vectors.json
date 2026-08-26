@@ -1,0 +1,900 @@
+{
+  "scope": "path_07_backpressure",
+  "generator": "vector_gen_agent_llm",
+  "spec_source": "llmmc_microarchitecturespec_filled.json",
+  "generated_at": "2026-04-14T15:24:51.688495",
+  "vector_count": 178,
+  "hex_format": "unknown",
+  "vectors": [
+    {
+      "hex_line": "00 00000000 00000000 00000000",
+      "op": 0,
+      "comment": "Reset all logic, initialize command queue and wishbone port to known state"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00020000",
+      "op": 2,
+      "comment": "Verify initial state after reset: queue empty, no stall, no ack"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00020000",
+      "op": 1,
+      "comment": "Drive all inputs to idle/inactive state"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00020000",
+      "op": 3,
+      "comment": "Settle after driving idle"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00020000",
+      "op": 2,
+      "comment": "Confirm queue stays empty with no activity"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00840001",
+      "op": 1,
+      "comment": "Issue a single Wishbone write request to address 256"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00040001",
+      "op": 3,
+      "comment": "Allow write request to propagate to command queue"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00040001",
+      "op": 2,
+      "comment": "Queue should have one entry from the write request"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00040001",
+      "op": 2,
+      "comment": "Queue not full, so no backpressure yet"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00080003",
+      "op": 1,
+      "comment": "Issue a single Wishbone read request to address 512"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00080003",
+      "op": 3,
+      "comment": "Allow read request to enter queue"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00080003",
+      "op": 2,
+      "comment": "Queue should now have 2 entries"
+    },
+    {
+      "hex_line": "01 00000000 00000000 008C0007",
+      "op": 1,
+      "comment": "Third write request"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000C0007",
+      "op": 3,
+      "comment": "Enqueue third command"
+    },
+    {
+      "hex_line": "02 00000000 00000000 000C0007",
+      "op": 2,
+      "comment": "3 entries, still not full"
+    },
+    {
+      "hex_line": "01 00000000 00000000 0090000F",
+      "op": 1,
+      "comment": "Fourth write request"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0010000F",
+      "op": 3,
+      "comment": "Enqueue fourth command"
+    },
+    {
+      "hex_line": "02 00000000 00000000 0010000F",
+      "op": 2,
+      "comment": "4 entries"
+    },
+    {
+      "hex_line": "01 00000000 00000000 0094001F",
+      "op": 1,
+      "comment": "Fifth write"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0014001F",
+      "op": 3,
+      "comment": "Enqueue fifth"
+    },
+    {
+      "hex_line": "01 00000000 00000000 0098003F",
+      "op": 1,
+      "comment": "Sixth write"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0018003F",
+      "op": 3,
+      "comment": "Enqueue sixth"
+    },
+    {
+      "hex_line": "01 00000000 00000000 009C007F",
+      "op": 1,
+      "comment": "Seventh write"
+    },
+    {
+      "hex_line": "03 00000001 00000000 001C007F",
+      "op": 3,
+      "comment": "Enqueue seventh"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00A000FF",
+      "op": 1,
+      "comment": "Eighth write"
+    },
+    {
+      "hex_line": "03 00000001 00000000 002000FF",
+      "op": 3,
+      "comment": "Enqueue eighth"
+    },
+    {
+      "hex_line": "02 00000000 00000000 002000FF",
+      "op": 2,
+      "comment": "8 entries, should be half full for 16-deep queue"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00A401FF",
+      "op": 1,
+      "comment": "Ninth write"
+    },
+    {
+      "hex_line": "03 00000001 00000000 002401FF",
+      "op": 3,
+      "comment": "Enqueue ninth"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00A803FF",
+      "op": 1,
+      "comment": "Tenth write"
+    },
+    {
+      "hex_line": "03 00000001 00000000 002803FF",
+      "op": 3,
+      "comment": "Enqueue tenth"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00AC07FF",
+      "op": 1,
+      "comment": "Eleventh write"
+    },
+    {
+      "hex_line": "03 00000001 00000000 002C07FF",
+      "op": 3,
+      "comment": "Enqueue eleventh"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00B00FFF",
+      "op": 1,
+      "comment": "Twelfth write"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00300FFF",
+      "op": 3,
+      "comment": "Enqueue twelfth"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00B41FFF",
+      "op": 1,
+      "comment": "Thirteenth write"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00341FFF",
+      "op": 3,
+      "comment": "Enqueue thirteenth"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00B83FFF",
+      "op": 1,
+      "comment": "Fourteenth write"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00383FFF",
+      "op": 3,
+      "comment": "Enqueue fourteenth"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00383FFF",
+      "op": 2,
+      "comment": "14 entries, nearing full"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00BC7FFF",
+      "op": 1,
+      "comment": "Fifteenth write - one before full"
+    },
+    {
+      "hex_line": "03 00000001 00000000 003C7FFF",
+      "op": 3,
+      "comment": "Enqueue fifteenth"
+    },
+    {
+      "hex_line": "02 00000000 00000000 003C7FFF",
+      "op": 2,
+      "comment": "15 entries, one slot remaining"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00C1FFFF",
+      "op": 1,
+      "comment": "Sixteenth write - should fill queue completely"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0041FFFF",
+      "op": 3,
+      "comment": "Enqueue sixteenth, queue should become full"
+    },
+    {
+      "hex_line": "02 00000000 00000000 0041FFFF",
+      "op": 2,
+      "comment": "Queue is now full at depth 16"
+    },
+    {
+      "hex_line": "02 00000000 00000000 0041FFFF",
+      "op": 2,
+      "comment": "CRITICAL: Backpressure must assert wb_stall_o when queue is full"
+    },
+    {
+      "hex_line": "01 00000000 00000000 0041FFFF",
+      "op": 1,
+      "comment": "Attempt 17th write while queue is full - should be stalled"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0041FFFF",
+      "op": 3,
+      "comment": "Try to enqueue while full"
+    },
+    {
+      "hex_line": "02 00000000 00000000 0041FFFF",
+      "op": 2,
+      "comment": "Queue still full, 17th request must not be accepted, stall persists"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0041FFFF",
+      "op": 3,
+      "comment": "Hold stalled state for another cycle to verify persistence"
+    },
+    {
+      "hex_line": "02 00000000 00000000 0041FFFF",
+      "op": 2,
+      "comment": "Stall remains asserted while queue is full and no dequeue"
+    },
+    {
+      "hex_line": "01 00000000 40000000 003CFFFE",
+      "op": 1,
+      "comment": "Dequeue entry 0 to free one slot"
+    },
+    {
+      "hex_line": "03 00000001 00000000 003CFFFE",
+      "op": 3,
+      "comment": "Process dequeue of one entry"
+    },
+    {
+      "hex_line": "02 00000000 00000000 003CFFFE",
+      "op": 2,
+      "comment": "After dequeue, queue not full, stall should deassert"
+    },
+    {
+      "hex_line": "03 00000001 00000000 003CFFFE",
+      "op": 3,
+      "comment": "The previously stalled 17th request should now be accepted"
+    },
+    {
+      "hex_line": "02 00000000 00000000 003CFFFE",
+      "op": 2,
+      "comment": "17th request gets enqueued, queue full again, stall reasserts"
+    },
+    {
+      "hex_line": "01 00000000 40000000 0038FFFC",
+      "op": 1,
+      "comment": "Stop new requests, dequeue entry 1"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0038FFFC",
+      "op": 3,
+      "comment": "Dequeue one entry with no new enqueue"
+    },
+    {
+      "hex_line": "02 00000000 00000000 0038FFFC",
+      "op": 2,
+      "comment": "Queue drops to 15, no stall"
+    },
+    {
+      "hex_line": "01 00000000 40000000 0034FFF8",
+      "op": 1,
+      "comment": "Dequeue entry 2"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0034FFF8",
+      "op": 3,
+      "comment": "Continue draining"
+    },
+    {
+      "hex_line": "02 00000000 00000000 0034FFF8",
+      "op": 2,
+      "comment": "14 entries, still no stall"
+    },
+    {
+      "hex_line": "01 00000000 40000000 0034FFF1",
+      "op": 1,
+      "comment": "Simultaneous enqueue (read) and dequeue - steady state throughput test"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0034FFF1",
+      "op": 3,
+      "comment": "Both enqueue and dequeue in same cycle"
+    },
+    {
+      "hex_line": "02 00000000 00000000 0034FFF1",
+      "op": 2,
+      "comment": "Count stays at 14 when enq and deq happen simultaneously"
+    },
+    {
+      "hex_line": "01 00000000 40000000 0030FFE1",
+      "op": 1,
+      "comment": "Dequeue only, continue draining"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0030FFE1",
+      "op": 3,
+      "comment": "Drain one more"
+    },
+    {
+      "hex_line": "01 00000000 40000000 002CFFC1",
+      "op": 1,
+      "comment": "Dequeue another"
+    },
+    {
+      "hex_line": "03 00000001 00000000 002CFFC1",
+      "op": 3,
+      "comment": "Drain"
+    },
+    {
+      "hex_line": "01 00000000 40000000 0028FF81",
+      "op": 1,
+      "comment": "Dequeue another"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0028FF81",
+      "op": 3,
+      "comment": "Drain"
+    },
+    {
+      "hex_line": "01 00000000 40000000 0024FF01",
+      "op": 1,
+      "comment": "Dequeue another"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0024FF01",
+      "op": 3,
+      "comment": "Drain"
+    },
+    {
+      "hex_line": "01 00000000 40000000 0020FE01",
+      "op": 1,
+      "comment": "Dequeue another"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0020FE01",
+      "op": 3,
+      "comment": "Drain"
+    },
+    {
+      "hex_line": "01 00000000 40000000 001CFC01",
+      "op": 1,
+      "comment": "Dequeue another"
+    },
+    {
+      "hex_line": "03 00000001 00000000 001CFC01",
+      "op": 3,
+      "comment": "Drain"
+    },
+    {
+      "hex_line": "01 00000000 40000000 0018F801",
+      "op": 1,
+      "comment": "Dequeue another"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0018F801",
+      "op": 3,
+      "comment": "Drain"
+    },
+    {
+      "hex_line": "01 00000000 40000000 0014F001",
+      "op": 1,
+      "comment": "Dequeue another"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0014F001",
+      "op": 3,
+      "comment": "Drain"
+    },
+    {
+      "hex_line": "01 00000000 40000000 0010E001",
+      "op": 1,
+      "comment": "Dequeue another"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0010E001",
+      "op": 3,
+      "comment": "Drain"
+    },
+    {
+      "hex_line": "01 00000000 40000000 000CC001",
+      "op": 1,
+      "comment": "Dequeue last remaining"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Drain to empty"
+    },
+    {
+      "hex_line": "02 00000000 00000000 000CC001",
+      "op": 2,
+      "comment": "Queue fully drained, empty flag set, no stall"
+    },
+    {
+      "hex_line": "01 00000000 40000000 0008C000",
+      "op": 1,
+      "comment": "Attempt dequeue from empty queue - underflow condition"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0008C000",
+      "op": 3,
+      "comment": "Underflow attempt"
+    },
+    {
+      "hex_line": "02 00000000 00000000 0008C000",
+      "op": 2,
+      "comment": "Queue should remain empty, no underflow corruption"
+    },
+    {
+      "hex_line": "01 00000000 00000000 008CC001",
+      "op": 1,
+      "comment": "Start linear incrementing burst write, beat 1 of 8"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "First burst beat"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Burst beat 2"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Second burst beat"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Burst beat 3"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Third burst beat"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Burst beat 4"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Fourth burst beat"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Burst beat 5"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Fifth burst beat"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Burst beat 6"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Sixth burst beat"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Burst beat 7"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Seventh burst beat"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Burst beat 8 (end of burst, cti=7)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Eighth and final burst beat"
+    },
+    {
+      "hex_line": "02 00000000 00000000 000CC001",
+      "op": 2,
+      "comment": "8-beat burst enqueued, queue half full, no stall"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Start read burst immediately after write burst - back to back"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Read burst beat 1"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Read burst beat 2"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Read burst beat 2"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Read burst beat 3"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Read burst beat 3"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Read burst beat 4"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Read burst beat 4"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Read burst beat 5"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Read burst beat 5"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Read burst beat 6"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Read burst beat 6"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Read burst beat 7"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Read burst beat 7"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Read burst beat 8 (end of burst)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Read burst beat 8 final"
+    },
+    {
+      "hex_line": "02 00000000 00000000 000CC001",
+      "op": 2,
+      "comment": "Two full bursts fill the 16-deep queue, stall asserts"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Attempt another request while queue full and stalled"
+    },
+    {
+      "hex_line": "03 00000002 00000000 000CC001",
+      "op": 3,
+      "comment": "Hold stall for two cycles"
+    },
+    {
+      "hex_line": "02 00000000 00000000 000CC001",
+      "op": 2,
+      "comment": "Stall persists, request not accepted"
+    },
+    {
+      "hex_line": "01 00000000 40000000 0008C000",
+      "op": 1,
+      "comment": "Stop new requests, dequeue to relieve backpressure"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0008C000",
+      "op": 3,
+      "comment": "Dequeue one"
+    },
+    {
+      "hex_line": "02 00000000 00000000 0008C000",
+      "op": 2,
+      "comment": "Stall deasserts immediately when queue drops below full"
+    },
+    {
+      "hex_line": "01 00000000 00000000 008CC001",
+      "op": 1,
+      "comment": "Immediately issue a new request after stall release"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Accept the previously stalled-out request"
+    },
+    {
+      "hex_line": "02 00000000 00000000 000CC001",
+      "op": 2,
+      "comment": "Queue fills again immediately"
+    },
+    {
+      "hex_line": "01 00000000 40000000 000CC001",
+      "op": 1,
+      "comment": "Dequeue to test rapid full/not-full toggling"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Dequeue one"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Enqueue again immediately"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Fill again"
+    },
+    {
+      "hex_line": "02 00000000 00000000 000CC001",
+      "op": 2,
+      "comment": "Full/stall reasserts - rapid toggling test"
+    },
+    {
+      "hex_line": "01 00000000 40000000 000CC001",
+      "op": 1,
+      "comment": "Simultaneous enqueue and dequeue while queue is full"
+    },
+    {
+      "hex_line": "03 00000001 00000000 000CC001",
+      "op": 3,
+      "comment": "Both operations in same cycle at full state"
+    },
+    {
+      "hex_line": "02 00000000 00000000 000CC001",
+      "op": 2,
+      "comment": "Simultaneous enq/deq at full: count stays 16, one replaced"
+    },
+    {
+      "hex_line": "01 00000000 00000000 000CC001",
+      "op": 1,
+      "comment": "Drop all bus activity"
+    },
+    {
+      "hex_line": "03 00000005 00000000 000CC001",
+      "op": 3,
+      "comment": "Idle for several cycles"
+    },
+    {
+      "hex_line": "02 00000000 00000000 000CC001",
+      "op": 2,
+      "comment": "Queue remains full during idle, stall persists"
+    },
+    {
+      "hex_line": "01 00000000 00000000 0090C003",
+      "op": 1,
+      "comment": "Drive max address boundary while stalled - verify no acceptance"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0010C003",
+      "op": 3,
+      "comment": "Max address request while stalled"
+    },
+    {
+      "hex_line": "02 00000000 00000000 0010C003",
+      "op": 2,
+      "comment": "Request at max address boundary properly stalled"
+    },
+    {
+      "hex_line": "01 00000000 00000000 0010C003",
+      "op": 1,
+      "comment": "De-assert bus"
+    },
+    {
+      "hex_line": "01 00000000 40000000 0010C003",
+      "op": 1,
+      "comment": "Start draining queue completely"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0010C003",
+      "op": 3,
+      "comment": "Dequeue"
+    },
+    {
+      "hex_line": "01 00000000 00000000 0010C003",
+      "op": 1,
+      "comment": "Dequeue next"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0010C003",
+      "op": 3,
+      "comment": "Dequeue"
+    },
+    {
+      "hex_line": "01 00000000 00000000 0010C003",
+      "op": 1,
+      "comment": "Dequeue next"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0010C003",
+      "op": 3,
+      "comment": "Dequeue"
+    },
+    {
+      "hex_line": "01 00000000 00000000 0010C003",
+      "op": 1,
+      "comment": "Dequeue next"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0010C003",
+      "op": 3,
+      "comment": "Dequeue"
+    },
+    {
+      "hex_line": "02 00000000 00000000 0010C003",
+      "op": 2,
+      "comment": "Queue no longer full after several dequeues"
+    },
+    {
+      "hex_line": "01 00000000 00000000 0010C003",
+      "op": 1,
+      "comment": "Continue draining"
+    },
+    {
+      "hex_line": "03 00000008 00000000 0010C003",
+      "op": 3,
+      "comment": "Drain remaining entries over 8 cycles"
+    },
+    {
+      "hex_line": "01 00000000 00000000 0010C003",
+      "op": 1,
+      "comment": "Stop dequeuing"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0010C003",
+      "op": 3,
+      "comment": "Settle"
+    },
+    {
+      "hex_line": "01 00000000 00000000 0094C007",
+      "op": 1,
+      "comment": "Write with sel=0 (no byte enables) - edge case with data mask"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0014C007",
+      "op": 3,
+      "comment": "Accept zero-sel write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 0014C007",
+      "op": 2,
+      "comment": "Controller should accept even with no byte enables active"
+    },
+    {
+      "hex_line": "01 00000000 00000000 0014C007",
+      "op": 1,
+      "comment": "Partial write with sel=0101 (bytes 0 and 2 only)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0014C007",
+      "op": 3,
+      "comment": "Partial write enqueue"
+    },
+    {
+      "hex_line": "02 00000000 00000000 0014C007",
+      "op": 2,
+      "comment": "Partial writes accepted normally"
+    },
+    {
+      "hex_line": "01 00000000 00000000 0014C007",
+      "op": 1,
+      "comment": "Idle bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0014C007",
+      "op": 3,
+      "comment": "Settle"
+    },
+    {
+      "hex_line": "01 00000000 00000000 0014C007",
+      "op": 1,
+      "comment": "Inject read response to test Wishbone response path under backpressure scenario"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0014C007",
+      "op": 3,
+      "comment": "Response should appear on wb_dat_o/wb_ack_o"
+    },
+    {
+      "hex_line": "02 00000000 00000000 0014C007",
+      "op": 2,
+      "comment": "Read response correctly forwarded to Wishbone port"
+    },
+    {
+      "hex_line": "01 00000000 00000000 0014C007",
+      "op": 1,
+      "comment": "De-assert response"
+    },
+    {
+      "hex_line": "03 00000001 00000000 0014C007",
+      "op": 3,
+      "comment": "Response done"
+    },
+    {
+      "hex_line": "02 00000000 00000000 0014C007",
+      "op": 2,
+      "comment": "Ack deasserts when no response"
+    },
+    {
+      "hex_line": "00 00000000 00000000 00000000",
+      "op": 0,
+      "comment": "Final reset to verify clean recovery from all states"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00020000",
+      "op": 3,
+      "comment": "Allow reset to propagate"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00020000",
+      "op": 2,
+      "comment": "Clean state after reset - all flags properly initialized"
+    }
+  ]
+}

@@ -1,0 +1,1115 @@
+[
+  {
+    "op": "reset",
+    "comment": "Initialize DUT, clear all state"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow reset to propagate through all pipeline stages"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_ack_o": 0,
+      "wb_stall_o": 0,
+      "wb_err_o": 0,
+      "queue_empty": 1,
+      "queue_full": 0,
+      "queue_count": 0
+    },
+    "comment": "Verify initial idle state after reset"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cke": 1,
+      "ddr_reset_n": 1,
+      "ddr_cmd": 7
+    },
+    "comment": "Verify DDR3 interface idle (NOP command = 0b111)"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0,
+      "wb_we_i": 0,
+      "wb_adr_i": 0,
+      "wb_dat_i": 0,
+      "wb_sel_i": 0,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Drive idle Wishbone bus state"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Stabilize idle state"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 0,
+      "enq_ready": 1
+    },
+    "comment": "Confirm ready to accept new transactions"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_is_active": 255,
+      "bank_act_allowed": 255,
+      "bank_rd_allowed": 255,
+      "bank_wr_allowed": 255,
+      "bank_pre_allowed": 255,
+      "ref_required": 0,
+      "ref_urgent": 0
+    },
+    "comment": "Configure all banks as active and ready for operations"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_open_row_0": 0
+    },
+    "comment": "Set open row for bank 0"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Apply bank configuration"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 256,
+      "wb_dat_i": 3735928559,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Single write transaction to address 0x100 (col=64, bank=0, row=0)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock in write request"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 0,
+      "queue_empty": 0
+    },
+    "comment": "Write accepted, queue no longer empty"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "req_wdata": 3735928559,
+      "req_wmask": 15
+    },
+    "comment": "Verify write data and mask captured"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 0,
+      "wb_we_i": 0
+    },
+    "comment": "Deassert strobe, maintain cycle"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_ack_o": 1
+    },
+    "comment": "Verify write acknowledged"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0
+    },
+    "comment": "End Wishbone cycle"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow command to propagate to scheduler"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_wr_valid": 1
+    },
+    "comment": "Verify write command issued by scheduler"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock write command"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 4,
+      "ddr_bank": 0
+    },
+    "comment": "Verify DDR3 WRITE command (0b100) to bank 0"
+  },
+  {
+    "op": "step",
+    "cycles": 10,
+    "comment": "Allow write to complete and queue to drain"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1,
+      "queue_count": 0
+    },
+    "comment": "Verify queue drained after write completion"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 8192,
+      "wb_dat_i": 305419896,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Write to different bank (address 0x2000 maps to bank 1)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock in second write"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 0,
+      "dec_rank": 0
+    },
+    "comment": "Request accepted, targeting rank 0"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 0
+    },
+    "comment": "Deassert strobe"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for processing"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_ack_o": 1
+    },
+    "comment": "Second write acknowledged"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0
+    },
+    "comment": "End cycle"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow scheduler to process"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_bank": 1
+    },
+    "comment": "Verify command targets bank 1"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 0,
+      "wb_dat_i": 4294967295,
+      "wb_sel_i": 15,
+      "wb_cti_i": 2,
+      "wb_bte_i": 0
+    },
+    "comment": "Start burst write at address 0 (incrementing burst)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "First beat of burst"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 0
+    },
+    "comment": "First burst beat accepted"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 4,
+      "wb_dat_i": 4278255360
+    },
+    "comment": "Second burst beat"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock second beat"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 8,
+      "wb_dat_i": 16711935
+    },
+    "comment": "Third burst beat"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock third beat"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 12,
+      "wb_dat_i": 255,
+      "wb_cti_i": 7
+    },
+    "comment": "Fourth burst beat (end of burst)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock final beat"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_ack_o": 1
+    },
+    "comment": "Burst write acknowledged"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0,
+      "wb_cti_i": 0
+    },
+    "comment": "End burst cycle"
+  },
+  {
+    "op": "step",
+    "cycles": 8,
+    "comment": "Allow burst to complete in DDR domain"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 536870908,
+      "wb_dat_i": 2863311530,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Write to max address boundary (0x1FFFFFFC)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process boundary address"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 0,
+      "wb_err_o": 0
+    },
+    "comment": "Max address write accepted without error"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0
+    },
+    "comment": "End cycle"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow processing"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 1024,
+      "wb_dat_i": 305419896,
+      "wb_sel_i": 5,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Partial write with byte mask (sel=0101, bytes 0 and 2 only)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process partial write"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "req_wmask": 5
+    },
+    "comment": "Verify partial write mask captured correctly"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0
+    },
+    "comment": "End cycle"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow completion"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_wr_allowed": 0
+    },
+    "comment": "Block all bank writes to test stall condition"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 2048,
+      "wb_dat_i": 1431655765,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Attempt write when banks not ready"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Request enters queue"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 0
+    },
+    "comment": "Command queued but cannot issue"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Wait while write blocked"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_wr_valid": 0
+    },
+    "comment": "No write issued due to bank restriction"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_wr_allowed": 255
+    },
+    "comment": "Re-enable bank writes"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow scheduler to issue pending write"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_wr_valid": 1
+    },
+    "comment": "Write now issued after bank enabled"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0
+    },
+    "comment": "End cycle"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow completion"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_required": 1,
+      "ref_urgent": 0
+    },
+    "comment": "Signal refresh required"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 4096,
+      "wb_dat_i": 2576980377,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Write during pending refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Request enters system"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Observe refresh vs write arbitration"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_ack": 1
+    },
+    "comment": "Refresh takes priority"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC (128 cycles) for refresh to complete"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_required": 0
+    },
+    "comment": "Clear refresh request"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow write to proceed after refresh"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0
+    },
+    "comment": "End cycle"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_required": 1,
+      "ref_urgent": 1
+    },
+    "comment": "Signal urgent refresh"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 5120,
+      "wb_dat_i": 858993459,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Write during urgent refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Observe urgent refresh handling"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_ref_valid": 1
+    },
+    "comment": "Urgent refresh issued immediately"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_required": 0,
+      "ref_urgent": 0
+    },
+    "comment": "Clear refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 130,
+    "comment": "Complete refresh cycle"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0
+    },
+    "comment": "End cycle"
+  },
+  {
+    "op": "step",
+    "cycles": 10,
+    "comment": "Drain any pending operations"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1
+    },
+    "comment": "Queue empty before fill test"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_wr_allowed": 0
+    },
+    "comment": "Block writes to fill queue"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 0,
+      "wb_dat_i": 1,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Fill queue entry 1"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue entry 1"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 16,
+      "wb_dat_i": 2
+    },
+    "comment": "Fill queue entry 2"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue entry 2"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 32,
+      "wb_dat_i": 3
+    },
+    "comment": "Fill queue entry 3"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue entry 3"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 48,
+      "wb_dat_i": 4
+    },
+    "comment": "Fill queue entry 4"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue entry 4"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 4
+    },
+    "comment": "Verify 4 entries queued"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 64,
+      "wb_dat_i": 5
+    },
+    "comment": "Fill queue entry 5"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue entry 5"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 80,
+      "wb_dat_i": 6
+    },
+    "comment": "Fill queue entry 6"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue entry 6"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 96,
+      "wb_dat_i": 7
+    },
+    "comment": "Fill queue entry 7"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue entry 7"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 112,
+      "wb_dat_i": 8
+    },
+    "comment": "Fill queue entry 8"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue entry 8"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 8
+    },
+    "comment": "Verify 8 entries queued"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 128,
+      "wb_dat_i": 9
+    },
+    "comment": "Fill queue entry 9"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue entry 9"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 144,
+      "wb_dat_i": 10
+    },
+    "comment": "Fill queue entry 10"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue entry 10"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 160,
+      "wb_dat_i": 11
+    },
+    "comment": "Fill queue entry 11"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue entry 11"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 176,
+      "wb_dat_i": 12
+    },
+    "comment": "Fill queue entry 12"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue entry 12"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 192,
+      "wb_dat_i": 13
+    },
+    "comment": "Fill queue entry 13"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue entry 13"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 208,
+      "wb_dat_i": 14
+    },
+    "comment": "Fill queue entry 14"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue entry 14"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 224,
+      "wb_dat_i": 15
+    },
+    "comment": "Fill queue entry 15"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue entry 15"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 240,
+      "wb_dat_i": 16
+    },
+    "comment": "Fill queue entry 16"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue entry 16 - should be full"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_full": 1,
+      "queue_count": 16
+    },
+    "comment": "Verify queue full condition"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 1
+    },
+    "comment": "Wishbone stalled due to full queue"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_wr_allowed": 255
+    },
+    "comment": "Enable writes to drain queue"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow some entries to drain"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_full": 0,
+      "wb_stall_o": 0
+    },
+    "comment": "Queue no longer full, stall released"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0
+    },
+    "comment": "End cycle"
+  },
+  {
+    "op": "step",
+    "cycles": 50,
+    "comment": "Allow queue to fully drain"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1,
+      "queue_count": 0
+    },
+    "comment": "Queue fully drained"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_is_active": 0,
+      "bank_open_row_0": 0
+    },
+    "comment": "Configure bank 0 as inactive to test activate sequence"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 0,
+      "wb_dat_i": 2863311530,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Write requiring bank activation"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Process activation requirement"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_act_valid": 1,
+      "fb_act_bank": 0
+    },
+    "comment": "Bank 0 activate command issued"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_is_active": 1
+    },
+    "comment": "Simulate bank becoming active"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRCD (11 cycles)"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_wr_valid": 1
+    },
+    "comment": "Write command issued after tRCD"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0
+    },
+    "comment": "End cycle"
+  },
+  {
+    "op": "step",
+    "cycles": 10,
+    "comment": "Complete write"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_is_active": 255
+    },
+    "comment": "All banks active again"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 0,
+      "wb_dat_i": 1111638594,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Back-to-back write 1"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "First write"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 16,
+      "wb_dat_i": 2222222222
+    },
+    "comment": "Back-to-back write 2"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Second write"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 32,
+      "wb_dat_i": 3333333333
+    },
+    "comment": "Back-to-back write 3"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Third write"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 0
+    },
+    "comment": "No stall on back-to-back writes"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0
+    },
+    "comment": "End cycle"
+  },
+  {
+    "op": "step",
+    "cycles": 20,
+    "comment": "Allow all writes to complete"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1
+    },
+    "comment": "All back-to-back writes completed"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 2097152,
+      "wb_dat_i": 4026531840,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Write to row 1 (address 0x200000 with row-bank-col mapping)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process row 1 write"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0
+    },
+    "comment": "End cycle"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow processing"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_wr_valid": 1
+    },
+    "comment": "Write to row 1 issued"
+  },
+  {
+    "op": "step",
+    "cycles": 10,
+    "comment": "Final cleanup cycles"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1,
+      "wb_stall_o": 0,
+      "wb_err_o": 0
+    },
+    "comment": "Final state: system idle, no errors"
+  }
+]

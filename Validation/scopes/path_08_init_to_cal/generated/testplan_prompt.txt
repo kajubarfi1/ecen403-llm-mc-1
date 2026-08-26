@@ -1,0 +1,28 @@
+Generate a test plan for the Init FSM → Calibration integration path.
+
+SPEC:
+{spec_json}
+
+PATH: init_fsm -> calibration
+CONNECTIONS:
+  init_fsm -> calibration: Init FSM signals init_done to calibration block.
+
+Available input signals (testbench drives these): "enable", "zqcs_ack"
+Available output signals (testbench checks these): "init_fail", "init_cmd_valid", "init_cmd", "init_addr", "init_bank", "init_cke", "init_reset_n", "init_state", "cal_done", "cal_fail", "zqcs_req"
+
+Output a JSON array of test operations:
+  {"op": "reset"}
+  {"op": "drive", "signals": {"signal_name": value, ...}, "comment": "<why>"}
+  {"op": "check", "expected": {"signal_name": expected_value, ...}, "comment": "<why>"}
+  {"op": "step", "cycles": <int>, "comment": "<why>"}
+
+All values are decimal integers.
+
+Generate at least 40 operations that exercise:
+1. Reset and verify initial state
+2. Normal operation through the path
+3. Boundary conditions (overflow, underflow, stall, timeout)
+4. Back-to-back operations
+5. State transitions at each block in the chain
+
+Output ONLY the JSON array.

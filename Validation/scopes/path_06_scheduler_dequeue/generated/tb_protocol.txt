@@ -1,0 +1,640 @@
+VECTOR HEX FILE FORMAT: path_06_scheduler_dequeue_vectors.hex
+Each line: OO PPPPPPPP DDDDDDDD EEEEEEEE
+  OO = opcode (8 bits):
+    00 = reset: Call handle_reset(). Do NOT write your own reset logic.
+    01 = drive: Call unpack_drive(DDDDDDDD) to set input signals. Advance 1 clock with @(posedge clk).
+    02 = check: Advance 1 clock with @(posedge clk), THEN call check_with_tolerance(vec_num, EEEEEEEE, pass_count, fail_count, total_tests).
+    03 = step: Advance PPPPPPPP clock cycles with repeat(PPPPPPPP) @(posedge clk).
+  PPPPPPPP = parameter (cycle count for step, 0 for other ops)
+  DDDDDDDD = packed input signal values (for drive ops)
+  EEEEEEEE = packed expected output values (for check ops)
+
+SIGNAL PACKING:
+  INPUT/DRIVE field packing (32-bit):
+    bit [0] = scheduler.q_valid_0
+    bits [15:1] = scheduler.q_row_0
+    bits [25:16] = scheduler.q_col_0
+    bits [28:26] = scheduler.q_bank_0
+    bit [29] = scheduler.q_we_0
+  OUTPUT/CHECK field packing (32-bit):
+    bit [0] = scheduler.ref_ack
+    bit [1] = scheduler.cmd_valid
+    bits [5:2] = scheduler.cmd_type
+    bits [20:6] = scheduler.cmd_row
+    bits [30:21] = scheduler.cmd_col
+  OUTPUT/CHECK unpacked arrays (not packed into word — drive/check individually):
+    cmd_queue.entry_row: 16x15
+    cmd_queue.entry_col: 16x10
+    cmd_queue.entry_bank: 16x3
+    cmd_queue.entry_we: 16x1
+    cmd_queue.entry_aux: 16x4
+
+TESTBENCH ARCHITECTURE:
+This testbench instantiates 2 modules wired together: scheduler, cmd_queue.
+RTL files needed: scheduler.sv, cmd_queue.sv
+
+Use these EXACT signal declarations and instantiations.
+COPY THIS WIRING BLOCK VERBATIM. Do NOT add ports that are not shown here.
+Do NOT add .clk or .rst_n connections to any module unless they appear below.
+Some modules (like addr_decoder) are purely combinational and have NO clock or reset.
+Adding clk/rst_n to a combinational module will cause an elaboration error.
+
+```systemverilog
+    // ---- Clock and reset ----
+    logic clk, rst_n;
+
+    // ---- Internal wires (between blocks) ----
+    logic        deq_grant;
+    logic [3:0] deq_idx;
+
+    // ---- Testbench-driven inputs ----
+    logic [15:0] q_valid;
+    logic [14:0] q_row [0:15];
+    logic [9:0] q_col [0:15];
+    logic [2:0] q_bank [0:15];
+    logic        q_we [0:15];
+    logic [3:0] q_aux [0:15];
+    logic [7:0] bank_is_active;
+    logic [14:0] bank_open_row [0:7];
+    logic [7:0] bank_act_allowed;
+    logic [7:0] bank_rd_allowed;
+    logic [7:0] bank_wr_allowed;
+    logic [7:0] bank_pre_allowed;
+    logic        ref_required;
+    logic        ref_urgent;
+    logic        enq_valid;
+    logic [14:0] enq_row;
+    logic [9:0] enq_col;
+    logic [2:0] enq_bank;
+    logic        enq_we;
+    logic [3:0] enq_aux;
+    logic        q_valid_0;
+    logic [14:0] q_row_0;
+    logic [9:0] q_col_0;
+    logic [2:0] q_bank_0;
+    logic        q_we_0;
+    logic [3:0] q_aux_0;
+    logic [14:0] bank_open_row_0;
+
+    // ---- Testbench-monitored outputs ----
+    logic        ref_ack;
+    logic        cmd_valid;
+    logic [3:0] cmd_type;
+    logic [14:0] cmd_row;
+    logic [9:0] cmd_col;
+    logic [2:0] cmd_bank;
+    logic        cmd_we;
+    logic [3:0] cmd_aux;
+    logic        enq_ready;
+    logic [15:0] entry_valid;
+    logic [14:0] entry_row [0:15];
+    logic [9:0] entry_col [0:15];
+    logic [2:0] entry_bank [0:15];
+    logic        entry_we [0:15];
+    logic [3:0] entry_aux [0:15];
+    logic        queue_full;
+    logic        queue_empty;
+    logic [4:0] queue_count;
+
+    // ---- Module instantiations ----
+    scheduler u_scheduler (
+        .clk(clk),
+        .rst_n(rst_n),
+        .bank_act_allowed(bank_act_allowed),
+        .bank_is_active(bank_is_active),
+        .bank_open_row(bank_open_row),
+        .bank_pre_allowed(bank_pre_allowed),
+        .bank_rd_allowed(bank_rd_allowed),
+        .bank_wr_allowed(bank_wr_allowed),
+        .cmd_aux(cmd_aux),
+        .cmd_bank(cmd_bank),
+        .cmd_col(cmd_col),
+        .cmd_row(cmd_row),
+        .cmd_type(cmd_type),
+        .cmd_valid(cmd_valid),
+        .cmd_we(cmd_we),
+        .deq_grant(deq_grant),
+        .deq_idx(deq_idx),
+        .q_aux(q_aux),
+        .q_bank(q_bank),
+        .q_col(q_col),
+        .q_row(q_row),
+        .q_valid(q_valid),
+        .q_we(q_we),
+        .ref_ack(ref_ack),
+        .ref_required(ref_required),
+        .ref_urgent(ref_urgent)
+    );
+
+    cmd_queue u_cmd_queue (
+        .clk(clk),
+        .rst_n(rst_n),
+        .deq_grant(deq_grant),
+        .deq_idx(deq_idx),
+        .enq_aux(enq_aux),
+        .enq_bank(enq_bank),
+        .enq_col(enq_col),
+        .enq_ready(enq_ready),
+        .enq_row(enq_row),
+        .enq_valid(enq_valid),
+        .enq_we(enq_we),
+        .entry_aux(entry_aux),
+        .entry_bank(entry_bank),
+        .entry_col(entry_col),
+        .entry_row(entry_row),
+        .entry_valid(entry_valid),
+        .entry_we(entry_we),
+        .queue_count(queue_count),
+        .queue_empty(queue_empty),
+        .queue_full(queue_full)
+    );
+
+    // ---- Single-entry mode: scalar aliases for array entry [0] ----
+    assign q_valid[0] = q_valid_0;
+    assign q_valid[1] = '0;
+    assign q_valid[2] = '0;
+    assign q_valid[3] = '0;
+    assign q_valid[4] = '0;
+    assign q_valid[5] = '0;
+    assign q_valid[6] = '0;
+    assign q_valid[7] = '0;
+    assign q_valid[8] = '0;
+    assign q_valid[9] = '0;
+    assign q_valid[10] = '0;
+    assign q_valid[11] = '0;
+    assign q_valid[12] = '0;
+    assign q_valid[13] = '0;
+    assign q_valid[14] = '0;
+    assign q_valid[15] = '0;
+    assign q_row[0] = q_row_0;
+    assign q_row[1] = '0;
+    assign q_row[2] = '0;
+    assign q_row[3] = '0;
+    assign q_row[4] = '0;
+    assign q_row[5] = '0;
+    assign q_row[6] = '0;
+    assign q_row[7] = '0;
+    assign q_row[8] = '0;
+    assign q_row[9] = '0;
+    assign q_row[10] = '0;
+    assign q_row[11] = '0;
+    assign q_row[12] = '0;
+    assign q_row[13] = '0;
+    assign q_row[14] = '0;
+    assign q_row[15] = '0;
+    assign q_col[0] = q_col_0;
+    assign q_col[1] = '0;
+    assign q_col[2] = '0;
+    assign q_col[3] = '0;
+    assign q_col[4] = '0;
+    assign q_col[5] = '0;
+    assign q_col[6] = '0;
+    assign q_col[7] = '0;
+    assign q_col[8] = '0;
+    assign q_col[9] = '0;
+    assign q_col[10] = '0;
+    assign q_col[11] = '0;
+    assign q_col[12] = '0;
+    assign q_col[13] = '0;
+    assign q_col[14] = '0;
+    assign q_col[15] = '0;
+    assign q_bank[0] = q_bank_0;
+    assign q_bank[1] = '0;
+    assign q_bank[2] = '0;
+    assign q_bank[3] = '0;
+    assign q_bank[4] = '0;
+    assign q_bank[5] = '0;
+    assign q_bank[6] = '0;
+    assign q_bank[7] = '0;
+    assign q_bank[8] = '0;
+    assign q_bank[9] = '0;
+    assign q_bank[10] = '0;
+    assign q_bank[11] = '0;
+    assign q_bank[12] = '0;
+    assign q_bank[13] = '0;
+    assign q_bank[14] = '0;
+    assign q_bank[15] = '0;
+    assign q_we[0] = q_we_0;
+    assign q_we[1] = '0;
+    assign q_we[2] = '0;
+    assign q_we[3] = '0;
+    assign q_we[4] = '0;
+    assign q_we[5] = '0;
+    assign q_we[6] = '0;
+    assign q_we[7] = '0;
+    assign q_we[8] = '0;
+    assign q_we[9] = '0;
+    assign q_we[10] = '0;
+    assign q_we[11] = '0;
+    assign q_we[12] = '0;
+    assign q_we[13] = '0;
+    assign q_we[14] = '0;
+    assign q_we[15] = '0;
+    assign q_aux[0] = q_aux_0;
+    assign q_aux[1] = '0;
+    assign q_aux[2] = '0;
+    assign q_aux[3] = '0;
+    assign q_aux[4] = '0;
+    assign q_aux[5] = '0;
+    assign q_aux[6] = '0;
+    assign q_aux[7] = '0;
+    assign q_aux[8] = '0;
+    assign q_aux[9] = '0;
+    assign q_aux[10] = '0;
+    assign q_aux[11] = '0;
+    assign q_aux[12] = '0;
+    assign q_aux[13] = '0;
+    assign q_aux[14] = '0;
+    assign q_aux[15] = '0;
+    assign bank_open_row[0] = bank_open_row_0;
+    assign bank_open_row[1] = '0;
+    assign bank_open_row[2] = '0;
+    assign bank_open_row[3] = '0;
+    assign bank_open_row[4] = '0;
+    assign bank_open_row[5] = '0;
+    assign bank_open_row[6] = '0;
+    assign bank_open_row[7] = '0;
+
+```
+
+=== MANDATORY FUNCTIONS — COPY ALL OF THESE EXACTLY ===
+DO NOT MODIFY. DO NOT OMIT. DO NOT WRITE YOUR OWN RESET LOGIC.
+The vector file and reference model depend on these exact functions.
+
+```systemverilog
+    function automatic logic [31:0] pack_outputs();
+        logic [31:0] packed_val;
+        packed_val = 32'b0;
+        packed_val[0] = ref_ack;
+        packed_val[1] = cmd_valid;
+        packed_val[5:2] = cmd_type;
+        packed_val[20:6] = cmd_row;
+        packed_val[30:21] = cmd_col;
+        return packed_val;
+    endfunction
+
+    task automatic unpack_drive(input logic [31:0] packed_val);
+        q_valid_0 = packed_val[0];
+        q_row_0 = packed_val[15:1];
+        q_col_0 = packed_val[25:16];
+        q_bank_0 = packed_val[28:26];
+        q_we_0 = packed_val[29];
+    endtask
+
+    // Output history buffer for ±2 cycle tolerance checking
+    logic [31:0] out_history [0:2];
+    always @(posedge clk) begin
+        out_history[2] <= out_history[1];
+        out_history[1] <= out_history[0];
+        out_history[0] <= pack_outputs();
+    end
+
+    task automatic check_with_tolerance(
+        input int vec_num,
+        input logic [31:0] expected,
+        inout int pass_count,
+        inout int fail_count,
+        inout int total_tests
+    );
+        logic [31:0] actual;
+        actual = pack_outputs();
+        total_tests = total_tests + 1;
+        if (actual === expected ||
+            out_history[0] === expected ||
+            out_history[1] === expected ||
+            out_history[2] === expected) begin
+            pass_count = pass_count + 1;
+        end else begin
+            fail_count = fail_count + 1;
+            $display("MISMATCH vec=%0d expected=0x%08X actual=0x%08X", vec_num, expected, actual);
+        end
+    endtask
+
+    // ==========================================================================
+    // Event-Mode Verification Task Library
+    // ==========================================================================
+    // SPEC AUTHORING GUIDANCE:
+    // - Prefer sampling FSM state registers (e.g. init_fsm.init_state) over
+    //   chaining command-output handshakes. One wait_for on the terminal state
+    //   is clearer than 8 expect_handshakes on intermediate MRS commands.
+    // - Use check_not_yet immediately after event_start() to guard JEDEC
+    //   minimum-time constraints (e.g. init_done >= 140000 cycles from start).
+    // - check_order between two wait_for'd events validates relative ordering
+    //   without depending on absolute cycle counts.
+    // ==========================================================================
+
+    localparam int MAX_SIG_ID = 32;
+
+    // Per-signal arrival tracking. arrival_cycle[id] == -1 means "not yet seen".
+    int  arrival_cycle [0:MAX_SIG_ID-1];
+    int  arrival_value [0:MAX_SIG_ID-1];
+    int  sim_cycle;  // cycles since last event_start() (or event_reset())
+
+    // --- Latching predicate tracking (Stage 4 bugfix) ---
+    // first_seen[id] is the first latch_cycle at which sample_signal(id) was
+    // nonzero. Set to -1 until observed. This lets wait_for capture narrow
+    // 1-cycle predicates even when called after the pulse has already fired.
+    int  first_seen [0:MAX_SIG_ID-1];
+    int  latch_cycle;       // advances every posedge after latch_enabled
+    bit  latch_enabled;     // gated by event_start()
+
+    // Codegen'd per-path by Stage 2. Returns current value of signal `id`
+    // as a 32-bit word. Stub returns 0 so template compiles standalone.
+    function automatic logic [31:0] sample_signal(input int id);
+        sample_signal = 32'h0;
+        // __SAMPLE_SIGNAL_CASES__
+    endfunction
+
+    // Latch block: records first cycle each signal is nonzero. Runs on every
+    // posedge once latch_enabled is set by event_start(). Gives wait_for a
+    // reliable fast path for 1-cycle predicates and already-asserted signals.
+    always_ff @(posedge clk) begin
+        if (latch_enabled) begin
+            latch_cycle <= latch_cycle + 1;
+            for (int _li = 0; _li < MAX_SIG_ID; _li++) begin
+                if (first_seen[_li] < 0 && sample_signal(_li) != 32'h0) begin
+                    first_seen[_li] <= latch_cycle + 1;
+                end
+            end
+        end
+    end
+
+    task automatic event_reset();
+        for (int i = 0; i < MAX_SIG_ID; i++) begin
+            arrival_cycle[i] = -1;
+            arrival_value[i] = 0;
+            first_seen[i] = -1;
+        end
+        sim_cycle = 0;
+        latch_cycle = 0;
+        latch_enabled = 1'b0;
+    endtask
+
+    // Pulse the DUT's start signal (e.g. init_fsm.enable) and zero sim_cycle
+    // at THAT moment. Codegen'd per-path; stub is a no-op for paths with no
+    // autonomous start (e.g. CSR-only tail paths).
+    task automatic event_start();
+        // __EVENT_START_BODY__
+        for (int _si = 0; _si < MAX_SIG_ID; _si++) first_seen[_si] = -1;
+        sim_cycle = 0;
+        latch_cycle = 0;
+        latch_enabled = 1'b1;
+    endtask
+
+    // CRITICAL INVARIANT: any code that advances simulation time outside this
+    // task will cause sim_cycle drift. The opcode 03 (step) dispatch in Stage 4
+    // MUST call this task in a loop, NOT bare @(posedge clk). Mixing modes
+    // without going through event_tick() will silently break check_at and
+    // check_not_yet timing relative to event_start().
+    task automatic event_tick();
+        @(posedge clk);
+        sim_cycle = sim_cycle + 1;
+    endtask
+
+    // --------------------------------------------------------------------------
+    // wait_for: block until sample_signal(id) == value, up to `timeout` cycles.
+    // Records arrival on success. Counts as one test.
+    // --------------------------------------------------------------------------
+    task automatic wait_for(
+        input int          sig_id,
+        input logic [31:0] value,
+        input int          timeout,
+        input int          vec_num,
+        inout int          pass_count,
+        inout int          fail_count,
+        inout int          total_tests
+    );
+        int waited;
+        logic [31:0] obs;
+        bit done;
+        waited = 0;
+        done = 1'b0;
+        total_tests = total_tests + 1;
+
+        // FAST PATH (value == 1): consult the latch. If the signal was ever
+        // observed nonzero, use the recorded fire cycle — don't re-sample.
+        // This handles narrow 1-cycle predicates and already-latched signals
+        // correctly regardless of when wait_for was called.
+        if (value == 32'h1 && first_seen[sig_id] >= 0) begin
+            arrival_cycle[sig_id] = first_seen[sig_id];
+            arrival_value[sig_id] = 32'h1;
+            pass_count = pass_count + 1;
+            done = 1'b1;
+        end
+
+        while (!done) begin
+            if (value == 32'h1) begin
+                // Poll the latch each tick — parallel latch block records
+                // first_seen[sig_id] the instant the predicate fires.
+                if (first_seen[sig_id] >= 0) begin
+                    arrival_cycle[sig_id] = first_seen[sig_id];
+                    arrival_value[sig_id] = 32'h1;
+                    pass_count = pass_count + 1;
+                    done = 1'b1;
+                end else if (waited >= timeout) begin
+                    fail_count = fail_count + 1;
+                    $display("WAIT_FOR TIMEOUT vec=%0d sig=%0d expected=0x%08X after=%0d",
+                             vec_num, sig_id, value, waited);
+                    done = 1'b1;
+                end else begin
+                    event_tick();
+                    waited = waited + 1;
+                end
+            end else begin
+                // Non-1 target (rare: "wait for signal to be deasserted"):
+                // live-sample fallback, unchanged from the original semantics.
+                obs = sample_signal(sig_id);
+                if (obs === value) begin
+                    arrival_cycle[sig_id] = sim_cycle;
+                    arrival_value[sig_id] = obs;
+                    pass_count = pass_count + 1;
+                    done = 1'b1;
+                end else if (waited >= timeout) begin
+                    fail_count = fail_count + 1;
+                    $display("WAIT_FOR TIMEOUT vec=%0d sig=%0d expected=0x%08X last=0x%08X after=%0d",
+                             vec_num, sig_id, value, obs, waited);
+                    done = 1'b1;
+                end else begin
+                    event_tick();
+                    waited = waited + 1;
+                end
+            end
+        end
+    endtask
+
+    // --------------------------------------------------------------------------
+    // check_at: advance to absolute cycle `target` (relative to last event_start)
+    // and verify sample_signal(id) == value.
+    // --------------------------------------------------------------------------
+    task automatic check_at(
+        input int          sig_id,
+        input logic [31:0] value,
+        input int          target,
+        input int          vec_num,
+        inout int          pass_count,
+        inout int          fail_count,
+        inout int          total_tests
+    );
+        logic [31:0] obs;
+        total_tests = total_tests + 1;
+        while (sim_cycle < target) event_tick();
+        obs = sample_signal(sig_id);
+        if (obs === value) begin
+            pass_count = pass_count + 1;
+        end else begin
+            fail_count = fail_count + 1;
+            $display("CHECK_AT MISMATCH vec=%0d sig=%0d cycle=%0d expected=0x%08X actual=0x%08X",
+                     vec_num, sig_id, target, value, obs);
+        end
+    endtask
+
+    // --------------------------------------------------------------------------
+    // check_not_yet: from current sim_cycle through `until_cycle`, verify the
+    // signal never equals `value`. JEDEC minimum-time guard. NB: `until` is a
+    // SystemVerilog reserved word, hence `until_cycle`.
+    // --------------------------------------------------------------------------
+    task automatic check_not_yet(
+        input int          sig_id,
+        input logic [31:0] value,
+        input int          until_cycle,
+        input int          vec_num,
+        inout int          pass_count,
+        inout int          fail_count,
+        inout int          total_tests
+    );
+        logic [31:0] obs;
+        bit violated;
+        total_tests = total_tests + 1;
+        violated = 1'b0;
+        while (sim_cycle < until_cycle) begin
+            if (!violated) begin
+                obs = sample_signal(sig_id);
+                if (obs === value) begin
+                    fail_count = fail_count + 1;
+                    $display("CHECK_NOT_YET VIOLATION vec=%0d sig=%0d value=0x%08X arrived=%0d min=%0d",
+                             vec_num, sig_id, value, sim_cycle, until_cycle);
+                    violated = 1'b1;
+                end
+            end
+            event_tick();
+        end
+        if (!violated) pass_count = pass_count + 1;
+    endtask
+
+    // --------------------------------------------------------------------------
+    // expect_handshake: wait for valid && ready on the same posedge. Records
+    // arrival under valid_id.
+    // --------------------------------------------------------------------------
+    task automatic expect_handshake(
+        input int valid_id,
+        input int ready_id,
+        input int timeout,
+        input int vec_num,
+        inout int pass_count,
+        inout int fail_count,
+        inout int total_tests
+    );
+        int waited;
+        bit done;
+        waited = 0;
+        done = 1'b0;
+        total_tests = total_tests + 1;
+        while (!done) begin
+            if (sample_signal(valid_id) === 32'h1 &&
+                sample_signal(ready_id) === 32'h1) begin
+                arrival_cycle[valid_id] = sim_cycle;
+                arrival_value[valid_id] = 1;
+                pass_count = pass_count + 1;
+                done = 1'b1;
+            end else if (waited >= timeout) begin
+                fail_count = fail_count + 1;
+                $display("HANDSHAKE TIMEOUT vec=%0d valid_sig=%0d ready_sig=%0d after=%0d",
+                         vec_num, valid_id, ready_id, waited);
+                done = 1'b1;
+            end else begin
+                event_tick();
+                waited = waited + 1;
+            end
+        end
+    endtask
+
+    // --------------------------------------------------------------------------
+    // check_order: verify two prior wait_for/expect_handshake events occurred
+    // in the right order with at least `min_gap` cycles between them.
+    // --------------------------------------------------------------------------
+    task automatic check_order(
+        input int first_id,
+        input int second_id,
+        input int min_gap,
+        input int vec_num,
+        inout int pass_count,
+        inout int fail_count,
+        inout int total_tests
+    );
+        int gap;
+        bit done;
+        done = 1'b0;
+        total_tests = total_tests + 1;
+        if (arrival_cycle[first_id] < 0) begin
+            fail_count = fail_count + 1;
+            $display("CHECK_ORDER MISSING vec=%0d first_sig=%0d never observed", vec_num, first_id);
+            done = 1'b1;
+        end
+        if (!done && arrival_cycle[second_id] < 0) begin
+            fail_count = fail_count + 1;
+            $display("CHECK_ORDER MISSING vec=%0d second_sig=%0d never observed", vec_num, second_id);
+            done = 1'b1;
+        end
+        if (!done) begin
+            gap = arrival_cycle[second_id] - arrival_cycle[first_id];
+            if (gap < min_gap) begin
+                fail_count = fail_count + 1;
+                $display("CHECK_ORDER VIOLATION vec=%0d first=%0d@%0d second=%0d@%0d gap=%0d min=%0d",
+                         vec_num, first_id, arrival_cycle[first_id],
+                         second_id, arrival_cycle[second_id], gap, min_gap);
+            end else begin
+                pass_count = pass_count + 1;
+            end
+        end
+    endtask
+
+
+
+
+    task automatic handle_reset();
+        rst_n = 1'b0;
+        q_valid_0 = '0;
+        q_row_0 = '0;
+        q_col_0 = '0;
+        q_bank_0 = '0;
+        q_we_0 = '0;
+        repeat(4) @(posedge clk);
+        rst_n = 1'b1;
+        @(posedge clk);
+        event_reset();  // clear arrival tracking + sim_cycle
+    endtask
+```
+
+TESTBENCH BEHAVIOR:
+- On opcode 00 (reset): Call handle_reset(). That is ALL. No other reset code.
+- On opcode 01 (drive): Call unpack_drive(DDDDDDDD). Then @(posedge clk).
+- On opcode 02 (check): @(posedge clk), then call pack_outputs(). Compare against EEEEEEEE.
+  On mismatch: $display("MISMATCH vec=%0d expected=0x%08X actual=0x%08X", vec_num, expect, actual).
+- On opcode 03 (step): repeat(PPPPPPPP) @(posedge clk).
+  NOTE: For event-mode compatibility, Stage 4 dispatch will replace this with
+  repeat(PPPPPPPP) event_tick() so sim_cycle stays consistent with event tasks.
+- Opcodes 04-09 (event mode, Stage 4): wait_for, check_at, check_not_yet,
+  expect_handshake, check_order, event_start. Use the verbatim event-mode task
+  library above. Do NOT reimplement these tasks.
+
+IMPORTANT:
+- Use $fscanf to read vectors line by line
+- $value$plusargs("VECTORS=%s", vector_file) with default "path_06_scheduler_dequeue_vectors.hex"
+- Track total_tests, pass_count, fail_count (count check ops as tests)
+- Print PASS/FAIL summary at end
+- Watchdog timeout: 200000 cycles
+- Module name: path_06_scheduler_dequeue_tb
+- NEVER use non-blocking assignments (<=) with associative arrays
+- NEVER use 'assign' statements for testbench-driven input signals
+- Port names must match EXACTLY
+- DO NOT add extra signals to pack_outputs or unpack_drive beyond what is shown above

@@ -1,0 +1,49 @@
+{
+  "path_id": "path_03_read_return",
+  "format": "OO PPPPPPPP DDDDDDDD EEEEEEEE",
+  "opcodes": {
+    "reset": 0,
+    "drive": 1,
+    "check": 2,
+    "step": 3
+  },
+  "input_packing": [
+    {
+      "block": "data_path",
+      "name": "cmd_wr_valid",
+      "width": 1,
+      "lo": 0,
+      "hi": 0
+    },
+    {
+      "block": "data_path",
+      "name": "cmd_rd_valid",
+      "width": 1,
+      "lo": 1,
+      "hi": 1
+    },
+    {
+      "block": "data_path",
+      "name": "wr_data_valid",
+      "width": 1,
+      "lo": 2,
+      "hi": 2
+    }
+  ],
+  "output_packing": [
+    {
+      "block": "data_path",
+      "name": "wr_data_ready",
+      "width": 1,
+      "lo": 0,
+      "hi": 0
+    },
+    {
+      "block": "data_path",
+      "name": "rd_rsp_valid",
+      "width": 1,
+      "lo": 1,
+      "hi": 1
+    }
+  ]
+}

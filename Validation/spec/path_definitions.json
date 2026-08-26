@@ -1,0 +1,505 @@
+{
+  "$comment": "DDR3-1600 Memory Controller — Path Definitions v2. Updated to match actual frontend-generated manifests.",
+  "schema_version": "2.0.0",
+  "source": "ddr3_block_diagram_v2.html + actual frontend manifests (Phase1/2/3)",
+  "spec_reference": "llmmc_microarchitecturespec_filled.json",
+
+  "spec_constants": {
+    "ROW_BITS": 15,
+    "COL_BITS": 10,
+    "BANK_BITS": 3,
+    "RANKS": 1,
+    "DATA_WIDTH": 32,
+    "ADDR_WIDTH": 29,
+    "BYTE_LANES": 2,
+    "CMD_QUEUE_DEPTH": 16,
+    "LOOKAHEAD": 8,
+    "AUX_WIDTH": 4,
+    "DDR_ADDR_BITS": 15,
+    "DDR_DATA_WIDTH": 16,
+    "DDR_DM_WIDTH": 2,
+    "DDR_DQS_WIDTH": 2,
+    "CSR_ADDR_BITS": 8,
+    "CSR_DATA_BITS": 32,
+    "MAX_POSTPONE": 8,
+    "URGENT_THRESH": 6
+  },
+
+  "blocks": {
+    "wb_port": {
+      "label": "Wishbone Port Interface",
+      "file": "wb_port.sv"
+    },
+    "addr_decoder": {
+      "label": "Address Decoder",
+      "file": "addr_decoder.sv"
+    },
+    "cmd_queue": {
+      "label": "Command Queue",
+      "file": "cmd_queue.sv"
+    },
+    "bank_tracker": {
+      "label": "Bank Status Tracker",
+      "file": "bank_tracker.sv"
+    },
+    "scheduler": {
+      "label": "FR-FCFS Scheduler",
+      "file": "scheduler.sv"
+    },
+    "refresh_ctrl": {
+      "label": "Refresh Controller",
+      "file": "refresh_ctrl.sv"
+    },
+    "cmd_gen": {
+      "label": "Command Generator",
+      "file": "cmd_gen.sv"
+    },
+    "data_path": {
+      "label": "Data Path & Alignment",
+      "file": "data_path.sv",
+      "$note": "No manifest found in frontend output — ports unverified"
+    },
+    "init_fsm": {
+      "label": "Init / Reset FSM",
+      "file": "init_fsm.sv"
+    },
+    "config_regs": {
+      "label": "Config / CSR Registers",
+      "file": "config_regs.sv"
+    },
+    "calibration": {
+      "label": "Calibration / ZQCS",
+      "file": "calibration.sv"
+    }
+  },
+
+  "direct_connections": [
+    {
+      "id": "conn_01",
+      "from": "wb_port",
+      "to": "addr_decoder",
+      "category": "request_path",
+      "signals": [
+        { "source_port": "req_addr", "sink_port": "req_addr", "width": 29 }
+      ],
+      "desc": "Wishbone port forwards host byte address to address decoder."
+    },
+    {
+      "id": "conn_02",
+      "from": "wb_port",
+      "to": "cmd_queue",
+      "category": "request_path",
+      "signals": [
+        { "source_port": "req_valid", "sink_port": "enq_valid", "width": 1 },
+        { "source_port": "req_we",    "sink_port": "enq_we",    "width": 1 },
+        { "source_port": "req_aux",   "sink_port": "enq_aux",   "width": 4 }
+      ],
+      "desc": "Wishbone port pushes request control into cmd_queue. Write data/mask handled separately via data_path."
+    },
+    {
+      "id": "conn_03",
+      "from": "addr_decoder",
+      "to": "cmd_queue",
+      "category": "request_path",
+      "signals": [
+        { "source_port": "dec_row",  "sink_port": "enq_row",  "width": 15 },
+        { "source_port": "dec_col",  "sink_port": "enq_col",  "width": 10 },
+        { "source_port": "dec_bank", "sink_port": "enq_bank", "width": 3 }
+      ],
+      "desc": "Decoded row/col/bank fields registered into cmd_queue entry."
+    },
+    {
+      "id": "conn_04",
+      "from": "cmd_queue",
+      "to": "scheduler",
+      "category": "scheduling",
+      "signals": [
+        { "source_port": "entry_valid", "sink_port": "q_valid", "width": 16 },
+        { "source_port": "entry_row",   "sink_port": "q_row",  "width": "16x15" },
+        { "source_port": "entry_col",   "sink_port": "q_col",  "width": "16x10" },
+        { "source_port": "entry_bank",  "sink_port": "q_bank", "width": "16x3" },
+        { "source_port": "entry_we",    "sink_port": "q_we",   "width": "16x1" },
+        { "source_port": "entry_aux",   "sink_port": "q_aux",  "width": "16x4" }
+      ],
+      "desc": "Command queue exposes per-entry fields to scheduler."
+    },
+    {
+      "id": "conn_05",
+      "from": "bank_tracker",
+      "to": "scheduler",
+      "category": "scheduling",
+      "signals": [
+        { "source_port": "bank_is_active",   "sink_port": "bank_is_active",   "width": 8 },
+        { "source_port": "bank_open_row",    "sink_port": "bank_open_row",    "width": "8x15" },
+        { "source_port": "bank_act_allowed", "sink_port": "bank_act_allowed", "width": 8 },
+        { "source_port": "bank_rd_allowed",  "sink_port": "bank_rd_allowed",  "width": 8 },
+        { "source_port": "bank_wr_allowed",  "sink_port": "bank_wr_allowed",  "width": 8 },
+        { "source_port": "bank_pre_allowed", "sink_port": "bank_pre_allowed", "width": 8 }
+      ],
+      "desc": "Bank tracker provides per-bank state and timing-clear flags to scheduler."
+    },
+    {
+      "id": "conn_06",
+      "from": "refresh_ctrl",
+      "to": "scheduler",
+      "category": "scheduling",
+      "signals": [
+        { "source_port": "ref_required", "sink_port": "ref_required", "width": 1 },
+        { "source_port": "ref_urgent",   "sink_port": "ref_urgent",   "width": 1 }
+      ],
+      "desc": "Refresh controller signals pending/urgent refresh to scheduler."
+    },
+    {
+      "id": "conn_07",
+      "from": "scheduler",
+      "to": "cmd_gen",
+      "category": "scheduling",
+      "signals": [
+        { "source_port": "cmd_valid", "sink_port": "sched_valid", "width": 1 },
+        { "source_port": "cmd_type",  "sink_port": "sched_type",  "width": 4 },
+        { "source_port": "cmd_bank",  "sink_port": "sched_bank",  "width": 3 },
+        { "source_port": "cmd_row",   "sink_port": "sched_row",   "width": 15 },
+        { "source_port": "cmd_col",   "sink_port": "sched_col",   "width": 10 },
+        { "source_port": "cmd_we",    "sink_port": "sched_we",    "width": 1 },
+        { "source_port": "cmd_aux",   "sink_port": "sched_aux",   "width": 4 }
+      ],
+      "desc": "Scheduler issues selected command to cmd_gen for DDR3 encoding."
+    },
+    {
+      "id": "conn_08",
+      "from": "scheduler",
+      "to": "refresh_ctrl",
+      "category": "scheduling",
+      "signals": [
+        { "source_port": "ref_ack", "sink_port": "ref_ack", "width": 1 }
+      ],
+      "desc": "Scheduler acknowledges refresh command was issued."
+    },
+    {
+      "id": "conn_09",
+      "from": "cmd_gen",
+      "to": "bank_tracker",
+      "category": "feedback",
+      "signals": [
+        { "source_port": "fb_act_valid", "sink_port": "cmd_act_valid", "width": 1 },
+        { "source_port": "fb_act_bank",  "sink_port": "cmd_act_bank",  "width": 3 },
+        { "source_port": "fb_act_row",   "sink_port": "cmd_act_row",   "width": 15 },
+        { "source_port": "fb_rd_valid",  "sink_port": "cmd_rd_valid",  "width": 1 },
+        { "source_port": "fb_wr_valid",  "sink_port": "cmd_wr_valid",  "width": 1 },
+        { "source_port": "fb_pre_valid", "sink_port": "cmd_pre_valid", "width": 1 },
+        { "source_port": "fb_ref_valid", "sink_port": "cmd_ref_valid", "width": 1 }
+      ],
+      "desc": "cmd_gen feeds back per-command-type valids to bank_tracker."
+    },
+    {
+      "id": "conn_10",
+      "from": "scheduler",
+      "to": "cmd_queue",
+      "category": "scheduling",
+      "signals": [
+        { "source_port": "deq_grant", "sink_port": "deq_grant", "width": 1 },
+        { "source_port": "deq_idx",   "sink_port": "deq_idx",   "width": 4 }
+      ],
+      "desc": "Scheduler grants dequeue of selected entry from cmd_queue."
+    },
+    {
+      "id": "conn_11",
+      "from": "data_path",
+      "to": "wb_port",
+      "category": "data_path",
+      "$note": "data_path manifest missing — cannot verify",
+      "signals": [
+        { "source_port": "rsp_valid", "sink_port": "rsp_valid", "width": 1 },
+        { "source_port": "rsp_rdata", "sink_port": "rsp_rdata", "width": 32 },
+        { "source_port": "rsp_aux",   "sink_port": "rsp_aux",   "width": 4 }
+      ],
+      "desc": "Data path returns deserialized read data to Wishbone port."
+    },
+    {
+      "id": "conn_12",
+      "from": "cmd_queue",
+      "to": "wb_port",
+      "category": "backpressure",
+      "signals": [
+        { "source_port": "enq_ready", "sink_port": "req_ready", "width": 1 }
+      ],
+      "desc": "Command queue backpressure to Wishbone port when full."
+    },
+    {
+      "id": "conn_13",
+      "from": "config_regs",
+      "to": "bank_tracker",
+      "category": "config",
+      "signals": [
+        { "source_port": "cfg_tRCD_nCK", "sink_port": "cfg_tRCD_nCK", "width": 8 },
+        { "source_port": "cfg_tRP_nCK",  "sink_port": "cfg_tRP_nCK",  "width": 8 },
+        { "source_port": "cfg_tRAS_nCK", "sink_port": "cfg_tRAS_nCK", "width": 8 },
+        { "source_port": "cfg_tRC_nCK",  "sink_port": "cfg_tRC_nCK",  "width": 8 },
+        { "source_port": "cfg_tRRD_nCK", "sink_port": "cfg_tRRD_nCK", "width": 8 },
+        { "source_port": "cfg_tFAW_nCK", "sink_port": "cfg_tFAW_nCK", "width": 8 },
+        { "source_port": "cfg_tWTR_nCK", "sink_port": "cfg_tWTR_nCK", "width": 8 },
+        { "source_port": "cfg_tWR_nCK",  "sink_port": "cfg_tWR_nCK",  "width": 8 },
+        { "source_port": "cfg_tRTP_nCK", "sink_port": "cfg_tRTP_nCK", "width": 8 },
+        { "source_port": "cfg_tCCD_nCK", "sink_port": "cfg_tCCD_nCK", "width": 8 },
+        { "source_port": "cfg_tRFC_nCK", "sink_port": "cfg_tRFC_nCK", "width": 8 }
+      ],
+      "desc": "CSR timing registers to bank tracker (11 individual timing parameters)."
+    },
+    {
+      "id": "conn_14",
+      "from": "config_regs",
+      "to": "refresh_ctrl",
+      "category": "config",
+      "signals": [
+        { "source_port": "cfg_max_postpone",     "sink_port": "cfg_max_postpone",     "width": 4 },
+        { "source_port": "cfg_urgent_threshold", "sink_port": "cfg_urgent_threshold",  "width": 4 },
+        { "source_port": "cfg_force_refresh",    "sink_port": "cfg_force_refresh",     "width": 1 },
+        { "source_port": "cfg_ref_priority",     "sink_port": "cfg_ref_priority",      "width": 1 },
+        { "source_port": "cfg_tREFI_nCK",        "sink_port": "cfg_tREFI_nCK",        "width": 24 }
+      ],
+      "desc": "CSR refresh configuration to refresh controller."
+    },
+    {
+      "id": "conn_15",
+      "from": "init_fsm",
+      "to": "calibration",
+      "category": "init",
+      "signals": [
+        { "source_port": "init_done", "sink_port": "init_done", "width": 1 }
+      ],
+      "desc": "Init FSM signals init_done to calibration block."
+    },
+    {
+      "id": "conn_16",
+      "from": "init_fsm",
+      "to": "refresh_ctrl",
+      "category": "init",
+      "signals": [
+        { "source_port": "init_done", "sink_port": "init_done", "width": 1 }
+      ],
+      "desc": "Init FSM signals init_done to refresh controller."
+    },
+    {
+      "id": "conn_17",
+      "from": "init_fsm",
+      "to": "config_regs",
+      "category": "status",
+      "signals": [
+        { "source_port": "init_done", "sink_port": "sts_init_done",       "width": 1 },
+        { "source_port": "init_fail", "sink_port": "sts_init_fail_event", "width": 1 }
+      ],
+      "desc": "Init FSM reports init_done and init_fail to CSR status."
+    },
+    {
+      "id": "conn_18",
+      "from": "calibration",
+      "to": "config_regs",
+      "category": "status",
+      "signals": [
+        { "source_port": "cal_done", "sink_port": "sts_cal_done", "width": 1 },
+        { "source_port": "cal_fail", "sink_port": "sts_cal_fail", "width": 1 }
+      ],
+      "desc": "Calibration reports cal_done/cal_fail to CSR status."
+    },
+    {
+      "id": "conn_19",
+      "from": "refresh_ctrl",
+      "to": "config_regs",
+      "category": "status",
+      "signals": [
+        { "source_port": "ref_starve_flag", "sink_port": "sts_ref_starve_event", "width": 1 },
+        { "source_port": "ref_pending_cnt", "sink_port": "sts_ref_pending_cnt",  "width": 3 }
+      ],
+      "desc": "Refresh controller reports starvation and pending count to CSR."
+    }
+  ],
+
+  "paths": [
+    {
+      "id": "path_01_write_cmd",
+      "name": "Write Command Path",
+      "category": "data_flow",
+      "blocks": ["wb_port", "addr_decoder", "cmd_queue", "scheduler", "cmd_gen"],
+      "connections_used": ["conn_01", "conn_02", "conn_03", "conn_04", "conn_07"],
+      "rtl_files": ["wb_port.sv", "addr_decoder.sv", "cmd_queue.sv", "scheduler.sv", "cmd_gen.sv"],
+      "entry_boundary": { "type": "external", "entity": "HOST", "signals": ["wb_cyc_i", "wb_stb_i", "wb_we_i", "wb_adr_i", "wb_dat_i", "wb_sel_i"] },
+      "exit_boundary": { "type": "ddr", "entity": "DDR3_SDRAM", "signals": ["ddr_cmd", "ddr_addr", "ddr_bank"] }
+    },
+    {
+      "id": "path_02_read_cmd",
+      "name": "Read Command Path",
+      "category": "data_flow",
+      "blocks": ["wb_port", "addr_decoder", "cmd_queue", "scheduler", "cmd_gen"],
+      "connections_used": ["conn_01", "conn_02", "conn_03", "conn_04", "conn_07"],
+      "rtl_files": ["wb_port.sv", "addr_decoder.sv", "cmd_queue.sv", "scheduler.sv", "cmd_gen.sv"],
+      "entry_boundary": { "type": "external", "entity": "HOST", "signals": ["wb_cyc_i", "wb_stb_i", "wb_adr_i"] },
+      "exit_boundary": { "type": "ddr", "entity": "DDR3_SDRAM", "signals": ["ddr_cmd", "ddr_addr", "ddr_bank"] }
+    },
+    {
+      "id": "path_03_read_return",
+      "name": "Read Data Return Path",
+      "category": "data_flow",
+      "blocks": ["data_path", "wb_port"],
+      "connections_used": ["conn_11"],
+      "rtl_files": ["data_path.sv", "wb_port.sv"],
+      "entry_boundary": { "type": "ddr", "entity": "DDR3_SDRAM", "signals": [] },
+      "exit_boundary": { "type": "external", "entity": "HOST", "signals": ["wb_ack_o", "wb_dat_o"] }
+    },
+    {
+      "id": "path_04_scheduler_bank_loop",
+      "name": "Scheduler → cmd_gen → Bank Tracker → Scheduler Feedback Loop",
+      "category": "feedback_loop",
+      "blocks": ["scheduler", "cmd_gen", "bank_tracker"],
+      "connections_used": ["conn_07", "conn_09", "conn_05"],
+      "rtl_files": ["scheduler.sv", "cmd_gen.sv", "bank_tracker.sv"]
+    },
+    {
+      "id": "path_05_scheduler_refresh_loop",
+      "name": "Scheduler ↔ Refresh Controller Feedback Loop",
+      "category": "feedback_loop",
+      "blocks": ["scheduler", "refresh_ctrl"],
+      "connections_used": ["conn_06", "conn_08"],
+      "rtl_files": ["scheduler.sv", "refresh_ctrl.sv"]
+    },
+    {
+      "id": "path_06_scheduler_dequeue",
+      "name": "Scheduler → Command Queue Dequeue",
+      "category": "scheduling",
+      "blocks": ["scheduler", "cmd_queue"],
+      "connections_used": ["conn_10"],
+      "rtl_files": ["scheduler.sv", "cmd_queue.sv"]
+    },
+    {
+      "id": "path_07_backpressure",
+      "name": "Command Queue → Wishbone Backpressure",
+      "category": "flow_control",
+      "blocks": ["cmd_queue", "wb_port"],
+      "connections_used": ["conn_12"],
+      "rtl_files": ["cmd_queue.sv", "wb_port.sv"],
+      "entry_boundary": { "type": "internal", "entity": "cmd_queue", "signals": ["enq_ready", "queue_count"] },
+      "exit_boundary": { "type": "external", "entity": "HOST", "signals": ["wb_stall_o"] }
+    },
+    {
+      "id": "path_08_init_to_cal",
+      "mode": "event",
+      "name": "Init FSM → Calibration",
+      "category": "init",
+      "blocks": ["init_fsm", "calibration"],
+      "connections_used": ["conn_15"],
+      "rtl_files": ["init_fsm.sv", "calibration.sv"]
+    },
+    {
+      "id": "path_09_init_to_refresh",
+      "mode": "event",
+      "name": "Init FSM → Refresh Controller",
+      "category": "init",
+      "blocks": ["init_fsm", "refresh_ctrl"],
+      "connections_used": ["conn_16"],
+      "rtl_files": ["init_fsm.sv", "refresh_ctrl.sv"]
+    },
+    {
+      "id": "path_10_csr_to_timing",
+      "name": "CSR → Bank Tracker Timing Configuration",
+      "category": "config",
+      "blocks": ["config_regs", "bank_tracker"],
+      "connections_used": ["conn_13"],
+      "rtl_files": ["config_regs.sv", "bank_tracker.sv"],
+      "entry_boundary": { "type": "external", "entity": "CSR_BUS", "signals": ["csr_cyc_i", "csr_stb_i", "csr_we_i", "csr_adr_i", "csr_dat_i"] },
+      "exit_boundary": { "type": "internal", "entity": "bank_tracker", "signals": ["cfg_tRCD_nCK"] }
+    },
+    {
+      "id": "path_11_csr_to_refresh",
+      "name": "CSR → Refresh Controller Configuration",
+      "category": "config",
+      "blocks": ["config_regs", "refresh_ctrl"],
+      "connections_used": ["conn_14"],
+      "rtl_files": ["config_regs.sv", "refresh_ctrl.sv"],
+      "entry_boundary": { "type": "external", "entity": "CSR_BUS", "signals": ["csr_cyc_i", "csr_stb_i", "csr_we_i", "csr_adr_i", "csr_dat_i"] },
+      "exit_boundary": { "type": "internal", "entity": "refresh_ctrl", "signals": ["cfg_max_postpone"] }
+    },
+    {
+      "id": "path_12_csr_timing_to_scheduling",
+      "name": "CSR → Bank Tracker → Scheduler (Transitive Config)",
+      "category": "config",
+      "blocks": ["config_regs", "bank_tracker", "scheduler"],
+      "connections_used": ["conn_13", "conn_05"],
+      "rtl_files": ["config_regs.sv", "bank_tracker.sv", "scheduler.sv"]
+    },
+    {
+      "id": "path_13_csr_refresh_to_scheduling",
+      "name": "CSR → Refresh Ctrl → Scheduler (Transitive Config)",
+      "category": "config",
+      "blocks": ["config_regs", "refresh_ctrl", "scheduler"],
+      "connections_used": ["conn_14", "conn_06"],
+      "rtl_files": ["config_regs.sv", "refresh_ctrl.sv", "scheduler.sv"]
+    },
+    {
+      "id": "path_14_status_init",
+      "mode": "event",
+      "name": "Init FSM → CSR Status Reporting",
+      "category": "status",
+      "blocks": ["init_fsm", "config_regs"],
+      "connections_used": ["conn_17"],
+      "rtl_files": ["init_fsm.sv", "config_regs.sv"]
+    },
+    {
+      "id": "path_15_status_cal",
+      "mode": "event",
+      "name": "Calibration → CSR Status Reporting",
+      "category": "status",
+      "blocks": ["calibration", "config_regs"],
+      "connections_used": ["conn_18"],
+      "rtl_files": ["calibration.sv", "config_regs.sv"]
+    },
+    {
+      "id": "path_16_status_refresh",
+      "name": "Refresh Ctrl → CSR Status Reporting",
+      "category": "status",
+      "blocks": ["refresh_ctrl", "config_regs"],
+      "connections_used": ["conn_19"],
+      "rtl_files": ["refresh_ctrl.sv", "config_regs.sv"]
+    },
+    {
+      "id": "path_17_full_boot",
+      "mode": "event",
+      "name": "Full Init → Cal → Status Path",
+      "category": "init",
+      "blocks": ["init_fsm", "calibration", "config_regs"],
+      "connections_used": ["conn_15", "conn_17", "conn_18"],
+      "rtl_files": ["init_fsm.sv", "calibration.sv", "config_regs.sv"]
+    },
+    {
+      "id": "path_18_full_write",
+      "name": "Full Write Transaction (End-to-End)",
+      "category": "end_to_end",
+      "blocks": ["wb_port", "addr_decoder", "cmd_queue", "scheduler", "cmd_gen"],
+      "connections_used": ["conn_01", "conn_02", "conn_03", "conn_04", "conn_07"],
+      "rtl_files": ["wb_port.sv", "addr_decoder.sv", "cmd_queue.sv", "scheduler.sv", "cmd_gen.sv"],
+      "entry_boundary": { "type": "external", "entity": "HOST", "signals": ["wb_cyc_i", "wb_stb_i", "wb_we_i", "wb_adr_i", "wb_dat_i", "wb_sel_i"] },
+      "exit_boundary": { "type": "ddr", "entity": "DDR3_SDRAM", "signals": ["ddr_cmd", "ddr_addr", "ddr_bank"] }
+    },
+    {
+      "id": "path_19_row_conflict",
+      "name": "Row Conflict Resolution (PRE → ACT → RD/WR)",
+      "category": "end_to_end",
+      "blocks": ["wb_port", "addr_decoder", "cmd_queue", "scheduler", "cmd_gen", "bank_tracker"],
+      "connections_used": ["conn_01", "conn_02", "conn_03", "conn_04", "conn_05", "conn_07", "conn_09"],
+      "rtl_files": ["wb_port.sv", "addr_decoder.sv", "cmd_queue.sv", "scheduler.sv", "cmd_gen.sv", "bank_tracker.sv"]
+    },
+    {
+      "id": "path_20_refresh_preempt",
+      "name": "Transaction Preempted by Urgent Refresh",
+      "category": "end_to_end",
+      "blocks": ["wb_port", "addr_decoder", "cmd_queue", "scheduler", "refresh_ctrl", "cmd_gen"],
+      "connections_used": ["conn_01", "conn_02", "conn_03", "conn_04", "conn_06", "conn_07", "conn_08"],
+      "rtl_files": ["wb_port.sv", "addr_decoder.sv", "cmd_queue.sv", "scheduler.sv", "refresh_ctrl.sv", "cmd_gen.sv"]
+    }
+  ],
+
+  "validation_summary": {
+    "total_blocks": 11,
+    "total_direct_connections": 19,
+    "total_paths": 20,
+    "data_path_manifest_missing": true
+  }
+}

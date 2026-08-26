@@ -1,0 +1,855 @@
+{
+  "scope": "path_01_write_cmd",
+  "generator": "vector_gen_agent_llm",
+  "spec_source": "llmmc_microarchitecturespec_filled.json",
+  "generated_at": "2026-04-08T10:16:16.072908",
+  "vector_count": 169,
+  "hex_format": "unknown",
+  "vectors": [
+    {
+      "hex_line": "00 00000000 00000000 00000000",
+      "op": 0,
+      "comment": "RESET"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify initial state after reset"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "DDR interface in reset state"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Allow reset to propagate"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Initialize Wishbone inputs to idle"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Initialize bank status - all operations allowed"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "No refresh pending"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Stabilize after init"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Controller ready to accept commands"
+    },
+    {
+      "hex_line": "01 00000000 00000807 00000001",
+      "op": 1,
+      "comment": "Issue single write to address 0x100"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock in write request"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Write accepted, queue no longer empty"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify write data and mask captured"
+    },
+    {
+      "hex_line": "01 00000000 00000001 00000000",
+      "op": 1,
+      "comment": "Deassert strobe, keep cycle"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Write acknowledged"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End Wishbone transaction"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Let command propagate to scheduler"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "One command in queue"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Simulate bank 0 active with row 0 open"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler evaluates bank state"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler issues write command"
+    },
+    {
+      "hex_line": "03 00000004 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for command generation (tCCD)"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "DDR WRITE command on bus (CAS-low, RAS-high, WE-low)"
+    },
+    {
+      "hex_line": "03 00000008 00000000 00000000",
+      "op": 3,
+      "comment": "Complete burst transfer"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Queue drained after write completes"
+    },
+    {
+      "hex_line": "01 00000000 00001007 00000000",
+      "op": 1,
+      "comment": "Start incrementing burst write"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "First beat of burst"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "First beat acknowledged"
+    },
+    {
+      "hex_line": "01 00000000 00001020 00000000",
+      "op": 1,
+      "comment": "Second beat of burst"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock second beat"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Second beat acknowledged"
+    },
+    {
+      "hex_line": "01 00000000 00001040 00000000",
+      "op": 1,
+      "comment": "Third beat of burst"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock third beat"
+    },
+    {
+      "hex_line": "01 00000000 00001060 00000000",
+      "op": 1,
+      "comment": "Fourth beat - end of burst"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock final beat"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Burst end acknowledged"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End burst transaction"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow burst to settle"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Burst coalesced into single DDR command"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Bank not active - needs activation"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler sees inactive bank"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler issues activate command"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRCD cycles"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Bank now active after ACT"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Update bank state"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Write command issued after activation"
+    },
+    {
+      "hex_line": "03 0000000C 00000000 00000000",
+      "op": 3,
+      "comment": "Complete write with tWR"
+    },
+    {
+      "hex_line": "01 00000000 01000007 00000000",
+      "op": 1,
+      "comment": "Write to different row forcing precharge"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Queue new write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End transaction"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Precharge needed for row miss"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRP cycles"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "New row activation"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRCD"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Write after row change"
+    },
+    {
+      "hex_line": "03 00000008 00000000 00000000",
+      "op": 3,
+      "comment": "Complete transfer"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Disable write to simulate timing constraint"
+    },
+    {
+      "hex_line": "01 00000000 00002007 00000000",
+      "op": 1,
+      "comment": "Write while timing blocked"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Queue write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End transaction"
+    },
+    {
+      "hex_line": "03 00000003 00000000 00000000",
+      "op": 3,
+      "comment": "Wait while blocked"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Write held back by timing"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Re-enable writes"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Timing clear"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Write released when timing allows"
+    },
+    {
+      "hex_line": "03 00000008 00000000 00000000",
+      "op": 3,
+      "comment": "Complete transfer"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Request refresh"
+    },
+    {
+      "hex_line": "01 00000000 00004007 00000000",
+      "op": 1,
+      "comment": "Write during refresh request"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Queue write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End transaction"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler arbitrates"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Write has priority over non-urgent refresh"
+    },
+    {
+      "hex_line": "03 00000008 00000000 00000000",
+      "op": 3,
+      "comment": "Complete write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Refresh acknowledged after write completes"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Clear refresh request"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC cycles"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Urgent refresh request"
+    },
+    {
+      "hex_line": "01 00000000 00006007 00000001",
+      "op": 1,
+      "comment": "Write during urgent refresh"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Queue write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End transaction"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler arbitrates"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Urgent refresh takes priority"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Clear refresh"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Queued write executes after refresh"
+    },
+    {
+      "hex_line": "03 00000008 00000000 00000000",
+      "op": 3,
+      "comment": "Complete write"
+    },
+    {
+      "hex_line": "01 00000000 00000007 00000001",
+      "op": 1,
+      "comment": "Write with partial byte select"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Queue partial write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Only byte 0 written"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End transaction"
+    },
+    {
+      "hex_line": "03 0000000A 00000000 00000000",
+      "op": 3,
+      "comment": "Complete transfer"
+    },
+    {
+      "hex_line": "01 00000000 00000027 00000001",
+      "op": 1,
+      "comment": "Write with non-contiguous byte mask"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Queue write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Bytes 1 and 3 enabled"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End transaction"
+    },
+    {
+      "hex_line": "03 0000000A 00000000 00000000",
+      "op": 3,
+      "comment": "Complete transfer"
+    },
+    {
+      "hex_line": "01 00000000 00000327 00000001",
+      "op": 1,
+      "comment": "Back-to-back write 1"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "First write"
+    },
+    {
+      "hex_line": "01 00000000 00000340 00000000",
+      "op": 1,
+      "comment": "Back-to-back write 2"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Second write"
+    },
+    {
+      "hex_line": "01 00000000 00000360 00000000",
+      "op": 1,
+      "comment": "Back-to-back write 3"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Third write"
+    },
+    {
+      "hex_line": "01 00000000 00000380 00000000",
+      "op": 1,
+      "comment": "Back-to-back write 4"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Fourth write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End back-to-back sequence"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "All four writes queued"
+    },
+    {
+      "hex_line": "03 00000028 00000000 00000000",
+      "op": 3,
+      "comment": "Drain queue"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Queue empty after draining"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Setup for queue fill test"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Stabilize"
+    },
+    {
+      "hex_line": "01 00000000 00000007 00000001",
+      "op": 1,
+      "comment": "Start filling queue"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Queue entry 0"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock entry"
+    },
+    {
+      "hex_line": "01 00000000 00000080 00000000",
+      "op": 1,
+      "comment": "Queue entry 1"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock entry"
+    },
+    {
+      "hex_line": "01 00000000 00000100 00000000",
+      "op": 1,
+      "comment": "Queue entry 2"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock entry"
+    },
+    {
+      "hex_line": "01 00000000 00000180 00000000",
+      "op": 1,
+      "comment": "Queue entry 3"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock entry"
+    },
+    {
+      "hex_line": "01 00000000 00000200 00000000",
+      "op": 1,
+      "comment": "Queue entry 4"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock entry"
+    },
+    {
+      "hex_line": "01 00000000 00000280 00000000",
+      "op": 1,
+      "comment": "Queue entry 5"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock entry"
+    },
+    {
+      "hex_line": "01 00000000 00000300 00000000",
+      "op": 1,
+      "comment": "Queue entry 6"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock entry"
+    },
+    {
+      "hex_line": "01 00000000 00000380 00000000",
+      "op": 1,
+      "comment": "Queue entry 7"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock entry"
+    },
+    {
+      "hex_line": "01 00000000 00000400 00000000",
+      "op": 1,
+      "comment": "Queue entry 8"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock entry"
+    },
+    {
+      "hex_line": "01 00000000 00000480 00000000",
+      "op": 1,
+      "comment": "Queue entry 9"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock entry"
+    },
+    {
+      "hex_line": "01 00000000 00000500 00000000",
+      "op": 1,
+      "comment": "Queue entry 10"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock entry"
+    },
+    {
+      "hex_line": "01 00000000 00000580 00000000",
+      "op": 1,
+      "comment": "Queue entry 11"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock entry"
+    },
+    {
+      "hex_line": "01 00000000 00000600 00000000",
+      "op": 1,
+      "comment": "Queue entry 12"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock entry"
+    },
+    {
+      "hex_line": "01 00000000 00000680 00000000",
+      "op": 1,
+      "comment": "Queue entry 13"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock entry"
+    },
+    {
+      "hex_line": "01 00000000 00000700 00000000",
+      "op": 1,
+      "comment": "Queue entry 14"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock entry"
+    },
+    {
+      "hex_line": "01 00000000 00000780 00000000",
+      "op": 1,
+      "comment": "Queue entry 15 - should fill queue"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock final entry"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Queue at maximum capacity"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Wishbone stalled due to full queue"
+    },
+    {
+      "hex_line": "01 00000000 00000800 00000000",
+      "op": 1,
+      "comment": "Attempt write to full queue"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Should remain stalled"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Write blocked by full queue"
+    },
+    {
+      "hex_line": "03 00000014 00000000 00000000",
+      "op": 3,
+      "comment": "Allow some queue drain"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Stall released as queue drains"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Blocked write now accepted"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End fill test"
+    },
+    {
+      "hex_line": "03 000000C8 00000000 00000000",
+      "op": 3,
+      "comment": "Drain remaining queue entries"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Queue fully drained"
+    },
+    {
+      "hex_line": "01 00000000 FFFFFFE7 00000001",
+      "op": 1,
+      "comment": "Write to maximum address"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Queue boundary write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Valid address accepted"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End transaction"
+    },
+    {
+      "hex_line": "03 00000014 00000000 00000000",
+      "op": 3,
+      "comment": "Complete boundary write"
+    },
+    {
+      "hex_line": "01 00000000 04000007 00000001",
+      "op": 1,
+      "comment": "Write to bank 1 (different from bank 0)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Queue cross-bank write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End transaction"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow decode"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Activate issued to bank 1"
+    },
+    {
+      "hex_line": "03 0000001E 00000000 00000000",
+      "op": 3,
+      "comment": "Complete cross-bank operation"
+    },
+    {
+      "hex_line": "00 00000000 00000000 00000000",
+      "op": 0,
+      "comment": "RESET"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Recovery after mid-test reset"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Clean state after reset"
+    }
+  ]
+}

@@ -1,0 +1,805 @@
+{
+  "scope": "path_10_csr_to_timing",
+  "generator": "vector_gen_agent_llm",
+  "spec_source": "llmmc_microarchitecturespec_filled.json",
+  "generated_at": "2026-04-21T15:15:02.229681",
+  "vector_count": 159,
+  "hex_format": "unknown",
+  "vectors": [
+    {
+      "hex_line": "00 00000000 00000000 00000000",
+      "op": 0,
+      "comment": "Initialize DUT and verify clean state"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Allow reset to propagate through pipeline"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify CSR interface idle after reset"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "All banks should be idle after reset"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Ensure CSR bus is idle"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Stabilize after reset"
+    },
+    {
+      "hex_line": "01 00000000 00000007 00000001",
+      "op": 1,
+      "comment": "Write CL=11 to CSR register 0"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for CSR write to complete"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CSR write should be acknowledged"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Allow ack to deassert"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify CL timing propagated to bank tracker"
+    },
+    {
+      "hex_line": "01 00000000 00000027 00000001",
+      "op": 1,
+      "comment": "Write CWL=8 to CSR register 1"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for CSR write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CSR write acknowledged"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation delay"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify CWL timing propagated"
+    },
+    {
+      "hex_line": "01 00000000 00000047 00000001",
+      "op": 1,
+      "comment": "Write tREFI=6240 cycles to CSR register 2"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for CSR write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CSR write acknowledged"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation delay"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify tREFI timing propagated to bank tracker"
+    },
+    {
+      "hex_line": "01 00000000 00000067 00000001",
+      "op": 1,
+      "comment": "Write sched_policy=0 (FCFS)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for CSR write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify scheduling policy propagated"
+    },
+    {
+      "hex_line": "01 00000000 00000087 00000001",
+      "op": 1,
+      "comment": "Write row_policy=1 (open page)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for CSR write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify row policy propagated"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Signal initialization complete"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow status to propagate"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Issue ACTIVATE to bank 0, row 100"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Process activate command"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Activate should be allowed initially"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Bank becomes active"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert activate"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow bank state update"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Read not allowed yet - tRCD not met (11 cycles)"
+    },
+    {
+      "hex_line": "03 00000008 00000000 00000000",
+      "op": 3,
+      "comment": "Wait partial tRCD"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Still waiting for tRCD"
+    },
+    {
+      "hex_line": "03 00000003 00000000 00000000",
+      "op": 3,
+      "comment": "Complete tRCD wait"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Read now allowed after tRCD=11 cycles"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Issue READ to bank 0"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Process read command"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert read"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Process"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Precharge not allowed - tRTP not met"
+    },
+    {
+      "hex_line": "03 00000006 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for tRTP=6 cycles"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Precharge now allowed after tRTP"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Issue ACTIVATE to bank 1"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Process activate"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert activate"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for tRCD"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Write allowed after tRCD on bank 1"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Issue WRITE to bank 1"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Process write command"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert write"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Process"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Read not allowed - tWTR not met"
+    },
+    {
+      "hex_line": "03 00000006 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for tWTR=6 cycles"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Read now allowed after tWTR"
+    },
+    {
+      "hex_line": "01 00000000 00000007 00000001",
+      "op": 1,
+      "comment": "Boundary test: Write CL=0 (minimum)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for CSR write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify minimum CL boundary handled"
+    },
+    {
+      "hex_line": "01 00000000 00000007 00000001",
+      "op": 1,
+      "comment": "Boundary test: Write CL=255 (maximum 8-bit)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for CSR write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify maximum CL boundary handled"
+    },
+    {
+      "hex_line": "01 00000000 00000007 00000001",
+      "op": 1,
+      "comment": "Back-to-back write 1: CL=11"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "First write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "First write ack"
+    },
+    {
+      "hex_line": "01 00000000 00000020 00000000",
+      "op": 1,
+      "comment": "Back-to-back write 2: CWL=8 (keep cyc/stb/we asserted)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Second write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Second write ack"
+    },
+    {
+      "hex_line": "01 00000000 00000040 00000000",
+      "op": 1,
+      "comment": "Back-to-back write 3: tREFI=3120"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Third write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Third write ack"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End burst"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify all back-to-back writes propagated"
+    },
+    {
+      "hex_line": "01 00000000 00000003 00000001",
+      "op": 1,
+      "comment": "Read back CL register"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for read"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify CL readback"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Cleanup"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Issue PRECHARGE to bank 0"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Process precharge"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert precharge"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Bank transitioning to idle"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Activate not allowed - tRP not met"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for tRP=11 cycles"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Activate now allowed after tRP"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Issue REFRESH command"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Process refresh"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert refresh"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Refresh in progress"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "All activates blocked during refresh"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for tRFC=128 cycles"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Activates allowed after tRFC"
+    },
+    {
+      "hex_line": "01 00000000 000000A7 00000001",
+      "op": 1,
+      "comment": "Enable ECC via CSR"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify ECC enable propagated"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Activate bank 2 for tRAS test"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Process activate"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert activate"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for tRCD"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Issue WRITE to bank 2"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Process write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert write"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Check tRAS constraint"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Precharge blocked - tRAS not met (28 cycles)"
+    },
+    {
+      "hex_line": "03 00000014 00000000 00000000",
+      "op": 3,
+      "comment": "Wait more cycles toward tRAS"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Still waiting for tRAS and tWR"
+    },
+    {
+      "hex_line": "03 0000000A 00000000 00000000",
+      "op": 3,
+      "comment": "Complete tRAS/tWR wait"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Precharge now allowed after tRAS=28"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Issue PRECHARGE ALL"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Process precharge all"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert precharge"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for tRP on all banks"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "All banks should be idle after precharge all"
+    },
+    {
+      "hex_line": "01 00000000 000000C7 00000001",
+      "op": 1,
+      "comment": "Set max_postpone=8"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "CSR write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify max_postpone propagated"
+    },
+    {
+      "hex_line": "01 00000000 000000E7 00000001",
+      "op": 1,
+      "comment": "Set urgent_threshold=4"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "CSR write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify urgent_threshold propagated"
+    },
+    {
+      "hex_line": "01 00000000 00000107 00000001",
+      "op": 1,
+      "comment": "Set ref_priority=2"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "CSR write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify ref_priority propagated to bank tracker"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Simulate pending refresh count"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow status propagation"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Activate bank 3"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Process activate"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert activate"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Activate bank 4 - test tRRD"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Process second activate"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Third activate blocked by tRRD=6"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert activate"
+    },
+    {
+      "hex_line": "03 00000006 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for tRRD"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Activate allowed after tRRD"
+    },
+    {
+      "hex_line": "00 00000000 00000000 00000000",
+      "op": 0,
+      "comment": "Final reset to verify clean shutdown"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Allow reset to complete"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify clean state after final reset"
+    }
+  ]
+}

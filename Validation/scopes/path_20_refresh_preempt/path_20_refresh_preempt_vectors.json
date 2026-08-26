@@ -1,0 +1,665 @@
+{
+  "scope": "path_20_refresh_preempt",
+  "generator": "vector_gen_agent_llm",
+  "spec_source": "llmmc_microarchitecturespec_filled.json",
+  "generated_at": "2026-04-08T10:55:25.196532",
+  "vector_count": 131,
+  "hex_format": "unknown",
+  "vectors": [
+    {
+      "hex_line": "00 00000000 00000000 00000000",
+      "op": 0,
+      "comment": "Assert reset to initialize all blocks in the path"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Hold reset for 5 cycles to ensure all state machines settle"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify initial state after reset: queues empty, no refresh pending, DDR inactive"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Signal initialization complete and configure refresh timing parameters"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow config to propagate through refresh_ctrl and scheduler"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "DDR interface should be active after init_done, no refresh pending yet"
+    },
+    {
+      "hex_line": "01 00000000 00000003 00000001",
+      "op": 1,
+      "comment": "Issue a simple read to address 0x0 (bank 0, row 0, col 0) - normal operation baseline"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock the read request into wb_port and addr_decoder"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Request should be enqueued; queue no longer empty"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "De-assert strobe after single-beat transaction"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow scheduler to pick up the command from queue"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler should issue a READ command since bank is active with matching row, no refresh preemption yet"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Let the read complete and clear from pipeline"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End the Wishbone cycle"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Queue should be drained, still no refresh pending"
+    },
+    {
+      "hex_line": "01 00000000 00010007 00000000",
+      "op": 1,
+      "comment": "Issue a write to address 0x2000 (maps to bank 0, row 0, col 512 with row-bank-col mapping)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock write request in"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Write accepted into queue"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "De-assert strobe"
+    },
+    {
+      "hex_line": "03 00000003 00000000 00000000",
+      "op": 3,
+      "comment": "Allow scheduler to issue the WRITE command"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler issues WRITE, still no refresh preemption"
+    },
+    {
+      "hex_line": "03 0000000A 00000000 00000000",
+      "op": 3,
+      "comment": "Complete write and drain"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End cycle"
+    },
+    {
+      "hex_line": "03 00001838 00000000 00000000",
+      "op": 3,
+      "comment": "Advance close to tREFI boundary (6240 cycles) to approach first refresh"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "After ~6240 cycles, one refresh should be pending"
+    },
+    {
+      "hex_line": "01 00000000 00020003 00000000",
+      "op": 1,
+      "comment": "Issue a burst read to a closed bank right as refresh becomes pending - requires ACT first"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock in first beat of burst"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Request accepted, refresh pending but not yet urgent"
+    },
+    {
+      "hex_line": "01 00000000 00020020 00000000",
+      "op": 1,
+      "comment": "Second beat of burst"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock second beat"
+    },
+    {
+      "hex_line": "01 00000000 00020040 00000000",
+      "op": 1,
+      "comment": "Third beat of burst"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock third beat"
+    },
+    {
+      "hex_line": "01 00000000 00020060 00000000",
+      "op": 1,
+      "comment": "Fourth and last beat of burst (end-of-burst)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock final beat"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End burst strobe"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Four burst beats should be in the command queue"
+    },
+    {
+      "hex_line": "03 00000003 00000000 00000000",
+      "op": 3,
+      "comment": "Allow scheduler to begin processing - should see ACT then READs"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler should issue ACTIVATE for the closed bank before reads"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRCD (11 cycles) for bank to become active"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Bank is now active and ready for reads"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler processes first read"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "First READ of burst issued"
+    },
+    {
+      "hex_line": "03 0000000F 00000000 00000000",
+      "op": 3,
+      "comment": "Process remaining reads in burst"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End transaction"
+    },
+    {
+      "hex_line": "03 00001770 00000000 00000000",
+      "op": 3,
+      "comment": "Advance time to accumulate multiple missed refreshes towards urgent threshold"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Two refreshes should now be pending (two tREFI intervals elapsed without refresh)"
+    },
+    {
+      "hex_line": "03 00001860 00000000 00000000",
+      "op": 3,
+      "comment": "Another full tREFI interval to push pending count higher"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Three refreshes pending, approaching urgent threshold of 5"
+    },
+    {
+      "hex_line": "03 000030C0 00000000 00000000",
+      "op": 3,
+      "comment": "Two more tREFI intervals to reach urgent threshold"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Pending count hits 5 (cfg_urgent_threshold), urgent/starve flag should assert"
+    },
+    {
+      "hex_line": "01 00000000 00200007 00000000",
+      "op": 1,
+      "comment": "Issue a write while refresh is URGENT - this should be preempted by refresh"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock write request in"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Write enqueued but refresh is urgent, scheduler should prioritize refresh"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "De-assert strobe after single beat"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow scheduler to arbitrate - urgent refresh should win"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CRITICAL CHECK: Scheduler issues REFRESH instead of WRITE - transaction preempted by urgent refresh"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC (128 cycles) for refresh to complete"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "One refresh completed, pending count decremented from 5 to 4"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler should now check if still urgent and possibly issue another refresh or the queued write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Still at or above threshold, another refresh may be issued before the write"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait another tRFC for second refresh"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Second refresh done, count drops to 3 - below urgent threshold"
+    },
+    {
+      "hex_line": "03 00000003 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler should now allow the queued write to proceed"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Write finally issued now that refresh is no longer urgent, starve flag cleared"
+    },
+    {
+      "hex_line": "03 0000000A 00000000 00000000",
+      "op": 3,
+      "comment": "Complete the write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End Wishbone cycle"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Force immediate refresh via config - boundary condition test"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Apply force refresh"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Force refresh increments pending count or triggers immediate refresh scheduling"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler picks up forced refresh"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Forced refresh issued to DDR3"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "De-assert force refresh"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC"
+    },
+    {
+      "hex_line": "01 00000000 00000003 00000000",
+      "op": 1,
+      "comment": "Start a burst read to fill the queue while refresh is still pending"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Beat 1"
+    },
+    {
+      "hex_line": "01 00000000 00000020 00000000",
+      "op": 1,
+      "comment": "Beat 2"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock beat 2"
+    },
+    {
+      "hex_line": "01 00000000 00000040 00000000",
+      "op": 1,
+      "comment": "Beat 3"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock beat 3"
+    },
+    {
+      "hex_line": "01 00000000 00000060 00000000",
+      "op": 1,
+      "comment": "Beat 4"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock beat 4"
+    },
+    {
+      "hex_line": "01 00000000 00000080 00000000",
+      "op": 1,
+      "comment": "Beat 5"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock beat 5"
+    },
+    {
+      "hex_line": "01 00000000 000000A0 00000000",
+      "op": 1,
+      "comment": "Beat 6"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock beat 6"
+    },
+    {
+      "hex_line": "01 00000000 000000C0 00000000",
+      "op": 1,
+      "comment": "Beat 7"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock beat 7"
+    },
+    {
+      "hex_line": "01 00000000 000000E0 00000000",
+      "op": 1,
+      "comment": "Beat 8 (end of burst)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock final beat"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End burst"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Full 8-beat burst queued"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Lower urgent threshold to 2 to make current pending count (3) immediately urgent"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Apply new threshold"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Pending count 3 exceeds new threshold 2, starve flag asserts"
+    },
+    {
+      "hex_line": "03 00000003 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler should preempt the queued burst reads with refresh"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Burst reads preempted by urgent refresh due to lowered threshold"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC for refresh completion"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Check if another refresh or reads proceed"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "One refresh done, pending now 2 - still at threshold"
+    },
+    {
+      "hex_line": "03 00000082 00000000 00000000",
+      "op": 3,
+      "comment": "Allow one more refresh cycle if still at threshold"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Below threshold now, reads should proceed"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler starts processing queued reads"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Reads now being issued, starve flag cleared"
+    },
+    {
+      "hex_line": "03 0000001E 00000000 00000000",
+      "op": 3,
+      "comment": "Allow all 8 reads to complete"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End transaction"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "All burst reads completed after refresh preemption"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Restore threshold but set max postpone to 1 - refresh cannot be delayed even once"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Apply config"
+    },
+    {
+      "hex_line": "01 00000000 00400003 00000000",
+      "op": 1,
+      "comment": "Issue read right before next tREFI boundary with max_postpone=1"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock in read"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Single beat done"
+    },
+    {
+      "hex_line": "03 00001860 00000000 00000000",
+      "op": 3,
+      "comment": "Advance to next tREFI - refresh becomes pending"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Refresh pending, with max_postpone=1 this should immediately become urgent"
+    },
+    {
+      "hex_line": "03 00000003 00000000 00000000",
+      "op": 3,
+      "comment": "Allow scheduler to react"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Immediate refresh due to max_postpone=1 - no transaction can delay it"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Restore normal max_postpone"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Stall downstream cmd_gen to test backpressure during refresh"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Apply backpressure"
+    },
+    {
+      "hex_line": "01 00000000 00800003 00000000",
+      "op": 1,
+      "comment": "Issue read while cmd_gen is stalled"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Clock in request"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End strobe"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler tries to issue but cmd_gen not ready"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Nothing issued due to downstream backpressure"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Release backpressure"
+    },
+    {
+      "hex_line": "03 00000003 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler can now issue commands"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Read finally issued after backpressure released"
+    },
+    {
+      "hex_line": "03 0000000A 00000000 00000000",
+      "op": 3,
+      "comment": "Complete transaction"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End cycle"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Final settling"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Final state: all queues drained, no errors, system idle and ready for next operation"
+    }
+  ]
+}

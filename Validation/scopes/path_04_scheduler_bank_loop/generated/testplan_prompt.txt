@@ -1,0 +1,47 @@
+Generate a test plan for the Scheduler → cmd_gen → Bank Tracker → Scheduler Feedback Loop integration path.
+
+SPEC:
+{spec_json}
+
+PATH: scheduler -> cmd_gen -> bank_tracker
+CONNECTIONS:
+  bank_tracker -> scheduler: Bank tracker provides per-bank state and timing-clear flags to scheduler.
+  scheduler -> cmd_gen: Scheduler issues selected command to cmd_gen for DDR3 encoding.
+  cmd_gen -> bank_tracker: cmd_gen feeds back per-command-type valids to bank_tracker.
+
+Available input signals (testbench drives these): "q_valid_0", "q_row_0", "q_col_0", "q_bank_0", "q_we_0", "q_aux_0", "ref_required", "ref_urgent", "cfg_tRCD_nCK", "cfg_tRP_nCK", "cfg_tRAS_nCK", "cfg_tRC_nCK", "cfg_tRRD_nCK", "cfg_tFAW_nCK", "cfg_tWTR_nCK", "cfg_tWR_nCK", "cfg_tRTP_nCK", "cfg_tCCD_nCK", "cfg_tRFC_nCK"
+Available output signals (testbench checks these): "ref_ack", "deq_grant", "deq_idx", "ddr_cmd", "ddr_addr", "ddr_bank", "ddr_cke", "ddr_reset_n", "ddr_odt"
+
+Output a JSON array of test operations:
+  {"op": "reset"}
+  {"op": "drive", "signals": {"signal_name": value, ...}, "comment": "<why>"}
+  {"op": "check", "expected": {"signal_name": expected_value, ...}, "comment": "<why>"}
+  {"op": "step", "cycles": <int>, "comment": "<why>"}
+
+All values are decimal integers.
+
+CRITICAL — COMMAND SAMPLING RULE:
+When a drive operation causes a command to be issued downstream (ACT, RD, WR, PRE, REF),
+the command appears on cmd_gen outputs (ddr_cmd, ddr_addr, ddr_bank) exactly N cycles
+later due to pipeline latency through the scope chain. To verify these outputs, you MUST:
+
+1. After driving a request that triggers a command, insert a `step` of exactly the
+   pipeline depth (3 cycles for scheduler->cmd_gen paths, 2 for bank_tracker-only paths).
+2. IMMEDIATELY follow with a `check` that samples the specific ddr_cmd value:
+     {"op": "check", "expected": {"ddr_cmd": 3}, "comment": "ACT issued"}
+     {"op": "check", "expected": {"ddr_cmd": 5}, "comment": "RD issued"}
+     {"op": "check", "expected": {"ddr_cmd": 4}, "comment": "WR issued"}
+3. DDR command encoding (copy these exact integer values):
+     DDR_NOP=7, DDR_MRS=0, DDR_REF=1, DDR_PRE=2, DDR_ACT=3, DDR_WR=4, DDR_RD=5
+4. At least 5 of your check ops must explicitly sample ddr_cmd with a non-NOP expected
+   value. Checks without explicit expected values for ddr_cmd during known command
+   cycles do NOT provide coverage for command encoding bugs.
+
+Generate at least 40 operations that exercise:
+1. Reset and verify initial state
+2. Normal operation through the path — with explicit ddr_cmd sampling after each command
+3. Boundary conditions (overflow, underflow, stall, timeout)
+4. Back-to-back operations — each with a ddr_cmd check
+5. State transitions at each block in the chain
+
+Output ONLY the JSON array.

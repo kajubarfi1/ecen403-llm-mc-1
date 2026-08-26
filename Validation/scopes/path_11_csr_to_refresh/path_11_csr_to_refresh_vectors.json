@@ -1,0 +1,945 @@
+{
+  "scope": "path_11_csr_to_refresh",
+  "generator": "vector_gen_agent_llm",
+  "spec_source": "llmmc_microarchitecturespec_filled.json",
+  "generated_at": "2026-04-20T18:39:55.180815",
+  "vector_count": 187,
+  "hex_format": "unknown",
+  "vectors": [
+    {
+      "hex_line": "00 00000000 00000000 00000000",
+      "op": 0,
+      "comment": "Assert reset to initialize all blocks to known state"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Allow reset to propagate through config_regs and refresh_ctrl"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "After reset, refresh controller should have no pending requests"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify default timing CSR values match DDR3-1600K spec defaults"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify remaining default timing parameters"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify CAS latency and remaining timing defaults"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Self-refresh mode and force should be inactive after reset"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Signal that initialization is complete so refresh controller can operate"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow init_done to propagate"
+    },
+    {
+      "hex_line": "01 00000000 00000087 00000000",
+      "op": 1,
+      "comment": "Write tRFC_nCK=130 via CSR (address 16 assumed for tRFC register) to test non-default value"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000001",
+      "op": 3,
+      "comment": "Wait for CSR write to complete"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CSR should acknowledge the write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR bus after write"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Allow cfg propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Refresh controller should see updated tRFC_nCK=130"
+    },
+    {
+      "hex_line": "01 00000000 00000087 00000000",
+      "op": 1,
+      "comment": "Restore tRFC_nCK to spec value 128"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000001",
+      "op": 3,
+      "comment": "Wait for CSR ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify write acknowledged"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation delay"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Confirm tRFC restored to 128"
+    },
+    {
+      "hex_line": "01 00000000 00000083 00000000",
+      "op": 1,
+      "comment": "Read back tRFC CSR register"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000001",
+      "op": 3,
+      "comment": "Wait for read data"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Read data should return 128 for tRFC_nCK"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus after read"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Bus idle"
+    },
+    {
+      "hex_line": "03 00001860 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tREFI_nCK=6240 cycles for first refresh interval to expire"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "After one tREFI interval, refresh controller should assert ref_required with 1 pending"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Acknowledge the refresh request (simulating bank machine completing REF command)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "One cycle ack pulse"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert ref_ack after single cycle handshake"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC_nCK=128 cycles for refresh to complete"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "After ack and tRFC, pending count should return to 0"
+    },
+    {
+      "hex_line": "03 00001860 00000000 00000000",
+      "op": 3,
+      "comment": "Wait another full tREFI for second refresh interval"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Second refresh interval expired, one refresh pending"
+    },
+    {
+      "hex_line": "03 00001860 00000000 00000000",
+      "op": 3,
+      "comment": "Wait another tREFI without acknowledging - accumulate 2 pending"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Two refresh intervals missed, pending count should be 2"
+    },
+    {
+      "hex_line": "03 00001860 00000000 00000000",
+      "op": 3,
+      "comment": "Wait a third tREFI without ack - 3 pending"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Three pending refreshes accumulated"
+    },
+    {
+      "hex_line": "03 00004920 00000000 00000000",
+      "op": 3,
+      "comment": "Wait 3 more tREFI intervals (6240*3) to reach 6 pending - should trigger urgent"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "With 6 pending refreshes, ref_urgent should be asserted"
+    },
+    {
+      "hex_line": "03 000030C0 00000000 00000000",
+      "op": 3,
+      "comment": "Wait 2 more tREFI intervals to reach 8 pending - near starvation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "8 pending refreshes should trigger starvation flag"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Drive status signals to reflect starvation event for CSR readback"
+    },
+    {
+      "hex_line": "01 00000000 00000203 00000000",
+      "op": 1,
+      "comment": "Read refresh status register to verify starvation reported via CSR"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000001",
+      "op": 3,
+      "comment": "Wait for read"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CSR read should be acknowledged"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Begin draining pending refreshes - ack first"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Ack pulse"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert ack"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC for refresh completion"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Ack second pending refresh"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Ack pulse"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert ack"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Ack third pending refresh"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Ack pulse"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert ack"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Ack fourth pending refresh"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Ack pulse"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert ack"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "After 4 acks, pending should drop to ~4, urgent should deassert"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Continue draining - ack 5th"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Ack pulse"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Ack 6th"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Ack pulse"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Ack 7th"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Ack pulse"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Ack 8th - final pending"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Ack pulse"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "All pending refreshes drained, all flags should be clear"
+    },
+    {
+      "hex_line": "01 00000000 00000187 00000000",
+      "op": 1,
+      "comment": "Write cfg_self_ref_mode=1 to enable self-refresh mode via CSR"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000001",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CSR write acked"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow propagation to refresh controller"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Refresh controller should see self_ref_mode=1"
+    },
+    {
+      "hex_line": "01 00000000 000001A7 00000000",
+      "op": 1,
+      "comment": "Write cfg_force_self_ref=1 to force entry into self-refresh"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000001",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CSR write acked"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Force self-refresh should propagate to refresh controller"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Simulate PHY reporting self-refresh active"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Let self-refresh stabilize"
+    },
+    {
+      "hex_line": "01 00000000 000001A7 00000000",
+      "op": 1,
+      "comment": "Clear force_self_ref to exit self-refresh"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000001",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CSR write acked"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Force self-refresh cleared"
+    },
+    {
+      "hex_line": "01 00000000 00000187 00000000",
+      "op": 1,
+      "comment": "Disable self-refresh mode"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000001",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "PHY exits self-refresh"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Self-refresh mode disabled in refresh controller"
+    },
+    {
+      "hex_line": "01 00000000 00000087 00000000",
+      "op": 1,
+      "comment": "Boundary test: write tRFC_nCK=0 (minimum/underflow)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000001",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CSR should accept write even for zero value"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation"
+    },
+    {
+      "hex_line": "01 00000000 00000087 00000000",
+      "op": 1,
+      "comment": "Boundary test: write tRFC_nCK=255 (maximum 8-bit field)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000001",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CSR should accept maximum value"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Max tRFC value should propagate to refresh controller"
+    },
+    {
+      "hex_line": "01 00000000 00000087 00000000",
+      "op": 1,
+      "comment": "Restore tRFC to spec value"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000001",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Idle"
+    },
+    {
+      "hex_line": "01 00000000 00000007 00000000",
+      "op": 1,
+      "comment": "Back-to-back write 1: tRCD_nCK=11"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000001",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "First back-to-back write acked"
+    },
+    {
+      "hex_line": "01 00000000 00000020 00000000",
+      "op": 1,
+      "comment": "Back-to-back write 2: tRP_nCK=11 (keep cyc/stb/we asserted)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Second back-to-back write acked"
+    },
+    {
+      "hex_line": "01 00000000 00000040 00000000",
+      "op": 1,
+      "comment": "Back-to-back write 3: tRAS_nCK=28"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Third back-to-back write acked"
+    },
+    {
+      "hex_line": "01 00000000 00000060 00000000",
+      "op": 1,
+      "comment": "Back-to-back write 4: tRC_nCK=39"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Fourth back-to-back write acked"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus after burst of writes"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow all cfg values to propagate"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify all back-to-back written timing values propagated correctly"
+    },
+    {
+      "hex_line": "01 00000000 00000001 00000000",
+      "op": 1,
+      "comment": "Stall test: assert cyc but not stb - bus should not produce ack"
+    },
+    {
+      "hex_line": "03 00000003 00000000 00000000",
+      "op": 3,
+      "comment": "Wait several cycles with stalled bus"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "No ack should be generated when stb is deasserted"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Release bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Bus idle"
+    },
+    {
+      "hex_line": "01 00000000 00000007 00000000",
+      "op": 1,
+      "comment": "Write to invalid/unmapped CSR address to test error handling"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000001",
+      "op": 3,
+      "comment": "Wait for response"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Invalid address should produce error response"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus after error"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Recovery"
+    },
+    {
+      "hex_line": "01 00000000 00000087 00000000",
+      "op": 1,
+      "comment": "Write minimum non-zero tRFC_nCK=1 - boundary condition"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000001",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Write accepted"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Minimum tRFC value should propagate - refresh controller uses this for its tRFC countdown"
+    },
+    {
+      "hex_line": "01 00000000 00000087 00000000",
+      "op": 1,
+      "comment": "Restore tRFC to normal spec value"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000001",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation and idle"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert init_done to test refresh controller behavior when init is not complete"
+    },
+    {
+      "hex_line": "03 00001860 00000000 00000000",
+      "op": 3,
+      "comment": "Wait full tREFI period with init_done=0"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Refresh should NOT be requested when initialization is not complete"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Re-assert init_done to resume normal refresh operation"
+    },
+    {
+      "hex_line": "03 00001860 00000000 00000000",
+      "op": 3,
+      "comment": "Wait one full tREFI after init_done reasserted"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Refresh should now be requested since init is complete"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Acknowledge to clear pending"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Ack pulse"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert ack"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Refresh drained, system in steady state"
+    },
+    {
+      "hex_line": "01 00000000 00000087 00000000",
+      "op": 1,
+      "comment": "Hot-update tRFC to 64 cycles while refresh is idle - dynamic reconfiguration"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000001",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Hot update write accepted"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Refresh controller should use new tRFC=64 for next refresh cycle"
+    },
+    {
+      "hex_line": "03 00001860 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for next tREFI expiry"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Refresh required after tREFI with new tRFC config"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Ack refresh"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Ack pulse"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000040 00000000 00000000",
+      "op": 3,
+      "comment": "Wait new tRFC=64 cycles"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Refresh completed with updated tRFC timing"
+    },
+    {
+      "hex_line": "01 00000000 00000087 00000000",
+      "op": 1,
+      "comment": "Restore tRFC to 128"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000001",
+      "op": 3,
+      "comment": "Ack"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Final idle"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Final state: all timing restored, no pending refreshes, no errors"
+    }
+  ]
+}

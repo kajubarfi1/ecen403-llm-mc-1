@@ -1,0 +1,28 @@
+Generate a test plan for the Read Data Return Path integration path.
+
+SPEC:
+{spec_json}
+
+PATH: data_path -> wb_port
+CONNECTIONS:
+  data_path -> wb_port: Data path returns deserialized read data to Wishbone port.
+
+Available input signals (testbench drives these): "cmd_wr_valid", "cmd_rd_valid", "cmd_aux", "wr_data_valid", "wr_data", "wr_mask", "cfg_CL_nCK", "cfg_CWL_nCK", "ddr_dq_i", "ddr_dqs_i", "wb_cyc_i", "wb_stb_i", "wb_we_i", "wb_adr_i", "wb_dat_i", "wb_sel_i", "wb_bte_i", "wb_cti_i", "req_ready"
+Available output signals (testbench checks these): "wr_data_ready", "rd_rsp_valid", "rd_rsp_data", "rd_rsp_aux", "ddr_dq_o", "ddr_dq_oe", "ddr_dm_o", "ddr_dqs_o", "ddr_dqs_oe", "wb_ack_o", "wb_dat_o", "wb_stall_o", "wb_err_o", "req_valid", "req_we", "req_addr", "req_wdata", "req_wmask", "req_aux"
+
+Output a JSON array of test operations:
+  {"op": "reset"}
+  {"op": "drive", "signals": {"signal_name": value, ...}, "comment": "<why>"}
+  {"op": "check", "expected": {"signal_name": expected_value, ...}, "comment": "<why>"}
+  {"op": "step", "cycles": <int>, "comment": "<why>"}
+
+All values are decimal integers.
+
+Generate at least 40 operations that exercise:
+1. Reset and verify initial state
+2. Normal operation through the path
+3. Boundary conditions (overflow, underflow, stall, timeout)
+4. Back-to-back operations
+5. State transitions at each block in the chain
+
+Output ONLY the JSON array.

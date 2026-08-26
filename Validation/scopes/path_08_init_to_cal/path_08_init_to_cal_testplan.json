@@ -1,0 +1,582 @@
+[
+  {
+    "op": "reset",
+    "comment": "Initialize DUT to known state"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_cke": 0,
+      "init_reset_n": 0,
+      "init_state": 0,
+      "cal_done": 0,
+      "cal_fail": 0,
+      "init_fail": 0
+    },
+    "comment": "Verify reset state - CKE low, RESET_n asserted low"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enable": 0,
+      "zqcs_ack": 0
+    },
+    "comment": "Keep init disabled initially"
+  },
+  {
+    "op": "step",
+    "cycles": 10,
+    "comment": "Hold reset state"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_cke": 0,
+      "init_reset_n": 0,
+      "init_cmd_valid": 0
+    },
+    "comment": "Confirm stable reset state with enable low"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enable": 1,
+      "zqcs_ack": 0
+    },
+    "comment": "Enable init FSM to start DDR3 initialization"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Allow FSM to register enable"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_state": 1,
+      "init_reset_n": 0,
+      "init_cke": 0
+    },
+    "comment": "FSM enters RESET_HOLD state - tRESET period"
+  },
+  {
+    "op": "step",
+    "cycles": 160000,
+    "comment": "Wait 200us equivalent for reset hold (200000ns/1.25ns = 160000 cycles)"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_reset_n": 1,
+      "init_cke": 0
+    },
+    "comment": "RESET_n deasserted, CKE still low for tCKE_INIT"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_state": 2
+    },
+    "comment": "FSM transitions to CKE_LOW state"
+  },
+  {
+    "op": "step",
+    "cycles": 400000,
+    "comment": "Wait 500us for CKE low period (500000ns/1.25ns = 400000 cycles)"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_cke": 1,
+      "init_reset_n": 1
+    },
+    "comment": "CKE asserted after tCKE_INIT"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_state": 3
+    },
+    "comment": "FSM enters NOP_WAIT state after CKE assertion"
+  },
+  {
+    "op": "step",
+    "cycles": 320,
+    "comment": "Wait tXPR (max of 5*tRFC = 5*128 = 640 cycles, use 320 for partial)"
+  },
+  {
+    "op": "step",
+    "cycles": 320,
+    "comment": "Complete tXPR wait period"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_cmd_valid": 1,
+      "init_state": 4
+    },
+    "comment": "FSM ready to issue MRS commands"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "MRS2 command issue cycle"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_cmd_valid": 1,
+      "init_cmd": 0,
+      "init_bank": 2
+    },
+    "comment": "MRS2 command to bank 2 (MRS command = 0)"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tMRD (4 cycles min) + margin for MRS2"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_cmd_valid": 1,
+      "init_bank": 3
+    },
+    "comment": "MRS3 command to bank 3"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tMRD for MRS3"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_cmd_valid": 1,
+      "init_bank": 1
+    },
+    "comment": "MRS1 command to bank 1 (DLL enable)"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tMRD for MRS1"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_cmd_valid": 1,
+      "init_bank": 0
+    },
+    "comment": "MRS0 command to bank 0 (DLL reset)"
+  },
+  {
+    "op": "step",
+    "cycles": 12,
+    "comment": "Wait tMOD (12 cycles) after MRS0 with DLL reset"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_state": 5
+    },
+    "comment": "FSM enters ZQCL state for initial ZQ calibration"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_cmd_valid": 1,
+      "init_cmd": 6
+    },
+    "comment": "ZQCL command issued (cmd code 6 for ZQ cal)"
+  },
+  {
+    "op": "step",
+    "cycles": 512,
+    "comment": "Wait tZQinit (512 cycles for initial ZQ calibration)"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_state": 6
+    },
+    "comment": "FSM enters PRE_ALL state"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_cmd_valid": 1,
+      "init_cmd": 2
+    },
+    "comment": "Precharge All command (cmd code 2)"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRP (11 cycles)"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_state": 7
+    },
+    "comment": "FSM enters REFRESH state for first refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC (128 cycles) for refresh"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_cmd_valid": 1,
+      "init_cmd": 1
+    },
+    "comment": "Second refresh command issued"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC for second refresh"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_state": 8
+    },
+    "comment": "FSM enters INIT_DONE state"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_fail": 0
+    },
+    "comment": "Init completed without failure"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow init_done signal propagation to calibration"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_state": 8,
+      "cal_done": 0,
+      "cal_fail": 0
+    },
+    "comment": "Calibration block receives init_done, starts calibration"
+  },
+  {
+    "op": "step",
+    "cycles": 50,
+    "comment": "Calibration write leveling setup phase"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "zqcs_req": 0
+    },
+    "comment": "No ZQCS request during early calibration"
+  },
+  {
+    "op": "step",
+    "cycles": 100,
+    "comment": "Write leveling training iterations"
+  },
+  {
+    "op": "step",
+    "cycles": 100,
+    "comment": "Read leveling gate training"
+  },
+  {
+    "op": "step",
+    "cycles": 100,
+    "comment": "Read leveling data eye training"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cal_fail": 0
+    },
+    "comment": "Calibration progressing without errors"
+  },
+  {
+    "op": "step",
+    "cycles": 200,
+    "comment": "Complete calibration sequence"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cal_done": 1,
+      "cal_fail": 0
+    },
+    "comment": "Calibration completed successfully"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enable": 0,
+      "zqcs_ack": 0
+    },
+    "comment": "Disable to test re-initialization"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow disable to propagate"
+  },
+  {
+    "op": "reset",
+    "comment": "Reset for ZQCS test sequence"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enable": 1,
+      "zqcs_ack": 0
+    },
+    "comment": "Re-enable init FSM"
+  },
+  {
+    "op": "step",
+    "cycles": 560000,
+    "comment": "Fast-forward through reset and CKE phases"
+  },
+  {
+    "op": "step",
+    "cycles": 800,
+    "comment": "Complete MRS sequence"
+  },
+  {
+    "op": "step",
+    "cycles": 512,
+    "comment": "Complete ZQCL"
+  },
+  {
+    "op": "step",
+    "cycles": 300,
+    "comment": "Complete precharge and refreshes"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_state": 8
+    },
+    "comment": "Init complete again"
+  },
+  {
+    "op": "step",
+    "cycles": 600,
+    "comment": "Complete calibration"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cal_done": 1
+    },
+    "comment": "Calibration done"
+  },
+  {
+    "op": "step",
+    "cycles": 6240,
+    "comment": "Wait tREFI for periodic ZQCS opportunity"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "zqcs_req": 1
+    },
+    "comment": "ZQCS request asserted after tREFI"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enable": 1,
+      "zqcs_ack": 1
+    },
+    "comment": "Acknowledge ZQCS request"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "ZQCS ack registered"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_cmd_valid": 1,
+      "init_cmd": 6
+    },
+    "comment": "ZQCS command issued"
+  },
+  {
+    "op": "step",
+    "cycles": 64,
+    "comment": "Wait tZQCS (64 cycles)"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enable": 1,
+      "zqcs_ack": 0
+    },
+    "comment": "Deassert ZQCS ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "zqcs_req": 0
+    },
+    "comment": "ZQCS request cleared after completion"
+  },
+  {
+    "op": "reset",
+    "comment": "Reset for timeout/error test"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enable": 1,
+      "zqcs_ack": 0
+    },
+    "comment": "Enable init"
+  },
+  {
+    "op": "step",
+    "cycles": 100,
+    "comment": "Partial init progress"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enable": 0,
+      "zqcs_ack": 0
+    },
+    "comment": "Disable mid-init to test abort"
+  },
+  {
+    "op": "step",
+    "cycles": 10,
+    "comment": "Allow abort to process"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_cmd_valid": 0
+    },
+    "comment": "Commands stopped on disable"
+  },
+  {
+    "op": "reset",
+    "comment": "Reset for back-to-back test"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enable": 1,
+      "zqcs_ack": 0
+    },
+    "comment": "Start first init sequence"
+  },
+  {
+    "op": "step",
+    "cycles": 561700,
+    "comment": "Complete full init and calibration"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cal_done": 1,
+      "init_state": 8
+    },
+    "comment": "First init+cal complete"
+  },
+  {
+    "op": "reset",
+    "comment": "Immediate reset for back-to-back"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_cke": 0,
+      "init_reset_n": 0,
+      "cal_done": 0
+    },
+    "comment": "Clean reset state"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enable": 1,
+      "zqcs_ack": 0
+    },
+    "comment": "Start second init sequence immediately"
+  },
+  {
+    "op": "step",
+    "cycles": 10,
+    "comment": "Verify immediate restart"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_state": 1,
+      "init_reset_n": 0
+    },
+    "comment": "Second init started properly"
+  },
+  {
+    "op": "step",
+    "cycles": 160000,
+    "comment": "Through reset hold"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_reset_n": 1,
+      "init_state": 2
+    },
+    "comment": "Reset released on schedule"
+  },
+  {
+    "op": "step",
+    "cycles": 400000,
+    "comment": "Through CKE low period"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_cke": 1
+    },
+    "comment": "CKE asserted on schedule"
+  },
+  {
+    "op": "step",
+    "cycles": 2000,
+    "comment": "Through MRS and ZQCL"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "init_state": 8
+    },
+    "comment": "Init complete on second sequence"
+  },
+  {
+    "op": "step",
+    "cycles": 700,
+    "comment": "Through calibration"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cal_done": 1,
+      "cal_fail": 0,
+      "init_fail": 0
+    },
+    "comment": "Back-to-back init+cal successful"
+  }
+]

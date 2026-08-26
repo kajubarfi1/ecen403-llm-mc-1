@@ -1,0 +1,74 @@
+// path_09_init_to_refresh: DDR3 init sequence through refresh handoff
+// Tests JEDEC init: reset -> CKE -> MR2 -> MR3 -> MR1 -> MR0 -> ZQCL -> done
+
+// Reset the DUT
+00 00000000 00000000 00000000
+
+// Start event mode - pulses enable, zeroes sim_cycle
+09 00000000 00000000 00000000
+
+// Wait for FSM to enter reset_low state (state=1)
+04 0000000F 00000001 00000100
+
+// Verify CKE stays low during reset phase
+04 00000018 00000001 0000A000
+
+// Verify reset_n is low during reset state
+04 00000019 00000001 0000A000
+
+// Wait for reset_high state (state=2) - after 40000 cycles
+04 00000010 00000001 0000A500
+
+// Wait for cke_wait state (state=3) - CKE goes high after 100000 more cycles
+04 00000011 00000001 000222E0
+
+// Verify CKE is high after wait state entered
+04 0000001E 00000001 00000100
+
+// Wait for MR2 command issued
+04 00000013 00000001 00000100
+
+// Wait for MR3 command issued
+04 00000014 00000001 00000100
+
+// Check MR2 issued before MR3 (sig 19 before sig 20, min gap 1)
+08 00001413 00000000 00000001
+
+// Wait for MR1 command issued
+04 00000015 00000001 00000100
+
+// Check MR3 issued before MR1
+08 00001514 00000000 00000001
+
+// Wait for MR0 command issued
+04 00000016 00000001 00000100
+
+// Check MR1 issued before MR0
+08 00001615 00000000 00000001
+
+// Wait for ZQCL state entered
+04 0000001C 00000001 00000100
+
+// Wait for ZQCL command issued
+04 00000017 00000001 00000100
+
+// Check MR0 issued before ZQCL
+08 00001716 00000000 00000001
+
+// Wait for init_done (state reaches S_DONE)
+04 00000001 00000001 00000200
+
+// Verify init_fail remains clear
+05 00000002 00000000 00023000
+
+// Wait for refresh controller to see init_done
+04 00000009 00000001 00000100
+
+// Verify complete handoff between init and refresh
+04 0000001A 00000001 00000100
+
+// Verify no refresh requests before init complete
+05 0000001B 00000001 00023000
+
+// Final state should be S_DONE (14 = 0xE)
+05 00000000 0000000E 00023100

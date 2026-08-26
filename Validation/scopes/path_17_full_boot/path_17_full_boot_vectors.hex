@@ -1,0 +1,31 @@
+// path_17_full_boot: DDR3 full initialization and calibration sequence
+// In-path blocks: init_fsm, calibration, config_regs
+
+// Reset the DUT
+00 00000000 00000000 00000000
+
+// Start autonomous sequence (zeroes sim_cycle)
+09 00000000 00000000 00000000
+
+// Wait for init_done (sig_id=1), value=1, timeout=500000 (0x7A120)
+04 00000001 00000001 0007A120
+
+// Wait for cal_done (sig_id=8), value=1, timeout=300000 (0x493E0)
+// Calibration starts after init_done, needs additional time
+04 00000008 00000001 000493E0
+
+// Verify ordering: init_done (sig_id=1) before cal_done (sig_id=8), min_gap=0
+// P = (8 << 8) | 1 = 0x0801
+08 00000801 00000000 00000000
+
+// Check init_fail (sig_id=2) = 0 at cycle 200000 (0x30D40)
+05 00000002 00000000 00030D40
+
+// Check cal_fail (sig_id=9) = 0 at cycle 200000 (0x30D40)
+05 00000009 00000000 00030D40
+
+// CSR read CTRL_STATUS @ 0x00, expected=0x00000003 (init_done=1, cal_done=1), timeout=100
+0A 00000000 00000003 00000064
+
+// CSR read ERROR_STATUS @ 0x1C, expected=0x00000000, timeout=100
+0A 0000001C 00000000 00000064

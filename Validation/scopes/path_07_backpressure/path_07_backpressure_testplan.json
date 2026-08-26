@@ -1,0 +1,1361 @@
+[
+  {
+    "op": "reset",
+    "comment": "Reset all logic, initialize command queue and wishbone port to known state"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_full": 0,
+      "queue_empty": 1,
+      "queue_count": 0,
+      "wb_stall_o": 0,
+      "wb_ack_o": 0,
+      "wb_err_o": 0
+    },
+    "comment": "Verify initial state after reset: queue empty, no stall, no ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_valid": 0,
+      "deq_grant": 0,
+      "deq_idx": 0,
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0,
+      "wb_we_i": 0,
+      "wb_adr_i": 0,
+      "wb_dat_i": 0,
+      "wb_sel_i": 15,
+      "wb_bte_i": 0,
+      "wb_cti_i": 0,
+      "rsp_valid": 0,
+      "rsp_rdata": 0,
+      "rsp_aux": 0
+    },
+    "comment": "Drive all inputs to idle/inactive state"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Settle after driving idle"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_full": 0,
+      "queue_empty": 1,
+      "queue_count": 0,
+      "wb_stall_o": 0
+    },
+    "comment": "Confirm queue stays empty with no activity"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 256,
+      "wb_dat_i": 3735928559,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Issue a single Wishbone write request to address 256"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Allow write request to propagate to command queue"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 0,
+      "queue_full": 0
+    },
+    "comment": "Queue should have one entry from the write request"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 0
+    },
+    "comment": "Queue not full, so no backpressure yet"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 0,
+      "wb_adr_i": 512,
+      "wb_dat_i": 0,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Issue a single Wishbone read request to address 512"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Allow read request to enter queue"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 0,
+      "queue_count": 2
+    },
+    "comment": "Queue should now have 2 entries"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 1024,
+      "wb_dat_i": 305419896,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Third write request"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue third command"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 3,
+      "queue_full": 0
+    },
+    "comment": "3 entries, still not full"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 1280,
+      "wb_dat_i": 4294967295,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Fourth write request"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue fourth command"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 4,
+      "queue_full": 0
+    },
+    "comment": "4 entries"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 1536,
+      "wb_dat_i": 2863311530,
+      "wb_sel_i": 15
+    },
+    "comment": "Fifth write"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue fifth"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 1792,
+      "wb_dat_i": 1431655765,
+      "wb_sel_i": 15
+    },
+    "comment": "Sixth write"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue sixth"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 2048,
+      "wb_dat_i": 858993459,
+      "wb_sel_i": 15
+    },
+    "comment": "Seventh write"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue seventh"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 2304,
+      "wb_dat_i": 572662306,
+      "wb_sel_i": 15
+    },
+    "comment": "Eighth write"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue eighth"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 8,
+      "queue_full": 0
+    },
+    "comment": "8 entries, should be half full for 16-deep queue"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 2560,
+      "wb_dat_i": 100,
+      "wb_sel_i": 15
+    },
+    "comment": "Ninth write"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue ninth"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 2816,
+      "wb_dat_i": 200,
+      "wb_sel_i": 15
+    },
+    "comment": "Tenth write"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue tenth"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 3072,
+      "wb_dat_i": 300,
+      "wb_sel_i": 15
+    },
+    "comment": "Eleventh write"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue eleventh"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 3328,
+      "wb_dat_i": 400,
+      "wb_sel_i": 15
+    },
+    "comment": "Twelfth write"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue twelfth"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 3584,
+      "wb_dat_i": 500,
+      "wb_sel_i": 15
+    },
+    "comment": "Thirteenth write"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue thirteenth"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 3840,
+      "wb_dat_i": 600,
+      "wb_sel_i": 15
+    },
+    "comment": "Fourteenth write"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue fourteenth"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 14,
+      "queue_full": 0
+    },
+    "comment": "14 entries, nearing full"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 4096,
+      "wb_dat_i": 700,
+      "wb_sel_i": 15
+    },
+    "comment": "Fifteenth write - one before full"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue fifteenth"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 15,
+      "queue_full": 0
+    },
+    "comment": "15 entries, one slot remaining"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 4352,
+      "wb_dat_i": 800,
+      "wb_sel_i": 15
+    },
+    "comment": "Sixteenth write - should fill queue completely"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue sixteenth, queue should become full"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 16,
+      "queue_full": 1,
+      "queue_empty": 0
+    },
+    "comment": "Queue is now full at depth 16"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 1
+    },
+    "comment": "CRITICAL: Backpressure must assert wb_stall_o when queue is full"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 4608,
+      "wb_dat_i": 900,
+      "wb_sel_i": 15
+    },
+    "comment": "Attempt 17th write while queue is full - should be stalled"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Try to enqueue while full"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 16,
+      "queue_full": 1,
+      "wb_stall_o": 1
+    },
+    "comment": "Queue still full, 17th request must not be accepted, stall persists"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Hold stalled state for another cycle to verify persistence"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 16,
+      "queue_full": 1,
+      "wb_stall_o": 1
+    },
+    "comment": "Stall remains asserted while queue is full and no dequeue"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_grant": 1,
+      "deq_idx": 0
+    },
+    "comment": "Dequeue entry 0 to free one slot"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process dequeue of one entry"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 15,
+      "queue_full": 0,
+      "wb_stall_o": 0
+    },
+    "comment": "After dequeue, queue not full, stall should deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "The previously stalled 17th request should now be accepted"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 16,
+      "queue_full": 1,
+      "wb_stall_o": 1
+    },
+    "comment": "17th request gets enqueued, queue full again, stall reasserts"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 0,
+      "deq_grant": 1,
+      "deq_idx": 1
+    },
+    "comment": "Stop new requests, dequeue entry 1"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Dequeue one entry with no new enqueue"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 15,
+      "queue_full": 0,
+      "wb_stall_o": 0
+    },
+    "comment": "Queue drops to 15, no stall"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_grant": 1,
+      "deq_idx": 2
+    },
+    "comment": "Dequeue entry 2"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Continue draining"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 14,
+      "queue_full": 0,
+      "wb_stall_o": 0
+    },
+    "comment": "14 entries, still no stall"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 0,
+      "wb_adr_i": 8192,
+      "wb_sel_i": 15,
+      "deq_grant": 1,
+      "deq_idx": 3
+    },
+    "comment": "Simultaneous enqueue (read) and dequeue - steady state throughput test"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Both enqueue and dequeue in same cycle"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 14,
+      "queue_full": 0,
+      "wb_stall_o": 0
+    },
+    "comment": "Count stays at 14 when enq and deq happen simultaneously"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 0,
+      "deq_grant": 1,
+      "deq_idx": 4
+    },
+    "comment": "Dequeue only, continue draining"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Drain one more"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_grant": 1,
+      "deq_idx": 5
+    },
+    "comment": "Dequeue another"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Drain"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_grant": 1,
+      "deq_idx": 6
+    },
+    "comment": "Dequeue another"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Drain"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_grant": 1,
+      "deq_idx": 7
+    },
+    "comment": "Dequeue another"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Drain"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_grant": 1,
+      "deq_idx": 8
+    },
+    "comment": "Dequeue another"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Drain"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_grant": 1,
+      "deq_idx": 9
+    },
+    "comment": "Dequeue another"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Drain"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_grant": 1,
+      "deq_idx": 10
+    },
+    "comment": "Dequeue another"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Drain"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_grant": 1,
+      "deq_idx": 11
+    },
+    "comment": "Dequeue another"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Drain"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_grant": 1,
+      "deq_idx": 12
+    },
+    "comment": "Dequeue another"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Drain"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_grant": 1,
+      "deq_idx": 13
+    },
+    "comment": "Dequeue last remaining"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Drain to empty"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 0,
+      "queue_empty": 1,
+      "queue_full": 0,
+      "wb_stall_o": 0
+    },
+    "comment": "Queue fully drained, empty flag set, no stall"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_grant": 1,
+      "deq_idx": 0
+    },
+    "comment": "Attempt dequeue from empty queue - underflow condition"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Underflow attempt"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 0,
+      "queue_empty": 1
+    },
+    "comment": "Queue should remain empty, no underflow corruption"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_grant": 0,
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 256,
+      "wb_dat_i": 11111111,
+      "wb_sel_i": 15,
+      "wb_cti_i": 2,
+      "wb_bte_i": 0
+    },
+    "comment": "Start linear incrementing burst write, beat 1 of 8"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "First burst beat"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 260,
+      "wb_dat_i": 22222222,
+      "wb_cti_i": 2
+    },
+    "comment": "Burst beat 2"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Second burst beat"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 264,
+      "wb_dat_i": 33333333,
+      "wb_cti_i": 2
+    },
+    "comment": "Burst beat 3"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Third burst beat"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 268,
+      "wb_dat_i": 44444444,
+      "wb_cti_i": 2
+    },
+    "comment": "Burst beat 4"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Fourth burst beat"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 272,
+      "wb_dat_i": 55555555,
+      "wb_cti_i": 2
+    },
+    "comment": "Burst beat 5"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Fifth burst beat"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 276,
+      "wb_dat_i": 66666666,
+      "wb_cti_i": 2
+    },
+    "comment": "Burst beat 6"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Sixth burst beat"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 280,
+      "wb_dat_i": 77777777,
+      "wb_cti_i": 2
+    },
+    "comment": "Burst beat 7"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Seventh burst beat"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 284,
+      "wb_dat_i": 88888888,
+      "wb_cti_i": 7
+    },
+    "comment": "Burst beat 8 (end of burst, cti=7)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Eighth and final burst beat"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 8,
+      "queue_full": 0,
+      "wb_stall_o": 0
+    },
+    "comment": "8-beat burst enqueued, queue half full, no stall"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 1,
+      "wb_we_i": 0,
+      "wb_adr_i": 8192,
+      "wb_cti_i": 2,
+      "wb_bte_i": 0
+    },
+    "comment": "Start read burst immediately after write burst - back to back"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Read burst beat 1"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 8196,
+      "wb_cti_i": 2
+    },
+    "comment": "Read burst beat 2"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Read burst beat 2"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 8200,
+      "wb_cti_i": 2
+    },
+    "comment": "Read burst beat 3"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Read burst beat 3"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 8204,
+      "wb_cti_i": 2
+    },
+    "comment": "Read burst beat 4"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Read burst beat 4"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 8208,
+      "wb_cti_i": 2
+    },
+    "comment": "Read burst beat 5"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Read burst beat 5"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 8212,
+      "wb_cti_i": 2
+    },
+    "comment": "Read burst beat 6"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Read burst beat 6"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 8216,
+      "wb_cti_i": 2
+    },
+    "comment": "Read burst beat 7"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Read burst beat 7"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 8220,
+      "wb_cti_i": 7
+    },
+    "comment": "Read burst beat 8 (end of burst)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Read burst beat 8 final"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 16,
+      "queue_full": 1,
+      "wb_stall_o": 1
+    },
+    "comment": "Two full bursts fill the 16-deep queue, stall asserts"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 1,
+      "wb_we_i": 0,
+      "wb_adr_i": 16384,
+      "wb_cti_i": 0
+    },
+    "comment": "Attempt another request while queue full and stalled"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Hold stall for two cycles"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 16,
+      "queue_full": 1,
+      "wb_stall_o": 1
+    },
+    "comment": "Stall persists, request not accepted"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 0,
+      "deq_grant": 1,
+      "deq_idx": 0
+    },
+    "comment": "Stop new requests, dequeue to relieve backpressure"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Dequeue one"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 15,
+      "queue_full": 0,
+      "wb_stall_o": 0
+    },
+    "comment": "Stall deasserts immediately when queue drops below full"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 16384,
+      "wb_dat_i": 999,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "deq_grant": 0
+    },
+    "comment": "Immediately issue a new request after stall release"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Accept the previously stalled-out request"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 16,
+      "queue_full": 1,
+      "wb_stall_o": 1
+    },
+    "comment": "Queue fills again immediately"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 0,
+      "deq_grant": 1,
+      "deq_idx": 1
+    },
+    "comment": "Dequeue to test rapid full/not-full toggling"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Dequeue one"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 1,
+      "wb_adr_i": 20480,
+      "wb_dat_i": 1234,
+      "deq_grant": 0
+    },
+    "comment": "Enqueue again immediately"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Fill again"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_full": 1,
+      "wb_stall_o": 1
+    },
+    "comment": "Full/stall reasserts - rapid toggling test"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 24576,
+      "deq_grant": 1,
+      "deq_idx": 2
+    },
+    "comment": "Simultaneous enqueue and dequeue while queue is full"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Both operations in same cycle at full state"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 16,
+      "queue_full": 1
+    },
+    "comment": "Simultaneous enq/deq at full: count stays 16, one replaced"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 0,
+      "wb_cyc_i": 0,
+      "deq_grant": 0
+    },
+    "comment": "Drop all bus activity"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Idle for several cycles"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_full": 1,
+      "wb_stall_o": 1
+    },
+    "comment": "Queue remains full during idle, stall persists"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 536870908,
+      "wb_dat_i": 4294967295,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0
+    },
+    "comment": "Drive max address boundary while stalled - verify no acceptance"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Max address request while stalled"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 16,
+      "queue_full": 1,
+      "wb_stall_o": 1
+    },
+    "comment": "Request at max address boundary properly stalled"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 0,
+      "wb_cyc_i": 0
+    },
+    "comment": "De-assert bus"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_grant": 1,
+      "deq_idx": 3
+    },
+    "comment": "Start draining queue completely"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Dequeue"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_idx": 4
+    },
+    "comment": "Dequeue next"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Dequeue"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_idx": 5
+    },
+    "comment": "Dequeue next"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Dequeue"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_idx": 6
+    },
+    "comment": "Dequeue next"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Dequeue"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_full": 0,
+      "wb_stall_o": 0
+    },
+    "comment": "Queue no longer full after several dequeues"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_idx": 7
+    },
+    "comment": "Continue draining"
+  },
+  {
+    "op": "step",
+    "cycles": 8,
+    "comment": "Drain remaining entries over 8 cycles"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "deq_grant": 0
+    },
+    "comment": "Stop dequeuing"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Settle"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 0,
+      "wb_dat_i": 0,
+      "wb_sel_i": 0,
+      "wb_cti_i": 0
+    },
+    "comment": "Write with sel=0 (no byte enables) - edge case with data mask"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Accept zero-sel write"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 0
+    },
+    "comment": "Controller should accept even with no byte enables active"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_sel_i": 5,
+      "wb_adr_i": 4,
+      "wb_dat_i": 2576980377
+    },
+    "comment": "Partial write with sel=0101 (bytes 0 and 2 only)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Partial write enqueue"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 0,
+      "queue_empty": 0
+    },
+    "comment": "Partial writes accepted normally"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 0,
+      "wb_cyc_i": 0
+    },
+    "comment": "Idle bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Settle"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "rsp_valid": 1,
+      "rsp_rdata": 305419896,
+      "rsp_aux": 42
+    },
+    "comment": "Inject read response to test Wishbone response path under backpressure scenario"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Response should appear on wb_dat_o/wb_ack_o"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_ack_o": 1,
+      "wb_dat_o": 305419896
+    },
+    "comment": "Read response correctly forwarded to Wishbone port"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "rsp_valid": 0
+    },
+    "comment": "De-assert response"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Response done"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_ack_o": 0
+    },
+    "comment": "Ack deasserts when no response"
+  },
+  {
+    "op": "reset",
+    "comment": "Final reset to verify clean recovery from all states"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow reset to propagate"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_full": 0,
+      "queue_empty": 1,
+      "queue_count": 0,
+      "wb_stall_o": 0,
+      "wb_ack_o": 0,
+      "wb_err_o": 0
+    },
+    "comment": "Clean state after reset - all flags properly initialized"
+  }
+]

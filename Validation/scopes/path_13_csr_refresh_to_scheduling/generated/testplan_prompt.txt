@@ -1,0 +1,29 @@
+Generate a test plan for the CSR → Refresh Ctrl → Scheduler (Transitive Config) integration path.
+
+SPEC:
+{spec_json}
+
+PATH: config_regs -> refresh_ctrl -> scheduler
+CONNECTIONS:
+  refresh_ctrl -> scheduler: Refresh controller signals pending/urgent refresh to scheduler.
+  config_regs -> refresh_ctrl: CSR refresh configuration to refresh controller.
+
+Available input signals (testbench drives these): "csr_cyc_i", "csr_stb_i", "csr_we_i", "csr_adr_i", "csr_dat_i", "csr_sel_i", "sts_init_done", "sts_cal_done", "sts_cal_fail", "sts_bist_done", "sts_bist_fail", "sts_ref_pending_cnt", "sts_self_refresh_active", "sts_ecc_ce_count", "sts_ecc_ue_event", "sts_ref_starve_event", "sts_init_fail_event", "sts_bist_fail_addr", "init_done", "q_valid_0", "q_row_0", "q_col_0", "q_bank_0", "q_we_0", "q_aux_0", "bank_is_active", "bank_open_row_0", "bank_act_allowed", "bank_rd_allowed", "bank_wr_allowed", "bank_pre_allowed"
+Available output signals (testbench checks these): "csr_ack_o", "csr_dat_o", "csr_err_o", "cfg_tRCD_nCK", "cfg_tRP_nCK", "cfg_tRAS_nCK", "cfg_tRC_nCK", "cfg_tRRD_nCK", "cfg_tWTR_nCK", "cfg_tFAW_nCK", "cfg_tRFC_nCK", "cfg_tWR_nCK", "cfg_tRTP_nCK", "cfg_CL_nCK", "cfg_CWL_nCK", "cfg_tCCD_nCK", "cfg_sched_policy", "cfg_row_policy", "cfg_self_ref_mode", "cfg_ecc_enable", "cfg_bist_start", "cfg_force_self_ref", "cfg_bist_pattern", "cfg_bist_addr_mode", "cfg_bist_addr_start", "cfg_bist_addr_end", "ref_pending_cnt", "ref_starve_flag", "cmd_valid", "cmd_type", "cmd_row", "cmd_col", "cmd_bank", "cmd_we", "cmd_aux", "deq_grant", "deq_idx"
+
+Output a JSON array of test operations:
+  {"op": "reset"}
+  {"op": "drive", "signals": {"signal_name": value, ...}, "comment": "<why>"}
+  {"op": "check", "expected": {"signal_name": expected_value, ...}, "comment": "<why>"}
+  {"op": "step", "cycles": <int>, "comment": "<why>"}
+
+All values are decimal integers.
+
+Generate at least 40 operations that exercise:
+1. Reset and verify initial state
+2. Normal operation through the path
+3. Boundary conditions (overflow, underflow, stall, timeout)
+4. Back-to-back operations
+5. State transitions at each block in the chain
+
+Output ONLY the JSON array.

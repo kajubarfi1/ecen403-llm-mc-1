@@ -1,0 +1,1333 @@
+[
+  {
+    "op": "reset",
+    "comment": "Assert reset to initialize all blocks to known state"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow reset to propagate through config_regs and refresh_ctrl"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 0,
+      "ref_urgent": 0,
+      "ref_pending_cnt": 0,
+      "ref_starve_flag": 0
+    },
+    "comment": "After reset, refresh controller should have no pending requests"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_tRFC_nCK": 128,
+      "cfg_tRC_nCK": 39,
+      "cfg_tRAS_nCK": 28,
+      "cfg_tRP_nCK": 11
+    },
+    "comment": "Verify default timing CSR values match DDR3-1600K spec defaults"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_tRCD_nCK": 11,
+      "cfg_tRRD_nCK": 6,
+      "cfg_tWTR_nCK": 6,
+      "cfg_tFAW_nCK": 32
+    },
+    "comment": "Verify remaining default timing parameters"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_tWR_nCK": 12,
+      "cfg_tRTP_nCK": 6,
+      "cfg_CL_nCK": 11,
+      "cfg_CWL_nCK": 8,
+      "cfg_tCCD_nCK": 4
+    },
+    "comment": "Verify CAS latency and remaining timing defaults"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_self_ref_mode": 0,
+      "cfg_force_self_ref": 0
+    },
+    "comment": "Self-refresh mode and force should be inactive after reset"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "init_done": 1,
+      "ref_ack": 0,
+      "sts_init_done": 1,
+      "sts_cal_done": 1,
+      "sts_cal_fail": 0
+    },
+    "comment": "Signal that initialization is complete so refresh controller can operate"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow init_done to propagate"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 16,
+      "csr_dat_i": 130,
+      "csr_sel_i": 15
+    },
+    "comment": "Write tRFC_nCK=130 via CSR (address 16 assumed for tRFC register) to test non-default value"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for CSR write to complete"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "CSR should acknowledge the write"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert CSR bus after write"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Allow cfg propagation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_tRFC_nCK": 130
+    },
+    "comment": "Refresh controller should see updated tRFC_nCK=130"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 16,
+      "csr_dat_i": 128,
+      "csr_sel_i": 15
+    },
+    "comment": "Restore tRFC_nCK to spec value 128"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for CSR ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "Verify write acknowledged"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Propagation delay"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_tRFC_nCK": 128
+    },
+    "comment": "Confirm tRFC restored to 128"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 0,
+      "csr_adr_i": 16,
+      "csr_sel_i": 15,
+      "csr_dat_i": 0
+    },
+    "comment": "Read back tRFC CSR register"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for read data"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "csr_dat_o": 128
+    },
+    "comment": "Read data should return 128 for tRFC_nCK"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0
+    },
+    "comment": "Deassert bus after read"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Bus idle"
+  },
+  {
+    "op": "step",
+    "cycles": 6240,
+    "comment": "Wait tREFI_nCK=6240 cycles for first refresh interval to expire"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 1,
+      "ref_pending_cnt": 1
+    },
+    "comment": "After one tREFI interval, refresh controller should assert ref_required with 1 pending"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "Acknowledge the refresh request (simulating bank machine completing REF command)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "One cycle ack pulse"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert ref_ack after single cycle handshake"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC_nCK=128 cycles for refresh to complete"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 0,
+      "ref_pending_cnt": 0
+    },
+    "comment": "After ack and tRFC, pending count should return to 0"
+  },
+  {
+    "op": "step",
+    "cycles": 6240,
+    "comment": "Wait another full tREFI for second refresh interval"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 1,
+      "ref_pending_cnt": 1
+    },
+    "comment": "Second refresh interval expired, one refresh pending"
+  },
+  {
+    "op": "step",
+    "cycles": 6240,
+    "comment": "Wait another tREFI without acknowledging - accumulate 2 pending"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 1,
+      "ref_pending_cnt": 2
+    },
+    "comment": "Two refresh intervals missed, pending count should be 2"
+  },
+  {
+    "op": "step",
+    "cycles": 6240,
+    "comment": "Wait a third tREFI without ack - 3 pending"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 1,
+      "ref_pending_cnt": 3
+    },
+    "comment": "Three pending refreshes accumulated"
+  },
+  {
+    "op": "step",
+    "cycles": 18720,
+    "comment": "Wait 3 more tREFI intervals (6240*3) to reach 6 pending - should trigger urgent"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 1,
+      "ref_urgent": 1,
+      "ref_pending_cnt": 6
+    },
+    "comment": "With 6 pending refreshes, ref_urgent should be asserted"
+  },
+  {
+    "op": "step",
+    "cycles": 12480,
+    "comment": "Wait 2 more tREFI intervals to reach 8 pending - near starvation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 1,
+      "ref_urgent": 1,
+      "ref_pending_cnt": 8,
+      "ref_starve_flag": 1
+    },
+    "comment": "8 pending refreshes should trigger starvation flag"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "sts_ref_pending_cnt": 8,
+      "sts_ref_starve_event": 1
+    },
+    "comment": "Drive status signals to reflect starvation event for CSR readback"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 0,
+      "csr_adr_i": 64,
+      "csr_sel_i": 15,
+      "csr_dat_i": 0
+    },
+    "comment": "Read refresh status register to verify starvation reported via CSR"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for read"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "CSR read should be acknowledged"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0
+    },
+    "comment": "Deassert bus"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "Begin draining pending refreshes - ack first"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack pulse"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert ack"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC for refresh completion"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "Ack second pending refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack pulse"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert ack"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "Ack third pending refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack pulse"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert ack"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "Ack fourth pending refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack pulse"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert ack"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_pending_cnt": 4,
+      "ref_urgent": 0
+    },
+    "comment": "After 4 acks, pending should drop to ~4, urgent should deassert"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "Continue draining - ack 5th"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack pulse"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "Ack 6th"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack pulse"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "Ack 7th"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack pulse"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "Ack 8th - final pending"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack pulse"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 0,
+      "ref_urgent": 0,
+      "ref_pending_cnt": 0,
+      "ref_starve_flag": 0
+    },
+    "comment": "All pending refreshes drained, all flags should be clear"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 48,
+      "csr_dat_i": 1,
+      "csr_sel_i": 15
+    },
+    "comment": "Write cfg_self_ref_mode=1 to enable self-refresh mode via CSR"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "CSR write acked"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert bus"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow propagation to refresh controller"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_self_ref_mode": 1
+    },
+    "comment": "Refresh controller should see self_ref_mode=1"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 52,
+      "csr_dat_i": 1,
+      "csr_sel_i": 15
+    },
+    "comment": "Write cfg_force_self_ref=1 to force entry into self-refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "CSR write acked"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert bus"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Propagation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_force_self_ref": 1
+    },
+    "comment": "Force self-refresh should propagate to refresh controller"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "sts_self_refresh_active": 1
+    },
+    "comment": "Simulate PHY reporting self-refresh active"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Let self-refresh stabilize"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 52,
+      "csr_dat_i": 0,
+      "csr_sel_i": 15
+    },
+    "comment": "Clear force_self_ref to exit self-refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "CSR write acked"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert bus"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Propagation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_force_self_ref": 0
+    },
+    "comment": "Force self-refresh cleared"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 48,
+      "csr_dat_i": 0,
+      "csr_sel_i": 15
+    },
+    "comment": "Disable self-refresh mode"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert bus"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "sts_self_refresh_active": 0
+    },
+    "comment": "PHY exits self-refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Propagation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_self_ref_mode": 0
+    },
+    "comment": "Self-refresh mode disabled in refresh controller"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 16,
+      "csr_dat_i": 0,
+      "csr_sel_i": 15
+    },
+    "comment": "Boundary test: write tRFC_nCK=0 (minimum/underflow)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "CSR should accept write even for zero value"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Propagation"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 16,
+      "csr_dat_i": 255,
+      "csr_sel_i": 15
+    },
+    "comment": "Boundary test: write tRFC_nCK=255 (maximum 8-bit field)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "CSR should accept maximum value"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Propagation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_tRFC_nCK": 255
+    },
+    "comment": "Max tRFC value should propagate to refresh controller"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 16,
+      "csr_dat_i": 128,
+      "csr_sel_i": 15
+    },
+    "comment": "Restore tRFC to spec value"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Idle"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 0,
+      "csr_dat_i": 11,
+      "csr_sel_i": 15
+    },
+    "comment": "Back-to-back write 1: tRCD_nCK=11"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "First back-to-back write acked"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_adr_i": 4,
+      "csr_dat_i": 11
+    },
+    "comment": "Back-to-back write 2: tRP_nCK=11 (keep cyc/stb/we asserted)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "Second back-to-back write acked"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_adr_i": 8,
+      "csr_dat_i": 28
+    },
+    "comment": "Back-to-back write 3: tRAS_nCK=28"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "Third back-to-back write acked"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_adr_i": 12,
+      "csr_dat_i": 39
+    },
+    "comment": "Back-to-back write 4: tRC_nCK=39"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "Fourth back-to-back write acked"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert bus after burst of writes"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow all cfg values to propagate"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_tRCD_nCK": 11,
+      "cfg_tRP_nCK": 11,
+      "cfg_tRAS_nCK": 28,
+      "cfg_tRC_nCK": 39
+    },
+    "comment": "Verify all back-to-back written timing values propagated correctly"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 0,
+      "csr_we_i": 0,
+      "csr_adr_i": 0,
+      "csr_sel_i": 15,
+      "csr_dat_i": 0
+    },
+    "comment": "Stall test: assert cyc but not stb - bus should not produce ack"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Wait several cycles with stalled bus"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 0
+    },
+    "comment": "No ack should be generated when stb is deasserted"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0
+    },
+    "comment": "Release bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Bus idle"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 256,
+      "csr_dat_i": 42,
+      "csr_sel_i": 15
+    },
+    "comment": "Write to invalid/unmapped CSR address to test error handling"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for response"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_err_o": 1
+    },
+    "comment": "Invalid address should produce error response"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert bus after error"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Recovery"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 16,
+      "csr_dat_i": 1,
+      "csr_sel_i": 15
+    },
+    "comment": "Write minimum non-zero tRFC_nCK=1 - boundary condition"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "Write accepted"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Propagation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_tRFC_nCK": 1
+    },
+    "comment": "Minimum tRFC value should propagate - refresh controller uses this for its tRFC countdown"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 16,
+      "csr_dat_i": 128,
+      "csr_sel_i": 15
+    },
+    "comment": "Restore tRFC to normal spec value"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert bus"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Propagation and idle"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "init_done": 0
+    },
+    "comment": "Deassert init_done to test refresh controller behavior when init is not complete"
+  },
+  {
+    "op": "step",
+    "cycles": 6240,
+    "comment": "Wait full tREFI period with init_done=0"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 0
+    },
+    "comment": "Refresh should NOT be requested when initialization is not complete"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "init_done": 1
+    },
+    "comment": "Re-assert init_done to resume normal refresh operation"
+  },
+  {
+    "op": "step",
+    "cycles": 6240,
+    "comment": "Wait one full tREFI after init_done reasserted"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 1,
+      "ref_pending_cnt": 1
+    },
+    "comment": "Refresh should now be requested since init is complete"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "Acknowledge to clear pending"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack pulse"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert ack"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 0,
+      "ref_pending_cnt": 0
+    },
+    "comment": "Refresh drained, system in steady state"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 16,
+      "csr_dat_i": 64,
+      "csr_sel_i": 15
+    },
+    "comment": "Hot-update tRFC to 64 cycles while refresh is idle - dynamic reconfiguration"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "Hot update write accepted"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert bus"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Propagation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_tRFC_nCK": 64
+    },
+    "comment": "Refresh controller should use new tRFC=64 for next refresh cycle"
+  },
+  {
+    "op": "step",
+    "cycles": 6240,
+    "comment": "Wait for next tREFI expiry"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 1
+    },
+    "comment": "Refresh required after tREFI with new tRFC config"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "Ack refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack pulse"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 64,
+    "comment": "Wait new tRFC=64 cycles"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 0,
+      "ref_pending_cnt": 0
+    },
+    "comment": "Refresh completed with updated tRFC timing"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 16,
+      "csr_dat_i": 128,
+      "csr_sel_i": 15
+    },
+    "comment": "Restore tRFC to 128"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Final idle"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_tRFC_nCK": 128,
+      "ref_required": 0,
+      "ref_urgent": 0,
+      "ref_pending_cnt": 0,
+      "ref_starve_flag": 0
+    },
+    "comment": "Final state: all timing restored, no pending refreshes, no errors"
+  }
+]

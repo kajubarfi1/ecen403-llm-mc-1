@@ -1,0 +1,89 @@
+{
+  "scope": "path_01_write_cmd",
+  "timestamp": "2026-04-08T10:16:56.251729",
+  "status": "triaged",
+  "passes": {
+    "classify": {
+      "category": "data_mismatch",
+      "severity": "medium",
+      "failure_summary": "Single test failure in write command path with 2 mismatches showing consistent pattern: DUT outputs 0x00000001 while reference model expects 0x00000000. The single-bit difference (bit 0 set vs clear) across all mismatches suggests a status/acknowledgment flag or write completion indicator that the DUT asserts but the reference model does not predict. With 97.4% pass rate (37/38), this indicates an edge case modeling discrepancy rather than fundamental protocol violation.",
+      "affected_vector_range": "N/A - specific vector indices not provided in failure log",
+      "likely_component": "refmodel",
+      "initial_hypothesis": "The reference model likely fails to account for a write command acknowledgment or completion status bit in a specific timing scenario. The consistent actual value of 0x00000001 (bit 0 asserted) suggests the DUT correctly sets a write-complete or write-accepted flag that the reference model's state machine does not track for this particular command sequence or timing window. This could be related to back-to-back write handling, write buffer status, or a corner case in write-to-read turnaround modeling.",
+      "needs_deeper_analysis": true,
+      "_category": "data_mismatch"
+    },
+    "localize": {
+      "failure_patterns": [
+        {
+          "pattern_id": 1,
+          "description": "CTRL_STATUS register read returns init_done=1, but expected value assumes init_done=0",
+          "affected_addresses": [
+            "0x00"
+          ],
+          "affected_fields": [
+            "init_done"
+          ],
+          "vector_indices": [
+            12
+          ],
+          "expected_correct_per_spec": false,
+          "testbench_drives_correctly": true,
+          "notes": "The test is 'path_01_write_cmd' which tests write command functionality. For a DDR3 controller to accept and process write commands, the initialization sequence MUST have completed (init_done=1). The spec clearly states init_done is '1 when init sequence complete' with reset_value=0. The expected value of 0x00000000 assumes reset state, but by vector 12 in a write command test path, initialization would have completed. The actual value 0x00000001 (bit 0 = init_done = 1) is the CORRECT behavior per spec semantics - you cannot issue write commands to uninitialized DDR3 memory. The reference model or vector generator failed to account for the state machine progressing past initialization before write commands can be verified."
+        }
+      ],
+      "common_thread": "The test vector expected values were generated assuming reset-state register values rather than the actual operational state required for write command testing. The CTRL_STATUS register is being read after the controller has completed its mandatory initialization sequence.",
+      "refined_hypothesis": "ROOT CAUSE: Test vector bug (category d). The reference model/vector generator incorrectly used the reset value (0x00000000) as the expected value for CTRL_STATUS at address 0x00. However, the test scenario 'path_01_write_cmd' requires the DDR3 controller to be fully initialized before write commands can be issued. The DUT correctly shows init_done=1 (0x00000001) indicating initialization is complete, which is a prerequisite for write operations. The expected value should be 0x00000001 (or potentially higher if cal_done is also set). The comment 'Verify write data and mask captured' suggests this check may have been intended to read a different register (perhaps a write buffer status), but was incorrectly pointed at CTRL_STATUS offset 0x00."
+    },
+    "rootcause": {
+      "root_causes": [
+        {
+          "pattern_id": 1,
+          "guilty_component": "vectors",
+          "confidence": "high",
+          "root_cause": "Test vector generator used reset value (0x00000000) as expected value for CTRL_STATUS register at vector 12, but the test scenario 'path_01_write_cmd' requires the DDR3 controller to be fully initialized (init_done=1) before write commands can be processed. The DUT correctly shows init_done=1 (0x00000001) which is the prerequisite state for write operations.",
+          "evidence": "1) Spec shows CTRL_STATUS offset 0x00, field init_done at bit[0], reset_value=0, description='1 when init sequence complete'. 2) Reference model explicitly sets self.init_done=True with comment 'Assume init complete for this path model'. 3) Actual value 0x00000001 = bit[0]=1 = init_done asserted. 4) Expected value 0x00000000 = reset state. 5) Vector index 12 is well past reset phase in a write command test path. 6) 97.4% pass rate indicates systemic vector generation error for one specific check, not RTL bug.",
+          "mechanism": "Step 1: Vector generator created test vectors for path_01_write_cmd to verify write command functionality. Step 2: At vector 12, a check was inserted to read CTRL_STATUS register at address 0x00. Step 3: The expected value was incorrectly set to the reset value (0x00000000) rather than the operational value (0x00000001 or higher if cal_done also set). Step 4: The DUT correctly shows init_done=1 because DDR3 memory controllers MUST complete initialization before accepting any read/write commands. Step 5: The comparison fails because expected (reset state) != actual (operational state). Step 6: The comment 'Verify write data and mask captured' suggests this check may have been intended to verify a different register (write buffer status) but was incorrectly pointed at CTRL_STATUS."
+        }
+      ],
+      "primary_root_cause": "Test vector expected value bug: The vector at index 12 checks CTRL_STATUS register expecting reset value 0x00000000, but a write command test path requires initialization to be complete, so the correct expected value should be 0x00000001 (init_done=1). The DUT behavior is correct; the expected value in the test vector is wrong.",
+      "is_rtl_bug": false,
+      "is_verification_bug": true
+    },
+    "recommend": {
+      "recommendations": [
+        {
+          "pattern_id": 1,
+          "target_file": "vectors",
+          "fix_type": "regenerate",
+          "description": "Update test vector index 12 in path_01_write_cmd to use correct expected value for CTRL_STATUS register. The vector currently expects the reset value (0x00000000) but should expect the operational value (0x00000001) since init_done must be asserted before write commands can be processed. The vector generator logic that creates status register checks should be updated to use operational state values rather than reset values for post-initialization test paths.",
+          "suggested_fix": "In vector generation for path_01_write_cmd:\n\n# INCORRECT (current):\nvector[12] = {\n  'type': 'read_check',\n  'address': 0x00,  # CTRL_STATUS\n  'expected': 0x00000000  # Reset value - WRONG\n}\n\n# CORRECT (fix):\nvector[12] = {\n  'type': 'read_check', \n  'address': 0x00,  # CTRL_STATUS\n  'expected': 0x00000001  # init_done=1, required for write ops\n}\n\n# Or update vector generator template:\nif test_path.startswith('path_') and 'write' in test_path:\n  ctrl_status_expected = 0x00000001  # Post-init state\nelse:\n  ctrl_status_expected = 0x00000000  # Reset state",
+          "priority": "high",
+          "can_auto_fix": true
+        }
+      ],
+      "suggested_pipeline_action": "regenerate_vectors",
+      "summary": "Test vector bug confirmed: Vector 12 in path_01_write_cmd incorrectly expects CTRL_STATUS=0x00000000 (reset state) instead of 0x00000001 (init_done=1). The DUT is functioning correctly - DDR3 controllers must complete initialization before accepting write commands, so init_done=1 is the correct operational state. Regenerate vectors with corrected expected value for post-initialization status register checks."
+    }
+  },
+  "coverage": {
+    "total_tests": 38,
+    "passed": 37,
+    "failed": 1,
+    "pass_rate_pct": 97.4,
+    "consistent_failure_pattern": true,
+    "unique_actual_values": [
+      "00000001"
+    ],
+    "validation_level": "substantially_validated",
+    "verdict": "37/38 tests passed (97%). 1 failures show consistent pattern (likely minor timing/modeling edge case). Path is substantially validated \u2014 core functionality confirmed."
+  },
+  "category": "data_mismatch",
+  "severity": "medium",
+  "primary_root_cause": "Test vector expected value bug: The vector at index 12 checks CTRL_STATUS register expecting reset value 0x00000000, but a write command test path requires initialization to be complete, so the correct expected value should be 0x00000001 (init_done=1). The DUT behavior is correct; the expected value in the test vector is wrong.",
+  "is_rtl_bug": false,
+  "is_verification_bug": true,
+  "guilty_component": "refmodel",
+  "suggested_action": "accept_with_waivers",
+  "summary": "Test vector bug confirmed: Vector 12 in path_01_write_cmd incorrectly expects CTRL_STATUS=0x00000000 (reset state) instead of 0x00000001 (init_done=1). The DUT is functioning correctly - DDR3 controllers must complete initialization before accepting write commands, so init_done=1 is the correct operational state. Regenerate vectors with corrected expected value for post-initialization status register checks."
+}

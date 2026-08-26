@@ -1,0 +1,105 @@
+{
+  "path_id": "path_14_status_init",
+  "format": "OO PPPPPPPP DDDDDDDD EEEEEEEE",
+  "opcodes": {
+    "reset": 0,
+    "drive": 1,
+    "check": 2,
+    "step": 3
+  },
+  "input_packing": [
+    {
+      "block": "init_fsm",
+      "name": "enable",
+      "width": 1,
+      "lo": 0,
+      "hi": 0
+    },
+    {
+      "block": "config_regs",
+      "name": "csr_cyc_i",
+      "width": 1,
+      "lo": 1,
+      "hi": 1
+    },
+    {
+      "block": "config_regs",
+      "name": "csr_stb_i",
+      "width": 1,
+      "lo": 2,
+      "hi": 2
+    },
+    {
+      "block": "config_regs",
+      "name": "csr_we_i",
+      "width": 1,
+      "lo": 3,
+      "hi": 3
+    },
+    {
+      "block": "config_regs",
+      "name": "csr_adr_i",
+      "width": 8,
+      "lo": 4,
+      "hi": 11
+    }
+  ],
+  "output_packing": [
+    {
+      "block": "init_fsm",
+      "name": "init_cmd_valid",
+      "width": 1,
+      "lo": 0,
+      "hi": 0
+    },
+    {
+      "block": "init_fsm",
+      "name": "init_cmd",
+      "width": 4,
+      "lo": 1,
+      "hi": 4
+    },
+    {
+      "block": "init_fsm",
+      "name": "init_addr",
+      "width": 15,
+      "lo": 5,
+      "hi": 19
+    },
+    {
+      "block": "init_fsm",
+      "name": "init_bank",
+      "width": 3,
+      "lo": 20,
+      "hi": 22
+    },
+    {
+      "block": "init_fsm",
+      "name": "init_cke",
+      "width": 1,
+      "lo": 23,
+      "hi": 23
+    },
+    {
+      "block": "init_fsm",
+      "name": "init_reset_n",
+      "width": 1,
+      "lo": 24,
+      "hi": 24
+    },
+    {
+      "block": "init_fsm",
+      "name": "init_state",
+      "width": 4,
+      "lo": 25,
+      "hi": 28
+    },
+    {
+      "block": "config_regs",
+      "name": "csr_ack_o",
+      "width": 1,
+      "lo": 29,
+      "hi": 29
+    }
+  ]
+}

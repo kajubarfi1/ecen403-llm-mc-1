@@ -1,0 +1,257 @@
+{
+  "path_id": "path_08_init_to_cal",
+  "mode": "event",
+  "max_sig_id": 32,
+  "sim_timeout_cycles": 800000,
+  "start": {
+    "kind": "pulse",
+    "expression": "u_init_fsm.enable = 1'b1;"
+  },
+  "signals": [
+    {
+      "id": 0,
+      "name": "init_state",
+      "kind": "raw",
+      "path": "u_init_fsm.init_state",
+      "width": 4
+    },
+    {
+      "id": 1,
+      "name": "init_done",
+      "kind": "raw",
+      "path": "u_init_fsm.init_done",
+      "width": 1
+    },
+    {
+      "id": 2,
+      "name": "init_fail",
+      "kind": "raw",
+      "path": "u_init_fsm.init_fail",
+      "width": 1
+    },
+    {
+      "id": 3,
+      "name": "init_cke",
+      "kind": "raw",
+      "path": "u_init_fsm.init_cke",
+      "width": 1
+    },
+    {
+      "id": 4,
+      "name": "init_reset_n",
+      "kind": "raw",
+      "path": "u_init_fsm.init_reset_n",
+      "width": 1
+    },
+    {
+      "id": 5,
+      "name": "init_cmd_valid",
+      "kind": "raw",
+      "path": "u_init_fsm.init_cmd_valid",
+      "width": 1
+    },
+    {
+      "id": 6,
+      "name": "init_cmd",
+      "kind": "raw",
+      "path": "u_init_fsm.init_cmd",
+      "width": 4
+    },
+    {
+      "id": 7,
+      "name": "init_bank",
+      "kind": "raw",
+      "path": "u_init_fsm.init_bank",
+      "width": 3
+    },
+    {
+      "id": 8,
+      "name": "cal_done",
+      "kind": "raw",
+      "path": "u_calibration.cal_done",
+      "width": 1
+    },
+    {
+      "id": 9,
+      "name": "cal_fail",
+      "kind": "raw",
+      "path": "u_calibration.cal_fail",
+      "width": 1
+    },
+    {
+      "id": 10,
+      "name": "cal_init_done_input",
+      "kind": "raw",
+      "path": "u_calibration.init_done",
+      "width": 1
+    },
+    {
+      "id": 11,
+      "name": "state_idle",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_state == 4'd0"
+    },
+    {
+      "id": 12,
+      "name": "state_reset_low",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_state == 4'd1"
+    },
+    {
+      "id": 13,
+      "name": "state_reset_high",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_state == 4'd2"
+    },
+    {
+      "id": 14,
+      "name": "state_cke_wait",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_state == 4'd3"
+    },
+    {
+      "id": 15,
+      "name": "state_mr2",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_state == 4'd4"
+    },
+    {
+      "id": 16,
+      "name": "state_mr3",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_state == 4'd6"
+    },
+    {
+      "id": 17,
+      "name": "state_mr1",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_state == 4'd8"
+    },
+    {
+      "id": 18,
+      "name": "state_mr0",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_state == 4'd10"
+    },
+    {
+      "id": 19,
+      "name": "state_zqcl",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_state == 4'd12"
+    },
+    {
+      "id": 20,
+      "name": "state_done",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_state == 4'd14"
+    },
+    {
+      "id": 21,
+      "name": "mrs_mr2_issued",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_cmd_valid && u_init_fsm.init_cmd == 4'b0000 && u_init_fsm.init_bank == 3'd2"
+    },
+    {
+      "id": 22,
+      "name": "mrs_mr3_issued",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_cmd_valid && u_init_fsm.init_cmd == 4'b0000 && u_init_fsm.init_bank == 3'd3"
+    },
+    {
+      "id": 23,
+      "name": "mrs_mr1_issued",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_cmd_valid && u_init_fsm.init_cmd == 4'b0000 && u_init_fsm.init_bank == 3'd1"
+    },
+    {
+      "id": 24,
+      "name": "mrs_mr0_issued",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_cmd_valid && u_init_fsm.init_cmd == 4'b0000 && u_init_fsm.init_bank == 3'd0"
+    },
+    {
+      "id": 25,
+      "name": "zqcl_issued",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_cmd_valid && u_init_fsm.init_cmd == 4'b0110"
+    },
+    {
+      "id": 26,
+      "name": "reset_asserted",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_reset_n == 1'b0"
+    },
+    {
+      "id": 27,
+      "name": "cke_high",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_cke == 1'b1"
+    },
+    {
+      "id": 28,
+      "name": "init_done_and_cal_done",
+      "kind": "predicate",
+      "expression": "u_init_fsm.init_done && u_calibration.cal_done"
+    }
+  ],
+  "vector_format": {
+    "format_string": "OO PPPPPPPP DDDDDDDD EEEEEEEE",
+    "opcodes": {
+      "00": {
+        "name": "reset",
+        "fields": {},
+        "task_call": "handle_reset()"
+      },
+      "09": {
+        "name": "event_start",
+        "fields": {},
+        "task_call": "event_start()"
+      },
+      "04": {
+        "name": "wait_for",
+        "fields": {
+          "PPPPPPPP[7:0]": "sig_id",
+          "DDDDDDDD": "value",
+          "EEEEEEEE": "timeout"
+        },
+        "task_call": "wait_for(sig_id, value, timeout, vec_num, pc, fc, tt)"
+      },
+      "05": {
+        "name": "check_at",
+        "fields": {
+          "PPPPPPPP[7:0]": "sig_id",
+          "DDDDDDDD": "value",
+          "EEEEEEEE": "target_cycle"
+        },
+        "task_call": "check_at(sig_id, value, target_cycle, vec_num, pc, fc, tt)"
+      },
+      "06": {
+        "name": "check_not_yet",
+        "fields": {
+          "PPPPPPPP[7:0]": "sig_id",
+          "DDDDDDDD": "value",
+          "EEEEEEEE": "until_cycle"
+        },
+        "task_call": "check_not_yet(sig_id, value, until_cycle, vec_num, pc, fc, tt)"
+      },
+      "07": {
+        "name": "expect_handshake",
+        "fields": {
+          "PPPPPPPP[7:0]": "valid_id",
+          "PPPPPPPP[15:8]": "ready_id",
+          "EEEEEEEE": "timeout"
+        },
+        "task_call": "expect_handshake(valid_id, ready_id, timeout, vec_num, pc, fc, tt)"
+      },
+      "08": {
+        "name": "check_order",
+        "fields": {
+          "PPPPPPPP[7:0]": "first_id",
+          "PPPPPPPP[15:8]": "second_id",
+          "EEEEEEEE": "min_gap"
+        },
+        "task_call": "check_order(first_id, second_id, min_gap, vec_num, pc, fc, tt)"
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+Generate a test plan for the Command Queue → Wishbone Backpressure integration path.
+
+SPEC:
+{spec_json}
+
+PATH: cmd_queue -> wb_port
+CONNECTIONS:
+  cmd_queue -> wb_port: Command queue backpressure to Wishbone port when full.
+
+Available input signals (testbench drives these): "enq_valid", "enq_row", "enq_col", "enq_bank", "enq_we", "enq_aux", "deq_grant", "deq_idx", "wb_cyc_i", "wb_stb_i", "wb_we_i", "wb_adr_i", "wb_dat_i", "wb_sel_i", "wb_bte_i", "wb_cti_i", "rsp_valid", "rsp_rdata", "rsp_aux"
+Available output signals (testbench checks these): "entry_valid", "queue_full", "queue_empty", "queue_count", "wb_ack_o", "wb_dat_o", "wb_stall_o", "wb_err_o", "req_valid", "req_we", "req_addr", "req_wdata", "req_wmask", "req_aux"
+
+Output a JSON array of test operations:
+  {"op": "reset"}
+  {"op": "drive", "signals": {"signal_name": value, ...}, "comment": "<why>"}
+  {"op": "check", "expected": {"signal_name": expected_value, ...}, "comment": "<why>"}
+  {"op": "step", "cycles": <int>, "comment": "<why>"}
+
+All values are decimal integers.
+
+Generate at least 40 operations that exercise:
+1. Reset and verify initial state
+2. Normal operation through the path
+3. Boundary conditions (overflow, underflow, stall, timeout)
+4. Back-to-back operations
+5. State transitions at each block in the chain
+
+Output ONLY the JSON array.

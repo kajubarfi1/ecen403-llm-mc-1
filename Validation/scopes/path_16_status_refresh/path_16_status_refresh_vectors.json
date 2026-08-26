@@ -1,0 +1,630 @@
+{
+  "scope": "path_16_status_refresh",
+  "generator": "vector_gen_agent_llm",
+  "spec_source": "llmmc_microarchitecturespec_filled.json",
+  "generated_at": "2026-04-05T20:45:46.015130",
+  "vector_count": 124,
+  "hex_format": "unknown",
+  "vectors": [
+    {
+      "hex_line": "00 00000000 00000000 00000000",
+      "op": 0,
+      "comment": "Initialize DUT to known state"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow reset to propagate"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify refresh signals deasserted after reset"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify CSR interface idle after reset"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Set all inputs to idle state"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Stabilize inputs"
+    },
+    {
+      "hex_line": "01 00000000 00000001 00000001",
+      "op": 1,
+      "comment": "Signal initialization complete to enable refresh controller"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Allow refresh controller to start operation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "No refresh needed immediately after init"
+    },
+    {
+      "hex_line": "03 00000064 00000000 00000000",
+      "op": 3,
+      "comment": "Allow some time to pass toward first refresh interval"
+    },
+    {
+      "hex_line": "01 00000000 0000020C 00000004",
+      "op": 1,
+      "comment": "CSR read of refresh status register (addr 0x10)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for CSR response"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify CSR acknowledges read request"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR request"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Complete CSR transaction"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify CSR ack deasserted"
+    },
+    {
+      "hex_line": "03 00001770 00000000 00000000",
+      "op": 3,
+      "comment": "Wait close to tREFI (6240 cycles) to trigger refresh required"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify ref_required asserted near tREFI"
+    },
+    {
+      "hex_line": "01 00000000 0000020C 00000004",
+      "op": 1,
+      "comment": "Read refresh status when ref_required active"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for CSR response"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify CSR read completes"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Complete read transaction"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Deassert CSR signals"
+    },
+    {
+      "hex_line": "01 00000000 00000002 00000000",
+      "op": 1,
+      "comment": "Acknowledge refresh request"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Allow ref_ack to be sampled"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert ref_ack"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC (128 cycles) for refresh to complete"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify ref_required cleared after refresh ack"
+    },
+    {
+      "hex_line": "03 0000189C 00000000 00000000",
+      "op": 3,
+      "comment": "Wait past another tREFI interval without ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify new refresh required"
+    },
+    {
+      "hex_line": "03 00001860 00000000 00000000",
+      "op": 3,
+      "comment": "Wait another full tREFI without ack - should increase pending"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify refresh becomes urgent after multiple missed intervals"
+    },
+    {
+      "hex_line": "01 00000000 0000020C 00000004",
+      "op": 1,
+      "comment": "Read status during urgent refresh"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for CSR response"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CSR read completes during urgent state"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End CSR transaction"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Transaction complete"
+    },
+    {
+      "hex_line": "01 00000000 00000002 00000000",
+      "op": 1,
+      "comment": "First refresh ack to reduce pending count"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Sample ack"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert ack"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC"
+    },
+    {
+      "hex_line": "01 00000000 00000002 00000000",
+      "op": 1,
+      "comment": "Second refresh ack"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Sample ack"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert ack"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify urgent cleared after catching up"
+    },
+    {
+      "hex_line": "01 00000000 0000020C 00000004",
+      "op": 1,
+      "comment": "Back-to-back CSR read 1"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "First read ack"
+    },
+    {
+      "hex_line": "01 00000000 00000288 00000000",
+      "op": 1,
+      "comment": "Back-to-back CSR read 2 - different address"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for second ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Second read ack"
+    },
+    {
+      "hex_line": "01 00000000 00000308 00000000",
+      "op": 1,
+      "comment": "Back-to-back CSR read 3"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for third ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Third read ack"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End burst read"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Complete transaction"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Signal self-refresh mode active"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Allow status to propagate"
+    },
+    {
+      "hex_line": "01 00000000 0000000C 00000004",
+      "op": 1,
+      "comment": "Read main status register"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify status read succeeds"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End transaction"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Complete"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Exit self-refresh mode"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Status update propagation"
+    },
+    {
+      "hex_line": "01 00000000 0000081C 00000004",
+      "op": 1,
+      "comment": "Write to force self-refresh config"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for write ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Write acknowledged"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End write"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Complete write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify config updated"
+    },
+    {
+      "hex_line": "03 00000064 00000000 00000000",
+      "op": 3,
+      "comment": "Allow refresh controller to react to self-ref mode"
+    },
+    {
+      "hex_line": "01 00000000 0000081C 00000004",
+      "op": 1,
+      "comment": "Clear force self-refresh"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End transaction"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Complete"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify config cleared"
+    },
+    {
+      "hex_line": "03 00001860 00000000 00000000",
+      "op": 3,
+      "comment": "Wait full tREFI interval"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Normal refresh required after exiting self-ref"
+    },
+    {
+      "hex_line": "01 00000000 00000002 00000000",
+      "op": 1,
+      "comment": "Acknowledge pending refresh"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Sample ack"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC"
+    },
+    {
+      "hex_line": "01 00000000 0000000C 00000004",
+      "op": 1,
+      "comment": "Read invalid/unmapped CSR address"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for response"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CSR still responds to unmapped address"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End transaction"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Complete"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "De-initialize to test refresh controller disable"
+    },
+    {
+      "hex_line": "03 0000000A 00000000 00000000",
+      "op": 3,
+      "comment": "Allow state change"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Refresh signals should be inactive when not initialized"
+    },
+    {
+      "hex_line": "01 00000000 0000020C 00000004",
+      "op": 1,
+      "comment": "Read refresh status while disabled"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CSR still accessible when refresh disabled"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End transaction"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Complete"
+    },
+    {
+      "hex_line": "01 00000000 00000001 00000001",
+      "op": 1,
+      "comment": "Re-enable refresh controller"
+    },
+    {
+      "hex_line": "03 0000000A 00000000 00000000",
+      "op": 3,
+      "comment": "Allow re-initialization"
+    },
+    {
+      "hex_line": "03 00004920 00000000 00000000",
+      "op": 3,
+      "comment": "Wait 3x tREFI to accumulate pending refreshes"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Multiple pending refreshes cause urgent"
+    },
+    {
+      "hex_line": "01 00000000 0000020C 00000004",
+      "op": 1,
+      "comment": "Read pending count at starvation"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for response"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify starvation status readable"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End read"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Complete"
+    },
+    {
+      "hex_line": "01 00000000 00000002 00000000",
+      "op": 1,
+      "comment": "Start clearing backlog - ack 1"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Sample"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "tRFC wait"
+    },
+    {
+      "hex_line": "01 00000000 00000002 00000000",
+      "op": 1,
+      "comment": "Ack 2"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Sample"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "tRFC wait"
+    },
+    {
+      "hex_line": "01 00000000 00000002 00000000",
+      "op": 1,
+      "comment": "Ack 3"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Sample"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "tRFC wait"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify backlog cleared, no longer urgent"
+    },
+    {
+      "hex_line": "01 00000000 0000020C 00000004",
+      "op": 1,
+      "comment": "Final status read"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify final read completes"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "End test sequence"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Final stabilization"
+    }
+  ]
+}

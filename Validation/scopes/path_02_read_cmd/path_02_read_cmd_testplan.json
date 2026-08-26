@@ -1,0 +1,874 @@
+[
+  {
+    "op": "reset",
+    "comment": "Initialize DUT and clear all state"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow reset to propagate through all pipeline stages"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_ack_o": 0,
+      "wb_stall_o": 0,
+      "wb_err_o": 0,
+      "queue_empty": 1,
+      "queue_full": 0,
+      "queue_count": 0,
+      "ddr_reset_n": 1,
+      "ddr_cke": 1
+    },
+    "comment": "Verify initial idle state after reset"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0,
+      "wb_we_i": 0,
+      "wb_adr_i": 0,
+      "wb_dat_i": 0,
+      "wb_sel_i": 0,
+      "wb_bte_i": 0,
+      "wb_cti_i": 0,
+      "req_ready": 1,
+      "bank_is_active": 0,
+      "bank_act_allowed": 255,
+      "bank_rd_allowed": 255,
+      "bank_pre_allowed": 255,
+      "ref_required": 0,
+      "ref_urgent": 0
+    },
+    "comment": "Set up idle inputs with banks ready for activation"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Settle inputs"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 0,
+      "queue_empty": 1,
+      "enq_ready": 1
+    },
+    "comment": "Confirm ready to accept commands"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 0,
+      "wb_adr_i": 0,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Issue single read to address 0x0 (row=0, bank=0, col=0)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock in the read request"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 0,
+      "queue_empty": 0,
+      "queue_count": 1,
+      "dec_rank": 0
+    },
+    "comment": "Verify request entered queue with correct rank decode"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 0,
+      "wb_we_i": 0
+    },
+    "comment": "Deassert strobe, keep cycle active"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Allow scheduler to process"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_act_valid": 1,
+      "fb_act_bank": 0,
+      "fb_act_row": 0
+    },
+    "comment": "Scheduler should issue ACTIVATE to bank 0, row 0"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_is_active": 1,
+      "bank_open_row_0": 0
+    },
+    "comment": "Simulate bank 0 now active with row 0 open"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRCD (11 cycles) for row activation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_rd_valid": 1
+    },
+    "comment": "After tRCD, READ command should be issued"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait CL (11 cycles) for read data"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "rsp_valid": 1,
+      "rsp_rdata": 305419896
+    },
+    "comment": "Memory returns read data 0x12345678"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock read data response"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_ack_o": 1,
+      "wb_dat_o": 305419896
+    },
+    "comment": "Verify read data returned to Wishbone"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0,
+      "rsp_valid": 0
+    },
+    "comment": "Complete transaction"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow queue to drain"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1,
+      "queue_count": 0,
+      "wb_ack_o": 0
+    },
+    "comment": "Queue should be empty after completion"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 0,
+      "wb_adr_i": 2048,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0
+    },
+    "comment": "Read from address 2048 (different row in bank 0)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock in request"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 1,
+      "fb_pre_valid": 1
+    },
+    "comment": "Should precharge bank 0 first (row miss)"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_is_active": 0
+    },
+    "comment": "Bank precharged"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRP for precharge"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_act_valid": 1,
+      "fb_act_row": 1
+    },
+    "comment": "Now activate new row"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_is_active": 1,
+      "bank_open_row_0": 1
+    },
+    "comment": "Bank active with row 1"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRCD"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_rd_valid": 1
+    },
+    "comment": "READ issued after activation"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "rsp_valid": 1,
+      "rsp_rdata": 2863311530
+    },
+    "comment": "Return data 0xAAAAAAAA"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock response"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_ack_o": 1,
+      "wb_dat_o": 2863311530
+    },
+    "comment": "Data delivered"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0,
+      "rsp_valid": 0
+    },
+    "comment": "End transaction"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Settle"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 0,
+      "wb_adr_i": 32,
+      "wb_sel_i": 15,
+      "wb_cti_i": 2,
+      "wb_bte_i": 0
+    },
+    "comment": "Start burst read of 8 beats, linear burst, addr=32"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "First beat"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 0,
+      "queue_count": 1
+    },
+    "comment": "First request queued"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 36,
+      "wb_cti_i": 2
+    },
+    "comment": "Second burst beat"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock beat 2"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 40,
+      "wb_cti_i": 2
+    },
+    "comment": "Third burst beat"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock beat 3"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 44,
+      "wb_cti_i": 2
+    },
+    "comment": "Fourth burst beat"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock beat 4"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 48,
+      "wb_cti_i": 2
+    },
+    "comment": "Fifth burst beat"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock beat 5"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 52,
+      "wb_cti_i": 2
+    },
+    "comment": "Sixth burst beat"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock beat 6"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 56,
+      "wb_cti_i": 2
+    },
+    "comment": "Seventh burst beat"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock beat 7"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 60,
+      "wb_cti_i": 7
+    },
+    "comment": "Eighth burst beat with EOB"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock final beat"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 8
+    },
+    "comment": "All 8 burst requests queued"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 0
+    },
+    "comment": "End burst input"
+  },
+  {
+    "op": "step",
+    "cycles": 4,
+    "comment": "Allow processing"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "rsp_valid": 1,
+      "rsp_rdata": 1
+    },
+    "comment": "Return burst data"
+  },
+  {
+    "op": "step",
+    "cycles": 8,
+    "comment": "Return all burst data"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "rsp_valid": 0,
+      "wb_cyc_i": 0
+    },
+    "comment": "End burst transaction"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Drain queue"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1
+    },
+    "comment": "Queue drained after burst"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 0,
+      "wb_adr_i": 65536,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "bank_is_active": 0,
+      "bank_act_allowed": 255
+    },
+    "comment": "Read from bank 1 (address maps to different bank)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue request"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 1,
+      "fb_act_valid": 1,
+      "fb_act_bank": 1
+    },
+    "comment": "Activate bank 1"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_is_active": 2
+    },
+    "comment": "Bank 1 now active"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "tRCD delay"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "rsp_valid": 1,
+      "rsp_rdata": 3735928559
+    },
+    "comment": "Return 0xDEADBEEF"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock response"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_ack_o": 1,
+      "wb_dat_o": 3735928559
+    },
+    "comment": "Data on wishbone"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0,
+      "rsp_valid": 0
+    },
+    "comment": "End transaction"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Settle"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "req_ready": 0
+    },
+    "comment": "Block downstream ready to test stall"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Apply backpressure"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 0,
+      "wb_adr_i": 128,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0
+    },
+    "comment": "Issue read while downstream stalled"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock request"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 1
+    },
+    "comment": "Request accepted into queue"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Wait with stall"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_rd_valid": 0
+    },
+    "comment": "No read issued while stalled"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "req_ready": 1
+    },
+    "comment": "Release backpressure"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow processing"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_act_valid": 1
+    },
+    "comment": "Activation proceeds after unstall"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0,
+      "rsp_valid": 1,
+      "rsp_rdata": 0
+    },
+    "comment": "Complete with dummy data"
+  },
+  {
+    "op": "step",
+    "cycles": 15,
+    "comment": "Complete transaction"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "rsp_valid": 0
+    },
+    "comment": "Clear response"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Settle"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1
+    },
+    "comment": "Queue empty"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_required": 1,
+      "ref_urgent": 0
+    },
+    "comment": "Request refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Apply refresh request"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 0,
+      "wb_adr_i": 256,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0
+    },
+    "comment": "Read during refresh request"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Process"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 1
+    },
+    "comment": "Request queued but may be delayed for refresh"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_required": 0
+    },
+    "comment": "Clear refresh request"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow completion"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_urgent": 1
+    },
+    "comment": "Urgent refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Process urgent"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_ref_valid": 1,
+      "ref_ack": 1
+    },
+    "comment": "Refresh acknowledged"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_urgent": 0
+    },
+    "comment": "Clear urgent"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0,
+      "rsp_valid": 1,
+      "rsp_rdata": 12345678
+    },
+    "comment": "Complete pending read"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Clock completion"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "rsp_valid": 0
+    },
+    "comment": "Clear response"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Settle"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1,
+      "ref_ack": 0
+    },
+    "comment": "System idle"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 0,
+      "wb_adr_i": 536870908,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0
+    },
+    "comment": "Read near end of address space (boundary test)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue boundary address"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 1,
+      "wb_err_o": 0
+    },
+    "comment": "Valid high address accepted"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0,
+      "rsp_valid": 1,
+      "rsp_rdata": 4294967295
+    },
+    "comment": "Return max value"
+  },
+  {
+    "op": "step",
+    "cycles": 15,
+    "comment": "Complete"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_dat_o": 4294967295
+    },
+    "comment": "Max data returned correctly"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "rsp_valid": 0
+    },
+    "comment": "End"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Final settle"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 0,
+      "wb_adr_i": 0,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "bank_is_active": 1,
+      "bank_open_row_0": 0
+    },
+    "comment": "Read with page hit (row already open)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Queue request"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_act_valid": 0,
+      "fb_rd_valid": 1
+    },
+    "comment": "Direct READ without activate (page hit)"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "rsp_valid": 1,
+      "rsp_rdata": 1111
+    },
+    "comment": "Fast response"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_ack_o": 1,
+      "wb_dat_o": 1111
+    },
+    "comment": "Fast completion on page hit"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "wb_stb_i": 0,
+      "rsp_valid": 0
+    },
+    "comment": "Complete"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Final state check"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1,
+      "queue_full": 0,
+      "wb_stall_o": 0,
+      "wb_err_o": 0,
+      "ddr_cke": 1,
+      "ddr_reset_n": 1
+    },
+    "comment": "Final idle state verification"
+  }
+]

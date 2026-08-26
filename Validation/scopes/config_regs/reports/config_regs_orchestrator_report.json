@@ -1,0 +1,39 @@
+{
+  "scope": "config_regs",
+  "project_root": "/Users/jacob/Capstone/ecen403-llm-mc-1",
+  "start_from": "refmodel",
+  "skip_sim": false,
+  "max_retries": 2,
+  "timestamp": "2026-03-23T20:03:46.596116",
+  "overall_status": "failed",
+  "retry_count": 0,
+  "stages": {
+    "refmodel": {
+      "scope": "config_regs",
+      "spec_source": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/spec/llmmc_microarchitecturespec_filled.json",
+      "status": "success",
+      "refmodel_path": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reference_models/config_regs_refmodel.py",
+      "errors": []
+    },
+    "vectors": {
+      "scope": "config_regs",
+      "status": "error",
+      "vector_count": 0,
+      "errors": [
+        "524 Server Error: <none> for url: https://chat-api.tamu.ai/openai/chat/completions"
+      ]
+    },
+    "testbench": {
+      "scope": "config_regs",
+      "status": "success",
+      "output_file": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/scopes/config_regs/config_regs_tb.sv",
+      "manifest_file": "/Users/jacob/Capstone/ecen403-llm-mc-1/Frontend/OutputFolders/Phase1Output/PHASE1RTL/config_regs_manifest.json",
+      "module_name": "config_regs",
+      "errors": [],
+      "timestamp": "2026-03-23T20:01:41.315745"
+    },
+    "simulate": {},
+    "triage": {}
+  },
+  "error_message": "Vector generation failed: ['524 Server Error: <none> for url: https://chat-api.tamu.ai/openai/chat/completions']"
+}

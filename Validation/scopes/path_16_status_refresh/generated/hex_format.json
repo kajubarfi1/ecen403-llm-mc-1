@@ -1,0 +1,77 @@
+{
+  "path_id": "path_16_status_refresh",
+  "format": "OO PPPPPPPP DDDDDDDD EEEEEEEE",
+  "opcodes": {
+    "reset": 0,
+    "drive": 1,
+    "check": 2,
+    "step": 3
+  },
+  "input_packing": [
+    {
+      "block": "refresh_ctrl",
+      "name": "init_done",
+      "width": 1,
+      "lo": 0,
+      "hi": 0
+    },
+    {
+      "block": "refresh_ctrl",
+      "name": "ref_ack",
+      "width": 1,
+      "lo": 1,
+      "hi": 1
+    },
+    {
+      "block": "config_regs",
+      "name": "csr_cyc_i",
+      "width": 1,
+      "lo": 2,
+      "hi": 2
+    },
+    {
+      "block": "config_regs",
+      "name": "csr_stb_i",
+      "width": 1,
+      "lo": 3,
+      "hi": 3
+    },
+    {
+      "block": "config_regs",
+      "name": "csr_we_i",
+      "width": 1,
+      "lo": 4,
+      "hi": 4
+    },
+    {
+      "block": "config_regs",
+      "name": "csr_adr_i",
+      "width": 8,
+      "lo": 5,
+      "hi": 12
+    }
+  ],
+  "output_packing": [
+    {
+      "block": "refresh_ctrl",
+      "name": "ref_required",
+      "width": 1,
+      "lo": 0,
+      "hi": 0
+    },
+    {
+      "block": "refresh_ctrl",
+      "name": "ref_urgent",
+      "width": 1,
+      "lo": 1,
+      "hi": 1
+    },
+    {
+      "block": "config_regs",
+      "name": "csr_ack_o",
+      "width": 1,
+      "lo": 2,
+      "hi": 2
+    }
+  ]
+}

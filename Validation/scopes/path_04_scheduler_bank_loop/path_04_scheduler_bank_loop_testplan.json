@@ -1,0 +1,803 @@
+[
+  {
+    "op": "reset",
+    "comment": "Initialize DUT and clear all bank states"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 7,
+      "ddr_cke": 1,
+      "ddr_reset_n": 1,
+      "ref_ack": 0,
+      "deq_grant": 0
+    },
+    "comment": "Verify idle state after reset - NOP on bus"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cfg_tRCD_nCK": 11,
+      "cfg_tRP_nCK": 11,
+      "cfg_tRAS_nCK": 28,
+      "cfg_tRC_nCK": 39,
+      "cfg_tRRD_nCK": 6,
+      "cfg_tFAW_nCK": 32,
+      "cfg_tWTR_nCK": 6,
+      "cfg_tWR_nCK": 12,
+      "cfg_tRTP_nCK": 6,
+      "cfg_tCCD_nCK": 4,
+      "cfg_tRFC_nCK": 128
+    },
+    "comment": "Configure timing parameters per DDR3-1600K spec"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Allow config to propagate"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 100,
+      "q_col_0": 0,
+      "q_bank_0": 0,
+      "q_we_0": 0,
+      "q_aux_0": 0,
+      "ref_required": 0,
+      "ref_urgent": 0
+    },
+    "comment": "Issue read request to bank 0 - should trigger ACT"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Pipeline latency for scheduler->cmd_gen"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 3,
+      "ddr_bank": 0
+    },
+    "comment": "ACT issued to bank 0"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 0
+    },
+    "comment": "Deassert request while waiting for tRCD"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRCD cycles for row activation"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 100,
+      "q_col_0": 0,
+      "q_bank_0": 0,
+      "q_we_0": 0,
+      "q_aux_0": 0
+    },
+    "comment": "Re-present read request - row hit should trigger RD"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Pipeline latency"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 5,
+      "ddr_bank": 0
+    },
+    "comment": "RD command issued - row hit path"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 0
+    },
+    "comment": "Clear request"
+  },
+  {
+    "op": "step",
+    "cycles": 4,
+    "comment": "Wait tCCD for next column command"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 100,
+      "q_col_0": 64,
+      "q_bank_0": 0,
+      "q_we_0": 1,
+      "q_aux_0": 0
+    },
+    "comment": "Write to same row - should be row hit WR"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Pipeline latency"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 4,
+      "ddr_bank": 0
+    },
+    "comment": "WR command issued - row hit write"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 0
+    },
+    "comment": "Clear request"
+  },
+  {
+    "op": "step",
+    "cycles": 12,
+    "comment": "Wait tWR for write recovery"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 200,
+      "q_col_0": 0,
+      "q_bank_0": 0,
+      "q_we_0": 0,
+      "q_aux_0": 0
+    },
+    "comment": "Read different row - should trigger PRE then ACT"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Pipeline latency for PRE"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 2,
+      "ddr_bank": 0
+    },
+    "comment": "PRE command issued for row miss"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRP for precharge completion"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 3,
+      "ddr_bank": 0
+    },
+    "comment": "ACT issued after tRP for new row"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRCD"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 5,
+      "ddr_bank": 0
+    },
+    "comment": "RD issued after tRCD"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 0
+    },
+    "comment": "Clear request"
+  },
+  {
+    "op": "step",
+    "cycles": 6,
+    "comment": "Wait tRTP"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 300,
+      "q_col_0": 0,
+      "q_bank_0": 1,
+      "q_we_0": 0,
+      "q_aux_0": 0
+    },
+    "comment": "Read to bank 1 - different bank, should ACT immediately"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Pipeline latency"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 3,
+      "ddr_bank": 1
+    },
+    "comment": "ACT issued to bank 1"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 400,
+      "q_col_0": 0,
+      "q_bank_0": 2,
+      "q_we_0": 0,
+      "q_aux_0": 0
+    },
+    "comment": "Queue request to bank 2"
+  },
+  {
+    "op": "step",
+    "cycles": 6,
+    "comment": "Wait tRRD between activates"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 3,
+      "ddr_bank": 2
+    },
+    "comment": "ACT to bank 2 after tRRD"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 500,
+      "q_col_0": 0,
+      "q_bank_0": 3,
+      "q_we_0": 0,
+      "q_aux_0": 0
+    },
+    "comment": "Queue request to bank 3"
+  },
+  {
+    "op": "step",
+    "cycles": 6,
+    "comment": "Wait tRRD"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 3,
+      "ddr_bank": 3
+    },
+    "comment": "ACT to bank 3 after tRRD"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 600,
+      "q_col_0": 0,
+      "q_bank_0": 4,
+      "q_we_0": 0,
+      "q_aux_0": 0
+    },
+    "comment": "Queue request to bank 4 - may hit tFAW"
+  },
+  {
+    "op": "step",
+    "cycles": 6,
+    "comment": "Wait tRRD"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 7
+    },
+    "comment": "NOP expected - tFAW window blocked 5th ACT"
+  },
+  {
+    "op": "step",
+    "cycles": 14,
+    "comment": "Wait remaining tFAW window to clear"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 3,
+      "ddr_bank": 4
+    },
+    "comment": "ACT to bank 4 after tFAW clears"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 0
+    },
+    "comment": "Clear all requests"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Allow tRCD for bank 4"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 0,
+      "ref_required": 1,
+      "ref_urgent": 0
+    },
+    "comment": "Signal refresh required"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Pipeline latency"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 2
+    },
+    "comment": "PRE all banks before refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRP"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 1,
+      "ref_ack": 1
+    },
+    "comment": "REF command issued"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_required": 0,
+      "ref_urgent": 0
+    },
+    "comment": "Clear refresh request"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC for refresh completion"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 7,
+      "ref_ack": 0
+    },
+    "comment": "NOP after refresh, ack cleared"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 700,
+      "q_col_0": 128,
+      "q_bank_0": 5,
+      "q_we_0": 1,
+      "q_aux_0": 0
+    },
+    "comment": "Write to bank 5 after refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Pipeline latency"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 3,
+      "ddr_bank": 5
+    },
+    "comment": "ACT to bank 5"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRCD"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 4,
+      "ddr_bank": 5
+    },
+    "comment": "WR to bank 5"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 700,
+      "q_col_0": 192,
+      "q_bank_0": 5,
+      "q_we_0": 1,
+      "q_aux_0": 0
+    },
+    "comment": "Back-to-back write same row"
+  },
+  {
+    "op": "step",
+    "cycles": 4,
+    "comment": "Wait tCCD"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 4,
+      "ddr_bank": 5
+    },
+    "comment": "Second WR - back-to-back"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 700,
+      "q_col_0": 256,
+      "q_bank_0": 5,
+      "q_we_0": 0,
+      "q_aux_0": 0
+    },
+    "comment": "Read same row after writes - check tWTR"
+  },
+  {
+    "op": "step",
+    "cycles": 6,
+    "comment": "Wait tWTR"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 5,
+      "ddr_bank": 5
+    },
+    "comment": "RD after tWTR delay"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 700,
+      "q_col_0": 320,
+      "q_bank_0": 5,
+      "q_we_0": 0,
+      "q_aux_0": 0
+    },
+    "comment": "Back-to-back reads"
+  },
+  {
+    "op": "step",
+    "cycles": 4,
+    "comment": "Wait tCCD"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 5,
+      "ddr_bank": 5
+    },
+    "comment": "Second RD - back-to-back"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 0
+    },
+    "comment": "Clear requests"
+  },
+  {
+    "op": "step",
+    "cycles": 6,
+    "comment": "Wait tRTP"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 0,
+      "ref_required": 1,
+      "ref_urgent": 1
+    },
+    "comment": "Urgent refresh request"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Pipeline latency"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 2
+    },
+    "comment": "Urgent PRE all"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRP"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 1,
+      "ref_ack": 1
+    },
+    "comment": "Urgent REF issued"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_required": 0,
+      "ref_urgent": 0
+    },
+    "comment": "Clear urgent refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 800,
+      "q_col_0": 0,
+      "q_bank_0": 6,
+      "q_we_0": 0,
+      "q_aux_0": 0
+    },
+    "comment": "Read to bank 6"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Pipeline latency"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 3,
+      "ddr_bank": 6
+    },
+    "comment": "ACT to bank 6"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 900,
+      "q_col_0": 0,
+      "q_bank_0": 7,
+      "q_we_0": 0,
+      "q_aux_0": 0
+    },
+    "comment": "Read to bank 7 concurrently"
+  },
+  {
+    "op": "step",
+    "cycles": 6,
+    "comment": "Wait tRRD"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 3,
+      "ddr_bank": 7
+    },
+    "comment": "ACT to bank 7"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Wait remaining tRCD for bank 6"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 800,
+      "q_col_0": 0,
+      "q_bank_0": 6,
+      "q_we_0": 0,
+      "q_aux_0": 0
+    },
+    "comment": "Re-present bank 6 read"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Pipeline latency"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 5,
+      "ddr_bank": 6
+    },
+    "comment": "RD to bank 6"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 900,
+      "q_col_0": 0,
+      "q_bank_0": 7,
+      "q_we_0": 0,
+      "q_aux_0": 0
+    },
+    "comment": "Bank 7 read - should be ready"
+  },
+  {
+    "op": "step",
+    "cycles": 4,
+    "comment": "Wait tCCD between different bank reads"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 5,
+      "ddr_bank": 7
+    },
+    "comment": "RD to bank 7"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 0
+    },
+    "comment": "Clear requests"
+  },
+  {
+    "op": "step",
+    "cycles": 10,
+    "comment": "Idle period"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 7,
+      "deq_grant": 0
+    },
+    "comment": "Verify idle - NOP, no grants"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 32767,
+      "q_col_0": 1023,
+      "q_bank_0": 7,
+      "q_we_0": 1,
+      "q_aux_0": 255
+    },
+    "comment": "Max address boundary test"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Pipeline latency for PRE (row conflict)"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 2,
+      "ddr_bank": 7
+    },
+    "comment": "PRE bank 7 for row conflict"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRP"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 3,
+      "ddr_bank": 7,
+      "ddr_addr": 32767
+    },
+    "comment": "ACT max row address"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRCD"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 4,
+      "ddr_bank": 7
+    },
+    "comment": "WR to max column"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 0,
+      "q_col_0": 0,
+      "q_bank_0": 0,
+      "q_we_0": 0,
+      "q_aux_0": 0
+    },
+    "comment": "Min address boundary test"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Pipeline latency"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 3,
+      "ddr_bank": 0,
+      "ddr_addr": 0
+    },
+    "comment": "ACT min address"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRCD"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 5,
+      "ddr_bank": 0
+    },
+    "comment": "RD min address"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 0
+    },
+    "comment": "Final cleanup"
+  },
+  {
+    "op": "step",
+    "cycles": 20,
+    "comment": "Allow all operations to complete"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cmd": 7,
+      "ddr_cke": 1,
+      "ddr_reset_n": 1
+    },
+    "comment": "Final idle state verification"
+  }
+]

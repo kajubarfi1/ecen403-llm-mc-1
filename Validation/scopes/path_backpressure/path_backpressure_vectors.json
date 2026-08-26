@@ -1,0 +1,890 @@
+{
+  "scope": "path_backpressure",
+  "generator": "vector_gen_agent_llm",
+  "spec_source": "llmmc_microarchitecturespec_filled.json",
+  "generated_at": "2026-03-24T01:49:16.961714",
+  "vector_count": 110,
+  "hex_format": "OO AAAAAAAA WWWWWWWW EEEEEEEE (op addr wdata expected_status)",
+  "vectors": [
+    {
+      "op": 0,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Initialize DUT, clear all state",
+      "hex_line": "00 00000000 00000000 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "After reset, queue empty, no stall",
+      "hex_line": "04 00000000 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 0,
+      "wdata": 305419896,
+      "expected": 33,
+      "comment": "Single write to addr 0, verify no stall",
+      "hex_line": "02 00000000 12345678 00000021"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 1,
+      "comment": "One entry in queue, no stall",
+      "hex_line": "04 00000000 00000000 00000001"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 32,
+      "comment": "Drain single entry to start fresh",
+      "hex_line": "03 00000000 00000000 00000020"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Queue empty again",
+      "hex_line": "04 00000000 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 0,
+      "wdata": 1,
+      "expected": 33,
+      "comment": "Fill queue entry 0, addr=0*128=0",
+      "hex_line": "02 00000000 00000001 00000021"
+    },
+    {
+      "op": 2,
+      "addr": 128,
+      "wdata": 2,
+      "expected": 34,
+      "comment": "Fill queue entry 1, addr=1*128=128",
+      "hex_line": "02 00000080 00000002 00000022"
+    },
+    {
+      "op": 2,
+      "addr": 256,
+      "wdata": 3,
+      "expected": 35,
+      "comment": "Fill queue entry 2, addr=2*128=256",
+      "hex_line": "02 00000100 00000003 00000023"
+    },
+    {
+      "op": 2,
+      "addr": 384,
+      "wdata": 4,
+      "expected": 36,
+      "comment": "Fill queue entry 3, addr=3*128=384",
+      "hex_line": "02 00000180 00000004 00000024"
+    },
+    {
+      "op": 2,
+      "addr": 512,
+      "wdata": 5,
+      "expected": 37,
+      "comment": "Fill queue entry 4, addr=4*128=512",
+      "hex_line": "02 00000200 00000005 00000025"
+    },
+    {
+      "op": 2,
+      "addr": 640,
+      "wdata": 6,
+      "expected": 38,
+      "comment": "Fill queue entry 5, addr=5*128=640",
+      "hex_line": "02 00000280 00000006 00000026"
+    },
+    {
+      "op": 2,
+      "addr": 768,
+      "wdata": 7,
+      "expected": 39,
+      "comment": "Fill queue entry 6, addr=6*128=768",
+      "hex_line": "02 00000300 00000007 00000027"
+    },
+    {
+      "op": 2,
+      "addr": 896,
+      "wdata": 8,
+      "expected": 40,
+      "comment": "Fill queue entry 7, addr=7*128=896",
+      "hex_line": "02 00000380 00000008 00000028"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 8,
+      "comment": "Half full, no stall yet",
+      "hex_line": "04 00000000 00000000 00000008"
+    },
+    {
+      "op": 2,
+      "addr": 1024,
+      "wdata": 9,
+      "expected": 41,
+      "comment": "Fill queue entry 8, addr=8*128=1024",
+      "hex_line": "02 00000400 00000009 00000029"
+    },
+    {
+      "op": 2,
+      "addr": 1152,
+      "wdata": 10,
+      "expected": 42,
+      "comment": "Fill queue entry 9, addr=9*128=1152",
+      "hex_line": "02 00000480 0000000A 0000002A"
+    },
+    {
+      "op": 2,
+      "addr": 1280,
+      "wdata": 11,
+      "expected": 43,
+      "comment": "Fill queue entry 10, addr=10*128=1280",
+      "hex_line": "02 00000500 0000000B 0000002B"
+    },
+    {
+      "op": 2,
+      "addr": 1408,
+      "wdata": 12,
+      "expected": 44,
+      "comment": "Fill queue entry 11, addr=11*128=1408",
+      "hex_line": "02 00000580 0000000C 0000002C"
+    },
+    {
+      "op": 2,
+      "addr": 1536,
+      "wdata": 13,
+      "expected": 45,
+      "comment": "Fill queue entry 12, addr=12*128=1536",
+      "hex_line": "02 00000600 0000000D 0000002D"
+    },
+    {
+      "op": 2,
+      "addr": 1664,
+      "wdata": 14,
+      "expected": 46,
+      "comment": "Fill queue entry 13, addr=13*128=1664",
+      "hex_line": "02 00000680 0000000E 0000002E"
+    },
+    {
+      "op": 2,
+      "addr": 1792,
+      "wdata": 15,
+      "expected": 47,
+      "comment": "Fill queue entry 14, addr=14*128=1792",
+      "hex_line": "02 00000700 0000000F 0000002F"
+    },
+    {
+      "op": 2,
+      "addr": 1920,
+      "wdata": 16,
+      "expected": 176,
+      "comment": "Fill queue entry 15, addr=15*128=1920",
+      "hex_line": "02 00000780 00000010 000000B0"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 208,
+      "comment": "Queue full, stall must be asserted",
+      "hex_line": "04 00000000 00000000 000000D0"
+    },
+    {
+      "op": 2,
+      "addr": 2048,
+      "wdata": 17,
+      "expected": 208,
+      "comment": "Attempt 17th write while full, should be blocked",
+      "hex_line": "02 00000800 00000011 000000D0"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 208,
+      "comment": "Still full, 17th write rejected",
+      "hex_line": "04 00000000 00000000 000000D0"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 47,
+      "comment": "Dequeue entry 0 to make space",
+      "hex_line": "03 00000000 00000000 0000002F"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 15,
+      "comment": "One slot free, stall deasserted",
+      "hex_line": "04 00000000 00000000 0000000F"
+    },
+    {
+      "op": 2,
+      "addr": 2048,
+      "wdata": 17,
+      "expected": 176,
+      "comment": "Now 17th write succeeds",
+      "hex_line": "02 00000800 00000011 000000B0"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 208,
+      "comment": "Full again after successful write",
+      "hex_line": "04 00000000 00000000 000000D0"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 47,
+      "comment": "Drain half: dequeue slot 0",
+      "hex_line": "03 00000000 00000000 0000002F"
+    },
+    {
+      "op": 3,
+      "addr": 1,
+      "wdata": 0,
+      "expected": 46,
+      "comment": "Drain half: dequeue slot 1",
+      "hex_line": "03 00000001 00000000 0000002E"
+    },
+    {
+      "op": 3,
+      "addr": 2,
+      "wdata": 0,
+      "expected": 45,
+      "comment": "Drain half: dequeue slot 2",
+      "hex_line": "03 00000002 00000000 0000002D"
+    },
+    {
+      "op": 3,
+      "addr": 3,
+      "wdata": 0,
+      "expected": 44,
+      "comment": "Drain half: dequeue slot 3",
+      "hex_line": "03 00000003 00000000 0000002C"
+    },
+    {
+      "op": 3,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 43,
+      "comment": "Drain half: dequeue slot 4",
+      "hex_line": "03 00000004 00000000 0000002B"
+    },
+    {
+      "op": 3,
+      "addr": 5,
+      "wdata": 0,
+      "expected": 42,
+      "comment": "Drain half: dequeue slot 5",
+      "hex_line": "03 00000005 00000000 0000002A"
+    },
+    {
+      "op": 3,
+      "addr": 6,
+      "wdata": 0,
+      "expected": 41,
+      "comment": "Drain half: dequeue slot 6",
+      "hex_line": "03 00000006 00000000 00000029"
+    },
+    {
+      "op": 3,
+      "addr": 7,
+      "wdata": 0,
+      "expected": 40,
+      "comment": "Drain half: dequeue slot 7",
+      "hex_line": "03 00000007 00000000 00000028"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 8,
+      "comment": "Half drained, 8 entries remain",
+      "hex_line": "04 00000000 00000000 00000008"
+    },
+    {
+      "op": 2,
+      "addr": 2176,
+      "wdata": 18,
+      "expected": 41,
+      "comment": "Fill again entry 0",
+      "hex_line": "02 00000880 00000012 00000029"
+    },
+    {
+      "op": 2,
+      "addr": 2304,
+      "wdata": 19,
+      "expected": 42,
+      "comment": "Fill again entry 1",
+      "hex_line": "02 00000900 00000013 0000002A"
+    },
+    {
+      "op": 2,
+      "addr": 2432,
+      "wdata": 20,
+      "expected": 43,
+      "comment": "Fill again entry 2",
+      "hex_line": "02 00000980 00000014 0000002B"
+    },
+    {
+      "op": 2,
+      "addr": 2560,
+      "wdata": 21,
+      "expected": 44,
+      "comment": "Fill again entry 3",
+      "hex_line": "02 00000A00 00000015 0000002C"
+    },
+    {
+      "op": 2,
+      "addr": 2688,
+      "wdata": 22,
+      "expected": 45,
+      "comment": "Fill again entry 4",
+      "hex_line": "02 00000A80 00000016 0000002D"
+    },
+    {
+      "op": 2,
+      "addr": 2816,
+      "wdata": 23,
+      "expected": 46,
+      "comment": "Fill again entry 5",
+      "hex_line": "02 00000B00 00000017 0000002E"
+    },
+    {
+      "op": 2,
+      "addr": 2944,
+      "wdata": 24,
+      "expected": 47,
+      "comment": "Fill again entry 6",
+      "hex_line": "02 00000B80 00000018 0000002F"
+    },
+    {
+      "op": 2,
+      "addr": 3072,
+      "wdata": 25,
+      "expected": 176,
+      "comment": "Fill again entry 7",
+      "hex_line": "02 00000C00 00000019 000000B0"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 208,
+      "comment": "Full again after 8 new writes",
+      "hex_line": "04 00000000 00000000 000000D0"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 47,
+      "comment": "Drain all: entry 0",
+      "hex_line": "03 00000000 00000000 0000002F"
+    },
+    {
+      "op": 3,
+      "addr": 1,
+      "wdata": 0,
+      "expected": 46,
+      "comment": "Drain all: entry 1",
+      "hex_line": "03 00000001 00000000 0000002E"
+    },
+    {
+      "op": 3,
+      "addr": 2,
+      "wdata": 0,
+      "expected": 45,
+      "comment": "Drain all: entry 2",
+      "hex_line": "03 00000002 00000000 0000002D"
+    },
+    {
+      "op": 3,
+      "addr": 3,
+      "wdata": 0,
+      "expected": 44,
+      "comment": "Drain all: entry 3",
+      "hex_line": "03 00000003 00000000 0000002C"
+    },
+    {
+      "op": 3,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 43,
+      "comment": "Drain all: entry 4",
+      "hex_line": "03 00000004 00000000 0000002B"
+    },
+    {
+      "op": 3,
+      "addr": 5,
+      "wdata": 0,
+      "expected": 42,
+      "comment": "Drain all: entry 5",
+      "hex_line": "03 00000005 00000000 0000002A"
+    },
+    {
+      "op": 3,
+      "addr": 6,
+      "wdata": 0,
+      "expected": 41,
+      "comment": "Drain all: entry 6",
+      "hex_line": "03 00000006 00000000 00000029"
+    },
+    {
+      "op": 3,
+      "addr": 7,
+      "wdata": 0,
+      "expected": 40,
+      "comment": "Drain all: entry 7",
+      "hex_line": "03 00000007 00000000 00000028"
+    },
+    {
+      "op": 3,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 39,
+      "comment": "Drain all: entry 8",
+      "hex_line": "03 00000008 00000000 00000027"
+    },
+    {
+      "op": 3,
+      "addr": 9,
+      "wdata": 0,
+      "expected": 38,
+      "comment": "Drain all: entry 9",
+      "hex_line": "03 00000009 00000000 00000026"
+    },
+    {
+      "op": 3,
+      "addr": 10,
+      "wdata": 0,
+      "expected": 37,
+      "comment": "Drain all: entry 10",
+      "hex_line": "03 0000000A 00000000 00000025"
+    },
+    {
+      "op": 3,
+      "addr": 11,
+      "wdata": 0,
+      "expected": 36,
+      "comment": "Drain all: entry 11",
+      "hex_line": "03 0000000B 00000000 00000024"
+    },
+    {
+      "op": 3,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 35,
+      "comment": "Drain all: entry 12",
+      "hex_line": "03 0000000C 00000000 00000023"
+    },
+    {
+      "op": 3,
+      "addr": 13,
+      "wdata": 0,
+      "expected": 34,
+      "comment": "Drain all: entry 13",
+      "hex_line": "03 0000000D 00000000 00000022"
+    },
+    {
+      "op": 3,
+      "addr": 14,
+      "wdata": 0,
+      "expected": 33,
+      "comment": "Drain all: entry 14",
+      "hex_line": "03 0000000E 00000000 00000021"
+    },
+    {
+      "op": 3,
+      "addr": 15,
+      "wdata": 0,
+      "expected": 32,
+      "comment": "Drain all: entry 15",
+      "hex_line": "03 0000000F 00000000 00000020"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Fully drained, queue empty",
+      "hex_line": "04 00000000 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 0,
+      "wdata": 100,
+      "expected": 33,
+      "comment": "Rapid fill-drain cycle 1: write",
+      "hex_line": "02 00000000 00000064 00000021"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 32,
+      "comment": "Rapid fill-drain cycle 1: dequeue",
+      "hex_line": "03 00000000 00000000 00000020"
+    },
+    {
+      "op": 2,
+      "addr": 128,
+      "wdata": 101,
+      "expected": 33,
+      "comment": "Rapid fill-drain cycle 2: write",
+      "hex_line": "02 00000080 00000065 00000021"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 32,
+      "comment": "Rapid fill-drain cycle 2: dequeue",
+      "hex_line": "03 00000000 00000000 00000020"
+    },
+    {
+      "op": 2,
+      "addr": 256,
+      "wdata": 102,
+      "expected": 33,
+      "comment": "Rapid fill-drain cycle 3: write",
+      "hex_line": "02 00000100 00000066 00000021"
+    },
+    {
+      "op": 2,
+      "addr": 384,
+      "wdata": 103,
+      "expected": 34,
+      "comment": "Rapid fill-drain cycle 3: second write",
+      "hex_line": "02 00000180 00000067 00000022"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 33,
+      "comment": "Rapid fill-drain cycle 3: dequeue first",
+      "hex_line": "03 00000000 00000000 00000021"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 33,
+      "comment": "Rapid fill-drain cycle 3: dequeue second",
+      "hex_line": "03 00000000 00000000 00000021"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "After rapid cycles, queue empty",
+      "hex_line": "04 00000000 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 0,
+      "wdata": 200,
+      "expected": 34,
+      "comment": "Address variety: addr=0",
+      "hex_line": "02 00000000 000000C8 00000022"
+    },
+    {
+      "op": 2,
+      "addr": 256,
+      "wdata": 201,
+      "expected": 35,
+      "comment": "Address variety: addr=0x100=256",
+      "hex_line": "02 00000100 000000C9 00000023"
+    },
+    {
+      "op": 2,
+      "addr": 4096,
+      "wdata": 202,
+      "expected": 36,
+      "comment": "Address variety: addr=0x1000=4096",
+      "hex_line": "02 00001000 000000CA 00000024"
+    },
+    {
+      "op": 2,
+      "addr": 65536,
+      "wdata": 203,
+      "expected": 37,
+      "comment": "Address variety: addr=0x10000=65536",
+      "hex_line": "02 00010000 000000CB 00000025"
+    },
+    {
+      "op": 2,
+      "addr": 536870784,
+      "wdata": 204,
+      "expected": 38,
+      "comment": "Address variety: near max (0x1FFFFF80)",
+      "hex_line": "02 1FFFFF80 000000CC 00000026"
+    },
+    {
+      "op": 2,
+      "addr": 536870656,
+      "wdata": 205,
+      "expected": 39,
+      "comment": "Address variety: near max minus 128",
+      "hex_line": "02 1FFFFF00 000000CD 00000027"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 6,
+      "comment": "6 varied addresses in queue",
+      "hex_line": "04 00000000 00000000 00000006"
+    },
+    {
+      "op": 1,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 40,
+      "comment": "Read at addr=0",
+      "hex_line": "01 00000000 00000000 00000028"
+    },
+    {
+      "op": 1,
+      "addr": 256,
+      "wdata": 0,
+      "expected": 41,
+      "comment": "Read at addr=0x100",
+      "hex_line": "01 00000100 00000000 00000029"
+    },
+    {
+      "op": 1,
+      "addr": 4096,
+      "wdata": 0,
+      "expected": 42,
+      "comment": "Read at addr=0x1000",
+      "hex_line": "01 00001000 00000000 0000002A"
+    },
+    {
+      "op": 1,
+      "addr": 65536,
+      "wdata": 0,
+      "expected": 43,
+      "comment": "Read at addr=0x10000",
+      "hex_line": "01 00010000 00000000 0000002B"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 10,
+      "comment": "10 entries: 6 writes + 4 reads",
+      "hex_line": "04 00000000 00000000 0000000A"
+    },
+    {
+      "op": 2,
+      "addr": 131072,
+      "wdata": 300,
+      "expected": 44,
+      "comment": "Continue filling: addr=0x20000",
+      "hex_line": "02 00020000 0000012C 0000002C"
+    },
+    {
+      "op": 2,
+      "addr": 262144,
+      "wdata": 301,
+      "expected": 45,
+      "comment": "Continue filling: addr=0x40000",
+      "hex_line": "02 00040000 0000012D 0000002D"
+    },
+    {
+      "op": 2,
+      "addr": 524288,
+      "wdata": 302,
+      "expected": 46,
+      "comment": "Continue filling: addr=0x80000",
+      "hex_line": "02 00080000 0000012E 0000002E"
+    },
+    {
+      "op": 2,
+      "addr": 1048576,
+      "wdata": 303,
+      "expected": 47,
+      "comment": "Continue filling: addr=0x100000",
+      "hex_line": "02 00100000 0000012F 0000002F"
+    },
+    {
+      "op": 2,
+      "addr": 2097152,
+      "wdata": 304,
+      "expected": 176,
+      "comment": "Continue filling: addr=0x200000",
+      "hex_line": "02 00200000 00000130 000000B0"
+    },
+    {
+      "op": 2,
+      "addr": 4194304,
+      "wdata": 305,
+      "expected": 208,
+      "comment": "Continue filling: addr=0x400000",
+      "hex_line": "02 00400000 00000131 000000D0"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 208,
+      "comment": "Queue full with mixed r/w",
+      "hex_line": "04 00000000 00000000 000000D0"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 47,
+      "comment": "Free one slot",
+      "hex_line": "03 00000000 00000000 0000002F"
+    },
+    {
+      "op": 1,
+      "addr": 536870784,
+      "wdata": 0,
+      "expected": 176,
+      "comment": "Read near max address",
+      "hex_line": "01 1FFFFF80 00000000 000000B0"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 208,
+      "comment": "Full again after read enqueue",
+      "hex_line": "04 00000000 00000000 000000D0"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 47,
+      "comment": "Final drain: slot 0",
+      "hex_line": "03 00000000 00000000 0000002F"
+    },
+    {
+      "op": 3,
+      "addr": 1,
+      "wdata": 0,
+      "expected": 46,
+      "comment": "Final drain: slot 1",
+      "hex_line": "03 00000001 00000000 0000002E"
+    },
+    {
+      "op": 3,
+      "addr": 2,
+      "wdata": 0,
+      "expected": 45,
+      "comment": "Final drain: slot 2",
+      "hex_line": "03 00000002 00000000 0000002D"
+    },
+    {
+      "op": 3,
+      "addr": 3,
+      "wdata": 0,
+      "expected": 44,
+      "comment": "Final drain: slot 3",
+      "hex_line": "03 00000003 00000000 0000002C"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 12,
+      "comment": "12 entries after 4 dequeues",
+      "hex_line": "04 00000000 00000000 0000000C"
+    },
+    {
+      "op": 3,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 43,
+      "comment": "Final drain: slot 4",
+      "hex_line": "03 00000004 00000000 0000002B"
+    },
+    {
+      "op": 3,
+      "addr": 5,
+      "wdata": 0,
+      "expected": 42,
+      "comment": "Final drain: slot 5",
+      "hex_line": "03 00000005 00000000 0000002A"
+    },
+    {
+      "op": 3,
+      "addr": 6,
+      "wdata": 0,
+      "expected": 41,
+      "comment": "Final drain: slot 6",
+      "hex_line": "03 00000006 00000000 00000029"
+    },
+    {
+      "op": 3,
+      "addr": 7,
+      "wdata": 0,
+      "expected": 40,
+      "comment": "Final drain: slot 7",
+      "hex_line": "03 00000007 00000000 00000028"
+    },
+    {
+      "op": 3,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 39,
+      "comment": "Final drain: slot 8",
+      "hex_line": "03 00000008 00000000 00000027"
+    },
+    {
+      "op": 3,
+      "addr": 9,
+      "wdata": 0,
+      "expected": 38,
+      "comment": "Final drain: slot 9",
+      "hex_line": "03 00000009 00000000 00000026"
+    },
+    {
+      "op": 3,
+      "addr": 10,
+      "wdata": 0,
+      "expected": 37,
+      "comment": "Final drain: slot 10",
+      "hex_line": "03 0000000A 00000000 00000025"
+    },
+    {
+      "op": 3,
+      "addr": 11,
+      "wdata": 0,
+      "expected": 36,
+      "comment": "Final drain: slot 11",
+      "hex_line": "03 0000000B 00000000 00000024"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Final check: queue fully drained",
+      "hex_line": "04 00000000 00000000 00000000"
+    }
+  ]
+}

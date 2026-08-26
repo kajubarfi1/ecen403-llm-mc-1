@@ -1,0 +1,32 @@
+Generate a test plan for the Read Command Path integration path.
+
+SPEC:
+{spec_json}
+
+PATH: wb_port -> addr_decoder -> cmd_queue -> scheduler -> cmd_gen
+CONNECTIONS:
+  wb_port -> addr_decoder: Wishbone port forwards host byte address to address decoder.
+  wb_port -> cmd_queue: Wishbone port pushes request control into cmd_queue. Write data/mask handled separately via data_path.
+  addr_decoder -> cmd_queue: Decoded row/col/bank fields registered into cmd_queue entry.
+  cmd_queue -> scheduler: Command queue exposes per-entry fields to scheduler.
+  scheduler -> cmd_gen: Scheduler issues selected command to cmd_gen for DDR3 encoding.
+
+Available input signals (testbench drives these): "wb_cyc_i", "wb_stb_i", "wb_we_i", "wb_adr_i", "wb_dat_i", "wb_sel_i", "wb_bte_i", "wb_cti_i", "req_ready", "rsp_valid", "rsp_rdata", "rsp_aux", "bank_is_active", "bank_open_row_0", "bank_act_allowed", "bank_rd_allowed", "bank_wr_allowed", "bank_pre_allowed", "ref_required", "ref_urgent"
+Available output signals (testbench checks these): "wb_ack_o", "wb_dat_o", "wb_stall_o", "wb_err_o", "req_wdata", "req_wmask", "dec_rank", "enq_ready", "queue_full", "queue_empty", "queue_count", "ref_ack", "ddr_cmd", "ddr_addr", "ddr_bank", "ddr_cke", "ddr_reset_n", "ddr_odt", "fb_act_valid", "fb_act_bank", "fb_act_row", "fb_pre_valid", "fb_rd_valid", "fb_wr_valid", "fb_ref_valid"
+
+Output a JSON array of test operations:
+  {"op": "reset"}
+  {"op": "drive", "signals": {"signal_name": value, ...}, "comment": "<why>"}
+  {"op": "check", "expected": {"signal_name": expected_value, ...}, "comment": "<why>"}
+  {"op": "step", "cycles": <int>, "comment": "<why>"}
+
+All values are decimal integers.
+
+Generate at least 40 operations that exercise:
+1. Reset and verify initial state
+2. Normal operation through the path
+3. Boundary conditions (overflow, underflow, stall, timeout)
+4. Back-to-back operations
+5. State transitions at each block in the chain
+
+Output ONLY the JSON array.

@@ -1,0 +1,73 @@
+{
+  "scope": "path_11_csr_to_refresh",
+  "timestamp": "2026-04-21T14:47:35.407099",
+  "status": "triaged",
+  "passes": {
+    "classify": {
+      "category": "compile_error",
+      "severity": "critical",
+      "failure_summary": "Compilation fails in refresh_ctrl.sv at line 63 due to undeclared identifier 'cfg_tREFI_nCK'. This configuration signal, which represents the refresh interval timing parameter in clock cycles, is referenced in the RTL but has not been declared as an input port or internal signal. The test scope 'path_11_csr_to_refresh' suggests this signal should be driven from the CSR (Control/Status Register) block to configure the refresh controller's timing, but the port declaration or signal connection is missing.",
+      "affected_vector_range": "all",
+      "likely_component": "rtl",
+      "initial_hypothesis": "The refresh_ctrl.sv module uses cfg_tREFI_nCK at line 63 (likely for refresh interval countdown or comparison logic) but the signal was never declared as an input port in the module header. This is likely a missing port declaration where cfg_tREFI_nCK should be added to the module's input list to receive the tREFI configuration value from the CSR block. Alternatively, a recent RTL edit may have renamed or removed the signal declaration while leaving the usage intact, or a merge conflict may have dropped the port from the module interface.",
+      "needs_deeper_analysis": true,
+      "_category": "compile_error"
+    },
+    "deterministic_check": {
+      "verdict": "no_mismatch",
+      "mismatches": [],
+      "summary": "DETERMINISTIC CHECK: 0 shared constants compared, all values agree. Value-level RTL bug ruled out."
+    },
+    "localize": {
+      "skipped": true,
+      "reason": "compile_error"
+    },
+    "rootcause": {
+      "root_causes": [
+        {
+          "pattern_id": 1,
+          "guilty_component": "infrastructure",
+          "confidence": "high",
+          "root_cause": "The refresh_ctrl.sv module uses cfg_tREFI_nCK at line 63 (likely for refresh interval countdown or comparison logic) but the signal was never declared as an input port in the module header. This is likely a missing port declaration where cfg_tREFI_nCK should be added to the module's input list to receive the tREFI configuration value from the CSR block. Alternatively, a recent RTL edit may have renamed or removed the signal declaration while leaving the usage intact, or a merge conflict may have dropped the port from the module interface.",
+          "evidence": "xmvlog: *E,UNDIDN (refresh_ctrl.sv,63|41): 'cfg_tREFI_nCK': undeclared identifier [12.5(IEEE)].",
+          "mechanism": "Simulation could not run due to infrastructure issues"
+        }
+      ],
+      "primary_root_cause": "The refresh_ctrl.sv module uses cfg_tREFI_nCK at line 63 (likely for refresh interval countdown or comparison logic) but the signal was never declared as an input port in the module header. This is likely a missing port declaration where cfg_tREFI_nCK should be added to the module's input list to receive the tREFI configuration value from the CSR block. Alternatively, a recent RTL edit may have renamed or removed the signal declaration while leaving the usage intact, or a merge conflict may have dropped the port from the module interface.",
+      "is_rtl_bug": false,
+      "is_verification_bug": true
+    },
+    "recommend": {
+      "recommendations": [
+        {
+          "pattern_id": 1,
+          "target_file": "rtl/refresh_ctrl.sv",
+          "fix_type": "code_change",
+          "description": "Add missing input port declaration for cfg_tREFI_nCK to the refresh_ctrl module header. The signal is used at line 63 for refresh interval timing logic but was never declared in the port list, causing compilation failure.",
+          "suggested_fix": "In refresh_ctrl.sv module header, add input port:\n\nmodule refresh_ctrl (\n    input  logic        clk,\n    input  logic        rst_n,\n    // ... existing ports ...\n    input  logic [15:0] cfg_tREFI_nCK,  // ADD THIS: Refresh interval from CSR block (units: clock cycles)\n    // ... remaining ports ...\n);",
+          "priority": "critical",
+          "can_auto_fix": false
+        },
+        {
+          "pattern_id": 1,
+          "target_file": "rtl/ddr3_ctrl_top.sv",
+          "fix_type": "code_change",
+          "description": "Ensure the parent/top-level module instantiation of refresh_ctrl connects cfg_tREFI_nCK from the CSR block output to the refresh controller input port.",
+          "suggested_fix": "In the refresh_ctrl instantiation, add port connection:\n\nrefresh_ctrl u_refresh_ctrl (\n    .clk              (clk),\n    .rst_n            (rst_n),\n    // ... existing connections ...\n    .cfg_tREFI_nCK    (csr_tREFI_nCK),  // ADD THIS: Connect CSR output to refresh ctrl\n    // ... remaining connections ...\n);",
+          "priority": "critical",
+          "can_auto_fix": false
+        }
+      ],
+      "suggested_pipeline_action": "manual_review",
+      "summary": "Compilation failure due to missing port declaration in refresh_ctrl.sv. The signal cfg_tREFI_nCK (refresh interval timing parameter) is used at line 63 but never declared as an input port. This is an RTL integration issue\u2014add the port to refresh_ctrl.sv module header and connect it from the CSR block in the parent module instantiation. Manual review required to verify correct signal width and connectivity path."
+    }
+  },
+  "category": "compile_error",
+  "severity": "critical",
+  "primary_root_cause": "The refresh_ctrl.sv module uses cfg_tREFI_nCK at line 63 (likely for refresh interval countdown or comparison logic) but the signal was never declared as an input port in the module header. This is likely a missing port declaration where cfg_tREFI_nCK should be added to the module's input list to receive the tREFI configuration value from the CSR block. Alternatively, a recent RTL edit may have renamed or removed the signal declaration while leaving the usage intact, or a merge conflict may have dropped the port from the module interface.",
+  "is_rtl_bug": false,
+  "is_verification_bug": true,
+  "guilty_component": "infrastructure",
+  "suggested_action": "manual_review",
+  "summary": "Compilation failure due to missing port declaration in refresh_ctrl.sv. The signal cfg_tREFI_nCK (refresh interval timing parameter) is used at line 63 but never declared as an input port. This is an RTL integration issue\u2014add the port to refresh_ctrl.sv module header and connect it from the CSR block in the parent module instantiation. Manual review required to verify correct signal width and connectivity path."
+}

@@ -1,0 +1,152 @@
+{
+  "scope": "path_07_backpressure",
+  "timestamp": "2026-04-14T15:21:41.480524",
+  "status": "triaged",
+  "passes": {
+    "classify": {
+      "category": "data_mismatch",
+      "severity": "critical",
+      "failure_summary": "In the backpressure test path (path_07_backpressure), 16 out of 31 tests failed with a consistent pattern: the DUT outputs 0x00020000 while the reference model expects 0x00040001. The 17 mismatches all show the same actual value, strongly indicating a single systematic root cause. The expected value 0x00040001 differs from the actual 0x00020000 in two key ways: bit[18] is set instead of bit[16] (a factor-of-2 shift in the upper field), and bit[0] is expected to be 1 but is 0 in actual output. This suggests a register field encoding error or a counter/status register that is not properly accounting for backpressure conditions \u2014 possibly a burst length or outstanding transaction count field that is halved and a ready/valid or completion flag bit that is never asserted under backpressure.",
+      "affected_vector_range": "16 of 31 tests (approximately half, likely the subset exercising backpressure-active scenarios)",
+      "likely_component": "rtl",
+      "initial_hypothesis": "The RTL has a bug in how it handles backpressure (ready/valid handshake stalls) that manifests in two ways: (1) A counter or address field in a status/response register is shifted by one bit position (value 0x0002xxxx instead of 0x0004xxxx), suggesting a counter increment is using a wrong step size or a bit-field is off by one bit \u2014 possibly the outstanding transaction count or write pointer increments by 1 instead of 2 under backpressure, or a shift operation uses the wrong amount; (2) The LSB (bit 0) remains 0 instead of being set to 1, suggesting a completion/done/valid flag or an odd-address bit is not being asserted when the DUT stalls due to backpressure. The most likely root cause is that the RTL's backpressure handling logic either drops a transaction or miscounts completions, resulting in a consistently halved upper-field count and a missing completion indicator. This is consistent with a single bug such as a ready signal being sampled one cycle too late, causing every other transaction to be lost.",
+      "needs_deeper_analysis": true,
+      "_category": "data_mismatch"
+    },
+    "localize": {
+      "failure_patterns": [
+        {
+          "pattern_id": 1,
+          "description": "A packed output word at address 0x0 consistently reads 0x00020000 instead of expected 0x00040001. The difference is: bit 18 is set instead of bit 17 (upper field shifted right by one bit position), and bit 0 is 0 instead of 1 (a flag/valid bit not being asserted). This pattern is identical across ALL 16 failing vectors spanning the entire test from vector 8 through vector 186, including after enqueue, dequeue, stall, burst, and even final reset operations.",
+          "affected_addresses": [
+            "0x0"
+          ],
+          "affected_fields": [
+            "pack_outputs() composite - likely includes queue occupancy/write_pointer in upper bits and a valid/ready/full flag in bit 0"
+          ],
+          "vector_indices": [
+            8,
+            9,
+            14,
+            19,
+            30,
+            45,
+            48,
+            51,
+            53,
+            105,
+            120,
+            139,
+            142,
+            178,
+            183,
+            186
+          ],
+          "expected_correct_per_spec": false,
+          "testbench_drives_correctly": false,
+          "notes": "The expected value 0x00040001 is constant across ALL vectors, including vector 186 which is described as 'Final reset to verify clean state recovery' where the input stimulus is all zeros (op=0, all fields 0x00000000). It is physically impossible for a status register to maintain 0x00040001 after a full reset - the spec says CTRL_STATUS reset_value is 0x00000000. Even vector 53, which explicitly expects 0x00040001 while its own stimulus field shows 0x00020000 (acknowledging the DUT value as the dequeue input), contradicts itself. The expected value appears to be a static constant that was incorrectly hardcoded in the test vectors or reference model. The pack_outputs() function packs multiple DUT output signals into a 32-bit word; the reference model or test vector generator computed the expected packed value incorrectly - likely using a wrong bit-field layout for the packing. Specifically, if pack_outputs() places a counter/pointer field at bits[18:16] and the reference model assumes it is at bits[19:17], this would explain the 0x0004 vs 0x0002 discrepancy (a 1-bit shift in field position). Similarly, bit 0 being expected as 1 (init_done or queue_not_empty) but the reference model placing it wrongly or the DUT not generating it suggests a field mapping error."
+        },
+        {
+          "pattern_id": 2,
+          "description": "Bit 0 mismatch: expected=1, actual=0. This likely corresponds to a 'queue not empty' or 'valid' or 'ready' flag. The flag never becomes 1 in the DUT output even after entries are enqueued.",
+          "affected_addresses": [
+            "0x0"
+          ],
+          "affected_fields": [
+            "bit 0 of packed output - likely a status/valid/not_empty flag"
+          ],
+          "vector_indices": [
+            8,
+            9,
+            14,
+            19,
+            30,
+            45,
+            48,
+            51,
+            53,
+            105,
+            120,
+            139,
+            142,
+            178,
+            183,
+            186
+          ],
+          "expected_correct_per_spec": false,
+          "testbench_drives_correctly": false,
+          "notes": "Vector 186 is a full reset with all-zero stimulus and expects bit 0 = 1, which contradicts the spec reset value of 0x00000000 for CTRL_STATUS. If this is a queue-level testbench (not CSR-level), then the pack_outputs() function's field assignment is likely wrong - the 'not_empty' flag may be at a different bit position than bit 0, or the reference model unconditionally sets bit 0. The fact that the expected value is IDENTICAL (0x00040001) for every single vector including reset strongly suggests the reference model / test vector expected values are static/wrong rather than dynamically computed."
+        }
+      ],
+      "common_thread": "The expected value 0x00040001 is identically wrong across all 16 failing vectors, including a final-reset vector where the correct expected value should be 0x00000000 (or at minimum different from the enqueued-state value). This is a hallmark of a test vector / reference model bug rather than an RTL bug. The reference model appears to have (1) a 1-bit shift error in the bit-field packing of a queue pointer or occupancy counter (placing it at bits[18:17] vs the RTL's bits[17:16], yielding 0x0004xxxx vs 0x0002xxxx), and (2) unconditionally asserting bit 0 regardless of actual queue state. The DUT value 0x00020000 is likely correct.",
+      "refined_hypothesis": "ROOT CAUSE: Reference model / test vector bug. The pack_outputs() function in the testbench or the reference model that generated the expected values uses a different bit-field layout than the actual RTL. Specifically, a queue write pointer or occupancy count field is shifted left by 1 bit position in the reference model compared to the RTL (explaining 0x0004 vs 0x0002 in bits [18:16]), and bit 0 is erroneously hardcoded to 1 in the expected values. The clinching evidence is vector 186: after a full reset with all-zero stimulus, the expected value is still 0x00040001, which is impossible per the spec (reset value = 0x00000000). The DUT output of 0x00020000 is more plausible and likely correct. This is category (c) reference model bug or (d) test vector bug, NOT an RTL bug."
+    },
+    "rootcause": {
+      "root_causes": [
+        {
+          "pattern_id": 1,
+          "guilty_component": "vectors",
+          "confidence": "high",
+          "root_cause": "The expected value 0x00040001 is a static constant hardcoded in the test vectors that does not match the pack_outputs() bit-field layout in the testbench. The pack_outputs() function places queue_count at bits [22:18], queue_empty at bit [17], queue_full at bit [16], and entry_valid at bits [15:0]. The DUT reads 0x00020000, which decodes to: entry_valid=0x0000, queue_full=0, queue_empty=1, queue_count=0, wb_ack_o=0 \u2014 a perfectly valid empty-queue state. The expected value 0x00040001 decodes to: entry_valid=0x0001 (slot 0 valid), queue_full=0, queue_empty=0, queue_count=1, wb_ack_o=0 \u2014 claiming one entry is valid. However, this same expected value 0x00040001 is used for ALL 17 failing vectors including vector 186 (final reset with all-zero stimulus), which is impossible: after reset, queue_count must be 0 and entry_valid must be 0x0000. The expected values were generated by a reference model or test vector generator that uses a different bit-field packing than the testbench's pack_outputs() function. Specifically, the reference model's pack_outputs equivalent likely has queue_count at bits [17:13] or a 1-bit-shifted field layout, producing 0x00040001 where the testbench's pack_outputs() would produce 0x00020000 for queue_count=1.",
+          "evidence": "Testbench pack_outputs() at lines: packed_val[15:0] = entry_valid; packed_val[16] = queue_full; packed_val[17] = queue_empty; packed_val[22:18] = queue_count; packed_val[23] = wb_ack_o. DUT actual=0x00020000 \u2192 bit 17 set \u2192 queue_empty=1, all else zero. Expected=0x00040001 \u2192 bit 0 set (entry_valid[0]=1) and bit 18 set (queue_count[0]=1). Vector 186 is a full reset with all-zero stimulus yet expects 0x00040001, which contradicts spec CTRL_STATUS reset_value=0x00000000 and the logical requirement that an empty queue after reset has queue_count=0 and entry_valid=0.",
+          "mechanism": "1. The test vector generator (or reference model) computes expected packed output values using a bit-field layout that differs from the testbench's pack_outputs() function. 2. The reference model likely packs queue_count starting at bit 17 instead of bit 18 (off by one bit), so queue_count=1 produces 0x00020000 in the reference model's view but the testbench's pack_outputs() would encode that as 0x00040000. 3. Additionally, the reference model sets bit 0 to 1 (possibly a 'not_empty' flag or erroneously setting entry_valid[0]), but the testbench's pack_outputs() maps entry_valid[0] to bit 0, which is 0 in an empty queue. 4. The expected value 0x00040001 is constant across all 17 failing vectors, including post-reset, confirming it is a static/incorrect expected value rather than a dynamically computed one tracking actual DUT state. 5. The DUT output 0x00020000 (queue_empty=1, everything else zero) is the correct response for an empty queue after reset."
+        },
+        {
+          "pattern_id": 2,
+          "guilty_component": "vectors",
+          "confidence": "high",
+          "root_cause": "Bit 0 of the expected value is erroneously set to 1 in all test vectors. In the testbench's pack_outputs(), bit 0 maps to entry_valid[0]. After reset and in an empty queue, entry_valid[0] must be 0. The test vectors incorrectly expect bit 0 = 1 even at vector 186 (post-reset), confirming the expected values are wrong.",
+          "evidence": "pack_outputs(): packed_val[15:0] = entry_valid. After reset, all queue entries are invalid so entry_valid = 16'h0000, meaning bit 0 = 0. Expected 0x00040001 has bit 0 = 1, which requires entry_valid[0] = 1 \u2014 impossible after reset per spec (reset_value = 0x00000000).",
+          "mechanism": "The test vector generator hardcoded or miscalculated the expected packed value, setting bit 0 to 1 unconditionally. This may have come from a 'not_empty' flag in the reference model's output packing that does not exist in the testbench's pack_outputs() layout, or from an off-by-one in field mapping where the reference model places queue_full at bit 0 instead of bit 16."
+        }
+      ],
+      "primary_root_cause": "The test vectors contain incorrect expected values. The expected packed output 0x00040001 was generated using a bit-field layout that does not match the testbench's pack_outputs() function (bits [22:18]=queue_count, bit [17]=queue_empty, bit [16]=queue_full, bits [15:0]=entry_valid). The expected value is also a static constant applied to all vectors including post-reset, which is physically impossible. The DUT output 0x00020000 correctly represents an empty queue (queue_empty=1, all else zero).",
+      "is_rtl_bug": false,
+      "is_verification_bug": true
+    },
+    "recommend": {
+      "recommendations": [
+        {
+          "pattern_id": 1,
+          "target_file": "vectors",
+          "fix_type": "regenerate",
+          "description": "The expected packed output values in the test vectors were generated using a bit-field layout that does not match the testbench's pack_outputs() function. The reference model or vector generator uses queue_count at bits [17:13] (or similar off-by-one shift) instead of bits [22:18], and erroneously sets bit 0. All 17 failing vectors share the same static expected value 0x00040001, which is incorrect even for the simplest post-reset case. The vectors must be regenerated using the correct pack_outputs() bit-field layout: bits [22:18]=queue_count, bit [17]=queue_empty, bit [16]=queue_full, bits [15:0]=entry_valid, bit [23]=wb_ack_o.",
+          "suggested_fix": "Regenerate test vectors using the following pack_outputs() layout for computing expected values:\n\n  packed_val[15:0]  = entry_valid;\n  packed_val[16]    = queue_full;\n  packed_val[17]    = queue_empty;\n  packed_val[22:18] = queue_count;\n  packed_val[23]    = wb_ack_o;\n\nFor a post-reset empty queue, the correct expected value is:\n  entry_valid=0x0000, queue_full=0, queue_empty=1, queue_count=0, wb_ack_o=0\n  => packed = 0x00020000\n\nFor a queue with 1 entry (slot 0 valid), the correct expected value is:\n  entry_valid=0x0001, queue_full=0, queue_empty=0, queue_count=1, wb_ack_o=0\n  => packed = 0x00040001\n\nEnsure each vector's expected value is dynamically computed based on the stimulus applied to that specific vector, not a static constant.",
+          "priority": "critical",
+          "can_auto_fix": true
+        },
+        {
+          "pattern_id": 2,
+          "target_file": "vectors",
+          "fix_type": "regenerate",
+          "description": "Bit 0 of the expected value is unconditionally set to 1 across all vectors, including post-reset vectors where entry_valid[0] must be 0. This indicates the vector generator either has a 'not_empty' flag mapped to bit 0 (which doesn't exist in the testbench's pack_outputs()), or has a field mapping error where queue_full is placed at bit 0 instead of bit 16. Fix the reference model / vector generator so that bit 0 (entry_valid[0]) is only set to 1 when queue slot 0 actually contains a valid entry.",
+          "suggested_fix": "In the reference model or vector generator script, locate the function that computes expected packed output values. Ensure:\n  1. entry_valid is placed at bits [15:0] (not offset or aliased with another field)\n  2. entry_valid[0] is only set when slot 0 has been written and not yet consumed\n  3. After reset, entry_valid = 16'h0000 unconditionally\n  4. No 'not_empty' or status flag is mapped to bit 0\n\nAfter fixing, verify vector 186 (post-reset) produces expected = 0x00020000.",
+          "priority": "critical",
+          "can_auto_fix": true
+        }
+      ],
+      "suggested_pipeline_action": "regenerate_vectors",
+      "summary": "All 17 failures in path_07_backpressure are caused by incorrect expected values in the test vectors. The expected packed output 0x00040001 was computed using a bit-field layout that does not match the testbench's pack_outputs() function (off-by-one in queue_count field position and an erroneous bit 0 set). The DUT output 0x00020000 is correct for an empty queue after reset. Regenerating the test vectors with the correct pack_outputs() bit-field mapping will resolve all failures."
+    }
+  },
+  "coverage": {
+    "total_tests": 0,
+    "passed": 0,
+    "failed": 17,
+    "pass_rate_pct": 0,
+    "consistent_failure_pattern": true,
+    "unique_actual_values": [
+      "00020000"
+    ],
+    "validation_level": "no_data",
+    "verdict": "No test results to assess"
+  },
+  "category": "data_mismatch",
+  "severity": "critical",
+  "primary_root_cause": "The test vectors contain incorrect expected values. The expected packed output 0x00040001 was generated using a bit-field layout that does not match the testbench's pack_outputs() function (bits [22:18]=queue_count, bit [17]=queue_empty, bit [16]=queue_full, bits [15:0]=entry_valid). The expected value is also a static constant applied to all vectors including post-reset, which is physically impossible. The DUT output 0x00020000 correctly represents an empty queue (queue_empty=1, all else zero).",
+  "is_rtl_bug": false,
+  "is_verification_bug": true,
+  "guilty_component": "vectors",
+  "suggested_action": "regenerate_vectors",
+  "summary": "All 17 failures in path_07_backpressure are caused by incorrect expected values in the test vectors. The expected packed output 0x00040001 was computed using a bit-field layout that does not match the testbench's pack_outputs() function (off-by-one in queue_count field position and an erroneous bit 0 set). The DUT output 0x00020000 is correct for an empty queue after reset. Regenerating the test vectors with the correct pack_outputs() bit-field mapping will resolve all failures."
+}

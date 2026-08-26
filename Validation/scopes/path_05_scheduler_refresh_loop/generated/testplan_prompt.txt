@@ -1,0 +1,29 @@
+Generate a test plan for the Scheduler ↔ Refresh Controller Feedback Loop integration path.
+
+SPEC:
+{spec_json}
+
+PATH: scheduler -> refresh_ctrl
+CONNECTIONS:
+  refresh_ctrl -> scheduler: Refresh controller signals pending/urgent refresh to scheduler.
+  scheduler -> refresh_ctrl: Scheduler acknowledges refresh command was issued.
+
+Available input signals (testbench drives these): "q_valid_0", "q_row_0", "q_col_0", "q_bank_0", "q_we_0", "q_aux_0", "bank_is_active", "bank_open_row_0", "bank_act_allowed", "bank_rd_allowed", "bank_wr_allowed", "bank_pre_allowed", "init_done", "cfg_force_refresh", "cfg_tREFI_nCK", "cfg_max_postpone", "cfg_urgent_threshold", "cfg_ref_priority"
+Available output signals (testbench checks these): "cmd_valid", "cmd_type", "cmd_row", "cmd_col", "cmd_bank", "cmd_we", "cmd_aux", "deq_grant", "deq_idx", "ref_pending_cnt", "ref_starve_flag"
+
+Output a JSON array of test operations:
+  {"op": "reset"}
+  {"op": "drive", "signals": {"signal_name": value, ...}, "comment": "<why>"}
+  {"op": "check", "expected": {"signal_name": expected_value, ...}, "comment": "<why>"}
+  {"op": "step", "cycles": <int>, "comment": "<why>"}
+
+All values are decimal integers.
+
+Generate at least 40 operations that exercise:
+1. Reset and verify initial state
+2. Normal operation through the path
+3. Boundary conditions (overflow, underflow, stall, timeout)
+4. Back-to-back operations
+5. State transitions at each block in the chain
+
+Output ONLY the JSON array.

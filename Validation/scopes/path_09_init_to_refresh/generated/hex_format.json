@@ -1,0 +1,126 @@
+{
+  "path_id": "path_09_init_to_refresh",
+  "format": "OO PPPPPPPP DDDDDDDD EEEEEEEE",
+  "opcodes": {
+    "reset": 0,
+    "drive": 1,
+    "check": 2,
+    "step": 3
+  },
+  "input_packing": [
+    {
+      "block": "init_fsm",
+      "name": "enable",
+      "width": 1,
+      "lo": 0,
+      "hi": 0
+    },
+    {
+      "block": "refresh_ctrl",
+      "name": "cfg_force_refresh",
+      "width": 1,
+      "lo": 1,
+      "hi": 1
+    },
+    {
+      "block": "refresh_ctrl",
+      "name": "cfg_max_postpone",
+      "width": 4,
+      "lo": 2,
+      "hi": 5
+    },
+    {
+      "block": "refresh_ctrl",
+      "name": "cfg_urgent_threshold",
+      "width": 4,
+      "lo": 6,
+      "hi": 9
+    },
+    {
+      "block": "refresh_ctrl",
+      "name": "cfg_ref_priority",
+      "width": 1,
+      "lo": 10,
+      "hi": 10
+    },
+    {
+      "block": "refresh_ctrl",
+      "name": "ref_ack",
+      "width": 1,
+      "lo": 11,
+      "hi": 11
+    }
+  ],
+  "output_packing": [
+    {
+      "block": "init_fsm",
+      "name": "init_fail",
+      "width": 1,
+      "lo": 0,
+      "hi": 0
+    },
+    {
+      "block": "init_fsm",
+      "name": "init_cmd_valid",
+      "width": 1,
+      "lo": 1,
+      "hi": 1
+    },
+    {
+      "block": "init_fsm",
+      "name": "init_cmd",
+      "width": 4,
+      "lo": 2,
+      "hi": 5
+    },
+    {
+      "block": "init_fsm",
+      "name": "init_addr",
+      "width": 15,
+      "lo": 6,
+      "hi": 20
+    },
+    {
+      "block": "init_fsm",
+      "name": "init_bank",
+      "width": 3,
+      "lo": 21,
+      "hi": 23
+    },
+    {
+      "block": "init_fsm",
+      "name": "init_cke",
+      "width": 1,
+      "lo": 24,
+      "hi": 24
+    },
+    {
+      "block": "init_fsm",
+      "name": "init_reset_n",
+      "width": 1,
+      "lo": 25,
+      "hi": 25
+    },
+    {
+      "block": "init_fsm",
+      "name": "init_state",
+      "width": 4,
+      "lo": 26,
+      "hi": 29
+    },
+    {
+      "block": "refresh_ctrl",
+      "name": "ref_required",
+      "width": 1,
+      "lo": 30,
+      "hi": 30
+    },
+    {
+      "block": "refresh_ctrl",
+      "name": "ref_urgent",
+      "width": 1,
+      "lo": 31,
+      "hi": 31
+    }
+  ]
+}

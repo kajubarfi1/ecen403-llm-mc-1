@@ -1,0 +1,47 @@
+{
+  "scope": "init_sequence",
+  "project_root": "/Users/jacob/Capstone/ecen403-llm-mc-1",
+  "start_from": "refmodel",
+  "skip_sim": false,
+  "max_retries": 2,
+  "timestamp": "2026-03-17T14:57:59.908616",
+  "overall_status": "passed",
+  "retry_count": 0,
+  "stages": {
+    "refmodel": {
+      "scope": "init_sequence",
+      "spec_source": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/spec/llmmc_microarchitecturespec_filled.json",
+      "status": "success",
+      "refmodel_path": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reference_models/init_sequence_refmodel.py",
+      "errors": []
+    },
+    "vectors": {
+      "scope": "init_sequence",
+      "status": "success",
+      "vector_count": 17,
+      "errors": []
+    },
+    "testbench": {
+      "scope": "init_sequence",
+      "status": "success",
+      "output_file": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/scopes/init_sequence/init_sequence_tb.sv",
+      "manifest_file": "/Users/jacob/Capstone/ecen403-llm-mc-1/Frontend/Output_Folders/Phase1_Output/init_fsm_manifest.json",
+      "module_name": "init_fsm",
+      "errors": [],
+      "timestamp": "2026-03-17T14:56:50.580909"
+    },
+    "simulate": {
+      "scope": "init_sequence",
+      "status": "pass",
+      "pass_count": 16,
+      "fail_count": 0,
+      "total_tests": 16,
+      "compile_errors": [],
+      "mismatches": [],
+      "timestamp": "2026-03-17T14:57:51.587304",
+      "sva_failures": 0
+    },
+    "triage": {}
+  },
+  "error_message": ""
+}

@@ -1,0 +1,25 @@
+// path_15_status_cal - Calibration status register verification
+// In-path blocks: calibration, config_regs
+// Expected CTRL_STATUS: 0x00000002 (bit[1] cal_done=1, all others tied low)
+
+// Reset the DUT
+00 00000000 00000000 00000000
+
+// Start autonomous event sequence (zeroes sim_cycle)
+09 00000000 00000000 00000000
+
+// Wait for calibration to complete
+// sig_id=1 (cal_done), value=1, timeout=200000 (0x30D40)
+04 00000001 00000001 00030D40
+
+// Verify calibration did not fail (always 0 in abstract PHY)
+// sig_id=2 (cal_fail), value=0, target_cycle=1 (already reached)
+05 00000002 00000000 00000001
+
+// Verify predicate: cal_complete_no_fail (cal_done && !cal_fail)
+// sig_id=7, value=1, timeout=100 (should be immediate)
+04 00000007 00000001 00000064
+
+// Read CTRL_STATUS @ 0x00 to verify status register reflects cal_done
+// csr_addr=0x00, expected=0x00000002, ack_timeout=100
+0A 00000000 00000002 00000064

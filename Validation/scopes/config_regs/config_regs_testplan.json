@@ -1,0 +1,2351 @@
+[
+  {
+    "op": "reset"
+  },
+  {
+    "op": "read",
+    "addr": 0,
+    "comment": "Verify CTRL_STATUS reset value 0x00000000"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Verify CTRL_CONFIG reset value 0x00000009"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 reset value 0x271C0B0B"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 reset value 0x80200606"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 reset value 0x080B060C"
+  },
+  {
+    "op": "read",
+    "addr": 20,
+    "comment": "Verify TIMING_3 reset value 0x00186004"
+  },
+  {
+    "op": "read",
+    "addr": 24,
+    "comment": "Verify REFRESH_CONFIG reset value 0x00000168"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Verify ERROR_STATUS reset value 0x00000000"
+  },
+  {
+    "op": "read",
+    "addr": 32,
+    "comment": "Verify BIST_CONFIG reset value 0x00000000"
+  },
+  {
+    "op": "read",
+    "addr": 36,
+    "comment": "Verify BIST_ADDR_START reset value 0x00000000"
+  },
+  {
+    "op": "read",
+    "addr": 40,
+    "comment": "Verify BIST_ADDR_END reset value 0x1FFFFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 0,
+    "data": 4294967295,
+    "comment": "Write 0xFFFFFFFF to RO CTRL_STATUS"
+  },
+  {
+    "op": "read",
+    "addr": 0,
+    "comment": "Read CTRL_STATUS - expect unchanged 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 4,
+    "data": 4294967295,
+    "comment": "Write 0xFFFFFFFF to CTRL_CONFIG"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Read CTRL_CONFIG - expect 0x0000001F (RW bits, WO cleared, reserved masked)"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 4294967295,
+    "comment": "Write 0xFFFFFFFF to TIMING_0"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Read TIMING_0 - expect 0xFFFFFFFF (all RW)"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294967295,
+    "comment": "Write 0xFFFFFFFF to TIMING_1"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Read TIMING_1 - expect 0xFFFFFFFF (all RW)"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 4294967295,
+    "comment": "Write 0xFFFFFFFF to TIMING_2"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Read TIMING_2 - expect 0xFFFFFFFF (all RW)"
+  },
+  {
+    "op": "write",
+    "addr": 20,
+    "data": 4294967295,
+    "comment": "Write 0xFFFFFFFF to TIMING_3"
+  },
+  {
+    "op": "read",
+    "addr": 20,
+    "comment": "Read TIMING_3 - expect 0xFFFFFFFF (all RW)"
+  },
+  {
+    "op": "write",
+    "addr": 24,
+    "data": 4294967295,
+    "comment": "Write 0xFFFFFFFF to REFRESH_CONFIG"
+  },
+  {
+    "op": "read",
+    "addr": 24,
+    "comment": "Read REFRESH_CONFIG - expect 0x000001FF (reserved masked)"
+  },
+  {
+    "op": "write",
+    "addr": 28,
+    "data": 4294967295,
+    "comment": "Write 0xFFFFFFFF to ERROR_STATUS"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Read ERROR_STATUS - RO fields unchanged, RW1C has no effect when not set"
+  },
+  {
+    "op": "write",
+    "addr": 32,
+    "data": 4294967295,
+    "comment": "Write 0xFFFFFFFF to BIST_CONFIG"
+  },
+  {
+    "op": "read",
+    "addr": 32,
+    "comment": "Read BIST_CONFIG - expect 0x0000000F (reserved masked)"
+  },
+  {
+    "op": "write",
+    "addr": 36,
+    "data": 4294967295,
+    "comment": "Write 0xFFFFFFFF to BIST_ADDR_START"
+  },
+  {
+    "op": "read",
+    "addr": 36,
+    "comment": "Read BIST_ADDR_START - expect 0x1FFFFFFF (29-bit field)"
+  },
+  {
+    "op": "write",
+    "addr": 40,
+    "data": 4294967295,
+    "comment": "Write 0xFFFFFFFF to BIST_ADDR_END"
+  },
+  {
+    "op": "read",
+    "addr": 40,
+    "comment": "Read BIST_ADDR_END - expect 0x1FFFFFFF (29-bit field)"
+  },
+  {
+    "op": "write",
+    "addr": 0,
+    "data": 0,
+    "comment": "Write 0x00000000 to RO CTRL_STATUS"
+  },
+  {
+    "op": "read",
+    "addr": 0,
+    "comment": "Read CTRL_STATUS - expect unchanged 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 4,
+    "data": 0,
+    "comment": "Write 0x00000000 to CTRL_CONFIG"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Read CTRL_CONFIG - expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 0,
+    "comment": "Write 0x00000000 to TIMING_0"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Read TIMING_0 - expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 0,
+    "comment": "Write 0x00000000 to TIMING_1"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Read TIMING_1 - expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 0,
+    "comment": "Write 0x00000000 to TIMING_2"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Read TIMING_2 - expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 20,
+    "data": 0,
+    "comment": "Write 0x00000000 to TIMING_3"
+  },
+  {
+    "op": "read",
+    "addr": 20,
+    "comment": "Read TIMING_3 - expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 24,
+    "data": 0,
+    "comment": "Write 0x00000000 to REFRESH_CONFIG"
+  },
+  {
+    "op": "read",
+    "addr": 24,
+    "comment": "Read REFRESH_CONFIG - expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 28,
+    "data": 0,
+    "comment": "Write 0x00000000 to ERROR_STATUS"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Read ERROR_STATUS - expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 32,
+    "data": 0,
+    "comment": "Write 0x00000000 to BIST_CONFIG"
+  },
+  {
+    "op": "read",
+    "addr": 32,
+    "comment": "Read BIST_CONFIG - expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 36,
+    "data": 0,
+    "comment": "Write 0x00000000 to BIST_ADDR_START"
+  },
+  {
+    "op": "read",
+    "addr": 36,
+    "comment": "Read BIST_ADDR_START - expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 40,
+    "data": 0,
+    "comment": "Write 0x00000000 to BIST_ADDR_END"
+  },
+  {
+    "op": "read",
+    "addr": 40,
+    "comment": "Read BIST_ADDR_END - expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 1,
+    "comment": "Walking-ones TIMING_0 bit 0"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00000001"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 2,
+    "comment": "Walking-ones TIMING_0 bit 1"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00000002"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 4,
+    "comment": "Walking-ones TIMING_0 bit 2"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00000004"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 8,
+    "comment": "Walking-ones TIMING_0 bit 3"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00000008"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 16,
+    "comment": "Walking-ones TIMING_0 bit 4"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00000010"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 32,
+    "comment": "Walking-ones TIMING_0 bit 5"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00000020"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 64,
+    "comment": "Walking-ones TIMING_0 bit 6"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00000040"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 128,
+    "comment": "Walking-ones TIMING_0 bit 7"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00000080"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 256,
+    "comment": "Walking-ones TIMING_0 bit 8"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00000100"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 512,
+    "comment": "Walking-ones TIMING_0 bit 9"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00000200"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 1024,
+    "comment": "Walking-ones TIMING_0 bit 10"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00000400"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 2048,
+    "comment": "Walking-ones TIMING_0 bit 11"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00000800"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 4096,
+    "comment": "Walking-ones TIMING_0 bit 12"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00001000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 8192,
+    "comment": "Walking-ones TIMING_0 bit 13"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00002000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 16384,
+    "comment": "Walking-ones TIMING_0 bit 14"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00004000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 32768,
+    "comment": "Walking-ones TIMING_0 bit 15"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00008000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 65536,
+    "comment": "Walking-ones TIMING_0 bit 16"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00010000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 131072,
+    "comment": "Walking-ones TIMING_0 bit 17"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00020000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 262144,
+    "comment": "Walking-ones TIMING_0 bit 18"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00040000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 524288,
+    "comment": "Walking-ones TIMING_0 bit 19"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00080000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 1048576,
+    "comment": "Walking-ones TIMING_0 bit 20"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00100000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 2097152,
+    "comment": "Walking-ones TIMING_0 bit 21"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00200000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 4194304,
+    "comment": "Walking-ones TIMING_0 bit 22"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00400000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 8388608,
+    "comment": "Walking-ones TIMING_0 bit 23"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x00800000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 16777216,
+    "comment": "Walking-ones TIMING_0 bit 24"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x01000000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 33554432,
+    "comment": "Walking-ones TIMING_0 bit 25"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x02000000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 67108864,
+    "comment": "Walking-ones TIMING_0 bit 26"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x04000000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 134217728,
+    "comment": "Walking-ones TIMING_0 bit 27"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x08000000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 268435456,
+    "comment": "Walking-ones TIMING_0 bit 28"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x10000000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 536870912,
+    "comment": "Walking-ones TIMING_0 bit 29"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x20000000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 1073741824,
+    "comment": "Walking-ones TIMING_0 bit 30"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x40000000"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 2147483648,
+    "comment": "Walking-ones TIMING_0 bit 31"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x80000000"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294967294,
+    "comment": "Walking-zeros TIMING_1 bit 0"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFFFFFE"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294967293,
+    "comment": "Walking-zeros TIMING_1 bit 1"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFFFFFD"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294967291,
+    "comment": "Walking-zeros TIMING_1 bit 2"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFFFFFB"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294967287,
+    "comment": "Walking-zeros TIMING_1 bit 3"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFFFFF7"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294967279,
+    "comment": "Walking-zeros TIMING_1 bit 4"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFFFFEF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294967263,
+    "comment": "Walking-zeros TIMING_1 bit 5"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFFFFDF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294967231,
+    "comment": "Walking-zeros TIMING_1 bit 6"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFFFFBF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294967167,
+    "comment": "Walking-zeros TIMING_1 bit 7"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFFFF7F"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294967039,
+    "comment": "Walking-zeros TIMING_1 bit 8"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFFFEFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294966783,
+    "comment": "Walking-zeros TIMING_1 bit 9"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFFFDFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294966271,
+    "comment": "Walking-zeros TIMING_1 bit 10"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFFFBFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294965247,
+    "comment": "Walking-zeros TIMING_1 bit 11"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFFF7FF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294963199,
+    "comment": "Walking-zeros TIMING_1 bit 12"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFFEFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294959103,
+    "comment": "Walking-zeros TIMING_1 bit 13"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFFDFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294950911,
+    "comment": "Walking-zeros TIMING_1 bit 14"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFFBFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294934527,
+    "comment": "Walking-zeros TIMING_1 bit 15"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFF7FFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294901759,
+    "comment": "Walking-zeros TIMING_1 bit 16"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFEFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294836223,
+    "comment": "Walking-zeros TIMING_1 bit 17"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFDFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294705151,
+    "comment": "Walking-zeros TIMING_1 bit 18"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFFBFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4294443007,
+    "comment": "Walking-zeros TIMING_1 bit 19"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFF7FFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4293918719,
+    "comment": "Walking-zeros TIMING_1 bit 20"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFEFFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4292870143,
+    "comment": "Walking-zeros TIMING_1 bit 21"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFDFFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4290772991,
+    "comment": "Walking-zeros TIMING_1 bit 22"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFFBFFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4286578687,
+    "comment": "Walking-zeros TIMING_1 bit 23"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFF7FFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4278190079,
+    "comment": "Walking-zeros TIMING_1 bit 24"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFEFFFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4261412863,
+    "comment": "Walking-zeros TIMING_1 bit 25"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFDFFFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4227858431,
+    "comment": "Walking-zeros TIMING_1 bit 26"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xFBFFFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4160749567,
+    "comment": "Walking-zeros TIMING_1 bit 27"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xF7FFFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 4026531839,
+    "comment": "Walking-zeros TIMING_1 bit 28"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xEFFFFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 3758096383,
+    "comment": "Walking-zeros TIMING_1 bit 29"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xDFFFFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 3221225471,
+    "comment": "Walking-zeros TIMING_1 bit 30"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0xBFFFFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 2147483647,
+    "comment": "Walking-zeros TIMING_1 bit 31"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0x7FFFFFFF"
+  },
+  {
+    "op": "inject",
+    "reg": "ERROR_STATUS",
+    "field": "ecc_ue_flag",
+    "value": 1,
+    "comment": "Inject ecc_ue_flag to test RW1C"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Verify ERROR_STATUS has ecc_ue_flag set (bit 16) = 0x00010000"
+  },
+  {
+    "op": "write",
+    "addr": 28,
+    "data": 65536,
+    "comment": "Write 1 to bit 16 to clear ecc_ue_flag"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Verify ecc_ue_flag cleared, expect 0x00000000"
+  },
+  {
+    "op": "inject",
+    "reg": "ERROR_STATUS",
+    "field": "ref_starve_flag",
+    "value": 1,
+    "comment": "Inject ref_starve_flag to test RW1C"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Verify ERROR_STATUS has ref_starve_flag set (bit 17) = 0x00020000"
+  },
+  {
+    "op": "write",
+    "addr": 28,
+    "data": 131072,
+    "comment": "Write 1 to bit 17 to clear ref_starve_flag"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Verify ref_starve_flag cleared, expect 0x00000000"
+  },
+  {
+    "op": "inject",
+    "reg": "ERROR_STATUS",
+    "field": "init_fail_flag",
+    "value": 1,
+    "comment": "Inject init_fail_flag to test RW1C"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Verify ERROR_STATUS has init_fail_flag set (bit 18) = 0x00040000"
+  },
+  {
+    "op": "write",
+    "addr": 28,
+    "data": 262144,
+    "comment": "Write 1 to bit 18 to clear init_fail_flag"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Verify init_fail_flag cleared, expect 0x00000000"
+  },
+  {
+    "op": "inject",
+    "reg": "ERROR_STATUS",
+    "field": "ecc_ue_flag",
+    "value": 1,
+    "comment": "Inject all three RW1C flags"
+  },
+  {
+    "op": "inject",
+    "reg": "ERROR_STATUS",
+    "field": "ref_starve_flag",
+    "value": 1,
+    "comment": "Inject ref_starve_flag"
+  },
+  {
+    "op": "inject",
+    "reg": "ERROR_STATUS",
+    "field": "init_fail_flag",
+    "value": 1,
+    "comment": "Inject init_fail_flag"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Verify all three flags set = 0x00070000"
+  },
+  {
+    "op": "write",
+    "addr": 28,
+    "data": 65536,
+    "comment": "Clear only ecc_ue_flag (bit 16)"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Verify only ref_starve_flag and init_fail_flag remain = 0x00060000"
+  },
+  {
+    "op": "write",
+    "addr": 28,
+    "data": 196608,
+    "comment": "Clear both remaining flags (bits 17,18)"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Verify all flags cleared = 0x00000000"
+  },
+  {
+    "op": "reset"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Verify CTRL_CONFIG at reset = 0x00000009"
+  },
+  {
+    "op": "write",
+    "addr": 4,
+    "data": 32,
+    "comment": "Write bist_start (bit 5) WO field"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Verify bist_start reads back as 0 (WO self-clear), expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 4,
+    "data": 64,
+    "comment": "Write force_refresh (bit 6) WO field"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Verify force_refresh reads back as 0 (WO self-clear), expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 4,
+    "data": 128,
+    "comment": "Write force_self_ref (bit 7) WO field"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Verify force_self_ref reads back as 0 (WO self-clear), expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 4,
+    "data": 224,
+    "comment": "Write all three WO fields at once (bits 5,6,7)"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Verify all WO fields read back as 0, expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 4,
+    "data": 255,
+    "comment": "Write RW bits (0-4) and WO bits (5-7) together"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Verify RW bits retained, WO cleared = 0x0000001F"
+  },
+  {
+    "op": "write",
+    "addr": 4,
+    "data": 4294967295,
+    "comment": "Write 0xFFFFFFFF to CTRL_CONFIG - test reserved masking"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Verify reserved bits masked, WO cleared = 0x0000001F"
+  },
+  {
+    "op": "write",
+    "addr": 24,
+    "data": 4294967295,
+    "comment": "Write 0xFFFFFFFF to REFRESH_CONFIG - test reserved masking"
+  },
+  {
+    "op": "read",
+    "addr": 24,
+    "comment": "Verify reserved bits 31:9 masked = 0x000001FF"
+  },
+  {
+    "op": "write",
+    "addr": 32,
+    "data": 4294967295,
+    "comment": "Write 0xFFFFFFFF to BIST_CONFIG - test reserved masking"
+  },
+  {
+    "op": "read",
+    "addr": 32,
+    "comment": "Verify reserved bits 31:4 masked = 0x0000000F"
+  },
+  {
+    "op": "write",
+    "addr": 36,
+    "data": 4294967295,
+    "comment": "Write 0xFFFFFFFF to BIST_ADDR_START - test reserved masking"
+  },
+  {
+    "op": "read",
+    "addr": 36,
+    "comment": "Verify reserved bits 31:29 masked = 0x1FFFFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 40,
+    "data": 4294967295,
+    "comment": "Write 0xFFFFFFFF to BIST_ADDR_END - test reserved masking"
+  },
+  {
+    "op": "read",
+    "addr": 40,
+    "comment": "Verify reserved bits 31:29 masked = 0x1FFFFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 20,
+    "data": 16777215,
+    "comment": "Write max value to tREFI_nCK (24-bit field, bits 31:8)"
+  },
+  {
+    "op": "read",
+    "addr": 20,
+    "comment": "Verify tREFI_nCK = 0x00FFFF00 (max 24-bit in upper field)"
+  },
+  {
+    "op": "write",
+    "addr": 20,
+    "data": 4294967040,
+    "comment": "Write 0xFFFFFF00 - max tREFI_nCK shifted to bits 31:8"
+  },
+  {
+    "op": "read",
+    "addr": 20,
+    "comment": "Verify TIMING_3 = 0xFFFFFF00"
+  },
+  {
+    "op": "write",
+    "addr": 36,
+    "data": 0,
+    "comment": "Set BIST_ADDR_START to minimum"
+  },
+  {
+    "op": "read",
+    "addr": 36,
+    "comment": "Verify BIST_ADDR_START = 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 36,
+    "data": 536870911,
+    "comment": "Set BIST_ADDR_START to max (29-bit)"
+  },
+  {
+    "op": "read",
+    "addr": 36,
+    "comment": "Verify BIST_ADDR_START = 0x1FFFFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 40,
+    "data": 0,
+    "comment": "Set BIST_ADDR_END to minimum"
+  },
+  {
+    "op": "read",
+    "addr": 40,
+    "comment": "Verify BIST_ADDR_END = 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 40,
+    "data": 536870911,
+    "comment": "Set BIST_ADDR_END to max (29-bit)"
+  },
+  {
+    "op": "read",
+    "addr": 40,
+    "comment": "Verify BIST_ADDR_END = 0x1FFFFFFF"
+  },
+  {
+    "op": "read",
+    "addr": 44,
+    "comment": "Read unmapped address 0x2C - expect 0xDEADBEEF"
+  },
+  {
+    "op": "read",
+    "addr": 48,
+    "comment": "Read unmapped address 0x30 - expect 0xDEADBEEF"
+  },
+  {
+    "op": "read",
+    "addr": 64,
+    "comment": "Read unmapped address 0x40 - expect 0xDEADBEEF"
+  },
+  {
+    "op": "read",
+    "addr": 128,
+    "comment": "Read unmapped address 0x80 - expect 0xDEADBEEF"
+  },
+  {
+    "op": "read",
+    "addr": 255,
+    "comment": "Read unmapped address 0xFF - expect 0xDEADBEEF"
+  },
+  {
+    "op": "read",
+    "addr": 52,
+    "comment": "Read unmapped address 0x34 - expect 0xDEADBEEF"
+  },
+  {
+    "op": "read",
+    "addr": 56,
+    "comment": "Read unmapped address 0x38 - expect 0xDEADBEEF"
+  },
+  {
+    "op": "read",
+    "addr": 60,
+    "comment": "Read unmapped address 0x3C - expect 0xDEADBEEF"
+  },
+  {
+    "op": "reset"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 305419896,
+    "comment": "Sequential test - write 0x12345678 to TIMING_0"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Sequential test - read TIMING_0, expect 0x12345678"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 2271560481,
+    "comment": "Sequential test - write 0x87654321 to TIMING_0"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Sequential test - read TIMING_0, expect 0x87654321"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 2863311530,
+    "comment": "Sequential test - write 0xAAAAAAAA to TIMING_0"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Sequential test - read TIMING_0, expect 0xAAAAAAAA"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 1431655765,
+    "comment": "Sequential test - write 0x55555555 to TIMING_0"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Sequential test - read TIMING_0, expect 0x55555555"
+  },
+  {
+    "op": "reset"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Cross-register test - read TIMING_0 reset value 0x271C0B0B"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Cross-register test - read TIMING_1 reset value 0x80200606"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 4294967295,
+    "comment": "Cross-register test - write 0xFFFFFFFF to TIMING_0"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0xFFFFFFFF"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 unchanged at 0x80200606"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 0,
+    "comment": "Cross-register test - write 0x00000000 to TIMING_1"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0x00000000"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 unchanged at 0xFFFFFFFF"
+  },
+  {
+    "op": "reset"
+  },
+  {
+    "op": "write",
+    "addr": 4,
+    "data": 1,
+    "comment": "Test sched_policy field in CTRL_CONFIG"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Verify sched_policy=1, expect 0x00000001"
+  },
+  {
+    "op": "write",
+    "addr": 4,
+    "data": 0,
+    "comment": "Test sched_policy=0"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Verify sched_policy=0, expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 4,
+    "data": 2,
+    "comment": "Test row_policy field in CTRL_CONFIG"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Verify row_policy=1, expect 0x00000002"
+  },
+  {
+    "op": "write",
+    "addr": 4,
+    "data": 0,
+    "comment": "Test row_policy=0"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Verify row_policy=0, expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 4,
+    "data": 12,
+    "comment": "Test self_ref_mode max (bits 3:2 = 11)"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Verify self_ref_mode=3, expect 0x0000000C"
+  },
+  {
+    "op": "write",
+    "addr": 4,
+    "data": 4,
+    "comment": "Test self_ref_mode=1"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Verify self_ref_mode=1, expect 0x00000004"
+  },
+  {
+    "op": "write",
+    "addr": 4,
+    "data": 16,
+    "comment": "Test ecc_enable=1"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Verify ecc_enable=1, expect 0x00000010"
+  },
+  {
+    "op": "write",
+    "addr": 4,
+    "data": 0,
+    "comment": "Test ecc_enable=0"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Verify ecc_enable=0, expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 32,
+    "data": 0,
+    "comment": "Test bist_pattern=0 (walking_ones)"
+  },
+  {
+    "op": "read",
+    "addr": 32,
+    "comment": "Verify bist_pattern=0, expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 32,
+    "data": 1,
+    "comment": "Test bist_pattern=1 (walking_zeros)"
+  },
+  {
+    "op": "read",
+    "addr": 32,
+    "comment": "Verify bist_pattern=1, expect 0x00000001"
+  },
+  {
+    "op": "write",
+    "addr": 32,
+    "data": 2,
+    "comment": "Test bist_pattern=2 (checkerboard)"
+  },
+  {
+    "op": "read",
+    "addr": 32,
+    "comment": "Verify bist_pattern=2, expect 0x00000002"
+  },
+  {
+    "op": "write",
+    "addr": 32,
+    "data": 3,
+    "comment": "Test bist_pattern=3 (lfsr)"
+  },
+  {
+    "op": "read",
+    "addr": 32,
+    "comment": "Verify bist_pattern=3, expect 0x00000003"
+  },
+  {
+    "op": "write",
+    "addr": 32,
+    "data": 4,
+    "comment": "Test bist_pattern=4 (all)"
+  },
+  {
+    "op": "read",
+    "addr": 32,
+    "comment": "Verify bist_pattern=4, expect 0x00000004"
+  },
+  {
+    "op": "write",
+    "addr": 32,
+    "data": 8,
+    "comment": "Test bist_addr_mode=1 (random_lfsr)"
+  },
+  {
+    "op": "read",
+    "addr": 32,
+    "comment": "Verify bist_addr_mode=1, expect 0x00000008"
+  },
+  {
+    "op": "write",
+    "addr": 32,
+    "data": 0,
+    "comment": "Test bist_addr_mode=0 (sequential)"
+  },
+  {
+    "op": "read",
+    "addr": 32,
+    "comment": "Verify bist_addr_mode=0, expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 24,
+    "data": 15,
+    "comment": "Test max_postpone=max (bits 3:0 = 0xF)"
+  },
+  {
+    "op": "read",
+    "addr": 24,
+    "comment": "Verify max_postpone=15, expect 0x0000000F"
+  },
+  {
+    "op": "write",
+    "addr": 24,
+    "data": 0,
+    "comment": "Test max_postpone=0"
+  },
+  {
+    "op": "read",
+    "addr": 24,
+    "comment": "Verify max_postpone=0, expect 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 24,
+    "data": 240,
+    "comment": "Test urgent_threshold=max (bits 7:4 = 0xF)"
+  },
+  {
+    "op": "read",
+    "addr": 24,
+    "comment": "Verify urgent_threshold=15, expect 0x000000F0"
+  },
+  {
+    "op": "write",
+    "addr": 24,
+    "data": 256,
+    "comment": "Test ref_priority=1"
+  },
+  {
+    "op": "read",
+    "addr": 24,
+    "comment": "Verify ref_priority=1, expect 0x00000100"
+  },
+  {
+    "op": "inject",
+    "reg": "CTRL_STATUS",
+    "field": "init_done",
+    "value": 1,
+    "comment": "Inject init_done status"
+  },
+  {
+    "op": "read",
+    "addr": 0,
+    "comment": "Verify init_done=1, expect 0x00000001"
+  },
+  {
+    "op": "inject",
+    "reg": "CTRL_STATUS",
+    "field": "cal_done",
+    "value": 1,
+    "comment": "Inject cal_done status"
+  },
+  {
+    "op": "read",
+    "addr": 0,
+    "comment": "Verify cal_done=1, expect 0x00000003"
+  },
+  {
+    "op": "inject",
+    "reg": "CTRL_STATUS",
+    "field": "cal_fail",
+    "value": 1,
+    "comment": "Inject cal_fail status"
+  },
+  {
+    "op": "read",
+    "addr": 0,
+    "comment": "Verify cal_fail=1, expect 0x00000007"
+  },
+  {
+    "op": "inject",
+    "reg": "CTRL_STATUS",
+    "field": "bist_done",
+    "value": 1,
+    "comment": "Inject bist_done status"
+  },
+  {
+    "op": "read",
+    "addr": 0,
+    "comment": "Verify bist_done=1, expect 0x0000000F"
+  },
+  {
+    "op": "inject",
+    "reg": "CTRL_STATUS",
+    "field": "bist_fail",
+    "value": 1,
+    "comment": "Inject bist_fail status"
+  },
+  {
+    "op": "read",
+    "addr": 0,
+    "comment": "Verify bist_fail=1, expect 0x0000001F"
+  },
+  {
+    "op": "inject",
+    "reg": "CTRL_STATUS",
+    "field": "ref_pending_cnt",
+    "value": 7,
+    "comment": "Inject ref_pending_cnt=7"
+  },
+  {
+    "op": "read",
+    "addr": 0,
+    "comment": "Verify ref_pending_cnt=7, expect 0x000000FF"
+  },
+  {
+    "op": "inject",
+    "reg": "CTRL_STATUS",
+    "field": "self_refresh_active",
+    "value": 1,
+    "comment": "Inject self_refresh_active"
+  },
+  {
+    "op": "read",
+    "addr": 0,
+    "comment": "Verify self_refresh_active=1, expect 0x000001FF"
+  },
+  {
+    "op": "reset"
+  },
+  {
+    "op": "inject",
+    "reg": "ERROR_STATUS",
+    "field": "ecc_ce_count",
+    "value": 65535,
+    "comment": "Inject max ecc_ce_count"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Verify ecc_ce_count=65535, expect 0x0000FFFF"
+  },
+  {
+    "op": "inject",
+    "reg": "ERROR_STATUS",
+    "field": "bist_fail_addr",
+    "value": 8191,
+    "comment": "Inject max bist_fail_addr (13 bits)"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Verify bist_fail_addr=8191, expect 0xFFF8FFFF"
+  },
+  {
+    "op": "reset"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 1,
+    "comment": "Walking-ones TIMING_2 bit 0"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00000001"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 2,
+    "comment": "Walking-ones TIMING_2 bit 1"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00000002"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 4,
+    "comment": "Walking-ones TIMING_2 bit 2"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00000004"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 8,
+    "comment": "Walking-ones TIMING_2 bit 3"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00000008"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 16,
+    "comment": "Walking-ones TIMING_2 bit 4"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00000010"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 32,
+    "comment": "Walking-ones TIMING_2 bit 5"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00000020"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 64,
+    "comment": "Walking-ones TIMING_2 bit 6"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00000040"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 128,
+    "comment": "Walking-ones TIMING_2 bit 7"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00000080"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 256,
+    "comment": "Walking-ones TIMING_2 bit 8"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00000100"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 512,
+    "comment": "Walking-ones TIMING_2 bit 9"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00000200"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 1024,
+    "comment": "Walking-ones TIMING_2 bit 10"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00000400"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 2048,
+    "comment": "Walking-ones TIMING_2 bit 11"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00000800"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 4096,
+    "comment": "Walking-ones TIMING_2 bit 12"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00001000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 8192,
+    "comment": "Walking-ones TIMING_2 bit 13"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00002000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 16384,
+    "comment": "Walking-ones TIMING_2 bit 14"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00004000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 32768,
+    "comment": "Walking-ones TIMING_2 bit 15"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00008000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 65536,
+    "comment": "Walking-ones TIMING_2 bit 16"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00010000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 131072,
+    "comment": "Walking-ones TIMING_2 bit 17"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00020000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 262144,
+    "comment": "Walking-ones TIMING_2 bit 18"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00040000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 524288,
+    "comment": "Walking-ones TIMING_2 bit 19"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00080000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 1048576,
+    "comment": "Walking-ones TIMING_2 bit 20"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00100000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 2097152,
+    "comment": "Walking-ones TIMING_2 bit 21"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00200000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 4194304,
+    "comment": "Walking-ones TIMING_2 bit 22"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00400000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 8388608,
+    "comment": "Walking-ones TIMING_2 bit 23"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x00800000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 16777216,
+    "comment": "Walking-ones TIMING_2 bit 24"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x01000000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 33554432,
+    "comment": "Walking-ones TIMING_2 bit 25"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x02000000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 67108864,
+    "comment": "Walking-ones TIMING_2 bit 26"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x04000000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 134217728,
+    "comment": "Walking-ones TIMING_2 bit 27"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x08000000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 268435456,
+    "comment": "Walking-ones TIMING_2 bit 28"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x10000000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 536870912,
+    "comment": "Walking-ones TIMING_2 bit 29"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x20000000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 1073741824,
+    "comment": "Walking-ones TIMING_2 bit 30"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x40000000"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 2147483648,
+    "comment": "Walking-ones TIMING_2 bit 31"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x80000000"
+  },
+  {
+    "op": "reset"
+  },
+  {
+    "op": "write",
+    "addr": 8,
+    "data": 656877351,
+    "comment": "Restore TIMING_0 to reset value 0x271C0B0B"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Verify TIMING_0 = 0x271C0B0B"
+  },
+  {
+    "op": "write",
+    "addr": 12,
+    "data": 2149877254,
+    "comment": "Restore TIMING_1 to reset value 0x80200606"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Verify TIMING_1 = 0x80200606"
+  },
+  {
+    "op": "write",
+    "addr": 16,
+    "data": 135136780,
+    "comment": "Restore TIMING_2 to reset value 0x080B060C"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Verify TIMING_2 = 0x080B060C"
+  },
+  {
+    "op": "write",
+    "addr": 20,
+    "data": 1597444,
+    "comment": "Restore TIMING_3 to reset value 0x00186004"
+  },
+  {
+    "op": "read",
+    "addr": 20,
+    "comment": "Verify TIMING_3 = 0x00186004"
+  },
+  {
+    "op": "write",
+    "addr": 24,
+    "data": 360,
+    "comment": "Restore REFRESH_CONFIG to reset value 0x00000168"
+  },
+  {
+    "op": "read",
+    "addr": 24,
+    "comment": "Verify REFRESH_CONFIG = 0x00000168"
+  },
+  {
+    "op": "write",
+    "addr": 4,
+    "data": 9,
+    "comment": "Restore CTRL_CONFIG to reset value 0x00000009"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Verify CTRL_CONFIG = 0x00000009"
+  },
+  {
+    "op": "write",
+    "addr": 40,
+    "data": 536870911,
+    "comment": "Restore BIST_ADDR_END to reset value 0x1FFFFFFF"
+  },
+  {
+    "op": "read",
+    "addr": 40,
+    "comment": "Verify BIST_ADDR_END = 0x1FFFFFFF"
+  },
+  {
+    "op": "inject",
+    "reg": "ERROR_STATUS",
+    "field": "ecc_ue_flag",
+    "value": 1,
+    "comment": "RW1C selective clear test - set all flags"
+  },
+  {
+    "op": "inject",
+    "reg": "ERROR_STATUS",
+    "field": "ref_starve_flag",
+    "value": 1,
+    "comment": "Set ref_starve_flag"
+  },
+  {
+    "op": "inject",
+    "reg": "ERROR_STATUS",
+    "field": "init_fail_flag",
+    "value": 1,
+    "comment": "Set init_fail_flag"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Verify all flags set = 0x00070000"
+  },
+  {
+    "op": "write",
+    "addr": 28,
+    "data": 0,
+    "comment": "Write 0 - should not clear any RW1C flags"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Verify flags still set = 0x00070000"
+  },
+  {
+    "op": "write",
+    "addr": 28,
+    "data": 458752,
+    "comment": "Write 1 to all three flags to clear all"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Verify all flags cleared = 0x00000000"
+  },
+  {
+    "op": "write",
+    "addr": 20,
+    "data": 4294967295,
+    "comment": "Write max to TIMING_3"
+  },
+  {
+    "op": "read",
+    "addr": 20,
+    "comment": "Verify TIMING_3 = 0xFFFFFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 20,
+    "data": 4,
+    "comment": "Write only tCCD_nCK=4"
+  },
+  {
+    "op": "read",
+    "addr": 20,
+    "comment": "Verify TIMING_3 = 0x00000004"
+  },
+  {
+    "op": "write",
+    "addr": 20,
+    "data": 4294967040,
+    "comment": "Write max tREFI_nCK (bits 31:8)"
+  },
+  {
+    "op": "read",
+    "addr": 20,
+    "comment": "Verify TIMING_3 = 0xFFFFFF00"
+  },
+  {
+    "op": "read",
+    "addr": 100,
+    "comment": "Read unmapped address 0x64 - expect 0xDEADBEEF"
+  },
+  {
+    "op": "read",
+    "addr": 200,
+    "comment": "Read unmapped address 0xC8 - expect 0xDEADBEEF"
+  },
+  {
+    "op": "read",
+    "addr": 252,
+    "comment": "Read unmapped address 0xFC - expect 0xDEADBEEF"
+  },
+  {
+    "op": "reset"
+  },
+  {
+    "op": "read",
+    "addr": 0,
+    "comment": "Final reset verification - CTRL_STATUS"
+  },
+  {
+    "op": "read",
+    "addr": 4,
+    "comment": "Final reset verification - CTRL_CONFIG"
+  },
+  {
+    "op": "read",
+    "addr": 8,
+    "comment": "Final reset verification - TIMING_0"
+  },
+  {
+    "op": "read",
+    "addr": 12,
+    "comment": "Final reset verification - TIMING_1"
+  },
+  {
+    "op": "read",
+    "addr": 16,
+    "comment": "Final reset verification - TIMING_2"
+  },
+  {
+    "op": "read",
+    "addr": 20,
+    "comment": "Final reset verification - TIMING_3"
+  },
+  {
+    "op": "read",
+    "addr": 24,
+    "comment": "Final reset verification - REFRESH_CONFIG"
+  },
+  {
+    "op": "read",
+    "addr": 28,
+    "comment": "Final reset verification - ERROR_STATUS"
+  },
+  {
+    "op": "read",
+    "addr": 32,
+    "comment": "Final reset verification - BIST_CONFIG"
+  },
+  {
+    "op": "read",
+    "addr": 36,
+    "comment": "Final reset verification - BIST_ADDR_START"
+  },
+  {
+    "op": "read",
+    "addr": 40,
+    "comment": "Final reset verification - BIST_ADDR_END"
+  }
+]

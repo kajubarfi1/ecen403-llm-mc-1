@@ -1,0 +1,934 @@
+[
+  {
+    "op": "reset",
+    "comment": "Assert reset to initialize all blocks in the path"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Hold reset for 5 cycles to ensure all state machines settle"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_ack_o": 0,
+      "wb_stall_o": 0,
+      "wb_err_o": 0,
+      "queue_empty": 1,
+      "queue_full": 0,
+      "queue_count": 0,
+      "ref_pending_cnt": 0,
+      "ref_starve_flag": 0,
+      "ddr_cke": 0,
+      "ddr_reset_n": 0,
+      "fb_ref_valid": 0,
+      "fb_act_valid": 0,
+      "fb_rd_valid": 0,
+      "fb_wr_valid": 0
+    },
+    "comment": "Verify initial state after reset: queues empty, no refresh pending, DDR inactive"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "init_done": 1,
+      "cfg_tREFI_nCK": 6240,
+      "cfg_max_postpone": 8,
+      "cfg_urgent_threshold": 5,
+      "cfg_ref_priority": 0,
+      "cfg_force_refresh": 0
+    },
+    "comment": "Signal initialization complete and configure refresh timing parameters"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow config to propagate through refresh_ctrl and scheduler"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ddr_cke": 1,
+      "ddr_reset_n": 1,
+      "ref_pending_cnt": 0,
+      "ref_starve_flag": 0
+    },
+    "comment": "DDR interface should be active after init_done, no refresh pending yet"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 0,
+      "wb_adr_i": 0,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0,
+      "wb_dat_i": 0,
+      "bank_is_active": 1,
+      "bank_open_row_0": 0,
+      "bank_act_allowed": 1,
+      "bank_rd_allowed": 1,
+      "bank_wr_allowed": 1,
+      "bank_pre_allowed": 1,
+      "req_ready": 1
+    },
+    "comment": "Issue a simple read to address 0x0 (bank 0, row 0, col 0) - normal operation baseline"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock the read request into wb_port and addr_decoder"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 0,
+      "queue_empty": 0,
+      "queue_count": 1
+    },
+    "comment": "Request should be enqueued; queue no longer empty"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 0
+    },
+    "comment": "De-assert strobe after single-beat transaction"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow scheduler to pick up the command from queue"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_rd_valid": 1,
+      "fb_ref_valid": 0
+    },
+    "comment": "Scheduler should issue a READ command since bank is active with matching row, no refresh preemption yet"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Let the read complete and clear from pipeline"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "req_ready": 1
+    },
+    "comment": "End the Wishbone cycle"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1,
+      "queue_count": 0,
+      "ref_pending_cnt": 0
+    },
+    "comment": "Queue should be drained, still no refresh pending"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 8192,
+      "wb_sel_i": 15,
+      "wb_dat_i": 305419896,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0,
+      "bank_is_active": 1,
+      "bank_open_row_0": 0,
+      "bank_act_allowed": 1,
+      "bank_rd_allowed": 1,
+      "bank_wr_allowed": 1,
+      "bank_pre_allowed": 1,
+      "req_ready": 1
+    },
+    "comment": "Issue a write to address 0x2000 (maps to bank 0, row 0, col 512 with row-bank-col mapping)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock write request in"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 0,
+      "queue_count": 1
+    },
+    "comment": "Write accepted into queue"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 0
+    },
+    "comment": "De-assert strobe"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Allow scheduler to issue the WRITE command"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_wr_valid": 1,
+      "fb_ref_valid": 0
+    },
+    "comment": "Scheduler issues WRITE, still no refresh preemption"
+  },
+  {
+    "op": "step",
+    "cycles": 10,
+    "comment": "Complete write and drain"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0
+    },
+    "comment": "End cycle"
+  },
+  {
+    "op": "step",
+    "cycles": 6200,
+    "comment": "Advance close to tREFI boundary (6240 cycles) to approach first refresh"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_pending_cnt": 1
+    },
+    "comment": "After ~6240 cycles, one refresh should be pending"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 0,
+      "wb_adr_i": 16384,
+      "wb_sel_i": 15,
+      "wb_cti_i": 2,
+      "wb_bte_i": 0,
+      "bank_is_active": 0,
+      "bank_open_row_0": 0,
+      "bank_act_allowed": 1,
+      "bank_rd_allowed": 0,
+      "bank_wr_allowed": 0,
+      "bank_pre_allowed": 1,
+      "req_ready": 1
+    },
+    "comment": "Issue a burst read to a closed bank right as refresh becomes pending - requires ACT first"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock in first beat of burst"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 0,
+      "ref_pending_cnt": 1
+    },
+    "comment": "Request accepted, refresh pending but not yet urgent"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 16388
+    },
+    "comment": "Second beat of burst"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock second beat"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 16392
+    },
+    "comment": "Third beat of burst"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock third beat"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 16396,
+      "wb_cti_i": 7
+    },
+    "comment": "Fourth and last beat of burst (end-of-burst)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock final beat"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 0,
+      "wb_cti_i": 0
+    },
+    "comment": "End burst strobe"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 4
+    },
+    "comment": "Four burst beats should be in the command queue"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Allow scheduler to begin processing - should see ACT then READs"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_act_valid": 1
+    },
+    "comment": "Scheduler should issue ACTIVATE for the closed bank before reads"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRCD (11 cycles) for bank to become active"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_is_active": 1,
+      "bank_rd_allowed": 1
+    },
+    "comment": "Bank is now active and ready for reads"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Scheduler processes first read"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_rd_valid": 1
+    },
+    "comment": "First READ of burst issued"
+  },
+  {
+    "op": "step",
+    "cycles": 15,
+    "comment": "Process remaining reads in burst"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0
+    },
+    "comment": "End transaction"
+  },
+  {
+    "op": "step",
+    "cycles": 6000,
+    "comment": "Advance time to accumulate multiple missed refreshes towards urgent threshold"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_pending_cnt": 2
+    },
+    "comment": "Two refreshes should now be pending (two tREFI intervals elapsed without refresh)"
+  },
+  {
+    "op": "step",
+    "cycles": 6240,
+    "comment": "Another full tREFI interval to push pending count higher"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_pending_cnt": 3
+    },
+    "comment": "Three refreshes pending, approaching urgent threshold of 5"
+  },
+  {
+    "op": "step",
+    "cycles": 12480,
+    "comment": "Two more tREFI intervals to reach urgent threshold"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_pending_cnt": 5,
+      "ref_starve_flag": 1
+    },
+    "comment": "Pending count hits 5 (cfg_urgent_threshold), urgent/starve flag should assert"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 1,
+      "wb_adr_i": 262144,
+      "wb_sel_i": 15,
+      "wb_dat_i": 2863311530,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0,
+      "bank_is_active": 1,
+      "bank_open_row_0": 0,
+      "bank_act_allowed": 1,
+      "bank_rd_allowed": 1,
+      "bank_wr_allowed": 1,
+      "bank_pre_allowed": 1,
+      "req_ready": 1
+    },
+    "comment": "Issue a write while refresh is URGENT - this should be preempted by refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock write request in"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "wb_stall_o": 0,
+      "queue_count": 1,
+      "ref_starve_flag": 1
+    },
+    "comment": "Write enqueued but refresh is urgent, scheduler should prioritize refresh"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 0
+    },
+    "comment": "De-assert strobe after single beat"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow scheduler to arbitrate - urgent refresh should win"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_ref_valid": 1,
+      "fb_wr_valid": 0
+    },
+    "comment": "CRITICAL CHECK: Scheduler issues REFRESH instead of WRITE - transaction preempted by urgent refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC (128 cycles) for refresh to complete"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_pending_cnt": 4
+    },
+    "comment": "One refresh completed, pending count decremented from 5 to 4"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Scheduler should now check if still urgent and possibly issue another refresh or the queued write"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_ref_valid": 1
+    },
+    "comment": "Still at or above threshold, another refresh may be issued before the write"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait another tRFC for second refresh"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_pending_cnt": 3
+    },
+    "comment": "Second refresh done, count drops to 3 - below urgent threshold"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Scheduler should now allow the queued write to proceed"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_wr_valid": 1,
+      "ref_starve_flag": 0
+    },
+    "comment": "Write finally issued now that refresh is no longer urgent, starve flag cleared"
+  },
+  {
+    "op": "step",
+    "cycles": 10,
+    "comment": "Complete the write"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0
+    },
+    "comment": "End Wishbone cycle"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cfg_force_refresh": 1
+    },
+    "comment": "Force immediate refresh via config - boundary condition test"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Apply force refresh"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_pending_cnt": 4
+    },
+    "comment": "Force refresh increments pending count or triggers immediate refresh scheduling"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Scheduler picks up forced refresh"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_ref_valid": 1
+    },
+    "comment": "Forced refresh issued to DDR3"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cfg_force_refresh": 0
+    },
+    "comment": "De-assert force refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 0,
+      "wb_adr_i": 0,
+      "wb_sel_i": 15,
+      "wb_cti_i": 2,
+      "wb_bte_i": 0,
+      "bank_is_active": 1,
+      "bank_open_row_0": 0,
+      "bank_act_allowed": 1,
+      "bank_rd_allowed": 1,
+      "bank_wr_allowed": 1,
+      "bank_pre_allowed": 1,
+      "req_ready": 1
+    },
+    "comment": "Start a burst read to fill the queue while refresh is still pending"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Beat 1"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 4
+    },
+    "comment": "Beat 2"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock beat 2"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 8
+    },
+    "comment": "Beat 3"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock beat 3"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 12
+    },
+    "comment": "Beat 4"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock beat 4"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 16
+    },
+    "comment": "Beat 5"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock beat 5"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 20
+    },
+    "comment": "Beat 6"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock beat 6"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 24
+    },
+    "comment": "Beat 7"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock beat 7"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_adr_i": 28,
+      "wb_cti_i": 7
+    },
+    "comment": "Beat 8 (end of burst)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock final beat"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 0,
+      "wb_cti_i": 0
+    },
+    "comment": "End burst"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 8
+    },
+    "comment": "Full 8-beat burst queued"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cfg_urgent_threshold": 2
+    },
+    "comment": "Lower urgent threshold to 2 to make current pending count (3) immediately urgent"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Apply new threshold"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_starve_flag": 1
+    },
+    "comment": "Pending count 3 exceeds new threshold 2, starve flag asserts"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Scheduler should preempt the queued burst reads with refresh"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_ref_valid": 1,
+      "fb_rd_valid": 0
+    },
+    "comment": "Burst reads preempted by urgent refresh due to lowered threshold"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC for refresh completion"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Check if another refresh or reads proceed"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_pending_cnt": 2
+    },
+    "comment": "One refresh done, pending now 2 - still at threshold"
+  },
+  {
+    "op": "step",
+    "cycles": 130,
+    "comment": "Allow one more refresh cycle if still at threshold"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_pending_cnt": 1
+    },
+    "comment": "Below threshold now, reads should proceed"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Scheduler starts processing queued reads"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_rd_valid": 1,
+      "ref_starve_flag": 0
+    },
+    "comment": "Reads now being issued, starve flag cleared"
+  },
+  {
+    "op": "step",
+    "cycles": 30,
+    "comment": "Allow all 8 reads to complete"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0
+    },
+    "comment": "End transaction"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1,
+      "queue_count": 0
+    },
+    "comment": "All burst reads completed after refresh preemption"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cfg_urgent_threshold": 5,
+      "cfg_max_postpone": 1
+    },
+    "comment": "Restore threshold but set max postpone to 1 - refresh cannot be delayed even once"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Apply config"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 0,
+      "wb_adr_i": 524288,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Issue read right before next tREFI boundary with max_postpone=1"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock in read"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 0
+    },
+    "comment": "Single beat done"
+  },
+  {
+    "op": "step",
+    "cycles": 6240,
+    "comment": "Advance to next tREFI - refresh becomes pending"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_pending_cnt": 2
+    },
+    "comment": "Refresh pending, with max_postpone=1 this should immediately become urgent"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Allow scheduler to react"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_ref_valid": 1
+    },
+    "comment": "Immediate refresh due to max_postpone=1 - no transaction can delay it"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0,
+      "cfg_max_postpone": 8
+    },
+    "comment": "Restore normal max_postpone"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "req_ready": 0
+    },
+    "comment": "Stall downstream cmd_gen to test backpressure during refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Apply backpressure"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 1,
+      "wb_stb_i": 1,
+      "wb_we_i": 0,
+      "wb_adr_i": 1048576,
+      "wb_sel_i": 15,
+      "wb_cti_i": 0,
+      "wb_bte_i": 0
+    },
+    "comment": "Issue read while cmd_gen is stalled"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock in request"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_stb_i": 0
+    },
+    "comment": "End strobe"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Scheduler tries to issue but cmd_gen not ready"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 1,
+      "fb_rd_valid": 0,
+      "fb_ref_valid": 0
+    },
+    "comment": "Nothing issued due to downstream backpressure"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "req_ready": 1
+    },
+    "comment": "Release backpressure"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Scheduler can now issue commands"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "fb_rd_valid": 1
+    },
+    "comment": "Read finally issued after backpressure released"
+  },
+  {
+    "op": "step",
+    "cycles": 10,
+    "comment": "Complete transaction"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "wb_cyc_i": 0
+    },
+    "comment": "End cycle"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Final settling"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1,
+      "queue_count": 0,
+      "wb_stall_o": 0,
+      "wb_err_o": 0
+    },
+    "comment": "Final state: all queues drained, no errors, system idle and ready for next operation"
+  }
+]

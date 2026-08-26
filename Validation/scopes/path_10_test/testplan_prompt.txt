@@ -1,0 +1,28 @@
+Generate a test plan for the CSR → Bank Tracker Timing Configuration integration path.
+
+SPEC:
+{spec_json}
+
+PATH: config_regs -> bank_tracker
+CONNECTIONS:
+  config_regs -> bank_tracker: CSR timing registers to bank tracker (11 individual timing parameters).
+
+Available input signals (testbench drives these): "csr_cyc_i", "csr_stb_i", "csr_we_i", "csr_adr_i", "csr_dat_i", "csr_sel_i", "sts_init_done", "sts_cal_done", "sts_cal_fail", "sts_bist_done", "sts_bist_fail", "sts_ref_pending_cnt", "sts_self_refresh_active", "sts_ecc_ce_count", "sts_ecc_ue_event", "sts_ref_starve_event", "sts_init_fail_event", "sts_bist_fail_addr", "cmd_act_valid", "cmd_act_bank", "cmd_act_row", "cmd_pre_valid", "cmd_pre_bank", "cmd_pre_all", "cmd_rd_valid", "cmd_rd_bank", "cmd_wr_valid", "cmd_wr_bank", "cmd_ref_valid"
+Available output signals (testbench checks these): "csr_ack_o", "csr_dat_o", "csr_err_o", "cfg_CL_nCK", "cfg_CWL_nCK", "cfg_tREFI_nCK", "cfg_sched_policy", "cfg_row_policy", "cfg_self_ref_mode", "cfg_ecc_enable", "cfg_bist_start", "cfg_force_refresh", "cfg_force_self_ref", "cfg_max_postpone", "cfg_urgent_threshold", "cfg_ref_priority", "cfg_bist_pattern", "cfg_bist_addr_mode", "cfg_bist_addr_start", "cfg_bist_addr_end", "bank_is_active", "bank_act_allowed", "bank_rd_allowed", "bank_wr_allowed", "bank_pre_allowed"
+
+Output a JSON array of test operations:
+  {"op": "reset"}
+  {"op": "drive", "signals": {"signal_name": value, ...}, "comment": "<why>"}
+  {"op": "check", "expected": {"signal_name": expected_value, ...}, "comment": "<why>"}
+  {"op": "step", "cycles": <int>, "comment": "<why>"}
+
+All values are decimal integers.
+
+Generate at least 40 operations that exercise:
+1. Reset and verify initial state
+2. Normal operation through the path
+3. Boundary conditions (overflow, underflow, stall, timeout)
+4. Back-to-back operations
+5. State transitions at each block in the chain
+
+Output ONLY the JSON array.

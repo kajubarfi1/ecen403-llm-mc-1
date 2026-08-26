@@ -1,0 +1,172 @@
+{
+  "path_id": "path_15_status_cal",
+  "mode": "mixed",
+  "max_sig_id": 32,
+  "sim_timeout_cycles": 200000,
+  "start": {
+    "kind": "pulse",
+    "expression": "u_calibration.init_done = 1'b1;"
+  },
+  "signals": [
+    {
+      "id": 0,
+      "name": "init_done",
+      "kind": "raw",
+      "path": "u_calibration.init_done",
+      "width": 1
+    },
+    {
+      "id": 1,
+      "name": "cal_done",
+      "kind": "raw",
+      "path": "u_calibration.cal_done",
+      "width": 1
+    },
+    {
+      "id": 2,
+      "name": "cal_fail",
+      "kind": "raw",
+      "path": "u_calibration.cal_fail",
+      "width": 1
+    },
+    {
+      "id": 3,
+      "name": "zqcs_req",
+      "kind": "raw",
+      "path": "u_calibration.zqcs_req",
+      "width": 1
+    },
+    {
+      "id": 4,
+      "name": "zqcs_ack",
+      "kind": "raw",
+      "path": "u_calibration.zqcs_ack",
+      "width": 1
+    },
+    {
+      "id": 5,
+      "name": "sts_cal_done",
+      "kind": "raw",
+      "path": "u_config_regs.sts_cal_done",
+      "width": 1
+    },
+    {
+      "id": 6,
+      "name": "sts_cal_fail",
+      "kind": "raw",
+      "path": "u_config_regs.sts_cal_fail",
+      "width": 1
+    },
+    {
+      "id": 7,
+      "name": "cal_complete_no_fail",
+      "kind": "predicate",
+      "expression": "u_calibration.cal_done && !u_calibration.cal_fail"
+    },
+    {
+      "id": 8,
+      "name": "csr_ack",
+      "kind": "raw",
+      "path": "u_config_regs.csr_ack_o",
+      "width": 1
+    }
+  ],
+  "csr_interface": {
+    "present": true,
+    "address_width": 8,
+    "data_width": 32,
+    "registers": [
+      {
+        "name": "CTRL_STATUS",
+        "address": "0x00",
+        "bits": {
+          "init_done": 0,
+          "cal_done": 1,
+          "cal_fail": 2,
+          "bist_done": 3,
+          "bist_fail": 4,
+          "ref_pending_cnt": "7:5",
+          "self_refresh_active": 8
+        }
+      }
+    ]
+  },
+  "vector_format": {
+    "format_string": "OO PPPPPPPP DDDDDDDD EEEEEEEE",
+    "opcodes": {
+      "00": {
+        "name": "reset",
+        "fields": {},
+        "task_call": "handle_reset()"
+      },
+      "09": {
+        "name": "event_start",
+        "fields": {},
+        "task_call": "event_start()"
+      },
+      "04": {
+        "name": "wait_for",
+        "fields": {
+          "PPPPPPPP[7:0]": "sig_id",
+          "DDDDDDDD": "value",
+          "EEEEEEEE": "timeout"
+        },
+        "task_call": "wait_for(sig_id, value, timeout, vec_num, pc, fc, tt)"
+      },
+      "05": {
+        "name": "check_at",
+        "fields": {
+          "PPPPPPPP[7:0]": "sig_id",
+          "DDDDDDDD": "value",
+          "EEEEEEEE": "target_cycle"
+        },
+        "task_call": "check_at(sig_id, value, target_cycle, vec_num, pc, fc, tt)"
+      },
+      "06": {
+        "name": "check_not_yet",
+        "fields": {
+          "PPPPPPPP[7:0]": "sig_id",
+          "DDDDDDDD": "value",
+          "EEEEEEEE": "until_cycle"
+        },
+        "task_call": "check_not_yet(sig_id, value, until_cycle, vec_num, pc, fc, tt)"
+      },
+      "07": {
+        "name": "expect_handshake",
+        "fields": {
+          "PPPPPPPP[7:0]": "valid_id",
+          "PPPPPPPP[15:8]": "ready_id",
+          "EEEEEEEE": "timeout"
+        },
+        "task_call": "expect_handshake(valid_id, ready_id, timeout, vec_num, pc, fc, tt)"
+      },
+      "08": {
+        "name": "check_order",
+        "fields": {
+          "PPPPPPPP[7:0]": "first_id",
+          "PPPPPPPP[15:8]": "second_id",
+          "EEEEEEEE": "min_gap"
+        },
+        "task_call": "check_order(first_id, second_id, min_gap, vec_num, pc, fc, tt)"
+      },
+      "0A": {
+        "name": "csr_read",
+        "fields": {
+          "PPPPPPPP[7:0]": "csr_addr",
+          "DDDDDDDD": "expected",
+          "EEEEEEEE": "timeout"
+        },
+        "task_call": "csr_read(addr, expected, timeout, vec_num, pc, fc, tt)"
+      },
+      "0B": {
+        "name": "csr_write",
+        "fields": {
+          "PPPPPPPP[7:0]": "csr_addr",
+          "DDDDDDDD": "data",
+          "EEEEEEEE": "timeout"
+        },
+        "task_call": "csr_write(addr, data, timeout, vec_num, pc, fc, tt)"
+      }
+    }
+  }
+}

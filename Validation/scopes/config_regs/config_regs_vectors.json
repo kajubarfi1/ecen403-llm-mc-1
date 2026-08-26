@@ -1,0 +1,3602 @@
+{
+  "scope": "config_regs",
+  "generator": "vector_gen_agent_llm",
+  "spec_source": "llmmc_microarchitecturespec_filled.json",
+  "generated_at": "2026-03-17T15:17:13.845217",
+  "vector_count": 449,
+  "hex_format": "OO AA WWWWWWWW EEEEEEEE (op addr wdata expected)",
+  "vectors": [
+    {
+      "op": 0,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "RESET",
+      "hex_line": "00 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify CTRL_STATUS reset value 0x00000000",
+      "hex_line": "01 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 9,
+      "comment": "Verify CTRL_CONFIG reset value 0x00000009",
+      "hex_line": "01 04 00000000 00000009"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 656149259,
+      "comment": "Verify TIMING_0 reset value 0x271C0B0B",
+      "hex_line": "01 08 00000000 271C0B0B"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 2149582342,
+      "comment": "Verify TIMING_1 reset value 0x80200606",
+      "hex_line": "01 0C 00000000 80200606"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 134940172,
+      "comment": "Verify TIMING_2 reset value 0x080B060C",
+      "hex_line": "01 10 00000000 080B060C"
+    },
+    {
+      "op": 1,
+      "addr": 20,
+      "wdata": 0,
+      "expected": 1597444,
+      "comment": "Verify TIMING_3 reset value 0x00186004",
+      "hex_line": "01 14 00000000 00186004"
+    },
+    {
+      "op": 1,
+      "addr": 24,
+      "wdata": 0,
+      "expected": 360,
+      "comment": "Verify REFRESH_CONFIG reset value 0x00000168",
+      "hex_line": "01 18 00000000 00000168"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify ERROR_STATUS reset value 0x00000000",
+      "hex_line": "01 1C 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 32,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify BIST_CONFIG reset value 0x00000000",
+      "hex_line": "01 20 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 36,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify BIST_ADDR_START reset value 0x00000000",
+      "hex_line": "01 24 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 40,
+      "wdata": 0,
+      "expected": 536870911,
+      "comment": "Verify BIST_ADDR_END reset value 0x1FFFFFFF",
+      "hex_line": "01 28 00000000 1FFFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 0,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Write 0xFFFFFFFF to RO CTRL_STATUS",
+      "hex_line": "02 00 FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Read CTRL_STATUS - expect unchanged 0x00000000",
+      "hex_line": "01 00 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 4,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Write 0xFFFFFFFF to CTRL_CONFIG",
+      "hex_line": "02 04 FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 31,
+      "comment": "Read CTRL_CONFIG - expect 0x0000001F (RW bits, WO cleared, reserved masked)",
+      "hex_line": "01 04 00000000 0000001F"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Write 0xFFFFFFFF to TIMING_0",
+      "hex_line": "02 08 FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 4294967295,
+      "comment": "Read TIMING_0 - expect 0xFFFFFFFF (all RW)",
+      "hex_line": "01 08 00000000 FFFFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Write 0xFFFFFFFF to TIMING_1",
+      "hex_line": "02 0C FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294967295,
+      "comment": "Read TIMING_1 - expect 0xFFFFFFFF (all RW)",
+      "hex_line": "01 0C 00000000 FFFFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Write 0xFFFFFFFF to TIMING_2",
+      "hex_line": "02 10 FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 4294967295,
+      "comment": "Read TIMING_2 - expect 0xFFFFFFFF (all RW)",
+      "hex_line": "01 10 00000000 FFFFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 20,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Write 0xFFFFFFFF to TIMING_3",
+      "hex_line": "02 14 FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 20,
+      "wdata": 0,
+      "expected": 4294967295,
+      "comment": "Read TIMING_3 - expect 0xFFFFFFFF (all RW)",
+      "hex_line": "01 14 00000000 FFFFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 24,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Write 0xFFFFFFFF to REFRESH_CONFIG",
+      "hex_line": "02 18 FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 24,
+      "wdata": 0,
+      "expected": 511,
+      "comment": "Read REFRESH_CONFIG - expect 0x000001FF (reserved masked)",
+      "hex_line": "01 18 00000000 000001FF"
+    },
+    {
+      "op": 2,
+      "addr": 28,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Write 0xFFFFFFFF to ERROR_STATUS",
+      "hex_line": "02 1C FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Read ERROR_STATUS - RO fields unchanged, RW1C has no effect when not set",
+      "hex_line": "01 1C 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 32,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Write 0xFFFFFFFF to BIST_CONFIG",
+      "hex_line": "02 20 FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 32,
+      "wdata": 0,
+      "expected": 15,
+      "comment": "Read BIST_CONFIG - expect 0x0000000F (reserved masked)",
+      "hex_line": "01 20 00000000 0000000F"
+    },
+    {
+      "op": 2,
+      "addr": 36,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Write 0xFFFFFFFF to BIST_ADDR_START",
+      "hex_line": "02 24 FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 36,
+      "wdata": 0,
+      "expected": 536870911,
+      "comment": "Read BIST_ADDR_START - expect 0x1FFFFFFF (29-bit field)",
+      "hex_line": "01 24 00000000 1FFFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 40,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Write 0xFFFFFFFF to BIST_ADDR_END",
+      "hex_line": "02 28 FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 40,
+      "wdata": 0,
+      "expected": 536870911,
+      "comment": "Read BIST_ADDR_END - expect 0x1FFFFFFF (29-bit field)",
+      "hex_line": "01 28 00000000 1FFFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Write 0x00000000 to RO CTRL_STATUS",
+      "hex_line": "02 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Read CTRL_STATUS - expect unchanged 0x00000000",
+      "hex_line": "01 00 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Write 0x00000000 to CTRL_CONFIG",
+      "hex_line": "02 04 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Read CTRL_CONFIG - expect 0x00000000",
+      "hex_line": "01 04 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Write 0x00000000 to TIMING_0",
+      "hex_line": "02 08 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Read TIMING_0 - expect 0x00000000",
+      "hex_line": "01 08 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Write 0x00000000 to TIMING_1",
+      "hex_line": "02 0C 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Read TIMING_1 - expect 0x00000000",
+      "hex_line": "01 0C 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Write 0x00000000 to TIMING_2",
+      "hex_line": "02 10 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Read TIMING_2 - expect 0x00000000",
+      "hex_line": "01 10 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 20,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Write 0x00000000 to TIMING_3",
+      "hex_line": "02 14 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 20,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Read TIMING_3 - expect 0x00000000",
+      "hex_line": "01 14 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 24,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Write 0x00000000 to REFRESH_CONFIG",
+      "hex_line": "02 18 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 24,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Read REFRESH_CONFIG - expect 0x00000000",
+      "hex_line": "01 18 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Write 0x00000000 to ERROR_STATUS",
+      "hex_line": "02 1C 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Read ERROR_STATUS - expect 0x00000000",
+      "hex_line": "01 1C 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 32,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Write 0x00000000 to BIST_CONFIG",
+      "hex_line": "02 20 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 32,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Read BIST_CONFIG - expect 0x00000000",
+      "hex_line": "01 20 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 36,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Write 0x00000000 to BIST_ADDR_START",
+      "hex_line": "02 24 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 36,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Read BIST_ADDR_START - expect 0x00000000",
+      "hex_line": "01 24 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 40,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Write 0x00000000 to BIST_ADDR_END",
+      "hex_line": "02 28 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 40,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Read BIST_ADDR_END - expect 0x00000000",
+      "hex_line": "01 28 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 1,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 0",
+      "hex_line": "02 08 00000001 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 1,
+      "comment": "Verify TIMING_0 = 0x00000001",
+      "hex_line": "01 08 00000000 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 2,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 1",
+      "hex_line": "02 08 00000002 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 2,
+      "comment": "Verify TIMING_0 = 0x00000002",
+      "hex_line": "01 08 00000000 00000002"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 4,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 2",
+      "hex_line": "02 08 00000004 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 4,
+      "comment": "Verify TIMING_0 = 0x00000004",
+      "hex_line": "01 08 00000000 00000004"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 8,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 3",
+      "hex_line": "02 08 00000008 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 8,
+      "comment": "Verify TIMING_0 = 0x00000008",
+      "hex_line": "01 08 00000000 00000008"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 16,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 4",
+      "hex_line": "02 08 00000010 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 16,
+      "comment": "Verify TIMING_0 = 0x00000010",
+      "hex_line": "01 08 00000000 00000010"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 32,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 5",
+      "hex_line": "02 08 00000020 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 32,
+      "comment": "Verify TIMING_0 = 0x00000020",
+      "hex_line": "01 08 00000000 00000020"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 64,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 6",
+      "hex_line": "02 08 00000040 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 64,
+      "comment": "Verify TIMING_0 = 0x00000040",
+      "hex_line": "01 08 00000000 00000040"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 128,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 7",
+      "hex_line": "02 08 00000080 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 128,
+      "comment": "Verify TIMING_0 = 0x00000080",
+      "hex_line": "01 08 00000000 00000080"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 256,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 8",
+      "hex_line": "02 08 00000100 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 256,
+      "comment": "Verify TIMING_0 = 0x00000100",
+      "hex_line": "01 08 00000000 00000100"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 512,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 9",
+      "hex_line": "02 08 00000200 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 512,
+      "comment": "Verify TIMING_0 = 0x00000200",
+      "hex_line": "01 08 00000000 00000200"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 1024,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 10",
+      "hex_line": "02 08 00000400 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 1024,
+      "comment": "Verify TIMING_0 = 0x00000400",
+      "hex_line": "01 08 00000000 00000400"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 2048,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 11",
+      "hex_line": "02 08 00000800 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 2048,
+      "comment": "Verify TIMING_0 = 0x00000800",
+      "hex_line": "01 08 00000000 00000800"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 4096,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 12",
+      "hex_line": "02 08 00001000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 4096,
+      "comment": "Verify TIMING_0 = 0x00001000",
+      "hex_line": "01 08 00000000 00001000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 8192,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 13",
+      "hex_line": "02 08 00002000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 8192,
+      "comment": "Verify TIMING_0 = 0x00002000",
+      "hex_line": "01 08 00000000 00002000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 16384,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 14",
+      "hex_line": "02 08 00004000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 16384,
+      "comment": "Verify TIMING_0 = 0x00004000",
+      "hex_line": "01 08 00000000 00004000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 32768,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 15",
+      "hex_line": "02 08 00008000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 32768,
+      "comment": "Verify TIMING_0 = 0x00008000",
+      "hex_line": "01 08 00000000 00008000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 65536,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 16",
+      "hex_line": "02 08 00010000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 65536,
+      "comment": "Verify TIMING_0 = 0x00010000",
+      "hex_line": "01 08 00000000 00010000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 131072,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 17",
+      "hex_line": "02 08 00020000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 131072,
+      "comment": "Verify TIMING_0 = 0x00020000",
+      "hex_line": "01 08 00000000 00020000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 262144,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 18",
+      "hex_line": "02 08 00040000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 262144,
+      "comment": "Verify TIMING_0 = 0x00040000",
+      "hex_line": "01 08 00000000 00040000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 524288,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 19",
+      "hex_line": "02 08 00080000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 524288,
+      "comment": "Verify TIMING_0 = 0x00080000",
+      "hex_line": "01 08 00000000 00080000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 1048576,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 20",
+      "hex_line": "02 08 00100000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 1048576,
+      "comment": "Verify TIMING_0 = 0x00100000",
+      "hex_line": "01 08 00000000 00100000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 2097152,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 21",
+      "hex_line": "02 08 00200000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 2097152,
+      "comment": "Verify TIMING_0 = 0x00200000",
+      "hex_line": "01 08 00000000 00200000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 4194304,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 22",
+      "hex_line": "02 08 00400000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 4194304,
+      "comment": "Verify TIMING_0 = 0x00400000",
+      "hex_line": "01 08 00000000 00400000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 8388608,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 23",
+      "hex_line": "02 08 00800000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 8388608,
+      "comment": "Verify TIMING_0 = 0x00800000",
+      "hex_line": "01 08 00000000 00800000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 16777216,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 24",
+      "hex_line": "02 08 01000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 16777216,
+      "comment": "Verify TIMING_0 = 0x01000000",
+      "hex_line": "01 08 00000000 01000000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 33554432,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 25",
+      "hex_line": "02 08 02000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 33554432,
+      "comment": "Verify TIMING_0 = 0x02000000",
+      "hex_line": "01 08 00000000 02000000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 67108864,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 26",
+      "hex_line": "02 08 04000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 67108864,
+      "comment": "Verify TIMING_0 = 0x04000000",
+      "hex_line": "01 08 00000000 04000000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 134217728,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 27",
+      "hex_line": "02 08 08000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 134217728,
+      "comment": "Verify TIMING_0 = 0x08000000",
+      "hex_line": "01 08 00000000 08000000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 268435456,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 28",
+      "hex_line": "02 08 10000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 268435456,
+      "comment": "Verify TIMING_0 = 0x10000000",
+      "hex_line": "01 08 00000000 10000000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 536870912,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 29",
+      "hex_line": "02 08 20000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 536870912,
+      "comment": "Verify TIMING_0 = 0x20000000",
+      "hex_line": "01 08 00000000 20000000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 1073741824,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 30",
+      "hex_line": "02 08 40000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 1073741824,
+      "comment": "Verify TIMING_0 = 0x40000000",
+      "hex_line": "01 08 00000000 40000000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 2147483648,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_0 bit 31",
+      "hex_line": "02 08 80000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 2147483648,
+      "comment": "Verify TIMING_0 = 0x80000000",
+      "hex_line": "01 08 00000000 80000000"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294967294,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 0",
+      "hex_line": "02 0C FFFFFFFE 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294967294,
+      "comment": "Verify TIMING_1 = 0xFFFFFFFE",
+      "hex_line": "01 0C 00000000 FFFFFFFE"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294967293,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 1",
+      "hex_line": "02 0C FFFFFFFD 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294967293,
+      "comment": "Verify TIMING_1 = 0xFFFFFFFD",
+      "hex_line": "01 0C 00000000 FFFFFFFD"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294967291,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 2",
+      "hex_line": "02 0C FFFFFFFB 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294967291,
+      "comment": "Verify TIMING_1 = 0xFFFFFFFB",
+      "hex_line": "01 0C 00000000 FFFFFFFB"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294967287,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 3",
+      "hex_line": "02 0C FFFFFFF7 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294967287,
+      "comment": "Verify TIMING_1 = 0xFFFFFFF7",
+      "hex_line": "01 0C 00000000 FFFFFFF7"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294967279,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 4",
+      "hex_line": "02 0C FFFFFFEF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294967279,
+      "comment": "Verify TIMING_1 = 0xFFFFFFEF",
+      "hex_line": "01 0C 00000000 FFFFFFEF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294967263,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 5",
+      "hex_line": "02 0C FFFFFFDF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294967263,
+      "comment": "Verify TIMING_1 = 0xFFFFFFDF",
+      "hex_line": "01 0C 00000000 FFFFFFDF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294967231,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 6",
+      "hex_line": "02 0C FFFFFFBF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294967231,
+      "comment": "Verify TIMING_1 = 0xFFFFFFBF",
+      "hex_line": "01 0C 00000000 FFFFFFBF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294967167,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 7",
+      "hex_line": "02 0C FFFFFF7F 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294967167,
+      "comment": "Verify TIMING_1 = 0xFFFFFF7F",
+      "hex_line": "01 0C 00000000 FFFFFF7F"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294967039,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 8",
+      "hex_line": "02 0C FFFFFEFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294967039,
+      "comment": "Verify TIMING_1 = 0xFFFFFEFF",
+      "hex_line": "01 0C 00000000 FFFFFEFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294966783,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 9",
+      "hex_line": "02 0C FFFFFDFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294966783,
+      "comment": "Verify TIMING_1 = 0xFFFFFDFF",
+      "hex_line": "01 0C 00000000 FFFFFDFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294966271,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 10",
+      "hex_line": "02 0C FFFFFBFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294966271,
+      "comment": "Verify TIMING_1 = 0xFFFFFBFF",
+      "hex_line": "01 0C 00000000 FFFFFBFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294965247,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 11",
+      "hex_line": "02 0C FFFFF7FF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294965247,
+      "comment": "Verify TIMING_1 = 0xFFFFF7FF",
+      "hex_line": "01 0C 00000000 FFFFF7FF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294963199,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 12",
+      "hex_line": "02 0C FFFFEFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294963199,
+      "comment": "Verify TIMING_1 = 0xFFFFEFFF",
+      "hex_line": "01 0C 00000000 FFFFEFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294959103,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 13",
+      "hex_line": "02 0C FFFFDFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294959103,
+      "comment": "Verify TIMING_1 = 0xFFFFDFFF",
+      "hex_line": "01 0C 00000000 FFFFDFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294950911,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 14",
+      "hex_line": "02 0C FFFFBFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294950911,
+      "comment": "Verify TIMING_1 = 0xFFFFBFFF",
+      "hex_line": "01 0C 00000000 FFFFBFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294934527,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 15",
+      "hex_line": "02 0C FFFF7FFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294934527,
+      "comment": "Verify TIMING_1 = 0xFFFF7FFF",
+      "hex_line": "01 0C 00000000 FFFF7FFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294901759,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 16",
+      "hex_line": "02 0C FFFEFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294901759,
+      "comment": "Verify TIMING_1 = 0xFFFEFFFF",
+      "hex_line": "01 0C 00000000 FFFEFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294836223,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 17",
+      "hex_line": "02 0C FFFDFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294836223,
+      "comment": "Verify TIMING_1 = 0xFFFDFFFF",
+      "hex_line": "01 0C 00000000 FFFDFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294705151,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 18",
+      "hex_line": "02 0C FFFBFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294705151,
+      "comment": "Verify TIMING_1 = 0xFFFBFFFF",
+      "hex_line": "01 0C 00000000 FFFBFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4294443007,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 19",
+      "hex_line": "02 0C FFF7FFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4294443007,
+      "comment": "Verify TIMING_1 = 0xFFF7FFFF",
+      "hex_line": "01 0C 00000000 FFF7FFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4293918719,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 20",
+      "hex_line": "02 0C FFEFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4293918719,
+      "comment": "Verify TIMING_1 = 0xFFEFFFFF",
+      "hex_line": "01 0C 00000000 FFEFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4292870143,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 21",
+      "hex_line": "02 0C FFDFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4292870143,
+      "comment": "Verify TIMING_1 = 0xFFDFFFFF",
+      "hex_line": "01 0C 00000000 FFDFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4290772991,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 22",
+      "hex_line": "02 0C FFBFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4290772991,
+      "comment": "Verify TIMING_1 = 0xFFBFFFFF",
+      "hex_line": "01 0C 00000000 FFBFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4286578687,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 23",
+      "hex_line": "02 0C FF7FFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4286578687,
+      "comment": "Verify TIMING_1 = 0xFF7FFFFF",
+      "hex_line": "01 0C 00000000 FF7FFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4278190079,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 24",
+      "hex_line": "02 0C FEFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4278190079,
+      "comment": "Verify TIMING_1 = 0xFEFFFFFF",
+      "hex_line": "01 0C 00000000 FEFFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4261412863,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 25",
+      "hex_line": "02 0C FDFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4261412863,
+      "comment": "Verify TIMING_1 = 0xFDFFFFFF",
+      "hex_line": "01 0C 00000000 FDFFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4227858431,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 26",
+      "hex_line": "02 0C FBFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4227858431,
+      "comment": "Verify TIMING_1 = 0xFBFFFFFF",
+      "hex_line": "01 0C 00000000 FBFFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4160749567,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 27",
+      "hex_line": "02 0C F7FFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4160749567,
+      "comment": "Verify TIMING_1 = 0xF7FFFFFF",
+      "hex_line": "01 0C 00000000 F7FFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 4026531839,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 28",
+      "hex_line": "02 0C EFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 4026531839,
+      "comment": "Verify TIMING_1 = 0xEFFFFFFF",
+      "hex_line": "01 0C 00000000 EFFFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 3758096383,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 29",
+      "hex_line": "02 0C DFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 3758096383,
+      "comment": "Verify TIMING_1 = 0xDFFFFFFF",
+      "hex_line": "01 0C 00000000 DFFFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 3221225471,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 30",
+      "hex_line": "02 0C BFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 3221225471,
+      "comment": "Verify TIMING_1 = 0xBFFFFFFF",
+      "hex_line": "01 0C 00000000 BFFFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 2147483647,
+      "expected": 0,
+      "comment": "Walking-zeros TIMING_1 bit 31",
+      "hex_line": "02 0C 7FFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 2147483647,
+      "comment": "Verify TIMING_1 = 0x7FFFFFFF",
+      "hex_line": "01 0C 00000000 7FFFFFFF"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 65536,
+      "expected": 0,
+      "comment": "Inject ecc_ue_flag to test RW1C",
+      "hex_line": "03 00 00010000 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 65536,
+      "comment": "Verify ERROR_STATUS has ecc_ue_flag set (bit 16) = 0x00010000",
+      "hex_line": "01 1C 00000000 00010000"
+    },
+    {
+      "op": 2,
+      "addr": 28,
+      "wdata": 65536,
+      "expected": 0,
+      "comment": "Write 1 to bit 16 to clear ecc_ue_flag",
+      "hex_line": "02 1C 00010000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify ecc_ue_flag cleared, expect 0x00000000",
+      "hex_line": "01 1C 00000000 00000000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 131072,
+      "expected": 0,
+      "comment": "Inject ref_starve_flag to test RW1C",
+      "hex_line": "03 00 00020000 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 131072,
+      "comment": "Verify ERROR_STATUS has ref_starve_flag set (bit 17) = 0x00020000",
+      "hex_line": "01 1C 00000000 00020000"
+    },
+    {
+      "op": 2,
+      "addr": 28,
+      "wdata": 131072,
+      "expected": 0,
+      "comment": "Write 1 to bit 17 to clear ref_starve_flag",
+      "hex_line": "02 1C 00020000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify ref_starve_flag cleared, expect 0x00000000",
+      "hex_line": "01 1C 00000000 00000000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 262144,
+      "expected": 0,
+      "comment": "Inject init_fail_flag to test RW1C",
+      "hex_line": "03 00 00040000 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 262144,
+      "comment": "Verify ERROR_STATUS has init_fail_flag set (bit 18) = 0x00040000",
+      "hex_line": "01 1C 00000000 00040000"
+    },
+    {
+      "op": 2,
+      "addr": 28,
+      "wdata": 262144,
+      "expected": 0,
+      "comment": "Write 1 to bit 18 to clear init_fail_flag",
+      "hex_line": "02 1C 00040000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify init_fail_flag cleared, expect 0x00000000",
+      "hex_line": "01 1C 00000000 00000000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 65536,
+      "expected": 0,
+      "comment": "Inject all three RW1C flags",
+      "hex_line": "03 00 00010000 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 196608,
+      "expected": 0,
+      "comment": "Inject ref_starve_flag",
+      "hex_line": "03 00 00030000 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 458752,
+      "expected": 0,
+      "comment": "Inject init_fail_flag",
+      "hex_line": "03 00 00070000 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 458752,
+      "comment": "Verify all three flags set = 0x00070000",
+      "hex_line": "01 1C 00000000 00070000"
+    },
+    {
+      "op": 2,
+      "addr": 28,
+      "wdata": 65536,
+      "expected": 0,
+      "comment": "Clear only ecc_ue_flag (bit 16)",
+      "hex_line": "02 1C 00010000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 393216,
+      "comment": "Verify only ref_starve_flag and init_fail_flag remain = 0x00060000",
+      "hex_line": "01 1C 00000000 00060000"
+    },
+    {
+      "op": 2,
+      "addr": 28,
+      "wdata": 196608,
+      "expected": 0,
+      "comment": "Clear both remaining flags (bits 17,18)",
+      "hex_line": "02 1C 00030000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 262144,
+      "comment": "Verify all flags cleared = 0x00000000",
+      "hex_line": "01 1C 00000000 00040000"
+    },
+    {
+      "op": 0,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "RESET",
+      "hex_line": "00 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 9,
+      "comment": "Verify CTRL_CONFIG at reset = 0x00000009",
+      "hex_line": "01 04 00000000 00000009"
+    },
+    {
+      "op": 2,
+      "addr": 4,
+      "wdata": 32,
+      "expected": 0,
+      "comment": "Write bist_start (bit 5) WO field",
+      "hex_line": "02 04 00000020 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify bist_start reads back as 0 (WO self-clear), expect 0x00000000",
+      "hex_line": "01 04 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 4,
+      "wdata": 64,
+      "expected": 0,
+      "comment": "Write force_refresh (bit 6) WO field",
+      "hex_line": "02 04 00000040 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify force_refresh reads back as 0 (WO self-clear), expect 0x00000000",
+      "hex_line": "01 04 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 4,
+      "wdata": 128,
+      "expected": 0,
+      "comment": "Write force_self_ref (bit 7) WO field",
+      "hex_line": "02 04 00000080 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify force_self_ref reads back as 0 (WO self-clear), expect 0x00000000",
+      "hex_line": "01 04 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 4,
+      "wdata": 224,
+      "expected": 0,
+      "comment": "Write all three WO fields at once (bits 5,6,7)",
+      "hex_line": "02 04 000000E0 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify all WO fields read back as 0, expect 0x00000000",
+      "hex_line": "01 04 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 4,
+      "wdata": 255,
+      "expected": 0,
+      "comment": "Write RW bits (0-4) and WO bits (5-7) together",
+      "hex_line": "02 04 000000FF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 31,
+      "comment": "Verify RW bits retained, WO cleared = 0x0000001F",
+      "hex_line": "01 04 00000000 0000001F"
+    },
+    {
+      "op": 2,
+      "addr": 4,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Write 0xFFFFFFFF to CTRL_CONFIG - test reserved masking",
+      "hex_line": "02 04 FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 31,
+      "comment": "Verify reserved bits masked, WO cleared = 0x0000001F",
+      "hex_line": "01 04 00000000 0000001F"
+    },
+    {
+      "op": 2,
+      "addr": 24,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Write 0xFFFFFFFF to REFRESH_CONFIG - test reserved masking",
+      "hex_line": "02 18 FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 24,
+      "wdata": 0,
+      "expected": 511,
+      "comment": "Verify reserved bits 31:9 masked = 0x000001FF",
+      "hex_line": "01 18 00000000 000001FF"
+    },
+    {
+      "op": 2,
+      "addr": 32,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Write 0xFFFFFFFF to BIST_CONFIG - test reserved masking",
+      "hex_line": "02 20 FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 32,
+      "wdata": 0,
+      "expected": 15,
+      "comment": "Verify reserved bits 31:4 masked = 0x0000000F",
+      "hex_line": "01 20 00000000 0000000F"
+    },
+    {
+      "op": 2,
+      "addr": 36,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Write 0xFFFFFFFF to BIST_ADDR_START - test reserved masking",
+      "hex_line": "02 24 FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 36,
+      "wdata": 0,
+      "expected": 536870911,
+      "comment": "Verify reserved bits 31:29 masked = 0x1FFFFFFF",
+      "hex_line": "01 24 00000000 1FFFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 40,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Write 0xFFFFFFFF to BIST_ADDR_END - test reserved masking",
+      "hex_line": "02 28 FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 40,
+      "wdata": 0,
+      "expected": 536870911,
+      "comment": "Verify reserved bits 31:29 masked = 0x1FFFFFFF",
+      "hex_line": "01 28 00000000 1FFFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 20,
+      "wdata": 16777215,
+      "expected": 0,
+      "comment": "Write max value to tREFI_nCK (24-bit field, bits 31:8)",
+      "hex_line": "02 14 00FFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 20,
+      "wdata": 0,
+      "expected": 16777215,
+      "comment": "Verify tREFI_nCK = 0x00FFFF00 (max 24-bit in upper field)",
+      "hex_line": "01 14 00000000 00FFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 20,
+      "wdata": 4294967040,
+      "expected": 0,
+      "comment": "Write 0xFFFFFF00 - max tREFI_nCK shifted to bits 31:8",
+      "hex_line": "02 14 FFFFFF00 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 20,
+      "wdata": 0,
+      "expected": 4294967040,
+      "comment": "Verify TIMING_3 = 0xFFFFFF00",
+      "hex_line": "01 14 00000000 FFFFFF00"
+    },
+    {
+      "op": 2,
+      "addr": 36,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Set BIST_ADDR_START to minimum",
+      "hex_line": "02 24 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 36,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify BIST_ADDR_START = 0x00000000",
+      "hex_line": "01 24 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 36,
+      "wdata": 536870911,
+      "expected": 0,
+      "comment": "Set BIST_ADDR_START to max (29-bit)",
+      "hex_line": "02 24 1FFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 36,
+      "wdata": 0,
+      "expected": 536870911,
+      "comment": "Verify BIST_ADDR_START = 0x1FFFFFFF",
+      "hex_line": "01 24 00000000 1FFFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 40,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Set BIST_ADDR_END to minimum",
+      "hex_line": "02 28 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 40,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify BIST_ADDR_END = 0x00000000",
+      "hex_line": "01 28 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 40,
+      "wdata": 536870911,
+      "expected": 0,
+      "comment": "Set BIST_ADDR_END to max (29-bit)",
+      "hex_line": "02 28 1FFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 40,
+      "wdata": 0,
+      "expected": 536870911,
+      "comment": "Verify BIST_ADDR_END = 0x1FFFFFFF",
+      "hex_line": "01 28 00000000 1FFFFFFF"
+    },
+    {
+      "op": 1,
+      "addr": 44,
+      "wdata": 0,
+      "expected": 3735928559,
+      "comment": "Read unmapped address 0x2C - expect 0xDEADBEEF",
+      "hex_line": "01 2C 00000000 DEADBEEF"
+    },
+    {
+      "op": 1,
+      "addr": 48,
+      "wdata": 0,
+      "expected": 3735928559,
+      "comment": "Read unmapped address 0x30 - expect 0xDEADBEEF",
+      "hex_line": "01 30 00000000 DEADBEEF"
+    },
+    {
+      "op": 1,
+      "addr": 64,
+      "wdata": 0,
+      "expected": 3735928559,
+      "comment": "Read unmapped address 0x40 - expect 0xDEADBEEF",
+      "hex_line": "01 40 00000000 DEADBEEF"
+    },
+    {
+      "op": 1,
+      "addr": 128,
+      "wdata": 0,
+      "expected": 3735928559,
+      "comment": "Read unmapped address 0x80 - expect 0xDEADBEEF",
+      "hex_line": "01 80 00000000 DEADBEEF"
+    },
+    {
+      "op": 1,
+      "addr": 255,
+      "wdata": 0,
+      "expected": 3735928559,
+      "comment": "Read unmapped address 0xFF - expect 0xDEADBEEF",
+      "hex_line": "01 FF 00000000 DEADBEEF"
+    },
+    {
+      "op": 1,
+      "addr": 52,
+      "wdata": 0,
+      "expected": 3735928559,
+      "comment": "Read unmapped address 0x34 - expect 0xDEADBEEF",
+      "hex_line": "01 34 00000000 DEADBEEF"
+    },
+    {
+      "op": 1,
+      "addr": 56,
+      "wdata": 0,
+      "expected": 3735928559,
+      "comment": "Read unmapped address 0x38 - expect 0xDEADBEEF",
+      "hex_line": "01 38 00000000 DEADBEEF"
+    },
+    {
+      "op": 1,
+      "addr": 60,
+      "wdata": 0,
+      "expected": 3735928559,
+      "comment": "Read unmapped address 0x3C - expect 0xDEADBEEF",
+      "hex_line": "01 3C 00000000 DEADBEEF"
+    },
+    {
+      "op": 0,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "RESET",
+      "hex_line": "00 00 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 305419896,
+      "expected": 0,
+      "comment": "Sequential test - write 0x12345678 to TIMING_0",
+      "hex_line": "02 08 12345678 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 305419896,
+      "comment": "Sequential test - read TIMING_0, expect 0x12345678",
+      "hex_line": "01 08 00000000 12345678"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 2271560481,
+      "expected": 0,
+      "comment": "Sequential test - write 0x87654321 to TIMING_0",
+      "hex_line": "02 08 87654321 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 2271560481,
+      "comment": "Sequential test - read TIMING_0, expect 0x87654321",
+      "hex_line": "01 08 00000000 87654321"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 2863311530,
+      "expected": 0,
+      "comment": "Sequential test - write 0xAAAAAAAA to TIMING_0",
+      "hex_line": "02 08 AAAAAAAA 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 2863311530,
+      "comment": "Sequential test - read TIMING_0, expect 0xAAAAAAAA",
+      "hex_line": "01 08 00000000 AAAAAAAA"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 1431655765,
+      "expected": 0,
+      "comment": "Sequential test - write 0x55555555 to TIMING_0",
+      "hex_line": "02 08 55555555 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 1431655765,
+      "comment": "Sequential test - read TIMING_0, expect 0x55555555",
+      "hex_line": "01 08 00000000 55555555"
+    },
+    {
+      "op": 0,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "RESET",
+      "hex_line": "00 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 656149259,
+      "comment": "Cross-register test - read TIMING_0 reset value 0x271C0B0B",
+      "hex_line": "01 08 00000000 271C0B0B"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 2149582342,
+      "comment": "Cross-register test - read TIMING_1 reset value 0x80200606",
+      "hex_line": "01 0C 00000000 80200606"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Cross-register test - write 0xFFFFFFFF to TIMING_0",
+      "hex_line": "02 08 FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 4294967295,
+      "comment": "Verify TIMING_0 = 0xFFFFFFFF",
+      "hex_line": "01 08 00000000 FFFFFFFF"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 2149582342,
+      "comment": "Verify TIMING_1 unchanged at 0x80200606",
+      "hex_line": "01 0C 00000000 80200606"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Cross-register test - write 0x00000000 to TIMING_1",
+      "hex_line": "02 0C 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify TIMING_1 = 0x00000000",
+      "hex_line": "01 0C 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 4294967295,
+      "comment": "Verify TIMING_0 unchanged at 0xFFFFFFFF",
+      "hex_line": "01 08 00000000 FFFFFFFF"
+    },
+    {
+      "op": 0,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "RESET",
+      "hex_line": "00 00 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 4,
+      "wdata": 1,
+      "expected": 0,
+      "comment": "Test sched_policy field in CTRL_CONFIG",
+      "hex_line": "02 04 00000001 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 1,
+      "comment": "Verify sched_policy=1, expect 0x00000001",
+      "hex_line": "01 04 00000000 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Test sched_policy=0",
+      "hex_line": "02 04 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify sched_policy=0, expect 0x00000000",
+      "hex_line": "01 04 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 4,
+      "wdata": 2,
+      "expected": 0,
+      "comment": "Test row_policy field in CTRL_CONFIG",
+      "hex_line": "02 04 00000002 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 2,
+      "comment": "Verify row_policy=1, expect 0x00000002",
+      "hex_line": "01 04 00000000 00000002"
+    },
+    {
+      "op": 2,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Test row_policy=0",
+      "hex_line": "02 04 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify row_policy=0, expect 0x00000000",
+      "hex_line": "01 04 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 4,
+      "wdata": 12,
+      "expected": 0,
+      "comment": "Test self_ref_mode max (bits 3:2 = 11)",
+      "hex_line": "02 04 0000000C 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 12,
+      "comment": "Verify self_ref_mode=3, expect 0x0000000C",
+      "hex_line": "01 04 00000000 0000000C"
+    },
+    {
+      "op": 2,
+      "addr": 4,
+      "wdata": 4,
+      "expected": 0,
+      "comment": "Test self_ref_mode=1",
+      "hex_line": "02 04 00000004 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 4,
+      "comment": "Verify self_ref_mode=1, expect 0x00000004",
+      "hex_line": "01 04 00000000 00000004"
+    },
+    {
+      "op": 2,
+      "addr": 4,
+      "wdata": 16,
+      "expected": 0,
+      "comment": "Test ecc_enable=1",
+      "hex_line": "02 04 00000010 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 16,
+      "comment": "Verify ecc_enable=1, expect 0x00000010",
+      "hex_line": "01 04 00000000 00000010"
+    },
+    {
+      "op": 2,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Test ecc_enable=0",
+      "hex_line": "02 04 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify ecc_enable=0, expect 0x00000000",
+      "hex_line": "01 04 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 32,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Test bist_pattern=0 (walking_ones)",
+      "hex_line": "02 20 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 32,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify bist_pattern=0, expect 0x00000000",
+      "hex_line": "01 20 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 32,
+      "wdata": 1,
+      "expected": 0,
+      "comment": "Test bist_pattern=1 (walking_zeros)",
+      "hex_line": "02 20 00000001 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 32,
+      "wdata": 0,
+      "expected": 1,
+      "comment": "Verify bist_pattern=1, expect 0x00000001",
+      "hex_line": "01 20 00000000 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 32,
+      "wdata": 2,
+      "expected": 0,
+      "comment": "Test bist_pattern=2 (checkerboard)",
+      "hex_line": "02 20 00000002 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 32,
+      "wdata": 0,
+      "expected": 2,
+      "comment": "Verify bist_pattern=2, expect 0x00000002",
+      "hex_line": "01 20 00000000 00000002"
+    },
+    {
+      "op": 2,
+      "addr": 32,
+      "wdata": 3,
+      "expected": 0,
+      "comment": "Test bist_pattern=3 (lfsr)",
+      "hex_line": "02 20 00000003 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 32,
+      "wdata": 0,
+      "expected": 3,
+      "comment": "Verify bist_pattern=3, expect 0x00000003",
+      "hex_line": "01 20 00000000 00000003"
+    },
+    {
+      "op": 2,
+      "addr": 32,
+      "wdata": 4,
+      "expected": 0,
+      "comment": "Test bist_pattern=4 (all)",
+      "hex_line": "02 20 00000004 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 32,
+      "wdata": 0,
+      "expected": 4,
+      "comment": "Verify bist_pattern=4, expect 0x00000004",
+      "hex_line": "01 20 00000000 00000004"
+    },
+    {
+      "op": 2,
+      "addr": 32,
+      "wdata": 8,
+      "expected": 0,
+      "comment": "Test bist_addr_mode=1 (random_lfsr)",
+      "hex_line": "02 20 00000008 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 32,
+      "wdata": 0,
+      "expected": 8,
+      "comment": "Verify bist_addr_mode=1, expect 0x00000008",
+      "hex_line": "01 20 00000000 00000008"
+    },
+    {
+      "op": 2,
+      "addr": 32,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Test bist_addr_mode=0 (sequential)",
+      "hex_line": "02 20 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 32,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify bist_addr_mode=0, expect 0x00000000",
+      "hex_line": "01 20 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 24,
+      "wdata": 15,
+      "expected": 0,
+      "comment": "Test max_postpone=max (bits 3:0 = 0xF)",
+      "hex_line": "02 18 0000000F 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 24,
+      "wdata": 0,
+      "expected": 15,
+      "comment": "Verify max_postpone=15, expect 0x0000000F",
+      "hex_line": "01 18 00000000 0000000F"
+    },
+    {
+      "op": 2,
+      "addr": 24,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Test max_postpone=0",
+      "hex_line": "02 18 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 24,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify max_postpone=0, expect 0x00000000",
+      "hex_line": "01 18 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 24,
+      "wdata": 240,
+      "expected": 0,
+      "comment": "Test urgent_threshold=max (bits 7:4 = 0xF)",
+      "hex_line": "02 18 000000F0 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 24,
+      "wdata": 0,
+      "expected": 240,
+      "comment": "Verify urgent_threshold=15, expect 0x000000F0",
+      "hex_line": "01 18 00000000 000000F0"
+    },
+    {
+      "op": 2,
+      "addr": 24,
+      "wdata": 256,
+      "expected": 0,
+      "comment": "Test ref_priority=1",
+      "hex_line": "02 18 00000100 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 24,
+      "wdata": 0,
+      "expected": 256,
+      "comment": "Verify ref_priority=1, expect 0x00000100",
+      "hex_line": "01 18 00000000 00000100"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 1,
+      "expected": 0,
+      "comment": "Inject init_done status",
+      "hex_line": "03 00 00000001 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 1,
+      "comment": "Verify init_done=1, expect 0x00000001",
+      "hex_line": "01 00 00000000 00000001"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 3,
+      "expected": 0,
+      "comment": "Inject cal_done status",
+      "hex_line": "03 00 00000003 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 3,
+      "comment": "Verify cal_done=1, expect 0x00000003",
+      "hex_line": "01 00 00000000 00000003"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 7,
+      "expected": 0,
+      "comment": "Inject cal_fail status",
+      "hex_line": "03 00 00000007 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 7,
+      "comment": "Verify cal_fail=1, expect 0x00000007",
+      "hex_line": "01 00 00000000 00000007"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 15,
+      "expected": 0,
+      "comment": "Inject bist_done status",
+      "hex_line": "03 00 0000000F 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 15,
+      "comment": "Verify bist_done=1, expect 0x0000000F",
+      "hex_line": "01 00 00000000 0000000F"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 31,
+      "expected": 0,
+      "comment": "Inject bist_fail status",
+      "hex_line": "03 00 0000001F 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 31,
+      "comment": "Verify bist_fail=1, expect 0x0000001F",
+      "hex_line": "01 00 00000000 0000001F"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 255,
+      "expected": 0,
+      "comment": "Inject ref_pending_cnt=7",
+      "hex_line": "03 00 000000FF 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 255,
+      "comment": "Verify ref_pending_cnt=7, expect 0x000000FF",
+      "hex_line": "01 00 00000000 000000FF"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 511,
+      "expected": 0,
+      "comment": "Inject self_refresh_active",
+      "hex_line": "03 00 000001FF 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 511,
+      "comment": "Verify self_refresh_active=1, expect 0x000001FF",
+      "hex_line": "01 00 00000000 000001FF"
+    },
+    {
+      "op": 0,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "RESET",
+      "hex_line": "00 00 00000000 00000000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Inject max ecc_ce_count",
+      "hex_line": "03 00 00000000 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify ecc_ce_count=65535, expect 0x0000FFFF",
+      "hex_line": "01 1C 00000000 00000000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Inject max bist_fail_addr (13 bits)",
+      "hex_line": "03 00 00000000 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify bist_fail_addr=8191, expect 0xFFF8FFFF",
+      "hex_line": "01 1C 00000000 00000000"
+    },
+    {
+      "op": 0,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "RESET",
+      "hex_line": "00 00 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 1,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 0",
+      "hex_line": "02 10 00000001 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 1,
+      "comment": "Verify TIMING_2 = 0x00000001",
+      "hex_line": "01 10 00000000 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 2,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 1",
+      "hex_line": "02 10 00000002 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 2,
+      "comment": "Verify TIMING_2 = 0x00000002",
+      "hex_line": "01 10 00000000 00000002"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 4,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 2",
+      "hex_line": "02 10 00000004 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 4,
+      "comment": "Verify TIMING_2 = 0x00000004",
+      "hex_line": "01 10 00000000 00000004"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 8,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 3",
+      "hex_line": "02 10 00000008 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 8,
+      "comment": "Verify TIMING_2 = 0x00000008",
+      "hex_line": "01 10 00000000 00000008"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 16,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 4",
+      "hex_line": "02 10 00000010 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 16,
+      "comment": "Verify TIMING_2 = 0x00000010",
+      "hex_line": "01 10 00000000 00000010"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 32,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 5",
+      "hex_line": "02 10 00000020 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 32,
+      "comment": "Verify TIMING_2 = 0x00000020",
+      "hex_line": "01 10 00000000 00000020"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 64,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 6",
+      "hex_line": "02 10 00000040 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 64,
+      "comment": "Verify TIMING_2 = 0x00000040",
+      "hex_line": "01 10 00000000 00000040"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 128,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 7",
+      "hex_line": "02 10 00000080 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 128,
+      "comment": "Verify TIMING_2 = 0x00000080",
+      "hex_line": "01 10 00000000 00000080"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 256,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 8",
+      "hex_line": "02 10 00000100 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 256,
+      "comment": "Verify TIMING_2 = 0x00000100",
+      "hex_line": "01 10 00000000 00000100"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 512,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 9",
+      "hex_line": "02 10 00000200 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 512,
+      "comment": "Verify TIMING_2 = 0x00000200",
+      "hex_line": "01 10 00000000 00000200"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 1024,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 10",
+      "hex_line": "02 10 00000400 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 1024,
+      "comment": "Verify TIMING_2 = 0x00000400",
+      "hex_line": "01 10 00000000 00000400"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 2048,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 11",
+      "hex_line": "02 10 00000800 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 2048,
+      "comment": "Verify TIMING_2 = 0x00000800",
+      "hex_line": "01 10 00000000 00000800"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 4096,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 12",
+      "hex_line": "02 10 00001000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 4096,
+      "comment": "Verify TIMING_2 = 0x00001000",
+      "hex_line": "01 10 00000000 00001000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 8192,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 13",
+      "hex_line": "02 10 00002000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 8192,
+      "comment": "Verify TIMING_2 = 0x00002000",
+      "hex_line": "01 10 00000000 00002000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 16384,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 14",
+      "hex_line": "02 10 00004000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 16384,
+      "comment": "Verify TIMING_2 = 0x00004000",
+      "hex_line": "01 10 00000000 00004000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 32768,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 15",
+      "hex_line": "02 10 00008000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 32768,
+      "comment": "Verify TIMING_2 = 0x00008000",
+      "hex_line": "01 10 00000000 00008000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 65536,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 16",
+      "hex_line": "02 10 00010000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 65536,
+      "comment": "Verify TIMING_2 = 0x00010000",
+      "hex_line": "01 10 00000000 00010000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 131072,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 17",
+      "hex_line": "02 10 00020000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 131072,
+      "comment": "Verify TIMING_2 = 0x00020000",
+      "hex_line": "01 10 00000000 00020000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 262144,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 18",
+      "hex_line": "02 10 00040000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 262144,
+      "comment": "Verify TIMING_2 = 0x00040000",
+      "hex_line": "01 10 00000000 00040000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 524288,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 19",
+      "hex_line": "02 10 00080000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 524288,
+      "comment": "Verify TIMING_2 = 0x00080000",
+      "hex_line": "01 10 00000000 00080000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 1048576,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 20",
+      "hex_line": "02 10 00100000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 1048576,
+      "comment": "Verify TIMING_2 = 0x00100000",
+      "hex_line": "01 10 00000000 00100000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 2097152,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 21",
+      "hex_line": "02 10 00200000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 2097152,
+      "comment": "Verify TIMING_2 = 0x00200000",
+      "hex_line": "01 10 00000000 00200000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 4194304,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 22",
+      "hex_line": "02 10 00400000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 4194304,
+      "comment": "Verify TIMING_2 = 0x00400000",
+      "hex_line": "01 10 00000000 00400000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 8388608,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 23",
+      "hex_line": "02 10 00800000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 8388608,
+      "comment": "Verify TIMING_2 = 0x00800000",
+      "hex_line": "01 10 00000000 00800000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 16777216,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 24",
+      "hex_line": "02 10 01000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 16777216,
+      "comment": "Verify TIMING_2 = 0x01000000",
+      "hex_line": "01 10 00000000 01000000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 33554432,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 25",
+      "hex_line": "02 10 02000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 33554432,
+      "comment": "Verify TIMING_2 = 0x02000000",
+      "hex_line": "01 10 00000000 02000000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 67108864,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 26",
+      "hex_line": "02 10 04000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 67108864,
+      "comment": "Verify TIMING_2 = 0x04000000",
+      "hex_line": "01 10 00000000 04000000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 134217728,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 27",
+      "hex_line": "02 10 08000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 134217728,
+      "comment": "Verify TIMING_2 = 0x08000000",
+      "hex_line": "01 10 00000000 08000000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 268435456,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 28",
+      "hex_line": "02 10 10000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 268435456,
+      "comment": "Verify TIMING_2 = 0x10000000",
+      "hex_line": "01 10 00000000 10000000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 536870912,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 29",
+      "hex_line": "02 10 20000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 536870912,
+      "comment": "Verify TIMING_2 = 0x20000000",
+      "hex_line": "01 10 00000000 20000000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 1073741824,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 30",
+      "hex_line": "02 10 40000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 1073741824,
+      "comment": "Verify TIMING_2 = 0x40000000",
+      "hex_line": "01 10 00000000 40000000"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 2147483648,
+      "expected": 0,
+      "comment": "Walking-ones TIMING_2 bit 31",
+      "hex_line": "02 10 80000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 2147483648,
+      "comment": "Verify TIMING_2 = 0x80000000",
+      "hex_line": "01 10 00000000 80000000"
+    },
+    {
+      "op": 0,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "RESET",
+      "hex_line": "00 00 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 8,
+      "wdata": 656877351,
+      "expected": 0,
+      "comment": "Restore TIMING_0 to reset value 0x271C0B0B",
+      "hex_line": "02 08 27272727 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 656877351,
+      "comment": "Verify TIMING_0 = 0x271C0B0B",
+      "hex_line": "01 08 00000000 27272727"
+    },
+    {
+      "op": 2,
+      "addr": 12,
+      "wdata": 2149877254,
+      "expected": 0,
+      "comment": "Restore TIMING_1 to reset value 0x80200606",
+      "hex_line": "02 0C 80248606 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 2149877254,
+      "comment": "Verify TIMING_1 = 0x80200606",
+      "hex_line": "01 0C 00000000 80248606"
+    },
+    {
+      "op": 2,
+      "addr": 16,
+      "wdata": 135136780,
+      "expected": 0,
+      "comment": "Restore TIMING_2 to reset value 0x080B060C",
+      "hex_line": "02 10 080E060C 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 135136780,
+      "comment": "Verify TIMING_2 = 0x080B060C",
+      "hex_line": "01 10 00000000 080E060C"
+    },
+    {
+      "op": 2,
+      "addr": 20,
+      "wdata": 1597444,
+      "expected": 0,
+      "comment": "Restore TIMING_3 to reset value 0x00186004",
+      "hex_line": "02 14 00186004 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 20,
+      "wdata": 0,
+      "expected": 1597444,
+      "comment": "Verify TIMING_3 = 0x00186004",
+      "hex_line": "01 14 00000000 00186004"
+    },
+    {
+      "op": 2,
+      "addr": 24,
+      "wdata": 360,
+      "expected": 0,
+      "comment": "Restore REFRESH_CONFIG to reset value 0x00000168",
+      "hex_line": "02 18 00000168 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 24,
+      "wdata": 0,
+      "expected": 360,
+      "comment": "Verify REFRESH_CONFIG = 0x00000168",
+      "hex_line": "01 18 00000000 00000168"
+    },
+    {
+      "op": 2,
+      "addr": 4,
+      "wdata": 9,
+      "expected": 0,
+      "comment": "Restore CTRL_CONFIG to reset value 0x00000009",
+      "hex_line": "02 04 00000009 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 9,
+      "comment": "Verify CTRL_CONFIG = 0x00000009",
+      "hex_line": "01 04 00000000 00000009"
+    },
+    {
+      "op": 2,
+      "addr": 40,
+      "wdata": 536870911,
+      "expected": 0,
+      "comment": "Restore BIST_ADDR_END to reset value 0x1FFFFFFF",
+      "hex_line": "02 28 1FFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 40,
+      "wdata": 0,
+      "expected": 536870911,
+      "comment": "Verify BIST_ADDR_END = 0x1FFFFFFF",
+      "hex_line": "01 28 00000000 1FFFFFFF"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 65536,
+      "expected": 0,
+      "comment": "RW1C selective clear test - set all flags",
+      "hex_line": "03 00 00010000 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 196608,
+      "expected": 0,
+      "comment": "Set ref_starve_flag",
+      "hex_line": "03 00 00030000 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 458752,
+      "expected": 0,
+      "comment": "Set init_fail_flag",
+      "hex_line": "03 00 00070000 00000000"
+    },
+    {
+      "op": 4,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "INJECT_WIDE (no drivable wide fields in block test)",
+      "hex_line": "04 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 458752,
+      "comment": "Verify all flags set = 0x00070000",
+      "hex_line": "01 1C 00000000 00070000"
+    },
+    {
+      "op": 2,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Write 0 - should not clear any RW1C flags",
+      "hex_line": "02 1C 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 458752,
+      "comment": "Verify flags still set = 0x00070000",
+      "hex_line": "01 1C 00000000 00070000"
+    },
+    {
+      "op": 2,
+      "addr": 28,
+      "wdata": 458752,
+      "expected": 0,
+      "comment": "Write 1 to all three flags to clear all",
+      "hex_line": "02 1C 00070000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Verify all flags cleared = 0x00000000",
+      "hex_line": "01 1C 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 20,
+      "wdata": 4294967295,
+      "expected": 0,
+      "comment": "Write max to TIMING_3",
+      "hex_line": "02 14 FFFFFFFF 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 20,
+      "wdata": 0,
+      "expected": 4294967295,
+      "comment": "Verify TIMING_3 = 0xFFFFFFFF",
+      "hex_line": "01 14 00000000 FFFFFFFF"
+    },
+    {
+      "op": 2,
+      "addr": 20,
+      "wdata": 4,
+      "expected": 0,
+      "comment": "Write only tCCD_nCK=4",
+      "hex_line": "02 14 00000004 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 20,
+      "wdata": 0,
+      "expected": 4,
+      "comment": "Verify TIMING_3 = 0x00000004",
+      "hex_line": "01 14 00000000 00000004"
+    },
+    {
+      "op": 2,
+      "addr": 20,
+      "wdata": 4294967040,
+      "expected": 0,
+      "comment": "Write max tREFI_nCK (bits 31:8)",
+      "hex_line": "02 14 FFFFFF00 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 20,
+      "wdata": 0,
+      "expected": 4294967040,
+      "comment": "Verify TIMING_3 = 0xFFFFFF00",
+      "hex_line": "01 14 00000000 FFFFFF00"
+    },
+    {
+      "op": 1,
+      "addr": 100,
+      "wdata": 0,
+      "expected": 3735928559,
+      "comment": "Read unmapped address 0x64 - expect 0xDEADBEEF",
+      "hex_line": "01 64 00000000 DEADBEEF"
+    },
+    {
+      "op": 1,
+      "addr": 200,
+      "wdata": 0,
+      "expected": 3735928559,
+      "comment": "Read unmapped address 0xC8 - expect 0xDEADBEEF",
+      "hex_line": "01 C8 00000000 DEADBEEF"
+    },
+    {
+      "op": 1,
+      "addr": 252,
+      "wdata": 0,
+      "expected": 3735928559,
+      "comment": "Read unmapped address 0xFC - expect 0xDEADBEEF",
+      "hex_line": "01 FC 00000000 DEADBEEF"
+    },
+    {
+      "op": 0,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "RESET",
+      "hex_line": "00 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Final reset verification - CTRL_STATUS",
+      "hex_line": "01 00 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 4,
+      "wdata": 0,
+      "expected": 9,
+      "comment": "Final reset verification - CTRL_CONFIG",
+      "hex_line": "01 04 00000000 00000009"
+    },
+    {
+      "op": 1,
+      "addr": 8,
+      "wdata": 0,
+      "expected": 656149259,
+      "comment": "Final reset verification - TIMING_0",
+      "hex_line": "01 08 00000000 271C0B0B"
+    },
+    {
+      "op": 1,
+      "addr": 12,
+      "wdata": 0,
+      "expected": 2149582342,
+      "comment": "Final reset verification - TIMING_1",
+      "hex_line": "01 0C 00000000 80200606"
+    },
+    {
+      "op": 1,
+      "addr": 16,
+      "wdata": 0,
+      "expected": 134940172,
+      "comment": "Final reset verification - TIMING_2",
+      "hex_line": "01 10 00000000 080B060C"
+    },
+    {
+      "op": 1,
+      "addr": 20,
+      "wdata": 0,
+      "expected": 1597444,
+      "comment": "Final reset verification - TIMING_3",
+      "hex_line": "01 14 00000000 00186004"
+    },
+    {
+      "op": 1,
+      "addr": 24,
+      "wdata": 0,
+      "expected": 360,
+      "comment": "Final reset verification - REFRESH_CONFIG",
+      "hex_line": "01 18 00000000 00000168"
+    },
+    {
+      "op": 1,
+      "addr": 28,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Final reset verification - ERROR_STATUS",
+      "hex_line": "01 1C 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 32,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Final reset verification - BIST_CONFIG",
+      "hex_line": "01 20 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 36,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Final reset verification - BIST_ADDR_START",
+      "hex_line": "01 24 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 40,
+      "wdata": 0,
+      "expected": 536870911,
+      "comment": "Final reset verification - BIST_ADDR_END",
+      "hex_line": "01 28 00000000 1FFFFFFF"
+    }
+  ]
+}

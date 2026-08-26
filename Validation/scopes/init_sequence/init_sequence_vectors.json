@@ -1,0 +1,146 @@
+{
+  "scope": "init_sequence",
+  "generator": "vector_gen_agent_llm",
+  "spec_source": "llmmc_microarchitecturespec_filled.json",
+  "generated_at": "2026-03-17T14:57:22.501946",
+  "vector_count": 17,
+  "hex_format": "OO PPPPPPPP SSSSSSSS VVVVVVVV (op param signal_id value)",
+  "vectors": [
+    {
+      "op": 0,
+      "param": 0,
+      "signal_id": 0,
+      "value": 0,
+      "comment": "RESET",
+      "hex_line": "00 00000000 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "param": 39999,
+      "signal_id": 0,
+      "value": 1,
+      "comment": "Reset must be held low for at least 200us (40000 controller cycles at 5ns)",
+      "hex_line": "01 00009C3F 00000000 00000001"
+    },
+    {
+      "op": 2,
+      "param": 42000,
+      "signal_id": 0,
+      "value": 1,
+      "comment": "Wait for reset release, allow some margin above 40000 minimum",
+      "hex_line": "02 0000A410 00000000 00000001"
+    },
+    {
+      "op": 1,
+      "param": 139999,
+      "signal_id": 1,
+      "value": 1,
+      "comment": "CKE must stay low for 500us (100000 cycles) after reset release at ~40000",
+      "hex_line": "01 000222DF 00000001 00000001"
+    },
+    {
+      "op": 2,
+      "param": 150000,
+      "signal_id": 1,
+      "value": 1,
+      "comment": "Wait for CKE assertion after 500us delay post-reset",
+      "hex_line": "02 000249F0 00000001 00000001"
+    },
+    {
+      "op": 3,
+      "param": 100000,
+      "signal_id": 1,
+      "value": 65537,
+      "comment": "CKE must rise at least 500us (100000 controller cycles) after reset release",
+      "hex_line": "03 000186A0 00000001 00010001"
+    },
+    {
+      "op": 2,
+      "param": 1000,
+      "signal_id": 2,
+      "value": 2,
+      "comment": "Wait for MR2 load command (bank address 2), first in MRS sequence",
+      "hex_line": "02 000003E8 00000002 00000002"
+    },
+    {
+      "op": 3,
+      "param": 34,
+      "signal_id": 65538,
+      "value": 65538,
+      "comment": "MR2 must come at least tXPR (136 DDR cycles = 34 controller cycles) after CKE",
+      "hex_line": "03 00000022 00010002 00010002"
+    },
+    {
+      "op": 2,
+      "param": 100,
+      "signal_id": 2,
+      "value": 3,
+      "comment": "Wait for MR3 load command (bank address 3), second in MRS sequence",
+      "hex_line": "02 00000064 00000002 00000003"
+    },
+    {
+      "op": 3,
+      "param": 0,
+      "signal_id": 131074,
+      "value": 131075,
+      "comment": "MR3 must follow MR2 (JEDEC-mandated order: MR2->MR3->MR1->MR0)",
+      "hex_line": "03 00000000 00020002 00020003"
+    },
+    {
+      "op": 2,
+      "param": 100,
+      "signal_id": 2,
+      "value": 1,
+      "comment": "Wait for MR1 load command (bank address 1), third in MRS sequence",
+      "hex_line": "02 00000064 00000002 00000001"
+    },
+    {
+      "op": 3,
+      "param": 0,
+      "signal_id": 131074,
+      "value": 196609,
+      "comment": "MR1 must follow MR3 (JEDEC-mandated order: MR2->MR3->MR1->MR0)",
+      "hex_line": "03 00000000 00020002 00030001"
+    },
+    {
+      "op": 2,
+      "param": 100,
+      "signal_id": 2,
+      "value": 0,
+      "comment": "Wait for MR0 load command (bank address 0), last in MRS sequence with DLL reset",
+      "hex_line": "02 00000064 00000002 00000000"
+    },
+    {
+      "op": 3,
+      "param": 0,
+      "signal_id": 131074,
+      "value": 65536,
+      "comment": "MR0 must follow MR1 (JEDEC-mandated order: MR2->MR3->MR1->MR0)",
+      "hex_line": "03 00000000 00020002 00010000"
+    },
+    {
+      "op": 2,
+      "param": 1000,
+      "signal_id": 4,
+      "value": 1,
+      "comment": "Wait for initialization complete signal after ZQCL calibration",
+      "hex_line": "02 000003E8 00000004 00000001"
+    },
+    {
+      "op": 3,
+      "param": 130,
+      "signal_id": 131076,
+      "value": 1,
+      "comment": "init_done must come at least 130 controller cycles after MR0 (covers ZQCL + tZQinit=512 DDR=128 ctrl + margin)",
+      "hex_line": "03 00000082 00020004 00000001"
+    },
+    {
+      "op": 4,
+      "param": 0,
+      "signal_id": 5,
+      "value": 0,
+      "comment": "Initialization must complete without failure flag",
+      "hex_line": "04 00000000 00000005 00000000"
+    }
+  ]
+}

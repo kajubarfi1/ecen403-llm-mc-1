@@ -1,0 +1,70 @@
+// path_08_init_to_cal.vec
+// DDR3 Init FSM to Calibration integration path test
+// Verifies JEDEC init sequence and handoff to calibration
+
+// Reset the DUT
+00 00000000 00000000 00000000
+
+// Start event-mode sequence
+09 00000000 00000000 00000000
+
+// Guard: init_done must not assert before minimum init time (~140000 cycles)
+// Using check_not_yet on init_done (sig 1), expect 0 until cycle 0x22000 (139264 dec)
+06 00000001 00000001 00022000
+
+// Wait for state_reset_low (sig 12) - should happen immediately after enable
+04 0000000C 00000001 00001000
+
+// Wait for state_reset_high (sig 13) after 40000 cycle reset period
+04 0000000D 00000001 000186A0
+
+// Wait for CKE to go high (sig 27) after CKE wait period
+04 0000001B 00000001 000186A0
+
+// Wait for MR2 issued (sig 21)
+04 00000015 00000001 000186A0
+
+// Wait for MR3 issued (sig 22)
+04 00000016 00000001 00001000
+
+// Wait for MR1 issued (sig 23)
+04 00000017 00000001 00001000
+
+// Wait for MR0 issued (sig 24)
+04 00000018 00000001 00001000
+
+// Wait for ZQCL issued (sig 25)
+04 00000019 00000001 00001000
+
+// Wait for init_done (sig 1)
+04 00000001 00000001 00030D40
+
+// Check MRS order: MR2 (21) before MR3 (22), min gap 1 cycle
+08 00001615 00000000 00000001
+
+// Check MRS order: MR3 (22) before MR1 (23), min gap 1 cycle
+08 00001716 00000000 00000001
+
+// Check MRS order: MR1 (23) before MR0 (24), min gap 1 cycle
+08 00001817 00000000 00000001
+
+// Check MRS order: MR0 (24) before ZQCL (25), min gap 3 cycles (tMOD)
+08 00001918 00000000 00000003
+
+// Check MRS order: ZQCL (25) before init_done (1), min gap 128 cycles
+08 00000119 00000000 00000080
+
+// Wait for cal_done (sig 8) - calibration should complete after init
+04 00000008 00000001 000C3500
+
+// Verify init_fail remained clear (sig 2 = 0) at cycle 0x30000
+05 00000002 00000000 00030000
+
+// Verify cal_fail remained clear (sig 9 = 0) at cycle 0xC0000
+05 00000009 00000000 000C0000
+
+// Final check: both init_done and cal_done asserted (sig 29)
+04 0000001D 00000001 000C3500
+
+// Verify calibration saw init_done properly connected (sig 31)
+05 0000001F 00000001 000C0000

@@ -1,0 +1,51 @@
+// path_08_init_to_cal: Init FSM to Calibration completion path
+// Tests JEDEC DDR3 init sequence -> init_done -> cal_done handoff
+
+// Reset the DUT
+00 00000000 00000000 00000000
+
+// Start event-mode timing (zeroes sim_cycle)
+09 00000000 00000000 00000000
+
+// Guard: init_done must not assert before MRS sequence begins (~140034 cycles)
+// Using 140000 as safe boundary before MR2 state
+06 00000001 00000001 00022338
+
+// Wait for MRS commands in JEDEC order: MR2 -> MR3 -> MR1 -> MR0
+04 00000015 00000001 00001000
+04 00000016 00000001 00001000
+04 00000017 00000001 00001000
+04 00000018 00000001 00001000
+
+// Wait for ZQCL command after MR0
+04 00000019 00000001 00001000
+
+// Wait for init_done (S_DONE state, after tZQinit = 128 cycles)
+04 00000001 00000001 00002000
+
+// Wait for calibration to complete (can take significant time)
+04 00000008 00000001 000927C0
+
+// Verify MRS ordering: MR2 before MR3 (min_gap=1 for tMRD)
+08 00001615 00000000 00000001
+
+// Verify MRS ordering: MR3 before MR1
+08 00001716 00000000 00000001
+
+// Verify MRS ordering: MR1 before MR0
+08 00001817 00000000 00000001
+
+// Verify MR0 before ZQCL (min_gap=3 for tMOD)
+08 00001918 00000000 00000003
+
+// Verify ZQCL before init_done (min_gap=128 for tZQinit)
+08 00000119 00000000 00000080
+
+// Verify init_done fires before cal_done (min_gap=0, may be same cycle or later)
+08 00000801 00000000 00000000
+
+// Verify no init_fail during sequence (check at current sim_cycle)
+05 00000002 00000000 00023000
+
+// Verify no cal_fail during sequence
+05 00000009 00000000 00023000

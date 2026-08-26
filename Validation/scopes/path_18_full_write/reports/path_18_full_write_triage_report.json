@@ -1,0 +1,141 @@
+{
+  "scope": "path_18_full_write",
+  "timestamp": "2026-04-20T17:06:58.257578",
+  "status": "triaged",
+  "passes": {
+    "classify": {
+      "category": "data_mismatch",
+      "severity": "high",
+      "failure_summary": "5 out of 34 tests failed in the path_18_full_write scope with a consistent mismatch pattern: actual value 00000001 versus expected value 00000000. The single-bit difference (bit 0 set high) across all failures strongly indicates a systematic issue rather than random data corruption. This pattern suggests either a status/flag bit being incorrectly asserted in the RTL, or the reference model failing to account for a legitimate condition that sets bit 0 during full write operations.",
+      "affected_vector_range": "5 specific vectors within path_18_full_write (exact indices not provided in log)",
+      "likely_component": "refmodel",
+      "initial_hypothesis": "The reference model does not properly model a status or completion flag (bit 0) that gets legitimately set during certain full-write scenarios. The consistent actual=1/expected=0 pattern across 5 tests suggests the RTL is correctly asserting a write-complete, busy, or error status bit under specific conditions that the reference model treats as should-remain-zero. Alternatively, the RTL may have a bug where a status register bit fails to clear properly after certain write sequences.",
+      "needs_deeper_analysis": true,
+      "_category": "data_mismatch"
+    },
+    "deterministic_check": {
+      "verdict": "rtl_bug",
+      "mismatches": [
+        {
+          "name": "DDR_RD",
+          "rtl_value": 4,
+          "rtl_line": "cmd_gen.sv:722",
+          "rtl_source": "localparam DDR_RD   = 4'b0100;",
+          "refmodel_value": 5,
+          "refmodel_line": "refmodel.py:20",
+          "refmodel_source": "DDR_RD   = 5   # 4'b0101",
+          "decision": "rtl_bug"
+        },
+        {
+          "name": "DDR_WR",
+          "rtl_value": 5,
+          "rtl_line": "cmd_gen.sv:721",
+          "rtl_source": "localparam DDR_WR   = 4'b0101;",
+          "refmodel_value": 4,
+          "refmodel_line": "refmodel.py:21",
+          "refmodel_source": "DDR_WR   = 4   # 4'b0100",
+          "decision": "rtl_bug"
+        }
+      ],
+      "summary": "DETERMINISTIC CHECK: RTL constant DDR_RD=4 (at cmd_gen.sv:722) contradicts refmodel DDR_RD=5 (at refmodel.py:20). RTL is the guilty component."
+    },
+    "localize": {
+      "failure_patterns": [
+        {
+          "pattern_id": 1,
+          "description": "CTRL_STATUS register bit 0 (init_done) reads as 1 when reference model expects 0",
+          "affected_addresses": [
+            "0x00000000"
+          ],
+          "affected_fields": [
+            "init_done"
+          ],
+          "vector_indices": [
+            13,
+            60,
+            70,
+            78,
+            130
+          ],
+          "expected_correct_per_spec": false,
+          "testbench_drives_correctly": true,
+          "notes": "Per spec, CTRL_STATUS offset 0x00, bit 0 is init_done which is '1 when init sequence complete'. The test path_18_full_write exercises active memory operations including write data capture (vec 13), bank restrictions (vec 60), refresh priority (vec 70, 78), and bank activate commands (vec 130). All these operations REQUIRE initialization to be complete - DDR3 cannot accept writes, activates, or refreshes before init_done. Therefore RTL returning init_done=1 (actual=0x00000001) is correct behavior. The reference model incorrectly expects init_done=0 (expected=0x00000000) during post-initialization write operations."
+        }
+      ],
+      "common_thread": "All 5 failures occur at address 0x00000000 (CTRL_STATUS register) with identical expected=0x00000000 vs actual=0x00000001 mismatch. The single-bit difference in bit 0 corresponds to the init_done status flag. The reference model generated test vectors that assume init_done remains at reset value (0) throughout the test, but any functional write test must occur after initialization completes, at which point init_done correctly transitions to 1.",
+      "refined_hypothesis": "ROOT CAUSE: Reference model bug. The reference model does not properly update the init_done status bit after the DDR3 initialization sequence completes. The RTL correctly sets CTRL_STATUS.init_done=1 upon initialization completion (required before any write/activate/refresh commands can execute), but the reference model's expected values still reflect the reset state (init_done=0). This is a reference model state-tracking deficiency, not an RTL bug. The RTL behavior (init_done=1 during active memory operations) is correct per JEDEC DDR3 protocol requirements and the spec's own field description."
+    },
+    "rootcause": {
+      "root_causes": [
+        {
+          "pattern_id": 1,
+          "guilty_component": "refmodel",
+          "confidence": "high",
+          "root_cause": "Reference model fails to update init_done status bit after DDR3 initialization sequence completes. In the PathModel.reset() method, init_done is initialized to False and the provided reference model code shows no mechanism to set it to True when initialization completes. The reference model line 'self.init_done = False' in the reset() function establishes the reset state, but the truncated code shows no state machine or logic to transition init_done to True after the initialization sequence.",
+          "evidence": "Reference model line: 'self.init_done = False' in reset() method under '# Refresh Controller State' section. Spec states CTRL_STATUS.init_done (offset 0x00, bit 0) description is '1 when init sequence complete' with reset_value=0. Test path_18_full_write exercises write data capture (vec 13), bank restrictions (vec 60), refresh priority (vec 70, 78), and bank activate commands (vec 130) - all operations that per JEDEC DDR3 protocol REQUIRE initialization to be complete before execution. RTL actual=0x00000001 (init_done=1), refmodel expected=0x00000000 (init_done=0).",
+          "mechanism": "1) Test path_18_full_write begins by completing DDR3 initialization sequence. 2) RTL correctly transitions CTRL_STATUS.init_done from 0 to 1 upon initialization completion. 3) Test proceeds to issue active memory operations (writes, activates, refreshes) which are only valid post-initialization. 4) Reference model's PathModel.reset() sets self.init_done=False but lacks logic to set it True after init completes. 5) When CTRL_STATUS register is read at vectors 13, 60, 70, 78, 130, RTL returns correct value 0x00000001 (init_done=1), but reference model still expects 0x00000000 (init_done=0). 6) Comparison fails because reference model's expected value is stale/incorrect."
+        }
+      ],
+      "primary_root_cause": "Reference model state-tracking deficiency: The PathModel class initializes init_done=False in reset() but never updates it to True after the DDR3 initialization sequence completes. The RTL correctly reports init_done=1 during active memory operations (which require initialization to be complete per JEDEC DDR3 protocol), but the reference model's expected values remain stuck at the reset state of init_done=0.",
+      "is_rtl_bug": false,
+      "is_verification_bug": true
+    },
+    "recommend": {
+      "recommendations": [
+        {
+          "priority": "critical",
+          "target_file": "cmd_gen.sv",
+          "description": "Fix RTL constant DDR_RD: currently 4 at cmd_gen.sv:722, should be 5 per spec (matches refmodel at refmodel.py:20)."
+        }
+      ],
+      "suggested_pipeline_action": "escalate_to_rtl_team",
+      "summary": "DETERMINISTIC CHECK: RTL constant DDR_RD=4 (at cmd_gen.sv:722) contradicts refmodel DDR_RD=5 (at refmodel.py:20). RTL is the guilty component."
+    }
+  },
+  "coverage": {
+    "total_tests": 34,
+    "passed": 29,
+    "failed": 5,
+    "pass_rate_pct": 85.3,
+    "consistent_failure_pattern": true,
+    "unique_actual_values": [
+      "00000001"
+    ],
+    "validation_level": "rtl_bug_detected",
+    "verdict": "29/34 tests passed (85.3%). DETERMINISTIC CHECK FAILED: DETERMINISTIC CHECK: RTL constant DDR_RD=4 (at cmd_gen.sv:722) contradicts refmodel DDR_RD=5 (at refmodel.py:20). RTL is the guilty component. Path cannot be validated until RTL is fixed."
+  },
+  "category": "data_mismatch",
+  "severity": "critical",
+  "primary_root_cause": "DETERMINISTIC CHECK: RTL constant DDR_RD=4 (at cmd_gen.sv:722) contradicts refmodel DDR_RD=5 (at refmodel.py:20). RTL is the guilty component.",
+  "is_rtl_bug": true,
+  "is_verification_bug": false,
+  "guilty_component": "rtl",
+  "suggested_action": "escalate_to_rtl_team",
+  "deterministic_verdict": {
+    "verdict": "rtl_bug",
+    "mismatches": [
+      {
+        "name": "DDR_RD",
+        "rtl_value": 4,
+        "rtl_line": "cmd_gen.sv:722",
+        "rtl_source": "localparam DDR_RD   = 4'b0100;",
+        "refmodel_value": 5,
+        "refmodel_line": "refmodel.py:20",
+        "refmodel_source": "DDR_RD   = 5   # 4'b0101",
+        "decision": "rtl_bug"
+      },
+      {
+        "name": "DDR_WR",
+        "rtl_value": 5,
+        "rtl_line": "cmd_gen.sv:721",
+        "rtl_source": "localparam DDR_WR   = 4'b0101;",
+        "refmodel_value": 4,
+        "refmodel_line": "refmodel.py:21",
+        "refmodel_source": "DDR_WR   = 4   # 4'b0100",
+        "decision": "rtl_bug"
+      }
+    ],
+    "summary": "DETERMINISTIC CHECK: RTL constant DDR_RD=4 (at cmd_gen.sv:722) contradicts refmodel DDR_RD=5 (at refmodel.py:20). RTL is the guilty component."
+  },
+  "summary": "DETERMINISTIC CHECK: RTL constant DDR_RD=4 (at cmd_gen.sv:722) contradicts refmodel DDR_RD=5 (at refmodel.py:20). RTL is the guilty component."
+}

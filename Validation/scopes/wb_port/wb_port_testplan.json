@@ -1,0 +1,867 @@
+[
+  {
+    "op": "reset"
+  },
+  {
+    "op": "idle",
+    "cyc": 0,
+    "stb": 0,
+    "comment": "Initial idle after reset"
+  },
+  {
+    "op": "write",
+    "addr": 0,
+    "data": 305419896,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Classic write at address 0"
+  },
+  {
+    "op": "read",
+    "addr": 0,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Classic read at address 0, verify data round-trip"
+  },
+  {
+    "op": "idle",
+    "cyc": 0,
+    "stb": 0,
+    "comment": "Idle between transactions"
+  },
+  {
+    "op": "write",
+    "addr": 256,
+    "data": 2779096485,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Classic write at address 256"
+  },
+  {
+    "op": "read",
+    "addr": 256,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Classic read at address 256"
+  },
+  {
+    "op": "idle",
+    "cyc": 0,
+    "stb": 0,
+    "comment": "Idle between transactions"
+  },
+  {
+    "op": "write",
+    "addr": 4096,
+    "data": 1515870810,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Classic write at address 4096"
+  },
+  {
+    "op": "read",
+    "addr": 4096,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Classic read at address 4096"
+  },
+  {
+    "op": "idle",
+    "cyc": 0,
+    "stb": 0,
+    "comment": "Idle between transactions"
+  },
+  {
+    "op": "write",
+    "addr": 65536,
+    "data": 4294967295,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Classic write at address 65536 with max value"
+  },
+  {
+    "op": "read",
+    "addr": 65536,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Classic read at address 65536"
+  },
+  {
+    "op": "idle",
+    "cyc": 0,
+    "stb": 0,
+    "comment": "Idle between transactions"
+  },
+  {
+    "op": "write",
+    "addr": 536870908,
+    "data": 2779096485,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Classic write near max address"
+  },
+  {
+    "op": "read",
+    "addr": 536870908,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Classic read near max address"
+  },
+  {
+    "op": "idle",
+    "cyc": 0,
+    "stb": 0,
+    "comment": "Idle before byte-masked tests"
+  },
+  {
+    "op": "write",
+    "addr": 512,
+    "data": 4294967295,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Write full word 0xFFFFFFFF for byte-mask testing"
+  },
+  {
+    "op": "write",
+    "addr": 512,
+    "data": 0,
+    "sel": 1,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Partial write sel=1 (byte 0 only)"
+  },
+  {
+    "op": "read",
+    "addr": 512,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read back, expect 0xFFFFFF00"
+  },
+  {
+    "op": "write",
+    "addr": 516,
+    "data": 4294967295,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Write full word for sel=2 test"
+  },
+  {
+    "op": "write",
+    "addr": 516,
+    "data": 0,
+    "sel": 2,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Partial write sel=2 (byte 1 only)"
+  },
+  {
+    "op": "read",
+    "addr": 516,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read back, expect 0xFFFF00FF"
+  },
+  {
+    "op": "write",
+    "addr": 520,
+    "data": 4294967295,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Write full word for sel=4 test"
+  },
+  {
+    "op": "write",
+    "addr": 520,
+    "data": 0,
+    "sel": 4,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Partial write sel=4 (byte 2 only)"
+  },
+  {
+    "op": "read",
+    "addr": 520,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read back, expect 0xFF00FFFF"
+  },
+  {
+    "op": "write",
+    "addr": 524,
+    "data": 4294967295,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Write full word for sel=8 test"
+  },
+  {
+    "op": "write",
+    "addr": 524,
+    "data": 0,
+    "sel": 8,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Partial write sel=8 (byte 3 only)"
+  },
+  {
+    "op": "read",
+    "addr": 524,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read back, expect 0x00FFFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 528,
+    "data": 4294967295,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Write full word for sel=3 test"
+  },
+  {
+    "op": "write",
+    "addr": 528,
+    "data": 0,
+    "sel": 3,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Partial write sel=3 (bytes 0-1)"
+  },
+  {
+    "op": "read",
+    "addr": 528,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read back, expect 0xFFFF0000"
+  },
+  {
+    "op": "write",
+    "addr": 532,
+    "data": 4294967295,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Write full word for sel=5 test"
+  },
+  {
+    "op": "write",
+    "addr": 532,
+    "data": 0,
+    "sel": 5,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Partial write sel=5 (bytes 0,2)"
+  },
+  {
+    "op": "read",
+    "addr": 532,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read back, expect 0xFF00FF00"
+  },
+  {
+    "op": "write",
+    "addr": 536,
+    "data": 4294967295,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Write full word for sel=10 test"
+  },
+  {
+    "op": "write",
+    "addr": 536,
+    "data": 0,
+    "sel": 10,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Partial write sel=10 (bytes 1,3)"
+  },
+  {
+    "op": "read",
+    "addr": 536,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read back, expect 0x00FF00FF"
+  },
+  {
+    "op": "write",
+    "addr": 540,
+    "data": 4294967295,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Write full word for sel=12 test"
+  },
+  {
+    "op": "write",
+    "addr": 540,
+    "data": 0,
+    "sel": 12,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Partial write sel=12 (bytes 2-3)"
+  },
+  {
+    "op": "read",
+    "addr": 540,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read back, expect 0x0000FFFF"
+  },
+  {
+    "op": "idle",
+    "cyc": 0,
+    "stb": 0,
+    "comment": "Idle before 4-beat burst write"
+  },
+  {
+    "op": "write",
+    "addr": 1024,
+    "data": 286331153,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "4-beat burst write beat 0"
+  },
+  {
+    "op": "write",
+    "addr": 1028,
+    "data": 572662306,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "4-beat burst write beat 1"
+  },
+  {
+    "op": "write",
+    "addr": 1032,
+    "data": 858993459,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "4-beat burst write beat 2"
+  },
+  {
+    "op": "write",
+    "addr": 1036,
+    "data": 1145324612,
+    "sel": 15,
+    "cti": 7,
+    "bte": 0,
+    "comment": "4-beat burst write beat 3 (end)"
+  },
+  {
+    "op": "idle",
+    "cyc": 0,
+    "stb": 0,
+    "comment": "Idle after burst write"
+  },
+  {
+    "op": "read",
+    "addr": 1024,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "4-beat burst read beat 0"
+  },
+  {
+    "op": "read",
+    "addr": 1028,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "4-beat burst read beat 1"
+  },
+  {
+    "op": "read",
+    "addr": 1032,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "4-beat burst read beat 2"
+  },
+  {
+    "op": "read",
+    "addr": 1036,
+    "sel": 15,
+    "cti": 7,
+    "bte": 0,
+    "comment": "4-beat burst read beat 3 (end)"
+  },
+  {
+    "op": "idle",
+    "cyc": 0,
+    "stb": 0,
+    "comment": "Idle before 8-beat burst write"
+  },
+  {
+    "op": "write",
+    "addr": 2048,
+    "data": 16843009,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "8-beat burst write beat 0"
+  },
+  {
+    "op": "write",
+    "addr": 2052,
+    "data": 33686018,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "8-beat burst write beat 1"
+  },
+  {
+    "op": "write",
+    "addr": 2056,
+    "data": 50529027,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "8-beat burst write beat 2"
+  },
+  {
+    "op": "write",
+    "addr": 2060,
+    "data": 67372036,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "8-beat burst write beat 3"
+  },
+  {
+    "op": "write",
+    "addr": 2064,
+    "data": 84215045,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "8-beat burst write beat 4"
+  },
+  {
+    "op": "write",
+    "addr": 2068,
+    "data": 101058054,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "8-beat burst write beat 5"
+  },
+  {
+    "op": "write",
+    "addr": 2072,
+    "data": 117901063,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "8-beat burst write beat 6"
+  },
+  {
+    "op": "write",
+    "addr": 2076,
+    "data": 134744072,
+    "sel": 15,
+    "cti": 7,
+    "bte": 0,
+    "comment": "8-beat burst write beat 7 (end)"
+  },
+  {
+    "op": "idle",
+    "cyc": 0,
+    "stb": 0,
+    "comment": "Idle after 8-beat burst write"
+  },
+  {
+    "op": "read",
+    "addr": 2048,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "8-beat burst read beat 0"
+  },
+  {
+    "op": "read",
+    "addr": 2052,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "8-beat burst read beat 1"
+  },
+  {
+    "op": "read",
+    "addr": 2056,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "8-beat burst read beat 2"
+  },
+  {
+    "op": "read",
+    "addr": 2060,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "8-beat burst read beat 3"
+  },
+  {
+    "op": "read",
+    "addr": 2064,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "8-beat burst read beat 4"
+  },
+  {
+    "op": "read",
+    "addr": 2068,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "8-beat burst read beat 5"
+  },
+  {
+    "op": "read",
+    "addr": 2072,
+    "sel": 15,
+    "cti": 2,
+    "bte": 0,
+    "comment": "8-beat burst read beat 6"
+  },
+  {
+    "op": "read",
+    "addr": 2076,
+    "sel": 15,
+    "cti": 7,
+    "bte": 0,
+    "comment": "8-beat burst read beat 7 (end)"
+  },
+  {
+    "op": "idle",
+    "cyc": 0,
+    "stb": 0,
+    "comment": "Idle before data pattern tests"
+  },
+  {
+    "op": "write",
+    "addr": 3072,
+    "data": 0,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Write data pattern 0"
+  },
+  {
+    "op": "read",
+    "addr": 3072,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read back data pattern 0"
+  },
+  {
+    "op": "write",
+    "addr": 3076,
+    "data": 4294967295,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Write data pattern 0xFFFFFFFF"
+  },
+  {
+    "op": "read",
+    "addr": 3076,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read back data pattern 0xFFFFFFFF"
+  },
+  {
+    "op": "write",
+    "addr": 3080,
+    "data": 2779096485,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Write data pattern 0xA5A5A5A5"
+  },
+  {
+    "op": "read",
+    "addr": 3080,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read back data pattern 0xA5A5A5A5"
+  },
+  {
+    "op": "write",
+    "addr": 3084,
+    "data": 1515870810,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Write data pattern 0x5A5A5A5A"
+  },
+  {
+    "op": "read",
+    "addr": 3084,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read back data pattern 0x5A5A5A5A"
+  },
+  {
+    "op": "write",
+    "addr": 3088,
+    "data": 305419896,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Write data pattern 0x12345678"
+  },
+  {
+    "op": "read",
+    "addr": 3088,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read back data pattern 0x12345678"
+  },
+  {
+    "op": "idle",
+    "cyc": 0,
+    "stb": 0,
+    "comment": "Idle before back-to-back writes"
+  },
+  {
+    "op": "write",
+    "addr": 4096,
+    "data": 4278255360,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Back-to-back write addr 4096"
+  },
+  {
+    "op": "write",
+    "addr": 4100,
+    "data": 4278255361,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Back-to-back write addr 4100"
+  },
+  {
+    "op": "write",
+    "addr": 4104,
+    "data": 4278255362,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Back-to-back write addr 4104"
+  },
+  {
+    "op": "write",
+    "addr": 4108,
+    "data": 4278255363,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Back-to-back write addr 4108"
+  },
+  {
+    "op": "read",
+    "addr": 4096,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Verify back-to-back write addr 4096"
+  },
+  {
+    "op": "read",
+    "addr": 4100,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Verify back-to-back write addr 4100"
+  },
+  {
+    "op": "read",
+    "addr": 4104,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Verify back-to-back write addr 4104"
+  },
+  {
+    "op": "read",
+    "addr": 4108,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Verify back-to-back write addr 4108"
+  },
+  {
+    "op": "idle",
+    "cyc": 0,
+    "stb": 0,
+    "comment": "Idle before unwritten address read"
+  },
+  {
+    "op": "read",
+    "addr": 131072,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read from unwritten address, expect 0 or undefined"
+  },
+  {
+    "op": "idle",
+    "cyc": 0,
+    "stb": 0,
+    "comment": "Idle before overwrite test"
+  },
+  {
+    "op": "write",
+    "addr": 8192,
+    "data": 3735928559,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "First write 0xDEADBEEF to addr 8192"
+  },
+  {
+    "op": "read",
+    "addr": 8192,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Verify first write"
+  },
+  {
+    "op": "write",
+    "addr": 8192,
+    "data": 3405691582,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Overwrite with 0xCAFEBABE to addr 8192"
+  },
+  {
+    "op": "read",
+    "addr": 8192,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Verify overwrite, expect 0xCAFEBABE"
+  },
+  {
+    "op": "idle",
+    "cyc": 0,
+    "stb": 0,
+    "comment": "Idle before row boundary test"
+  },
+  {
+    "op": "write",
+    "addr": 2044,
+    "data": 4008636142,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Write near page boundary"
+  },
+  {
+    "op": "write",
+    "addr": 2048,
+    "data": 4008636143,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Write at page boundary"
+  },
+  {
+    "op": "read",
+    "addr": 2044,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read near page boundary"
+  },
+  {
+    "op": "read",
+    "addr": 2048,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read at page boundary"
+  },
+  {
+    "op": "idle",
+    "cyc": 0,
+    "stb": 0,
+    "comment": "Idle before bank crossing test"
+  },
+  {
+    "op": "write",
+    "addr": 262144,
+    "data": 2863311530,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Write to bank 1 region"
+  },
+  {
+    "op": "write",
+    "addr": 524288,
+    "data": 2863311531,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Write to bank 2 region"
+  },
+  {
+    "op": "read",
+    "addr": 262144,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read from bank 1 region"
+  },
+  {
+    "op": "read",
+    "addr": 524288,
+    "sel": 15,
+    "cti": 0,
+    "bte": 0,
+    "comment": "Read from bank 2 region"
+  },
+  {
+    "op": "idle",
+    "cyc": 0,
+    "stb": 0,
+    "comment": "Final idle"
+  }
+]

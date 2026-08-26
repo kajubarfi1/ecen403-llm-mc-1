@@ -1,0 +1,720 @@
+{
+  "scope": "path_13_csr_refresh_to_scheduling",
+  "generator": "vector_gen_agent_llm",
+  "spec_source": "llmmc_microarchitecturespec_filled.json",
+  "generated_at": "2026-04-07T16:47:26.472981",
+  "vector_count": 142,
+  "hex_format": "unknown",
+  "vectors": [
+    {
+      "hex_line": "00 00000000 00000000 00000000",
+      "op": 0,
+      "comment": "Global reset to initialize all blocks"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Allow reset to propagate through CSR, refresh ctrl, and scheduler"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify default timing config outputs after reset match DDR3-1600K defaults"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Refresh controller should have zero pending refreshes after reset"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler should not issue any command after reset"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify default policy/mode CSR outputs are zero after reset"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Signal that initialization and calibration are complete"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Let init_done propagate"
+    },
+    {
+      "hex_line": "01 00000000 00000107 00000001",
+      "op": 1,
+      "comment": "Write tRFC_nCK=128 to CSR address 0x20 (refresh timing register)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for CSR write acknowledge"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "CSR write should be acknowledged without error"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert CSR bus after write"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Bus idle cycle"
+    },
+    {
+      "hex_line": "01 00000000 00000127 00000001",
+      "op": 1,
+      "comment": "Write tREFI=6240 cycles to CSR address 0x24 (refresh interval register)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for CSR ack"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "tREFI write acknowledged"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Idle"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Verify tRFC propagated from CSR to refresh ctrl and scheduler path"
+    },
+    {
+      "hex_line": "01 00000000 00000103 00000001",
+      "op": 1,
+      "comment": "Read back tRFC CSR register"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for read data"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Read back should return 128 for tRFC"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Idle"
+    },
+    {
+      "hex_line": "03 00001860 00000000 00000000",
+      "op": 3,
+      "comment": "Wait one full tREFI interval for refresh to become pending"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "After one tREFI, refresh controller should have 1 pending refresh"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "All banks idle and allow precharge/activate for refresh"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Let scheduler pick up refresh request"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler should issue a refresh command when refresh is pending and banks allow it"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "Wait tRFC cycles for refresh to complete"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "After refresh execution, pending count should decrement to 0"
+    },
+    {
+      "hex_line": "03 00001860 00000000 00000000",
+      "op": 3,
+      "comment": "Wait another tREFI for second refresh"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Second refresh interval elapsed, one pending"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "All banks active - refresh cannot proceed immediately"
+    },
+    {
+      "hex_line": "03 0000000A 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler should stall refresh while banks are active"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Pending refresh not consumed since banks are busy"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Banks now idle, allow precharge for refresh"
+    },
+    {
+      "hex_line": "03 00000003 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler should now issue refresh"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler issues refresh now that banks are idle"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "tRFC completion"
+    },
+    {
+      "hex_line": "01 00000000 00000127 00000001",
+      "op": 1,
+      "comment": "Write very short tREFI=100 to stress refresh accumulation"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "CSR write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Acknowledged"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Idle"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Block all banks so refreshes accumulate"
+    },
+    {
+      "hex_line": "03 00000384 00000000 00000000",
+      "op": 3,
+      "comment": "Wait 9 tREFI intervals (9*100=900 cycles) to accumulate ~9 pending refreshes"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Multiple pending refreshes should trigger starvation flag"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Status reflects accumulated pending refreshes"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Update status"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Unblock banks to drain accumulated refreshes"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler should urgently issue refresh due to starvation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Urgent refresh command issued"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "First refresh tRFC"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Next refresh should follow quickly"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Back-to-back refresh to drain pending count"
+    },
+    {
+      "hex_line": "01 00000000 00000127 00000001",
+      "op": 1,
+      "comment": "Restore normal tREFI=6240"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "CSR write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Allow propagation"
+    },
+    {
+      "hex_line": "01 00000000 00000147 00000001",
+      "op": 1,
+      "comment": "Write cfg_force_self_ref=1 to enter self-refresh mode"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "CSR write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Acknowledged"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Allow self-refresh entry propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Force self-refresh propagated to refresh ctrl"
+    },
+    {
+      "hex_line": "03 00000032 00000000 00000000",
+      "op": 3,
+      "comment": "While in self-refresh, normal refresh requests should be suppressed"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "No refresh commands during forced self-refresh mode"
+    },
+    {
+      "hex_line": "01 00000000 00000147 00000001",
+      "op": 1,
+      "comment": "Clear force_self_ref to exit self-refresh"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "CSR write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Allow exit propagation"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Self-refresh mode cleared"
+    },
+    {
+      "hex_line": "01 00000000 00000107 00000001",
+      "op": 1,
+      "comment": "Write minimum tRFC=1 (boundary: underflow test)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "CSR write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Acknowledged"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Propagate"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Minimum tRFC written - boundary condition"
+    },
+    {
+      "hex_line": "01 00000000 00000107 00000001",
+      "op": 1,
+      "comment": "Write maximum 8-bit tRFC=255 (boundary: overflow test)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "CSR write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Acknowledged"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Propagate"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Maximum tRFC boundary value propagated"
+    },
+    {
+      "hex_line": "01 00000000 00000107 00000001",
+      "op": 1,
+      "comment": "Restore tRFC=128 for nominal operation"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "CSR write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Idle"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Submit a read request to queue while no refresh is pending - scheduler should prioritize data"
+    },
+    {
+      "hex_line": "03 00000003 00000000 00000000",
+      "op": 3,
+      "comment": "Let scheduler arbitrate between data request and no-refresh"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler issues data command when no refresh is pending"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Remove data request"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Idle"
+    },
+    {
+      "hex_line": "03 00001860 00000000 00000000",
+      "op": 3,
+      "comment": "Wait for tREFI to elapse and refresh to become pending"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Submit write request simultaneously with pending refresh - test priority arbitration"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Let scheduler arbitrate between refresh and write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler should issue either refresh or write based on policy"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Remove write request"
+    },
+    {
+      "hex_line": "03 00000082 00000000 00000000",
+      "op": 3,
+      "comment": "Complete any pending refresh cycle"
+    },
+    {
+      "hex_line": "01 00000000 00000167 00000001",
+      "op": 1,
+      "comment": "Write cfg_sched_policy=1 to change scheduling policy mid-operation"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "CSR write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Acknowledged"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Propagate"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "New scheduling policy active and visible to scheduler"
+    },
+    {
+      "hex_line": "01 00000000 00000187 00000001",
+      "op": 1,
+      "comment": "Back-to-back CSR write: cfg_row_policy=1"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "CSR write"
+    },
+    {
+      "hex_line": "01 00000000 00000160 00000000",
+      "op": 1,
+      "comment": "Immediately follow with cfg_sched_policy=0 (back-to-back write)"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Second CSR write"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Second write acknowledged"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus"
+    },
+    {
+      "hex_line": "03 00000002 00000000 00000000",
+      "op": 3,
+      "comment": "Propagate both writes"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Both back-to-back CSR writes propagated correctly"
+    },
+    {
+      "hex_line": "01 00000000 00000127 00000001",
+      "op": 1,
+      "comment": "Set extremely short tREFI=50 to test rapid refresh accumulation and starvation timeout"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "CSR write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Propagate"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Block all banks to force starvation"
+    },
+    {
+      "hex_line": "03 000001F4 00000000 00000000",
+      "op": 3,
+      "comment": "10 tREFI intervals at 50 cycles each"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Starvation flag must be asserted after many missed refreshes"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Unblock banks to allow urgent refresh drain"
+    },
+    {
+      "hex_line": "03 00000003 00000000 00000000",
+      "op": 3,
+      "comment": "Scheduler should immediately issue urgent refresh"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Urgent refresh issued after starvation"
+    },
+    {
+      "hex_line": "03 00000080 00000000 00000000",
+      "op": 3,
+      "comment": "tRFC for first urgent refresh"
+    },
+    {
+      "hex_line": "03 00000003 00000000 00000000",
+      "op": 3,
+      "comment": "Check for second back-to-back urgent refresh"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Second back-to-back urgent refresh to drain pending count"
+    },
+    {
+      "hex_line": "01 00000000 00000127 00000001",
+      "op": 1,
+      "comment": "Restore normal tREFI=6240"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "CSR write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert"
+    },
+    {
+      "hex_line": "03 000007D0 00000000 00000000",
+      "op": 3,
+      "comment": "Allow system to stabilize and drain all pending refreshes"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "After draining, starvation cleared and no pending refreshes"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "De-assert init_done to simulate re-initialization scenario"
+    },
+    {
+      "hex_line": "03 0000000A 00000000 00000000",
+      "op": 3,
+      "comment": "Observe behavior when init not done"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "Scheduler should not issue commands when init_done is deasserted"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Re-assert init_done"
+    },
+    {
+      "hex_line": "03 00000005 00000000 00000000",
+      "op": 3,
+      "comment": "Resume normal operation"
+    },
+    {
+      "hex_line": "01 00000000 00000123 00000001",
+      "op": 1,
+      "comment": "Read back tREFI register to verify it survived init toggle"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "CSR read"
+    },
+    {
+      "hex_line": "02 00000000 00000000 00000000",
+      "op": 2,
+      "comment": "tREFI readback should still be 6240"
+    },
+    {
+      "hex_line": "01 00000000 00000000 00000000",
+      "op": 1,
+      "comment": "Deassert bus"
+    },
+    {
+      "hex_line": "03 00000001 00000000 00000000",
+      "op": 3,
+      "comment": "Final idle cycle"
+    }
+  ]
+}

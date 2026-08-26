@@ -1,0 +1,29 @@
+// path_14_status_init: DDR3 init FSM with CSR status verification
+// Reset DUT
+00 00000000 00000000 00000000
+// Start autonomous sequence (zeroes sim_cycle)
+09 00000000 00000000 00000000
+// Wait for MRS MR2 issued (sig_id=20=0x14), value=1, timeout=800000=0xC3500
+04 00000014 00000001 000C3500
+// Wait for MRS MR3 issued (sig_id=21=0x15), value=1, timeout=800000
+04 00000015 00000001 000C3500
+// Wait for MRS MR1 issued (sig_id=22=0x16), value=1, timeout=800000
+04 00000016 00000001 000C3500
+// Wait for MRS MR0 issued (sig_id=23=0x17), value=1, timeout=800000
+04 00000017 00000001 000C3500
+// Wait for ZQCL issued (sig_id=24=0x18), value=1, timeout=800000
+04 00000018 00000001 000C3500
+// Wait for init_done (sig_id=1), value=1, timeout=800000
+04 00000001 00000001 000C3500
+// Check order: MR2 (20=0x14) before MR3 (21=0x15), min_gap=1 (tMRD)
+08 00001514 00000000 00000001
+// Check order: MR3 (21=0x15) before MR1 (22=0x16), min_gap=1 (tMRD)
+08 00001615 00000000 00000001
+// Check order: MR1 (22=0x16) before MR0 (23=0x17), min_gap=1 (tMRD)
+08 00001716 00000000 00000001
+// Check order: MR0 (23=0x17) before ZQCL (24=0x18), min_gap=3 (tMOD)
+08 00001817 00000000 00000003
+// CSR read CTRL_STATUS addr=0x00, expect init_done bit[0]=1, ack_timeout=100
+0A 00000000 00000001 00000064
+// Check init_fail (sig_id=2) = 0 at cycle 150000 (0x249F0)
+05 00000002 00000000 000249F0

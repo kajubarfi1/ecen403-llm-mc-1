@@ -1,0 +1,128 @@
+[
+  {
+    "op": "reset"
+  },
+  {
+    "op": "check_not_yet",
+    "cycle": 39999,
+    "signal": "init_reset_n",
+    "value": 1,
+    "comment": "Reset must be held low for at least 200us (40000 controller cycles at 5ns)"
+  },
+  {
+    "op": "wait_for",
+    "signal": "init_reset_n",
+    "value": 1,
+    "timeout": 42000,
+    "comment": "Wait for reset release, allow some margin above 40000 minimum"
+  },
+  {
+    "op": "check_not_yet",
+    "cycle": 139999,
+    "signal": "init_cke",
+    "value": 1,
+    "comment": "CKE must stay low for 500us (100000 cycles) after reset release at ~40000"
+  },
+  {
+    "op": "wait_for",
+    "signal": "init_cke",
+    "value": 1,
+    "timeout": 150000,
+    "comment": "Wait for CKE assertion after 500us delay post-reset"
+  },
+  {
+    "op": "check_order",
+    "first_signal": "init_reset_n",
+    "first_value": 1,
+    "second_signal": "init_cke",
+    "second_value": 1,
+    "min_gap": 100000,
+    "comment": "CKE must rise at least 500us (100000 controller cycles) after reset release"
+  },
+  {
+    "op": "wait_for",
+    "signal": "mrs",
+    "value": 2,
+    "timeout": 1000,
+    "comment": "Wait for MR2 load command (bank address 2), first in MRS sequence"
+  },
+  {
+    "op": "check_order",
+    "first_signal": "init_cke",
+    "first_value": 1,
+    "second_signal": "mrs",
+    "second_value": 2,
+    "min_gap": 34,
+    "comment": "MR2 must come at least tXPR (136 DDR cycles = 34 controller cycles) after CKE"
+  },
+  {
+    "op": "wait_for",
+    "signal": "mrs",
+    "value": 3,
+    "timeout": 100,
+    "comment": "Wait for MR3 load command (bank address 3), second in MRS sequence"
+  },
+  {
+    "op": "check_order",
+    "first_signal": "mrs",
+    "first_value": 2,
+    "second_signal": "mrs",
+    "second_value": 3,
+    "min_gap": 0,
+    "comment": "MR3 must follow MR2 (JEDEC-mandated order: MR2->MR3->MR1->MR0)"
+  },
+  {
+    "op": "wait_for",
+    "signal": "mrs",
+    "value": 1,
+    "timeout": 100,
+    "comment": "Wait for MR1 load command (bank address 1), third in MRS sequence"
+  },
+  {
+    "op": "check_order",
+    "first_signal": "mrs",
+    "first_value": 3,
+    "second_signal": "mrs",
+    "second_value": 1,
+    "min_gap": 0,
+    "comment": "MR1 must follow MR3 (JEDEC-mandated order: MR2->MR3->MR1->MR0)"
+  },
+  {
+    "op": "wait_for",
+    "signal": "mrs",
+    "value": 0,
+    "timeout": 100,
+    "comment": "Wait for MR0 load command (bank address 0), last in MRS sequence with DLL reset"
+  },
+  {
+    "op": "check_order",
+    "first_signal": "mrs",
+    "first_value": 1,
+    "second_signal": "mrs",
+    "second_value": 0,
+    "min_gap": 0,
+    "comment": "MR0 must follow MR1 (JEDEC-mandated order: MR2->MR3->MR1->MR0)"
+  },
+  {
+    "op": "wait_for",
+    "signal": "init_done",
+    "value": 1,
+    "timeout": 1000,
+    "comment": "Wait for initialization complete signal after ZQCL calibration"
+  },
+  {
+    "op": "check_order",
+    "first_signal": "mrs",
+    "first_value": 0,
+    "second_signal": "init_done",
+    "second_value": 1,
+    "min_gap": 130,
+    "comment": "init_done must come at least 130 controller cycles after MR0 (covers ZQCL + tZQinit=512 DDR=128 ctrl + margin)"
+  },
+  {
+    "op": "final_check",
+    "signal": "init_fail",
+    "value": 0,
+    "comment": "Initialization must complete without failure flag"
+  }
+]

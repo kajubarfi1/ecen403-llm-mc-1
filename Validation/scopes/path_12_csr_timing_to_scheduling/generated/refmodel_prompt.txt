@@ -1,0 +1,200 @@
+Generate a Python reference model for the CSR → Bank Tracker → Scheduler (Transitive Config) of a DDR3 memory controller.
+
+This models the INTEGRATION path: config_regs -> bank_tracker -> scheduler
+
+SPEC:
+{spec_json}
+
+CONNECTIONS IN THIS PATH:
+  bank_tracker -> scheduler: bank_is_active->bank_is_active, bank_open_row->bank_open_row, bank_act_allowed->bank_act_allowed, bank_rd_allowed->bank_rd_allowed, bank_wr_allowed->bank_wr_allowed, bank_pre_allowed->bank_pre_allowed (Bank tracker provides per-bank state and timing-clear flags to scheduler.)
+  config_regs -> bank_tracker: cfg_tRCD_nCK->cfg_tRCD_nCK, cfg_tRP_nCK->cfg_tRP_nCK, cfg_tRAS_nCK->cfg_tRAS_nCK, cfg_tRC_nCK->cfg_tRC_nCK, cfg_tRRD_nCK->cfg_tRRD_nCK, cfg_tFAW_nCK->cfg_tFAW_nCK, cfg_tWTR_nCK->cfg_tWTR_nCK, cfg_tWR_nCK->cfg_tWR_nCK, cfg_tRTP_nCK->cfg_tRTP_nCK, cfg_tCCD_nCK->cfg_tCCD_nCK, cfg_tRFC_nCK->cfg_tRFC_nCK (CSR timing registers to bank tracker (11 individual timing parameters).)
+
+SINGLE-ENTRY MODE:
+The following array ports have been flattened to single-entry scalars.
+Only entry [0] is active. Entries [1:N-1] are hardwired to 0 in the testbench.
+Your step() method should accept these as scalar inputs:
+  q_valid_0 (was q_valid[0:15], 1 bits) — only entry 0
+  q_row_0 (was q_row[0:15], 15 bits) — only entry 0
+  q_col_0 (was q_col[0:15], 10 bits) — only entry 0
+  q_bank_0 (was q_bank[0:15], 3 bits) — only entry 0
+  q_we_0 (was q_we[0:15], 1 bits) — only entry 0
+  q_aux_0 (was q_aux[0:15], 4 bits) — only entry 0
+Model a SINGLE pending request, not a full 16-entry queue.
+
+Build a PathModel class that models the data/control flow through this chain of blocks.
+The model tracks the behavioral state of each block and how signals flow between them.
+
+MANDATORY METHOD SIGNATURES — implement exactly these three methods:
+
+    def reset(self):
+        # Reset all internal state to power-on defaults.
+
+    def step(self, **inputs) -> dict:
+        # Advance the model by one clock cycle.
+        # Accept any input signals as keyword arguments (ignore unknown ones).
+        # Input signals that the testbench may drive: "csr_cyc_i", "csr_stb_i", "csr_we_i", "csr_adr_i", "csr_dat_i", "csr_sel_i", "sts_init_done", "sts_cal_done", "sts_cal_fail", "sts_bist_done", "sts_bist_fail", "sts_ref_pending_cnt", "sts_self_refresh_active", "sts_ecc_ce_count", "sts_ecc_ue_event", "sts_ref_starve_event", "sts_init_fail_event", "sts_bist_fail_addr", "cmd_act_valid", "cmd_act_bank", "cmd_act_row", "cmd_pre_valid", "cmd_pre_bank", "cmd_pre_all", "cmd_rd_valid", "cmd_rd_bank", "cmd_wr_valid", "cmd_wr_bank", "cmd_ref_valid", "q_valid_0", "q_row_0", "q_col_0", "q_bank_0", "q_we_0", "q_aux_0", "ref_required", "ref_urgent"
+        # Output signals that the testbench will check: "csr_ack_o", "csr_dat_o", "csr_err_o", "cfg_CL_nCK", "cfg_CWL_nCK", "cfg_tREFI_nCK", "cfg_sched_policy", "cfg_row_policy", "cfg_self_ref_mode", "cfg_ecc_enable", "cfg_bist_start", "cfg_force_refresh", "cfg_force_self_ref", "cfg_max_postpone", "cfg_urgent_threshold", "cfg_ref_priority", "cfg_bist_pattern", "cfg_bist_addr_mode", "cfg_bist_addr_start", "cfg_bist_addr_end", "ref_ack", "cmd_valid", "cmd_type", "cmd_row", "cmd_col", "cmd_bank", "cmd_we", "cmd_aux", "deq_grant", "deq_idx"
+        # Returns a dict with ALL output signal names as keys and their current integer values.
+        # IMPORTANT: The returned dict MUST contain every output signal listed above.
+        # Missing keys will be treated as 0 by the testbench.
+
+    def get_state(self) -> dict:
+        # Return a dict with the full internal state for debugging.
+
+RULES:
+- step() must accept **kwargs and silently ignore unknown signal names.
+- step() must return a dict with ALL output signals every time, even if unchanged.
+- Do NOT include any signal packing or hex formatting code. Packing is handled externally.
+- Do NOT include an execute_test_plan method. Vector generation is handled externally.
+- Focus entirely on modeling the correct BEHAVIOR of the blocks in this path.
+- Your main simulation method MUST be named exactly "step". Do NOT name it any of:
+  "cycle", "tick", "clock_tick", "advance_cycles", "update", "process", "clock", "run_cycle",
+  "next_cycle", "advance". The method name MUST be "step" — nothing else will work.
+- Your reset method MUST be named exactly "reset". Do NOT name it "apply_reset", "do_reset",
+  or "reset_state". The method name MUST be "reset".
+
+CRITICAL — TIMING COUNTER BEHAVIOR (from RTL bank_tracker.sv):
+Each call to step() represents ONE CONTROLLER CLOCK CYCLE.
+The RTL bank_tracker loads cfg_t*_nCK values DIRECTLY into timing counters
+WITHOUT any clock domain conversion. The counters decrement by 1 each
+controller cycle. For example:
+  - cfg_tRCD_nCK = 11 → counter loads 11, takes 11 controller cycles to reach 0
+  - cfg_tRP_nCK = 11 → counter loads 11, takes 11 controller cycles
+  - cfg_tRFC_nCK = 128 → counter loads 128, takes 128 controller cycles
+  - cfg_tRAS_nCK = 28 → counter loads 28, takes 28 controller cycles
+DO NOT divide by 4. DO NOT apply any clock domain conversion.
+Use the cfg values directly as counter initial values.
+If you divide by 4, your tRCD will be 3 instead of 11 and commands will
+be issued 8 cycles too early, causing mismatches on every timing-dependent test.
+
+CRITICAL — REFRESH COUNTER ARCHITECTURE:
+The RTL refresh controller uses a DOWN-COUNTER for tREFI, not an up-counter.
+The counter is held at 0 while init_done=0. On the FIRST cycle after init_done
+transitions to 1, the counter sees value==0, which fires refi_tick IMMEDIATELY
+and reloads the counter with cfg_tREFI_nCK. This means:
+  - ref_required asserts on the VERY FIRST cycle after init_done goes high
+  - postpone_cnt increments to 1 immediately when init_done transitions 0→1
+  - The first full tREFI interval starts counting DOWN from cfg_tREFI_nCK AFTER
+    this initial tick
+  - While init_done=0, both refi_counter and postpone_cnt are held at 0
+If you model the refresh counter as an up-counter starting from 0, the first
+ref_required will be delayed by a full tREFI interval, causing mismatches.
+
+CRITICAL — RTL PIPELINE LATENCY (from RTL source inspection):
+The RTL has registered outputs at every boundary. The EXACT timing is:
+
+  Cycle N:   Scheduler combinational decision (based on current bank state)
+             At posedge: scheduler registers cmd_valid, cmd_type, deq_grant, ref_ack
+  Cycle N+1: cmd_gen sees scheduler output.
+             At posedge: cmd_gen registers ddr_cmd, fb_act_valid, etc.
+  Cycle N+2: DDR pins show the command (ddr_cmd, ddr_addr, ddr_bank visible).
+             fb_act_valid is also visible to bank_tracker inputs.
+             BUT bank_tracker state has NOT updated yet.
+             At posedge: bank_tracker captures feedback, updates bk_state registers.
+  Cycle N+3: bank_tracker state registers have new values.
+             Combinational outputs (all_banks_idle, bank_is_active) update immediately.
+             Scheduler sees updated state for next decision.
+
+CRITICAL — FEEDBACK DELAY IN REFMODEL:
+Your step() must NOT update bank state in the same cycle it outputs the DDR command.
+The DDR command and the bank state update are OFFSET BY 1 CYCLE.
+
+Correct step() order:
+  1. Apply PENDING feedback from the PREVIOUS cycle to bank state
+  2. Decrement timing counters
+  3. Compute combinational outputs (all_banks_idle, faw_allows_act) from CURRENT state
+  4. CAPTURE DDR output from pipe_s2 BEFORE shifting (this is 2 cycles old)
+  5. Shift pipeline: pipe_s2 = pipe_s1, pipe_s1 = new_decision
+  6. Store old pipe_s2 command as pending feedback (to be applied NEXT cycle)
+
+CRITICAL — OUTPUT PIPELINE STAGES ARE DIFFERENT:
+  ddr_cmd, ddr_addr, ddr_bank come from the CAPTURED old pipe_s2 (step 4) — 2 cycles delayed
+  deq_grant, ref_ack come from pipe_s2 AFTER the shift (step 5) — 1 cycle delayed
+  These are NOT from the same pipeline stage!
+  ddr_cmd is the cmd_gen output (2 cycle delay).
+  deq_grant/ref_ack are the scheduler output (1 cycle delay).
+  The LLM MUST read deq_grant and ref_ack from self.pipe_s2 AFTER the shift,
+  NOT from the captured output_stage variable.
+
+Use a pending_feedback buffer:
+  self.pending_fb_type = None (or SCHED_NOP)
+  self.pending_fb_bank = 0
+  self.pending_fb_row = 0
+
+Each step: apply pending_fb, then set pending_fb = current pipe_s2 command.
+This ensures all_banks_idle reflects the state BEFORE the current DDR command's
+effect, matching the RTL where bank_tracker hasn't processed this cycle's feedback yet.
+
+CRITICAL — SCHEDULER RE-ISSUE BEHAVIOR:
+The scheduler has NO stall, backpressure, or "already sent" tracking. It is purely
+combinational — it evaluates bank state EVERY cycle and issues a command EVERY cycle.
+Because bank state doesn't update until 3 cycles after a decision, the scheduler
+WILL RE-ISSUE THE SAME COMMAND for 2-3 consecutive cycles until feedback arrives.
+
+Example: q_valid_0=1, bank 0 is idle:
+  Cycle 0: scheduler sees bank_idle → decision=ACT
+  Cycle 1: scheduler STILL sees bank_idle (feedback not back yet) → decision=ACT again
+  Cycle 2: scheduler STILL sees bank_idle → decision=ACT again
+  Cycle 3: bank_tracker updated, bank_is_active=1 → scheduler sees row hit → decision=RD
+
+Your refmodel MUST replicate this re-issue behavior. Do NOT suppress duplicate
+commands — if bank state hasn't changed, issue the same command again. The RTL does.
+
+SCHEDULER PRIORITY ORDER (from RTL always_comb):
+  Priority 1: ref_urgent → CMD_REF (preempts everything)
+  Priority 2: Row-hit CAS (is_cas_ready, lowest queue index wins) → CMD_RD or CMD_WR
+              is_cas_ready = q_valid AND bank_is_active AND (bank_open_row == q_row)
+                             AND (q_we ? bank_wr_allowed : bank_rd_allowed)
+  Priority 3: Row-miss handling (is_act_needed, lowest queue index wins):
+              If bank active with wrong row AND bank_pre_allowed → CMD_PRE
+              If bank idle AND bank_act_allowed → CMD_ACT
+              is_act_needed = q_valid AND (!bank_is_active OR (bank_open_row != q_row))
+  Priority 4: ref_required (normal, non-urgent) → CMD_REF
+  Priority 5: Nothing valid → CMD_NOP (sel_valid=0)
+
+deq_grant only asserts for CMD_RD or CMD_WR (CAS commands that complete a request).
+ACT and PRE do NOT dequeue — they are intermediate steps.
+
+REFRESH STATE CLEANUP (MANDATORY — implement exactly this logic):
+When applying feedback for a REF command in your _apply_feedback method:
+```python
+if cmd_type == SCHED_REF:
+    for b in range(NUM_BANKS):
+        bank_is_active[b] = 0
+        bank_open_row[b] = 0
+    cnt_rfc = cfg_tRFC_nCK        # start RFC countdown
+    faw_window = []                # CLEAR — all prior ACTs invalidated
+    cnt_rrd = 0                    # CLEAR — no prior ACT relevant
+    refresh_in_progress = True     # block scheduling until cnt_rfc == 0
+```
+When decrementing counters:
+```python
+if cnt_rfc > 0:
+    cnt_rfc -= 1
+if cnt_rfc == 0 and refresh_in_progress:
+    refresh_in_progress = False    # unblock scheduling
+```
+If you omit the faw_window=[] line, post-refresh ACTs will be blocked by
+stale timestamps and ref_ack will mismatch.
+
+DDR COMMAND ENCODING (from RTL cmd_gen.sv — use these exact values):
+  NOP  = 4'b0111 = 7    ACT  = 4'b0011 = 3    RD   = 4'b0101 = 5
+  WR   = 4'b0100 = 4    PRE  = 4'b0010 = 2    REF  = 4'b0001 = 1
+  MRS  = 4'b0000 = 0    ZQCL = 4'b0110 = 6    DESL = 4'b1111 = 15
+These are CS#/RAS#/CAS#/WE# active-low encoding. NOP is NOT 0.
+
+The file MUST end with:
+```python
+if __name__ == "__main__":
+    run_self_test()
+```
+Without this block the testbench cannot execute the self-test and the model will be discarded.
+
+run_self_test() must verify:
+1. After reset, all outputs are at their reset values
+2. Basic data flow through the path works correctly
+3. Boundary conditions specific to this path are handled
+4. step() returns a dict containing all expected output signal keys
+5. step() accepts and ignores unknown keyword arguments without crashing
+
+Print exactly "ALL TESTS PASSED" if all pass.

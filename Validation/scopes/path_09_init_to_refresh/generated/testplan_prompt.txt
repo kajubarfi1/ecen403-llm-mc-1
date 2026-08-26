@@ -1,0 +1,28 @@
+Generate a test plan for the Init FSM → Refresh Controller integration path.
+
+SPEC:
+{spec_json}
+
+PATH: init_fsm -> refresh_ctrl
+CONNECTIONS:
+  init_fsm -> refresh_ctrl: Init FSM signals init_done to refresh controller.
+
+Available input signals (testbench drives these): "enable", "cfg_force_refresh", "cfg_tREFI_nCK", "cfg_max_postpone", "cfg_urgent_threshold", "cfg_ref_priority", "ref_ack"
+Available output signals (testbench checks these): "init_fail", "init_cmd_valid", "init_cmd", "init_addr", "init_bank", "init_cke", "init_reset_n", "init_state", "ref_required", "ref_urgent", "ref_pending_cnt", "ref_starve_flag"
+
+Output a JSON array of test operations:
+  {"op": "reset"}
+  {"op": "drive", "signals": {"signal_name": value, ...}, "comment": "<why>"}
+  {"op": "check", "expected": {"signal_name": expected_value, ...}, "comment": "<why>"}
+  {"op": "step", "cycles": <int>, "comment": "<why>"}
+
+All values are decimal integers.
+
+Generate at least 40 operations that exercise:
+1. Reset and verify initial state
+2. Normal operation through the path
+3. Boundary conditions (overflow, underflow, stall, timeout)
+4. Back-to-back operations
+5. State transitions at each block in the chain
+
+Output ONLY the JSON array.

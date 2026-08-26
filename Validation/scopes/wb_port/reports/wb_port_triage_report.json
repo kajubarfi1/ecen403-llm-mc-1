@@ -1,0 +1,71 @@
+{
+  "scope": "wb_port",
+  "timestamp": "2026-03-17T14:48:03.859373",
+  "status": "triaged",
+  "passes": {
+    "classify": {
+      "category": "compile_error",
+      "severity": "critical",
+      "failure_summary": "The testbench wb_port_tb.sv fails elaboration due to multiple drivers on always_ff output variables rsp_valid and rsp_rdata. The Cadence Xcelium elaborator (xmelab) detected that these signals are being driven from multiple always_ff blocks, which violates SystemVerilog synthesis semantics. Line 122 is flagged as one of the conflicting driver locations. The rsp_rdata error appears 9 times, suggesting it is a multi-bit bus where each bit conflict is reported separately. The simulation never executed any test vectors.",
+      "affected_vector_range": "N/A",
+      "likely_component": "testbench",
+      "initial_hypothesis": "The testbench contains multiple always_ff blocks that independently drive rsp_valid and rsp_rdata signals. This commonly occurs when (1) a response generation block and a reset/initialization block both assign to these signals, (2) copy-paste errors created duplicate procedural blocks, or (3) the testbench incorrectly models a bus functional model with separate always_ff blocks for different response scenarios instead of consolidating them into a single always_ff with conditional logic. The fix requires merging all drivers of rsp_valid and rsp_rdata into a single always_ff block or converting to always_comb if combinational behavior was intended.",
+      "needs_deeper_analysis": true,
+      "_category": "compile_error"
+    },
+    "localize": {
+      "failure_patterns": [
+        {
+          "pattern_id": 1,
+          "description": "Compile/elaboration errors prevent simulation",
+          "affected_addresses": [],
+          "affected_fields": [],
+          "vector_indices": [],
+          "expected_correct_per_spec": null,
+          "testbench_drives_correctly": null,
+          "notes": "xmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_valid detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected.\nxmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_rdata detected."
+        }
+      ],
+      "common_thread": "Compile errors must be fixed before triage can proceed",
+      "refined_hypothesis": "Fix compile errors in RTL or testbench"
+    },
+    "rootcause": {
+      "root_causes": [
+        {
+          "pattern_id": 1,
+          "guilty_component": "testbench",
+          "confidence": "high",
+          "root_cause": "The testbench has multiple drivers for signals rsp_valid, rsp_rdata, and rsp_aux. These signals are driven both by the initial block (lines 102-104) and by an always_ff block (lines 122-137). SystemVerilog always_ff blocks enforce single-driver semantics, causing the elaboration error.",
+          "evidence": "Error messages: 'xmelab: *E,MULAXX (./wb_port_tb.sv,122|12): Multiple drivers to always_ff output variable rsp_valid detected.' and similar for rsp_rdata. Line 102-104 shows initial block: 'rsp_valid = 1'b0; rsp_rdata = 32'b0; rsp_aux = 4'b0;'. Lines 122-137 show always_ff block driving the same signals with non-blocking assignments.",
+          "mechanism": "1. The initial block at line 102-104 assigns initial values to rsp_valid, rsp_rdata, and rsp_aux using blocking assignments. 2. The always_ff block starting at line 122 also drives these same signals with non-blocking assignments. 3. SystemVerilog semantics require that signals driven by always_ff can only have a single procedural driver. 4. The elaborator detects both the initial block and always_ff block as separate drivers to the same signals. 5. The MULAXX error is issued, preventing simulation from running."
+        }
+      ],
+      "primary_root_cause": "Testbench coding error: signals rsp_valid, rsp_rdata, and rsp_aux are driven from both an initial block (line 102-104) and an always_ff block (line 122), violating SystemVerilog's single-driver requirement for always_ff outputs. The fix is to either remove the initialization of these signals from the initial block (relying on the always_ff reset clause instead), or change the always_ff to a regular always block.",
+      "is_rtl_bug": false,
+      "is_verification_bug": true
+    },
+    "recommend": {
+      "recommendations": [
+        {
+          "pattern_id": 1,
+          "target_file": "testbench",
+          "fix_type": "code_change",
+          "description": "Remove the initialization of rsp_valid, rsp_rdata, and rsp_aux from the initial block (lines 102-104). These signals should only be driven by the always_ff block, which already handles reset initialization. The always_ff reset branch should ensure proper initialization when the reset signal is asserted.",
+          "suggested_fix": "Option 1 (Preferred): Remove lines 102-104 from the initial block:\n  // DELETE: rsp_valid = 1'b0;\n  // DELETE: rsp_rdata = 32'b0;\n  // DELETE: rsp_aux = 4'b0;\n\nEnsure the always_ff block (line 122) has proper reset handling:\n  always_ff @(posedge clk or negedge rst_n) begin\n    if (!rst_n) begin\n      rsp_valid <= 1'b0;\n      rsp_rdata <= 32'b0;\n      rsp_aux <= 4'b0;\n    end else begin\n      // existing logic\n    end\n  end\n\nOption 2 (Alternative): Change always_ff to always @(posedge clk) if synthesis semantics are not required in the testbench.",
+          "priority": "critical",
+          "can_auto_fix": true
+        }
+      ],
+      "suggested_pipeline_action": "regenerate_testbench",
+      "summary": "The simulation failed during elaboration due to a testbench coding error where rsp_valid, rsp_rdata, and rsp_aux signals have multiple drivers (initial block and always_ff block). This is a verification infrastructure bug, not an RTL issue. The fix requires regenerating the testbench to remove the conflicting initial block assignments and rely solely on the always_ff reset clause for initialization."
+    }
+  },
+  "category": "compile_error",
+  "severity": "critical",
+  "primary_root_cause": "Testbench coding error: signals rsp_valid, rsp_rdata, and rsp_aux are driven from both an initial block (line 102-104) and an always_ff block (line 122), violating SystemVerilog's single-driver requirement for always_ff outputs. The fix is to either remove the initialization of these signals from the initial block (relying on the always_ff reset clause instead), or change the always_ff to a regular always block.",
+  "is_rtl_bug": false,
+  "is_verification_bug": true,
+  "guilty_component": "testbench",
+  "suggested_action": "regenerate_testbench",
+  "summary": "The simulation failed during elaboration due to a testbench coding error where rsp_valid, rsp_rdata, and rsp_aux signals have multiple drivers (initial block and always_ff block). This is a verification infrastructure bug, not an RTL issue. The fix requires regenerating the testbench to remove the conflicting initial block assignments and rely solely on the always_ff reset clause for initialization."
+}

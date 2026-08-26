@@ -1,0 +1,866 @@
+{
+  "scope": "wb_port",
+  "generator": "vector_gen_agent_llm",
+  "spec_source": "llmmc_microarchitecturespec_filled.json",
+  "generated_at": "2026-03-17T15:11:19.933856",
+  "vector_count": 107,
+  "hex_format": "OO AAAAAAAA WWWWWWWW EEEEEEEE (op addr wdata expected)",
+  "vectors": [
+    {
+      "op": 0,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "RESET",
+      "hex_line": "00 00000000 00000000 00000000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Initial idle after reset",
+      "hex_line": "03 00000000 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 0,
+      "wdata": 305419896,
+      "expected": 1,
+      "comment": "Classic write at address 0",
+      "hex_line": "02 00000000 12345678 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Classic read at address 0, verify data round-trip",
+      "hex_line": "01 00000000 00000000 DEAD0000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Idle between transactions",
+      "hex_line": "03 00000000 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 256,
+      "wdata": 2779096485,
+      "expected": 1,
+      "comment": "Classic write at address 256",
+      "hex_line": "02 00000100 A5A5A5A5 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 256,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Classic read at address 256",
+      "hex_line": "01 00000100 00000000 DEAD0000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Idle between transactions",
+      "hex_line": "03 00000000 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 4096,
+      "wdata": 1515870810,
+      "expected": 1,
+      "comment": "Classic write at address 4096",
+      "hex_line": "02 00001000 5A5A5A5A 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 4096,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Classic read at address 4096",
+      "hex_line": "01 00001000 00000000 DEAD0000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Idle between transactions",
+      "hex_line": "03 00000000 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 65536,
+      "wdata": 4294967295,
+      "expected": 1,
+      "comment": "Classic write at address 65536 with max value",
+      "hex_line": "02 00010000 FFFFFFFF 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 65536,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Classic read at address 65536",
+      "hex_line": "01 00010000 00000000 DEAD0000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Idle between transactions",
+      "hex_line": "03 00000000 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 536870908,
+      "wdata": 2779096485,
+      "expected": 1,
+      "comment": "Classic write near max address",
+      "hex_line": "02 1FFFFFFC A5A5A5A5 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 536870908,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Classic read near max address",
+      "hex_line": "01 1FFFFFFC 00000000 DEAD0000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Idle before byte-masked tests",
+      "hex_line": "03 00000000 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 512,
+      "wdata": 4294967295,
+      "expected": 1,
+      "comment": "Write full word 0xFFFFFFFF for byte-mask testing",
+      "hex_line": "02 00000200 FFFFFFFF 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 512,
+      "wdata": 0,
+      "expected": 1,
+      "comment": "Partial write sel=1 (byte 0 only)",
+      "hex_line": "02 00000200 00000000 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 512,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read back, expect 0xFFFFFF00",
+      "hex_line": "01 00000200 00000000 DEAD0000"
+    },
+    {
+      "op": 2,
+      "addr": 516,
+      "wdata": 4294967295,
+      "expected": 1,
+      "comment": "Write full word for sel=2 test",
+      "hex_line": "02 00000204 FFFFFFFF 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 516,
+      "wdata": 0,
+      "expected": 1,
+      "comment": "Partial write sel=2 (byte 1 only)",
+      "hex_line": "02 00000204 00000000 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 516,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read back, expect 0xFFFF00FF",
+      "hex_line": "01 00000204 00000000 DEAD0000"
+    },
+    {
+      "op": 2,
+      "addr": 520,
+      "wdata": 4294967295,
+      "expected": 1,
+      "comment": "Write full word for sel=4 test",
+      "hex_line": "02 00000208 FFFFFFFF 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 520,
+      "wdata": 0,
+      "expected": 1,
+      "comment": "Partial write sel=4 (byte 2 only)",
+      "hex_line": "02 00000208 00000000 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 520,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read back, expect 0xFF00FFFF",
+      "hex_line": "01 00000208 00000000 DEAD0000"
+    },
+    {
+      "op": 2,
+      "addr": 524,
+      "wdata": 4294967295,
+      "expected": 1,
+      "comment": "Write full word for sel=8 test",
+      "hex_line": "02 0000020C FFFFFFFF 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 524,
+      "wdata": 0,
+      "expected": 1,
+      "comment": "Partial write sel=8 (byte 3 only)",
+      "hex_line": "02 0000020C 00000000 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 524,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read back, expect 0x00FFFFFF",
+      "hex_line": "01 0000020C 00000000 DEAD0000"
+    },
+    {
+      "op": 2,
+      "addr": 528,
+      "wdata": 4294967295,
+      "expected": 1,
+      "comment": "Write full word for sel=3 test",
+      "hex_line": "02 00000210 FFFFFFFF 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 528,
+      "wdata": 0,
+      "expected": 1,
+      "comment": "Partial write sel=3 (bytes 0-1)",
+      "hex_line": "02 00000210 00000000 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 528,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read back, expect 0xFFFF0000",
+      "hex_line": "01 00000210 00000000 DEAD0000"
+    },
+    {
+      "op": 2,
+      "addr": 532,
+      "wdata": 4294967295,
+      "expected": 1,
+      "comment": "Write full word for sel=5 test",
+      "hex_line": "02 00000214 FFFFFFFF 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 532,
+      "wdata": 0,
+      "expected": 1,
+      "comment": "Partial write sel=5 (bytes 0,2)",
+      "hex_line": "02 00000214 00000000 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 532,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read back, expect 0xFF00FF00",
+      "hex_line": "01 00000214 00000000 DEAD0000"
+    },
+    {
+      "op": 2,
+      "addr": 536,
+      "wdata": 4294967295,
+      "expected": 1,
+      "comment": "Write full word for sel=10 test",
+      "hex_line": "02 00000218 FFFFFFFF 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 536,
+      "wdata": 0,
+      "expected": 1,
+      "comment": "Partial write sel=10 (bytes 1,3)",
+      "hex_line": "02 00000218 00000000 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 536,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read back, expect 0x00FF00FF",
+      "hex_line": "01 00000218 00000000 DEAD0000"
+    },
+    {
+      "op": 2,
+      "addr": 540,
+      "wdata": 4294967295,
+      "expected": 1,
+      "comment": "Write full word for sel=12 test",
+      "hex_line": "02 0000021C FFFFFFFF 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 540,
+      "wdata": 0,
+      "expected": 1,
+      "comment": "Partial write sel=12 (bytes 2-3)",
+      "hex_line": "02 0000021C 00000000 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 540,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read back, expect 0x0000FFFF",
+      "hex_line": "01 0000021C 00000000 DEAD0000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Idle before 4-beat burst write",
+      "hex_line": "03 00000000 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 1024,
+      "wdata": 286331153,
+      "expected": 1,
+      "comment": "4-beat burst write beat 0",
+      "hex_line": "02 00000400 11111111 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 1028,
+      "wdata": 572662306,
+      "expected": 1,
+      "comment": "4-beat burst write beat 1",
+      "hex_line": "02 00000404 22222222 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 1032,
+      "wdata": 858993459,
+      "expected": 1,
+      "comment": "4-beat burst write beat 2",
+      "hex_line": "02 00000408 33333333 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 1036,
+      "wdata": 1145324612,
+      "expected": 1,
+      "comment": "4-beat burst write beat 3 (end)",
+      "hex_line": "02 0000040C 44444444 00000001"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Idle after burst write",
+      "hex_line": "03 00000000 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 1024,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "4-beat burst read beat 0",
+      "hex_line": "01 00000400 00000000 DEAD0000"
+    },
+    {
+      "op": 1,
+      "addr": 1028,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "4-beat burst read beat 1",
+      "hex_line": "01 00000404 00000000 DEAD0000"
+    },
+    {
+      "op": 1,
+      "addr": 1032,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "4-beat burst read beat 2",
+      "hex_line": "01 00000408 00000000 DEAD0000"
+    },
+    {
+      "op": 1,
+      "addr": 1036,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "4-beat burst read beat 3 (end)",
+      "hex_line": "01 0000040C 00000000 DEAD0000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Idle before 8-beat burst write",
+      "hex_line": "03 00000000 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 2048,
+      "wdata": 16843009,
+      "expected": 1,
+      "comment": "8-beat burst write beat 0",
+      "hex_line": "02 00000800 01010101 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 2052,
+      "wdata": 33686018,
+      "expected": 1,
+      "comment": "8-beat burst write beat 1",
+      "hex_line": "02 00000804 02020202 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 2056,
+      "wdata": 50529027,
+      "expected": 1,
+      "comment": "8-beat burst write beat 2",
+      "hex_line": "02 00000808 03030303 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 2060,
+      "wdata": 67372036,
+      "expected": 1,
+      "comment": "8-beat burst write beat 3",
+      "hex_line": "02 0000080C 04040404 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 2064,
+      "wdata": 84215045,
+      "expected": 1,
+      "comment": "8-beat burst write beat 4",
+      "hex_line": "02 00000810 05050505 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 2068,
+      "wdata": 101058054,
+      "expected": 1,
+      "comment": "8-beat burst write beat 5",
+      "hex_line": "02 00000814 06060606 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 2072,
+      "wdata": 117901063,
+      "expected": 1,
+      "comment": "8-beat burst write beat 6",
+      "hex_line": "02 00000818 07070707 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 2076,
+      "wdata": 134744072,
+      "expected": 1,
+      "comment": "8-beat burst write beat 7 (end)",
+      "hex_line": "02 0000081C 08080808 00000001"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Idle after 8-beat burst write",
+      "hex_line": "03 00000000 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 2048,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "8-beat burst read beat 0",
+      "hex_line": "01 00000800 00000000 DEAD0000"
+    },
+    {
+      "op": 1,
+      "addr": 2052,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "8-beat burst read beat 1",
+      "hex_line": "01 00000804 00000000 DEAD0000"
+    },
+    {
+      "op": 1,
+      "addr": 2056,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "8-beat burst read beat 2",
+      "hex_line": "01 00000808 00000000 DEAD0000"
+    },
+    {
+      "op": 1,
+      "addr": 2060,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "8-beat burst read beat 3",
+      "hex_line": "01 0000080C 00000000 DEAD0000"
+    },
+    {
+      "op": 1,
+      "addr": 2064,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "8-beat burst read beat 4",
+      "hex_line": "01 00000810 00000000 DEAD0000"
+    },
+    {
+      "op": 1,
+      "addr": 2068,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "8-beat burst read beat 5",
+      "hex_line": "01 00000814 00000000 DEAD0000"
+    },
+    {
+      "op": 1,
+      "addr": 2072,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "8-beat burst read beat 6",
+      "hex_line": "01 00000818 00000000 DEAD0000"
+    },
+    {
+      "op": 1,
+      "addr": 2076,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "8-beat burst read beat 7 (end)",
+      "hex_line": "01 0000081C 00000000 DEAD0000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Idle before data pattern tests",
+      "hex_line": "03 00000000 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 3072,
+      "wdata": 0,
+      "expected": 1,
+      "comment": "Write data pattern 0",
+      "hex_line": "02 00000C00 00000000 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 3072,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read back data pattern 0",
+      "hex_line": "01 00000C00 00000000 DEAD0000"
+    },
+    {
+      "op": 2,
+      "addr": 3076,
+      "wdata": 4294967295,
+      "expected": 1,
+      "comment": "Write data pattern 0xFFFFFFFF",
+      "hex_line": "02 00000C04 FFFFFFFF 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 3076,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read back data pattern 0xFFFFFFFF",
+      "hex_line": "01 00000C04 00000000 DEAD0000"
+    },
+    {
+      "op": 2,
+      "addr": 3080,
+      "wdata": 2779096485,
+      "expected": 1,
+      "comment": "Write data pattern 0xA5A5A5A5",
+      "hex_line": "02 00000C08 A5A5A5A5 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 3080,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read back data pattern 0xA5A5A5A5",
+      "hex_line": "01 00000C08 00000000 DEAD0000"
+    },
+    {
+      "op": 2,
+      "addr": 3084,
+      "wdata": 1515870810,
+      "expected": 1,
+      "comment": "Write data pattern 0x5A5A5A5A",
+      "hex_line": "02 00000C0C 5A5A5A5A 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 3084,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read back data pattern 0x5A5A5A5A",
+      "hex_line": "01 00000C0C 00000000 DEAD0000"
+    },
+    {
+      "op": 2,
+      "addr": 3088,
+      "wdata": 305419896,
+      "expected": 1,
+      "comment": "Write data pattern 0x12345678",
+      "hex_line": "02 00000C10 12345678 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 3088,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read back data pattern 0x12345678",
+      "hex_line": "01 00000C10 00000000 DEAD0000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Idle before back-to-back writes",
+      "hex_line": "03 00000000 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 4096,
+      "wdata": 4278255360,
+      "expected": 1,
+      "comment": "Back-to-back write addr 4096",
+      "hex_line": "02 00001000 FF00FF00 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 4100,
+      "wdata": 4278255361,
+      "expected": 1,
+      "comment": "Back-to-back write addr 4100",
+      "hex_line": "02 00001004 FF00FF01 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 4104,
+      "wdata": 4278255362,
+      "expected": 1,
+      "comment": "Back-to-back write addr 4104",
+      "hex_line": "02 00001008 FF00FF02 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 4108,
+      "wdata": 4278255363,
+      "expected": 1,
+      "comment": "Back-to-back write addr 4108",
+      "hex_line": "02 0000100C FF00FF03 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 4096,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Verify back-to-back write addr 4096",
+      "hex_line": "01 00001000 00000000 DEAD0000"
+    },
+    {
+      "op": 1,
+      "addr": 4100,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Verify back-to-back write addr 4100",
+      "hex_line": "01 00001004 00000000 DEAD0000"
+    },
+    {
+      "op": 1,
+      "addr": 4104,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Verify back-to-back write addr 4104",
+      "hex_line": "01 00001008 00000000 DEAD0000"
+    },
+    {
+      "op": 1,
+      "addr": 4108,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Verify back-to-back write addr 4108",
+      "hex_line": "01 0000100C 00000000 DEAD0000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Idle before unwritten address read",
+      "hex_line": "03 00000000 00000000 00000000"
+    },
+    {
+      "op": 1,
+      "addr": 131072,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read from unwritten address, expect 0 or undefined",
+      "hex_line": "01 00020000 00000000 DEAD0000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Idle before overwrite test",
+      "hex_line": "03 00000000 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 8192,
+      "wdata": 3735928559,
+      "expected": 1,
+      "comment": "First write 0xDEADBEEF to addr 8192",
+      "hex_line": "02 00002000 DEADBEEF 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 8192,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Verify first write",
+      "hex_line": "01 00002000 00000000 DEAD0000"
+    },
+    {
+      "op": 2,
+      "addr": 8192,
+      "wdata": 3405691582,
+      "expected": 1,
+      "comment": "Overwrite with 0xCAFEBABE to addr 8192",
+      "hex_line": "02 00002000 CAFEBABE 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 8192,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Verify overwrite, expect 0xCAFEBABE",
+      "hex_line": "01 00002000 00000000 DEAD0000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Idle before row boundary test",
+      "hex_line": "03 00000000 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 2044,
+      "wdata": 4008636142,
+      "expected": 1,
+      "comment": "Write near page boundary",
+      "hex_line": "02 000007FC EEEEEEEE 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 2048,
+      "wdata": 4008636143,
+      "expected": 1,
+      "comment": "Write at page boundary",
+      "hex_line": "02 00000800 EEEEEEEF 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 2044,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read near page boundary",
+      "hex_line": "01 000007FC 00000000 DEAD0000"
+    },
+    {
+      "op": 1,
+      "addr": 2048,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read at page boundary",
+      "hex_line": "01 00000800 00000000 DEAD0000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Idle before bank crossing test",
+      "hex_line": "03 00000000 00000000 00000000"
+    },
+    {
+      "op": 2,
+      "addr": 262144,
+      "wdata": 2863311530,
+      "expected": 1,
+      "comment": "Write to bank 1 region",
+      "hex_line": "02 00040000 AAAAAAAA 00000001"
+    },
+    {
+      "op": 2,
+      "addr": 524288,
+      "wdata": 2863311531,
+      "expected": 1,
+      "comment": "Write to bank 2 region",
+      "hex_line": "02 00080000 AAAAAAAB 00000001"
+    },
+    {
+      "op": 1,
+      "addr": 262144,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read from bank 1 region",
+      "hex_line": "01 00040000 00000000 DEAD0000"
+    },
+    {
+      "op": 1,
+      "addr": 524288,
+      "wdata": 0,
+      "expected": 3735879680,
+      "comment": "Read from bank 2 region",
+      "hex_line": "01 00080000 00000000 DEAD0000"
+    },
+    {
+      "op": 3,
+      "addr": 0,
+      "wdata": 0,
+      "expected": 0,
+      "comment": "Final idle",
+      "hex_line": "03 00000000 00000000 00000000"
+    }
+  ]
+}

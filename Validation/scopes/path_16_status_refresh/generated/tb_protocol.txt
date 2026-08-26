@@ -1,0 +1,551 @@
+VECTOR HEX FILE FORMAT: path_16_status_refresh_vectors.hex
+Each line: OO PPPPPPPP DDDDDDDD EEEEEEEE
+  OO = opcode (8 bits):
+    00 = reset: Call handle_reset(). Do NOT write your own reset logic.
+    01 = drive: Call unpack_drive(DDDDDDDD) to set input signals. Advance 1 clock with @(posedge clk).
+    02 = check: Advance 1 clock with @(posedge clk), THEN call check_with_tolerance(vec_num, EEEEEEEE, pass_count, fail_count, total_tests).
+    03 = step: Advance PPPPPPPP clock cycles with repeat(PPPPPPPP) @(posedge clk).
+  PPPPPPPP = parameter (cycle count for step, 0 for other ops)
+  DDDDDDDD = packed input signal values (for drive ops)
+  EEEEEEEE = packed expected output values (for check ops)
+
+SIGNAL PACKING:
+  INPUT/DRIVE field packing (32-bit):
+    bit [0] = refresh_ctrl.init_done
+    bit [1] = refresh_ctrl.ref_ack
+    bit [2] = config_regs.csr_cyc_i
+    bit [3] = config_regs.csr_stb_i
+    bit [4] = config_regs.csr_we_i
+    bits [12:5] = config_regs.csr_adr_i
+  OUTPUT/CHECK field packing (32-bit):
+    bit [0] = refresh_ctrl.ref_required
+    bit [1] = refresh_ctrl.ref_urgent
+    bit [2] = config_regs.csr_ack_o
+
+TESTBENCH ARCHITECTURE:
+This testbench instantiates 2 modules wired together: refresh_ctrl, config_regs.
+RTL files needed: refresh_ctrl.sv, config_regs.sv
+
+Use these EXACT signal declarations and instantiations.
+COPY THIS WIRING BLOCK VERBATIM. Do NOT add ports that are not shown here.
+Do NOT add .clk or .rst_n connections to any module unless they appear below.
+Some modules (like addr_decoder) are purely combinational and have NO clock or reset.
+Adding clk/rst_n to a combinational module will cause an elaboration error.
+
+```systemverilog
+    // ---- Clock and reset ----
+    logic clk, rst_n;
+
+    // ---- Internal wires (between blocks) ----
+    logic        cfg_force_refresh;
+    logic [3:0] cfg_max_postpone;
+    logic        cfg_ref_priority;
+    logic [23:0] cfg_tREFI_nCK;
+    logic [3:0] cfg_urgent_threshold;
+    logic [2:0] refresh_ctrl_ref_pending_cnt;
+    logic        refresh_ctrl_ref_starve_flag;
+
+    // ---- Testbench-driven inputs ----
+    logic        init_done;
+    logic        ref_ack;
+    logic        csr_cyc_i;
+    logic        csr_stb_i;
+    logic        csr_we_i;
+    logic [7:0] csr_adr_i;
+    logic [31:0] csr_dat_i;
+    logic [3:0] csr_sel_i;
+    logic        sts_init_done;
+    logic        sts_cal_done;
+    logic        sts_cal_fail;
+    logic        sts_bist_done;
+    logic        sts_bist_fail;
+    logic        sts_self_refresh_active;
+    logic [15:0] sts_ecc_ce_count;
+    logic        sts_ecc_ue_event;
+    logic        sts_init_fail_event;
+    logic [12:0] sts_bist_fail_addr;
+
+    // ---- Testbench-monitored outputs ----
+    logic        ref_required;
+    logic        ref_urgent;
+    logic        csr_ack_o;
+    logic [31:0] csr_dat_o;
+    logic        csr_err_o;
+    logic [7:0] cfg_tRCD_nCK;
+    logic [7:0] cfg_tRP_nCK;
+    logic [7:0] cfg_tRAS_nCK;
+    logic [7:0] cfg_tRC_nCK;
+    logic [7:0] cfg_tRRD_nCK;
+    logic [7:0] cfg_tWTR_nCK;
+    logic [7:0] cfg_tFAW_nCK;
+    logic [7:0] cfg_tRFC_nCK;
+    logic [7:0] cfg_tWR_nCK;
+    logic [7:0] cfg_tRTP_nCK;
+    logic [7:0] cfg_CL_nCK;
+    logic [7:0] cfg_CWL_nCK;
+    logic [7:0] cfg_tCCD_nCK;
+    logic        cfg_sched_policy;
+    logic        cfg_row_policy;
+    logic [1:0] cfg_self_ref_mode;
+    logic        cfg_ecc_enable;
+    logic        cfg_bist_start;
+    logic        cfg_force_self_ref;
+    logic [2:0] cfg_bist_pattern;
+    logic        cfg_bist_addr_mode;
+    logic [28:0] cfg_bist_addr_start;
+    logic [28:0] cfg_bist_addr_end;
+
+    // ---- Module instantiations ----
+    refresh_ctrl u_refresh_ctrl (
+        .clk(clk),
+        .rst_n(rst_n),
+        .cfg_force_refresh(cfg_force_refresh),
+        .cfg_max_postpone(cfg_max_postpone),
+        .cfg_ref_priority(cfg_ref_priority),
+        .cfg_tREFI_nCK(cfg_tREFI_nCK),
+        .cfg_urgent_threshold(cfg_urgent_threshold),
+        .init_done(init_done),
+        .ref_ack(ref_ack),
+        .ref_pending_cnt(refresh_ctrl_ref_pending_cnt),
+        .ref_required(ref_required),
+        .ref_starve_flag(refresh_ctrl_ref_starve_flag),
+        .ref_urgent(ref_urgent)
+    );
+
+    config_regs u_config_regs (
+        .clk(clk),
+        .rst_n(rst_n),
+        .cfg_CL_nCK(cfg_CL_nCK),
+        .cfg_CWL_nCK(cfg_CWL_nCK),
+        .cfg_bist_addr_end(cfg_bist_addr_end),
+        .cfg_bist_addr_mode(cfg_bist_addr_mode),
+        .cfg_bist_addr_start(cfg_bist_addr_start),
+        .cfg_bist_pattern(cfg_bist_pattern),
+        .cfg_bist_start(cfg_bist_start),
+        .cfg_ecc_enable(cfg_ecc_enable),
+        .cfg_force_refresh(cfg_force_refresh),
+        .cfg_force_self_ref(cfg_force_self_ref),
+        .cfg_max_postpone(cfg_max_postpone),
+        .cfg_ref_priority(cfg_ref_priority),
+        .cfg_row_policy(cfg_row_policy),
+        .cfg_sched_policy(cfg_sched_policy),
+        .cfg_self_ref_mode(cfg_self_ref_mode),
+        .cfg_tCCD_nCK(cfg_tCCD_nCK),
+        .cfg_tFAW_nCK(cfg_tFAW_nCK),
+        .cfg_tRAS_nCK(cfg_tRAS_nCK),
+        .cfg_tRCD_nCK(cfg_tRCD_nCK),
+        .cfg_tRC_nCK(cfg_tRC_nCK),
+        .cfg_tREFI_nCK(cfg_tREFI_nCK),
+        .cfg_tRFC_nCK(cfg_tRFC_nCK),
+        .cfg_tRP_nCK(cfg_tRP_nCK),
+        .cfg_tRRD_nCK(cfg_tRRD_nCK),
+        .cfg_tRTP_nCK(cfg_tRTP_nCK),
+        .cfg_tWR_nCK(cfg_tWR_nCK),
+        .cfg_tWTR_nCK(cfg_tWTR_nCK),
+        .cfg_urgent_threshold(cfg_urgent_threshold),
+        .csr_ack_o(csr_ack_o),
+        .csr_adr_i(csr_adr_i),
+        .csr_cyc_i(csr_cyc_i),
+        .csr_dat_i(csr_dat_i),
+        .csr_dat_o(csr_dat_o),
+        .csr_err_o(csr_err_o),
+        .csr_sel_i(csr_sel_i),
+        .csr_stb_i(csr_stb_i),
+        .csr_we_i(csr_we_i),
+        .sts_bist_done(sts_bist_done),
+        .sts_bist_fail(sts_bist_fail),
+        .sts_bist_fail_addr(sts_bist_fail_addr),
+        .sts_cal_done(sts_cal_done),
+        .sts_cal_fail(sts_cal_fail),
+        .sts_ecc_ce_count(sts_ecc_ce_count),
+        .sts_ecc_ue_event(sts_ecc_ue_event),
+        .sts_init_done(sts_init_done),
+        .sts_init_fail_event(sts_init_fail_event),
+        .sts_ref_pending_cnt(refresh_ctrl_ref_pending_cnt),
+        .sts_ref_starve_event(refresh_ctrl_ref_starve_flag),
+        .sts_self_refresh_active(sts_self_refresh_active)
+    );
+
+```
+
+=== MANDATORY FUNCTIONS — COPY ALL OF THESE EXACTLY ===
+DO NOT MODIFY. DO NOT OMIT. DO NOT WRITE YOUR OWN RESET LOGIC.
+The vector file and reference model depend on these exact functions.
+
+```systemverilog
+    function automatic logic [31:0] pack_outputs();
+        logic [31:0] packed_val;
+        packed_val = 32'b0;
+        packed_val[0] = ref_required;
+        packed_val[1] = ref_urgent;
+        packed_val[2] = csr_ack_o;
+        return packed_val;
+    endfunction
+
+    task automatic unpack_drive(input logic [31:0] packed_val);
+        init_done = packed_val[0];
+        ref_ack = packed_val[1];
+        csr_cyc_i = packed_val[2];
+        csr_stb_i = packed_val[3];
+        csr_we_i = packed_val[4];
+        csr_adr_i = packed_val[12:5];
+    endtask
+
+    // Output history buffer for ±2 cycle tolerance checking
+    logic [31:0] out_history [0:2];
+    always @(posedge clk) begin
+        out_history[2] <= out_history[1];
+        out_history[1] <= out_history[0];
+        out_history[0] <= pack_outputs();
+    end
+
+    task automatic check_with_tolerance(
+        input int vec_num,
+        input logic [31:0] expected,
+        inout int pass_count,
+        inout int fail_count,
+        inout int total_tests
+    );
+        logic [31:0] actual;
+        actual = pack_outputs();
+        total_tests = total_tests + 1;
+        if (actual === expected ||
+            out_history[0] === expected ||
+            out_history[1] === expected ||
+            out_history[2] === expected) begin
+            pass_count = pass_count + 1;
+        end else begin
+            fail_count = fail_count + 1;
+            $display("MISMATCH vec=%0d expected=0x%08X actual=0x%08X", vec_num, expected, actual);
+        end
+    endtask
+
+    // ==========================================================================
+    // Event-Mode Verification Task Library
+    // ==========================================================================
+    // SPEC AUTHORING GUIDANCE:
+    // - Prefer sampling FSM state registers (e.g. init_fsm.init_state) over
+    //   chaining command-output handshakes. One wait_for on the terminal state
+    //   is clearer than 8 expect_handshakes on intermediate MRS commands.
+    // - Use check_not_yet immediately after event_start() to guard JEDEC
+    //   minimum-time constraints (e.g. init_done >= 140000 cycles from start).
+    // - check_order between two wait_for'd events validates relative ordering
+    //   without depending on absolute cycle counts.
+    // ==========================================================================
+
+    localparam int MAX_SIG_ID = 32;
+
+    // Per-signal arrival tracking. arrival_cycle[id] == -1 means "not yet seen".
+    int  arrival_cycle [0:MAX_SIG_ID-1];
+    int  arrival_value [0:MAX_SIG_ID-1];
+    int  sim_cycle;  // cycles since last event_start() (or event_reset())
+
+    // --- Latching predicate tracking (Stage 4 bugfix) ---
+    // first_seen[id] is the first latch_cycle at which sample_signal(id) was
+    // nonzero. Set to -1 until observed. This lets wait_for capture narrow
+    // 1-cycle predicates even when called after the pulse has already fired.
+    int  first_seen [0:MAX_SIG_ID-1];
+    int  latch_cycle;       // advances every posedge after latch_enabled
+    bit  latch_enabled;     // gated by event_start()
+
+    // Codegen'd per-path by Stage 2. Returns current value of signal `id`
+    // as a 32-bit word. Stub returns 0 so template compiles standalone.
+    function automatic logic [31:0] sample_signal(input int id);
+        sample_signal = 32'h0;
+        // __SAMPLE_SIGNAL_CASES__
+    endfunction
+
+    // Latch block: records first cycle each signal is nonzero. Runs on every
+    // posedge once latch_enabled is set by event_start(). Gives wait_for a
+    // reliable fast path for 1-cycle predicates and already-asserted signals.
+    always_ff @(posedge clk) begin
+        if (latch_enabled) begin
+            latch_cycle <= latch_cycle + 1;
+            for (int _li = 0; _li < MAX_SIG_ID; _li++) begin
+                if (first_seen[_li] < 0 && sample_signal(_li) != 32'h0) begin
+                    first_seen[_li] <= latch_cycle + 1;
+                end
+            end
+        end
+    end
+
+    task automatic event_reset();
+        for (int i = 0; i < MAX_SIG_ID; i++) begin
+            arrival_cycle[i] = -1;
+            arrival_value[i] = 0;
+            first_seen[i] = -1;
+        end
+        sim_cycle = 0;
+        latch_cycle = 0;
+        latch_enabled = 1'b0;
+    endtask
+
+    // Pulse the DUT's start signal (e.g. init_fsm.enable) and zero sim_cycle
+    // at THAT moment. Codegen'd per-path; stub is a no-op for paths with no
+    // autonomous start (e.g. CSR-only tail paths).
+    task automatic event_start();
+        // __EVENT_START_BODY__
+        for (int _si = 0; _si < MAX_SIG_ID; _si++) first_seen[_si] = -1;
+        sim_cycle = 0;
+        latch_cycle = 0;
+        latch_enabled = 1'b1;
+    endtask
+
+    // CRITICAL INVARIANT: any code that advances simulation time outside this
+    // task will cause sim_cycle drift. The opcode 03 (step) dispatch in Stage 4
+    // MUST call this task in a loop, NOT bare @(posedge clk). Mixing modes
+    // without going through event_tick() will silently break check_at and
+    // check_not_yet timing relative to event_start().
+    task automatic event_tick();
+        @(posedge clk);
+        sim_cycle = sim_cycle + 1;
+    endtask
+
+    // --------------------------------------------------------------------------
+    // wait_for: block until sample_signal(id) == value, up to `timeout` cycles.
+    // Records arrival on success. Counts as one test.
+    // --------------------------------------------------------------------------
+    task automatic wait_for(
+        input int          sig_id,
+        input logic [31:0] value,
+        input int          timeout,
+        input int          vec_num,
+        inout int          pass_count,
+        inout int          fail_count,
+        inout int          total_tests
+    );
+        int waited;
+        logic [31:0] obs;
+        bit done;
+        waited = 0;
+        done = 1'b0;
+        total_tests = total_tests + 1;
+
+        // FAST PATH (value == 1): consult the latch. If the signal was ever
+        // observed nonzero, use the recorded fire cycle — don't re-sample.
+        // This handles narrow 1-cycle predicates and already-latched signals
+        // correctly regardless of when wait_for was called.
+        if (value == 32'h1 && first_seen[sig_id] >= 0) begin
+            arrival_cycle[sig_id] = first_seen[sig_id];
+            arrival_value[sig_id] = 32'h1;
+            pass_count = pass_count + 1;
+            done = 1'b1;
+        end
+
+        while (!done) begin
+            if (value == 32'h1) begin
+                // Poll the latch each tick — parallel latch block records
+                // first_seen[sig_id] the instant the predicate fires.
+                if (first_seen[sig_id] >= 0) begin
+                    arrival_cycle[sig_id] = first_seen[sig_id];
+                    arrival_value[sig_id] = 32'h1;
+                    pass_count = pass_count + 1;
+                    done = 1'b1;
+                end else if (waited >= timeout) begin
+                    fail_count = fail_count + 1;
+                    $display("WAIT_FOR TIMEOUT vec=%0d sig=%0d expected=0x%08X after=%0d",
+                             vec_num, sig_id, value, waited);
+                    done = 1'b1;
+                end else begin
+                    event_tick();
+                    waited = waited + 1;
+                end
+            end else begin
+                // Non-1 target (rare: "wait for signal to be deasserted"):
+                // live-sample fallback, unchanged from the original semantics.
+                obs = sample_signal(sig_id);
+                if (obs === value) begin
+                    arrival_cycle[sig_id] = sim_cycle;
+                    arrival_value[sig_id] = obs;
+                    pass_count = pass_count + 1;
+                    done = 1'b1;
+                end else if (waited >= timeout) begin
+                    fail_count = fail_count + 1;
+                    $display("WAIT_FOR TIMEOUT vec=%0d sig=%0d expected=0x%08X last=0x%08X after=%0d",
+                             vec_num, sig_id, value, obs, waited);
+                    done = 1'b1;
+                end else begin
+                    event_tick();
+                    waited = waited + 1;
+                end
+            end
+        end
+    endtask
+
+    // --------------------------------------------------------------------------
+    // check_at: advance to absolute cycle `target` (relative to last event_start)
+    // and verify sample_signal(id) == value.
+    // --------------------------------------------------------------------------
+    task automatic check_at(
+        input int          sig_id,
+        input logic [31:0] value,
+        input int          target,
+        input int          vec_num,
+        inout int          pass_count,
+        inout int          fail_count,
+        inout int          total_tests
+    );
+        logic [31:0] obs;
+        total_tests = total_tests + 1;
+        while (sim_cycle < target) event_tick();
+        obs = sample_signal(sig_id);
+        if (obs === value) begin
+            pass_count = pass_count + 1;
+        end else begin
+            fail_count = fail_count + 1;
+            $display("CHECK_AT MISMATCH vec=%0d sig=%0d cycle=%0d expected=0x%08X actual=0x%08X",
+                     vec_num, sig_id, target, value, obs);
+        end
+    endtask
+
+    // --------------------------------------------------------------------------
+    // check_not_yet: from current sim_cycle through `until_cycle`, verify the
+    // signal never equals `value`. JEDEC minimum-time guard. NB: `until` is a
+    // SystemVerilog reserved word, hence `until_cycle`.
+    // --------------------------------------------------------------------------
+    task automatic check_not_yet(
+        input int          sig_id,
+        input logic [31:0] value,
+        input int          until_cycle,
+        input int          vec_num,
+        inout int          pass_count,
+        inout int          fail_count,
+        inout int          total_tests
+    );
+        logic [31:0] obs;
+        bit violated;
+        total_tests = total_tests + 1;
+        violated = 1'b0;
+        while (sim_cycle < until_cycle) begin
+            if (!violated) begin
+                obs = sample_signal(sig_id);
+                if (obs === value) begin
+                    fail_count = fail_count + 1;
+                    $display("CHECK_NOT_YET VIOLATION vec=%0d sig=%0d value=0x%08X arrived=%0d min=%0d",
+                             vec_num, sig_id, value, sim_cycle, until_cycle);
+                    violated = 1'b1;
+                end
+            end
+            event_tick();
+        end
+        if (!violated) pass_count = pass_count + 1;
+    endtask
+
+    // --------------------------------------------------------------------------
+    // expect_handshake: wait for valid && ready on the same posedge. Records
+    // arrival under valid_id.
+    // --------------------------------------------------------------------------
+    task automatic expect_handshake(
+        input int valid_id,
+        input int ready_id,
+        input int timeout,
+        input int vec_num,
+        inout int pass_count,
+        inout int fail_count,
+        inout int total_tests
+    );
+        int waited;
+        bit done;
+        waited = 0;
+        done = 1'b0;
+        total_tests = total_tests + 1;
+        while (!done) begin
+            if (sample_signal(valid_id) === 32'h1 &&
+                sample_signal(ready_id) === 32'h1) begin
+                arrival_cycle[valid_id] = sim_cycle;
+                arrival_value[valid_id] = 1;
+                pass_count = pass_count + 1;
+                done = 1'b1;
+            end else if (waited >= timeout) begin
+                fail_count = fail_count + 1;
+                $display("HANDSHAKE TIMEOUT vec=%0d valid_sig=%0d ready_sig=%0d after=%0d",
+                         vec_num, valid_id, ready_id, waited);
+                done = 1'b1;
+            end else begin
+                event_tick();
+                waited = waited + 1;
+            end
+        end
+    endtask
+
+    // --------------------------------------------------------------------------
+    // check_order: verify two prior wait_for/expect_handshake events occurred
+    // in the right order with at least `min_gap` cycles between them.
+    // --------------------------------------------------------------------------
+    task automatic check_order(
+        input int first_id,
+        input int second_id,
+        input int min_gap,
+        input int vec_num,
+        inout int pass_count,
+        inout int fail_count,
+        inout int total_tests
+    );
+        int gap;
+        bit done;
+        done = 1'b0;
+        total_tests = total_tests + 1;
+        if (arrival_cycle[first_id] < 0) begin
+            fail_count = fail_count + 1;
+            $display("CHECK_ORDER MISSING vec=%0d first_sig=%0d never observed", vec_num, first_id);
+            done = 1'b1;
+        end
+        if (!done && arrival_cycle[second_id] < 0) begin
+            fail_count = fail_count + 1;
+            $display("CHECK_ORDER MISSING vec=%0d second_sig=%0d never observed", vec_num, second_id);
+            done = 1'b1;
+        end
+        if (!done) begin
+            gap = arrival_cycle[second_id] - arrival_cycle[first_id];
+            if (gap < min_gap) begin
+                fail_count = fail_count + 1;
+                $display("CHECK_ORDER VIOLATION vec=%0d first=%0d@%0d second=%0d@%0d gap=%0d min=%0d",
+                         vec_num, first_id, arrival_cycle[first_id],
+                         second_id, arrival_cycle[second_id], gap, min_gap);
+            end else begin
+                pass_count = pass_count + 1;
+            end
+        end
+    endtask
+
+
+
+
+    task automatic handle_reset();
+        rst_n = 1'b0;
+        init_done = '0;
+        ref_ack = '0;
+        csr_cyc_i = '0;
+        csr_stb_i = '0;
+        csr_we_i = '0;
+        csr_adr_i = '0;
+        repeat(4) @(posedge clk);
+        rst_n = 1'b1;
+        @(posedge clk);
+        event_reset();  // clear arrival tracking + sim_cycle
+    endtask
+```
+
+TESTBENCH BEHAVIOR:
+- On opcode 00 (reset): Call handle_reset(). That is ALL. No other reset code.
+- On opcode 01 (drive): Call unpack_drive(DDDDDDDD). Then @(posedge clk).
+- On opcode 02 (check): @(posedge clk), then call pack_outputs(). Compare against EEEEEEEE.
+  On mismatch: $display("MISMATCH vec=%0d expected=0x%08X actual=0x%08X", vec_num, expect, actual).
+- On opcode 03 (step): repeat(PPPPPPPP) @(posedge clk).
+  NOTE: For event-mode compatibility, Stage 4 dispatch will replace this with
+  repeat(PPPPPPPP) event_tick() so sim_cycle stays consistent with event tasks.
+- Opcodes 04-09 (event mode, Stage 4): wait_for, check_at, check_not_yet,
+  expect_handshake, check_order, event_start. Use the verbatim event-mode task
+  library above. Do NOT reimplement these tasks.
+
+IMPORTANT:
+- Use $fscanf to read vectors line by line
+- $value$plusargs("VECTORS=%s", vector_file) with default "path_16_status_refresh_vectors.hex"
+- Track total_tests, pass_count, fail_count (count check ops as tests)
+- Print PASS/FAIL summary at end
+- Watchdog timeout: 200000 cycles
+- Module name: path_16_status_refresh_tb
+- NEVER use non-blocking assignments (<=) with associative arrays
+- NEVER use 'assign' statements for testbench-driven input signals
+- Port names must match EXACTLY
+- DO NOT add extra signals to pack_outputs or unpack_drive beyond what is shown above

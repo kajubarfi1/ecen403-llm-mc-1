@@ -1,0 +1,1271 @@
+[
+  {
+    "op": "reset",
+    "comment": "Full system reset to initialize all CSR, bank tracker, and scheduler state"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow reset to propagate through all pipeline stages"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 0,
+      "csr_err_o": 0,
+      "cmd_valid": 0,
+      "ref_ack": 0
+    },
+    "comment": "Verify quiescent state after reset - no pending acks, no commands issued"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_CL_nCK": 11,
+      "cfg_CWL_nCK": 8,
+      "cfg_tREFI_nCK": 6240
+    },
+    "comment": "Verify default timing parameters match DDR3-1600K spec after reset"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_sched_policy": 0,
+      "cfg_row_policy": 0,
+      "cfg_ecc_enable": 0,
+      "cfg_bist_start": 0
+    },
+    "comment": "Verify default scheduler/policy config registers are zero after reset"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "sts_init_done": 1,
+      "sts_cal_done": 1,
+      "sts_cal_fail": 0
+    },
+    "comment": "Signal that init and calibration are complete so controller is operational"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Let init_done propagate"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 0,
+      "csr_dat_i": 11,
+      "csr_sel_i": 15
+    },
+    "comment": "Write CL=11 to CSR register 0 (cfg_CL_nCK)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for CSR write acknowledge"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "csr_err_o": 0
+    },
+    "comment": "CSR write to CL register should be acknowledged without error"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert CSR bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Bus turnaround cycle"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 4,
+      "csr_dat_i": 8,
+      "csr_sel_i": 15
+    },
+    "comment": "Write CWL=8 to CSR register 1 (cfg_CWL_nCK)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for CSR ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "cfg_CWL_nCK": 8
+    },
+    "comment": "Verify CWL write acknowledged and output updated"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert CSR bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Bus turnaround"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 8,
+      "csr_dat_i": 6240,
+      "csr_sel_i": 15
+    },
+    "comment": "Write tREFI=6240 cycles to CSR register 2"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "cfg_tREFI_nCK": 6240
+    },
+    "comment": "Verify tREFI written correctly"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert CSR bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Bus turnaround"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 12,
+      "csr_dat_i": 1,
+      "csr_sel_i": 15
+    },
+    "comment": "Write scheduler policy = 1 (e.g. FR-FCFS) to policy register"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "cfg_sched_policy": 1
+    },
+    "comment": "Scheduler policy updated to FR-FCFS"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert CSR bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Bus turnaround"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 16,
+      "csr_dat_i": 1,
+      "csr_sel_i": 15
+    },
+    "comment": "Write row_policy = 1 (open-page) to row policy register"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "cfg_row_policy": 1
+    },
+    "comment": "Row policy updated to open-page"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert CSR bus"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow config to propagate to bank tracker and scheduler"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 1,
+      "cmd_act_bank": 0,
+      "cmd_act_row": 100
+    },
+    "comment": "Issue ACTIVATE to bank 0, row 100 - bank tracker should start tRCD countdown"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock in the activate command"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 0
+    },
+    "comment": "Deassert activate"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 0
+    },
+    "comment": "Scheduler should not issue column command yet - tRCD not elapsed (11 cycles)"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Wait 5 cycles, still within tRCD=11"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 100,
+      "q_col_0": 0,
+      "q_bank_0": 0,
+      "q_we_0": 0,
+      "q_aux_0": 0
+    },
+    "comment": "Present a read request to bank 0 row 100 in request queue (page hit)"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 0
+    },
+    "comment": "tRCD still not elapsed (only 6 of 11 cycles), scheduler must wait"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Complete remaining tRCD cycles (total now 11)"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "cmd_type": 1,
+      "cmd_bank": 0,
+      "cmd_we": 0
+    },
+    "comment": "After tRCD=11 cycles, scheduler issues READ command to bank 0 (cmd_type=1 for READ)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock the read command through"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_rd_valid": 1,
+      "cmd_rd_bank": 0
+    },
+    "comment": "Acknowledge read command was sent on DRAM interface"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Bank tracker records read issued, starts tRTP/tCCD counters"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_rd_valid": 0,
+      "q_valid_0": 0
+    },
+    "comment": "Deassert read and queue valid"
+  },
+  {
+    "op": "step",
+    "cycles": 4,
+    "comment": "Wait tCCD=4 cycles before next column command is allowed"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 100,
+      "q_col_0": 8,
+      "q_bank_0": 0,
+      "q_we_0": 1,
+      "q_aux_0": 1
+    },
+    "comment": "Present a write request to same bank 0 row 100 (page hit, different column)"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow scheduler to evaluate - read-to-write turnaround may apply"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "cmd_bank": 0,
+      "cmd_we": 1
+    },
+    "comment": "Scheduler issues WRITE to bank 0 after proper CL+tCCD delay"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_wr_valid": 1,
+      "cmd_wr_bank": 0
+    },
+    "comment": "Acknowledge write on DRAM interface"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Bank tracker updates write-active state"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_wr_valid": 0,
+      "q_valid_0": 0
+    },
+    "comment": "Deassert write and queue"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 1,
+      "cmd_act_bank": 1,
+      "cmd_act_row": 200
+    },
+    "comment": "ACTIVATE bank 1, row 200 - test inter-bank scheduling"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock activate"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 0
+    },
+    "comment": "Deassert activate"
+  },
+  {
+    "op": "step",
+    "cycles": 6,
+    "comment": "Wait tRRD=6 cycles before another bank can be activated"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 1,
+      "cmd_act_bank": 2,
+      "cmd_act_row": 300
+    },
+    "comment": "ACTIVATE bank 2 after tRRD elapsed - test tRRD enforcement"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock activate"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 0
+    },
+    "comment": "Deassert activate"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Allow bank tracker to register"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 1,
+      "cmd_act_bank": 3,
+      "cmd_act_row": 400
+    },
+    "comment": "ACTIVATE bank 3"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock activate"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 6,
+    "comment": "Wait for tRRD between banks 2 and 3"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 1,
+      "cmd_act_bank": 4,
+      "cmd_act_row": 500
+    },
+    "comment": "ACTIVATE bank 4 - this is the 5th activate, tFAW window should be checked (4 ACTs in tFAW=32)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock activate"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 15,
+    "comment": "Wait for tFAW window to partially clear"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_required": 1,
+      "ref_urgent": 0
+    },
+    "comment": "Signal non-urgent refresh required"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow scheduler to see refresh request"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_ack": 0
+    },
+    "comment": "Scheduler may defer non-urgent refresh if commands pending under FR-FCFS policy"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_required": 1,
+      "ref_urgent": 1
+    },
+    "comment": "Elevate to urgent refresh - scheduler must prioritize"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow scheduler to precharge open banks and issue refresh"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_ack": 1
+    },
+    "comment": "Scheduler acknowledges urgent refresh, begins tRFC countdown"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_ref_valid": 1
+    },
+    "comment": "Confirm refresh command issued on DRAM bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock refresh"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_ref_valid": 0,
+      "ref_required": 0,
+      "ref_urgent": 0
+    },
+    "comment": "Deassert refresh signals"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC=128 cycles - all banks locked during refresh"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 0
+    },
+    "comment": "During tRFC no commands should be issued"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "A few more cycles after tRFC to ensure banks are available again"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 0,
+      "csr_dat_i": 0,
+      "csr_sel_i": 15
+    },
+    "comment": "Boundary: Write CL=0 (invalid/minimum) to test boundary condition"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "CSR accepts write even for boundary value 0"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Turnaround"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 0,
+      "csr_dat_i": 4294967295,
+      "csr_sel_i": 15
+    },
+    "comment": "Boundary: Write max 32-bit value (0xFFFFFFFF) to CL register - overflow test"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "CSR write completes - bank tracker must handle large timing value gracefully"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Turnaround"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 0,
+      "csr_dat_i": 11,
+      "csr_sel_i": 15
+    },
+    "comment": "Restore CL=11 to valid value"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "cfg_CL_nCK": 11
+    },
+    "comment": "CL restored to spec value"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Turnaround"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 0,
+      "csr_adr_i": 0,
+      "csr_sel_i": 15
+    },
+    "comment": "CSR read-back of CL register to verify written value"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "csr_dat_o": 11,
+      "csr_err_o": 0
+    },
+    "comment": "Read-back CL=11 matches what was written"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Turnaround"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 4,
+      "csr_dat_i": 10,
+      "csr_sel_i": 15
+    },
+    "comment": "Back-to-back CSR write 1: Change CWL to 10"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack cycle"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_adr_i": 8,
+      "csr_dat_i": 3120
+    },
+    "comment": "Back-to-back CSR write 2: Change tREFI to 3120 (halved) without deasserting cyc"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack cycle for second write"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "cfg_CWL_nCK": 10,
+      "cfg_tREFI_nCK": 3120
+    },
+    "comment": "Both back-to-back writes took effect"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "End back-to-back burst"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow new timing to propagate to bank tracker"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 4,
+      "csr_dat_i": 8,
+      "csr_sel_i": 15
+    },
+    "comment": "Restore CWL=8"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_adr_i": 8,
+      "csr_dat_i": 6240
+    },
+    "comment": "Restore tREFI=6240"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Propagation delay"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 1,
+      "cmd_act_bank": 5,
+      "cmd_act_row": 32767
+    },
+    "comment": "Activate bank 5 with max row address (2^15 - 1) - boundary test"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock activate"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait full tRCD=11 cycles"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 32767,
+      "q_col_0": 1023,
+      "q_bank_0": 5,
+      "q_we_0": 0,
+      "q_aux_0": 0
+    },
+    "comment": "Read request to bank 5, max row, max column (1023) - boundary address"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow scheduler to evaluate and issue"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "cmd_bank": 5,
+      "cmd_row": 32767,
+      "cmd_col": 1023,
+      "cmd_we": 0
+    },
+    "comment": "Scheduler issues READ at boundary addresses"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_rd_valid": 1,
+      "cmd_rd_bank": 5
+    },
+    "comment": "Ack read on DRAM bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock read ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_rd_valid": 0,
+      "q_valid_0": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 6,
+    "comment": "Wait tRTP=6 cycles before precharge of bank 5 is allowed"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_pre_valid": 1,
+      "cmd_pre_bank": 5,
+      "cmd_pre_all": 0
+    },
+    "comment": "Precharge bank 5 after tRTP elapsed"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock precharge"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_pre_valid": 0
+    },
+    "comment": "Deassert precharge"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRP=11 cycles for bank to become idle"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 1,
+      "cmd_act_bank": 5,
+      "cmd_act_row": 0
+    },
+    "comment": "Re-activate bank 5 with row 0 - verify bank became idle after precharge+tRP"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock activate"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRCD"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 0,
+      "q_col_0": 0,
+      "q_bank_0": 5,
+      "q_we_0": 1,
+      "q_aux_0": 2
+    },
+    "comment": "Write request to bank 5 row 0 col 0 - verify reactivated bank accepts writes"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Scheduler evaluation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "cmd_bank": 5,
+      "cmd_we": 1
+    },
+    "comment": "Write command issued to reactivated bank 5"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_wr_valid": 1,
+      "cmd_wr_bank": 5
+    },
+    "comment": "Ack write"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock write ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_wr_valid": 0,
+      "q_valid_0": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 6,
+    "comment": "Wait tWTR=6 before read can follow write to same bank"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_pre_valid": 1,
+      "cmd_pre_bank": 0,
+      "cmd_pre_all": 1
+    },
+    "comment": "Precharge ALL banks - state transition test for all bank trackers"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock precharge all"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_pre_valid": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRP for all banks to close"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 0
+    },
+    "comment": "All banks idle, no pending commands, scheduler quiescent"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 20,
+      "csr_dat_i": 8,
+      "csr_sel_i": 15
+    },
+    "comment": "Write cfg_max_postpone=8 to test refresh postponement limit"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "cfg_max_postpone": 8
+    },
+    "comment": "Max postpone threshold set to 8"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Turnaround"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 24,
+      "csr_dat_i": 4,
+      "csr_sel_i": 15
+    },
+    "comment": "Write cfg_urgent_threshold=4 for refresh urgency"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "cfg_urgent_threshold": 4
+    },
+    "comment": "Urgent threshold configured"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Turnaround"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 28,
+      "csr_dat_i": 1,
+      "csr_sel_i": 15
+    },
+    "comment": "Write cfg_ref_priority=1 to elevate refresh priority in scheduler"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "cfg_ref_priority": 1
+    },
+    "comment": "Refresh priority enabled"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow config propagation"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 1,
+      "cmd_act_bank": 0,
+      "cmd_act_row": 50
+    },
+    "comment": "Activate bank 0 for conflict test"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRCD"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid_0": 1,
+      "q_row_0": 999,
+      "q_col_0": 0,
+      "q_bank_0": 0,
+      "q_we_0": 0,
+      "q_aux_0": 3
+    },
+    "comment": "Read to bank 0 but DIFFERENT row 999 (row miss) - requires precharge+activate cycle"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Scheduler should detect row conflict and initiate precharge"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "cmd_bank": 0
+    },
+    "comment": "Scheduler issues PRECHARGE for bank 0 due to row conflict"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRP after precharge"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Scheduler issues ACTIVATE for new row"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait tRCD after activate"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "cmd_bank": 0,
+      "cmd_row": 999,
+      "cmd_we": 0
+    },
+    "comment": "Finally scheduler issues READ after precharge+tRP+activate+tRCD"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_rd_valid": 1,
+      "cmd_rd_bank": 0
+    },
+    "comment": "Ack read"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_rd_valid": 0,
+      "q_valid_0": 0
+    },
+    "comment": "Deassert all"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Final settling period"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 0,
+      "ref_ack": 0,
+      "csr_err_o": 0
+    },
+    "comment": "Final state check - system quiescent, no errors accumulated"
+  }
+]

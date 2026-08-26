@@ -1,0 +1,1104 @@
+[
+  {
+    "op": "reset",
+    "comment": "Initialize DUT and verify clean state"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow reset to propagate through pipeline"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 0,
+      "csr_err_o": 0
+    },
+    "comment": "Verify CSR interface idle after reset"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_is_active": 0
+    },
+    "comment": "All banks should be idle after reset"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0,
+      "csr_adr_i": 0,
+      "csr_dat_i": 0,
+      "csr_sel_i": 15
+    },
+    "comment": "Ensure CSR bus is idle"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Stabilize after reset"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 0,
+      "csr_dat_i": 11,
+      "csr_sel_i": 15
+    },
+    "comment": "Write CL=11 to CSR register 0"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for CSR write to complete"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "CSR write should be acknowledged"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert CSR bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Allow ack to deassert"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_CL_nCK": 11
+    },
+    "comment": "Verify CL timing propagated to bank tracker"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 4,
+      "csr_dat_i": 8,
+      "csr_sel_i": 15
+    },
+    "comment": "Write CWL=8 to CSR register 1"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for CSR write"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "CSR write acknowledged"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert CSR bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Propagation delay"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_CWL_nCK": 8
+    },
+    "comment": "Verify CWL timing propagated"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 8,
+      "csr_dat_i": 6240,
+      "csr_sel_i": 15
+    },
+    "comment": "Write tREFI=6240 cycles to CSR register 2"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for CSR write"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "CSR write acknowledged"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert CSR bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Propagation delay"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_tREFI_nCK": 6240
+    },
+    "comment": "Verify tREFI timing propagated to bank tracker"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 12,
+      "csr_dat_i": 0,
+      "csr_sel_i": 15
+    },
+    "comment": "Write sched_policy=0 (FCFS)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for CSR write"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert CSR bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Propagation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_sched_policy": 0
+    },
+    "comment": "Verify scheduling policy propagated"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 16,
+      "csr_dat_i": 1,
+      "csr_sel_i": 15
+    },
+    "comment": "Write row_policy=1 (open page)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for CSR write"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert CSR bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Propagation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_row_policy": 1
+    },
+    "comment": "Verify row policy propagated"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "sts_init_done": 1,
+      "sts_cal_done": 1,
+      "sts_cal_fail": 0
+    },
+    "comment": "Signal initialization complete"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow status to propagate"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 1,
+      "cmd_act_bank": 0,
+      "cmd_act_row": 100
+    },
+    "comment": "Issue ACTIVATE to bank 0, row 100"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process activate command"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_act_allowed": 1
+    },
+    "comment": "Activate should be allowed initially"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Bank becomes active"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 0
+    },
+    "comment": "Deassert activate"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow bank state update"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_rd_allowed": 0
+    },
+    "comment": "Read not allowed yet - tRCD not met (11 cycles)"
+  },
+  {
+    "op": "step",
+    "cycles": 8,
+    "comment": "Wait partial tRCD"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_rd_allowed": 0
+    },
+    "comment": "Still waiting for tRCD"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Complete tRCD wait"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_rd_allowed": 1
+    },
+    "comment": "Read now allowed after tRCD=11 cycles"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_rd_valid": 1,
+      "cmd_rd_bank": 0
+    },
+    "comment": "Issue READ to bank 0"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process read command"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_rd_valid": 0
+    },
+    "comment": "Deassert read"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_pre_allowed": 0
+    },
+    "comment": "Precharge not allowed - tRTP not met"
+  },
+  {
+    "op": "step",
+    "cycles": 6,
+    "comment": "Wait for tRTP=6 cycles"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_pre_allowed": 1
+    },
+    "comment": "Precharge now allowed after tRTP"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 1,
+      "cmd_act_bank": 1,
+      "cmd_act_row": 200
+    },
+    "comment": "Issue ACTIVATE to bank 1"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process activate"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 0
+    },
+    "comment": "Deassert activate"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait for tRCD"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_wr_allowed": 1
+    },
+    "comment": "Write allowed after tRCD on bank 1"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_wr_valid": 1,
+      "cmd_wr_bank": 1
+    },
+    "comment": "Issue WRITE to bank 1"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process write command"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_wr_valid": 0
+    },
+    "comment": "Deassert write"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_rd_allowed": 0
+    },
+    "comment": "Read not allowed - tWTR not met"
+  },
+  {
+    "op": "step",
+    "cycles": 6,
+    "comment": "Wait for tWTR=6 cycles"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_rd_allowed": 1
+    },
+    "comment": "Read now allowed after tWTR"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 0,
+      "csr_dat_i": 0,
+      "csr_sel_i": 15
+    },
+    "comment": "Boundary test: Write CL=0 (minimum)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for CSR write"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert CSR bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Propagation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_CL_nCK": 0
+    },
+    "comment": "Verify minimum CL boundary handled"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 0,
+      "csr_dat_i": 255,
+      "csr_sel_i": 15
+    },
+    "comment": "Boundary test: Write CL=255 (maximum 8-bit)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for CSR write"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert CSR bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Propagation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_CL_nCK": 255
+    },
+    "comment": "Verify maximum CL boundary handled"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 0,
+      "csr_dat_i": 11,
+      "csr_sel_i": 15
+    },
+    "comment": "Back-to-back write 1: CL=11"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "First write"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "First write ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_adr_i": 4,
+      "csr_dat_i": 8
+    },
+    "comment": "Back-to-back write 2: CWL=8 (keep cyc/stb/we asserted)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Second write"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "Second write ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_adr_i": 8,
+      "csr_dat_i": 3120
+    },
+    "comment": "Back-to-back write 3: tREFI=3120"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Third write"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "Third write ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "End burst"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Propagation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_CL_nCK": 11,
+      "cfg_CWL_nCK": 8,
+      "cfg_tREFI_nCK": 3120
+    },
+    "comment": "Verify all back-to-back writes propagated"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 0,
+      "csr_adr_i": 0,
+      "csr_sel_i": 15
+    },
+    "comment": "Read back CL register"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for read"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "csr_dat_o": 11
+    },
+    "comment": "Verify CL readback"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0
+    },
+    "comment": "Deassert CSR bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Cleanup"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_pre_valid": 1,
+      "cmd_pre_bank": 0,
+      "cmd_pre_all": 0
+    },
+    "comment": "Issue PRECHARGE to bank 0"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process precharge"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_pre_valid": 0
+    },
+    "comment": "Deassert precharge"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Bank transitioning to idle"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_act_allowed": 0
+    },
+    "comment": "Activate not allowed - tRP not met"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait for tRP=11 cycles"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_act_allowed": 1
+    },
+    "comment": "Activate now allowed after tRP"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_ref_valid": 1
+    },
+    "comment": "Issue REFRESH command"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process refresh"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_ref_valid": 0
+    },
+    "comment": "Deassert refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Refresh in progress"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_act_allowed": 0
+    },
+    "comment": "All activates blocked during refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait for tRFC=128 cycles"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_act_allowed": 1
+    },
+    "comment": "Activates allowed after tRFC"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 20,
+      "csr_dat_i": 1,
+      "csr_sel_i": 15
+    },
+    "comment": "Enable ECC via CSR"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for write"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert CSR bus"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Propagation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_ecc_enable": 1
+    },
+    "comment": "Verify ECC enable propagated"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 1,
+      "cmd_act_bank": 2,
+      "cmd_act_row": 300
+    },
+    "comment": "Activate bank 2 for tRAS test"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process activate"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 0
+    },
+    "comment": "Deassert activate"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait for tRCD"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_wr_valid": 1,
+      "cmd_wr_bank": 2
+    },
+    "comment": "Issue WRITE to bank 2"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process write"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_wr_valid": 0
+    },
+    "comment": "Deassert write"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Check tRAS constraint"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_pre_allowed": 0
+    },
+    "comment": "Precharge blocked - tRAS not met (28 cycles)"
+  },
+  {
+    "op": "step",
+    "cycles": 20,
+    "comment": "Wait more cycles toward tRAS"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_pre_allowed": 0
+    },
+    "comment": "Still waiting for tRAS and tWR"
+  },
+  {
+    "op": "step",
+    "cycles": 10,
+    "comment": "Complete tRAS/tWR wait"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_pre_allowed": 1
+    },
+    "comment": "Precharge now allowed after tRAS=28"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_pre_valid": 1,
+      "cmd_pre_bank": 2,
+      "cmd_pre_all": 1
+    },
+    "comment": "Issue PRECHARGE ALL"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process precharge all"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_pre_valid": 0
+    },
+    "comment": "Deassert precharge"
+  },
+  {
+    "op": "step",
+    "cycles": 11,
+    "comment": "Wait for tRP on all banks"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_is_active": 0
+    },
+    "comment": "All banks should be idle after precharge all"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 24,
+      "csr_dat_i": 8,
+      "csr_sel_i": 15
+    },
+    "comment": "Set max_postpone=8"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "CSR write"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert CSR"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Propagation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_max_postpone": 8
+    },
+    "comment": "Verify max_postpone propagated"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 28,
+      "csr_dat_i": 4,
+      "csr_sel_i": 15
+    },
+    "comment": "Set urgent_threshold=4"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "CSR write"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert CSR"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Propagation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_urgent_threshold": 4
+    },
+    "comment": "Verify urgent_threshold propagated"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 32,
+      "csr_dat_i": 2,
+      "csr_sel_i": 15
+    },
+    "comment": "Set ref_priority=2"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "CSR write"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "Deassert CSR"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Propagation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_ref_priority": 2
+    },
+    "comment": "Verify ref_priority propagated to bank tracker"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "sts_ref_pending_cnt": 5
+    },
+    "comment": "Simulate pending refresh count"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow status propagation"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 1,
+      "cmd_act_bank": 3,
+      "cmd_act_row": 400
+    },
+    "comment": "Activate bank 3"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process activate"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 0
+    },
+    "comment": "Deassert activate"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 1,
+      "cmd_act_bank": 4,
+      "cmd_act_row": 500
+    },
+    "comment": "Activate bank 4 - test tRRD"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process second activate"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_act_allowed": 0
+    },
+    "comment": "Third activate blocked by tRRD=6"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "cmd_act_valid": 0
+    },
+    "comment": "Deassert activate"
+  },
+  {
+    "op": "step",
+    "cycles": 6,
+    "comment": "Wait for tRRD"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "bank_act_allowed": 1
+    },
+    "comment": "Activate allowed after tRRD"
+  },
+  {
+    "op": "reset",
+    "comment": "Final reset to verify clean shutdown"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow reset to complete"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 0,
+      "csr_err_o": 0,
+      "bank_is_active": 0
+    },
+    "comment": "Verify clean state after final reset"
+  }
+]

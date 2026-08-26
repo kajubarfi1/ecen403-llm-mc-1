@@ -1,0 +1,918 @@
+[
+  {
+    "op": "reset",
+    "comment": "Initialize DUT to known state"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow reset to propagate"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1,
+      "queue_full": 0,
+      "queue_count": 0,
+      "cmd_valid": 0,
+      "enq_ready": 1
+    },
+    "comment": "Verify initial empty state after reset"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid": 0,
+      "bank_is_active": 0,
+      "bank_act_allowed": 0,
+      "bank_rd_allowed": 0,
+      "bank_wr_allowed": 0,
+      "bank_pre_allowed": 0,
+      "ref_required": 0,
+      "ref_urgent": 0,
+      "enq_valid": 0,
+      "enq_row": 0,
+      "enq_col": 0,
+      "enq_bank": 0,
+      "enq_we": 0,
+      "enq_aux": 0
+    },
+    "comment": "Drive all inputs to idle state"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Settle after driving idle"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 0,
+      "ref_ack": 0,
+      "entry_valid": 0
+    },
+    "comment": "Verify no spurious command output with empty queue"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_valid": 1,
+      "enq_row": 100,
+      "enq_col": 64,
+      "enq_bank": 0,
+      "enq_we": 0,
+      "enq_aux": 1
+    },
+    "comment": "Enqueue first read command to bank 0"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock in the enqueue"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 0,
+      "queue_count": 1,
+      "enq_ready": 1
+    },
+    "comment": "Verify queue has one entry"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_valid": 1,
+      "enq_row": 200,
+      "enq_col": 128,
+      "enq_bank": 1,
+      "enq_we": 1,
+      "enq_aux": 2
+    },
+    "comment": "Enqueue second write command to bank 1"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock in second enqueue"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 2,
+      "queue_empty": 0
+    },
+    "comment": "Verify queue has two entries"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_valid": 1,
+      "enq_row": 300,
+      "enq_col": 256,
+      "enq_bank": 2,
+      "enq_we": 0,
+      "enq_aux": 3
+    },
+    "comment": "Enqueue third read command to bank 2"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock in third enqueue"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 3
+    },
+    "comment": "Verify three entries in queue"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_valid": 0
+    },
+    "comment": "Stop enqueuing, prepare for scheduler test"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Settle"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid": 7,
+      "bank_is_active": 1,
+      "bank_act_allowed": 255,
+      "bank_rd_allowed": 1,
+      "bank_wr_allowed": 0,
+      "bank_pre_allowed": 255
+    },
+    "comment": "Bank 0 active and ready for read, scheduler should select bank 0 entry"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Allow scheduler to process"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "cmd_bank": 0,
+      "cmd_we": 0,
+      "cmd_row": 100,
+      "cmd_col": 64
+    },
+    "comment": "Verify scheduler dequeued bank 0 read command"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Complete dequeue"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 2
+    },
+    "comment": "Verify queue count decreased after dequeue"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid": 6,
+      "bank_is_active": 2,
+      "bank_rd_allowed": 0,
+      "bank_wr_allowed": 2
+    },
+    "comment": "Bank 1 active and ready for write"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Allow scheduler to select write"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "cmd_bank": 1,
+      "cmd_we": 1,
+      "cmd_row": 200,
+      "cmd_col": 128
+    },
+    "comment": "Verify scheduler dequeued bank 1 write command"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Complete write dequeue"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 1
+    },
+    "comment": "Verify one entry remaining"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid": 4,
+      "bank_is_active": 4,
+      "bank_rd_allowed": 4,
+      "bank_wr_allowed": 0
+    },
+    "comment": "Bank 2 active and ready for read"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process last entry"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "cmd_bank": 2,
+      "cmd_we": 0,
+      "cmd_row": 300,
+      "cmd_col": 256,
+      "cmd_aux": 3
+    },
+    "comment": "Verify last command dequeued correctly"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Complete last dequeue"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1,
+      "queue_count": 0
+    },
+    "comment": "Verify queue is now empty"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid": 0,
+      "bank_is_active": 0,
+      "bank_rd_allowed": 0,
+      "bank_wr_allowed": 0
+    },
+    "comment": "Clear scheduler inputs"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Settle"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 0
+    },
+    "comment": "Verify no command when queue empty - underflow protection"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_valid": 1,
+      "enq_row": 500,
+      "enq_col": 32,
+      "enq_bank": 3,
+      "enq_we": 0,
+      "enq_aux": 10
+    },
+    "comment": "Start filling queue for overflow test"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue 1"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_row": 501,
+      "enq_bank": 4
+    },
+    "comment": "Continue filling"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue 2"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_row": 502,
+      "enq_bank": 5
+    },
+    "comment": "Continue filling"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue 3"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_row": 503,
+      "enq_bank": 6
+    },
+    "comment": "Continue filling"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue 4"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_row": 504,
+      "enq_bank": 7
+    },
+    "comment": "Continue filling"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue 5"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_row": 505,
+      "enq_bank": 0
+    },
+    "comment": "Continue filling"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue 6"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_row": 506,
+      "enq_bank": 1
+    },
+    "comment": "Continue filling"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue 7"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_row": 507,
+      "enq_bank": 2
+    },
+    "comment": "Continue filling"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue 8"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 8
+    },
+    "comment": "Verify 8 entries"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_row": 508,
+      "enq_bank": 3
+    },
+    "comment": "Continue filling"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue 9"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_row": 509,
+      "enq_bank": 4
+    },
+    "comment": "Continue filling"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue 10"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_row": 510,
+      "enq_bank": 5
+    },
+    "comment": "Continue filling"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue 11"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_row": 511,
+      "enq_bank": 6
+    },
+    "comment": "Continue filling"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue 12"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_row": 512,
+      "enq_bank": 7
+    },
+    "comment": "Continue filling"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue 13"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_row": 513,
+      "enq_bank": 0
+    },
+    "comment": "Continue filling"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue 14"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_row": 514,
+      "enq_bank": 1
+    },
+    "comment": "Continue filling"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue 15"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_row": 515,
+      "enq_bank": 2
+    },
+    "comment": "Attempt to fill to capacity"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue 16"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_full": 1,
+      "enq_ready": 0,
+      "queue_count": 16
+    },
+    "comment": "Verify queue full condition"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_valid": 1,
+      "enq_row": 999,
+      "enq_bank": 7
+    },
+    "comment": "Attempt overflow enqueue"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Try to overflow"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 16,
+      "queue_full": 1
+    },
+    "comment": "Verify overflow rejected, count unchanged"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_valid": 0
+    },
+    "comment": "Stop enqueue attempts"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_required": 1,
+      "ref_urgent": 0
+    },
+    "comment": "Assert refresh required, non-urgent"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process refresh request"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_ack": 0,
+      "cmd_valid": 0
+    },
+    "comment": "Verify non-urgent refresh doesn't stall dequeue immediately"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_urgent": 1
+    },
+    "comment": "Assert urgent refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process urgent refresh"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_ack": 1
+    },
+    "comment": "Verify urgent refresh acknowledged"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_required": 0,
+      "ref_urgent": 0
+    },
+    "comment": "Clear refresh signals"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Resume normal operation"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid": 255,
+      "bank_is_active": 255,
+      "bank_rd_allowed": 255,
+      "bank_wr_allowed": 0
+    },
+    "comment": "All banks active, reads allowed - back-to-back dequeue test"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Dequeue 1"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "queue_count": 15
+    },
+    "comment": "Verify first back-to-back dequeue"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Dequeue 2"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "queue_count": 14
+    },
+    "comment": "Verify second back-to-back dequeue"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Dequeue 3"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "queue_count": 13
+    },
+    "comment": "Verify third back-to-back dequeue"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Dequeue 4"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "queue_count": 12
+    },
+    "comment": "Verify fourth back-to-back dequeue"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_rd_allowed": 0
+    },
+    "comment": "Block all reads to test stall"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process with blocked reads"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 0,
+      "queue_count": 12
+    },
+    "comment": "Verify stall - no dequeue when reads blocked"
+  },
+  {
+    "op": "step",
+    "cycles": 3,
+    "comment": "Hold stall for multiple cycles"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_count": 12
+    },
+    "comment": "Verify count stable during stall"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_rd_allowed": 8
+    },
+    "comment": "Allow only bank 3 reads"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Selective bank enable"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "cmd_bank": 3
+    },
+    "comment": "Verify scheduler selected bank 3 entry"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Complete selective dequeue"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_is_active": 0,
+      "bank_act_allowed": 16
+    },
+    "comment": "No banks active, only bank 4 can activate"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Test activate path"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "cmd_type": 1
+    },
+    "comment": "Verify activate command issued for bank 4"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "bank_is_active": 16,
+      "bank_rd_allowed": 16
+    },
+    "comment": "Bank 4 now active"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Follow-up read after activate"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "cmd_bank": 4
+    },
+    "comment": "Verify read to bank 4 after activation"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid": 0,
+      "bank_is_active": 0,
+      "bank_act_allowed": 0,
+      "bank_rd_allowed": 0
+    },
+    "comment": "Block all operations"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Multiple cycles of complete stall"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 0
+    },
+    "comment": "Verify no commands during complete stall"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "q_valid": 255,
+      "bank_is_active": 255,
+      "bank_rd_allowed": 255
+    },
+    "comment": "Re-enable all operations"
+  },
+  {
+    "op": "step",
+    "cycles": 8,
+    "comment": "Drain remaining entries"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1,
+      "queue_count": 0
+    },
+    "comment": "Verify queue drained completely"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_valid": 1,
+      "enq_row": 1000,
+      "enq_col": 512,
+      "enq_bank": 0,
+      "enq_we": 1,
+      "enq_aux": 255
+    },
+    "comment": "Enqueue with max aux value"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Clock in max aux entry"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_valid": 0,
+      "bank_is_active": 1,
+      "bank_wr_allowed": 1
+    },
+    "comment": "Enable write dequeue"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process write"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "cmd_aux": 255,
+      "cmd_we": 1,
+      "cmd_row": 1000,
+      "cmd_col": 512
+    },
+    "comment": "Verify aux field preserved through dequeue"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Complete aux test"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_valid": 1,
+      "enq_row": 32767,
+      "enq_col": 1023,
+      "enq_bank": 7,
+      "enq_we": 0,
+      "enq_aux": 0
+    },
+    "comment": "Boundary test - max row and col values"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Enqueue boundary values"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "enq_valid": 0,
+      "bank_is_active": 128,
+      "bank_rd_allowed": 128
+    },
+    "comment": "Enable bank 7"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Process boundary entry"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cmd_valid": 1,
+      "cmd_row": 32767,
+      "cmd_col": 1023,
+      "cmd_bank": 7
+    },
+    "comment": "Verify boundary values preserved"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Complete boundary test"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1
+    },
+    "comment": "Final empty check"
+  },
+  {
+    "op": "reset",
+    "comment": "Final reset to clean state"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow final reset to propagate"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "queue_empty": 1,
+      "queue_full": 0,
+      "queue_count": 0,
+      "cmd_valid": 0,
+      "ref_ack": 0
+    },
+    "comment": "Verify clean state after final reset"
+  }
+]

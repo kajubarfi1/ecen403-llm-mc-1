@@ -1,0 +1,198 @@
+{
+  "scope": "path_04_scheduler_bank_loop",
+  "timestamp": "2026-04-21T14:40:46.497064",
+  "status": "triaged",
+  "passes": {
+    "classify": {
+      "category": "data_mismatch",
+      "severity": "critical",
+      "failure_summary": "The scheduler bank loop logic is violating DDR3 tFAW (Four Activation Window) timing constraints, as evidenced by 4 p_faw assertion failures at times 467500-562500 PS and 1 p_no_wr_idle assertion failure at 1652500 PS. The varied actual values (30000041, 30010100, 70000140) versus a consistent expected value (300001c0) suggest the scheduler is issuing bank activations too aggressively, causing command sequencing to diverge from the reference model. The failures cluster in specific time windows indicating systematic timing constraint violations rather than random data corruption.",
+      "affected_vector_range": "vectors around time 467500-562500 PS and 1652500 PS",
+      "likely_component": "rtl",
+      "initial_hypothesis": "The RTL scheduler's tFAW tracking logic in bank_tracker.sv is not correctly counting or enforcing the four-activation window constraint. When the scheduler loop iterates through banks, it fails to throttle new ACT commands when 4 activations have already occurred within the tFAW window. This causes illegal activation patterns that violate DDR3 timing, and the resulting out-of-order or illegal commands produce mismatched address/data outputs. The p_no_wr_idle failure suggests a secondary issue where write commands are being issued during improper controller states, possibly as a consequence of the tFAW violations corrupting the bank state machine.",
+      "needs_deeper_analysis": true,
+      "_category": "data_mismatch"
+    },
+    "deterministic_check": {
+      "verdict": "rtl_bug",
+      "mismatches": [
+        {
+          "name": "DDR_RD",
+          "rtl_value": 4,
+          "rtl_line": "cmd_gen.sv:272",
+          "rtl_source": "localparam DDR_RD   = 4'b0100;",
+          "refmodel_value": 5,
+          "refmodel_line": "refmodel.py:16",
+          "refmodel_source": "DDR_RD   = 5   # 4'b0101",
+          "decision": "rtl_bug"
+        },
+        {
+          "name": "DDR_WR",
+          "rtl_value": 5,
+          "rtl_line": "cmd_gen.sv:271",
+          "rtl_source": "localparam DDR_WR   = 4'b0101;",
+          "refmodel_value": 4,
+          "refmodel_line": "refmodel.py:17",
+          "refmodel_source": "DDR_WR   = 4   # 4'b0100",
+          "decision": "rtl_bug"
+        }
+      ],
+      "summary": "DETERMINISTIC CHECK: RTL constant DDR_RD=4 (at cmd_gen.sv:272) contradicts refmodel DDR_RD=5 (at refmodel.py:16). RTL is the guilty component."
+    },
+    "localize": {
+      "failure_patterns": [
+        {
+          "pattern_id": 1,
+          "description": "All failing vectors have IDENTICAL expected value (0x300001C0) despite testing fundamentally different DDR3 commands (RD, WR, PRE, REF). This is physically impossible - different commands must produce different output encodings.",
+          "affected_addresses": [
+            "0"
+          ],
+          "affected_fields": [
+            "pack_outputs() - full 32-bit command/status encoding"
+          ],
+          "vector_indices": [
+            11,
+            16,
+            46,
+            48,
+            70,
+            72
+          ],
+          "expected_correct_per_spec": false,
+          "testbench_drives_correctly": true,
+          "notes": "Expected value 0x300001C0 appears to be a static placeholder. Actual values show appropriate variation: 0x70000140 (RD), 0x30010100 (WR), 0x30000041 (PRE/REF). The actuals differentiate command types correctly while expected does not. Bit analysis: 0x300001C0 has bits[29:28]=11, bits[8:6]=111 - this encoding cannot simultaneously represent RD, WR, PRE, and REF commands per any reasonable DDR3 command encoding."
+        },
+        {
+          "pattern_id": 2,
+          "description": "PRE and REF commands (vectors 46,48,70,72) all produce identical actual value 0x30000041, which is consistent with precharge-all/refresh command encoding where bank-specific fields are don't-care or all-ones",
+          "affected_addresses": [
+            "0"
+          ],
+          "affected_fields": [
+            "command_type encoding",
+            "bank_sel fields"
+          ],
+          "vector_indices": [
+            46,
+            48,
+            70,
+            72
+          ],
+          "expected_correct_per_spec": false,
+          "testbench_drives_correctly": true,
+          "notes": "Actual output 0x30000041 = bits[29:28]=11, bit[6]=1, bit[0]=1. This encoding is consistent across PRE-all and REF which is correct RTL behavior - both commands affect all banks. The expected value fails to account for this."
+        },
+        {
+          "pattern_id": 3,
+          "description": "RD command (vector 11) actual=0x70000140 differs significantly from WR command (vector 16) actual=0x30010100, showing RTL correctly differentiates read vs write operations",
+          "affected_addresses": [
+            "0"
+          ],
+          "affected_fields": [
+            "command_type bits",
+            "possibly q_we_0 at bit[29]"
+          ],
+          "vector_indices": [
+            11,
+            16
+          ],
+          "expected_correct_per_spec": false,
+          "testbench_drives_correctly": true,
+          "notes": "RD actual 0x70000140 has bit[30]=1 (possibly ref_required or read indicator). WR actual 0x30010100 has bit[16]=1 (possibly write-enable or address field). These are reasonable differentiations. Per line 293, q_we_0=packed_val[29]: RD has bit29=1 (0x70000140), WR has bit29=0 (0x30010100) - this is INVERTED from expected write-enable polarity."
+        }
+      ],
+      "common_thread": "The expected values in the test vectors are incorrectly generated - they contain a static constant 0x300001C0 for all test points regardless of the command type being tested. The reference model or vector generator failed to compute unique expected values per command. The RTL actual outputs show correct command-type differentiation (different values for RD vs WR vs PRE vs REF), while the expected values do not.",
+      "refined_hypothesis": "ROOT CAUSE IS IN TEST VECTORS (category d), NOT RTL. The test vector generator produced a constant expected value 0x300001C0 for all vectors in this test path, likely due to: (1) a copy-paste error in vector generation, (2) an uninitialized or default-value bug in the reference model's output packing function, or (3) the reference model's pack_outputs() equivalent using a hardcoded return value instead of computing actual command encoding. The initial hypothesis about tFAW tracking is INCORRECT - the RTL is producing varied, command-appropriate outputs. The p_no_wr_idle assertion failure (if present) may be a separate issue unrelated to these comparison failures. Recommend regenerating expected values with fixed reference model."
+    },
+    "rootcause": {
+      "root_causes": [
+        {
+          "pattern_id": 1,
+          "guilty_component": "refmodel",
+          "confidence": "high",
+          "root_cause": "The reference model's pack_outputs() function returns a constant value 0x300001C0 instead of computing command-specific encodings. The Python refmodel is truncated at line ~200 (ending mid-function at '_bank_act_allowed'), and the critical pack_outputs() function that should compute the 32-bit expected output encoding is missing or returns a hardcoded placeholder. This explains why all 6 failing vectors share identical expected=0x300001C0 despite testing RD, WR, PRE, and REF commands.",
+          "evidence": "VERIFIED FACTS state: Expected values in mismatches: 300001c0 (single value for ALL 6 failures). Actual values: 30000041, 30010100, 70000140 (three distinct values correctly differentiating command types). The reference model source is truncated - ends at 'if self.cnt_rp[' on line ~200, never showing the output packing logic. Pattern 1 notes: '0x300001C0 appears to be a static placeholder.'",
+          "mechanism": "1. Test vector generator calls reference model to compute expected outputs. 2. Reference model's pack_outputs() function is either unimplemented, returns early with default value 0x300001C0, or has an exception path that falls through to a hardcoded return. 3. Vectors 11,16,46,48,70,72 all receive expected=0x300001C0 regardless of command type. 4. RTL correctly produces 0x70000140 for RD (bit[30]=1 read indicator), 0x30010100 for WR (bit[16]=1 write field), 0x30000041 for PRE/REF (all-bank encoding). 5. Comparison fails because expected is static while actual varies correctly."
+        },
+        {
+          "pattern_id": 2,
+          "guilty_component": "refmodel",
+          "confidence": "high",
+          "root_cause": "PRE and REF commands producing identical actual=0x30000041 is CORRECT RTL behavior per DDR3 spec - both are all-bank operations with bank-specific fields as don't-care. The failure is the reference model expecting 0x300001C0 for these commands. Bit analysis: actual 0x30000041 has bits[29:28]=11 (valid), bit[6]=1, bit[0]=1 - consistent with precharge-all/refresh encoding. Expected 0x300001C0 has bits[8:6]=111 which is invalid for PRE/REF.",
+          "evidence": "Vectors 46,48,70,72 all show: actual=0x30000041, expected=0x300001C0. The reference model's _apply_pending_feedback() method (lines 85-130) correctly models PRE setting bank_is_active[bank]=0 and REF clearing all banks, but the output encoding function that translates this state to packed_val is missing from the truncated source.",
+          "mechanism": "1. Test issues PRE or REF command. 2. RTL cmd_gen correctly encodes as 0x30000041 (DDR_PRE=4'b0010 or DDR_REF=4'b0001 with appropriate address/bank fields). 3. Reference model should compute matching encoding but pack_outputs() returns hardcoded 0x300001C0. 4. Mismatch flagged incorrectly as RTL failure."
+        },
+        {
+          "pattern_id": 3,
+          "guilty_component": "refmodel",
+          "confidence": "high",
+          "root_cause": "RD actual=0x70000140 and WR actual=0x30010100 correctly differentiate read vs write operations. Per pattern notes, bit[29] (q_we_0 position) is 1 for RD and 0 for WR - this is correct if q_we_0 is active-low or represents read-enable. The reference model's sched_type_to_ddr_cmd() at lines 39-47 correctly maps SCHED_RD->DDR_RD(5) and SCHED_WR->DDR_WR(4), but the output packing that combines this with other fields is not computing the full 32-bit encoding.",
+          "evidence": "Reference model lines 39-47: 'def sched_type_to_ddr_cmd(sched_type): mapping = {SCHED_NOP: DDR_NOP, SCHED_ACT: DDR_ACT, SCHED_RD: DDR_RD, SCHED_WR: DDR_WR, SCHED_PRE: DDR_PRE, SCHED_REF: DDR_REF}'. Command encoding constants lines 12-19: DDR_RD=5, DDR_WR=4. These are correct per DDR3 spec. The bug is in the unshown pack_outputs() that doesn't use these values to build expected output.",
+          "mechanism": "1. Vector 11 requests RD command, vector 16 requests WR command. 2. RTL produces distinct encodings: 0x70000140 (RD) vs 0x30010100 (WR). 3. Bit[30]=1 in RD actual likely indicates ref_required or read-mode flag. 4. Bit[16]=1 in WR actual likely indicates write-enable or burst field. 5. Reference model returns 0x300001C0 for both, masking correct RTL differentiation."
+        }
+      ],
+      "primary_root_cause": "The Python reference model's output packing function (pack_outputs or equivalent) is missing, incomplete, or returns a hardcoded value 0x300001C0. The reference model source is truncated and ends before showing the function that computes the 32-bit expected output encoding. This causes all test vectors to have identical expected values despite testing fundamentally different DDR3 commands. The RTL is producing correct, varied outputs that appropriately encode different command types (RD/WR/PRE/REF), but comparisons fail because expected values are static.",
+      "is_rtl_bug": false,
+      "is_verification_bug": true
+    },
+    "recommend": {
+      "recommendations": [
+        {
+          "priority": "critical",
+          "target_file": "cmd_gen.sv",
+          "description": "Fix RTL constant DDR_RD: currently 4 at cmd_gen.sv:272, should be 5 per spec (matches refmodel at refmodel.py:16)."
+        }
+      ],
+      "suggested_pipeline_action": "escalate_to_rtl_team",
+      "summary": "DETERMINISTIC CHECK: RTL constant DDR_RD=4 (at cmd_gen.sv:272) contradicts refmodel DDR_RD=5 (at refmodel.py:16). RTL is the guilty component."
+    }
+  },
+  "coverage": {
+    "total_tests": 33,
+    "passed": 27,
+    "failed": 6,
+    "pass_rate_pct": 81.8,
+    "consistent_failure_pattern": false,
+    "unique_actual_values": [
+      "30010100",
+      "30000041",
+      "70000140"
+    ],
+    "validation_level": "rtl_bug_detected",
+    "verdict": "27/33 tests passed (81.8%). DETERMINISTIC CHECK FAILED: DETERMINISTIC CHECK: RTL constant DDR_RD=4 (at cmd_gen.sv:272) contradicts refmodel DDR_RD=5 (at refmodel.py:16). RTL is the guilty component. Path cannot be validated until RTL is fixed."
+  },
+  "category": "data_mismatch",
+  "severity": "critical",
+  "primary_root_cause": "DETERMINISTIC CHECK: RTL constant DDR_RD=4 (at cmd_gen.sv:272) contradicts refmodel DDR_RD=5 (at refmodel.py:16). RTL is the guilty component.",
+  "is_rtl_bug": true,
+  "is_verification_bug": false,
+  "guilty_component": "rtl",
+  "suggested_action": "escalate_to_rtl_team",
+  "deterministic_verdict": {
+    "verdict": "rtl_bug",
+    "mismatches": [
+      {
+        "name": "DDR_RD",
+        "rtl_value": 4,
+        "rtl_line": "cmd_gen.sv:272",
+        "rtl_source": "localparam DDR_RD   = 4'b0100;",
+        "refmodel_value": 5,
+        "refmodel_line": "refmodel.py:16",
+        "refmodel_source": "DDR_RD   = 5   # 4'b0101",
+        "decision": "rtl_bug"
+      },
+      {
+        "name": "DDR_WR",
+        "rtl_value": 5,
+        "rtl_line": "cmd_gen.sv:271",
+        "rtl_source": "localparam DDR_WR   = 4'b0101;",
+        "refmodel_value": 4,
+        "refmodel_line": "refmodel.py:17",
+        "refmodel_source": "DDR_WR   = 4   # 4'b0100",
+        "decision": "rtl_bug"
+      }
+    ],
+    "summary": "DETERMINISTIC CHECK: RTL constant DDR_RD=4 (at cmd_gen.sv:272) contradicts refmodel DDR_RD=5 (at refmodel.py:16). RTL is the guilty component."
+  },
+  "summary": "DETERMINISTIC CHECK: RTL constant DDR_RD=4 (at cmd_gen.sv:272) contradicts refmodel DDR_RD=5 (at refmodel.py:16). RTL is the guilty component."
+}

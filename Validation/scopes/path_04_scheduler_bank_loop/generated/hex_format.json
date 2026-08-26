@@ -1,0 +1,126 @@
+{
+  "path_id": "path_04_scheduler_bank_loop",
+  "format": "OO PPPPPPPP DDDDDDDD EEEEEEEE",
+  "opcodes": {
+    "reset": 0,
+    "drive": 1,
+    "check": 2,
+    "step": 3
+  },
+  "input_packing": [
+    {
+      "block": "scheduler",
+      "name": "q_valid_0",
+      "width": 1,
+      "lo": 0,
+      "hi": 0
+    },
+    {
+      "block": "scheduler",
+      "name": "q_row_0",
+      "width": 15,
+      "lo": 1,
+      "hi": 15
+    },
+    {
+      "block": "scheduler",
+      "name": "q_col_0",
+      "width": 10,
+      "lo": 16,
+      "hi": 25
+    },
+    {
+      "block": "scheduler",
+      "name": "q_bank_0",
+      "width": 3,
+      "lo": 26,
+      "hi": 28
+    },
+    {
+      "block": "scheduler",
+      "name": "q_we_0",
+      "width": 1,
+      "lo": 29,
+      "hi": 29
+    },
+    {
+      "block": "scheduler",
+      "name": "ref_required",
+      "width": 1,
+      "lo": 30,
+      "hi": 30
+    },
+    {
+      "block": "scheduler",
+      "name": "ref_urgent",
+      "width": 1,
+      "lo": 31,
+      "hi": 31
+    }
+  ],
+  "output_packing": [
+    {
+      "block": "scheduler",
+      "name": "ref_ack",
+      "width": 1,
+      "lo": 0,
+      "hi": 0
+    },
+    {
+      "block": "scheduler",
+      "name": "deq_grant",
+      "width": 1,
+      "lo": 1,
+      "hi": 1
+    },
+    {
+      "block": "scheduler",
+      "name": "deq_idx",
+      "width": 4,
+      "lo": 2,
+      "hi": 5
+    },
+    {
+      "block": "cmd_gen",
+      "name": "ddr_cmd",
+      "width": 4,
+      "lo": 6,
+      "hi": 9
+    },
+    {
+      "block": "cmd_gen",
+      "name": "ddr_addr",
+      "width": 15,
+      "lo": 10,
+      "hi": 24
+    },
+    {
+      "block": "cmd_gen",
+      "name": "ddr_bank",
+      "width": 3,
+      "lo": 25,
+      "hi": 27
+    },
+    {
+      "block": "cmd_gen",
+      "name": "ddr_cke",
+      "width": 1,
+      "lo": 28,
+      "hi": 28
+    },
+    {
+      "block": "cmd_gen",
+      "name": "ddr_reset_n",
+      "width": 1,
+      "lo": 29,
+      "hi": 29
+    },
+    {
+      "block": "cmd_gen",
+      "name": "ddr_odt",
+      "width": 1,
+      "lo": 30,
+      "hi": 30
+    }
+  ]
+}

@@ -1,0 +1,540 @@
+{
+  "scope": "path_04_scheduler_bank_loop",
+  "generator": "vector_gen_agent_llm",
+  "spec_source": "llmmc_microarchitecturespec_filled.json",
+  "generated_at": "2026-04-21T14:40:06.624534",
+  "vector_count": 106,
+  "hex_format": "unknown",
+  "vectors": [
+    {
+      "hex_line": "00 00000000 00000000 00000000",
+      "op": 0,
+      "comment": "Initialize DUT and clear all bank states"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "Verify idle state after reset - NOP on bus"
+    },
+    {
+      "hex_line": "01 00000000 00000000 300001C0",
+      "op": 1,
+      "comment": "Configure timing parameters per DDR3-1600K spec"
+    },
+    {
+      "hex_line": "03 00000001 00000000 300001C0",
+      "op": 3,
+      "comment": "Allow config to propagate"
+    },
+    {
+      "hex_line": "01 00000000 000000C9 300001C0",
+      "op": 1,
+      "comment": "Issue read request to bank 0 - should trigger ACT"
+    },
+    {
+      "hex_line": "03 00000003 00000000 300001C0",
+      "op": 3,
+      "comment": "Pipeline latency for scheduler->cmd_gen"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "ACT issued to bank 0"
+    },
+    {
+      "hex_line": "01 00000000 00000000 300001C0",
+      "op": 1,
+      "comment": "Deassert request while waiting for tRCD"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tRCD cycles for row activation"
+    },
+    {
+      "hex_line": "01 00000000 000000C9 300001C0",
+      "op": 1,
+      "comment": "Re-present read request - row hit should trigger RD"
+    },
+    {
+      "hex_line": "03 00000003 00000000 300001C0",
+      "op": 3,
+      "comment": "Pipeline latency"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "RD command issued - row hit path"
+    },
+    {
+      "hex_line": "01 00000000 00000000 300001C0",
+      "op": 1,
+      "comment": "Clear request"
+    },
+    {
+      "hex_line": "03 00000004 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tCCD for next column command"
+    },
+    {
+      "hex_line": "01 00000000 204000C9 300001C0",
+      "op": 1,
+      "comment": "Write to same row - should be row hit WR"
+    },
+    {
+      "hex_line": "03 00000003 00000000 300001C0",
+      "op": 3,
+      "comment": "Pipeline latency"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "WR command issued - row hit write"
+    },
+    {
+      "hex_line": "01 00000000 00000000 300001C0",
+      "op": 1,
+      "comment": "Clear request"
+    },
+    {
+      "hex_line": "03 0000000C 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tWR for write recovery"
+    },
+    {
+      "hex_line": "01 00000000 00000191 300001C0",
+      "op": 1,
+      "comment": "Read different row - should trigger PRE then ACT"
+    },
+    {
+      "hex_line": "03 00000003 00000000 300001C0",
+      "op": 3,
+      "comment": "Pipeline latency for PRE"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "PRE command issued for row miss"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tRP for precharge completion"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "ACT issued after tRP for new row"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tRCD"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "RD issued after tRCD"
+    },
+    {
+      "hex_line": "01 00000000 00000000 300001C0",
+      "op": 1,
+      "comment": "Clear request"
+    },
+    {
+      "hex_line": "03 00000006 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tRTP"
+    },
+    {
+      "hex_line": "01 00000000 04000259 300001C0",
+      "op": 1,
+      "comment": "Read to bank 1 - different bank, should ACT immediately"
+    },
+    {
+      "hex_line": "03 00000003 00000000 300001C0",
+      "op": 3,
+      "comment": "Pipeline latency"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "ACT issued to bank 1"
+    },
+    {
+      "hex_line": "01 00000000 08000321 300001C0",
+      "op": 1,
+      "comment": "Queue request to bank 2"
+    },
+    {
+      "hex_line": "03 00000006 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tRRD between activates"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "ACT to bank 2 after tRRD"
+    },
+    {
+      "hex_line": "01 00000000 0C0003E9 300001C0",
+      "op": 1,
+      "comment": "Queue request to bank 3"
+    },
+    {
+      "hex_line": "03 00000006 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tRRD"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "ACT to bank 3 after tRRD"
+    },
+    {
+      "hex_line": "01 00000000 100004B1 300001C0",
+      "op": 1,
+      "comment": "Queue request to bank 4 - may hit tFAW"
+    },
+    {
+      "hex_line": "03 00000006 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tRRD"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "NOP expected - tFAW window blocked 5th ACT"
+    },
+    {
+      "hex_line": "03 0000000E 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait remaining tFAW window to clear"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "ACT to bank 4 after tFAW clears"
+    },
+    {
+      "hex_line": "01 00000000 00000000 300001C0",
+      "op": 1,
+      "comment": "Clear all requests"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 300001C0",
+      "op": 3,
+      "comment": "Allow tRCD for bank 4"
+    },
+    {
+      "hex_line": "01 00000000 40000000 300001C0",
+      "op": 1,
+      "comment": "Signal refresh required"
+    },
+    {
+      "hex_line": "03 00000003 00000000 300001C0",
+      "op": 3,
+      "comment": "Pipeline latency"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "PRE all banks before refresh"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tRP"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "REF command issued"
+    },
+    {
+      "hex_line": "01 00000000 00000000 300001C0",
+      "op": 1,
+      "comment": "Clear refresh request"
+    },
+    {
+      "hex_line": "03 00000080 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tRFC for refresh completion"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "NOP after refresh, ack cleared"
+    },
+    {
+      "hex_line": "01 00000000 34800579 300001C0",
+      "op": 1,
+      "comment": "Write to bank 5 after refresh"
+    },
+    {
+      "hex_line": "03 00000003 00000000 300001C0",
+      "op": 3,
+      "comment": "Pipeline latency"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "ACT to bank 5"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tRCD"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "WR to bank 5"
+    },
+    {
+      "hex_line": "01 00000000 34C00579 300001C0",
+      "op": 1,
+      "comment": "Back-to-back write same row"
+    },
+    {
+      "hex_line": "03 00000004 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tCCD"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "Second WR - back-to-back"
+    },
+    {
+      "hex_line": "01 00000000 15000579 300001C0",
+      "op": 1,
+      "comment": "Read same row after writes - check tWTR"
+    },
+    {
+      "hex_line": "03 00000006 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tWTR"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "RD after tWTR delay"
+    },
+    {
+      "hex_line": "01 00000000 15400579 300001C0",
+      "op": 1,
+      "comment": "Back-to-back reads"
+    },
+    {
+      "hex_line": "03 00000004 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tCCD"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "Second RD - back-to-back"
+    },
+    {
+      "hex_line": "01 00000000 00000000 300001C0",
+      "op": 1,
+      "comment": "Clear requests"
+    },
+    {
+      "hex_line": "03 00000006 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tRTP"
+    },
+    {
+      "hex_line": "01 00000000 C0000000 300001C0",
+      "op": 1,
+      "comment": "Urgent refresh request"
+    },
+    {
+      "hex_line": "03 00000003 00000000 300001C0",
+      "op": 3,
+      "comment": "Pipeline latency"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "Urgent PRE all"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tRP"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "Urgent REF issued"
+    },
+    {
+      "hex_line": "01 00000000 00000000 300001C0",
+      "op": 1,
+      "comment": "Clear urgent refresh"
+    },
+    {
+      "hex_line": "03 00000080 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tRFC"
+    },
+    {
+      "hex_line": "01 00000000 18000641 300001C0",
+      "op": 1,
+      "comment": "Read to bank 6"
+    },
+    {
+      "hex_line": "03 00000003 00000000 300001C0",
+      "op": 3,
+      "comment": "Pipeline latency"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "ACT to bank 6"
+    },
+    {
+      "hex_line": "01 00000000 1C000709 300001C0",
+      "op": 1,
+      "comment": "Read to bank 7 concurrently"
+    },
+    {
+      "hex_line": "03 00000006 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tRRD"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "ACT to bank 7"
+    },
+    {
+      "hex_line": "03 00000005 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait remaining tRCD for bank 6"
+    },
+    {
+      "hex_line": "01 00000000 18000641 300001C0",
+      "op": 1,
+      "comment": "Re-present bank 6 read"
+    },
+    {
+      "hex_line": "03 00000003 00000000 300001C0",
+      "op": 3,
+      "comment": "Pipeline latency"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "RD to bank 6"
+    },
+    {
+      "hex_line": "01 00000000 1C000709 300001C0",
+      "op": 1,
+      "comment": "Bank 7 read - should be ready"
+    },
+    {
+      "hex_line": "03 00000004 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tCCD between different bank reads"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "RD to bank 7"
+    },
+    {
+      "hex_line": "01 00000000 00000000 300001C0",
+      "op": 1,
+      "comment": "Clear requests"
+    },
+    {
+      "hex_line": "03 0000000A 00000000 300001C0",
+      "op": 3,
+      "comment": "Idle period"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "Verify idle - NOP, no grants"
+    },
+    {
+      "hex_line": "01 00000000 3FFFFFFF 300001C0",
+      "op": 1,
+      "comment": "Max address boundary test"
+    },
+    {
+      "hex_line": "03 00000003 00000000 300001C0",
+      "op": 3,
+      "comment": "Pipeline latency for PRE (row conflict)"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "PRE bank 7 for row conflict"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tRP"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "ACT max row address"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tRCD"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "WR to max column"
+    },
+    {
+      "hex_line": "01 00000000 00000001 300001C0",
+      "op": 1,
+      "comment": "Min address boundary test"
+    },
+    {
+      "hex_line": "03 00000003 00000000 300001C0",
+      "op": 3,
+      "comment": "Pipeline latency"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "ACT min address"
+    },
+    {
+      "hex_line": "03 0000000B 00000000 300001C0",
+      "op": 3,
+      "comment": "Wait tRCD"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "RD min address"
+    },
+    {
+      "hex_line": "01 00000000 00000000 300001C0",
+      "op": 1,
+      "comment": "Final cleanup"
+    },
+    {
+      "hex_line": "03 00000014 00000000 300001C0",
+      "op": 3,
+      "comment": "Allow all operations to complete"
+    },
+    {
+      "hex_line": "02 00000000 00000000 300001C0",
+      "op": 2,
+      "comment": "Final idle state verification"
+    }
+  ]
+}

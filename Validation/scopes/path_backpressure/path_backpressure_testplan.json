@@ -1,0 +1,612 @@
+[
+  {
+    "op": "reset",
+    "comment": "Initialize DUT, clear all state"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 0,
+    "expected_count": 0,
+    "comment": "After reset, queue empty, no stall"
+  },
+  {
+    "op": "write",
+    "addr": 0,
+    "data": 305419896,
+    "comment": "Single write to addr 0, verify no stall"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 0,
+    "expected_count": 1,
+    "comment": "One entry in queue, no stall"
+  },
+  {
+    "op": "dequeue",
+    "idx": 0,
+    "comment": "Drain single entry to start fresh"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 0,
+    "expected_count": 0,
+    "comment": "Queue empty again"
+  },
+  {
+    "op": "write",
+    "addr": 0,
+    "data": 1,
+    "comment": "Fill queue entry 0, addr=0*128=0"
+  },
+  {
+    "op": "write",
+    "addr": 128,
+    "data": 2,
+    "comment": "Fill queue entry 1, addr=1*128=128"
+  },
+  {
+    "op": "write",
+    "addr": 256,
+    "data": 3,
+    "comment": "Fill queue entry 2, addr=2*128=256"
+  },
+  {
+    "op": "write",
+    "addr": 384,
+    "data": 4,
+    "comment": "Fill queue entry 3, addr=3*128=384"
+  },
+  {
+    "op": "write",
+    "addr": 512,
+    "data": 5,
+    "comment": "Fill queue entry 4, addr=4*128=512"
+  },
+  {
+    "op": "write",
+    "addr": 640,
+    "data": 6,
+    "comment": "Fill queue entry 5, addr=5*128=640"
+  },
+  {
+    "op": "write",
+    "addr": 768,
+    "data": 7,
+    "comment": "Fill queue entry 6, addr=6*128=768"
+  },
+  {
+    "op": "write",
+    "addr": 896,
+    "data": 8,
+    "comment": "Fill queue entry 7, addr=7*128=896"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 0,
+    "expected_count": 8,
+    "comment": "Half full, no stall yet"
+  },
+  {
+    "op": "write",
+    "addr": 1024,
+    "data": 9,
+    "comment": "Fill queue entry 8, addr=8*128=1024"
+  },
+  {
+    "op": "write",
+    "addr": 1152,
+    "data": 10,
+    "comment": "Fill queue entry 9, addr=9*128=1152"
+  },
+  {
+    "op": "write",
+    "addr": 1280,
+    "data": 11,
+    "comment": "Fill queue entry 10, addr=10*128=1280"
+  },
+  {
+    "op": "write",
+    "addr": 1408,
+    "data": 12,
+    "comment": "Fill queue entry 11, addr=11*128=1408"
+  },
+  {
+    "op": "write",
+    "addr": 1536,
+    "data": 13,
+    "comment": "Fill queue entry 12, addr=12*128=1536"
+  },
+  {
+    "op": "write",
+    "addr": 1664,
+    "data": 14,
+    "comment": "Fill queue entry 13, addr=13*128=1664"
+  },
+  {
+    "op": "write",
+    "addr": 1792,
+    "data": 15,
+    "comment": "Fill queue entry 14, addr=14*128=1792"
+  },
+  {
+    "op": "write",
+    "addr": 1920,
+    "data": 16,
+    "comment": "Fill queue entry 15, addr=15*128=1920"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 1,
+    "expected_count": 16,
+    "comment": "Queue full, stall must be asserted"
+  },
+  {
+    "op": "write",
+    "addr": 2048,
+    "data": 17,
+    "comment": "Attempt 17th write while full, should be blocked"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 1,
+    "expected_count": 16,
+    "comment": "Still full, 17th write rejected"
+  },
+  {
+    "op": "dequeue",
+    "idx": 0,
+    "comment": "Dequeue entry 0 to make space"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 0,
+    "expected_count": 15,
+    "comment": "One slot free, stall deasserted"
+  },
+  {
+    "op": "write",
+    "addr": 2048,
+    "data": 17,
+    "comment": "Now 17th write succeeds"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 1,
+    "expected_count": 16,
+    "comment": "Full again after successful write"
+  },
+  {
+    "op": "dequeue",
+    "idx": 0,
+    "comment": "Drain half: dequeue slot 0"
+  },
+  {
+    "op": "dequeue",
+    "idx": 1,
+    "comment": "Drain half: dequeue slot 1"
+  },
+  {
+    "op": "dequeue",
+    "idx": 2,
+    "comment": "Drain half: dequeue slot 2"
+  },
+  {
+    "op": "dequeue",
+    "idx": 3,
+    "comment": "Drain half: dequeue slot 3"
+  },
+  {
+    "op": "dequeue",
+    "idx": 4,
+    "comment": "Drain half: dequeue slot 4"
+  },
+  {
+    "op": "dequeue",
+    "idx": 5,
+    "comment": "Drain half: dequeue slot 5"
+  },
+  {
+    "op": "dequeue",
+    "idx": 6,
+    "comment": "Drain half: dequeue slot 6"
+  },
+  {
+    "op": "dequeue",
+    "idx": 7,
+    "comment": "Drain half: dequeue slot 7"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 0,
+    "expected_count": 8,
+    "comment": "Half drained, 8 entries remain"
+  },
+  {
+    "op": "write",
+    "addr": 2176,
+    "data": 18,
+    "comment": "Fill again entry 0"
+  },
+  {
+    "op": "write",
+    "addr": 2304,
+    "data": 19,
+    "comment": "Fill again entry 1"
+  },
+  {
+    "op": "write",
+    "addr": 2432,
+    "data": 20,
+    "comment": "Fill again entry 2"
+  },
+  {
+    "op": "write",
+    "addr": 2560,
+    "data": 21,
+    "comment": "Fill again entry 3"
+  },
+  {
+    "op": "write",
+    "addr": 2688,
+    "data": 22,
+    "comment": "Fill again entry 4"
+  },
+  {
+    "op": "write",
+    "addr": 2816,
+    "data": 23,
+    "comment": "Fill again entry 5"
+  },
+  {
+    "op": "write",
+    "addr": 2944,
+    "data": 24,
+    "comment": "Fill again entry 6"
+  },
+  {
+    "op": "write",
+    "addr": 3072,
+    "data": 25,
+    "comment": "Fill again entry 7"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 1,
+    "expected_count": 16,
+    "comment": "Full again after 8 new writes"
+  },
+  {
+    "op": "dequeue",
+    "idx": 0,
+    "comment": "Drain all: entry 0"
+  },
+  {
+    "op": "dequeue",
+    "idx": 1,
+    "comment": "Drain all: entry 1"
+  },
+  {
+    "op": "dequeue",
+    "idx": 2,
+    "comment": "Drain all: entry 2"
+  },
+  {
+    "op": "dequeue",
+    "idx": 3,
+    "comment": "Drain all: entry 3"
+  },
+  {
+    "op": "dequeue",
+    "idx": 4,
+    "comment": "Drain all: entry 4"
+  },
+  {
+    "op": "dequeue",
+    "idx": 5,
+    "comment": "Drain all: entry 5"
+  },
+  {
+    "op": "dequeue",
+    "idx": 6,
+    "comment": "Drain all: entry 6"
+  },
+  {
+    "op": "dequeue",
+    "idx": 7,
+    "comment": "Drain all: entry 7"
+  },
+  {
+    "op": "dequeue",
+    "idx": 8,
+    "comment": "Drain all: entry 8"
+  },
+  {
+    "op": "dequeue",
+    "idx": 9,
+    "comment": "Drain all: entry 9"
+  },
+  {
+    "op": "dequeue",
+    "idx": 10,
+    "comment": "Drain all: entry 10"
+  },
+  {
+    "op": "dequeue",
+    "idx": 11,
+    "comment": "Drain all: entry 11"
+  },
+  {
+    "op": "dequeue",
+    "idx": 12,
+    "comment": "Drain all: entry 12"
+  },
+  {
+    "op": "dequeue",
+    "idx": 13,
+    "comment": "Drain all: entry 13"
+  },
+  {
+    "op": "dequeue",
+    "idx": 14,
+    "comment": "Drain all: entry 14"
+  },
+  {
+    "op": "dequeue",
+    "idx": 15,
+    "comment": "Drain all: entry 15"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 0,
+    "expected_count": 0,
+    "comment": "Fully drained, queue empty"
+  },
+  {
+    "op": "write",
+    "addr": 0,
+    "data": 100,
+    "comment": "Rapid fill-drain cycle 1: write"
+  },
+  {
+    "op": "dequeue",
+    "idx": 0,
+    "comment": "Rapid fill-drain cycle 1: dequeue"
+  },
+  {
+    "op": "write",
+    "addr": 128,
+    "data": 101,
+    "comment": "Rapid fill-drain cycle 2: write"
+  },
+  {
+    "op": "dequeue",
+    "idx": 0,
+    "comment": "Rapid fill-drain cycle 2: dequeue"
+  },
+  {
+    "op": "write",
+    "addr": 256,
+    "data": 102,
+    "comment": "Rapid fill-drain cycle 3: write"
+  },
+  {
+    "op": "write",
+    "addr": 384,
+    "data": 103,
+    "comment": "Rapid fill-drain cycle 3: second write"
+  },
+  {
+    "op": "dequeue",
+    "idx": 0,
+    "comment": "Rapid fill-drain cycle 3: dequeue first"
+  },
+  {
+    "op": "dequeue",
+    "idx": 0,
+    "comment": "Rapid fill-drain cycle 3: dequeue second"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 0,
+    "expected_count": 0,
+    "comment": "After rapid cycles, queue empty"
+  },
+  {
+    "op": "write",
+    "addr": 0,
+    "data": 200,
+    "comment": "Address variety: addr=0"
+  },
+  {
+    "op": "write",
+    "addr": 256,
+    "data": 201,
+    "comment": "Address variety: addr=0x100=256"
+  },
+  {
+    "op": "write",
+    "addr": 4096,
+    "data": 202,
+    "comment": "Address variety: addr=0x1000=4096"
+  },
+  {
+    "op": "write",
+    "addr": 65536,
+    "data": 203,
+    "comment": "Address variety: addr=0x10000=65536"
+  },
+  {
+    "op": "write",
+    "addr": 536870784,
+    "data": 204,
+    "comment": "Address variety: near max (0x1FFFFF80)"
+  },
+  {
+    "op": "write",
+    "addr": 536870656,
+    "data": 205,
+    "comment": "Address variety: near max minus 128"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 0,
+    "expected_count": 6,
+    "comment": "6 varied addresses in queue"
+  },
+  {
+    "op": "read",
+    "addr": 0,
+    "comment": "Read at addr=0"
+  },
+  {
+    "op": "read",
+    "addr": 256,
+    "comment": "Read at addr=0x100"
+  },
+  {
+    "op": "read",
+    "addr": 4096,
+    "comment": "Read at addr=0x1000"
+  },
+  {
+    "op": "read",
+    "addr": 65536,
+    "comment": "Read at addr=0x10000"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 0,
+    "expected_count": 10,
+    "comment": "10 entries: 6 writes + 4 reads"
+  },
+  {
+    "op": "write",
+    "addr": 131072,
+    "data": 300,
+    "comment": "Continue filling: addr=0x20000"
+  },
+  {
+    "op": "write",
+    "addr": 262144,
+    "data": 301,
+    "comment": "Continue filling: addr=0x40000"
+  },
+  {
+    "op": "write",
+    "addr": 524288,
+    "data": 302,
+    "comment": "Continue filling: addr=0x80000"
+  },
+  {
+    "op": "write",
+    "addr": 1048576,
+    "data": 303,
+    "comment": "Continue filling: addr=0x100000"
+  },
+  {
+    "op": "write",
+    "addr": 2097152,
+    "data": 304,
+    "comment": "Continue filling: addr=0x200000"
+  },
+  {
+    "op": "write",
+    "addr": 4194304,
+    "data": 305,
+    "comment": "Continue filling: addr=0x400000"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 1,
+    "expected_count": 16,
+    "comment": "Queue full with mixed r/w"
+  },
+  {
+    "op": "dequeue",
+    "idx": 0,
+    "comment": "Free one slot"
+  },
+  {
+    "op": "read",
+    "addr": 536870784,
+    "comment": "Read near max address"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 1,
+    "expected_count": 16,
+    "comment": "Full again after read enqueue"
+  },
+  {
+    "op": "dequeue",
+    "idx": 0,
+    "comment": "Final drain: slot 0"
+  },
+  {
+    "op": "dequeue",
+    "idx": 1,
+    "comment": "Final drain: slot 1"
+  },
+  {
+    "op": "dequeue",
+    "idx": 2,
+    "comment": "Final drain: slot 2"
+  },
+  {
+    "op": "dequeue",
+    "idx": 3,
+    "comment": "Final drain: slot 3"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 0,
+    "expected_count": 12,
+    "comment": "12 entries after 4 dequeues"
+  },
+  {
+    "op": "dequeue",
+    "idx": 4,
+    "comment": "Final drain: slot 4"
+  },
+  {
+    "op": "dequeue",
+    "idx": 5,
+    "comment": "Final drain: slot 5"
+  },
+  {
+    "op": "dequeue",
+    "idx": 6,
+    "comment": "Final drain: slot 6"
+  },
+  {
+    "op": "dequeue",
+    "idx": 7,
+    "comment": "Final drain: slot 7"
+  },
+  {
+    "op": "dequeue",
+    "idx": 8,
+    "comment": "Final drain: slot 8"
+  },
+  {
+    "op": "dequeue",
+    "idx": 9,
+    "comment": "Final drain: slot 9"
+  },
+  {
+    "op": "dequeue",
+    "idx": 10,
+    "comment": "Final drain: slot 10"
+  },
+  {
+    "op": "dequeue",
+    "idx": 11,
+    "comment": "Final drain: slot 11"
+  },
+  {
+    "op": "check_stall",
+    "expected_stall": 0,
+    "expected_count": 0,
+    "comment": "Final check: queue fully drained"
+  }
+]

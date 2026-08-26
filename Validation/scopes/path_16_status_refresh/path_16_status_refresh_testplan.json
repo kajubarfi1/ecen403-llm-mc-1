@@ -1,0 +1,831 @@
+[
+  {
+    "op": "reset",
+    "comment": "Initialize DUT to known state"
+  },
+  {
+    "op": "step",
+    "cycles": 2,
+    "comment": "Allow reset to propagate"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 0,
+      "ref_urgent": 0
+    },
+    "comment": "Verify refresh signals deasserted after reset"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 0,
+      "csr_err_o": 0
+    },
+    "comment": "Verify CSR interface idle after reset"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "init_done": 0,
+      "ref_ack": 0,
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0,
+      "csr_adr_i": 0,
+      "csr_dat_i": 0,
+      "csr_sel_i": 15
+    },
+    "comment": "Set all inputs to idle state"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Stabilize inputs"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "init_done": 1
+    },
+    "comment": "Signal initialization complete to enable refresh controller"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow refresh controller to start operation"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 0,
+      "ref_urgent": 0
+    },
+    "comment": "No refresh needed immediately after init"
+  },
+  {
+    "op": "step",
+    "cycles": 100,
+    "comment": "Allow some time to pass toward first refresh interval"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 0,
+      "csr_adr_i": 16
+    },
+    "comment": "CSR read of refresh status register (addr 0x10)"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for CSR response"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "csr_err_o": 0
+    },
+    "comment": "Verify CSR acknowledges read request"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0
+    },
+    "comment": "Deassert CSR request"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Complete CSR transaction"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 0
+    },
+    "comment": "Verify CSR ack deasserted"
+  },
+  {
+    "op": "step",
+    "cycles": 6000,
+    "comment": "Wait close to tREFI (6240 cycles) to trigger refresh required"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 1
+    },
+    "comment": "Verify ref_required asserted near tREFI"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 0,
+      "csr_adr_i": 16
+    },
+    "comment": "Read refresh status when ref_required active"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for CSR response"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "csr_err_o": 0
+    },
+    "comment": "Verify CSR read completes"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0
+    },
+    "comment": "Complete read transaction"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Deassert CSR signals"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "Acknowledge refresh request"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Allow ref_ack to be sampled"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert ref_ack"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC (128 cycles) for refresh to complete"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 0
+    },
+    "comment": "Verify ref_required cleared after refresh ack"
+  },
+  {
+    "op": "step",
+    "cycles": 6300,
+    "comment": "Wait past another tREFI interval without ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 1
+    },
+    "comment": "Verify new refresh required"
+  },
+  {
+    "op": "step",
+    "cycles": 6240,
+    "comment": "Wait another full tREFI without ack - should increase pending"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 1,
+      "ref_urgent": 1
+    },
+    "comment": "Verify refresh becomes urgent after multiple missed intervals"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 0,
+      "csr_adr_i": 16
+    },
+    "comment": "Read status during urgent refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for CSR response"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "CSR read completes during urgent state"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0
+    },
+    "comment": "End CSR transaction"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Transaction complete"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "First refresh ack to reduce pending count"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Sample ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert ack"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "Second refresh ack"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Sample ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert ack"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_urgent": 0
+    },
+    "comment": "Verify urgent cleared after catching up"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 0,
+      "csr_adr_i": 16
+    },
+    "comment": "Back-to-back CSR read 1"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "First read ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_stb_i": 1,
+      "csr_adr_i": 20
+    },
+    "comment": "Back-to-back CSR read 2 - different address"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for second ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "Second read ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_stb_i": 1,
+      "csr_adr_i": 24
+    },
+    "comment": "Back-to-back CSR read 3"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for third ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "Third read ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0
+    },
+    "comment": "End burst read"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Complete transaction"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "sts_self_refresh_active": 1
+    },
+    "comment": "Signal self-refresh mode active"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Allow status to propagate"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 0,
+      "csr_adr_i": 0
+    },
+    "comment": "Read main status register"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "csr_err_o": 0
+    },
+    "comment": "Verify status read succeeds"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0
+    },
+    "comment": "End transaction"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Complete"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "sts_self_refresh_active": 0
+    },
+    "comment": "Exit self-refresh mode"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Status update propagation"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 64,
+      "csr_dat_i": 1
+    },
+    "comment": "Write to force self-refresh config"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for write ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "Write acknowledged"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "End write"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Complete write"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_force_self_ref": 1
+    },
+    "comment": "Verify config updated"
+  },
+  {
+    "op": "step",
+    "cycles": 100,
+    "comment": "Allow refresh controller to react to self-ref mode"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 1,
+      "csr_adr_i": 64,
+      "csr_dat_i": 0
+    },
+    "comment": "Clear force self-refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0,
+      "csr_we_i": 0
+    },
+    "comment": "End transaction"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Complete"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "cfg_force_self_ref": 0
+    },
+    "comment": "Verify config cleared"
+  },
+  {
+    "op": "step",
+    "cycles": 6240,
+    "comment": "Wait full tREFI interval"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 1
+    },
+    "comment": "Normal refresh required after exiting self-ref"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "Acknowledge pending refresh"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Sample ack"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "Wait tRFC"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 0,
+      "csr_adr_i": 256
+    },
+    "comment": "Read invalid/unmapped CSR address"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for response"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "CSR still responds to unmapped address"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0
+    },
+    "comment": "End transaction"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Complete"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "init_done": 0
+    },
+    "comment": "De-initialize to test refresh controller disable"
+  },
+  {
+    "op": "step",
+    "cycles": 10,
+    "comment": "Allow state change"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 0,
+      "ref_urgent": 0
+    },
+    "comment": "Refresh signals should be inactive when not initialized"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 0,
+      "csr_adr_i": 16
+    },
+    "comment": "Read refresh status while disabled"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1
+    },
+    "comment": "CSR still accessible when refresh disabled"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0
+    },
+    "comment": "End transaction"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Complete"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "init_done": 1
+    },
+    "comment": "Re-enable refresh controller"
+  },
+  {
+    "op": "step",
+    "cycles": 10,
+    "comment": "Allow re-initialization"
+  },
+  {
+    "op": "step",
+    "cycles": 18720,
+    "comment": "Wait 3x tREFI to accumulate pending refreshes"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_required": 1,
+      "ref_urgent": 1
+    },
+    "comment": "Multiple pending refreshes cause urgent"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 0,
+      "csr_adr_i": 16
+    },
+    "comment": "Read pending count at starvation"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for response"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "csr_err_o": 0
+    },
+    "comment": "Verify starvation status readable"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0
+    },
+    "comment": "End read"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Complete"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "Start clearing backlog - ack 1"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Sample"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "tRFC wait"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "Ack 2"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Sample"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "tRFC wait"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 1
+    },
+    "comment": "Ack 3"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Sample"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "ref_ack": 0
+    },
+    "comment": "Deassert"
+  },
+  {
+    "op": "step",
+    "cycles": 128,
+    "comment": "tRFC wait"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "ref_urgent": 0
+    },
+    "comment": "Verify backlog cleared, no longer urgent"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 1,
+      "csr_stb_i": 1,
+      "csr_we_i": 0,
+      "csr_adr_i": 16
+    },
+    "comment": "Final status read"
+  },
+  {
+    "op": "step",
+    "cycles": 1,
+    "comment": "Wait for ack"
+  },
+  {
+    "op": "check",
+    "expected": {
+      "csr_ack_o": 1,
+      "csr_err_o": 0
+    },
+    "comment": "Verify final read completes"
+  },
+  {
+    "op": "drive",
+    "signals": {
+      "csr_cyc_i": 0,
+      "csr_stb_i": 0
+    },
+    "comment": "End test sequence"
+  },
+  {
+    "op": "step",
+    "cycles": 5,
+    "comment": "Final stabilization"
+  }
+]

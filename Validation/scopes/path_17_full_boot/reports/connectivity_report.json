@@ -1,0 +1,958 @@
+{
+  "status": "fail",
+  "timestamp": "2026-04-13T23:16:29.761238",
+  "frontend_root": "/Users/jacob/Capstone/ecen403-llm-mc-1/Frontend/OutputFolders",
+  "path_defs_path": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/spec/path_definitions.json",
+  "summary": {
+    "total_checks": 86,
+    "pass": 76,
+    "fail": 4,
+    "warn": 6,
+    "skip": 0
+  },
+  "manifests_found": {
+    "addr_decoder": "PHASE2RTL/addr_decoder_manifest.json",
+    "refresh_ctrl": "PHASE2RTL/refresh_ctrl_manifest.json",
+    "bank_tracker": "PHASE2RTL/bank_tracker_manifest.json",
+    "calibration": "PHASE2RTL/calibration_manifest.json",
+    "wb_port": "VALIDATIONREPORT/lint_combined/wb_port_manifest.json",
+    "config_regs": "VALIDATIONREPORT/lint_combined/config_regs_manifest.json",
+    "init_fsm": "VALIDATIONREPORT/lint_combined/init_fsm_manifest.json",
+    "data_path": "VALIDATIONREPORT/lint_combined_p4/data_path_manifest.json",
+    "scheduler": "VALIDATIONREPORT/lint_combined_p4/scheduler_manifest.json",
+    "cmd_gen": "VALIDATIONREPORT/lint_combined_p4/cmd_gen_manifest.json",
+    "cmd_queue": "VALIDATIONREPORT/lint_combined_p4/cmd_queue_manifest.json"
+  },
+  "manifests_missing": [],
+  "rtl_fallbacks": [],
+  "port_sources": {
+    "wb_port": "manifest",
+    "addr_decoder": "manifest",
+    "cmd_queue": "manifest",
+    "bank_tracker": "manifest",
+    "scheduler": "manifest",
+    "refresh_ctrl": "manifest",
+    "cmd_gen": "manifest",
+    "data_path": "manifest",
+    "init_fsm": "manifest",
+    "config_regs": "manifest",
+    "calibration": "manifest"
+  },
+  "connection_summary": {
+    "conn_01": "pass",
+    "conn_02": "pass",
+    "conn_03": "pass",
+    "conn_04": "warn",
+    "conn_05": "warn",
+    "conn_06": "pass",
+    "conn_07": "pass",
+    "conn_08": "pass",
+    "conn_09": "pass",
+    "conn_10": "pass",
+    "conn_11": "fail",
+    "conn_12": "pass",
+    "conn_13": "pass",
+    "conn_14": "pass",
+    "conn_15": "pass",
+    "conn_16": "pass",
+    "conn_17": "pass",
+    "conn_18": "pass",
+    "conn_19": "pass"
+  },
+  "path_summary": {
+    "path_01_write_cmd": "pass",
+    "path_02_read_cmd": "pass",
+    "path_03_read_return": "fail",
+    "path_04_scheduler_bank_loop": "pass",
+    "path_05_scheduler_refresh_loop": "pass",
+    "path_06_scheduler_dequeue": "pass",
+    "path_07_backpressure": "pass",
+    "path_08_init_to_cal": "pass",
+    "path_09_init_to_refresh": "pass",
+    "path_10_csr_to_timing": "pass",
+    "path_11_csr_to_refresh": "pass",
+    "path_12_csr_timing_to_scheduling": "pass",
+    "path_13_csr_refresh_to_scheduling": "pass",
+    "path_14_status_init": "pass",
+    "path_15_status_cal": "pass",
+    "path_16_status_refresh": "pass",
+    "path_17_full_boot": "pass",
+    "path_18_full_write": "pass",
+    "path_19_row_conflict": "pass",
+    "path_20_refresh_preempt": "pass"
+  },
+  "connection_results": [
+    {
+      "check_id": "conn_01_req_addr_ok",
+      "target": "conn_01",
+      "status": "pass",
+      "message": "Signal 'wb_port.req_addr \u2192 addr_decoder.req_addr' verified: width=29, directions correct.",
+      "details": {
+        "signal": "wb_port.req_addr \u2192 addr_decoder.req_addr",
+        "width": 29
+      }
+    },
+    {
+      "check_id": "conn_02_req_valid_ok",
+      "target": "conn_02",
+      "status": "pass",
+      "message": "Signal 'wb_port.req_valid \u2192 cmd_queue.enq_valid' verified: width=1, directions correct.",
+      "details": {
+        "signal": "wb_port.req_valid \u2192 cmd_queue.enq_valid",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_02_req_we_ok",
+      "target": "conn_02",
+      "status": "pass",
+      "message": "Signal 'wb_port.req_we \u2192 cmd_queue.enq_we' verified: width=1, directions correct.",
+      "details": {
+        "signal": "wb_port.req_we \u2192 cmd_queue.enq_we",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_02_req_aux_ok",
+      "target": "conn_02",
+      "status": "pass",
+      "message": "Signal 'wb_port.req_aux \u2192 cmd_queue.enq_aux' verified: width=4, directions correct.",
+      "details": {
+        "signal": "wb_port.req_aux \u2192 cmd_queue.enq_aux",
+        "width": 4
+      }
+    },
+    {
+      "check_id": "conn_03_dec_row_ok",
+      "target": "conn_03",
+      "status": "pass",
+      "message": "Signal 'addr_decoder.dec_row \u2192 cmd_queue.enq_row' verified: width=15, directions correct.",
+      "details": {
+        "signal": "addr_decoder.dec_row \u2192 cmd_queue.enq_row",
+        "width": 15
+      }
+    },
+    {
+      "check_id": "conn_03_dec_col_ok",
+      "target": "conn_03",
+      "status": "pass",
+      "message": "Signal 'addr_decoder.dec_col \u2192 cmd_queue.enq_col' verified: width=10, directions correct.",
+      "details": {
+        "signal": "addr_decoder.dec_col \u2192 cmd_queue.enq_col",
+        "width": 10
+      }
+    },
+    {
+      "check_id": "conn_03_dec_bank_ok",
+      "target": "conn_03",
+      "status": "pass",
+      "message": "Signal 'addr_decoder.dec_bank \u2192 cmd_queue.enq_bank' verified: width=3, directions correct.",
+      "details": {
+        "signal": "addr_decoder.dec_bank \u2192 cmd_queue.enq_bank",
+        "width": 3
+      }
+    },
+    {
+      "check_id": "conn_04_entry_valid_ok",
+      "target": "conn_04",
+      "status": "pass",
+      "message": "Signal 'cmd_queue.entry_valid \u2192 scheduler.q_valid' verified: width=16, directions correct.",
+      "details": {
+        "signal": "cmd_queue.entry_valid \u2192 scheduler.q_valid",
+        "width": 16
+      }
+    },
+    {
+      "check_id": "conn_04_entry_row_struct",
+      "target": "conn_04",
+      "status": "warn",
+      "message": "Signal 'cmd_queue.entry_row \u2192 scheduler.q_row' has structured width '16x15' \u2014 existence verified, width check skipped.",
+      "details": {
+        "signal": "cmd_queue.entry_row \u2192 scheduler.q_row",
+        "structured_width": "16x15"
+      }
+    },
+    {
+      "check_id": "conn_04_entry_col_struct",
+      "target": "conn_04",
+      "status": "warn",
+      "message": "Signal 'cmd_queue.entry_col \u2192 scheduler.q_col' has structured width '16x10' \u2014 existence verified, width check skipped.",
+      "details": {
+        "signal": "cmd_queue.entry_col \u2192 scheduler.q_col",
+        "structured_width": "16x10"
+      }
+    },
+    {
+      "check_id": "conn_04_entry_bank_struct",
+      "target": "conn_04",
+      "status": "warn",
+      "message": "Signal 'cmd_queue.entry_bank \u2192 scheduler.q_bank' has structured width '16x3' \u2014 existence verified, width check skipped.",
+      "details": {
+        "signal": "cmd_queue.entry_bank \u2192 scheduler.q_bank",
+        "structured_width": "16x3"
+      }
+    },
+    {
+      "check_id": "conn_04_entry_we_struct",
+      "target": "conn_04",
+      "status": "warn",
+      "message": "Signal 'cmd_queue.entry_we \u2192 scheduler.q_we' has structured width '16x1' \u2014 existence verified, width check skipped.",
+      "details": {
+        "signal": "cmd_queue.entry_we \u2192 scheduler.q_we",
+        "structured_width": "16x1"
+      }
+    },
+    {
+      "check_id": "conn_04_entry_aux_struct",
+      "target": "conn_04",
+      "status": "warn",
+      "message": "Signal 'cmd_queue.entry_aux \u2192 scheduler.q_aux' has structured width '16x4' \u2014 existence verified, width check skipped.",
+      "details": {
+        "signal": "cmd_queue.entry_aux \u2192 scheduler.q_aux",
+        "structured_width": "16x4"
+      }
+    },
+    {
+      "check_id": "conn_05_bank_is_active_ok",
+      "target": "conn_05",
+      "status": "pass",
+      "message": "Signal 'bank_tracker.bank_is_active \u2192 scheduler.bank_is_active' verified: width=8, directions correct.",
+      "details": {
+        "signal": "bank_tracker.bank_is_active \u2192 scheduler.bank_is_active",
+        "width": 8
+      }
+    },
+    {
+      "check_id": "conn_05_bank_open_row_struct",
+      "target": "conn_05",
+      "status": "warn",
+      "message": "Signal 'bank_tracker.bank_open_row \u2192 scheduler.bank_open_row' has structured width '8x15' \u2014 existence verified, width check skipped.",
+      "details": {
+        "signal": "bank_tracker.bank_open_row \u2192 scheduler.bank_open_row",
+        "structured_width": "8x15"
+      }
+    },
+    {
+      "check_id": "conn_05_bank_act_allowed_ok",
+      "target": "conn_05",
+      "status": "pass",
+      "message": "Signal 'bank_tracker.bank_act_allowed \u2192 scheduler.bank_act_allowed' verified: width=8, directions correct.",
+      "details": {
+        "signal": "bank_tracker.bank_act_allowed \u2192 scheduler.bank_act_allowed",
+        "width": 8
+      }
+    },
+    {
+      "check_id": "conn_05_bank_rd_allowed_ok",
+      "target": "conn_05",
+      "status": "pass",
+      "message": "Signal 'bank_tracker.bank_rd_allowed \u2192 scheduler.bank_rd_allowed' verified: width=8, directions correct.",
+      "details": {
+        "signal": "bank_tracker.bank_rd_allowed \u2192 scheduler.bank_rd_allowed",
+        "width": 8
+      }
+    },
+    {
+      "check_id": "conn_05_bank_wr_allowed_ok",
+      "target": "conn_05",
+      "status": "pass",
+      "message": "Signal 'bank_tracker.bank_wr_allowed \u2192 scheduler.bank_wr_allowed' verified: width=8, directions correct.",
+      "details": {
+        "signal": "bank_tracker.bank_wr_allowed \u2192 scheduler.bank_wr_allowed",
+        "width": 8
+      }
+    },
+    {
+      "check_id": "conn_05_bank_pre_allowed_ok",
+      "target": "conn_05",
+      "status": "pass",
+      "message": "Signal 'bank_tracker.bank_pre_allowed \u2192 scheduler.bank_pre_allowed' verified: width=8, directions correct.",
+      "details": {
+        "signal": "bank_tracker.bank_pre_allowed \u2192 scheduler.bank_pre_allowed",
+        "width": 8
+      }
+    },
+    {
+      "check_id": "conn_06_ref_required_ok",
+      "target": "conn_06",
+      "status": "pass",
+      "message": "Signal 'refresh_ctrl.ref_required \u2192 scheduler.ref_required' verified: width=1, directions correct.",
+      "details": {
+        "signal": "refresh_ctrl.ref_required \u2192 scheduler.ref_required",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_06_ref_urgent_ok",
+      "target": "conn_06",
+      "status": "pass",
+      "message": "Signal 'refresh_ctrl.ref_urgent \u2192 scheduler.ref_urgent' verified: width=1, directions correct.",
+      "details": {
+        "signal": "refresh_ctrl.ref_urgent \u2192 scheduler.ref_urgent",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_07_cmd_valid_ok",
+      "target": "conn_07",
+      "status": "pass",
+      "message": "Signal 'scheduler.cmd_valid \u2192 cmd_gen.sched_valid' verified: width=1, directions correct.",
+      "details": {
+        "signal": "scheduler.cmd_valid \u2192 cmd_gen.sched_valid",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_07_cmd_type_ok",
+      "target": "conn_07",
+      "status": "pass",
+      "message": "Signal 'scheduler.cmd_type \u2192 cmd_gen.sched_type' verified: width=4, directions correct.",
+      "details": {
+        "signal": "scheduler.cmd_type \u2192 cmd_gen.sched_type",
+        "width": 4
+      }
+    },
+    {
+      "check_id": "conn_07_cmd_bank_ok",
+      "target": "conn_07",
+      "status": "pass",
+      "message": "Signal 'scheduler.cmd_bank \u2192 cmd_gen.sched_bank' verified: width=3, directions correct.",
+      "details": {
+        "signal": "scheduler.cmd_bank \u2192 cmd_gen.sched_bank",
+        "width": 3
+      }
+    },
+    {
+      "check_id": "conn_07_cmd_row_ok",
+      "target": "conn_07",
+      "status": "pass",
+      "message": "Signal 'scheduler.cmd_row \u2192 cmd_gen.sched_row' verified: width=15, directions correct.",
+      "details": {
+        "signal": "scheduler.cmd_row \u2192 cmd_gen.sched_row",
+        "width": 15
+      }
+    },
+    {
+      "check_id": "conn_07_cmd_col_ok",
+      "target": "conn_07",
+      "status": "pass",
+      "message": "Signal 'scheduler.cmd_col \u2192 cmd_gen.sched_col' verified: width=10, directions correct.",
+      "details": {
+        "signal": "scheduler.cmd_col \u2192 cmd_gen.sched_col",
+        "width": 10
+      }
+    },
+    {
+      "check_id": "conn_07_cmd_we_ok",
+      "target": "conn_07",
+      "status": "pass",
+      "message": "Signal 'scheduler.cmd_we \u2192 cmd_gen.sched_we' verified: width=1, directions correct.",
+      "details": {
+        "signal": "scheduler.cmd_we \u2192 cmd_gen.sched_we",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_07_cmd_aux_ok",
+      "target": "conn_07",
+      "status": "pass",
+      "message": "Signal 'scheduler.cmd_aux \u2192 cmd_gen.sched_aux' verified: width=4, directions correct.",
+      "details": {
+        "signal": "scheduler.cmd_aux \u2192 cmd_gen.sched_aux",
+        "width": 4
+      }
+    },
+    {
+      "check_id": "conn_08_ref_ack_ok",
+      "target": "conn_08",
+      "status": "pass",
+      "message": "Signal 'scheduler.ref_ack \u2192 refresh_ctrl.ref_ack' verified: width=1, directions correct.",
+      "details": {
+        "signal": "scheduler.ref_ack \u2192 refresh_ctrl.ref_ack",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_09_fb_act_valid_ok",
+      "target": "conn_09",
+      "status": "pass",
+      "message": "Signal 'cmd_gen.fb_act_valid \u2192 bank_tracker.cmd_act_valid' verified: width=1, directions correct.",
+      "details": {
+        "signal": "cmd_gen.fb_act_valid \u2192 bank_tracker.cmd_act_valid",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_09_fb_act_bank_ok",
+      "target": "conn_09",
+      "status": "pass",
+      "message": "Signal 'cmd_gen.fb_act_bank \u2192 bank_tracker.cmd_act_bank' verified: width=3, directions correct.",
+      "details": {
+        "signal": "cmd_gen.fb_act_bank \u2192 bank_tracker.cmd_act_bank",
+        "width": 3
+      }
+    },
+    {
+      "check_id": "conn_09_fb_act_row_ok",
+      "target": "conn_09",
+      "status": "pass",
+      "message": "Signal 'cmd_gen.fb_act_row \u2192 bank_tracker.cmd_act_row' verified: width=15, directions correct.",
+      "details": {
+        "signal": "cmd_gen.fb_act_row \u2192 bank_tracker.cmd_act_row",
+        "width": 15
+      }
+    },
+    {
+      "check_id": "conn_09_fb_rd_valid_ok",
+      "target": "conn_09",
+      "status": "pass",
+      "message": "Signal 'cmd_gen.fb_rd_valid \u2192 bank_tracker.cmd_rd_valid' verified: width=1, directions correct.",
+      "details": {
+        "signal": "cmd_gen.fb_rd_valid \u2192 bank_tracker.cmd_rd_valid",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_09_fb_wr_valid_ok",
+      "target": "conn_09",
+      "status": "pass",
+      "message": "Signal 'cmd_gen.fb_wr_valid \u2192 bank_tracker.cmd_wr_valid' verified: width=1, directions correct.",
+      "details": {
+        "signal": "cmd_gen.fb_wr_valid \u2192 bank_tracker.cmd_wr_valid",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_09_fb_pre_valid_ok",
+      "target": "conn_09",
+      "status": "pass",
+      "message": "Signal 'cmd_gen.fb_pre_valid \u2192 bank_tracker.cmd_pre_valid' verified: width=1, directions correct.",
+      "details": {
+        "signal": "cmd_gen.fb_pre_valid \u2192 bank_tracker.cmd_pre_valid",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_09_fb_ref_valid_ok",
+      "target": "conn_09",
+      "status": "pass",
+      "message": "Signal 'cmd_gen.fb_ref_valid \u2192 bank_tracker.cmd_ref_valid' verified: width=1, directions correct.",
+      "details": {
+        "signal": "cmd_gen.fb_ref_valid \u2192 bank_tracker.cmd_ref_valid",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_10_deq_grant_ok",
+      "target": "conn_10",
+      "status": "pass",
+      "message": "Signal 'scheduler.deq_grant \u2192 cmd_queue.deq_grant' verified: width=1, directions correct.",
+      "details": {
+        "signal": "scheduler.deq_grant \u2192 cmd_queue.deq_grant",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_10_deq_idx_ok",
+      "target": "conn_10",
+      "status": "pass",
+      "message": "Signal 'scheduler.deq_idx \u2192 cmd_queue.deq_idx' verified: width=4, directions correct.",
+      "details": {
+        "signal": "scheduler.deq_idx \u2192 cmd_queue.deq_idx",
+        "width": 4
+      }
+    },
+    {
+      "check_id": "conn_11_rsp_valid_src_exists",
+      "target": "conn_11",
+      "status": "fail",
+      "message": "Source port 'rsp_valid' not found in data_path manifest.",
+      "details": {
+        "signal": "data_path.rsp_valid \u2192 wb_port.rsp_valid",
+        "available_ports": [
+          "cfg_CL_nCK",
+          "cfg_CWL_nCK",
+          "clk",
+          "cmd_aux",
+          "cmd_rd_valid",
+          "cmd_wr_valid",
+          "ddr_dm_o",
+          "ddr_dq_i",
+          "ddr_dq_o",
+          "ddr_dq_oe",
+          "ddr_dqs_i",
+          "ddr_dqs_o",
+          "ddr_dqs_oe",
+          "rd_rsp_aux",
+          "rd_rsp_data",
+          "rd_rsp_valid",
+          "rst_n",
+          "wr_data",
+          "wr_data_ready",
+          "wr_data_valid",
+          "wr_mask"
+        ]
+      }
+    },
+    {
+      "check_id": "conn_11_rsp_rdata_src_exists",
+      "target": "conn_11",
+      "status": "fail",
+      "message": "Source port 'rsp_rdata' not found in data_path manifest.",
+      "details": {
+        "signal": "data_path.rsp_rdata \u2192 wb_port.rsp_rdata",
+        "available_ports": [
+          "cfg_CL_nCK",
+          "cfg_CWL_nCK",
+          "clk",
+          "cmd_aux",
+          "cmd_rd_valid",
+          "cmd_wr_valid",
+          "ddr_dm_o",
+          "ddr_dq_i",
+          "ddr_dq_o",
+          "ddr_dq_oe",
+          "ddr_dqs_i",
+          "ddr_dqs_o",
+          "ddr_dqs_oe",
+          "rd_rsp_aux",
+          "rd_rsp_data",
+          "rd_rsp_valid",
+          "rst_n",
+          "wr_data",
+          "wr_data_ready",
+          "wr_data_valid",
+          "wr_mask"
+        ]
+      }
+    },
+    {
+      "check_id": "conn_11_rsp_aux_src_exists",
+      "target": "conn_11",
+      "status": "fail",
+      "message": "Source port 'rsp_aux' not found in data_path manifest.",
+      "details": {
+        "signal": "data_path.rsp_aux \u2192 wb_port.rsp_aux",
+        "available_ports": [
+          "cfg_CL_nCK",
+          "cfg_CWL_nCK",
+          "clk",
+          "cmd_aux",
+          "cmd_rd_valid",
+          "cmd_wr_valid",
+          "ddr_dm_o",
+          "ddr_dq_i",
+          "ddr_dq_o",
+          "ddr_dq_oe",
+          "ddr_dqs_i",
+          "ddr_dqs_o",
+          "ddr_dqs_oe",
+          "rd_rsp_aux",
+          "rd_rsp_data",
+          "rd_rsp_valid",
+          "rst_n",
+          "wr_data",
+          "wr_data_ready",
+          "wr_data_valid",
+          "wr_mask"
+        ]
+      }
+    },
+    {
+      "check_id": "conn_12_enq_ready_ok",
+      "target": "conn_12",
+      "status": "pass",
+      "message": "Signal 'cmd_queue.enq_ready \u2192 wb_port.req_ready' verified: width=1, directions correct.",
+      "details": {
+        "signal": "cmd_queue.enq_ready \u2192 wb_port.req_ready",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_13_cfg_tRCD_nCK_ok",
+      "target": "conn_13",
+      "status": "pass",
+      "message": "Signal 'config_regs.cfg_tRCD_nCK \u2192 bank_tracker.cfg_tRCD_nCK' verified: width=8, directions correct.",
+      "details": {
+        "signal": "config_regs.cfg_tRCD_nCK \u2192 bank_tracker.cfg_tRCD_nCK",
+        "width": 8
+      }
+    },
+    {
+      "check_id": "conn_13_cfg_tRP_nCK_ok",
+      "target": "conn_13",
+      "status": "pass",
+      "message": "Signal 'config_regs.cfg_tRP_nCK \u2192 bank_tracker.cfg_tRP_nCK' verified: width=8, directions correct.",
+      "details": {
+        "signal": "config_regs.cfg_tRP_nCK \u2192 bank_tracker.cfg_tRP_nCK",
+        "width": 8
+      }
+    },
+    {
+      "check_id": "conn_13_cfg_tRAS_nCK_ok",
+      "target": "conn_13",
+      "status": "pass",
+      "message": "Signal 'config_regs.cfg_tRAS_nCK \u2192 bank_tracker.cfg_tRAS_nCK' verified: width=8, directions correct.",
+      "details": {
+        "signal": "config_regs.cfg_tRAS_nCK \u2192 bank_tracker.cfg_tRAS_nCK",
+        "width": 8
+      }
+    },
+    {
+      "check_id": "conn_13_cfg_tRC_nCK_ok",
+      "target": "conn_13",
+      "status": "pass",
+      "message": "Signal 'config_regs.cfg_tRC_nCK \u2192 bank_tracker.cfg_tRC_nCK' verified: width=8, directions correct.",
+      "details": {
+        "signal": "config_regs.cfg_tRC_nCK \u2192 bank_tracker.cfg_tRC_nCK",
+        "width": 8
+      }
+    },
+    {
+      "check_id": "conn_13_cfg_tRRD_nCK_ok",
+      "target": "conn_13",
+      "status": "pass",
+      "message": "Signal 'config_regs.cfg_tRRD_nCK \u2192 bank_tracker.cfg_tRRD_nCK' verified: width=8, directions correct.",
+      "details": {
+        "signal": "config_regs.cfg_tRRD_nCK \u2192 bank_tracker.cfg_tRRD_nCK",
+        "width": 8
+      }
+    },
+    {
+      "check_id": "conn_13_cfg_tFAW_nCK_ok",
+      "target": "conn_13",
+      "status": "pass",
+      "message": "Signal 'config_regs.cfg_tFAW_nCK \u2192 bank_tracker.cfg_tFAW_nCK' verified: width=8, directions correct.",
+      "details": {
+        "signal": "config_regs.cfg_tFAW_nCK \u2192 bank_tracker.cfg_tFAW_nCK",
+        "width": 8
+      }
+    },
+    {
+      "check_id": "conn_13_cfg_tWTR_nCK_ok",
+      "target": "conn_13",
+      "status": "pass",
+      "message": "Signal 'config_regs.cfg_tWTR_nCK \u2192 bank_tracker.cfg_tWTR_nCK' verified: width=8, directions correct.",
+      "details": {
+        "signal": "config_regs.cfg_tWTR_nCK \u2192 bank_tracker.cfg_tWTR_nCK",
+        "width": 8
+      }
+    },
+    {
+      "check_id": "conn_13_cfg_tWR_nCK_ok",
+      "target": "conn_13",
+      "status": "pass",
+      "message": "Signal 'config_regs.cfg_tWR_nCK \u2192 bank_tracker.cfg_tWR_nCK' verified: width=8, directions correct.",
+      "details": {
+        "signal": "config_regs.cfg_tWR_nCK \u2192 bank_tracker.cfg_tWR_nCK",
+        "width": 8
+      }
+    },
+    {
+      "check_id": "conn_13_cfg_tRTP_nCK_ok",
+      "target": "conn_13",
+      "status": "pass",
+      "message": "Signal 'config_regs.cfg_tRTP_nCK \u2192 bank_tracker.cfg_tRTP_nCK' verified: width=8, directions correct.",
+      "details": {
+        "signal": "config_regs.cfg_tRTP_nCK \u2192 bank_tracker.cfg_tRTP_nCK",
+        "width": 8
+      }
+    },
+    {
+      "check_id": "conn_13_cfg_tCCD_nCK_ok",
+      "target": "conn_13",
+      "status": "pass",
+      "message": "Signal 'config_regs.cfg_tCCD_nCK \u2192 bank_tracker.cfg_tCCD_nCK' verified: width=8, directions correct.",
+      "details": {
+        "signal": "config_regs.cfg_tCCD_nCK \u2192 bank_tracker.cfg_tCCD_nCK",
+        "width": 8
+      }
+    },
+    {
+      "check_id": "conn_13_cfg_tRFC_nCK_ok",
+      "target": "conn_13",
+      "status": "pass",
+      "message": "Signal 'config_regs.cfg_tRFC_nCK \u2192 bank_tracker.cfg_tRFC_nCK' verified: width=8, directions correct.",
+      "details": {
+        "signal": "config_regs.cfg_tRFC_nCK \u2192 bank_tracker.cfg_tRFC_nCK",
+        "width": 8
+      }
+    },
+    {
+      "check_id": "conn_14_cfg_max_postpone_ok",
+      "target": "conn_14",
+      "status": "pass",
+      "message": "Signal 'config_regs.cfg_max_postpone \u2192 refresh_ctrl.cfg_max_postpone' verified: width=4, directions correct.",
+      "details": {
+        "signal": "config_regs.cfg_max_postpone \u2192 refresh_ctrl.cfg_max_postpone",
+        "width": 4
+      }
+    },
+    {
+      "check_id": "conn_14_cfg_urgent_threshold_ok",
+      "target": "conn_14",
+      "status": "pass",
+      "message": "Signal 'config_regs.cfg_urgent_threshold \u2192 refresh_ctrl.cfg_urgent_threshold' verified: width=4, directions correct.",
+      "details": {
+        "signal": "config_regs.cfg_urgent_threshold \u2192 refresh_ctrl.cfg_urgent_threshold",
+        "width": 4
+      }
+    },
+    {
+      "check_id": "conn_14_cfg_force_refresh_ok",
+      "target": "conn_14",
+      "status": "pass",
+      "message": "Signal 'config_regs.cfg_force_refresh \u2192 refresh_ctrl.cfg_force_refresh' verified: width=1, directions correct.",
+      "details": {
+        "signal": "config_regs.cfg_force_refresh \u2192 refresh_ctrl.cfg_force_refresh",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_14_cfg_ref_priority_ok",
+      "target": "conn_14",
+      "status": "pass",
+      "message": "Signal 'config_regs.cfg_ref_priority \u2192 refresh_ctrl.cfg_ref_priority' verified: width=1, directions correct.",
+      "details": {
+        "signal": "config_regs.cfg_ref_priority \u2192 refresh_ctrl.cfg_ref_priority",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_14_cfg_tREFI_nCK_ok",
+      "target": "conn_14",
+      "status": "pass",
+      "message": "Signal 'config_regs.cfg_tREFI_nCK \u2192 refresh_ctrl.cfg_tREFI_nCK' verified: width=24, directions correct.",
+      "details": {
+        "signal": "config_regs.cfg_tREFI_nCK \u2192 refresh_ctrl.cfg_tREFI_nCK",
+        "width": 24
+      }
+    },
+    {
+      "check_id": "conn_15_init_done_ok",
+      "target": "conn_15",
+      "status": "pass",
+      "message": "Signal 'init_fsm.init_done \u2192 calibration.init_done' verified: width=1, directions correct.",
+      "details": {
+        "signal": "init_fsm.init_done \u2192 calibration.init_done",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_16_init_done_ok",
+      "target": "conn_16",
+      "status": "pass",
+      "message": "Signal 'init_fsm.init_done \u2192 refresh_ctrl.init_done' verified: width=1, directions correct.",
+      "details": {
+        "signal": "init_fsm.init_done \u2192 refresh_ctrl.init_done",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_17_init_done_ok",
+      "target": "conn_17",
+      "status": "pass",
+      "message": "Signal 'init_fsm.init_done \u2192 config_regs.sts_init_done' verified: width=1, directions correct.",
+      "details": {
+        "signal": "init_fsm.init_done \u2192 config_regs.sts_init_done",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_17_init_fail_ok",
+      "target": "conn_17",
+      "status": "pass",
+      "message": "Signal 'init_fsm.init_fail \u2192 config_regs.sts_init_fail_event' verified: width=1, directions correct.",
+      "details": {
+        "signal": "init_fsm.init_fail \u2192 config_regs.sts_init_fail_event",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_18_cal_done_ok",
+      "target": "conn_18",
+      "status": "pass",
+      "message": "Signal 'calibration.cal_done \u2192 config_regs.sts_cal_done' verified: width=1, directions correct.",
+      "details": {
+        "signal": "calibration.cal_done \u2192 config_regs.sts_cal_done",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_18_cal_fail_ok",
+      "target": "conn_18",
+      "status": "pass",
+      "message": "Signal 'calibration.cal_fail \u2192 config_regs.sts_cal_fail' verified: width=1, directions correct.",
+      "details": {
+        "signal": "calibration.cal_fail \u2192 config_regs.sts_cal_fail",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_19_ref_starve_flag_ok",
+      "target": "conn_19",
+      "status": "pass",
+      "message": "Signal 'refresh_ctrl.ref_starve_flag \u2192 config_regs.sts_ref_starve_event' verified: width=1, directions correct.",
+      "details": {
+        "signal": "refresh_ctrl.ref_starve_flag \u2192 config_regs.sts_ref_starve_event",
+        "width": 1
+      }
+    },
+    {
+      "check_id": "conn_19_ref_pending_cnt_ok",
+      "target": "conn_19",
+      "status": "pass",
+      "message": "Signal 'refresh_ctrl.ref_pending_cnt \u2192 config_regs.sts_ref_pending_cnt' verified: width=3, directions correct.",
+      "details": {
+        "signal": "refresh_ctrl.ref_pending_cnt \u2192 config_regs.sts_ref_pending_cnt",
+        "width": 3
+      }
+    }
+  ],
+  "path_results": [
+    {
+      "check_id": "path_01_write_cmd_conns",
+      "target": "path_01_write_cmd",
+      "status": "pass",
+      "message": "Path 'path_01_write_cmd': all 5 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_02_read_cmd_conns",
+      "target": "path_02_read_cmd",
+      "status": "pass",
+      "message": "Path 'path_02_read_cmd': all 5 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_03_read_return_conns",
+      "target": "path_03_read_return",
+      "status": "fail",
+      "message": "Path 'path_03_read_return' has 1 failing connections: ['conn_11'].",
+      "details": {
+        "failed_connections": [
+          "conn_11"
+        ]
+      }
+    },
+    {
+      "check_id": "path_04_scheduler_bank_loop_conns",
+      "target": "path_04_scheduler_bank_loop",
+      "status": "pass",
+      "message": "Path 'path_04_scheduler_bank_loop': all 3 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_05_scheduler_refresh_loop_conns",
+      "target": "path_05_scheduler_refresh_loop",
+      "status": "pass",
+      "message": "Path 'path_05_scheduler_refresh_loop': all 2 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_06_scheduler_dequeue_conns",
+      "target": "path_06_scheduler_dequeue",
+      "status": "pass",
+      "message": "Path 'path_06_scheduler_dequeue': all 1 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_07_backpressure_conns",
+      "target": "path_07_backpressure",
+      "status": "pass",
+      "message": "Path 'path_07_backpressure': all 1 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_08_init_to_cal_conns",
+      "target": "path_08_init_to_cal",
+      "status": "pass",
+      "message": "Path 'path_08_init_to_cal': all 1 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_09_init_to_refresh_conns",
+      "target": "path_09_init_to_refresh",
+      "status": "pass",
+      "message": "Path 'path_09_init_to_refresh': all 1 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_10_csr_to_timing_conns",
+      "target": "path_10_csr_to_timing",
+      "status": "pass",
+      "message": "Path 'path_10_csr_to_timing': all 1 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_11_csr_to_refresh_conns",
+      "target": "path_11_csr_to_refresh",
+      "status": "pass",
+      "message": "Path 'path_11_csr_to_refresh': all 1 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_12_csr_timing_to_scheduling_conns",
+      "target": "path_12_csr_timing_to_scheduling",
+      "status": "pass",
+      "message": "Path 'path_12_csr_timing_to_scheduling': all 2 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_13_csr_refresh_to_scheduling_conns",
+      "target": "path_13_csr_refresh_to_scheduling",
+      "status": "pass",
+      "message": "Path 'path_13_csr_refresh_to_scheduling': all 2 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_14_status_init_conns",
+      "target": "path_14_status_init",
+      "status": "pass",
+      "message": "Path 'path_14_status_init': all 1 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_15_status_cal_conns",
+      "target": "path_15_status_cal",
+      "status": "pass",
+      "message": "Path 'path_15_status_cal': all 1 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_16_status_refresh_conns",
+      "target": "path_16_status_refresh",
+      "status": "pass",
+      "message": "Path 'path_16_status_refresh': all 1 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_17_full_boot_conns",
+      "target": "path_17_full_boot",
+      "status": "pass",
+      "message": "Path 'path_17_full_boot': all 3 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_18_full_write_conns",
+      "target": "path_18_full_write",
+      "status": "pass",
+      "message": "Path 'path_18_full_write': all 5 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_19_row_conflict_conns",
+      "target": "path_19_row_conflict",
+      "status": "pass",
+      "message": "Path 'path_19_row_conflict': all 7 connections verified.",
+      "details": {}
+    },
+    {
+      "check_id": "path_20_refresh_preempt_conns",
+      "target": "path_20_refresh_preempt",
+      "status": "pass",
+      "message": "Path 'path_20_refresh_preempt': all 7 connections verified.",
+      "details": {}
+    }
+  ]
+}
