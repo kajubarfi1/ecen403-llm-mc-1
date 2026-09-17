@@ -1,0 +1,188 @@
+{
+  "module_name": "wb_port",
+  "file": "wb_port.sv",
+  "phase": 1,
+  "agent": "wb_port_agent",
+  "spec_version": "2.0.0",
+  "design_id": "ddr3_mc_core_v2",
+  "parameters": {
+    "DATA_WIDTH": 32,
+    "ADDR_WIDTH": 29,
+    "SEL_WIDTH": 4,
+    "AUX_WIDTH": 4,
+    "MAX_BURST_LEN": 8,
+    "QUEUE_DEPTH": 16,
+    "BURST_CTR_W": 3,
+    "TAG_FIFO_DEPTH": 16,
+    "ROW_BITS": 15
+  },
+  "ports": {
+    "clock_reset": [
+      {
+        "name": "clk",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "rst_n",
+        "width": 1,
+        "dir": "input"
+      }
+    ],
+    "external_in": [
+      {
+        "name": "wb_cyc_i",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "wb_stb_i",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "wb_we_i",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "wb_adr_i",
+        "width": 29,
+        "dir": "input"
+      },
+      {
+        "name": "wb_dat_i",
+        "width": 32,
+        "dir": "input"
+      },
+      {
+        "name": "wb_sel_i",
+        "width": 4,
+        "dir": "input"
+      },
+      {
+        "name": "wb_bte_i",
+        "width": 2,
+        "dir": "input"
+      },
+      {
+        "name": "wb_cti_i",
+        "width": 3,
+        "dir": "input"
+      }
+    ],
+    "external_out": [
+      {
+        "name": "wb_ack_o",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "wb_dat_o",
+        "width": 32,
+        "dir": "output"
+      },
+      {
+        "name": "wb_stall_o",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "wb_err_o",
+        "width": 1,
+        "dir": "output"
+      }
+    ],
+    "internal_out": [
+      {
+        "name": "req_valid",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "req_we",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "req_addr",
+        "width": 29,
+        "dir": "output"
+      },
+      {
+        "name": "req_wdata",
+        "width": 32,
+        "dir": "output"
+      },
+      {
+        "name": "req_wmask",
+        "width": 4,
+        "dir": "output"
+      },
+      {
+        "name": "req_aux",
+        "width": 4,
+        "dir": "output"
+      }
+    ],
+    "internal_in": [
+      {
+        "name": "req_ready",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "rsp_valid",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "rsp_rdata",
+        "width": 32,
+        "dir": "input"
+      },
+      {
+        "name": "rsp_aux",
+        "width": 4,
+        "dir": "input"
+      }
+    ]
+  },
+  "assertions": [
+    {
+      "name": "p_stall_hold",
+      "check": "WB-005"
+    },
+    {
+      "name": "p_pipeline",
+      "check": "WB-008"
+    },
+    {
+      "name": "p_tag",
+      "check": "WB-009"
+    },
+    {
+      "name": "p_burst_len",
+      "check": "WB-003/004"
+    },
+    {
+      "name": "p_tag_no_overflow",
+      "check": "WB-005"
+    },
+    {
+      "name": "p_sel_nonzero_write",
+      "check": "WB-006"
+    }
+  ],
+  "coverage_points": [
+    "cp_single_rd",
+    "cp_single_wr",
+    "cp_burst_rd",
+    "cp_burst_wr",
+    "cp_burst_end",
+    "cp_stall",
+    "cp_err",
+    "cp_backtoback",
+    "cp_tag_full"
+  ]
+}

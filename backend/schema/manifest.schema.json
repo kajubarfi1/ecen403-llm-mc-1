@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ddr3-capstone/schema/manifest.schema.json",
+  "title": "DDR3 frontend-to-backend bundle manifest",
+  "description": "Contract for a bundle handed from the RTL-generation subsystem to the backend. One manifest describes one synthesizable unit: either a leaf block or the structural top level. Cross-bundle rules that JSON Schema cannot express (source resolution, width agreement, single-top) are enforced by schema/validate_bundles.py.",
+  "type": "object",
+  "required": [
+    "module_name",
+    "file",
+    "ports",
+    "parameters"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "module_name": {
+      "description": "Top module defined by this bundle. Must be declared in exactly one of the files listed in `file`.",
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+    },
+    "file": {
+      "description": "RTL source(s), relative to the bundle directory. A string for a single-file block; an array for a bundle whose module spans several sources, such as the top level. Array order is passed through to VERILOG_FILES unchanged.",
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      ]
+    },
+    "kind": {
+      "description": "block = a leaf module. top = the structural module that instantiates the blocks. Exactly one bundle in a set may be `top`.",
+      "enum": [
+        "block",
+        "top"
+      ],
+      "default": "block"
+    },
+    "ports": {
+      "description": "Port list grouped by function. Group names are free-form and carry no semantics except `clock_reset`, which the packager reads to infer the clock and reset.",
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/port"
+        }
+      },
+      "properties": {
+        "clock_reset": {
+          "description": "Clock and reset ports. Entries here must not carry `source` \u2014 clock and reset are distributed by the top level, not wired as data edges.",
+          "type": "array",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/port"
+              },
+              {
+                "not": {
+                  "required": [
+                    "source"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "parameters": {
+      "description": "Elaboration parameters. May be empty. Values are informational for the backend; the RTL's own defaults are authoritative.",
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "number",
+          "string",
+          "boolean"
+        ]
+      }
+    },
+    "dependencies": {
+      "description": "Blocks this one consumes signals from. Must be consistent with the `source` fields on this bundle's input ports.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "phase": {
+      "description": "Generation phase. 1 = root block fed from outside the controller; higher phases consume earlier ones. Used to order bring-up, not to drive the flow.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "agent": {
+      "description": "Frontend agent that produced this bundle. Provenance only.",
+      "type": "string"
+    },
+    "spec_version": {
+      "type": [
+        "string",
+        "number"
+      ]
+    },
+    "design_id": {
+      "type": "string"
+    },
+    "assertions": {
+      "description": "Properties the validation subsystem is expected to prove. Carried through by the backend, never interpreted by it \u2014 kept permissive on purpose so the validation team can extend the entry shape without breaking intake.",
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "check": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "coverage_points": {
+      "description": "Coverage bins for the validation subsystem. Opaque to the backend.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "platform": {
+      "description": "Target PDK. Omit to let the backend's PLATFORM default apply.",
+      "type": "string"
+    },
+    "clock_port": {
+      "description": "Explicit clock port name. Overrides inference from ports.clock_reset.",
+      "type": "string"
+    },
+    "reset_port": {
+      "type": "string"
+    },
+    "clock_period_ns": {
+      "description": "Target clock period. Omitted values default to 10.0 ns and raise packager warning OR-003.",
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "orfs_config": {
+      "description": "ORFS make variables this design needs, appended verbatim to config.mk (e.g. {\"SYNTH_ARGS\": \"-nofsm\"}). Use only for settings the design genuinely requires; the backend owns floorplan and timing defaults.",
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "string",
+          "number",
+          "boolean"
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "port": {
+      "type": "object",
+      "required": [
+        "name",
+        "dir",
+        "width"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "dir": {
+          "enum": [
+            "input",
+            "output",
+            "inout"
+          ]
+        },
+        "width": {
+          "description": "Total bits. An integer, a decimal string, or \"NxM\" for an unpacked array of N entries by M bits.",
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "string",
+              "pattern": "^[0-9]+([xX][0-9]+)?$"
+            }
+          ]
+        },
+        "source": {
+          "description": "For an input only: the driving port, as `<module_name>.<port_name>`. This is the connectivity contract the top-level elaborator reads. An input with no `source` is promoted to a top-level chip pin, so omitting one that should be wired silently changes the design.",
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*\\.[A-Za-z_][A-Za-z0-9_]*$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "source"
+            ]
+          },
+          "then": {
+            "properties": {
+              "dir": {
+                "const": "input"
+              }
+            },
+            "description": "Only inputs may declare a source."
+          }
+        }
+      ]
+    }
+  }
+}

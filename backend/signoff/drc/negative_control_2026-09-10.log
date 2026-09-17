@@ -1,0 +1,9 @@
+DRC negative control — config_regs 6_final.gds, sky130hd.lydrc (KLayout 0.30.3)
+Injected into a COPY of the GDS (original untouched): 3 met1 (68/20) shapes
+  - 0.05 x 0.05 um square            (min width 0.14 um)
+  - two 0.2 x 0.2 um squares 0.02 um apart (min spacing 0.14 um)
+  - all three below met1 min area
+
+clean GDS : items=0
+bad GDS   : items=6   m1.6 (min area)=3, m1.1 (min width)=2, m1.2 (min spacing)=1
+ORFS 'grep -c "<value>"' agreed with <item> count here (6 = 6); count <item>, one per violation.

@@ -1,0 +1,40 @@
+{
+  "status": "PASS_WITH_WARNINGS",
+  "errors": [],
+  "warnings": [
+    {
+      "severity": "WARNING",
+      "code": "OR-003",
+      "message": "clock_period_ns not provided; defaulting to 10.0 ns.",
+      "fix": "Add manifest.clock_period_ns (or pass --clock_period_ns) to control timing constraints."
+    }
+  ],
+  "info": [
+    {
+      "severity": "INFO",
+      "code": "OK-001",
+      "message": "Packaging completed and ORFS design directory created.",
+      "fix": "You can now run make with DESIGN_CONFIG=..."
+    }
+  ],
+  "facts": {
+    "bundle_dir": "..\\integration\\ddr3_controller",
+    "intake_report_path": "..\\integration\\out\\intake\\intake_report.json",
+    "out_dir": "..\\integration\\out\\package",
+    "env": {
+      "ORFS_DIR": "C:/Users/dawca/OpenROAD-flow-scripts",
+      "OUT_ROOT": "C:/Users/dawca/OneDrive/Desktop/ddr3_backend/pipeline_out",
+      "PLATFORM": "sky130hd",
+      "MAKE_JOBS": "1"
+    },
+    "intake_status": "PASS_WITH_WARNINGS",
+    "resolved_platform": "sky130hd",
+    "resolved_design_name": "ddr3_controller",
+    "rtl_src": "..\\integration\\ddr3_controller\\ddr3_controller.sv",
+    "rtl_dst": "C:\\Users\\dawca\\OpenROAD-flow-scripts\\flow\\designs\\sky130hd\\ddr3_controller\\src\\ddr3_controller.sv",
+    "design_dir": "C:\\Users\\dawca\\OpenROAD-flow-scripts\\flow\\designs\\sky130hd\\ddr3_controller",
+    "config_mk_path": "C:\\Users\\dawca\\OpenROAD-flow-scripts\\flow\\designs\\sky130hd\\ddr3_controller\\config.mk",
+    "sdc_path": "C:\\Users\\dawca\\OpenROAD-flow-scripts\\flow\\designs\\sky130hd\\ddr3_controller\\constraint.sdc",
+    "defaulted_clock_period": true
+  }
+}

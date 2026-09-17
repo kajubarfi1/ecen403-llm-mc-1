@@ -1,0 +1,24 @@
+{
+  "module_name": "nearly_valid_test",
+  "file": "nearly_valid_test.sv",
+  "ports": {
+    "clock_reset": [
+      { "name": "clk",   "dir": "input",  "width": 1 },
+      { "name": "clk2",  "dir": "input",  "width": 1 },
+      { "name": "rst_n", "dir": "input",  "width": 1 }
+    ],
+    "data": [
+      { "name": "data_in",  "dir": "input",  "width": 8 },
+      { "name": "data_out", "dir": "output", "width": 8 }
+    ],
+    "control": [
+      { "name": "addr",   "dir": "input",  "width": 4 },
+      { "name": "wr_en",  "dir": "input",  "width": 1 },
+      { "name": "valid",  "dir": "output", "width": 1 },
+      { "name": "status", "dir": "output", "width": 4 }
+    ]
+  },
+  "parameters": {},
+  "platform": "sky130hd",
+  "clock_period_ns": 0.5
+}
