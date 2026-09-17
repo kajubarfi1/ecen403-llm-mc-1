@@ -1,0 +1,2193 @@
+{
+  "$comment": "Grading rules for STAGE INVARIANT CHECKERS — the agent-generated LegalityCheckers required by composed-path stages whose output stream is order-nondeterministic (sched_cmd under FR-FCFS). A stage checker observes the stage's input AND output streams in order and asserts set/state properties: conservation (nothing dropped, nothing invented), bank-state legality of the command stream, and refresh service. Timing stays with SVA. Traces here are synthesised from the spec's failure_taxonomy plus the proposed extensions below; the checker never sees them.",
+  "$trace_format": "Each trace step is [iface, kind, {field: value}]. A value may be a symbolic command name (e.g. 'ACT') for the stage's command_field; it is resolved through the catalog command_encoding of encoding_iface at grade time. Missing schema fields default to 0.",
+  "proposed_taxonomy_extensions": {
+    "$why": "The spec's failure_taxonomy covers timing, protocol state, init, data and CSR, but has no ids for scheduler conservation or refresh-service liveness — properties any queue+arbiter can violate. These ids are used locally and routed up the chain as a spec-gap finding proposing their adoption.",
+    "SCHED_001": "Enqueued request never issued as a command (dropped request; starvation at end of trace).",
+    "SCHED_002": "Command issued that corresponds to no enqueued request (invented command).",
+    "SCHED_003": "Refresh request raised but never serviced with a REFRESH command.",
+    "INIT_003": "init_done raised before the initialisation sequence completed (a mode register left unprogrammed, or no ZQCL issued).",
+    "CAL_001": "Calibration reported complete (cal_done) before initialisation completed (init_done).",
+    "CAL_002": "Periodic ZQ short calibration (ZQCS) requested before calibration completed.",
+    "REF_003": "Refresh requested before initialisation completed: the tREFI timer must not run until init_done.",
+    "REF_004": "No refresh requested after initialisation completed (end of trace): the refresh timer never ran, so tREFI cannot be honoured."
+  },
+  "stages": {
+    "cmd_queue_scheduler": {
+      "blocks": [
+        "cmd_queue",
+        "scheduler"
+      ],
+      "input_ifaces": [
+        "cq_enq",
+        "refresh_req"
+      ],
+      "output_ifaces": [
+        "sched_cmd"
+      ],
+      "command_iface": "sched_cmd",
+      "command_field": "type",
+      "encoding_iface": "sched_in",
+      "rules": [
+        {
+          "id": "SCHED_001",
+          "requirement": "Every enqueued request must eventually issue as a CAS command (RD/WR) to its decoded row/bank/col. Outstanding requests at end of trace are dropped requests.",
+          "legal": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 2,
+                "row": 5
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "WR",
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ]
+          ],
+          "why": "The request to bank 2 is never issued; final() must report it."
+        },
+        {
+          "id": "SCHED_002",
+          "requirement": "No CAS command may issue that matches no enqueued request.",
+          "legal": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 2,
+                "row": 5
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "WR",
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 3,
+                "row": 7
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "RD",
+                "bank": 3,
+                "col": 16,
+                "we": 0
+              }
+            ]
+          ],
+          "why": "A read to bank 3 issues although nothing was ever enqueued."
+        },
+        {
+          "id": "PROTO_001",
+          "requirement": "READ/WRITE issued to a bank that has no active row.",
+          "legal": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 2,
+                "row": 5
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "WR",
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "WR",
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ]
+          ],
+          "why": "The write issues with no preceding ACTIVATE to bank 2."
+        },
+        {
+          "id": "PROTO_002",
+          "requirement": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE.",
+          "legal": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 6,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 2,
+                "row": 5
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "WR",
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "PRE",
+                "bank": 2
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 2,
+                "row": 6
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "WR",
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 6,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 2,
+                "row": 5
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "WR",
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 2,
+                "row": 6
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "WR",
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ]
+          ],
+          "why": "The second ACTIVATE to bank 2 has no PRECHARGE before it."
+        },
+        {
+          "id": "REF_002",
+          "requirement": "REFRESH issued while one or more banks are still active (not precharged).",
+          "legal": [
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "REF"
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 2,
+                "row": 5
+              }
+            ],
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "REF"
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "WR",
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ]
+          ],
+          "why": "REFRESH issues while bank 2 still has an open row."
+        }
+      ]
+    },
+    "scheduler": {
+      "blocks": [
+        "scheduler"
+      ],
+      "input_ifaces": [
+        "refresh_req"
+      ],
+      "output_ifaces": [
+        "sched_cmd"
+      ],
+      "command_iface": "sched_cmd",
+      "command_field": "type",
+      "encoding_iface": "sched_in",
+      "rules": [
+        {
+          "id": "SCHED_003",
+          "requirement": "Every refresh request (rising edge of the request stream) must eventually be serviced with a REFRESH command.",
+          "legal": [
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "REF"
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ]
+          ],
+          "why": "The request is never followed by a REFRESH; final() must report it."
+        },
+        {
+          "id": "REF_001",
+          "requirement": "Refresh postpone count exceeded max_postpone_count (spec: controller_architecture.refresh_policy.max_postpone_count).",
+          "spec_value_path": "controller_architecture.refresh_policy.max_postpone_count",
+          "legal": [
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 1,
+                "pending": 8,
+                "starve": 0
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "REF"
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 1,
+                "pending": 9,
+                "starve": 1
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "REF"
+              }
+            ]
+          ],
+          "why": "The pending count on the request stream exceeds the spec's max_postpone_count of 8."
+        },
+        {
+          "id": "REF_002",
+          "requirement": "REFRESH issued while one or more banks are still active (not precharged).",
+          "legal": [
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 0,
+                "row": 1
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "PRE",
+                "bank": 0
+              }
+            ],
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "REF"
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 0,
+                "row": 1
+              }
+            ],
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "REF"
+              }
+            ]
+          ],
+          "why": "REFRESH issues while bank 0 still has an open row."
+        }
+      ]
+    },
+    "bank_tracker_scheduler": {
+      "blocks": [
+        "bank_tracker",
+        "scheduler"
+      ],
+      "input_ifaces": [
+        "cfg_timing",
+        "refresh_req"
+      ],
+      "output_ifaces": [
+        "sched_cmd"
+      ],
+      "command_iface": "sched_cmd",
+      "command_field": "type",
+      "encoding_iface": "sched_in",
+      "rules": [
+        {
+          "id": "PROTO_001",
+          "requirement": "READ/WRITE issued to a bank that has no active row.",
+          "legal": [
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 0,
+                "row": 1
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "RD",
+                "bank": 0,
+                "col": 0,
+                "we": 0
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "RD",
+                "bank": 0,
+                "col": 0,
+                "we": 0
+              }
+            ]
+          ],
+          "why": "A CAS with no preceding ACTIVATE has no open row to address."
+        },
+        {
+          "id": "PROTO_002",
+          "requirement": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE.",
+          "legal": [
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 0,
+                "row": 1
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "PRE",
+                "bank": 0
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 0,
+                "row": 2
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 0,
+                "row": 1
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 0,
+                "row": 2
+              }
+            ]
+          ],
+          "why": "A second ACTIVATE to bank 0 without a PRECHARGE between them."
+        },
+        {
+          "id": "REF_002",
+          "requirement": "REFRESH issued while one or more banks are still active (not precharged).",
+          "legal": [
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 0,
+                "row": 1
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "PRE",
+                "bank": 0
+              }
+            ],
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "REF"
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 0,
+                "row": 1
+              }
+            ],
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "REF"
+              }
+            ]
+          ],
+          "why": "REFRESH issues while bank 0 still has an open row."
+        }
+      ]
+    },
+    "path_04_scheduler_bank_loop": {
+      "blocks": [
+        "scheduler",
+        "cmd_gen",
+        "bank_tracker"
+      ],
+      "input_ifaces": [],
+      "output_ifaces": [
+        "ddr_cmd"
+      ],
+      "command_iface": "ddr_cmd",
+      "command_field": "cmd",
+      "encoding_iface": "ddr_cmd",
+      "$note": "Feedback loop: no entry/exit stream to predict across, but the DDR pin command stream must stay legal for the bank state it itself creates.",
+      "rules": [
+        {
+          "id": "PROTO_001",
+          "requirement": "READ/WRITE issued to a bank that has no active row. Track open rows from ACT (addr carries the row) and PRE.",
+          "legal": [
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 0,
+                "addr": 1
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "RD",
+                "bank": 0,
+                "addr": 0
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "RD",
+                "bank": 0,
+                "addr": 0
+              }
+            ]
+          ],
+          "why": "A CAS with no preceding ACTIVATE has no open row to address."
+        },
+        {
+          "id": "PROTO_002",
+          "requirement": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE.",
+          "legal": [
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 0,
+                "addr": 1
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "PRE",
+                "bank": 0
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 0,
+                "addr": 2
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 0,
+                "addr": 1
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 0,
+                "addr": 2
+              }
+            ]
+          ],
+          "why": "A second ACTIVATE to bank 0 without a PRECHARGE between them."
+        },
+        {
+          "id": "REF_002",
+          "requirement": "REFRESH issued while one or more banks are still active (not precharged).",
+          "legal": [
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 0,
+                "addr": 1
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "PRE",
+                "bank": 0
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "REF"
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 0,
+                "addr": 1
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "REF"
+              }
+            ]
+          ],
+          "why": "REFRESH issues while bank 0 still has an open row."
+        }
+      ]
+    },
+    "path_05_scheduler_refresh_loop": {
+      "blocks": [
+        "scheduler",
+        "refresh_ctrl"
+      ],
+      "input_ifaces": [
+        "refresh_req"
+      ],
+      "output_ifaces": [
+        "ddr_cmd"
+      ],
+      "command_iface": "ddr_cmd",
+      "command_field": "cmd",
+      "encoding_iface": "ddr_cmd",
+      "rules": [
+        {
+          "id": "SCHED_003",
+          "requirement": "Every refresh request must eventually be serviced with a REFRESH command on the DDR pins.",
+          "legal": [
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "REF"
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ]
+          ],
+          "why": "The request is never followed by a REFRESH; final() must report it."
+        },
+        {
+          "id": "REF_001",
+          "requirement": "Refresh postpone count exceeded max_postpone_count (spec: controller_architecture.refresh_policy.max_postpone_count).",
+          "spec_value_path": "controller_architecture.refresh_policy.max_postpone_count",
+          "legal": [
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 1,
+                "pending": 8,
+                "starve": 0
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "REF"
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 1,
+                "pending": 9,
+                "starve": 1
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "REF"
+              }
+            ]
+          ],
+          "why": "The pending count on the request stream exceeds the spec's limit of 8."
+        },
+        {
+          "id": "REF_002",
+          "requirement": "REFRESH issued while one or more banks are still active (not precharged).",
+          "legal": [
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 0,
+                "addr": 1
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "PRE",
+                "bank": 0
+              }
+            ],
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "REF"
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 0,
+                "addr": 1
+              }
+            ],
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "REF"
+              }
+            ]
+          ],
+          "why": "REFRESH issues while bank 0 still has an open row."
+        }
+      ]
+    },
+    "path_19_row_conflict": {
+      "blocks": [
+        "wb_port",
+        "addr_decoder",
+        "cmd_queue",
+        "scheduler",
+        "cmd_gen",
+        "bank_tracker"
+      ],
+      "input_ifaces": [
+        "cq_enq"
+      ],
+      "output_ifaces": [
+        "ddr_cmd"
+      ],
+      "command_iface": "ddr_cmd",
+      "command_field": "cmd",
+      "encoding_iface": "ddr_cmd",
+      "$note": "Full command path, host request to DDR pins. A CAS matches an enqueued request when its bank matches, the DDR addr carries the request's col, the command direction matches we, and the bank's open row (set by the preceding ACT's addr) is the request's row.",
+      "rules": [
+        {
+          "id": "SCHED_001",
+          "requirement": "Every enqueued request must eventually issue as a matching CAS (RD/WR) on the DDR pins. Outstanding requests at end of trace are dropped.",
+          "legal": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 2,
+                "addr": 5
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "WR",
+                "bank": 2,
+                "addr": 8
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ]
+          ],
+          "why": "The request to bank 2 never issues; final() must report it."
+        },
+        {
+          "id": "SCHED_002",
+          "requirement": "No CAS may issue that corresponds to no enqueued request.",
+          "legal": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 2,
+                "addr": 5
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "WR",
+                "bank": 2,
+                "addr": 8
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 3,
+                "addr": 7
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "RD",
+                "bank": 3,
+                "addr": 16
+              }
+            ]
+          ],
+          "why": "A read issues to bank 3 although nothing was enqueued."
+        },
+        {
+          "id": "PROTO_001",
+          "requirement": "READ/WRITE issued to a bank that has no active row.",
+          "legal": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 2,
+                "addr": 5
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "WR",
+                "bank": 2,
+                "addr": 8
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "WR",
+                "bank": 2,
+                "addr": 8
+              }
+            ]
+          ],
+          "why": "The write issues with no preceding ACTIVATE to bank 2."
+        },
+        {
+          "id": "PROTO_002",
+          "requirement": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE.",
+          "legal": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 6,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 2,
+                "addr": 5
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "WR",
+                "bank": 2,
+                "addr": 8
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "PRE",
+                "bank": 2
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 2,
+                "addr": 6
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "WR",
+                "bank": 2,
+                "addr": 8
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 6,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 2,
+                "addr": 5
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "WR",
+                "bank": 2,
+                "addr": 8
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 2,
+                "addr": 6
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "WR",
+                "bank": 2,
+                "addr": 8
+              }
+            ]
+          ],
+          "why": "The second ACTIVATE to bank 2 has no PRECHARGE before it."
+        }
+      ]
+    },
+    "path_20_refresh_preempt": {
+      "blocks": [
+        "wb_port",
+        "addr_decoder",
+        "cmd_queue",
+        "scheduler",
+        "refresh_ctrl",
+        "cmd_gen"
+      ],
+      "input_ifaces": [
+        "cq_enq",
+        "refresh_req"
+      ],
+      "output_ifaces": [
+        "ddr_cmd"
+      ],
+      "command_iface": "ddr_cmd",
+      "command_field": "cmd",
+      "encoding_iface": "ddr_cmd",
+      "rules": [
+        {
+          "id": "REF_002",
+          "requirement": "REFRESH issued while one or more banks are still active (not precharged).",
+          "legal": [
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "REF"
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 2,
+                "addr": 5
+              }
+            ],
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "REF"
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "WR",
+                "bank": 2,
+                "addr": 8
+              }
+            ]
+          ],
+          "why": "REFRESH issues while bank 2 still has an open row."
+        },
+        {
+          "id": "SCHED_003",
+          "requirement": "Every refresh request must eventually be serviced with a REFRESH command.",
+          "legal": [
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "REF"
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ]
+          ],
+          "why": "The request is never followed by a REFRESH; final() must report it."
+        },
+        {
+          "id": "SCHED_001",
+          "requirement": "Refresh preemption must not drop host requests: every enqueued request still issues as a matching CAS.",
+          "legal": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 2,
+                "addr": 5
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "WR",
+                "bank": 2,
+                "addr": 8
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "REF"
+              }
+            ]
+          ],
+          "why": "The refresh is serviced but the host request never issues."
+        }
+      ]
+    },
+    "path_08_init_to_cal": {
+      "blocks": [
+        "init_fsm",
+        "calibration"
+      ],
+      "input_ifaces": [
+        "init_cmd",
+        "init_status"
+      ],
+      "output_ifaces": [
+        "cal_status",
+        "cal_zqcs"
+      ],
+      "command_iface": "init_cmd",
+      "command_field": "cmd",
+      "encoding_iface": "init_cmd",
+      "$note": "Autonomous path: nothing is driven. The checker judges the ORDER of what the init FSM and calibration block did from reset; inter-step timing (INIT_002) is SVA's (init_fsm_sva). For an MRS command the bank field carries the mode-register number (JESD79-3 BA[2:0]).",
+      "rules": [
+        {
+          "id": "INIT_001",
+          "requirement": "Mode register commands must be issued in the order the spec's initialization_sequence states (MR2, MR3, MR1, MR0 — each an MRS whose bank field is the MR number), followed by ZQCL, before init_done.",
+          "legal": [
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 2,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 3,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 1,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 0,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "ZQCL",
+                "addr": 1024,
+                "bank": 0
+              }
+            ],
+            [
+              "init_status",
+              "done",
+              {
+                "fail": 0,
+                "state": 15
+              }
+            ],
+            [
+              "cal_status",
+              "done",
+              {
+                "fail": 0
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 0,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 1,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 2,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 3,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "ZQCL",
+                "addr": 1024,
+                "bank": 0
+              }
+            ],
+            [
+              "init_status",
+              "done",
+              {
+                "fail": 0,
+                "state": 15
+              }
+            ]
+          ],
+          "why": "MR0 was programmed first. The spec (initialization_sequence.$derived.init_sequence_order) requires MR2 → MR3 → MR1 → MR0: MR0's DLL reset must come after the other registers are set."
+        },
+        {
+          "id": "INIT_003",
+          "requirement": "init_done must not be raised until every mode register in the sequence has been programmed and ZQCL has been issued.",
+          "legal": [
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 2,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 3,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 1,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 0,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "ZQCL",
+                "addr": 1024,
+                "bank": 0
+              }
+            ],
+            [
+              "init_status",
+              "done",
+              {
+                "fail": 0,
+                "state": 15
+              }
+            ],
+            [
+              "cal_status",
+              "done",
+              {
+                "fail": 0
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 2,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 3,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 1,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 0,
+                "addr": 0
+              }
+            ],
+            [
+              "init_status",
+              "done",
+              {
+                "fail": 0,
+                "state": 15
+              }
+            ],
+            [
+              "cal_status",
+              "done",
+              {
+                "fail": 0
+              }
+            ]
+          ],
+          "why": "init_done was raised with no ZQCL issued: the DRAM's output drivers were never calibrated, yet the controller declared initialisation complete."
+        },
+        {
+          "id": "CAL_001",
+          "requirement": "Calibration must not report cal_done before init_done has been observed.",
+          "legal": [
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 2,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 3,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 1,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 0,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "ZQCL",
+                "addr": 1024,
+                "bank": 0
+              }
+            ],
+            [
+              "init_status",
+              "done",
+              {
+                "fail": 0,
+                "state": 15
+              }
+            ],
+            [
+              "cal_status",
+              "done",
+              {
+                "fail": 0
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 2,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 3,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 1,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 0,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "ZQCL",
+                "addr": 1024,
+                "bank": 0
+              }
+            ],
+            [
+              "cal_status",
+              "done",
+              {
+                "fail": 0
+              }
+            ],
+            [
+              "init_status",
+              "done",
+              {
+                "fail": 0,
+                "state": 15
+              }
+            ]
+          ],
+          "why": "cal_done preceded init_done: calibration ran on an uninitialised DRAM."
+        },
+        {
+          "id": "CAL_002",
+          "requirement": "A periodic ZQCS request must not be raised before cal_done.",
+          "legal": [
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 2,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 3,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 1,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 0,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "ZQCL",
+                "addr": 1024,
+                "bank": 0
+              }
+            ],
+            [
+              "init_status",
+              "done",
+              {
+                "fail": 0,
+                "state": 15
+              }
+            ],
+            [
+              "cal_status",
+              "done",
+              {
+                "fail": 0
+              }
+            ],
+            [
+              "cal_zqcs",
+              "request",
+              {}
+            ],
+            [
+              "cal_zqcs",
+              "request",
+              {}
+            ]
+          ],
+          "violating": [
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 2,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 3,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 1,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "MRS",
+                "bank": 0,
+                "addr": 0
+              }
+            ],
+            [
+              "init_cmd",
+              "command",
+              {
+                "cmd": "ZQCL",
+                "addr": 1024,
+                "bank": 0
+              }
+            ],
+            [
+              "init_status",
+              "done",
+              {
+                "fail": 0,
+                "state": 15
+              }
+            ],
+            [
+              "cal_zqcs",
+              "request",
+              {}
+            ],
+            [
+              "cal_status",
+              "done",
+              {
+                "fail": 0
+              }
+            ]
+          ],
+          "why": "A ZQCS request was raised before calibration completed; periodic recalibration only begins once the initial calibration is done."
+        }
+      ]
+    },
+    "path_09_init_to_refresh": {
+      "blocks": [
+        "init_fsm",
+        "refresh_ctrl"
+      ],
+      "input_ifaces": [
+        "init_status"
+      ],
+      "output_ifaces": [
+        "refresh_req"
+      ],
+      "$note": "No command stream on this path: the rules are pure ordering between the init completion event and refresh requests. Interval pacing (tREFI) is SVA's (TIMING_012 in cmd_gen_sva).",
+      "rules": [
+        {
+          "id": "REF_003",
+          "requirement": "No refresh may be requested before init_done: the refresh timer is held until initialisation completes.",
+          "legal": [
+            [
+              "init_status",
+              "done",
+              {
+                "fail": 0,
+                "state": 15
+              }
+            ],
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ],
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 2,
+                "starve": 0
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ],
+            [
+              "init_status",
+              "done",
+              {
+                "fail": 0,
+                "state": 15
+              }
+            ],
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 2,
+                "starve": 0
+              }
+            ]
+          ],
+          "why": "A refresh request was raised before initialisation completed — the DRAM cannot accept REFRESH before its mode registers are programmed."
+        },
+        {
+          "id": "REF_004",
+          "requirement": "After init_done at least one refresh request must be raised before the end of the trace; a controller that never requests refresh cannot honour tREFI.",
+          "legal": [
+            [
+              "init_status",
+              "done",
+              {
+                "fail": 0,
+                "state": 15
+              }
+            ],
+            [
+              "refresh_req",
+              "request",
+              {
+                "urgent": 0,
+                "pending": 1,
+                "starve": 0
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "init_status",
+              "done",
+              {
+                "fail": 0,
+                "state": 15
+              }
+            ]
+          ],
+          "why": "Initialisation completed and no refresh was ever requested; final() must report it."
+        }
+      ]
+    }
+  }
+}

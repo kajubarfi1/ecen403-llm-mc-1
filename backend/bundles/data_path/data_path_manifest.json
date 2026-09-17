@@ -1,0 +1,176 @@
+{
+  "module_name": "data_path",
+  "file": "data_path.sv",
+  "phase": 3,
+  "agent": "data_path_agent",
+  "spec_version": "2.0.0",
+  "design_id": "ddr3_mc_core_v2",
+  "parameters": {
+    "DATA_WIDTH": 32,
+    "DQ_WIDTH": 8,
+    "DM_WIDTH": 4,
+    "SEL_WIDTH": 4,
+    "AUX_WIDTH": 4,
+    "BURST_LEN": 8,
+    "CLK_RATIO": 4,
+    "BURST_CTRL_CYC": 2,
+    "RD_FIFO_DEPTH": 16,
+    "CL": 11,
+    "CWL": 8
+  },
+  "ports": {
+    "clock_reset": [
+      {
+        "name": "clk",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "rst_n",
+        "width": 1,
+        "dir": "input"
+      }
+    ],
+    "cmd_in": [
+      {
+        "name": "cmd_wr_valid",
+        "width": 1,
+        "dir": "input",
+        "source": "cmd_gen.fb_wr_valid"
+      },
+      {
+        "name": "cmd_rd_valid",
+        "width": 1,
+        "dir": "input",
+        "source": "cmd_gen.fb_rd_valid"
+      },
+      {
+        "name": "cmd_aux",
+        "width": 4,
+        "dir": "input",
+        "source": "scheduler.cmd_aux"
+      }
+    ],
+    "wr_data_in": [
+      {
+        "name": "wr_data_valid",
+        "width": 1,
+        "dir": "input",
+        "source": "wb_port.req_valid"
+      },
+      {
+        "name": "wr_data",
+        "width": 32,
+        "dir": "input",
+        "source": "wb_port.req_wdata"
+      },
+      {
+        "name": "wr_mask",
+        "width": 4,
+        "dir": "input",
+        "source": "wb_port.req_wmask"
+      }
+    ],
+    "wr_ctrl_out": [
+      {
+        "name": "wr_data_ready",
+        "width": 1,
+        "dir": "output"
+      }
+    ],
+    "rd_rsp_out": [
+      {
+        "name": "rd_rsp_valid",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "rd_rsp_data",
+        "width": 32,
+        "dir": "output"
+      },
+      {
+        "name": "rd_rsp_aux",
+        "width": 4,
+        "dir": "output"
+      }
+    ],
+    "cfg_in": [
+      {
+        "name": "cfg_CL_nCK",
+        "width": 8,
+        "dir": "input",
+        "source": "config_regs.cfg_CL_nCK"
+      },
+      {
+        "name": "cfg_CWL_nCK",
+        "width": 8,
+        "dir": "input",
+        "source": "config_regs.cfg_CWL_nCK"
+      }
+    ],
+    "ddr_phy": [
+      {
+        "name": "ddr_dq_o",
+        "width": 32,
+        "dir": "output"
+      },
+      {
+        "name": "ddr_dq_oe",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "ddr_dq_i",
+        "width": 32,
+        "dir": "input"
+      },
+      {
+        "name": "ddr_dm_o",
+        "width": 4,
+        "dir": "output"
+      },
+      {
+        "name": "ddr_dqs_o",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "ddr_dqs_oe",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "ddr_dqs_i",
+        "width": 1,
+        "dir": "input"
+      }
+    ]
+  },
+  "dependencies": [
+    "cmd_gen",
+    "scheduler",
+    "wb_port",
+    "config_regs"
+  ],
+  "assertions": [
+    {
+      "name": "p_wr_no_overflow",
+      "check": "DP-001"
+    },
+    {
+      "name": "p_dq_oe_only_drive",
+      "check": "DP-002"
+    },
+    {
+      "name": "p_rd_rsp_valid",
+      "check": "DP-005"
+    }
+  ],
+  "coverage_points": [
+    "cp_wr_drive",
+    "cp_rd_cap",
+    "cp_wr_full",
+    "cp_rd_empty"
+  ]
+}

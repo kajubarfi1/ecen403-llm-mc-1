@@ -1,0 +1,237 @@
+{
+  "name": "timing_boundary_tccd_tfaw_trrd",
+  "targets": [
+    "VP_TIME_001",
+    "VP_TIME_002",
+    "VP_TIME_009"
+  ],
+  "rationale": "Close tCCD by issuing back-to-back RD commands with no idle; close tRRD by issuing ACT commands to different banks with exactly 1 idle cycle between; close tFAW by issuing ACT with 7 idle cycles before next ACT to same bank.",
+  "steps": [
+    {
+      "op": "reset"
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 1,
+        "row": 100,
+        "col": 0,
+        "bank": 0,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 10
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 2,
+        "row": 100,
+        "col": 0,
+        "bank": 0,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 2,
+        "row": 100,
+        "col": 64,
+        "bank": 0,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 10
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 4,
+        "row": 0,
+        "col": 0,
+        "bank": 0,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 10
+    },
+    {
+      "op": "reset"
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 1,
+        "row": 200,
+        "col": 0,
+        "bank": 1,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 1
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 1,
+        "row": 200,
+        "col": 0,
+        "bank": 2,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 10
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 4,
+        "row": 0,
+        "col": 0,
+        "bank": 1,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 4,
+        "row": 0,
+        "col": 0,
+        "bank": 2,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 10
+    },
+    {
+      "op": "reset"
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 1,
+        "row": 300,
+        "col": 0,
+        "bank": 3,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 7
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 4,
+        "row": 0,
+        "col": 0,
+        "bank": 3,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 10
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 1,
+        "row": 300,
+        "col": 0,
+        "bank": 3,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 10
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 4,
+        "row": 0,
+        "col": 0,
+        "bank": 3,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 10
+    }
+  ],
+  "_provenance": {
+    "generated_utc": "2026-09-03T18:20:36.295365+00:00",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "model": "claude-opus-4-6",
+    "attempts": 1,
+    "aimed_at": [
+      "cg_timing.cp_tccd_spacing",
+      "cg_timing.cp_tfaw_spacing",
+      "cg_timing.cp_trrd_spacing",
+      "cg_refresh.cp_ref_001_exercised",
+      "cg_refresh.cp_ref_002_exercised",
+      "cg_init_sequence.cp_init_001_exercised",
+      "cg_init_sequence.cp_init_002_exercised",
+      "cg_scheduler.cp_proto_001_exercised",
+      "cg_scheduler.cp_proto_002_exercised",
+      "cg_data_path.cp_data_001_exercised",
+      "cg_data_path.cp_data_002_exercised",
+      "cg_config_regs.cp_csr_001_exercised"
+    ],
+    "note": "Stimulus only \u2014 carries no expected values. Judged by whether the coverage it produces closes the targeted holes, a metric the generating model cannot influence."
+  }
+}

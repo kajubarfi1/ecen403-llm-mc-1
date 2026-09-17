@@ -1,0 +1,1360 @@
+{
+  "status": "PASS_WITH_WARNINGS",
+  "errors": [],
+  "warnings": [
+    {
+      "severity": "WARNING",
+      "code": "DEP-010",
+      "owner": "frontend",
+      "message": "cmd_gen: dependencies disagree with declared sources \u2014 listed but unused: ['bank_tracker'].",
+      "fix": "Regenerate `dependencies` from the port source fields."
+    },
+    {
+      "severity": "WARNING",
+      "code": "DEP-010",
+      "owner": "frontend",
+      "message": "refresh_ctrl: dependencies disagree with declared sources \u2014 used but not listed: ['init_fsm'].",
+      "fix": "Regenerate `dependencies` from the port source fields."
+    },
+    {
+      "severity": "WARNING",
+      "code": "GAP-010",
+      "owner": "frontend",
+      "message": "cmd_queue.deq_grant has no source but 'deq_grant' is an output of scheduler \u2014 probable missing connection.",
+      "fix": "Add \"source\": \"scheduler.deq_grant\", or confirm it is intentionally a top-level pin."
+    },
+    {
+      "severity": "WARNING",
+      "code": "GAP-010",
+      "owner": "frontend",
+      "message": "cmd_queue.deq_idx has no source but 'deq_idx' is an output of scheduler \u2014 probable missing connection.",
+      "fix": "Add \"source\": \"scheduler.deq_idx\", or confirm it is intentionally a top-level pin."
+    },
+    {
+      "severity": "WARNING",
+      "code": "GAP-010",
+      "owner": "frontend",
+      "message": "refresh_ctrl.ref_ack has no source but 'ref_ack' is an output of scheduler \u2014 probable missing connection.",
+      "fix": "Add \"source\": \"scheduler.ref_ack\", or confirm it is intentionally a top-level pin."
+    }
+  ],
+  "facts": {
+    "declared_edges": 52,
+    "distinct_producer_ports": 50,
+    "modules": [
+      "addr_decoder",
+      "bank_tracker",
+      "calibration",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "init_fsm",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "top_bundle": null,
+    "internal_edges": [
+      {
+        "from": {
+          "module": "wb_port",
+          "port": "req_addr"
+        },
+        "to": {
+          "module": "addr_decoder",
+          "port": "req_addr"
+        },
+        "width": 29
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_tRCD_nCK"
+        },
+        "to": {
+          "module": "bank_tracker",
+          "port": "cfg_tRCD_nCK"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_tRP_nCK"
+        },
+        "to": {
+          "module": "bank_tracker",
+          "port": "cfg_tRP_nCK"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_tRAS_nCK"
+        },
+        "to": {
+          "module": "bank_tracker",
+          "port": "cfg_tRAS_nCK"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_tRC_nCK"
+        },
+        "to": {
+          "module": "bank_tracker",
+          "port": "cfg_tRC_nCK"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_tRRD_nCK"
+        },
+        "to": {
+          "module": "bank_tracker",
+          "port": "cfg_tRRD_nCK"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_tFAW_nCK"
+        },
+        "to": {
+          "module": "bank_tracker",
+          "port": "cfg_tFAW_nCK"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_tWTR_nCK"
+        },
+        "to": {
+          "module": "bank_tracker",
+          "port": "cfg_tWTR_nCK"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_tWR_nCK"
+        },
+        "to": {
+          "module": "bank_tracker",
+          "port": "cfg_tWR_nCK"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_tRTP_nCK"
+        },
+        "to": {
+          "module": "bank_tracker",
+          "port": "cfg_tRTP_nCK"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_tCCD_nCK"
+        },
+        "to": {
+          "module": "bank_tracker",
+          "port": "cfg_tCCD_nCK"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_tRFC_nCK"
+        },
+        "to": {
+          "module": "bank_tracker",
+          "port": "cfg_tRFC_nCK"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "init_fsm",
+          "port": "init_done"
+        },
+        "to": {
+          "module": "calibration",
+          "port": "init_done"
+        },
+        "width": 1
+      },
+      {
+        "from": {
+          "module": "scheduler",
+          "port": "cmd_valid"
+        },
+        "to": {
+          "module": "cmd_gen",
+          "port": "sched_valid"
+        },
+        "width": 1
+      },
+      {
+        "from": {
+          "module": "scheduler",
+          "port": "cmd_type"
+        },
+        "to": {
+          "module": "cmd_gen",
+          "port": "sched_type"
+        },
+        "width": 4
+      },
+      {
+        "from": {
+          "module": "scheduler",
+          "port": "cmd_row"
+        },
+        "to": {
+          "module": "cmd_gen",
+          "port": "sched_row"
+        },
+        "width": 15
+      },
+      {
+        "from": {
+          "module": "scheduler",
+          "port": "cmd_col"
+        },
+        "to": {
+          "module": "cmd_gen",
+          "port": "sched_col"
+        },
+        "width": 10
+      },
+      {
+        "from": {
+          "module": "scheduler",
+          "port": "cmd_bank"
+        },
+        "to": {
+          "module": "cmd_gen",
+          "port": "sched_bank"
+        },
+        "width": 3
+      },
+      {
+        "from": {
+          "module": "scheduler",
+          "port": "cmd_we"
+        },
+        "to": {
+          "module": "cmd_gen",
+          "port": "sched_we"
+        },
+        "width": 1
+      },
+      {
+        "from": {
+          "module": "scheduler",
+          "port": "cmd_aux"
+        },
+        "to": {
+          "module": "cmd_gen",
+          "port": "sched_aux"
+        },
+        "width": 4
+      },
+      {
+        "from": {
+          "module": "addr_decoder",
+          "port": "dec_row"
+        },
+        "to": {
+          "module": "cmd_queue",
+          "port": "enq_row"
+        },
+        "width": 15
+      },
+      {
+        "from": {
+          "module": "addr_decoder",
+          "port": "dec_col"
+        },
+        "to": {
+          "module": "cmd_queue",
+          "port": "enq_col"
+        },
+        "width": 10
+      },
+      {
+        "from": {
+          "module": "addr_decoder",
+          "port": "dec_bank"
+        },
+        "to": {
+          "module": "cmd_queue",
+          "port": "enq_bank"
+        },
+        "width": 3
+      },
+      {
+        "from": {
+          "module": "wb_port",
+          "port": "req_we"
+        },
+        "to": {
+          "module": "cmd_queue",
+          "port": "enq_we"
+        },
+        "width": 1
+      },
+      {
+        "from": {
+          "module": "cmd_gen",
+          "port": "fb_wr_valid"
+        },
+        "to": {
+          "module": "data_path",
+          "port": "cmd_wr_valid"
+        },
+        "width": 1
+      },
+      {
+        "from": {
+          "module": "cmd_gen",
+          "port": "fb_rd_valid"
+        },
+        "to": {
+          "module": "data_path",
+          "port": "cmd_rd_valid"
+        },
+        "width": 1
+      },
+      {
+        "from": {
+          "module": "scheduler",
+          "port": "cmd_aux"
+        },
+        "to": {
+          "module": "data_path",
+          "port": "cmd_aux"
+        },
+        "width": 4
+      },
+      {
+        "from": {
+          "module": "wb_port",
+          "port": "req_valid"
+        },
+        "to": {
+          "module": "data_path",
+          "port": "wr_data_valid"
+        },
+        "width": 1
+      },
+      {
+        "from": {
+          "module": "wb_port",
+          "port": "req_wdata"
+        },
+        "to": {
+          "module": "data_path",
+          "port": "wr_data"
+        },
+        "width": 32
+      },
+      {
+        "from": {
+          "module": "wb_port",
+          "port": "req_wmask"
+        },
+        "to": {
+          "module": "data_path",
+          "port": "wr_mask"
+        },
+        "width": 4
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_CL_nCK"
+        },
+        "to": {
+          "module": "data_path",
+          "port": "cfg_CL_nCK"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_CWL_nCK"
+        },
+        "to": {
+          "module": "data_path",
+          "port": "cfg_CWL_nCK"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "init_fsm",
+          "port": "init_done"
+        },
+        "to": {
+          "module": "refresh_ctrl",
+          "port": "init_done"
+        },
+        "width": 1
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_force_refresh"
+        },
+        "to": {
+          "module": "refresh_ctrl",
+          "port": "cfg_force_refresh"
+        },
+        "width": 1
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_tREFI_nCK"
+        },
+        "to": {
+          "module": "refresh_ctrl",
+          "port": "cfg_tREFI_nCK"
+        },
+        "width": 24
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_max_postpone"
+        },
+        "to": {
+          "module": "refresh_ctrl",
+          "port": "cfg_max_postpone"
+        },
+        "width": 4
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_urgent_threshold"
+        },
+        "to": {
+          "module": "refresh_ctrl",
+          "port": "cfg_urgent_threshold"
+        },
+        "width": 4
+      },
+      {
+        "from": {
+          "module": "config_regs",
+          "port": "cfg_ref_priority"
+        },
+        "to": {
+          "module": "refresh_ctrl",
+          "port": "cfg_ref_priority"
+        },
+        "width": 1
+      },
+      {
+        "from": {
+          "module": "cmd_queue",
+          "port": "entry_valid"
+        },
+        "to": {
+          "module": "scheduler",
+          "port": "q_valid"
+        },
+        "width": 16
+      },
+      {
+        "from": {
+          "module": "cmd_queue",
+          "port": "entry_row"
+        },
+        "to": {
+          "module": "scheduler",
+          "port": "q_row"
+        },
+        "width": 240
+      },
+      {
+        "from": {
+          "module": "cmd_queue",
+          "port": "entry_col"
+        },
+        "to": {
+          "module": "scheduler",
+          "port": "q_col"
+        },
+        "width": 160
+      },
+      {
+        "from": {
+          "module": "cmd_queue",
+          "port": "entry_bank"
+        },
+        "to": {
+          "module": "scheduler",
+          "port": "q_bank"
+        },
+        "width": 48
+      },
+      {
+        "from": {
+          "module": "cmd_queue",
+          "port": "entry_we"
+        },
+        "to": {
+          "module": "scheduler",
+          "port": "q_we"
+        },
+        "width": 16
+      },
+      {
+        "from": {
+          "module": "cmd_queue",
+          "port": "entry_aux"
+        },
+        "to": {
+          "module": "scheduler",
+          "port": "q_aux"
+        },
+        "width": 64
+      },
+      {
+        "from": {
+          "module": "bank_tracker",
+          "port": "bank_is_active"
+        },
+        "to": {
+          "module": "scheduler",
+          "port": "bank_is_active"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "bank_tracker",
+          "port": "bank_open_row"
+        },
+        "to": {
+          "module": "scheduler",
+          "port": "bank_open_row"
+        },
+        "width": 120
+      },
+      {
+        "from": {
+          "module": "bank_tracker",
+          "port": "bank_act_allowed"
+        },
+        "to": {
+          "module": "scheduler",
+          "port": "bank_act_allowed"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "bank_tracker",
+          "port": "bank_rd_allowed"
+        },
+        "to": {
+          "module": "scheduler",
+          "port": "bank_rd_allowed"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "bank_tracker",
+          "port": "bank_wr_allowed"
+        },
+        "to": {
+          "module": "scheduler",
+          "port": "bank_wr_allowed"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "bank_tracker",
+          "port": "bank_pre_allowed"
+        },
+        "to": {
+          "module": "scheduler",
+          "port": "bank_pre_allowed"
+        },
+        "width": 8
+      },
+      {
+        "from": {
+          "module": "refresh_ctrl",
+          "port": "ref_required"
+        },
+        "to": {
+          "module": "scheduler",
+          "port": "ref_required"
+        },
+        "width": 1
+      },
+      {
+        "from": {
+          "module": "refresh_ctrl",
+          "port": "ref_urgent"
+        },
+        "to": {
+          "module": "scheduler",
+          "port": "ref_urgent"
+        },
+        "width": 1
+      }
+    ],
+    "gaps": [
+      {
+        "module": "cmd_queue",
+        "port": "deq_grant",
+        "candidates": [
+          "scheduler"
+        ]
+      },
+      {
+        "module": "cmd_queue",
+        "port": "deq_idx",
+        "candidates": [
+          "scheduler"
+        ]
+      },
+      {
+        "module": "refresh_ctrl",
+        "port": "ref_ack",
+        "candidates": [
+          "scheduler"
+        ]
+      }
+    ],
+    "top_level_inputs": [
+      "bank_tracker.cmd_act_bank",
+      "bank_tracker.cmd_act_row",
+      "bank_tracker.cmd_act_valid",
+      "bank_tracker.cmd_pre_all",
+      "bank_tracker.cmd_pre_bank",
+      "bank_tracker.cmd_pre_valid",
+      "bank_tracker.cmd_rd_bank",
+      "bank_tracker.cmd_rd_valid",
+      "bank_tracker.cmd_ref_valid",
+      "bank_tracker.cmd_wr_bank",
+      "bank_tracker.cmd_wr_valid",
+      "calibration.zqcs_ack",
+      "cmd_queue.enq_aux",
+      "cmd_queue.enq_valid",
+      "config_regs.csr_adr_i",
+      "config_regs.csr_cyc_i",
+      "config_regs.csr_dat_i",
+      "config_regs.csr_sel_i",
+      "config_regs.csr_stb_i",
+      "config_regs.csr_we_i",
+      "config_regs.sts_bist_done",
+      "config_regs.sts_bist_fail",
+      "config_regs.sts_bist_fail_addr",
+      "config_regs.sts_cal_done",
+      "config_regs.sts_cal_fail",
+      "config_regs.sts_ecc_ce_count",
+      "config_regs.sts_ecc_ue_event",
+      "config_regs.sts_init_done",
+      "config_regs.sts_init_fail_event",
+      "config_regs.sts_ref_pending_cnt",
+      "config_regs.sts_ref_starve_event",
+      "config_regs.sts_self_refresh_active",
+      "data_path.ddr_dq_i",
+      "data_path.ddr_dqs_i",
+      "init_fsm.enable",
+      "wb_port.req_ready",
+      "wb_port.rsp_aux",
+      "wb_port.rsp_rdata",
+      "wb_port.rsp_valid",
+      "wb_port.wb_adr_i",
+      "wb_port.wb_bte_i",
+      "wb_port.wb_cti_i",
+      "wb_port.wb_cyc_i",
+      "wb_port.wb_dat_i",
+      "wb_port.wb_sel_i",
+      "wb_port.wb_stb_i",
+      "wb_port.wb_we_i"
+    ],
+    "top_level_outputs": [
+      "addr_decoder.dec_rank",
+      "bank_tracker.all_banks_idle",
+      "bank_tracker.faw_allows_act",
+      "calibration.cal_done",
+      "calibration.cal_fail",
+      "calibration.zqcs_req",
+      "cmd_gen.ddr_addr",
+      "cmd_gen.ddr_bank",
+      "cmd_gen.ddr_cke",
+      "cmd_gen.ddr_cmd",
+      "cmd_gen.ddr_odt",
+      "cmd_gen.ddr_reset_n",
+      "cmd_gen.fb_act_bank",
+      "cmd_gen.fb_act_row",
+      "cmd_gen.fb_act_valid",
+      "cmd_gen.fb_pre_valid",
+      "cmd_gen.fb_ref_valid",
+      "cmd_queue.enq_ready",
+      "cmd_queue.queue_count",
+      "cmd_queue.queue_empty",
+      "cmd_queue.queue_full",
+      "config_regs.cfg_bist_addr_end",
+      "config_regs.cfg_bist_addr_mode",
+      "config_regs.cfg_bist_addr_start",
+      "config_regs.cfg_bist_pattern",
+      "config_regs.cfg_bist_start",
+      "config_regs.cfg_ecc_enable",
+      "config_regs.cfg_force_self_ref",
+      "config_regs.cfg_row_policy",
+      "config_regs.cfg_sched_policy",
+      "config_regs.cfg_self_ref_mode",
+      "config_regs.csr_ack_o",
+      "config_regs.csr_dat_o",
+      "config_regs.csr_err_o",
+      "data_path.ddr_dm_o",
+      "data_path.ddr_dq_o",
+      "data_path.ddr_dq_oe",
+      "data_path.ddr_dqs_o",
+      "data_path.ddr_dqs_oe",
+      "data_path.rd_rsp_aux",
+      "data_path.rd_rsp_data",
+      "data_path.rd_rsp_valid",
+      "data_path.wr_data_ready",
+      "init_fsm.init_addr",
+      "init_fsm.init_bank",
+      "init_fsm.init_cke",
+      "init_fsm.init_cmd",
+      "init_fsm.init_cmd_valid",
+      "init_fsm.init_fail",
+      "init_fsm.init_reset_n",
+      "init_fsm.init_state",
+      "refresh_ctrl.ref_pending_cnt",
+      "refresh_ctrl.ref_starve_flag",
+      "scheduler.deq_grant",
+      "scheduler.deq_idx",
+      "scheduler.ref_ack",
+      "wb_port.req_aux",
+      "wb_port.wb_ack_o",
+      "wb_port.wb_dat_o",
+      "wb_port.wb_err_o",
+      "wb_port.wb_stall_o"
+    ],
+    "worksheet": {
+      "addr_decoder": {
+        "bundle_dir": "addr_decoder",
+        "unsourced_inputs": [],
+        "unconsumed_outputs": [
+          {
+            "port": "dec_rank",
+            "width": 1
+          }
+        ],
+        "outputs_total": 4,
+        "outputs_consumed": 3
+      },
+      "bank_tracker": {
+        "bundle_dir": "bank_tracker",
+        "unsourced_inputs": [
+          {
+            "port": "cmd_act_bank",
+            "width": 3,
+            "group": "cmd_feedback"
+          },
+          {
+            "port": "cmd_act_row",
+            "width": 15,
+            "group": "cmd_feedback"
+          },
+          {
+            "port": "cmd_act_valid",
+            "width": 1,
+            "group": "cmd_feedback"
+          },
+          {
+            "port": "cmd_pre_all",
+            "width": 1,
+            "group": "cmd_feedback"
+          },
+          {
+            "port": "cmd_pre_bank",
+            "width": 3,
+            "group": "cmd_feedback"
+          },
+          {
+            "port": "cmd_pre_valid",
+            "width": 1,
+            "group": "cmd_feedback"
+          },
+          {
+            "port": "cmd_rd_bank",
+            "width": 3,
+            "group": "cmd_feedback"
+          },
+          {
+            "port": "cmd_rd_valid",
+            "width": 1,
+            "group": "cmd_feedback"
+          },
+          {
+            "port": "cmd_ref_valid",
+            "width": 1,
+            "group": "cmd_feedback"
+          },
+          {
+            "port": "cmd_wr_bank",
+            "width": 3,
+            "group": "cmd_feedback"
+          },
+          {
+            "port": "cmd_wr_valid",
+            "width": 1,
+            "group": "cmd_feedback"
+          }
+        ],
+        "unconsumed_outputs": [
+          {
+            "port": "all_banks_idle",
+            "width": 1
+          },
+          {
+            "port": "faw_allows_act",
+            "width": 1
+          }
+        ],
+        "outputs_total": 8,
+        "outputs_consumed": 6
+      },
+      "calibration": {
+        "bundle_dir": "calibration",
+        "unsourced_inputs": [
+          {
+            "port": "zqcs_ack",
+            "width": 1,
+            "group": "zqcs_if"
+          }
+        ],
+        "unconsumed_outputs": [
+          {
+            "port": "cal_done",
+            "width": 1
+          },
+          {
+            "port": "cal_fail",
+            "width": 1
+          },
+          {
+            "port": "zqcs_req",
+            "width": 1
+          }
+        ],
+        "outputs_total": 3,
+        "outputs_consumed": 0
+      },
+      "cmd_gen": {
+        "bundle_dir": "cmd_gen",
+        "unsourced_inputs": [],
+        "unconsumed_outputs": [
+          {
+            "port": "ddr_addr",
+            "width": 15
+          },
+          {
+            "port": "ddr_bank",
+            "width": 3
+          },
+          {
+            "port": "ddr_cke",
+            "width": 1
+          },
+          {
+            "port": "ddr_cmd",
+            "width": 4
+          },
+          {
+            "port": "ddr_odt",
+            "width": 1
+          },
+          {
+            "port": "ddr_reset_n",
+            "width": 1
+          },
+          {
+            "port": "fb_act_bank",
+            "width": 3
+          },
+          {
+            "port": "fb_act_row",
+            "width": 15
+          },
+          {
+            "port": "fb_act_valid",
+            "width": 1
+          },
+          {
+            "port": "fb_pre_valid",
+            "width": 1
+          },
+          {
+            "port": "fb_ref_valid",
+            "width": 1
+          }
+        ],
+        "outputs_total": 13,
+        "outputs_consumed": 2
+      },
+      "cmd_queue": {
+        "bundle_dir": "cmd_queue",
+        "unsourced_inputs": [
+          {
+            "port": "deq_grant",
+            "width": 1,
+            "group": "dequeue"
+          },
+          {
+            "port": "deq_idx",
+            "width": 4,
+            "group": "dequeue"
+          },
+          {
+            "port": "enq_aux",
+            "width": 4,
+            "group": "enqueue"
+          },
+          {
+            "port": "enq_valid",
+            "width": 1,
+            "group": "enqueue"
+          }
+        ],
+        "unconsumed_outputs": [
+          {
+            "port": "enq_ready",
+            "width": 1
+          },
+          {
+            "port": "queue_count",
+            "width": 5
+          },
+          {
+            "port": "queue_empty",
+            "width": 1
+          },
+          {
+            "port": "queue_full",
+            "width": 1
+          }
+        ],
+        "outputs_total": 10,
+        "outputs_consumed": 6
+      },
+      "config_regs": {
+        "bundle_dir": "config_regs",
+        "unsourced_inputs": [
+          {
+            "port": "csr_adr_i",
+            "width": 8,
+            "group": "csr_bus_in"
+          },
+          {
+            "port": "csr_cyc_i",
+            "width": 1,
+            "group": "csr_bus_in"
+          },
+          {
+            "port": "csr_dat_i",
+            "width": 32,
+            "group": "csr_bus_in"
+          },
+          {
+            "port": "csr_sel_i",
+            "width": 4,
+            "group": "csr_bus_in"
+          },
+          {
+            "port": "csr_stb_i",
+            "width": 1,
+            "group": "csr_bus_in"
+          },
+          {
+            "port": "csr_we_i",
+            "width": 1,
+            "group": "csr_bus_in"
+          },
+          {
+            "port": "sts_bist_done",
+            "width": 1,
+            "group": "status_in"
+          },
+          {
+            "port": "sts_bist_fail",
+            "width": 1,
+            "group": "status_in"
+          },
+          {
+            "port": "sts_bist_fail_addr",
+            "width": 13,
+            "group": "status_in"
+          },
+          {
+            "port": "sts_cal_done",
+            "width": 1,
+            "group": "status_in"
+          },
+          {
+            "port": "sts_cal_fail",
+            "width": 1,
+            "group": "status_in"
+          },
+          {
+            "port": "sts_ecc_ce_count",
+            "width": 16,
+            "group": "status_in"
+          },
+          {
+            "port": "sts_ecc_ue_event",
+            "width": 1,
+            "group": "status_in"
+          },
+          {
+            "port": "sts_init_done",
+            "width": 1,
+            "group": "status_in"
+          },
+          {
+            "port": "sts_init_fail_event",
+            "width": 1,
+            "group": "status_in"
+          },
+          {
+            "port": "sts_ref_pending_cnt",
+            "width": 3,
+            "group": "status_in"
+          },
+          {
+            "port": "sts_ref_starve_event",
+            "width": 1,
+            "group": "status_in"
+          },
+          {
+            "port": "sts_self_refresh_active",
+            "width": 1,
+            "group": "status_in"
+          }
+        ],
+        "unconsumed_outputs": [
+          {
+            "port": "cfg_bist_addr_end",
+            "width": 29
+          },
+          {
+            "port": "cfg_bist_addr_mode",
+            "width": 1
+          },
+          {
+            "port": "cfg_bist_addr_start",
+            "width": 29
+          },
+          {
+            "port": "cfg_bist_pattern",
+            "width": 3
+          },
+          {
+            "port": "cfg_bist_start",
+            "width": 1
+          },
+          {
+            "port": "cfg_ecc_enable",
+            "width": 1
+          },
+          {
+            "port": "cfg_force_self_ref",
+            "width": 1
+          },
+          {
+            "port": "cfg_row_policy",
+            "width": 1
+          },
+          {
+            "port": "cfg_sched_policy",
+            "width": 1
+          },
+          {
+            "port": "cfg_self_ref_mode",
+            "width": 2
+          },
+          {
+            "port": "csr_ack_o",
+            "width": 1
+          },
+          {
+            "port": "csr_dat_o",
+            "width": 32
+          },
+          {
+            "port": "csr_err_o",
+            "width": 1
+          }
+        ],
+        "outputs_total": 31,
+        "outputs_consumed": 18
+      },
+      "data_path": {
+        "bundle_dir": "data_path",
+        "unsourced_inputs": [
+          {
+            "port": "ddr_dq_i",
+            "width": 32,
+            "group": "ddr_phy"
+          },
+          {
+            "port": "ddr_dqs_i",
+            "width": 1,
+            "group": "ddr_phy"
+          }
+        ],
+        "unconsumed_outputs": [
+          {
+            "port": "ddr_dm_o",
+            "width": 4
+          },
+          {
+            "port": "ddr_dq_o",
+            "width": 32
+          },
+          {
+            "port": "ddr_dq_oe",
+            "width": 1
+          },
+          {
+            "port": "ddr_dqs_o",
+            "width": 1
+          },
+          {
+            "port": "ddr_dqs_oe",
+            "width": 1
+          },
+          {
+            "port": "rd_rsp_aux",
+            "width": 4
+          },
+          {
+            "port": "rd_rsp_data",
+            "width": 32
+          },
+          {
+            "port": "rd_rsp_valid",
+            "width": 1
+          },
+          {
+            "port": "wr_data_ready",
+            "width": 1
+          }
+        ],
+        "outputs_total": 9,
+        "outputs_consumed": 0
+      },
+      "init_fsm": {
+        "bundle_dir": "init_fsm",
+        "unsourced_inputs": [
+          {
+            "port": "enable",
+            "width": 1,
+            "group": "control"
+          }
+        ],
+        "unconsumed_outputs": [
+          {
+            "port": "init_addr",
+            "width": 15
+          },
+          {
+            "port": "init_bank",
+            "width": 3
+          },
+          {
+            "port": "init_cke",
+            "width": 1
+          },
+          {
+            "port": "init_cmd",
+            "width": 4
+          },
+          {
+            "port": "init_cmd_valid",
+            "width": 1
+          },
+          {
+            "port": "init_fail",
+            "width": 1
+          },
+          {
+            "port": "init_reset_n",
+            "width": 1
+          },
+          {
+            "port": "init_state",
+            "width": 4
+          }
+        ],
+        "outputs_total": 9,
+        "outputs_consumed": 1
+      },
+      "refresh_ctrl": {
+        "bundle_dir": "refresh_ctrl",
+        "unsourced_inputs": [
+          {
+            "port": "ref_ack",
+            "width": 1,
+            "group": "scheduler_if"
+          }
+        ],
+        "unconsumed_outputs": [
+          {
+            "port": "ref_pending_cnt",
+            "width": 3
+          },
+          {
+            "port": "ref_starve_flag",
+            "width": 1
+          }
+        ],
+        "outputs_total": 4,
+        "outputs_consumed": 2
+      },
+      "scheduler": {
+        "bundle_dir": "scheduler",
+        "unsourced_inputs": [],
+        "unconsumed_outputs": [
+          {
+            "port": "deq_grant",
+            "width": 1
+          },
+          {
+            "port": "deq_idx",
+            "width": 4
+          },
+          {
+            "port": "ref_ack",
+            "width": 1
+          }
+        ],
+        "outputs_total": 10,
+        "outputs_consumed": 7
+      },
+      "wb_port": {
+        "bundle_dir": "wb_port",
+        "unsourced_inputs": [
+          {
+            "port": "req_ready",
+            "width": 1,
+            "group": "internal_in"
+          },
+          {
+            "port": "rsp_aux",
+            "width": 4,
+            "group": "internal_in"
+          },
+          {
+            "port": "rsp_rdata",
+            "width": 32,
+            "group": "internal_in"
+          },
+          {
+            "port": "rsp_valid",
+            "width": 1,
+            "group": "internal_in"
+          },
+          {
+            "port": "wb_adr_i",
+            "width": 29,
+            "group": "external_in"
+          },
+          {
+            "port": "wb_bte_i",
+            "width": 2,
+            "group": "external_in"
+          },
+          {
+            "port": "wb_cti_i",
+            "width": 3,
+            "group": "external_in"
+          },
+          {
+            "port": "wb_cyc_i",
+            "width": 1,
+            "group": "external_in"
+          },
+          {
+            "port": "wb_dat_i",
+            "width": 32,
+            "group": "external_in"
+          },
+          {
+            "port": "wb_sel_i",
+            "width": 4,
+            "group": "external_in"
+          },
+          {
+            "port": "wb_stb_i",
+            "width": 1,
+            "group": "external_in"
+          },
+          {
+            "port": "wb_we_i",
+            "width": 1,
+            "group": "external_in"
+          }
+        ],
+        "unconsumed_outputs": [
+          {
+            "port": "req_aux",
+            "width": 4
+          },
+          {
+            "port": "wb_ack_o",
+            "width": 1
+          },
+          {
+            "port": "wb_dat_o",
+            "width": 32
+          },
+          {
+            "port": "wb_err_o",
+            "width": 1
+          },
+          {
+            "port": "wb_stall_o",
+            "width": 1
+          }
+        ],
+        "outputs_total": 10,
+        "outputs_consumed": 5
+      }
+    }
+  }
+}

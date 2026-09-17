@@ -1,0 +1,47 @@
+{
+  "$comment": "Which failure_taxonomy IDs a LegalityChecker can be held responsible for, and how to synthesise a trace that violates each one. A checker observes transactions in ORDER and carries no cycle information — the contract deliberately withholds timing, because timing is what SVA checks. So a checker cannot be graded on a tRCD violation, and asking it to would be demanding evidence it cannot have. This file records that split as data so it is reviewable rather than buried in a gate.",
+
+  "$split_rationale": "TIMING_* and INIT_002 and DATA_002 are elapsed-time properties: they belong to Validation/sva. DATA_001 is a value comparison: it belongs to the scoreboard and its predictor. CSR_001 is register access semantics: it belongs to the register-map predictor gate. What remains are ordering and state properties, which are exactly what a transaction-level checker can see.",
+
+  "interface": "ddr_cmd",
+  "command_field": "cmd",
+  "bank_field": "bank",
+
+  "checkable": [
+    {
+      "id": "PROTO_001",
+      "requirement": "READ/WRITE issued to a bank that has no active row.",
+      "legal":     [["ACT", 0], ["RD", 0]],
+      "violating": [["RD", 0]],
+      "why": "A CAS with no preceding ACTIVATE to that bank has no open row to address."
+    },
+    {
+      "id": "PROTO_002",
+      "requirement": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE.",
+      "legal":     [["ACT", 0], ["PRE", 0], ["ACT", 0]],
+      "violating": [["ACT", 0], ["ACT", 0]],
+      "why": "A second ACTIVATE to the same bank without a PRECHARGE between them."
+    },
+    {
+      "id": "REF_002",
+      "requirement": "REFRESH issued while one or more banks are still active (not precharged).",
+      "legal":     [["ACT", 0], ["PRE", 0], ["REF", 0]],
+      "violating": [["ACT", 0], ["REF", 0]],
+      "why": "A REFRESH while bank 0 still has an open row."
+    }
+  ],
+
+  "not_checkable_here": [
+    { "ids": ["TIMING_001","TIMING_002","TIMING_003","TIMING_004","TIMING_005",
+              "TIMING_006","TIMING_007","TIMING_008","TIMING_009","TIMING_010",
+              "TIMING_011","INIT_002","DATA_002"],
+      "owner": "Validation/sva",
+      "why": "elapsed-time properties; a checker sees order, not cycles" },
+    { "ids": ["DATA_001"], "owner": "scoreboard + predictor",
+      "why": "a value comparison against a predicted response" },
+    { "ids": ["CSR_001"], "owner": "RegisterMapGate",
+      "why": "register access semantics, graded on the predictor" },
+    { "ids": ["REF_001","INIT_001"], "owner": "unassigned",
+      "why": "REF_001 needs the refresh request/ack stream and INIT_001 needs the init command stream; both are checkable in principle but the traces are synthesised on ddr_cmd, which carries neither. Add when those interfaces are monitored." }
+  ]
+}

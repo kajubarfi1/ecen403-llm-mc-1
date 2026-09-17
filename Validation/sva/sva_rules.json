@@ -1,0 +1,218 @@
+{
+  "$comment": "How each spec failure_taxonomy category becomes a SystemVerilog assertion. This file is the reviewable CATALOG: which command pair a rule constrains, which spec timing parameter bounds it, and whether the bank must match. The cycle counts are NOT here — they are computed at generation time from the spec's nanosecond values and the controller clock period, so a spec change changes the assertions without editing this file.",
+  "$unit_note": "Cycle counts are derived as ceil(param_ns / controller_clock_period_ns). The spec's $derived_cycles are expressed in nCK (DDR clocks, tCK=1.25ns) while commands are issued on the controller clock (5.0ns); deriving from nanoseconds avoids that unit mismatch entirely and states the physical requirement the standard actually imposes.",
+  "$independence_note": "These assertions count elapsed cycles from the OBSERVED command stream. They deliberately do not reference the design's own timing counters or permission signals. bank_tracker.sv already contains assertions of the form 'cmd_rd_valid |-> (ctr_rcd[bank] == 0)', which check the design against its own counter: if the counter is loaded wrongly, the assertion agrees with the bug. An independent check must recompute the requirement from the spec.",
+  "command_signals": {
+    "interface": "ddr_cmd",
+    "cmd_field": "cmd",
+    "bank_field": "bank",
+    "encoding_source": "interface_catalog.json -> ddr_cmd.command_encoding",
+    "addr_field": "addr",
+    "precharge_all_bit": 10,
+    "$precharge_all_note": "JESD79-3: a PRECHARGE with A10 high precharges every bank, not just the addressed one. Bank-state tracking that ignores this leaves banks marked open after they were closed, and the protocol assertions then fire on correct behaviour — the exact failure mode that teaches people to ignore assertions."
+  },
+  "min_separation_rules": [
+    {
+      "id": "TIMING_001",
+      "from": [
+        "ACT"
+      ],
+      "to": [
+        "RD",
+        "WR"
+      ],
+      "param": "tRCD",
+      "same_bank": true,
+      "requirement": "READ or WRITE issued before tRCD elapsed after ACTIVATE to same bank."
+    },
+    {
+      "id": "TIMING_002",
+      "from": [
+        "PRE"
+      ],
+      "to": [
+        "ACT"
+      ],
+      "param": "tRP",
+      "same_bank": true,
+      "requirement": "ACTIVATE issued before tRP elapsed after PRECHARGE to same bank."
+    },
+    {
+      "id": "TIMING_003",
+      "from": [
+        "ACT"
+      ],
+      "to": [
+        "PRE"
+      ],
+      "param": "tRAS",
+      "same_bank": true,
+      "requirement": "PRECHARGE issued before tRAS elapsed after ACTIVATE to same bank."
+    },
+    {
+      "id": "TIMING_004",
+      "from": [
+        "ACT"
+      ],
+      "to": [
+        "ACT"
+      ],
+      "param": "tRC",
+      "same_bank": true,
+      "requirement": "ACTIVATE issued before tRC elapsed after previous ACTIVATE to same bank."
+    },
+    {
+      "id": "TIMING_005",
+      "from": [
+        "ACT"
+      ],
+      "to": [
+        "ACT"
+      ],
+      "param": "tRRD",
+      "same_bank": false,
+      "requirement": "ACTIVATE to different bank before tRRD elapsed."
+    },
+    {
+      "id": "TIMING_007",
+      "from": [
+        "WR"
+      ],
+      "to": [
+        "RD"
+      ],
+      "param": "tWTR",
+      "same_bank": null,
+      "requirement": "READ issued before tWTR elapsed after last WRITE data burst."
+    },
+    {
+      "id": "TIMING_008",
+      "from": [
+        "WR"
+      ],
+      "to": [
+        "PRE"
+      ],
+      "param": "tWR",
+      "same_bank": true,
+      "requirement": "PRECHARGE issued before tWR elapsed after last WRITE data burst."
+    },
+    {
+      "id": "TIMING_009",
+      "from": [
+        "RD"
+      ],
+      "to": [
+        "PRE"
+      ],
+      "param": "tRTP",
+      "same_bank": true,
+      "requirement": "PRECHARGE issued before tRTP elapsed after READ command."
+    },
+    {
+      "id": "TIMING_010",
+      "from": [
+        "RD",
+        "WR"
+      ],
+      "to": [
+        "RD",
+        "WR"
+      ],
+      "param": "tCCD",
+      "same_bank": null,
+      "requirement": "CAS-to-CAS (READ-READ or WRITE-WRITE) within tCCD."
+    },
+    {
+      "id": "TIMING_011",
+      "from": [
+        "REF"
+      ],
+      "to": [
+        "ACT",
+        "RD",
+        "WR",
+        "PRE",
+        "REF"
+      ],
+      "param": "tRFC",
+      "same_bank": null,
+      "requirement": "Command issued before tRFC elapsed after REFRESH."
+    }
+  ],
+  "window_rules": [
+    {
+      "id": "TIMING_006",
+      "command": "ACT",
+      "max_in_window": 4,
+      "param": "tFAW",
+      "requirement": "5th ACTIVATE within tFAW window.",
+      "note": "A sliding-window count, not a pairwise separation: generated as a shift register over the window and a population count."
+    }
+  ],
+  "state_rules": [
+    {
+      "id": "PROTO_001",
+      "kind": "cas_requires_open_row",
+      "requirement": "READ/WRITE issued to a bank that has no active row.",
+      "note": "Row-open state is tracked HERE from observed ACT/PRE commands, never read from the design's own bank state, so a wrong state machine cannot excuse itself."
+    },
+    {
+      "id": "PROTO_002",
+      "kind": "no_double_activate",
+      "requirement": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE."
+    }
+  ],
+  "proposed_taxonomy_extensions": {
+    "$why": "The taxonomy bounds every timing parameter except tREFI. tREFI is a MAXIMUM interval, not a minimum separation, so it needs its own rule kind; JESD79-3 allows up to max_postpone_count refreshes to be deferred, so the observable bound is (max_postpone_count + 1) x tREFI between REFRESH commands.",
+    "TIMING_012": "tREFI violation: no REFRESH issued within (max_postpone_count + 1) x tREFI of the previous REFRESH."
+  },
+  "max_interval_rules": [
+    {
+      "id": "TIMING_012",
+      "command": "REF",
+      "param": "tREFI",
+      "multiplier": {
+        "spec_path": "controller_architecture.refresh_policy.max_postpone_count",
+        "plus": 1
+      },
+      "requirement": "No REFRESH issued within (max_postpone_count + 1) x tREFI of the previous REFRESH.",
+      "note": "Armed by the first observed REFRESH (the window before it belongs to initialisation, whose length init_fsm decides). One error per missed interval: the assertion fires on the cycle the gap first exceeds the bound, not on every cycle after."
+    }
+  ],
+  "command_groups": [
+    {
+      "name": "init",
+      "$why": "The init FSM issues its own command stream (init_cmd) before cmd_gen owns the pins. Its inter-step delays are INIT_002; the spec states tZQinit (initialization_sequence.tZQinit_ns) — tMRD and tMOD are NOT in the spec, so MRS-to-MRS spacing cannot be asserted (intake rule INIT_TMRD/INIT_TMOD).",
+      "command_signals": {
+        "interface": "init_cmd",
+        "cmd_field": "cmd",
+        "bank_field": "bank",
+        "encoding_source": "interface_catalog.json -> init_cmd.command_encoding"
+      },
+      "min_separation_rules": [
+        {
+          "id": "INIT_002",
+          "from": [
+            "ZQCL"
+          ],
+          "to": [
+            "MRS",
+            "REF",
+            "PRE",
+            "ACT",
+            "WR",
+            "RD",
+            "ZQCL"
+          ],
+          "param": "initialization_sequence.tZQinit_ns",
+          "same_bank": null,
+          "requirement": "Insufficient delay between init sequence steps: a command issued before tZQinit elapsed after ZQCL."
+        }
+      ],
+      "window_rules": [],
+      "state_rules": [],
+      "max_interval_rules": []
+    }
+  ]
+}

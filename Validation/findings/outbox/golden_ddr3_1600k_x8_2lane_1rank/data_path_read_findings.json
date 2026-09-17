@@ -1,0 +1,27 @@
+{
+  "$schema": "validation-findings/1",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "finding_count": 1,
+  "findings": [
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "rtl_bug",
+      "scope": "data_path",
+      "severity": "critical",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "data_path read path emits duplicate and X-valued responses per read burst",
+      "detail": "The read capture FSM pushes the response FIFO on EVERY RD_CAPTURE cycle (data_path.sv rd_capture_valid), so a BURST_CTRL_CYC=2 burst enqueues two entries per read; rd_rsp_valid (= ~rd_empty) then streams both toward wb_port. In the path_18 chain run this produced 60 dp_rd_rsp responses with X-valued data on many (uninitialised FIFO entries escaping to the interface, caught by the scoreboard's X-value check), duplicate wb acks, and wb_port's own embedded p_tag/p_stall_hold assertions firing 20+ times. One read must produce exactly one host-word response; capture should accumulate the burst's beats, then push once.",
+      "evidence": {
+        "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
+        "dp_rd_rsp_responses": 60,
+        "x_valued_field_occurrences": 55,
+        "wb_port_assertions": [
+          "p_tag",
+          "p_stall_hold"
+        ]
+      },
+      "status": "open"
+    }
+  ]
+}

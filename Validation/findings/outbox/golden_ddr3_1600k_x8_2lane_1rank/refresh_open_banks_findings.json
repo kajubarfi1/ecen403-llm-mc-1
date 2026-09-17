@@ -1,0 +1,86 @@
+{
+  "$schema": "validation-findings/1",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "finding_count": 3,
+  "findings": [
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "rtl_defect",
+      "scope": "scheduler",
+      "severity": "critical",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "taxonomy_id": "REF_002",
+      "title": "REFRESH issued while banks still have open rows",
+      "detail": "Under refresh stress (CSR programs tREFI = 512 nCK and max_postpone = 2, then 600 back-to-back host writes), the scheduler grants refresh while banks it has activated are still open. The path checkers reconstruct bank state from the observed DDR command stream (ACT opens, PRE / PRE-all closes) and report REF_002 on 12 of the 22 refresh requests in path_05 and 10 in path_20; the design's own bank_tracker coverpoint cp_ref_002_exercised sees the same event. JESD79-3 requires all banks precharged before REFRESH. The scheduler must precharge open banks (or wait for their precharge) before acknowledging ref_required.",
+      "evidence": {
+        "paths": [
+          "path_05_scheduler_refresh_loop",
+          "path_20_refresh_preempt"
+        ],
+        "stimulus": "Validation/sequences/refresh_stress.py (seed 1)",
+        "reports": [
+          "Validation/reports/paths/path_05_scheduler_refresh_loop_report.json",
+          "Validation/reports/paths/path_20_refresh_preempt_report.json"
+        ],
+        "violations": {
+          "path_05": {
+            "REF_002": 12
+          },
+          "path_20": {
+            "REF_002": 10
+          }
+        },
+        "refresh_requests_observed": 22,
+        "refresh_acks_observed": 39
+      },
+      "status": "open"
+    },
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "rtl_defect",
+      "scope": "scheduler",
+      "severity": "critical",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "taxonomy_id": "TIMING_011",
+      "title": "Command issued before tRFC elapsed after REFRESH",
+      "detail": "In the same refresh-stress runs the independent tRFC assertion (a_TIMING_011, Validation/sva/generated/cmd_gen_sva.sv, bound recomputed from timing_model.tRFC = 160 ns = 32 controller cycles) fired 24 times and the cp_trfc_spacing illegal bin was hit 18 times: the scheduler resumes ACT/RD/WR within tRFC of a REFRESH. This is a distinct defect from the refresh-while-open-banks one above: the first is about what precedes a REFRESH, this is about what follows it. Note the run also reproduces the previously filed scheduler re-grant defect (a_TIMING_004 956x, a_PROTO_002 977x, p_faw 1022x) at a far higher rate under sustained traffic; those are not re-filed here.",
+      "evidence": {
+        "paths": [
+          "path_05_scheduler_refresh_loop",
+          "path_20_refresh_preempt"
+        ],
+        "assertion": "a_TIMING_011",
+        "assertion_failures": 24,
+        "illegal_bin_hits": {
+          "cp_trfc_spacing": 18
+        },
+        "logs": [
+          "Validation/reports/paths/path_05_scheduler_refresh_loop_sim.log"
+        ]
+      },
+      "status": "open"
+    },
+    {
+      "source": "validation",
+      "target": "spec",
+      "kind": "spec_gap",
+      "scope": "csr_register_map",
+      "severity": "minor",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "ref_pending_cnt is 3 bits wide but max_postpone is programmable to 8: the refresh-starvation antecedent cannot be represented",
+      "detail": "CTRL_STATUS.ref_pending_cnt occupies bits 7:5 (values 0-7) while REFRESH_CONFIG.max_postpone is documented as 0-8 with reset value 8. The starvation condition REF_001 (pending count exceeding max_postpone) is therefore unreachable at the reset configuration by construction, and the coverpoint cg_refresh.cp_ref_001_exercised (VP_FAIL_012) reads 0% even under refresh stress. Under stress with max_postpone = 2 the antecedent is representable but still never occurs, because the scheduler acknowledges every refresh request immediately (39 acks for 22 requests) instead of postponing \u2014 the same behaviour that produces the REF_002 defect above. Either the status field must be 4 bits wide or the postpone budget must be capped at 7; the spec should state which.",
+      "evidence": {
+        "spec_paths": [
+          "csr_register_map.registers[CTRL_STATUS].fields[ref_pending_cnt]",
+          "csr_register_map.registers[REFRESH_CONFIG].fields[max_postpone]",
+          "controller_architecture.refresh_policy.max_postpone_count"
+        ],
+        "coverpoint": "cg_refresh.cp_ref_001_exercised = 0% after path_05, path_16, path_20",
+        "rollup": "Validation/reports/coverage_rollup.json"
+      },
+      "status": "open"
+    }
+  ]
+}

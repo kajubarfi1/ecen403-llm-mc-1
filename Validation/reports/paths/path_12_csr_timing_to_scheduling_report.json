@@ -1,0 +1,44 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_12_csr_timing_to_scheduling",
+  "strategy": "composed",
+  "verdict": "fail",
+  "timestamp": "2026-09-17T11:37:56.579341",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+  "stages": [
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "fail",
+      "summary": "scope=config_regs  strategy=exact  status=fail  matched=102/103  WAIVED=2 field comparison(s)  value=1",
+      "detail": [
+        "scope=config_regs  strategy=exact  status=fail  matched=102/103  WAIVED=2 field comparison(s)  value=1",
+        "  csr_rsp[0] value: predicted [csr_rsp.read_data addr=0x0 data=0x0 err=0x0] but observed [csr_rsp.read_data addr=0x0 data=0x20 err=0x0]"
+      ]
+    },
+    {
+      "stage": "bank_tracker+scheduler",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/bank_tracker_scheduler_checker.py",
+      "scope": "bank_tracker_scheduler",
+      "verdict": "pass",
+      "summary": "scope=bank_tracker_scheduler  strategy=invariant  status=pass  (291 transactions, no rule broken)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+  "observed_trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl"
+}

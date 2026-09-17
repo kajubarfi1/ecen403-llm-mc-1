@@ -1,0 +1,388 @@
+{
+  "$schema": "validation-integration-map/1",
+  "$comment": "Port-level wiring between the Frontend's blocks, declared as data. No integrated top-level exists in the RTL drop, so the validation subsystem generates its own integration harness (chain_harness_gen.py) from this map. Every connection is checkable against the manifests: named ports must exist and widths must agree \u2014 a rename or resize in a regenerated drop becomes a loud structural failure, not a silently unconnected net.",
+  "$provenance": "Derived by reading the block manifests side by side (catalog v1.15 streams give the intent; the manifests give the port names). Where the blocks' interfaces do not actually compose, the gap is recorded in `glue` with a filed finding rather than silently papered over.",
+  "connections": [
+    {
+      "from": "wb_port.req_addr",
+      "to": "addr_decoder.req_addr"
+    },
+    {
+      "from": "wb_port.req_valid",
+      "to": "cmd_queue.enq_valid"
+    },
+    {
+      "from": "wb_port.req_we",
+      "to": "cmd_queue.enq_we"
+    },
+    {
+      "from": "wb_port.req_aux",
+      "to": "cmd_queue.enq_aux"
+    },
+    {
+      "from": "cmd_queue.enq_ready",
+      "to": "wb_port.req_ready"
+    },
+    {
+      "from": "addr_decoder.dec_row",
+      "to": "cmd_queue.enq_row"
+    },
+    {
+      "from": "addr_decoder.dec_bank",
+      "to": "cmd_queue.enq_bank"
+    },
+    {
+      "from": "addr_decoder.dec_col",
+      "to": "cmd_queue.enq_col"
+    },
+    {
+      "from": "cmd_queue.entry_valid",
+      "to": "scheduler.q_valid"
+    },
+    {
+      "from": "cmd_queue.entry_row",
+      "to": "scheduler.q_row"
+    },
+    {
+      "from": "cmd_queue.entry_col",
+      "to": "scheduler.q_col"
+    },
+    {
+      "from": "cmd_queue.entry_bank",
+      "to": "scheduler.q_bank"
+    },
+    {
+      "from": "cmd_queue.entry_we",
+      "to": "scheduler.q_we"
+    },
+    {
+      "from": "cmd_queue.entry_aux",
+      "to": "scheduler.q_aux"
+    },
+    {
+      "from": "scheduler.deq_grant",
+      "to": "cmd_queue.deq_grant"
+    },
+    {
+      "from": "scheduler.deq_idx",
+      "to": "cmd_queue.deq_idx"
+    },
+    {
+      "from": "bank_tracker.bank_is_active",
+      "to": "scheduler.bank_is_active"
+    },
+    {
+      "from": "bank_tracker.bank_open_row",
+      "to": "scheduler.bank_open_row"
+    },
+    {
+      "from": "bank_tracker.bank_act_allowed",
+      "to": "scheduler.bank_act_allowed"
+    },
+    {
+      "from": "bank_tracker.bank_rd_allowed",
+      "to": "scheduler.bank_rd_allowed"
+    },
+    {
+      "from": "bank_tracker.bank_wr_allowed",
+      "to": "scheduler.bank_wr_allowed"
+    },
+    {
+      "from": "bank_tracker.bank_pre_allowed",
+      "to": "scheduler.bank_pre_allowed"
+    },
+    {
+      "from": "scheduler.cmd_valid",
+      "to": "cmd_gen.sched_valid"
+    },
+    {
+      "from": "scheduler.cmd_type",
+      "to": "cmd_gen.sched_type"
+    },
+    {
+      "from": "scheduler.cmd_row",
+      "to": "cmd_gen.sched_row"
+    },
+    {
+      "from": "scheduler.cmd_col",
+      "to": "cmd_gen.sched_col"
+    },
+    {
+      "from": "scheduler.cmd_bank",
+      "to": "cmd_gen.sched_bank"
+    },
+    {
+      "from": "scheduler.cmd_we",
+      "to": "cmd_gen.sched_we"
+    },
+    {
+      "from": "scheduler.cmd_aux",
+      "to": "cmd_gen.sched_aux"
+    },
+    {
+      "from": "cmd_gen.fb_act_valid",
+      "to": "bank_tracker.cmd_act_valid"
+    },
+    {
+      "from": "cmd_gen.fb_act_bank",
+      "to": "bank_tracker.cmd_act_bank"
+    },
+    {
+      "from": "cmd_gen.fb_act_row",
+      "to": "bank_tracker.cmd_act_row"
+    },
+    {
+      "from": "cmd_gen.fb_pre_valid",
+      "to": "bank_tracker.cmd_pre_valid"
+    },
+    {
+      "from": "cmd_gen.fb_rd_valid",
+      "to": "bank_tracker.cmd_rd_valid"
+    },
+    {
+      "from": "cmd_gen.fb_wr_valid",
+      "to": "bank_tracker.cmd_wr_valid"
+    },
+    {
+      "from": "cmd_gen.fb_ref_valid",
+      "to": "bank_tracker.cmd_ref_valid"
+    },
+    {
+      "from": "refresh_ctrl.ref_required",
+      "to": "scheduler.ref_required"
+    },
+    {
+      "from": "refresh_ctrl.ref_urgent",
+      "to": "scheduler.ref_urgent"
+    },
+    {
+      "from": "scheduler.ref_ack",
+      "to": "refresh_ctrl.ref_ack"
+    },
+    {
+      "from": "config_regs.cfg_tRCD_nCK",
+      "to": "bank_tracker.cfg_tRCD_nCK"
+    },
+    {
+      "from": "config_regs.cfg_tRP_nCK",
+      "to": "bank_tracker.cfg_tRP_nCK"
+    },
+    {
+      "from": "config_regs.cfg_tRAS_nCK",
+      "to": "bank_tracker.cfg_tRAS_nCK"
+    },
+    {
+      "from": "config_regs.cfg_tRC_nCK",
+      "to": "bank_tracker.cfg_tRC_nCK"
+    },
+    {
+      "from": "config_regs.cfg_tRRD_nCK",
+      "to": "bank_tracker.cfg_tRRD_nCK"
+    },
+    {
+      "from": "config_regs.cfg_tFAW_nCK",
+      "to": "bank_tracker.cfg_tFAW_nCK"
+    },
+    {
+      "from": "config_regs.cfg_tWTR_nCK",
+      "to": "bank_tracker.cfg_tWTR_nCK"
+    },
+    {
+      "from": "config_regs.cfg_tWR_nCK",
+      "to": "bank_tracker.cfg_tWR_nCK"
+    },
+    {
+      "from": "config_regs.cfg_tRTP_nCK",
+      "to": "bank_tracker.cfg_tRTP_nCK"
+    },
+    {
+      "from": "config_regs.cfg_tCCD_nCK",
+      "to": "bank_tracker.cfg_tCCD_nCK"
+    },
+    {
+      "from": "config_regs.cfg_tRFC_nCK",
+      "to": "bank_tracker.cfg_tRFC_nCK"
+    },
+    {
+      "from": "config_regs.cfg_tREFI_nCK",
+      "to": "refresh_ctrl.cfg_tREFI_nCK"
+    },
+    {
+      "from": "config_regs.cfg_max_postpone",
+      "to": "refresh_ctrl.cfg_max_postpone"
+    },
+    {
+      "from": "config_regs.cfg_urgent_threshold",
+      "to": "refresh_ctrl.cfg_urgent_threshold"
+    },
+    {
+      "from": "config_regs.cfg_ref_priority",
+      "to": "refresh_ctrl.cfg_ref_priority"
+    },
+    {
+      "from": "config_regs.cfg_force_refresh",
+      "to": "refresh_ctrl.cfg_force_refresh"
+    },
+    {
+      "from": "refresh_ctrl.ref_pending_cnt",
+      "to": "config_regs.sts_ref_pending_cnt"
+    },
+    {
+      "from": "cmd_gen.fb_wr_valid",
+      "to": "data_path.cmd_wr_valid"
+    },
+    {
+      "from": "cmd_gen.fb_rd_valid",
+      "to": "data_path.cmd_rd_valid"
+    },
+    {
+      "from": "wb_port.req_wdata",
+      "to": "data_path.wr_data"
+    },
+    {
+      "from": "wb_port.req_wmask",
+      "to": "data_path.wr_mask"
+    },
+    {
+      "from": "data_path.rd_rsp_valid",
+      "to": "wb_port.rsp_valid"
+    },
+    {
+      "from": "data_path.rd_rsp_data",
+      "to": "wb_port.rsp_rdata"
+    },
+    {
+      "from": "data_path.rd_rsp_aux",
+      "to": "wb_port.rsp_aux"
+    },
+    {
+      "from": "config_regs.cfg_CL_nCK",
+      "to": "data_path.cfg_CL_nCK"
+    },
+    {
+      "from": "config_regs.cfg_CWL_nCK",
+      "to": "data_path.cfg_CWL_nCK"
+    },
+    {
+      "from": "init_fsm.init_done",
+      "to": "calibration.init_done"
+    },
+    {
+      "from": "init_fsm.init_done",
+      "to": "refresh_ctrl.init_done"
+    },
+    {
+      "from": "init_fsm.init_done",
+      "to": "config_regs.sts_init_done"
+    },
+    {
+      "from": "init_fsm.init_fail",
+      "to": "config_regs.sts_init_fail_event"
+    },
+    {
+      "from": "calibration.cal_done",
+      "to": "config_regs.sts_cal_done"
+    },
+    {
+      "from": "calibration.cal_fail",
+      "to": "config_regs.sts_cal_fail"
+    }
+  ],
+  "glue": [
+    {
+      "from": "scheduler.cmd_bank",
+      "to": [
+        "bank_tracker.cmd_pre_bank",
+        "bank_tracker.cmd_rd_bank",
+        "bank_tracker.cmd_wr_bank"
+      ],
+      "delay_cycles": 1,
+      "why": "cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. The harness registers the scheduler's cmd_bank one cycle so it aligns with the REGISTERED fb pulses. This is testbench glue standing in for a missing design signal \u2014 see the filed finding; the Frontend should add fb_pre_bank/fb_rd_bank/fb_wr_bank."
+    },
+    {
+      "from": "scheduler.cmd_aux",
+      "to": [
+        "data_path.cmd_aux"
+      ],
+      "delay_cycles": 1,
+      "why": "cmd_gen's feedback carries no aux tag, but data_path needs the issued command's aux to tag read responses (rd_rsp_aux). Registered one cycle to align with the registered fb_rd_valid/fb_wr_valid pulses. Same missing-feedback-signal gap as the bank workaround \u2014 covered by the filed fb-bank finding; the design wants fb_aux."
+    }
+  ],
+  "ties": {
+    "refresh_ctrl.init_done": "1'b1",
+    "$why_init_done": "FALLBACK when init_fsm is not instantiated (command-path harnesses): refresh_ctrl waits for init_done before counting tREFI, and a tied-low init_done would silently disable every refresh. When init_fsm IS instantiated, the real init_fsm.init_done connection takes precedence.",
+    "init_fsm.enable": "1'b1",
+    "$why_enable": "init_fsm starts as soon as reset releases; the harness has no power-management layer to gate it."
+  },
+  "requires": {
+    "$comment": "Support-block closure: instantiating a block pulls these in, because tied-zero substitutes for them are behaviourally wrong (a zeroed bank_act_allowed blocks every ACTIVATE; zeroed cfg timings erase every constraint).",
+    "scheduler": [
+      "cmd_queue",
+      "bank_tracker",
+      "refresh_ctrl"
+    ],
+    "bank_tracker": [
+      "config_regs",
+      "cmd_gen"
+    ],
+    "refresh_ctrl": [
+      "config_regs"
+    ],
+    "cmd_gen": [
+      "scheduler"
+    ],
+    "cmd_queue": [
+      "addr_decoder",
+      "scheduler"
+    ],
+    "addr_decoder": [
+      "wb_port"
+    ],
+    "wb_port": [
+      "data_path"
+    ],
+    "data_path": [
+      "cmd_gen",
+      "config_regs"
+    ],
+    "calibration": [
+      "init_fsm"
+    ]
+  },
+  "expr_glue": [
+    {
+      "to": "data_path.wr_data_valid",
+      "expr": "wb_port.req_valid && wb_port.req_we && cmd_queue.enq_ready",
+      "why": "data_path buffers a write word when wb_port's write request is ACCEPTED (valid && we && ready). No single design port carries that event; it is the same accept condition cmd_queue enqueues on."
+    },
+    {
+      "to": "calibration.zqcs_ack",
+      "expr": "calibration.zqcs_req",
+      "why": "Nothing in the drop consumes zqcs_req: no scheduler or cmd_gen port accepts a ZQCS request, so periodic ZQ calibration can never be granted by the design itself \u2014 an integration gap (finding filed). The harness acks immediately so the calibration FSM does not wedge; the cal_zqcs monitor still observes every request."
+    }
+  ],
+  "stubs": [
+    {
+      "module": "dram_stub",
+      "instance": "u_dram",
+      "source": "Validation/structural/dram_stub.sv",
+      "when_block": "data_path",
+      "$why": "Something must sit on the far side of the DDR pins or every read returns the tied-off bus. A behavioral DRAM: ACT opens rows, WR stores the burst word, RD replies after CL. Testbench component \u2014 nothing judges the design against it.",
+      "inputs": {
+        "clk": "@clk",
+        "rst_n": "@rst_n",
+        "ddr_cmd": "cmd_gen.ddr_cmd",
+        "ddr_addr": "cmd_gen.ddr_addr",
+        "ddr_bank": "cmd_gen.ddr_bank",
+        "ddr_dq_o": "data_path.ddr_dq_o",
+        "ddr_dq_oe": "data_path.ddr_dq_oe",
+        "cfg_CL_nCK": "config_regs.cfg_CL_nCK",
+        "cfg_CWL_nCK": "config_regs.cfg_CWL_nCK"
+      },
+      "outputs": {
+        "ddr_dq_i": "data_path.ddr_dq_i",
+        "ddr_dqs_i": "data_path.ddr_dqs_i"
+      }
+    }
+  ]
+}

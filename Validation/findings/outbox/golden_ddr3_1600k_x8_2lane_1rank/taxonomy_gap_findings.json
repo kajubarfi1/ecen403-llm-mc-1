@@ -1,0 +1,61 @@
+{
+  "$schema": "validation-findings/1",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "finding_count": 2,
+  "findings": [
+    {
+      "source": "validation",
+      "target": "spec",
+      "kind": "spec_gap",
+      "scope": "failure_taxonomy",
+      "severity": "minor",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "failure_taxonomy has no ids for scheduler conservation or refresh-service liveness",
+      "detail": "The taxonomy covers timing (TIMING_*), protocol state (PROTO_*), refresh state (REF_*), init, data and CSR failures, but a queue+arbiter can also drop an enqueued request, issue a command that matches no request, or never service a refresh request \u2014 and none of those has an id. Validation checks these today under proposed local ids and requests their adoption into the spec: SCHED_001 (enqueued request never issued as a command), SCHED_002 (command issued matching no enqueued request), SCHED_003 (refresh request raised but never serviced with a REFRESH command). Declared in Validation/gates/stage_invariant_rules.json under proposed_taxonomy_extensions.",
+      "evidence": {
+        "proposed_ids": [
+          "SCHED_001",
+          "SCHED_002",
+          "SCHED_003"
+        ],
+        "used_by": [
+          "cmd_queue_scheduler_checker",
+          "scheduler_checker"
+        ],
+        "declared_in": "Validation/gates/stage_invariant_rules.json"
+      },
+      "status": "open"
+    },
+    {
+      "source": "validation",
+      "target": "spec",
+      "kind": "spec_gap",
+      "scope": "failure_taxonomy",
+      "severity": "minor",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "failure_taxonomy has no ids for init/calibration ordering, refresh-versus-init ordering, or a tREFI interval violation",
+      "detail": "Bringing the six autonomous paths (init -> calibration, init -> refresh, and the four status-reporting paths) under real checks needed failure classes the taxonomy cannot name. INIT_001/INIT_002 cover mode-register order and inter-step timing, but not: init_done raised before the sequence completed (INIT_003); calibration finishing before init_done (CAL_001); periodic ZQCS requested before cal_done (CAL_002); a refresh requested before init_done (REF_003); no refresh ever requested after init_done (REF_004). Separately, every timing parameter in timing_model has a TIMING_* id except tREFI \u2014 a MAXIMUM interval rather than a minimum separation \u2014 so the refresh-interval assertion reports under a proposed TIMING_012. Checkers and assertions use these ids locally; adoption into the spec is requested. The intake gate (Validation/spec/spec_completeness.py, rule TAXONOMY_NAMES_TIMING_PARAMS) now flags an unnamed timing parameter on arrival.",
+      "evidence": {
+        "proposed_ids": [
+          "INIT_003",
+          "CAL_001",
+          "CAL_002",
+          "REF_003",
+          "REF_004",
+          "TIMING_012"
+        ],
+        "used_by": [
+          "path_08_init_to_cal_checker",
+          "path_09_init_to_refresh_checker",
+          "cmd_gen_sva (a_TIMING_012)",
+          "cmd_gen_coverage (cp_trefi_spacing)"
+        ],
+        "declared_in": [
+          "Validation/gates/stage_invariant_rules.json",
+          "Validation/sva/sva_rules.json"
+        ]
+      },
+      "status": "open"
+    }
+  ]
+}

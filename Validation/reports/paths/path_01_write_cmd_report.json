@@ -1,0 +1,72 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_01_write_cmd",
+  "strategy": "composed",
+  "verdict": "fail",
+  "timestamp": "2026-09-17T11:37:51.477710",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+  "stages": [
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "pass",
+      "summary": "scope=wb_port  strategy=exact  status=pass  matched=200/200  (200 output transaction(s) matched)",
+      "detail": []
+    },
+    {
+      "stage": "addr_decoder",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
+      "scope": "addr_decoder",
+      "verdict": "pass",
+      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=200/200  (200 output transaction(s) matched)",
+      "detail": []
+    },
+    {
+      "stage": "cmd_queue+scheduler",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
+      "scope": "cmd_queue_scheduler",
+      "verdict": "fail",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=172",
+      "detail": [
+        "  SCHED_002: WR to bank=0 col=24 matches no enqueued request @ [sched_cmd.command aux=0xb bank=0x0 col=0x18 row=0x0 type=0x3 we=0x1]",
+        "  SCHED_002: WR to bank=0 col=0 matches no enqueued request @ [sched_cmd.command aux=0xb bank=0x0 col=0x0 row=0x0 type=0x3 we=0x1]",
+        "  SCHED_002: WR to bank=0 col=0 matches no enqueued request @ [sched_cmd.command aux=0xc bank=0x0 col=0x0 row=0x0 type=0x3 we=0x1]",
+        "  SCHED_002: WR to bank=0 col=24 matches no enqueued request @ [sched_cmd.command aux=0xc bank=0x0 col=0x18 row=0x0 type=0x3 we=0x1]",
+        "  SCHED_002: WR to bank=0 col=8 matches no enqueued request @ [sched_cmd.command aux=0xd bank=0x0 col=0x8 row=0x0 type=0x3 we=0x1]",
+        "  SCHED_002: WR to bank=0 col=0 matches no enqueued request @ [sched_cmd.command aux=0xd bank=0x0 col=0x0 row=0x0 type=0x3 we=0x1]",
+        "  SCHED_002: WR to bank=0 col=24 matches no enqueued request @ [sched_cmd.command aux=0xe bank=0x0 col=0x18 row=0x0 type=0x3 we=0x1]",
+        "  SCHED_002: WR to bank=0 col=8 matches no enqueued request @ [sched_cmd.command aux=0x0 bank=0x0 col=0x8 row=0x0 type=0x3 we=0x1]",
+        "  SCHED_002: WR to bank=0 col=16 matches no enqueued request @ [sched_cmd.command aux=0xe bank=0x0 col=0x10 row=0x0 type=0x3 we=0x1]",
+        "  SCHED_002: WR to bank=0 col=16 matches no enqueued request @ [sched_cmd.command aux=0xf bank=0x0 col=0x10 row=0x0 type=0x3 we=0x1]",
+        "  SCHED_002: WR to bank=0 col=24 matches no enqueued request @ [sched_cmd.command aux=0x1 bank=0x0 col=0x18 row=0x0 type=0x3 we=0x1]",
+        "  SCHED_002: WR to bank=0 col=8 matches no enqueued request @ [sched_cmd.command aux=0x2 bank=0x0 col=0x8 row=0x0 type=0x3 we=0x1]"
+      ]
+    },
+    {
+      "stage": "cmd_gen",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
+      "scope": "cmd_gen",
+      "verdict": "pass",
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=375/375  (375 output transaction(s) matched)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+  "observed_trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl"
+}

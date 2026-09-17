@@ -1,0 +1,51 @@
+{
+  "design": "scheduler",
+  "platform": "sky130hd",
+  "ran": true,
+  "error": null,
+  "mutate": null,
+  "drc": {
+    "status": "PASS",
+    "violations": 0,
+    "by_rule": {},
+    "report": "/signoff_out/drc.lyrdb",
+    "deck": "/OpenROAD-flow-scripts/flow/platforms/sky130hd/drc/sky130hd.lydrc",
+    "seconds": 64.7
+  },
+  "lvs": {
+    "verdict": "match",
+    "report": "/signoff_out/lvs.lvsdb",
+    "deck": "/signoff/lvs/sky130hd_fixed.lylvs",
+    "seconds": 16.3,
+    "prep": {
+      "taps": 2204,
+      "diodes": 41,
+      "ties": 1,
+      "feedthroughs": 0,
+      "pin_aliases": 0,
+      "lib_cells": 106,
+      "missing_defs": "[]"
+    },
+    "blackboxed_instances": 4,
+    "top_status": "Match",
+    "nets_compared": 5094,
+    "pins_compared": 753,
+    "cell_mismatches": [],
+    "status": "PASS",
+    "detail": "netlists match: 5094 nets / 753 pins compared, 4 black-boxed cell instance(s)"
+  },
+  "audit": {
+    "status": "PASS",
+    "pins_present": 754,
+    "pins_total": 754,
+    "feedthroughs_ok": 0,
+    "feedthroughs_total": 0,
+    "control_wrong_accepted": 0,
+    "detail": "754/754 pins in layout, 0/0 pin-to-pin feedthroughs on one net, 0 wrong pairings accepted"
+  },
+  "gds": "/OpenROAD-flow-scripts/flow/results/sky130hd/scheduler/base/6_final.gds",
+  "freshness": {
+    "gds_written": "2026-09-17 17:05:47",
+    "newer_artifacts": []
+  }
+}

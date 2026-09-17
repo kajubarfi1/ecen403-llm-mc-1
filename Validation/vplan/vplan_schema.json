@@ -1,0 +1,28 @@
+{
+  "$comment": "Schema for the DDR3 memory controller verification plan (vplan). One vplan item = one verifiable requirement traceable to the microarchitecture spec.",
+  "schema_version": "1.0",
+  "item_fields": {
+    "id":            "Stable vplan ID, VP_<SCOPE>_<NNN>. Never renumbered once assigned.",
+    "title":         "One-line human-readable requirement name.",
+    "scope":         "Validation scope this belongs to (matches spec.validation_scopes).",
+    "requirement":   "What must be true. Written as an assertion about behavior, not about the testbench.",
+    "spec_ref":      "Dotted path into llmmc_microarchitecturespec_filled.json that this requirement is derived from.",
+    "failure_ref":   "Optional failure_taxonomy category ID this requirement guards against (e.g. TIMING_001).",
+    "method":        "assertion | directed | random | formal — how this requirement is proven.",
+    "coverage_items":"List of coverage objects that measure whether this requirement was exercised.",
+    "priority":      "critical | major | minor — inherited from failure_taxonomy severity where applicable.",
+    "status":        "not_started | in_progress | covered | waived",
+    "waiver_reason": "Required when status == waived. Must name who approved it.",
+    "tests":         "List of test/sequence names that target this item. Populated by the run flow, not by hand."
+  },
+  "coverage_item_fields": {
+    "type": "functional | code_line | code_toggle | code_fsm | code_expr",
+    "name": "Covergroup.coverpoint path for functional, or RTL scope for code coverage.",
+    "goal": "Target percentage (default 100)."
+  },
+  "status_rules": [
+    "An item may only reach 'covered' when every coverage_item meets its goal AND its method has been executed.",
+    "'waived' requires waiver_reason naming an approver. Waivers are reviewed at each milestone.",
+    "Items are never marked covered by a passing test alone — coverage must confirm the scenario was exercised."
+  ]
+}

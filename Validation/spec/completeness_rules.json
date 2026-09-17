@@ -1,0 +1,158 @@
+{
+  "$schema": "validation-spec-completeness/1",
+  "$comment": "What a specification must SAY before RTL is generated from it or validated against it. Rules are keyed to section TYPES (any spec with a register map must answer these questions; any spec with a DDR channel must answer those), not to this design — a customised spec is checked by the same rules. Every rule cites the incident that produced it: this file is a ratchet. When validation discovers a gap the hard way, its resolution becomes a rule here so the next spec is checked for it on arrival.",
+  "$dispositions": {
+    "standard": "The applicable standard determines the answer. Validation adopts it and files a completion request; checking continues.",
+    "decision": "A genuine design choice the spec owner must make. Until made, comparisons on the affected field are UNDETERMINED (never pass, never fail).",
+    "vocabulary": "The spec lacks the words to report a failure class; proposed IDs are used locally and requested upstream."
+  },
+  "rules": [
+    {
+      "id": "CSR_UNMAPPED_READ_DATA",
+      "kind": "required_field",
+      "when_present": "csr_register_map",
+      "require": "csr_register_map.unmapped_read_data",
+      "options": [
+        "zero",
+        "all_ones",
+        "undefined",
+        "last_written"
+      ],
+      "disposition": "decision",
+      "question": "What data accompanies a read of an address the register map does not declare?",
+      "consequence": "A spec-derived model and a design can both be 'correct' with different answers; the comparison is unfalsifiable until this is stated.",
+      "discovered_by": "VP_CSR_006 — design returned 0xDEADBEEF, model returned 0; waived as W-001"
+    },
+    {
+      "id": "CSR_UNMAPPED_WRITE",
+      "kind": "required_field",
+      "when_present": "csr_register_map",
+      "require": "csr_register_map.unmapped_write_behavior",
+      "options": [
+        "ignored_with_error",
+        "ignored_silently",
+        "error_only"
+      ],
+      "disposition": "decision",
+      "question": "What happens on a write to an undeclared address — error flag, silent drop, or both?",
+      "consequence": "Error-flag comparison on unmapped writes rests on an assumption.",
+      "discovered_by": "sibling of VP_CSR_006 (the error flag happened to agree; the spec never said it must)"
+    },
+    {
+      "id": "CSR_READ_BYTE_ENABLES",
+      "kind": "required_field",
+      "when_present": "csr_register_map",
+      "require": "csr_register_map.read_byte_enable_semantics",
+      "options": [
+        "ignored",
+        "must_be_full",
+        "masks_data"
+      ],
+      "disposition": "decision",
+      "question": "Do byte enables mean anything on a READ, and what value is expected on the request?",
+      "consequence": "A model predicted full enables on reads; the bus drove none. Neither is wrong.",
+      "discovered_by": "byte_enable_semantics finding (path_18)"
+    },
+    {
+      "id": "CSR_STATUS_READ_SAMPLING",
+      "kind": "required_field",
+      "when_present": "csr_register_map",
+      "require": "csr_register_map.status_read_sampling",
+      "options": [
+        "previous_edge",
+        "same_cycle"
+      ],
+      "disposition": "decision",
+      "question": "When a status register is read in the same cycle its source changes, does the read return the old or the new value?",
+      "consequence": "A one-cycle coincidence produced a mismatch that no waiver can express. Registered designs return the old value; the spec must say so.",
+      "discovered_by": "csr_status_read_coherency finding (path_12/13, CTRL_STATUS.ref_pending_cnt)"
+    },
+    {
+      "id": "DDR_DM_POLARITY",
+      "kind": "required_field",
+      "when_present": "data_path_mapping.pack_mode",
+      "require": "data_path_mapping.ddr_dm_polarity",
+      "options": [
+        "active_high_mask",
+        "active_high_enable"
+      ],
+      "disposition": "standard",
+      "standard": {
+        "name": "JESD79-3 (DDR3)",
+        "value": "active_high_mask",
+        "note": "DM=1 masks the byte. The host-side wishbone sel (1 = write this byte) is the inverse convention."
+      },
+      "question": "On the DDR channel, does the data-mask pin mask or enable a byte?",
+      "consequence": "The design drives ~sel (JEDEC-correct); a spec-derived model carried sel through unchanged. The standard decides this one.",
+      "discovered_by": "byte_enable_semantics finding (data_path pack/unpack gate)"
+    },
+    {
+      "id": "TAXONOMY_SCHEDULER_FAMILY",
+      "kind": "taxonomy_family",
+      "when_present": "controller_architecture.scheduler_policy",
+      "require_prefix": "SCHED_",
+      "minimum": [
+        "dropped request",
+        "invented command",
+        "refresh never serviced"
+      ],
+      "disposition": "vocabulary",
+      "question": "Does the failure taxonomy have ids for what a queue + arbiter can do wrong — drop a request, invent a command, starve a refresh?",
+      "consequence": "Checkers reported real defects under locally proposed ids (SCHED_001..003) that the spec cannot name.",
+      "discovered_by": "taxonomy_gap finding (stage invariant checkers)"
+    },
+    {
+      "id": "INTERFACE_CONTRACTS",
+      "kind": "path_interfaces",
+      "require": "block_interfaces",
+      "disposition": "decision",
+      "question": "For every pair of blocks a path connects, what are the port-level signals, widths and handshake between them?",
+      "consequence": "The drop shipped 11 blocks and no top level; two block pairs did not compose (no bank on cmd_gen's feedback, nothing consuming calibration's ZQCS request). Validation had to author a 75-connection map by hand. Interfaces that are not specified cannot be generated consistently on both sides.",
+      "discovered_by": "integration_map.json glue entries; fb-bank and ZQCS findings"
+    },
+    {
+      "id": "TAXONOMY_NAMES_TIMING_PARAMS",
+      "kind": "taxonomy_names_params",
+      "when_present": "timing_model",
+      "params_from": "timing_model",
+      "param_prefix": "t",
+      "exclude": [
+        "tCK_ns"
+      ],
+      "disposition": "vocabulary",
+      "question": "Does the failure taxonomy have an id for violating EVERY timing parameter the timing model states?",
+      "consequence": "A parameter with no failure id has no assertion name to report under; tREFI had none, so the refresh-interval assertion reports under a proposed TIMING_012.",
+      "discovered_by": "sva_rules.json max_interval_rules (tREFI) — no taxonomy id names tREFI"
+    },
+    {
+      "id": "INIT_TMRD",
+      "kind": "required_field",
+      "when_present": "initialization_sequence.mode_registers",
+      "require": "timing_model.tMRD",
+      "disposition": "standard",
+      "standard": {
+        "name": "JESD79-3 (DDR3)",
+        "value": "4 nCK",
+        "note": "MRS-to-MRS command spacing. Stated in nanoseconds in timing_model (4 x tCK)."
+      },
+      "question": "What is the minimum spacing between consecutive mode-register-set commands (tMRD)?",
+      "consequence": "The init sequence issues four MRS commands; without tMRD their spacing cannot be asserted, so INIT_002 is only partially checkable.",
+      "discovered_by": "sva_rules.json command_groups[init] — only tZQinit could be generated"
+    },
+    {
+      "id": "INIT_TMOD",
+      "kind": "required_field",
+      "when_present": "initialization_sequence.mode_registers",
+      "require": "timing_model.tMOD",
+      "disposition": "standard",
+      "standard": {
+        "name": "JESD79-3 (DDR3)",
+        "value": "max(12 nCK, 15 ns)",
+        "note": "MRS to any non-MRS command."
+      },
+      "question": "What is the minimum delay from a mode-register-set command to the next non-MRS command (tMOD)?",
+      "consequence": "ZQCL after the last MRS cannot be checked for tMOD without it.",
+      "discovered_by": "sva_rules.json command_groups[init]"
+    }
+  ]
+}

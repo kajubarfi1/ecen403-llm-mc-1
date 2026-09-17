@@ -1,0 +1,41 @@
+{
+  "$schema": "validation-findings/1",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "finding_count": 2,
+  "findings": [
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "rtl_bug",
+      "scope": "data_path",
+      "severity": "critical",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "data_path.ddr_dq_o is 32 bits; the spec declares 16",
+      "detail": "data_path_mapping.ddr_channel_width_bits = 16, so data_path.ddr_dq_o must be 16 bits wide; the design makes it 32. The DDR data bus is the channel width. pack_mode 'pack_32_to_16' means each 32-bit host word is driven as two 16-bit beats, so the DQ ports are 16 bits, not 32.",
+      "evidence": {
+        "spec_path": "data_path_mapping.ddr_channel_width_bits",
+        "spec_value": 16,
+        "port": "ddr_dq_o",
+        "rtl_width": 32
+      },
+      "status": "open"
+    },
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "rtl_bug",
+      "scope": "data_path",
+      "severity": "critical",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "data_path.ddr_dq_i is 32 bits; the spec declares 16",
+      "detail": "data_path_mapping.ddr_channel_width_bits = 16, so data_path.ddr_dq_i must be 16 bits wide; the design makes it 32. The DDR data bus is the channel width. pack_mode 'pack_32_to_16' means each 32-bit host word is driven as two 16-bit beats, so the DQ ports are 16 bits, not 32.",
+      "evidence": {
+        "spec_path": "data_path_mapping.ddr_channel_width_bits",
+        "spec_value": 16,
+        "port": "ddr_dq_i",
+        "rtl_width": 32
+      },
+      "status": "open"
+    }
+  ]
+}

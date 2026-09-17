@@ -1,0 +1,283 @@
+{
+  "name": "timing_boundary_stress",
+  "targets": [
+    "VP_TIME_001",
+    "VP_TIME_002",
+    "VP_TIME_003",
+    "VP_TIME_009",
+    "VP_TIME_011"
+  ],
+  "rationale": "Exercises each timing constraint at its exact minimum legal spacing: tCCD with back-to-back reads, tFAW with 4 ACTs spaced by 7 idle cycles, tRAS with ACT-to-PRE at 6 idle, tRRD with ACT-to-ACT at 1 idle, and tWR with WR-to-PRE at 2 idle.",
+  "steps": [
+    {
+      "op": "reset"
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 1,
+        "row": 100,
+        "col": 0,
+        "bank": 0,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 10
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 2,
+        "row": 100,
+        "col": 0,
+        "bank": 0,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 2,
+        "row": 100,
+        "col": 64,
+        "bank": 0,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 10
+    },
+    {
+      "op": "reset"
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 1,
+        "row": 200,
+        "col": 0,
+        "bank": 1,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 7
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 1,
+        "row": 201,
+        "col": 0,
+        "bank": 2,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 7
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 1,
+        "row": 202,
+        "col": 0,
+        "bank": 3,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 7
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 1,
+        "row": 203,
+        "col": 0,
+        "bank": 4,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 20
+    },
+    {
+      "op": "reset"
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 1,
+        "row": 300,
+        "col": 0,
+        "bank": 2,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 6
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 4,
+        "row": 300,
+        "col": 0,
+        "bank": 2,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 10
+    },
+    {
+      "op": "reset"
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 1,
+        "row": 400,
+        "col": 0,
+        "bank": 3,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 1
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 1,
+        "row": 401,
+        "col": 0,
+        "bank": 4,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 10
+    },
+    {
+      "op": "reset"
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 1,
+        "row": 500,
+        "col": 0,
+        "bank": 5,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 10
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 3,
+        "row": 500,
+        "col": 0,
+        "bank": 5,
+        "we": 1,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "sched_in",
+      "kind": "command",
+      "fields": {
+        "type": 4,
+        "row": 500,
+        "col": 0,
+        "bank": 5,
+        "we": 0,
+        "aux": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 10
+    }
+  ],
+  "_provenance": {
+    "generated_utc": "2026-09-03T18:20:05.440183+00:00",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "model": "claude-opus-4-6",
+    "attempts": 1,
+    "aimed_at": [
+      "cg_timing.cp_tccd_spacing",
+      "cg_timing.cp_tfaw_spacing",
+      "cg_timing.cp_tras_spacing",
+      "cg_timing.cp_trrd_spacing",
+      "cg_timing.cp_twr_spacing",
+      "cg_refresh.cp_ref_001_exercised",
+      "cg_refresh.cp_ref_002_exercised",
+      "cg_init_sequence.cp_init_001_exercised",
+      "cg_init_sequence.cp_init_002_exercised",
+      "cg_scheduler.cp_proto_001_exercised",
+      "cg_scheduler.cp_proto_002_exercised",
+      "cg_data_path.cp_data_001_exercised"
+    ],
+    "note": "Stimulus only \u2014 carries no expected values. Judged by whether the coverage it produces closes the targeted holes, a metric the generating model cannot influence."
+  }
+}

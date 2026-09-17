@@ -1,0 +1,1306 @@
+{
+  "name": "register_walk_config_regs",
+  "targets": [
+    "VP_FAIL_020",
+    "VP_CSR_001",
+    "VP_CSR_002",
+    "VP_CSR_003",
+    "VP_CSR_004",
+    "VP_CSR_005",
+    "VP_CSR_006"
+  ],
+  "rationale": "Directed walk of all 11 registers in csr_register_map on csr: reset-value read, then access-type-appropriate writes with toggle patterns and read-back, plus 2 unmapped probes. 103 drives.",
+  "steps": [
+    {
+      "op": "reset"
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 0,
+        "data": 4294967295
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 0,
+        "data": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 0,
+        "data": 2779096485
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 0,
+        "data": 1515870810
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 4
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 4,
+        "data": 4294967295
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 4
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 4,
+        "data": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 4
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 4,
+        "data": 2779096485
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 4
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 4,
+        "data": 1515870810
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 4
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 8
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 8,
+        "data": 4294967295
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 8
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 8,
+        "data": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 8
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 8,
+        "data": 2779096485
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 8
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 8,
+        "data": 1515870810
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 8
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 12
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 12,
+        "data": 4294967295
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 12
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 12,
+        "data": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 12
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 12,
+        "data": 2779096485
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 12
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 12,
+        "data": 1515870810
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 12
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 16
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 16,
+        "data": 4294967295
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 16
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 16,
+        "data": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 16
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 16,
+        "data": 2779096485
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 16
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 16,
+        "data": 1515870810
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 16
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 20
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 20,
+        "data": 4294967295
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 20
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 20,
+        "data": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 20
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 20,
+        "data": 2779096485
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 20
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 20,
+        "data": 1515870810
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 20
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 24
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 24,
+        "data": 4294967295
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 24
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 24,
+        "data": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 24
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 24,
+        "data": 2779096485
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 24
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 24,
+        "data": 1515870810
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 24
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 28
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 28,
+        "data": 4294967295
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 28
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 28,
+        "data": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 28
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 28,
+        "data": 2779096485
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 28
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 28,
+        "data": 1515870810
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 28
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 32
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 32,
+        "data": 4294967295
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 32
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 32,
+        "data": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 32
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 32,
+        "data": 2779096485
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 32
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 32,
+        "data": 1515870810
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 32
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 36
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 36,
+        "data": 4294967295
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 36
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 36,
+        "data": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 36
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 36,
+        "data": 2779096485
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 36
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 36,
+        "data": 1515870810
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 36
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 40
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 40,
+        "data": 4294967295
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 40
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 40,
+        "data": 0
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 40
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 40,
+        "data": 2779096485
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 40
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 40,
+        "data": 1515870810
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 40
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 44
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 44,
+        "data": 1515870810
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "read",
+      "fields": {
+        "addr": 252
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    },
+    {
+      "op": "drive",
+      "iface": "csr",
+      "kind": "write",
+      "fields": {
+        "addr": 252,
+        "data": 1515870810
+      }
+    },
+    {
+      "op": "idle",
+      "cycles": 2
+    }
+  ],
+  "_provenance": {
+    "arm": "directed",
+    "generator": "register_walk.py",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "reads_coverage": false
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "validation-findings/1",
+  "generated_utc": "2026-09-03T16:58:13.757674+00:00",
+  "scope": "config_regs",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "rtl_drop": "PHASE1RTL@local",
+  "finding_count": 1,
+  "by_target": {
+    "spec_owner": 1
+  },
+  "findings": [
+    {
+      "kind": "spec_gap",
+      "scope": "config_regs",
+      "title": "Read data for an unmapped register address is undefined",
+      "detail": "11 reads to addresses outside the register map disagreed on returned data. Both the design and the spec-derived model agree the access is exceptional (the error indication matches on every one), so this is not a disagreement about whether the access fails. They differ only on the data accompanying the error: the design returns 0xdeadbeef, the model returns 0x0. The model reads the specification literally, and the specification does not state what data an unmapped read returns \u2014 the terms 'unmapped', 'unimplemented', 'decode_error' and 'undefined address' do not appear in it. Neither implementation is wrong; the specification did not decide.",
+      "severity": "major",
+      "target": "spec_owner",
+      "source": "validation",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "rtl_drop": "PHASE1RTL@local",
+      "vplan_items": [
+        "VP_CSR_006"
+      ],
+      "question": "What must a read of an unmapped CSR address return on the data bus? Options: (a) the design's current 0xDEADBEEF, recorded in the spec as the defined response; (b) zero; (c) explicitly 'don't care', in which case validation must exclude the data field from comparison for errored accesses. Any of the three is actionable; silence is not.",
+      "evidence": [
+        {
+          "addresses": [
+            "0x2c",
+            "0x30",
+            "0x34",
+            "0x38",
+            "0x3c",
+            "0x40",
+            "0x64",
+            "0x80",
+            "0xc8",
+            "0xfc",
+            "0xff"
+          ],
+          "design_returns": [
+            "0xdeadbeef"
+          ],
+          "model_returns": [
+            "0x0"
+          ],
+          "error_indication_agrees": true,
+          "example": "csr_rsp[230] value: predicted [csr_rsp.read_data addr=0x2c data=0x0 err=0x1] but observed [csr_rsp.read_data addr=0x2c data=0xdeadbeef err=0x1]"
+        }
+      ],
+      "occurrences": 11,
+      "status": "open",
+      "routing_reason": "The specification does not define this behaviour; it must say, or the item stays blocked."
+    }
+  ]
+}

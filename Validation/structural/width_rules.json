@@ -1,0 +1,140 @@
+{
+  "$comment": "Which RTL port widths the spec determines. Each rule names a dotted spec path and the ports that must equal it. This is DATA: a different design adds rules here, never edits width_conformance.py. Widths the spec does not determine are deliberately absent \u2014 inventing a rule to make a check pass would be worse than not checking.",
+  "rules": [
+    {
+      "block": "data_path",
+      "spec_path": "data_path_mapping.ddr_channel_width_bits",
+      "ports": [
+        "ddr_dq_o",
+        "ddr_dq_i"
+      ],
+      "severity": "critical",
+      "requirement": "The DDR data bus is the channel width. pack_mode 'pack_32_to_16' means each 32-bit host word is driven as two 16-bit beats, so the DQ ports are 16 bits, not 32."
+    },
+    {
+      "block": "data_path",
+      "spec_path": "data_path_mapping.host_width_bits",
+      "ports": [
+        "wr_data",
+        "rd_rsp_data"
+      ],
+      "severity": "critical",
+      "requirement": "Host-side data ports are the host word width."
+    },
+    {
+      "block": "config_regs",
+      "spec_path": "csr_register_map.address_width_bits",
+      "ports": [
+        "csr_adr_i"
+      ],
+      "severity": "critical",
+      "requirement": "The CSR address port spans exactly the register map's address space."
+    },
+    {
+      "block": "config_regs",
+      "spec_path": "csr_register_map.data_width_bits",
+      "ports": [
+        "csr_dat_i",
+        "csr_dat_o"
+      ],
+      "severity": "critical",
+      "requirement": "CSR data ports are the register map's data width."
+    },
+    {
+      "block": "addr_decoder",
+      "spec_path": "memory_geometry.row_bits",
+      "ports": [
+        "dec_row"
+      ],
+      "severity": "critical",
+      "requirement": "The decoded row field spans the device's row address."
+    },
+    {
+      "block": "addr_decoder",
+      "spec_path": "memory_geometry.bank_bits",
+      "ports": [
+        "dec_bank"
+      ],
+      "severity": "critical",
+      "requirement": "The decoded bank field spans the device's bank count."
+    },
+    {
+      "block": "addr_decoder",
+      "spec_path": "memory_geometry.column_bits",
+      "ports": [
+        "dec_col"
+      ],
+      "severity": "critical",
+      "requirement": "The decoded column field spans the device's column address."
+    },
+    {
+      "block": "cmd_gen",
+      "spec_path": "memory_geometry.row_bits",
+      "ports": [
+        "ddr_addr",
+        "sched_row"
+      ],
+      "severity": "critical",
+      "requirement": "The DDR address bus carries a row address."
+    },
+    {
+      "block": "cmd_gen",
+      "spec_path": "memory_geometry.bank_bits",
+      "ports": [
+        "ddr_bank",
+        "sched_bank"
+      ],
+      "severity": "critical",
+      "requirement": "The DDR bank field spans the device's bank count."
+    },
+    {
+      "block": "bank_tracker",
+      "spec_path": "memory_geometry.bank_bits",
+      "ports": [
+        "cmd_act_bank",
+        "cmd_pre_bank",
+        "cmd_rd_bank",
+        "cmd_wr_bank"
+      ],
+      "severity": "critical",
+      "requirement": "Bank selectors span the device's bank count."
+    },
+    {
+      "block": "cmd_queue",
+      "spec_path": "memory_geometry.row_bits",
+      "ports": [
+        "enq_row"
+      ],
+      "severity": "major",
+      "requirement": "Queued row addresses span the device's row address."
+    },
+    {
+      "block": "cmd_queue",
+      "spec_path": "memory_geometry.column_bits",
+      "ports": [
+        "enq_col"
+      ],
+      "severity": "major",
+      "requirement": "Queued column addresses span the device's column address."
+    },
+    {
+      "block": "scheduler",
+      "spec_path": "memory_geometry.row_bits",
+      "ports": [
+        "cmd_row"
+      ],
+      "severity": "major",
+      "requirement": "Scheduled row addresses span the device's row address."
+    },
+    {
+      "block": "wb_port",
+      "spec_path": "host_interface.data_width_bits",
+      "ports": [
+        "wb_dat_i",
+        "wb_dat_o"
+      ],
+      "severity": "critical",
+      "requirement": "Host bus data ports are the host interface data width."
+    }
+  ]
+}

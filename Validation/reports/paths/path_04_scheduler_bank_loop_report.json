@@ -1,0 +1,36 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_04_scheduler_bank_loop",
+  "strategy": "invariant",
+  "verdict": "fail",
+  "timestamp": "2026-09-17T11:38:00.638463",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_04_scheduler_bank_loop_seed1.json",
+  "stages": [
+    {
+      "stage": "(path-level)",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_04_scheduler_bank_loop_checker.py",
+      "scope": "path_04_scheduler_bank_loop",
+      "verdict": "fail",
+      "summary": "scope=path_04_scheduler_bank_loop  strategy=invariant  status=fail  violations=2",
+      "detail": [
+        "scope=path_04_scheduler_bank_loop  strategy=invariant  status=fail  violations=2",
+        "  PROTO_002: ACTIVATE to bank 0 which already has active row 0 @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x3]",
+        "  PROTO_002: ACTIVATE to bank 0 which already has active row 0 @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x3]"
+      ]
+    }
+  ],
+  "log": "Validation/reports/paths/path_04_scheduler_bank_loop_sim.log",
+  "observed_trace": "Validation/reports/paths/path_04_scheduler_bank_loop_observed.jsonl"
+}

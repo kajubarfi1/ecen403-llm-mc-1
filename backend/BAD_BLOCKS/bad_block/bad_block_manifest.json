@@ -1,0 +1,47 @@
+{
+  "module_name": "good_block",
+  "file": "bad_block.sv",
+  "phase": 1,
+  "agent": "test_agent",
+  "spec_version": "2.0.0",
+  "design_id": "ddr3_mc_test_invalid",
+  "parameters": {
+    "DATA_W": 8
+  },
+  "ports": {
+    "clock_reset": [
+      {
+        "name": "clk",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "rst_n",
+        "width": 1,
+        "dir": "input"
+      }
+    ],
+    "data": [
+      {
+        "name": "data_in",
+        "width": 8,
+        "dir": "input"
+      },
+      {
+        "name": "data_out",
+        "width": 8,
+        "dir": "input"
+      },
+      {
+        "name": "valid_out",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "missing_port",
+        "width": 4,
+        "dir": "output"
+      }
+    ]
+  }
+}

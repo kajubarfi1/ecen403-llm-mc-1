@@ -1,0 +1,475 @@
+{
+  "$schema": "validation-closure-experiment/1",
+  "generated_utc": "2026-09-03T18:24:38.212431+00:00",
+  "scope": "cmd_gen",
+  "iterations_budget": 5,
+  "design": "Both arms use the same harness, driver codegen, assertions, covergroups and rollup. The only difference is whether the stimulus generator reads the coverage rollup before producing a sequence.",
+  "arms": {
+    "agent": [
+      [
+        {
+          "iteration": 1,
+          "covtest": "agent_r1_it1",
+          "sequence": "timing_constraint_exercise",
+          "targets": [
+            "VP_FAIL_001",
+            "VP_FAIL_002",
+            "VP_FAIL_003",
+            "VP_FAIL_004",
+            "VP_FAIL_005",
+            "VP_FAIL_006",
+            "VP_FAIL_007",
+            "VP_FAIL_008",
+            "VP_FAIL_009",
+            "VP_FAIL_010",
+            "VP_FAIL_011",
+            "VP_FAIL_012"
+          ],
+          "bins_hit": 22,
+          "bins_total": 33,
+          "new_bins": 22,
+          "coverpoints_at_100": 11,
+          "percent": 66.67
+        },
+        {
+          "iteration": 2,
+          "covtest": "agent_r1_it2",
+          "sequence": "timing_boundary_sweep",
+          "targets": [
+            "VP_TIME_001",
+            "VP_TIME_002",
+            "VP_TIME_003",
+            "VP_TIME_004",
+            "VP_TIME_005",
+            "VP_TIME_007",
+            "VP_TIME_008",
+            "VP_TIME_009",
+            "VP_TIME_010",
+            "VP_TIME_011",
+            "VP_TIME_012",
+            "VP_FAIL_012"
+          ],
+          "bins_hit": 28,
+          "bins_total": 33,
+          "new_bins": 6,
+          "coverpoints_at_100": 17,
+          "percent": 84.85
+        },
+        {
+          "iteration": 3,
+          "covtest": "agent_r1_it3",
+          "sequence": "timing_boundary_stress",
+          "targets": [
+            "VP_TIME_001",
+            "VP_TIME_002",
+            "VP_TIME_003",
+            "VP_TIME_009",
+            "VP_TIME_011"
+          ],
+          "bins_hit": 30,
+          "bins_total": 33,
+          "new_bins": 2,
+          "coverpoints_at_100": 19,
+          "percent": 90.91
+        },
+        {
+          "iteration": 4,
+          "covtest": "agent_r1_it4",
+          "sequence": "timing_boundary_tccd_tfaw_trrd",
+          "targets": [
+            "VP_TIME_001",
+            "VP_TIME_002",
+            "VP_TIME_009"
+          ],
+          "bins_hit": 30,
+          "bins_total": 33,
+          "new_bins": 0,
+          "coverpoints_at_100": 19,
+          "percent": 90.91
+        },
+        {
+          "iteration": 5,
+          "covtest": "agent_r1_it5",
+          "sequence": "timing_boundary_tccd_tfaw_trrd",
+          "targets": [
+            "VP_TIME_001",
+            "VP_TIME_002",
+            "VP_TIME_009"
+          ],
+          "bins_hit": 30,
+          "bins_total": 33,
+          "new_bins": 0,
+          "coverpoints_at_100": 19,
+          "percent": 90.91
+        }
+      ],
+      [
+        {
+          "iteration": 1,
+          "covtest": "agent_r2_it1",
+          "sequence": "timing_constraint_exercise",
+          "targets": [
+            "VP_FAIL_001",
+            "VP_FAIL_002",
+            "VP_FAIL_003",
+            "VP_FAIL_004",
+            "VP_FAIL_005",
+            "VP_FAIL_006",
+            "VP_FAIL_007",
+            "VP_FAIL_008",
+            "VP_FAIL_009",
+            "VP_FAIL_010",
+            "VP_FAIL_011",
+            "VP_FAIL_012"
+          ],
+          "bins_hit": 22,
+          "bins_total": 33,
+          "new_bins": 22,
+          "coverpoints_at_100": 11,
+          "percent": 66.67
+        },
+        {
+          "iteration": 2,
+          "covtest": "agent_r2_it2",
+          "sequence": "timing_boundary_sweep",
+          "targets": [
+            "VP_TIME_001",
+            "VP_TIME_002",
+            "VP_TIME_003",
+            "VP_TIME_004",
+            "VP_TIME_005",
+            "VP_TIME_007",
+            "VP_TIME_008",
+            "VP_TIME_009",
+            "VP_TIME_010",
+            "VP_TIME_011",
+            "VP_TIME_012",
+            "VP_FAIL_012"
+          ],
+          "bins_hit": 28,
+          "bins_total": 33,
+          "new_bins": 6,
+          "coverpoints_at_100": 17,
+          "percent": 84.85
+        },
+        {
+          "iteration": 3,
+          "covtest": "agent_r2_it3",
+          "sequence": "timing_boundary_stress",
+          "targets": [
+            "VP_TIME_001",
+            "VP_TIME_002",
+            "VP_TIME_003",
+            "VP_TIME_009",
+            "VP_TIME_011"
+          ],
+          "bins_hit": 30,
+          "bins_total": 33,
+          "new_bins": 2,
+          "coverpoints_at_100": 19,
+          "percent": 90.91
+        },
+        {
+          "iteration": 4,
+          "covtest": "agent_r2_it4",
+          "sequence": "timing_boundary_tccd_tfaw_trrd",
+          "targets": [
+            "VP_TIME_001",
+            "VP_TIME_002",
+            "VP_TIME_009"
+          ],
+          "bins_hit": 30,
+          "bins_total": 33,
+          "new_bins": 0,
+          "coverpoints_at_100": 19,
+          "percent": 90.91
+        },
+        {
+          "iteration": 5,
+          "covtest": "agent_r2_it5",
+          "sequence": "timing_boundary_tccd_tfaw_trrd",
+          "targets": [
+            "VP_TIME_001",
+            "VP_TIME_002",
+            "VP_TIME_009"
+          ],
+          "bins_hit": 30,
+          "bins_total": 33,
+          "new_bins": 0,
+          "coverpoints_at_100": 19,
+          "percent": 90.91
+        }
+      ],
+      [
+        {
+          "iteration": 1,
+          "covtest": "agent_r3_it1",
+          "sequence": "timing_constraint_exercise",
+          "targets": [
+            "VP_FAIL_001",
+            "VP_FAIL_002",
+            "VP_FAIL_003",
+            "VP_FAIL_004",
+            "VP_FAIL_005",
+            "VP_FAIL_006",
+            "VP_FAIL_007",
+            "VP_FAIL_008",
+            "VP_FAIL_009",
+            "VP_FAIL_010",
+            "VP_FAIL_011",
+            "VP_FAIL_012"
+          ],
+          "bins_hit": 22,
+          "bins_total": 33,
+          "new_bins": 22,
+          "coverpoints_at_100": 11,
+          "percent": 66.67
+        },
+        {
+          "iteration": 2,
+          "covtest": "agent_r3_it2",
+          "sequence": "timing_boundary_sweep",
+          "targets": [
+            "VP_TIME_001",
+            "VP_TIME_002",
+            "VP_TIME_003",
+            "VP_TIME_004",
+            "VP_TIME_005",
+            "VP_TIME_007",
+            "VP_TIME_008",
+            "VP_TIME_009",
+            "VP_TIME_010",
+            "VP_TIME_011",
+            "VP_TIME_012",
+            "VP_FAIL_012"
+          ],
+          "bins_hit": 28,
+          "bins_total": 33,
+          "new_bins": 6,
+          "coverpoints_at_100": 17,
+          "percent": 84.85
+        },
+        {
+          "iteration": 3,
+          "covtest": "agent_r3_it3",
+          "sequence": "timing_boundary_stress",
+          "targets": [
+            "VP_TIME_001",
+            "VP_TIME_002",
+            "VP_TIME_003",
+            "VP_TIME_009",
+            "VP_TIME_011"
+          ],
+          "bins_hit": 30,
+          "bins_total": 33,
+          "new_bins": 2,
+          "coverpoints_at_100": 19,
+          "percent": 90.91
+        },
+        {
+          "iteration": 4,
+          "covtest": "agent_r3_it4",
+          "sequence": "timing_boundary_tccd_tfaw_trrd",
+          "targets": [
+            "VP_TIME_001",
+            "VP_TIME_002",
+            "VP_TIME_009"
+          ],
+          "bins_hit": 30,
+          "bins_total": 33,
+          "new_bins": 0,
+          "coverpoints_at_100": 19,
+          "percent": 90.91
+        },
+        {
+          "iteration": 5,
+          "covtest": "agent_r3_it5",
+          "sequence": "timing_boundary_tccd_tfaw_trrd",
+          "targets": [
+            "VP_TIME_001",
+            "VP_TIME_002",
+            "VP_TIME_009"
+          ],
+          "bins_hit": 30,
+          "bins_total": 33,
+          "new_bins": 0,
+          "coverpoints_at_100": 19,
+          "percent": 90.91
+        }
+      ]
+    ],
+    "control": [
+      [
+        {
+          "iteration": 1,
+          "covtest": "control_r1_it1",
+          "sequence": "random_seed1001",
+          "targets": [],
+          "bins_hit": 12,
+          "bins_total": 33,
+          "new_bins": 12,
+          "coverpoints_at_100": 8,
+          "percent": 36.36
+        },
+        {
+          "iteration": 2,
+          "covtest": "control_r1_it2",
+          "sequence": "random_seed1002",
+          "targets": [],
+          "bins_hit": 19,
+          "bins_total": 33,
+          "new_bins": 7,
+          "coverpoints_at_100": 11,
+          "percent": 57.58
+        },
+        {
+          "iteration": 3,
+          "covtest": "control_r1_it3",
+          "sequence": "random_seed1003",
+          "targets": [],
+          "bins_hit": 22,
+          "bins_total": 33,
+          "new_bins": 3,
+          "coverpoints_at_100": 11,
+          "percent": 66.67
+        },
+        {
+          "iteration": 4,
+          "covtest": "control_r1_it4",
+          "sequence": "random_seed1004",
+          "targets": [],
+          "bins_hit": 22,
+          "bins_total": 33,
+          "new_bins": 0,
+          "coverpoints_at_100": 11,
+          "percent": 66.67
+        },
+        {
+          "iteration": 5,
+          "covtest": "control_r1_it5",
+          "sequence": "random_seed1005",
+          "targets": [],
+          "bins_hit": 22,
+          "bins_total": 33,
+          "new_bins": 0,
+          "coverpoints_at_100": 11,
+          "percent": 66.67
+        }
+      ],
+      [
+        {
+          "iteration": 1,
+          "covtest": "control_r2_it1",
+          "sequence": "random_seed2001",
+          "targets": [],
+          "bins_hit": 15,
+          "bins_total": 33,
+          "new_bins": 15,
+          "coverpoints_at_100": 11,
+          "percent": 45.45
+        },
+        {
+          "iteration": 2,
+          "covtest": "control_r2_it2",
+          "sequence": "random_seed2002",
+          "targets": [],
+          "bins_hit": 22,
+          "bins_total": 33,
+          "new_bins": 7,
+          "coverpoints_at_100": 11,
+          "percent": 66.67
+        },
+        {
+          "iteration": 3,
+          "covtest": "control_r2_it3",
+          "sequence": "random_seed2003",
+          "targets": [],
+          "bins_hit": 23,
+          "bins_total": 33,
+          "new_bins": 1,
+          "coverpoints_at_100": 12,
+          "percent": 69.7
+        },
+        {
+          "iteration": 4,
+          "covtest": "control_r2_it4",
+          "sequence": "random_seed2004",
+          "targets": [],
+          "bins_hit": 24,
+          "bins_total": 33,
+          "new_bins": 1,
+          "coverpoints_at_100": 13,
+          "percent": 72.73
+        },
+        {
+          "iteration": 5,
+          "covtest": "control_r2_it5",
+          "sequence": "random_seed2005",
+          "targets": [],
+          "bins_hit": 24,
+          "bins_total": 33,
+          "new_bins": 0,
+          "coverpoints_at_100": 13,
+          "percent": 72.73
+        }
+      ],
+      [
+        {
+          "iteration": 1,
+          "covtest": "control_r3_it1",
+          "sequence": "random_seed3001",
+          "targets": [],
+          "bins_hit": 14,
+          "bins_total": 33,
+          "new_bins": 14,
+          "coverpoints_at_100": 11,
+          "percent": 42.42
+        },
+        {
+          "iteration": 2,
+          "covtest": "control_r3_it2",
+          "sequence": "random_seed3002",
+          "targets": [],
+          "bins_hit": 20,
+          "bins_total": 33,
+          "new_bins": 6,
+          "coverpoints_at_100": 11,
+          "percent": 60.61
+        },
+        {
+          "iteration": 3,
+          "covtest": "control_r3_it3",
+          "sequence": "random_seed3003",
+          "targets": [],
+          "bins_hit": 21,
+          "bins_total": 33,
+          "new_bins": 1,
+          "coverpoints_at_100": 11,
+          "percent": 63.64
+        },
+        {
+          "iteration": 4,
+          "covtest": "control_r3_it4",
+          "sequence": "random_seed3004",
+          "targets": [],
+          "bins_hit": 21,
+          "bins_total": 33,
+          "new_bins": 0,
+          "coverpoints_at_100": 11,
+          "percent": 63.64
+        },
+        {
+          "iteration": 5,
+          "covtest": "control_r3_it5",
+          "sequence": "random_seed3005",
+          "targets": [],
+          "bins_hit": 22,
+          "bins_total": 33,
+          "new_bins": 1,
+          "coverpoints_at_100": 11,
+          "percent": 66.67
+        }
+      ]
+    ]
+  }
+}

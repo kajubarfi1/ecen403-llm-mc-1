@@ -1,0 +1,45 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_19_row_conflict",
+  "strategy": "invariant",
+  "verdict": "fail",
+  "timestamp": "2026-09-17T11:38:04.914924",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_19_row_conflict_seed1.json",
+  "stages": [
+    {
+      "stage": "(path-level)",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_19_row_conflict_checker.py",
+      "scope": "path_19_row_conflict",
+      "verdict": "fail",
+      "summary": "scope=path_19_row_conflict  strategy=invariant  status=fail  violations=172",
+      "detail": [
+        "  spurious_cas: WR to bank 0 has no matching enqueued request @ [ddr_cmd.command addr=0x18 bank=0x0 cmd=0x4]",
+        "  spurious_cas: WR to bank 0 has no matching enqueued request @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x4]",
+        "  spurious_cas: WR to bank 0 has no matching enqueued request @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x4]",
+        "  spurious_cas: WR to bank 0 has no matching enqueued request @ [ddr_cmd.command addr=0x18 bank=0x0 cmd=0x4]",
+        "  spurious_cas: WR to bank 0 has no matching enqueued request @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x4]",
+        "  spurious_cas: WR to bank 0 has no matching enqueued request @ [ddr_cmd.command addr=0x18 bank=0x0 cmd=0x4]",
+        "  spurious_cas: WR to bank 0 has no matching enqueued request @ [ddr_cmd.command addr=0x8 bank=0x0 cmd=0x4]",
+        "  spurious_cas: WR to bank 0 has no matching enqueued request @ [ddr_cmd.command addr=0x8 bank=0x0 cmd=0x4]",
+        "  spurious_cas: WR to bank 0 has no matching enqueued request @ [ddr_cmd.command addr=0x10 bank=0x0 cmd=0x4]",
+        "  spurious_cas: WR to bank 0 has no matching enqueued request @ [ddr_cmd.command addr=0x18 bank=0x0 cmd=0x4]",
+        "  spurious_cas: WR to bank 0 has no matching enqueued request @ [ddr_cmd.command addr=0x8 bank=0x0 cmd=0x4]",
+        "  spurious_cas: WR to bank 0 has no matching enqueued request @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x4]"
+      ]
+    }
+  ],
+  "log": "Validation/reports/paths/path_19_row_conflict_sim.log",
+  "observed_trace": "Validation/reports/paths/path_19_row_conflict_observed.jsonl"
+}

@@ -1,0 +1,28 @@
+{
+  "scope": "wb_port",
+  "strategy": "exact",
+  "generated_utc": "2026-09-03T18:43:52.921316+00:00",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "model": "claude-opus-4-6",
+  "accepted_by_gate": "bus_bridge",
+  "attempts": [
+    {
+      "attempt": 1,
+      "failures": 1,
+      "gate": "bus_bridge"
+    },
+    {
+      "attempt": 2,
+      "failures": 0,
+      "gate": "bus_bridge"
+    }
+  ],
+  "input_ifaces": [
+    "wb"
+  ],
+  "output_ifaces": [
+    "req",
+    "wb_rsp"
+  ],
+  "note": "Generated from the spec and transaction schemas only; no RTL was supplied to the model. Accepted by a gate whose expectations are composed from the same spec by code the model never saw."
+}

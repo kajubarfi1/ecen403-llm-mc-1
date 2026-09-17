@@ -1,0 +1,26 @@
+{
+  "$schema": "validation-findings/1",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "finding_count": 1,
+  "findings": [
+    {
+      "source": "validation",
+      "target": "spec",
+      "kind": "spec_gap",
+      "scope": "data_path_mapping",
+      "severity": "minor",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "Byte-enable semantics underspecified: DDR-side DM polarity and read-request mask",
+      "detail": "data_path_mapping.byte_enable_semantics says 'wishbone_sel_per_byte' for the host side and nothing else. Two questions the spec must answer: (1) DDR-side DM polarity \u2014 the design drives ddr_dm_o = ~sel (JEDEC DDR3 DM=1 masks a byte), while a spec-derived model carries sel through unchanged; both are defensible readings of a silent spec. (2) What byte-enable accompanies a READ request internally \u2014 observed req.mask is 0 on reads (wb_sel_i not driven), a spec-derived model predicts full enables. Until the spec states both, mask comparisons on ddr_wr_beat and on read req transactions assert requirements the spec never makes; a waiver is PROPOSED for those two field comparisons and awaits owner approval (waivers require a named approver \u2014 none added unilaterally).",
+      "evidence": {
+        "rtl": "data_path.sv 'ddr_dm_o = ~wr_msk_r  // DM active-high masks'",
+        "observed": "req.mask=0x0 on reads; predicted 0xf",
+        "proposed_waivers": [
+          "ddr_wr_beat.mask when write",
+          "req.mask when we=0"
+        ]
+      },
+      "status": "open"
+    }
+  ]
+}

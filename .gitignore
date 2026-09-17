@@ -1,6 +1,39 @@
 .env
+*.env
+setup.env
+!*.env.example
 .venv/
 backend/workspace/
 **/_pycache_/
 *.pyc
 lint.out
+
+.DS_Store
+**/.DS_Store
+
+# ---- backend (DDR3 physical-design subsystem) ----
+# Secrets. The repo is public; the backend .env holds an ANTHROPIC_API_KEY.
+.env
+*.env
+!env.template
+
+# Virtualenvs (the existing .venv/ rule does not match a plain venv/)
+venv/
+backend/agents/venv/
+
+# Correct spelling of the bytecode rule above
+__pycache__/
+
+# Pipeline output: ~500 MB of regenerated artifacts per full run.
+pipeline_out/
+backend/pipeline_out/
+backend/agents/pipeline_out/
+
+# Large generated layout/verification artifacts. Regenerate with pipeline_batch.py;
+# the committed evidence logs under backend/signoff/ record every result.
+*.lvsdb
+*.gds
+*.def
+*.odb
+*.spef
+*.cir

@@ -1,0 +1,37 @@
+{
+  "scope": "scheduler",
+  "strategy": "invariant",
+  "generated_utc": "2026-09-10T16:52:00.655733+00:00",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "model": "claude-opus-4-6",
+  "accepted_by_gate": "stage_invariant",
+  "attempts": [
+    {
+      "attempt": 1,
+      "failures": 1,
+      "gate": "stage_invariant"
+    },
+    {
+      "attempt": 2,
+      "failures": 1,
+      "gate": "stage_invariant"
+    },
+    {
+      "attempt": 3,
+      "failures": 1,
+      "gate": "stage_invariant"
+    },
+    {
+      "attempt": 4,
+      "failures": 0,
+      "gate": "stage_invariant"
+    }
+  ],
+  "input_ifaces": [
+    "refresh_req"
+  ],
+  "output_ifaces": [
+    "sched_cmd"
+  ],
+  "note": "Generated from the spec and transaction schemas only; no RTL was supplied to the model. Accepted by a gate whose expectations are composed from the same spec by code the model never saw."
+}

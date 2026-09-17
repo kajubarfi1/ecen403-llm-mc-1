@@ -1,0 +1,34 @@
+{
+  "$schema": "validation-findings/1",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "finding_count": 1,
+  "findings": [
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "rtl_bug",
+      "scope": "cmd_queue+scheduler",
+      "severity": "critical",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "Scheduler re-selects a granted slot during the one-cycle dequeue window (confirmed at source)",
+      "detail": "CONFIRMED BY SOURCE INSPECTION, cycle-accurate: scheduler.sv's FR-FCFS selection is purely combinational over q_valid and carries no mask for the slot granted on the previous cycle; deq_grant is registered (one-cycle pulse), and cmd_queue.sv clears mem_valid[deq_idx] one cycle after the grant. During that cycle the still-valid slot is re-selected, issuing every CAS twice (observed: 29 grants for 19 enqueues; duplicate WR/RD flagged as SCHED_002 by the invariant checker). The ACT path is worse: bank state feedback routes through cmd_gen's REGISTERED fb pulses, so is_act_needed lags selection by two cycles and the scheduler repeats ACTIVATE to the same bank without PRECHARGE (PROTO_002). Fix is internal to the scheduler: mask the just-granted slot (and in-flight ACT targets) from selection, or make the dequeue clear same-cycle. Independently corroborated by wb_port's own embedded assertions (p_tag, p_stall_hold) firing in the same runs.",
+      "evidence": {
+        "run": "Validation/reports/paths/path_01_write_cmd_report.json",
+        "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+        "enqueues_accepted": 19,
+        "deq_grants": 29,
+        "violations": 12,
+        "taxonomy_ids": [
+          "SCHED_002",
+          "PROTO_002"
+        ],
+        "source_refs": [
+          "scheduler.sv: always_comb selection over q_valid, no granted-slot mask",
+          "scheduler.sv: deq_grant <= 1'b1 registered, defaulted 0 each cycle",
+          "cmd_queue.sv: if (deq_grant && mem_valid[deq_idx]) mem_valid[deq_idx] <= 1'b0  (one cycle later)"
+        ]
+      },
+      "status": "open"
+    }
+  ]
+}
