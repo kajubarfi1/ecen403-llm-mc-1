@@ -1,0 +1,45 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_17_full_boot",
+  "strategy": "composed",
+  "verdict": "pass",
+  "timestamp": "2026-09-17T12:17:00.100079",
+  "blocks": [
+    "calibration",
+    "config_regs",
+    "init_fsm"
+  ],
+  "sequence": "Validation/sequences/generated/path_17_full_boot_seed1.json",
+  "stimulus_generator": "status_poll",
+  "autonomous": false,
+  "window_cycles": 64,
+  "stages": [
+    {
+      "stage": "init_fsm",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "init_fsm",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA"
+    },
+    {
+      "stage": "calibration",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "calibration",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA"
+    },
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "pass",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=180/180  (180 output transaction(s) matched)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/paths/path_17_full_boot_sim.log",
+  "observed_trace": "Validation/reports/paths/path_17_full_boot_observed.jsonl"
+}

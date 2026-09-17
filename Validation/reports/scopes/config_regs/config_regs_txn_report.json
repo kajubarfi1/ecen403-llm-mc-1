@@ -1,0 +1,23 @@
+{
+  "$schema": "validation-txn-run/1",
+  "scope": "config_regs",
+  "pipeline": "transaction",
+  "verdict": "pass",
+  "timestamp": "2026-09-17T11:35:23.838840",
+  "rtl": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+  "sequence": "Validation/sequences/generated/config_regs_register_walk.json",
+  "model": "Validation/predictors/config_regs_predictor.py",
+  "monitored_ifaces": [
+    "cfg_refresh",
+    "cfg_timing",
+    "csr",
+    "csr_rsp",
+    "csr_sts",
+    "csr_sts_level"
+  ],
+  "coverage": true,
+  "log": "Validation/scopes/config_regs/reports/config_regs_txn_sim.log",
+  "observed_trace": "Validation/scopes/config_regs/reports/config_regs_txn_observed.jsonl",
+  "findings": "Validation/scopes/config_regs/reports/config_regs_txn_findings.json",
+  "note": "Verdict comes from the offline scoreboard against the gate-accepted model; the testbench itself checks nothing. This replaces the legacy vector-diff flow, whose 176 config_regs 'failures' were artifacts of active-region sampling and latency assumptions."
+}

@@ -1,0 +1,85 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_02_read_cmd",
+  "strategy": "composed",
+  "verdict": "fail",
+  "timestamp": "2026-09-17T11:37:55.399408",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_02_read_cmd_seed1.json",
+  "stages": [
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "fail",
+      "summary": "scope=wb_port  strategy=exact  status=fail  matched=251/1108  missing=272 value=585  violations=272",
+      "detail": [
+        "  x_value: wb_rsp.read_data seq=474 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x36 data=None]",
+        "  x_value: wb_rsp.read_data seq=478 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x36 data=None]",
+        "  x_value: wb_rsp.read_data seq=510 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x1c data=None]",
+        "  x_value: wb_rsp.read_data seq=514 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x1c data=None]",
+        "  x_value: wb_rsp.read_data seq=538 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x1c data=None]",
+        "  x_value: wb_rsp.read_data seq=542 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x1d data=None]",
+        "  x_value: wb_rsp.read_data seq=568 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x1c data=None]",
+        "  x_value: wb_rsp.read_data seq=574 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x1c data=None]",
+        "  x_value: wb_rsp.read_data seq=862 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x32 data=None]",
+        "  x_value: wb_rsp.read_data seq=866 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x32 data=None]",
+        "  x_value: wb_rsp.read_data seq=890 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x32 data=None]",
+        "  x_value: wb_rsp.read_data seq=894 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x32 data=None]"
+      ]
+    },
+    {
+      "stage": "addr_decoder",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
+      "scope": "addr_decoder",
+      "verdict": "pass",
+      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=554/554  (554 output transaction(s) matched)",
+      "detail": []
+    },
+    {
+      "stage": "cmd_queue+scheduler",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
+      "scope": "cmd_queue_scheduler",
+      "verdict": "fail",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=279",
+      "detail": [
+        "  SCHED_002: RD to bank=0 col=24 matches no enqueued request @ [sched_cmd.command aux=0x1 bank=0x0 col=0x18 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002: RD to bank=0 col=24 matches no enqueued request @ [sched_cmd.command aux=0x3 bank=0x0 col=0x18 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002: RD to bank=0 col=24 matches no enqueued request @ [sched_cmd.command aux=0x4 bank=0x0 col=0x18 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002: RD to bank=0 col=24 matches no enqueued request @ [sched_cmd.command aux=0x4 bank=0x0 col=0x18 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002: RD to bank=0 col=8 matches no enqueued request @ [sched_cmd.command aux=0x8 bank=0x0 col=0x8 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002: RD to bank=0 col=8 matches no enqueued request @ [sched_cmd.command aux=0xb bank=0x0 col=0x8 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002: RD to bank=0 col=8 matches no enqueued request @ [sched_cmd.command aux=0x9 bank=0x0 col=0x8 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002: RD to bank=0 col=8 matches no enqueued request @ [sched_cmd.command aux=0xd bank=0x0 col=0x8 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002: RD to bank=0 col=0 matches no enqueued request @ [sched_cmd.command aux=0x1 bank=0x0 col=0x0 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002: RD to bank=0 col=24 matches no enqueued request @ [sched_cmd.command aux=0x1 bank=0x0 col=0x18 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002: RD to bank=0 col=24 matches no enqueued request @ [sched_cmd.command aux=0x5 bank=0x0 col=0x18 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002: RD to bank=0 col=24 matches no enqueued request @ [sched_cmd.command aux=0x2 bank=0x0 col=0x18 row=0x0 type=0x2 we=0x0]"
+      ]
+    },
+    {
+      "stage": "cmd_gen",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
+      "scope": "cmd_gen",
+      "verdict": "pass",
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=836/836  (836 output transaction(s) matched)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/paths/path_02_read_cmd_sim.log",
+  "observed_trace": "Validation/reports/paths/path_02_read_cmd_observed.jsonl"
+}

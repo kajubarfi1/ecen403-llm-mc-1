@@ -17,6 +17,7 @@ Usage (validation flow):
 
 import paramiko
 import getpass
+import socket
 import time
 import os
 import re
@@ -34,24 +35,65 @@ SSH_CONFIG = {
 }
 
 SLURM_CONFIG = {
-    "partition": "adademic",          
+    # NOT a typo — "adademic" is the real partition name on Olympus, however
+    # it looks. Proven by working runs: sim logs show `srun: job 322215 has
+    # been allocated resources` and real Xcelium output from n01-zeus /
+    # n03-poseidon with this exact value.
+    #
+    # Frontend/Agents/cadence_ssh_agent.py has "academic" with a comment
+    # claiming it fixes a typo. That copy is wrong; "corrections" here have
+    # broken every srun (empty stdout, no allocation). Do not change this
+    # without a successful srun to back it up.
+    "partition": "adademic",
     "qos": "olympus-academic",
     "cpus_per_task": 1,
     "job_name": "ecen-454-agent",
 }
 
+# NOTE: the Cadence tree is mounted on COMPUTE nodes only, not the Slurm head
+# node. Anything that needs xrun/imc must go through srun(); a bare
+# _head_exec() will report the tools as missing when they are simply not
+# visible from there.
+#
+# VMANAGER supplies imc, the coverage merge/report tool. It was previously
+# absent from PATH, which made `which imc` fail and looked like a missing
+# install — it is present at /opt/coe/cadence/VMANAGER/tools.lnx86/bin/imc.
+VMANAGER_ROOT = "/opt/coe/cadence/VMANAGER"
+
 CADENCE_ENV = (
     "export DISPLAY='' && "
     "source /opt/coe/ncsu/ncsu-cdk-1.6.0.beta/ncsu.sh 2>/dev/null && "
     "export PATH=/opt/coe/cadence/XCELIUM240/tools/bin:"
-    "/opt/coe/cadence/XCELIUM240/tools.lnx86/bin:$PATH"
+    "/opt/coe/cadence/XCELIUM240/tools.lnx86/bin:"
+    f"{VMANAGER_ROOT}/tools.lnx86/bin:"
+    f"{VMANAGER_ROOT}/bin:$PATH"
 )
 
 
 
+# =============================================================================
+# Result parsing
+# =============================================================================
+# Pure function: no SSH, no filesystem, no simulator. Unit-testable by feeding
+# it recorded xrun logs.
+#
+# THE CONTRACT: a run is reported "pass" only when ALL of the following hold:
+#   1. the testbench emitted a summary this parser recognised,
+#   2. that summary reports zero failures,
+#   3. no assertion fired, no mismatch was printed, no watchdog tripped.
+# Every other outcome is compile_error / timeout / fail / unknown / error.
+# "unknown" is NEVER upgraded to "pass" — an unparseable run is a harness
+# failure, not a passing design.
+
+
 class CadenceSSHAgent:
 
-    def __init__(self, ssh_config=SSH_CONFIG, slurm_config=SLURM_CONFIG):
+    def __init__(self, ssh_config=SSH_CONFIG, slurm_config=SLURM_CONFIG,
+                 work_subdir=None):
+        # work_subdir gives a run its OWN remote directory. Two runs sharing
+        # cadence_agent_work clobber each other's worklib (xmelab DLPKFL,
+        # "failed to flush library worklib") the moment they overlap.
+        self.work_subdir = work_subdir
         self.ssh = ssh_config
         self.slurm = slurm_config
         self.client = paramiko.SSHClient()
@@ -81,6 +123,8 @@ class CadenceSSHAgent:
         result = self._head_exec("echo $HOME")
         home = result["stdout"].strip() or f"/home/{self.ssh['username']}"
         self.work_dir = f"{home}/cadence_agent_work"
+        if self.work_subdir:
+            self.work_dir += f"/{self.work_subdir}"
         self._head_exec(f"mkdir -p {self.work_dir}")
 
     def disconnect(self):
@@ -90,14 +134,42 @@ class CadenceSSHAgent:
 
     # --- Command execution ---
 
-    def _head_exec(self, cmd, timeout=30):
-        stdin, stdout, stderr = self.client.exec_command(cmd, timeout=timeout)
-        exit_code = stdout.channel.recv_exit_status()
-        return {
-            "stdout": stdout.read().decode("utf-8").strip(),
-            "stderr": stderr.read().decode("utf-8").strip(),
-            "exit_code": exit_code,
-        }
+    def _head_exec(self, cmd, timeout=120):
+        """Run a command on the head node and return stdout/stderr/exit_code.
+
+        Drains both streams BEFORE asking for the exit status: paramiko's
+        channel window is finite (~2 MB), so a process that fills it while we
+        block in recv_exit_status() stalls on write, never exits, and hangs us
+        forever. xrun output on an elaborated design exceeds that routinely.
+
+        Draining first has a consequence worth knowing: it makes `timeout`
+        real. recv_exit_status() waits on an event and ignores the channel
+        timeout, so the previous ordering let arbitrarily long commands finish
+        regardless of what timeout said. read() honours it, so a command that
+        outlives `timeout` now raises instead of silently succeeding. That is
+        the correct behaviour, but it must not crash the caller — a timeout is
+        returned as a normal result with timed_out=True and exit_code -1.
+        Callers running slow commands should pass a larger timeout explicitly.
+        """
+        try:
+            stdin, stdout, stderr = self.client.exec_command(cmd, timeout=timeout)
+            out = stdout.read().decode("utf-8", errors="replace").strip()
+            err = stderr.read().decode("utf-8", errors="replace").strip()
+            exit_code = stdout.channel.recv_exit_status()
+            return {
+                "stdout": out,
+                "stderr": err,
+                "exit_code": exit_code,
+                "timed_out": False,
+            }
+        except (socket.timeout, paramiko.buffered_pipe.PipeTimeout):
+            return {
+                "stdout": "",
+                "stderr": (f"command exceeded the {timeout}s channel timeout "
+                           f"and was abandoned: {cmd[:120]}"),
+                "exit_code": -1,
+                "timed_out": True,
+            }
 
     def srun(self, cmd, timeout=300):
         srun_cmd = (
@@ -111,8 +183,15 @@ class CadenceSSHAgent:
         return self._head_exec(srun_cmd, timeout=timeout)
 
     def run_sim(self, command, timeout=300):
-        """Run a simulation command on a compute node. Primary entry point."""
-        return self.srun(f"cd {self.work_dir} && {command}", timeout=timeout)
+        """Run a simulation command on a compute node. Primary entry point.
+
+        The timeout is enforced remotely with `timeout(1)` so a hung xrun is
+        killed on the cluster rather than hanging this process. The local
+        paramiko timeout is set higher so the remote guard always fires first;
+        a killed command comes back with exit_code 124.
+        """
+        guarded = f"cd {self.work_dir} && timeout {timeout}s {command}"
+        return self.srun(guarded, timeout=timeout + 30)
 
     # --- Batch jobs (long simulations) ---
 
@@ -314,106 +393,19 @@ cd {self.work_dir}
             print(f"[SimRunner][{scope}] stderr:\n{result['stderr'][:500]}")
 
         # --- Step 5: Parse results ---
-        stdout = result["stdout"]
+        # All verdict logic lives in parse_sim_output() so it can be unit
+        # tested against recorded logs without SSH or a simulator.
+        report.update(parse_sim_output(result["stdout"], result.get("exit_code", 0)))
 
-        # Check for compile errors (xmvlog/xmelab only — NOT xmsim runtime errors)
-        compile_errors = re.findall(r'(?:xmvlog|xmelab): \*E.*', stdout)
-        report["compile_errors"] = compile_errors
-
-        if compile_errors:
-            report["status"] = "compile_error"
-            print(f"[SimRunner][{scope}] COMPILE ERROR: {len(compile_errors)} errors")
-            for err in compile_errors[:5]:
+        if report["status"] == "compile_error":
+            print(f"[SimRunner][{scope}] COMPILE ERROR: {len(report['compile_errors'])} errors")
+            for err in report["compile_errors"][:5]:
                 print(f"  {err}")
             return report
 
-        # Check for SVA assertion failures (runtime, not compile errors)
-        sva_failures = re.findall(r'xmsim: \*E,ASRTST.*', stdout)
-        report["sva_failures"] = len(sva_failures)
-
-        # Parse pass/fail from testbench output
-        # Format 1: "PASS: X/Y" or "FAIL: X/Y"
-        pass_match = re.search(r'PASS:\s*(\d+)/(\d+)', stdout)
-        fail_match = re.search(r'FAIL:\s*(\d+)/(\d+)', stdout)
-        # Format 2: "PASS: N  FAIL: M" on one line (init_sequence style)
-        summary_line = re.search(r'PASS:\s*(\d+)\s+FAIL:\s*(\d+)', stdout)
-        # Format 3: "Passed: X" / "Pass: X" + "Failed: Y" / "Fail: Y" (with optional whitespace before colon)
-        passed_line = re.search(r'(?:pass_count|Pass(?:ed)?|PASS(?:ED)?)\s*:\s*(\d+)', stdout)
-        failed_line = re.search(r'(?:fail_count|Fail(?:ed)?|FAIL(?:ED)?)\s*:\s*(\d+)', stdout)
-        # Format 4: "Total tests: X" or "Total vectors: X" (with optional whitespace before colon)
-        total_line = re.search(r'Total\s+(?:tests|vectors)\s*:\s*(\d+)', stdout)
-        # Format 5: Comma-separated: "Tests: 29, Passed: 27, Failed: 2"
-        comma_summary = re.search(r'(?:Total\s+)?[Tt]ests\s*:\s*(\d+)\s*,\s*Pass(?:ed)?\s*:\s*(\d+)\s*,\s*Fail(?:ed)?\s*:\s*(\d+)', stdout)
-        # Format 6: "All N tests passed" or "PASS: All N tests passed"
-        all_pass = re.search(r'All\s+(\d+)\s+tests\s+passed', stdout)
-
-        if re.search(r'RESULT:\s*FAIL', stdout):
-            report["status"] = "fail"
-        elif re.search(r'RESULT:\s*PASS', stdout) and report.get("status") == "unknown":
-            report["status"] = "pass"
-
-        if comma_summary:
-            report["total_tests"] = int(comma_summary.group(1))
-            report["pass_count"] = int(comma_summary.group(2))
-            report["fail_count"] = int(comma_summary.group(3))
-            report["status"] = "pass" if report["fail_count"] == 0 else "fail"
-        elif summary_line:
-            report["pass_count"] = int(summary_line.group(1))
-            report["fail_count"] = int(summary_line.group(2))
-            report["total_tests"] = report["pass_count"] + report["fail_count"]
-            report["status"] = "pass" if report["fail_count"] == 0 else "fail"
-        elif all_pass:
-            report["total_tests"] = int(all_pass.group(1))
-            report["pass_count"] = report["total_tests"]
-            report["fail_count"] = 0
-            report["status"] = "pass"
-        elif pass_match:
-            report["pass_count"] = int(pass_match.group(1))
-            report["total_tests"] = int(pass_match.group(2))
-            report["fail_count"] = 0
-            report["status"] = "pass"
-        elif fail_match:
-            report["pass_count"] = int(fail_match.group(1))
-            report["total_tests"] = int(fail_match.group(2))
-            report["fail_count"] = report["total_tests"] - report["pass_count"]
-            report["status"] = "fail"
-        elif passed_line and failed_line:
-            report["pass_count"] = int(passed_line.group(1))
-            report["fail_count"] = int(failed_line.group(1))
-            report["total_tests"] = report["pass_count"] + report["fail_count"]
-            if total_line:
-                report["total_tests"] = int(total_line.group(1))
-            report["status"] = "pass" if report["fail_count"] == 0 else "fail"
-
-        # Collect individual mismatches — handle both with and without addr field
-        mismatches = re.findall(
-            r'MISMATCH\s+vec[= ]*(\d+)\s+.*?expected=0x([0-9A-Fa-f]+)\s+actual=0x([0-9A-Fa-f]+)',
-            stdout
-        )
-        report["mismatches"] = [
-            {"vector": int(m[0]), "addr": "0", "expected": m[1], "actual": m[2]}
-            for m in mismatches
-        ]
-
-        # If we found mismatches but no test counts were parsed, count from mismatches
-        if mismatches and report["status"] == "unknown":
-            report["status"] = "fail"
-            report["fail_count"] = len(mismatches)
-        # If test counts show 0/0 but we have mismatches, override
-        if mismatches and report["total_tests"] == 0:
-            report["fail_count"] = len(mismatches)
-            report["status"] = "fail"
-
-        # Check for watchdog / timeout
-        if "Watchdog" in stdout or "WATCHDOG" in stdout:
-            report["status"] = "timeout"
-
-        # Check for simulation finishing at all
         if report["status"] == "unknown":
-            if "$finish" in stdout or "Simulation complete" in stdout:
-                report["status"] = "pass"  # No failures found
-            else:
-                report["status"] = "error"
+            print(f"[SimRunner][{scope}] WARNING: simulation ran but printed no "
+                  f"summary this parser recognises. Reporting 'unknown', NOT 'pass'.")
 
         # --- Print summary ---
         print(f"\n{'='*60}")

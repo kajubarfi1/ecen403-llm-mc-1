@@ -8,7 +8,9 @@ Environment Variables:
     TAMU_AI_API_KEY       –TAMU AI key (required for TAMU endpoint)
     ANTHROPIC_API_KEY     – personal Anthropic key (fallback)
     LLM_PROVIDER          – Force a provider: "tamu", "anthropic", or "auto" (default)
-    ANTHROPIC_MODEL       – Model for direct Anthropic calls (default: claude-sonnet-4-20250514)
+    ANTHROPIC_MODEL       – Model for direct Anthropic calls (default: claude-opus-5;
+                            the fallback must not be weaker than the TAMU primary,
+                            or a quota hit silently degrades every generated model)
 
 """
 
@@ -19,7 +21,12 @@ import requests
 from typing import Dict, List, Optional
 try:
     from dotenv import load_dotenv
-    load_dotenv("setup.env")
+    # Validation/setup.env, wherever the agent is launched from. A cwd-relative
+    # name only worked when run from Validation/, so every runner started from
+    # the repo root saw an empty personal key and no fallback.
+    load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "..", "setup.env"))
+    load_dotenv("setup.env")  # cwd override, if one exists
 except ImportError:
     pass
 
@@ -38,7 +45,7 @@ _config = {
     "anthropic_base_url": "https://api.anthropic.com",
     "anthropic_endpoint": "/v1/messages",
     "anthropic_api_key": os.environ.get("ANTHROPIC_API_KEY", ""),
-    "anthropic_model": os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-20250514"),
+    "anthropic_model": os.environ.get("ANTHROPIC_MODEL", "claude-opus-5"),
     "anthropic_api_version": "2023-06-01",
 
     # "auto" = try TAMU first, fallback to Anthropic
@@ -69,7 +76,7 @@ def configure(**kwargs):
 
     Examples:
         configure(tamu_api_key="sk-...", provider="auto")
-        configure(anthropic_api_key="sk-ant-...", anthropic_model="claude-sonnet-4-20250514")
+        configure(anthropic_api_key="sk-ant-...", anthropic_model="claude-opus-5")
         configure(provider="anthropic")  # skip TAMU entirely
     """
     for k, v in kwargs.items():
@@ -90,6 +97,21 @@ def configure(**kwargs):
 # TAMU AI (OpenAI-compatible format)
 # =============================================================================
 
+# TAMU's proxy enables extended thinking server-side, and Bedrock rejects any
+# request whose max_tokens is not greater than the thinking budget. Measured
+# empirically against protected.Claude Opus 4.5: 1024 fails, 4096 succeeds.
+# Any call below this floor fails with a BadRequestError that looks nothing
+# like a token-budget problem, so raise it here rather than let each caller
+# discover it.
+TAMU_MIN_MAX_TOKENS = 4096
+
+
+class _TamuRequestError(Exception):
+    """TAMU rejected the REQUEST — a bad model name, a malformed payload, a
+    max_tokens below the thinking budget. Distinct from a quota problem: the
+    fix is in our request, not in waiting or paying."""
+
+
 class _QuotaError(Exception):
     """Internal: signals TAMU quota/rate-limit so we can fall back."""
     pass
@@ -104,6 +126,11 @@ def _call_tamu(messages: List[Dict[str, str]], max_tokens: int = 20000,
         "Content-Type": "application/json",
         "Accept": "application/json",
     }
+    if max_tokens < TAMU_MIN_MAX_TOKENS:
+        # Silently raising the ceiling is safe: max_tokens is an upper bound,
+        # not a request for that many tokens.
+        max_tokens = TAMU_MIN_MAX_TOKENS
+
     payload = {
         "model": _config["tamu_model"],
         "messages": messages,
@@ -144,71 +171,82 @@ def _call_tamu(messages: List[Dict[str, str]], max_tokens: int = 20000,
 
 
 def _check_content_for_errors(content: str):
-    """Raise _QuotaError if TAMU returned an error message instead of real output."""
-    if not content or len(content.strip()) < 20:
-        raise _QuotaError(f"TAMU returned empty/tiny response ({len(content)} chars)")
-    # Check first 500 chars for error patterns (errors show up at the start)
-    snippet = content[:500].lower()
-    for pattern in _ERROR_CONTENT_PATTERNS:
-        if pattern.lower() in snippet:
-            raise _QuotaError(
-                f"TAMU returned error content (matched '{pattern}'): "
-                f"{content[:150]}"
-            )
+    """Classify an error TAMU returned in a 200 response body.
 
+    The proxy returns HTTP 200 with an error payload, so status codes alone
+    never reveal a failure. Distinguishing the two kinds matters because they
+    have opposite responses:
 
-# =============================================================================
-# Anthropic Messages API (direct)
-# =============================================================================
+      quota / rate limit -> falling back to a personal key is the right move
+      bad request        -> falling back HIDES a configuration bug and quietly
+                            moves spend onto a personal key
+
+    An earlier version matched only the '\U0001F6AB' emoji and called
+    everything a quota hit, which reported a max_tokens-below-thinking-budget
+    rejection as "TAMU quota/rate-limit hit" and silently rerouted every call.
+
+    A later version scanned the first 2000 chars of ANY response for the
+    patterns, which misclassified a legitimate long <think> answer (whose
+    reasoning happened to use words like "capacity" or "exceeded") as a quota
+    error and threw away a completed generation. A real proxy error payload is
+    short and IS the whole response; genuine model output is long and contains
+    reasoning/code. So: only classify short responses as errors.
+    """
+    if not content:
+        return
+    if len(content) > 1500:
+        return  # real output — error pages are never this long
+    head = content[:2000]
+    if not any(m in head for m in _ERROR_CONTENT_PATTERNS):
+        return
+
+    low = head.lower()
+    # Transient service failures (Bedrock 503s surface in the body under an
+    # HTTP 200) are fallback-worthy like quota hits: nothing about our request
+    # is wrong, so "fix the request/config" would be misleading advice.
+    quota_words = ("rate limit", "rate-limit", "quota", "too many requests",
+                   "429", "insufficient credit", "budget exceeded",
+                   "exceeded your", "capacity", "503",
+                   "serviceunavailable", "service unavailable",
+                   "unable to process your request", "overloaded")
+    if any(w in low for w in quota_words):
+        raise _QuotaError(f"TAMU quota/rate-limit/transient error: {head[:400]}")
+
+    raise _TamuRequestError(
+        f"TAMU rejected the request (this is NOT a quota problem — falling "
+        f"back would hide it): {head[:500]}")
+
 
 def _call_anthropic(messages: List[Dict[str, str]], max_tokens: int = 16000,
                     temperature: float = 1.0) -> str:
-    """Call Anthropic Messages API directly with your personal key.
+    """Call the Anthropic Messages API directly (the fallback provider).
 
-    Converts OpenAI-style messages to Anthropic format automatically:
-      - Extracts 'system' messages into the top-level `system` param
-      - Keeps user/assistant messages in order
+    This existed only as a name until the fallback path first actually fired,
+    at which point every fallback crashed with NameError — the loud-failure
+    handling in call_llm() referenced a function nobody had written.
     """
-    url = _config["anthropic_base_url"].rstrip("/") + _config["anthropic_endpoint"]
+    url = (_config["anthropic_base_url"].rstrip("/")
+           + _config["anthropic_endpoint"])
     headers = {
         "x-api-key": _config["anthropic_api_key"],
         "anthropic-version": _config["anthropic_api_version"],
         "Content-Type": "application/json",
     }
-
-    # Separate system prompt from conversation messages
-    system_parts = []
-    api_messages = []
-    for msg in messages:
-        if msg["role"] == "system":
-            system_parts.append(msg["content"])
-        else:
-            api_messages.append({"role": msg["role"], "content": msg["content"]})
-
+    system_parts = [m["content"] for m in messages if m["role"] == "system"]
     payload = {
         "model": _config["anthropic_model"],
         "max_tokens": max_tokens,
         "temperature": temperature,
-        "messages": api_messages,
+        "messages": [m for m in messages if m["role"] != "system"],
     }
     if system_parts:
         payload["system"] = "\n\n".join(system_parts)
 
     r = requests.post(url, headers=headers, json=payload, timeout=300)
     r.raise_for_status()
-
     data = r.json()
-    # Anthropic returns content as a list of blocks
-    return "".join(
-        block.get("text", "")
-        for block in data.get("content", [])
-        if block.get("type") == "text"
-    )
-
-
-# =============================================================================
-# Unified call_llm with fallback
-# =============================================================================
+    return "".join(b.get("text", "") for b in data.get("content", [])
+                   if b.get("type") == "text")
 
 
 def call_llm(messages: List[Dict[str, str]], max_tokens: int = 16000,
@@ -235,6 +273,16 @@ def call_llm(messages: List[Dict[str, str]], max_tokens: int = 16000,
     if _config["tamu_api_key"]:
         try:
             return _call_tamu(messages, max_tokens, temperature)
+        except _TamuRequestError as e:
+            # Loud: this is a bug in our request or config, and falling back
+            # would silently move spend to the personal key while hiding it.
+            print(f"[LLM] *** TAMU REJECTED THE REQUEST — not a quota issue ***")
+            print(f"[LLM] {e}")
+            print(f"[LLM] Fix the request/config; falling back for now so work "
+                  f"is not blocked, but TAMU credits are NOT being used.")
+            if _config["anthropic_api_key"]:
+                return _call_anthropic(messages, max_tokens, temperature)
+            raise
         except _QuotaError as e:
             print(f"[LLM] TAMU quota/rate-limit hit: {e}")
             if _config["anthropic_api_key"]:

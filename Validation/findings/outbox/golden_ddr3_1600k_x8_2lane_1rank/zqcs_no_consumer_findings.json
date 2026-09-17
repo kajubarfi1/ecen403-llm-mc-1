@@ -1,0 +1,29 @@
+{
+  "$schema": "validation-findings/1",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "finding_count": 1,
+  "findings": [
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "rtl_bug",
+      "scope": "calibration",
+      "severity": "major",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "No block consumes calibration's ZQCS request \u2014 periodic ZQ calibration can never be granted",
+      "detail": "calibration raises zqcs_req for periodic ZQ calibration (spec: calibration.periodic_recalibration_enable, interval 640us), and expects zqcs_ack. No other block in the drop has a matching port: the scheduler and cmd_gen accept no ZQCS request, and no arbiter exists to issue a ZQCS command on the DDR bus. The request can never be acknowledged by the design, so periodic recalibration is unreachable. The integration harness acks it with testbench glue (integration_map.json expr_glue) so the calibration FSM does not wedge; the design needs a scheduler-side zqcs_req/zqcs_ack pair (like refresh's ref_required/ref_ack) and a ZQCS entry in the command generator. Related: init_fsm's init_cmd_* outputs also reach no DDR-bus arbiter \u2014 cmd_gen drives the DDR pins directly, so init commands never appear on the bus either; the two gaps share a root cause (no command-bus mux/arbiter block).",
+      "evidence": {
+        "calibration_ports": [
+          "zqcs_req (output)",
+          "zqcs_ack (input)"
+        ],
+        "consumers_found": 0,
+        "workaround": "integration_map.json expr_glue: zqcs_ack = zqcs_req",
+        "related_dangling": [
+          "init_fsm.init_cmd_valid/init_cmd/init_addr/init_bank"
+        ]
+      },
+      "status": "open"
+    }
+  ]
+}

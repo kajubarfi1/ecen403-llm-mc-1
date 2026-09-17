@@ -1,0 +1,25 @@
+{
+  "$schema": "validation-findings/1",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "finding_count": 1,
+  "findings": [
+    {
+      "source": "validation",
+      "target": "spec",
+      "kind": "spec_gap",
+      "scope": "csr_register_map",
+      "severity": "minor",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "CSR reads of live status fields: the spec does not say which cycle's value a read returns",
+      "detail": "In the integrated chain (path_12/13), a read of CTRL_STATUS completed in the same controller cycle that refresh_ctrl's ref_pending_cnt changed from 1 to 0. The design returned the pre-change value (ref_pending_cnt=1, data 0x20); the spec-derived model, which sees the status-level change in that same cycle, predicted the post-change value (0x0). Both are defensible: the spec defines the CTRL_STATUS field layout but never states the read-data sampling relationship to status inputs (registered one cycle behind, or combinational). This is 1 of 103 comparisons in an otherwise fully matching register walk and appears only when live status sources are wired, never in block-level runs. Requested: a sentence in csr_register_map stating that read data for status registers reflects the status inputs as of the previous clock edge (or the alternative). Until then the comparison is reported, not waived, because it fails only under a specific same-cycle coincidence the waiver schema cannot express.",
+      "evidence": {
+        "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+        "time_ns": 39000,
+        "observed": "csr_rsp.read_data addr=0x0 data=0x20",
+        "predicted": "data=0x0 after csr_sts_level ref_pending 1->0 in the same cycle",
+        "field": "CTRL_STATUS.ref_pending_cnt[7:5]"
+      },
+      "status": "open"
+    }
+  ]
+}

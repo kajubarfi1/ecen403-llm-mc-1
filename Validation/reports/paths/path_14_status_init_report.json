@@ -1,0 +1,36 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_14_status_init",
+  "strategy": "composed",
+  "verdict": "pass",
+  "timestamp": "2026-09-17T12:16:35.713870",
+  "blocks": [
+    "config_regs",
+    "init_fsm"
+  ],
+  "sequence": "Validation/sequences/generated/path_14_status_init_seed1.json",
+  "stimulus_generator": "status_poll",
+  "autonomous": false,
+  "window_cycles": 64,
+  "stages": [
+    {
+      "stage": "init_fsm",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "init_fsm",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA"
+    },
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "pass",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=160/160  (160 output transaction(s) matched)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/paths/path_14_status_init_sim.log",
+  "observed_trace": "Validation/reports/paths/path_14_status_init_observed.jsonl"
+}

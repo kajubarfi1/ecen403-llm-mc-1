@@ -1,0 +1,30 @@
+{
+  "scope": "data_path",
+  "strategy": "exact",
+  "generated_utc": "2026-09-10T16:59:02.643241+00:00",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "model": "claude-opus-4-6",
+  "accepted_by_gate": "bus_bridge",
+  "attempts": [
+    {
+      "attempt": 1,
+      "failures": 9,
+      "gate": "bus_bridge"
+    },
+    {
+      "attempt": 2,
+      "failures": 0,
+      "gate": "bus_bridge"
+    }
+  ],
+  "input_ifaces": [
+    "ddr_rd_beat",
+    "dp_cmd",
+    "dp_wr"
+  ],
+  "output_ifaces": [
+    "ddr_wr_beat",
+    "dp_rd_rsp"
+  ],
+  "note": "Generated from the spec and transaction schemas only; no RTL was supplied to the model. Accepted by a gate whose expectations are composed from the same spec by code the model never saw."
+}

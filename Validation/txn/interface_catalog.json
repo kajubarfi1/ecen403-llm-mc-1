@@ -1,0 +1,714 @@
+{
+  "$comment": "Which DUT ports form each interface's transactions, and WHEN a transaction has occurred. This is DATA, not code: widths and directions are NOT listed here — schema_gen.py resolves them from the frontend manifests at generation time and fails loudly on any mismatch. Swapping the spec/design means editing this file (or regenerating it), never editing infrastructure code. 'qualifier' is a SystemVerilog boolean expression over the block's own ports that is true exactly on the cycle a transaction completes; 'kind_select' picks which transaction kind occurred when an interface has more than one. A request/response bus is modelled as TWO interfaces (e.g. csr and csr_rsp) observed on the same pins: one carries what was asked, the other what was answered. Collapsing them into one interface makes the scoreboard's input/output partition ambiguous. 'role' says whether an interface is driven INTO the block (request) or produced BY it (response). It cannot be inferred from port directions: a response stream often carries the address that was requested, whose port is a DUT input. A predictor consumes requests and predicts responses.",
+  "schema_version": "1.12",
+  "interfaces": {
+    "csr": {
+      "block": "config_regs",
+      "description": "CSR request stream (address + write data) into config_regs",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "csr_ack_o",
+      "qualifier_note": "Wishbone-classic slave: ack marks the completed access.",
+      "kind_select": {
+        "expr": "csr_we_i",
+        "map": {
+          "1": "write",
+          "0": "read"
+        }
+      },
+      "kinds": {
+        "write": {
+          "addr": "csr_adr_i",
+          "data": "csr_dat_i"
+        },
+        "read": {
+          "addr": "csr_adr_i"
+        }
+      },
+      "role": "request",
+      "drive": {
+        "$note": "Wishbone-style: assert cyc+stb (we from kind_select), hold sel all-ones, wait for ack.",
+        "assert": [
+          "csr_cyc_i",
+          "csr_stb_i"
+        ],
+        "complete": "csr_ack_o",
+        "hold": {
+          "csr_sel_i": "'1"
+        }
+      }
+    },
+    "wb": {
+      "block": "wb_port",
+      "description": "Host Wishbone request stream into wb_port",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "wb_ack_o",
+      "kind_select": {
+        "expr": "wb_we_i",
+        "map": {
+          "1": "write",
+          "0": "read"
+        }
+      },
+      "kinds": {
+        "write": {
+          "addr": "wb_adr_i",
+          "data": "wb_dat_i",
+          "sel": "wb_sel_i"
+        },
+        "read": {
+          "addr": "wb_adr_i"
+        }
+      },
+      "role": "request",
+      "drive": {
+        "assert": [
+          "wb_cyc_i",
+          "wb_stb_i"
+        ],
+        "complete": "wb_ack_o"
+      }
+    },
+    "req": {
+      "block": "wb_port",
+      "description": "Internal request descriptors wb_port emits toward cmd_queue",
+      "kinds": {
+        "request": {
+          "we": "req_we",
+          "addr": "req_addr",
+          "data": "req_wdata",
+          "mask": "req_wmask"
+        }
+      },
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "req_valid && req_ready",
+      "qualifier_note": "valid/ready handshake: a descriptor transfers only when both are high.",
+      "role": "response",
+      "derives_from": {
+        "$note": "This output stream is a TRANSLATION of another interface's requests, not an independent one. Declaring the correspondence here lets a general bridge gate check it without knowing anything about this design: which source interface, which fields carry across (including renames), and how the direction flag is set. A design with a different bridge changes this block only.",
+        "interface": "wb",
+        "cardinality": "one_per_source_transaction",
+        "field_map": {
+          "addr": "addr",
+          "data": "data",
+          "mask": "sel"
+        },
+        "direction_field": {
+          "field": "we",
+          "by_source_kind": {
+            "write": 1,
+            "read": 0
+          }
+        },
+        "fields_absent_on": {
+          "read": [
+            "data"
+          ]
+        }
+      },
+      "consumers": [
+        "addr_decoder",
+        "cmd_queue"
+      ],
+      "$consumers_note": "wb_port emits request descriptors; addr_decoder decodes req_addr and cmd_queue takes the control fields. Declaring the consumers is what lets a downstream stage's predictor legally name 'req' as its input."
+    },
+    "ddr_cmd": {
+      "block": "cmd_gen",
+      "description": "Pin-level DDR3 command stream out of cmd_gen",
+      "kinds": {
+        "command": {
+          "cmd": "ddr_cmd",
+          "addr": "ddr_addr",
+          "bank": "ddr_bank"
+        }
+      },
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "(ddr_cmd != 4'b0111) && (ddr_cmd != 4'b1111)",
+      "qualifier_note": "A command is issued on any cycle the pins are not NOP (4'b0111) or DESELECT (4'b1111). These encodings are design data, taken from cmd_gen's localparams DDR_NOP/DDR_DESL; a design that encodes commands differently changes this expression only.",
+      "role": "response",
+      "command_encoding": {
+        "$note": "DDR3 command encodings on the {CS#,RAS#,CAS#,WE#} pins as this design drives them. Design data, like the qualifier: a design that encodes commands differently changes this map only. Taken from cmd_gen's DDR_* localparams and consistent with JESD79-3.",
+        "MRS": "4'b0000",
+        "REF": "4'b0001",
+        "PRE": "4'b0010",
+        "ACT": "4'b0011",
+        "WR": "4'b0100",
+        "RD": "4'b0101",
+        "NOP": "4'b0111",
+        "DESL": "4'b1111"
+      },
+      "derives_from": {
+        "$note": "cmd_gen is a bridge like wb_port, with two additions a plain field map cannot express: the command VALUE is re-encoded between two different encodings, and the address field is selected by command type (a row for ACTIVATE, a column for a CAS). Both are declared here so the same bridge gate grades them — a design that encodes or muxes differently edits this block, not the gate.",
+        "interface": "sched_in",
+        "cardinality": "one_per_source_transaction",
+        "field_map": {
+          "bank": "bank"
+        },
+        "value_map": {
+          "cmd": {
+            "from_field": "type",
+            "source_encoding_iface": "sched_in",
+            "target_encoding_iface": "ddr_cmd"
+          }
+        },
+        "conditional_map": {
+          "addr": {
+            "selector_field": "type",
+            "by_command": {
+              "ACT": "row",
+              "RD": "col",
+              "WR": "col"
+            }
+          }
+        },
+        "no_output_for": {
+          "type": [
+            "NOP"
+          ]
+        },
+        "$no_output_note": "A NOP scheduler decision issues no DDR command: the pins idle at the NOP encoding, which the monitor's qualifier deliberately excludes from being a transaction."
+      }
+    },
+    "csr_rsp": {
+      "block": "config_regs",
+      "description": "CSR response stream (read data / error status) out of config_regs",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "csr_ack_o",
+      "qualifier_note": "Same ack cycle as the request; this stream carries what the DUT answered.",
+      "kind_select": {
+        "expr": "csr_we_i",
+        "map": {
+          "1": "write_ack",
+          "0": "read_data"
+        }
+      },
+      "kinds": {
+        "read_data": {
+          "addr": "csr_adr_i",
+          "data": "csr_dat_o",
+          "err": "csr_err_o"
+        },
+        "write_ack": {
+          "addr": "csr_adr_i",
+          "err": "csr_err_o"
+        }
+      },
+      "role": "response"
+    },
+    "wb_rsp": {
+      "block": "wb_port",
+      "description": "Host Wishbone response stream out of wb_port",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "wb_ack_o && !wb_we_i",
+      "qualifier_note": "Only reads return data; a write's completion is the ack itself.",
+      "kinds": {
+        "read_data": {
+          "addr": "wb_adr_i",
+          "data": "wb_dat_o"
+        }
+      },
+      "role": "response",
+      "derives_from": {
+        "interface": "wb",
+        "cardinality": "one_per_source_kind",
+        "only_for_kinds": [
+          "read"
+        ],
+        "field_map": {
+          "addr": "addr"
+        },
+        "$note": "A read response echoes the requested address; its data comes from downstream and is not determined by the request, so it is deliberately not in field_map — gating it would assert a requirement the spec does not make of this block."
+      }
+    },
+    "init_cmd": {
+      "block": "init_fsm",
+      "description": "DDR3 command stream issued by the initialisation FSM",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "init_cmd_valid",
+      "qualifier_note": "init_cmd_valid pulses for one cycle per issued init command.",
+      "kinds": {
+        "command": {
+          "cmd": "init_cmd",
+          "addr": "init_addr",
+          "bank": "init_bank"
+        }
+      },
+      "role": "response",
+      "command_encoding": {
+        "$note": "DDR pin encoding, identical to ddr_cmd (init_fsm's CMD_* localparams); ZQCL is the init-only ZQ calibration long command.",
+        "MRS": "4'b0000",
+        "REF": "4'b0001",
+        "PRE": "4'b0010",
+        "ACT": "4'b0011",
+        "WR": "4'b0100",
+        "RD": "4'b0101",
+        "ZQCL": "4'b0110",
+        "NOP": "4'b0111",
+        "DESL": "4'b1111"
+      },
+      "autonomous": true,
+      "autonomous_note": "Time-driven source: the block runs from reset on its own timers with no input transaction, so an order-only predictor cannot know when (or how many) events occur. The stream is OBSERVED; its pacing is SVA's job and its ordering is checked by the path checkers in stage_invariant_rules.json."
+    },
+    "init_status": {
+      "block": "init_fsm",
+      "description": "Initialisation completion event",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "init_done",
+      "qualifier_note": "init_done is a level that latches high; emit once on assertion.",
+      "qualifier_edge": "rising",
+      "kinds": {
+        "done": {
+          "fail": "init_fail",
+          "state": "init_state"
+        }
+      },
+      "role": "response",
+      "autonomous": true,
+      "autonomous_note": "Time-driven source: the block runs from reset on its own timers with no input transaction, so an order-only predictor cannot know when (or how many) events occur. The stream is OBSERVED; its pacing is SVA's job and its ordering is checked by the path checkers in stage_invariant_rules.json."
+    },
+    "refresh_req": {
+      "block": "refresh_ctrl",
+      "description": "Refresh request raised by the refresh controller",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "ref_required",
+      "qualifier_note": "ref_required stays high until acknowledged; the request is the rising edge.",
+      "qualifier_edge": "rising",
+      "kinds": {
+        "request": {
+          "urgent": "ref_urgent",
+          "pending": "ref_pending_cnt",
+          "starve": "ref_starve_flag"
+        }
+      },
+      "role": "response",
+      "consumers": [
+        "scheduler"
+      ],
+      "autonomous": true,
+      "autonomous_note": "Time-driven source: emission is paced by the tREFI counter, not by any input transaction, so an order-only predictor cannot know how many requests occur. The stream is OBSERVED and fed downstream as a chain input; its spacing against cfg_refresh.trefi is owned by SVA."
+    },
+    "refresh_ack": {
+      "block": "refresh_ctrl",
+      "description": "Scheduler acknowledgement consumed by the refresh controller",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "ref_ack",
+      "qualifier_note": "ref_ack pulses for one cycle when the scheduler grants a refresh.",
+      "kinds": {
+        "ack": {
+          "pending": "ref_pending_cnt"
+        }
+      },
+      "role": "request"
+    },
+    "cal_zqcs": {
+      "block": "calibration",
+      "description": "ZQ short-calibration request issued by the calibration block",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "zqcs_req",
+      "qualifier_note": "zqcs_req is a level held until zqcs_ack; the request is its rising edge.",
+      "qualifier_edge": "rising",
+      "kinds": {
+        "request": {}
+      },
+      "role": "response",
+      "autonomous": true,
+      "autonomous_note": "Time-driven source: the block runs from reset on its own timers with no input transaction, so an order-only predictor cannot know when (or how many) events occur. The stream is OBSERVED; its pacing is SVA's job and its ordering is checked by the path checkers in stage_invariant_rules.json."
+    },
+    "cal_status": {
+      "block": "calibration",
+      "description": "Calibration completion event",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "cal_done",
+      "qualifier_edge": "rising",
+      "kinds": {
+        "done": {
+          "fail": "cal_fail"
+        }
+      },
+      "role": "response",
+      "autonomous": true,
+      "autonomous_note": "Time-driven source: the block runs from reset on its own timers with no input transaction, so an order-only predictor cannot know when (or how many) events occur. The stream is OBSERVED; its pacing is SVA's job and its ordering is checked by the path checkers in stage_invariant_rules.json."
+    },
+    "cq_enq": {
+      "block": "cmd_queue",
+      "description": "Request descriptors entering the command queue",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "enq_valid && enq_ready",
+      "qualifier_note": "valid/ready handshake: an entry is accepted only when both are high.",
+      "kinds": {
+        "enqueue": {
+          "row": "enq_row",
+          "col": "enq_col",
+          "bank": "enq_bank",
+          "we": "enq_we"
+        }
+      },
+      "role": "request",
+      "producers": [
+        "addr_decoder"
+      ],
+      "$producers_note": "The enqueue descriptor's row/col/bank are addr_decoder's decode of req_addr (conn_03); its we/aux come from wb_port. addr_decoder is the stage that PRODUCES this stream in a composed chain.",
+      "$aux_note": "enq_aux is deliberately NOT a transaction field: it is an internal routing tag whose values the spec does not determine, so no spec-derived model can predict it and comparing it would fail every enqueue for a reason that is not a defect. If a future spec assigns it meaning, add it back with that meaning.",
+      "derives_from": {
+        "$note": "The enqueue descriptor is addr_decoder's translation of the request stream: the byte address splits into row/bank/column per the spec's address_mapping, and we rides through. The split positions are NOT written here — the gate computes them from memory_geometry at grading time, so a different geometry grades correctly with no edit.",
+        "interface": "req",
+        "cardinality": "one_per_source_transaction",
+        "field_map": {
+          "we": "we"
+        },
+        "address_split": {
+          "from_field": "addr",
+          "geometry_section": "memory_geometry",
+          "output_fields": {
+            "row": "row_bits",
+            "bank": "bank_bits",
+            "col": "column_bits"
+          },
+          "burst_aligned_fields": [
+            "col"
+          ],
+          "$alignment_note": "burst_length=8 means a DRAM burst covers 8 channel words, so the column address issued for a burst is aligned: its low log2(burst_length) bits are zero and the within-burst offset is handled by the data path. Declared per-field because a controller could legitimately issue unaligned critical-word-first columns; the arithmetic itself is spec-derived."
+        }
+      },
+      "drive": {
+        "assert": [
+          "enq_valid"
+        ],
+        "complete": "enq_ready"
+      }
+    },
+    "cq_deq": {
+      "block": "cmd_queue",
+      "description": "Entries retired from the command queue on a scheduler grant",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "deq_grant",
+      "qualifier_note": "Only the retired slot index is a transaction field. entry_* are 16-deep arrays carrying queue STATE, checked by assertions rather than compared as a stream.",
+      "kinds": {
+        "dequeue": {
+          "idx": "deq_idx"
+        }
+      },
+      "role": "request"
+    },
+    "sched_cmd": {
+      "block": "scheduler",
+      "description": "Commands selected by the FR-FCFS scheduler",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "cmd_valid",
+      "qualifier_note": "The scheduler's output decision stream. Several orderings of this stream are legal under FR-FCFS, which is why scopes containing the scheduler use check_strategy 'invariant' rather than exact match.",
+      "kinds": {
+        "command": {
+          "type": "cmd_type",
+          "row": "cmd_row",
+          "col": "cmd_col",
+          "bank": "cmd_bank",
+          "we": "cmd_we",
+          "aux": "cmd_aux"
+        }
+      },
+      "role": "response",
+      "consumers": [
+        "cmd_gen"
+      ],
+      "same_stream_as": "sched_in",
+      "order_nondeterministic": true,
+      "order_note": "FR-FCFS admits several legal orderings of this stream, so exact stream comparison is unsound for any stage that emits it. Stages producing this stream are checked by an invariant checker (conservation + per-bank order + refresh service), graded by LegalityCheckerGate."
+    },
+    "sched_deq": {
+      "block": "scheduler",
+      "description": "Queue-slot grants issued by the scheduler",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "deq_grant",
+      "qualifier_note": "q_* inputs are 16-deep arrays (queue state), excluded from transactions.",
+      "kinds": {
+        "grant": {
+          "idx": "deq_idx"
+        }
+      },
+      "role": "response"
+    },
+    "dp_wr": {
+      "block": "data_path",
+      "description": "Host write data accepted by the data path",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "wr_data_valid && wr_data_ready",
+      "kinds": {
+        "write": {
+          "data": "wr_data",
+          "mask": "wr_mask"
+        }
+      },
+      "role": "request",
+      "drive": {
+        "assert": [
+          "wr_data_valid"
+        ],
+        "complete": "wr_data_ready"
+      }
+    },
+    "dp_rd_rsp": {
+      "block": "data_path",
+      "description": "Read response data returned toward the host",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "rd_rsp_valid",
+      "kinds": {
+        "response": {
+          "data": "rd_rsp_data",
+          "aux": "rd_rsp_aux"
+        }
+      },
+      "role": "response",
+      "consumers": [
+        "wb_port"
+      ],
+      "derives_from": {
+        "$note": "PACK side of the spec's data_path_mapping: after a read command on dp_cmd, host_width/channel_width beats received on ddr_rd_beat pack into one host word, low half first for little endianness.",
+        "interface": "ddr_rd_beat",
+        "pack": {
+          "geometry_section": "data_path_mapping",
+          "from_field": "data",
+          "data_field": "data",
+          "command_iface": "dp_cmd",
+          "command_kind": "read"
+        }
+      }
+    },
+    "csr_sts": {
+      "block": "config_regs",
+      "role": "request",
+      "description": "Hardware status events latched into the CSR status registers. These are a genuine INPUT stream: they set RW1C flag fields that the bus can only clear, so a predictor that cannot see them cannot model those registers. Discovered when an agent-generated predictor disagreed with real silicon on ERROR_STATUS bits 16-18 — neither was wrong; the observation was incomplete.",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "sts_ecc_ue_event || sts_ref_starve_event || sts_init_fail_event",
+      "qualifier_note": "Event pins pulse for one cycle when the condition occurs.",
+      "kinds": {
+        "event": {
+          "ecc_ue": "sts_ecc_ue_event",
+          "ref_starve": "sts_ref_starve_event",
+          "init_fail": "sts_init_fail_event"
+        }
+      }
+    },
+    "csr_sts_level": {
+      "block": "config_regs",
+      "role": "request",
+      "description": "Hardware status LEVELS reflected in the CSR status registers. Unlike csr_sts these are not pulses: they carry continuously-valid state that read-only status fields mirror. A predictor cannot model those fields without seeing them, which is why 7 CTRL_STATUS reads were unattributable before this interface existed.",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "1'b1",
+      "qualifier_edge": "change",
+      "qualifier_note": "Level stream: emit only when the observed state changes, so the trace carries updates rather than every cycle.",
+      "kinds": {
+        "state": {
+          "init_done": "sts_init_done",
+          "cal_done": "sts_cal_done",
+          "cal_fail": "sts_cal_fail",
+          "bist_done": "sts_bist_done",
+          "bist_fail": "sts_bist_fail",
+          "ref_pending": "sts_ref_pending_cnt",
+          "self_refresh": "sts_self_refresh_active",
+          "ecc_ce_count": "sts_ecc_ce_count",
+          "bist_fail_addr": "sts_bist_fail_addr"
+        }
+      }
+    },
+    "sched_in": {
+      "block": "cmd_gen",
+      "role": "request",
+      "description": "Scheduler decisions driven into cmd_gen. This is the stimulus surface for the timing scope: what a sequence drives in order to produce a DDR command stream on ddr_cmd, which the assertions and coverage then observe.",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "sched_valid",
+      "kinds": {
+        "command": {
+          "type": "sched_type",
+          "row": "sched_row",
+          "col": "sched_col",
+          "bank": "sched_bank",
+          "we": "sched_we",
+          "aux": "sched_aux"
+        }
+      },
+      "command_encoding": {
+        "$note": "Scheduler-side command encoding, distinct from the DDR pin encoding on ddr_cmd. From cmd_gen's SCMD_* localparams.",
+        "NOP": 0,
+        "ACT": 1,
+        "RD": 2,
+        "WR": 3,
+        "PRE": 4,
+        "REF": 5
+      },
+      "same_stream_as": "sched_cmd",
+      "producers": [
+        "scheduler"
+      ],
+      "$alias_note": "scheduler.cmd_* and cmd_gen.sched_* are the same wires observed from either end; the transaction field names are identical, so the two catalog entries are one stream under two names. A composed chain treats them as equal."
+    },
+    "cfg_timing": {
+      "block": "config_regs",
+      "role": "response",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "consumers": [
+        "bank_tracker"
+      ],
+      "description": "Timing configuration broadcast from the CSR block to bank_tracker. A LEVEL stream: values persist and downstream reloads counters from them, so the transaction is the change, not the cycle.",
+      "qualifier": "1'b1",
+      "qualifier_edge": "change",
+      "kinds": {
+        "update": {
+          "trcd": "cfg_tRCD_nCK",
+          "trp": "cfg_tRP_nCK",
+          "tras": "cfg_tRAS_nCK",
+          "trc": "cfg_tRC_nCK",
+          "trrd": "cfg_tRRD_nCK",
+          "tfaw": "cfg_tFAW_nCK",
+          "twtr": "cfg_tWTR_nCK",
+          "twr": "cfg_tWR_nCK",
+          "trtp": "cfg_tRTP_nCK",
+          "tccd": "cfg_tCCD_nCK",
+          "trfc": "cfg_tRFC_nCK"
+        }
+      }
+    },
+    "cfg_refresh": {
+      "block": "config_regs",
+      "role": "response",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "consumers": [
+        "refresh_ctrl"
+      ],
+      "description": "Refresh configuration broadcast from the CSR block to refresh_ctrl. Level stream, change-qualified.",
+      "qualifier": "1'b1",
+      "qualifier_edge": "change",
+      "kinds": {
+        "update": {
+          "trefi": "cfg_tREFI_nCK",
+          "max_postpone": "cfg_max_postpone",
+          "urgent_threshold": "cfg_urgent_threshold",
+          "force_refresh": "cfg_force_refresh",
+          "priority": "cfg_ref_priority"
+        }
+      }
+    },
+    "dp_cmd": {
+      "block": "data_path",
+      "description": "Data-movement commands driven into the data path: send a write burst or capture a read burst.",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "cmd_wr_valid || cmd_rd_valid",
+      "kind_select": {
+        "expr": "cmd_rd_valid",
+        "map": {
+          "1": "read",
+          "0": "write"
+        }
+      },
+      "kinds": {
+        "read": {
+          "aux": "cmd_aux"
+        },
+        "write": {
+          "aux": "cmd_aux"
+        }
+      },
+      "role": "request",
+      "drive": {
+        "$note": "The strobe is kind-dependent: a read asserts cmd_rd_valid, a write cmd_wr_valid.",
+        "assert_by_kind": {
+          "read": [
+            "cmd_rd_valid"
+          ],
+          "write": [
+            "cmd_wr_valid"
+          ]
+        }
+      }
+    },
+    "ddr_rd_beat": {
+      "block": "data_path",
+      "description": "Read data beats arriving from the DDR PHY: dq sampled while the incoming strobe is high.",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "ddr_dqs_i",
+      "kinds": {
+        "beat": {
+          "data": "ddr_dq_i"
+        }
+      },
+      "role": "request"
+    },
+    "ddr_wr_beat": {
+      "block": "data_path",
+      "description": "Write data beats driven toward the DDR PHY while the data output enable is asserted.",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "ddr_dq_oe",
+      "kinds": {
+        "beat": {
+          "data": "ddr_dq_o",
+          "mask": "ddr_dm_o"
+        }
+      },
+      "role": "response",
+      "derives_from": {
+        "$note": "UNPACK side of the spec's data_path_mapping: each accepted host write word is emitted as host_width/channel_width beats on the DDR side, low half first for little endianness. Mask polarity is deliberately unchecked - the spec declares wishbone sel semantics for the host side only.",
+        "interface": "dp_wr",
+        "unpack": {
+          "geometry_section": "data_path_mapping",
+          "from_field": "data",
+          "data_field": "data"
+        }
+      }
+    }
+  },
+  "$blocks_without_transaction_interfaces": {
+    "addr_decoder": "Purely combinational: req_addr in, dec_row/bank/col/rank out, with no clock or valid to qualify a transaction. Checked instead by an SVA derived from memory_geometry asserting the row-bank-column slicing holds every cycle, which is a stronger claim than a sampled comparison.",
+    "bank_tracker": "Has no output transaction stream at all — every output (bank_is_active, bank_open_row, *_allowed) is continuously visible STATE, not an event. Verified via check_strategy 'invariant': input command events are monitored, and the state itself is checked by the TIMING_001-011 assertions that live in this block."
+  },
+  "version": "1.17"
+}

@@ -1,0 +1,62 @@
+// Xcelium coverage configuration for the DDR3 validation subsystem.
+//
+// Fed to xrun via:  -coverage A -covoverwrite -covfile <this file>
+
+// --- What to collect -------------------------------------------------------
+select_coverage -all
+select_functional                       // covergroups: the vplan's 42 items
+
+// --- What NOT to count -----------------------------------------------------
+// Testbench code is not the design. With everything selected, the harness,
+// the generated driver, the passive monitors and the DRAM stub all land in
+// the headline number and dilute it (22.4% reported vs ~25% design-only on
+// the first merged sweep). Code coverage of a monitor says nothing about the
+// controller. Covergroup modules (*_coverage) are deliberately NOT excluded:
+// they carry the vplan's functional coverage.
+deselect_coverage -all -module chain_harness
+deselect_coverage -all -module *_txn_harness
+deselect_coverage -all -module seq_driver
+deselect_coverage -all -module dram_stub
+deselect_coverage -all -module *_monitor
+deselect_coverage -all -module *_tb
+// Covergroup carriers: drop their CODE coverage only. '-all' would also
+// drop functional coverage and silence the very covergroups they exist
+// to hold (which is exactly what happened on the first try: 0% on every
+// new coverpoint while the design merged fine).
+deselect_coverage -block -expr -toggle -fsm -module *_fcov
+
+// --- Covergroups -----------------------------------------------------------
+set_covergroup -new_instance_reporting  // per-instance scoping and naming
+set_optimize -prune_covergroup
+
+// --- Block / statement / branch --------------------------------------------
+// The course disables implicit and explicit block scoring and relies on
+// statement + branch instead; keeping that identical for comparability.
+set_implicit_block_scoring -off
+set_explicit_block_scoring -off
+set_statement_scoring
+set_branch_scoring
+set_code_fine_grained_merging
+
+// --- Expression ------------------------------------------------------------
+set_expr_scoring -max_expr_terms 2048
+set_expr_coverable_operators -bitwise -relational -reduction -logical_not
+set_expr_coverable_statements -all
+set_optimize -top_expr_non_scorable
+
+// --- Toggle ----------------------------------------------------------------
+set_toggle_includez
+set_toggle_scoring -sv_enum
+set_toggle_scoring -sv_mda 16 -regeot
+
+// --- FSM -------------------------------------------------------------------
+// Matters for this design: init_fsm and calibration are the autonomous blocks
+// behind the five deferred paths, and the spec's INIT_001/INIT_002 failure
+// categories are ordering properties over their states.
+set_fsm_scoring -hold_transition on
+
+// --- Misc ------------------------------------------------------------------
+set_parameterized_module_coverage
+set_libcell_scoring -enable_vy
+set_subprogram_scoring -all -svpackage
+set_refinement_resilience

@@ -1,0 +1,24 @@
+# Generated per-run / per-drop artifacts. Everything here is reproduced by the
+# tools; only the inputs (spec, catalog, rules, models) and the reports worth
+# keeping (findings, coverage numbers, path verdicts) are versioned.
+sequences/generated/runs/
+sequences/generated/*_vm*.json
+sequences/generated/*_seed*.json
+sequences/generated/*.sv
+txn/generated/monitors/chain_monitors_bind.sv
+txn/generated/monitors/*_monitors_bind.sv
+reports/vmanager_session/
+reports/paths/*_sim.log
+reports/paths/*_observed.jsonl
+reports/scopes/*/*_sim.log
+reports/scopes/*/*_observed.jsonl
+_archive_legacy/
+setup.env
+
+# Presentation layer, not the system: the cockpit and any rendered HTML /
+# slide material are regenerated from the JSON reports (dashboard_gen.py) and
+# stay local. The machine-readable reports, findings and coverage JSON are the
+# record of what ran; those are versioned.
+reports/*.html
+reports/slides/
+tools/dashboard_gen.py

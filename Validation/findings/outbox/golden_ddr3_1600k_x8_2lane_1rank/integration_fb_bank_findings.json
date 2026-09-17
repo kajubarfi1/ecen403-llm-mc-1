@@ -1,0 +1,35 @@
+{
+  "$schema": "validation-findings/1",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "finding_count": 1,
+  "findings": [
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "rtl_bug",
+      "scope": "cmd_gen",
+      "severity": "major",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "cmd_gen's bank-tracker feedback carries no bank for PRE/RD/WR",
+      "detail": "cmd_gen emits fb_act_valid/fb_act_bank/fb_act_row for ACTIVATE, but its fb_pre_valid, fb_rd_valid and fb_wr_valid pulses carry no bank number, while bank_tracker's inputs require cmd_pre_bank, cmd_rd_bank and cmd_wr_bank to track per-bank state. The two blocks' interfaces do not compose: no wiring of the existing ports can tell bank_tracker WHICH bank a precharge/read/write hit. The validation integration harness works around it with testbench glue (the scheduler's cmd_bank registered one cycle to align with the registered fb pulses \u2014 integration_map.json 'glue'), but the design needs fb_pre_bank, fb_rd_bank and fb_wr_bank outputs (or a unified command feedback bus) for the blocks to integrate without glue.",
+      "evidence": {
+        "cmd_gen_outputs": [
+          "fb_act_valid",
+          "fb_act_bank",
+          "fb_act_row",
+          "fb_pre_valid",
+          "fb_rd_valid",
+          "fb_wr_valid",
+          "fb_ref_valid"
+        ],
+        "bank_tracker_inputs_unserved": [
+          "cmd_pre_bank",
+          "cmd_rd_bank",
+          "cmd_wr_bank"
+        ],
+        "workaround": "Validation/structural/integration_map.json glue entry"
+      },
+      "status": "open"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "validation-waivers/1",
+  "waivers": [
+    {
+      "id": "W-001",
+      "scope": "config_regs",
+      "iface": "csr_rsp",
+      "kind": "read_data",
+      "field_name": "data",
+      "reason": "The specification does not define what data accompanies an errored CSR read: the terms 'unmapped', 'unimplemented', 'decode_error' and 'undefined address' appear nowhere in it. The design returns 0xDEADBEEF and a spec-derived model returns 0; both are consistent with a spec that is silent. Comparing the field would assert a requirement the specification never states. The error indication itself IS compared and agrees on every occurrence, so the checked claim remains 'an unmapped access is reported as an error'.",
+      "approved_by": "Jacob Zatopek",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "approved_utc": "2026-09-03T17:02:43.889633+00:00",
+      "when": {
+        "err": 1
+      },
+      "vplan_items": [
+        "VP_CSR_006"
+      ],
+      "pending_spec_change": true,
+      "resolves_when": "The spec states the read data for an unmapped address \u2014 either a defined value, or an explicit 'undefined', which would make this waiver permanent rather than pending."
+    }
+  ]
+}

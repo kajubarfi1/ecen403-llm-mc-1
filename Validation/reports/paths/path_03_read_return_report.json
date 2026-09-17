@@ -1,0 +1,67 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_03_read_return",
+  "strategy": "composed",
+  "verdict": "fail",
+  "timestamp": "2026-09-17T11:37:53.249284",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_03_read_return_seed1.json",
+  "stages": [
+    {
+      "stage": "data_path",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/data_path_predictor.py",
+      "scope": "data_path",
+      "verdict": "fail",
+      "summary": "scope=data_path  strategy=exact  status=fail  matched=89/554  missing=446 unexpected=174 value=19  violations=272",
+      "detail": [
+        "  x_value: dp_rd_rsp.response seq=476 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  x_value: dp_rd_rsp.response seq=480 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  x_value: dp_rd_rsp.response seq=512 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  x_value: dp_rd_rsp.response seq=516 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  x_value: dp_rd_rsp.response seq=540 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  x_value: dp_rd_rsp.response seq=545 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  x_value: dp_rd_rsp.response seq=571 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  x_value: dp_rd_rsp.response seq=576 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  x_value: dp_rd_rsp.response seq=864 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  x_value: dp_rd_rsp.response seq=868 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  x_value: dp_rd_rsp.response seq=892 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  x_value: dp_rd_rsp.response seq=896 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]"
+      ]
+    },
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "fail",
+      "summary": "scope=wb_port  strategy=exact  status=fail  matched=251/1108  missing=272 value=585  violations=272",
+      "detail": [
+        "  x_value: wb_rsp.read_data seq=474 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x36 data=None]",
+        "  x_value: wb_rsp.read_data seq=478 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x36 data=None]",
+        "  x_value: wb_rsp.read_data seq=510 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x1c data=None]",
+        "  x_value: wb_rsp.read_data seq=514 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x1c data=None]",
+        "  x_value: wb_rsp.read_data seq=538 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x1c data=None]",
+        "  x_value: wb_rsp.read_data seq=542 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x1d data=None]",
+        "  x_value: wb_rsp.read_data seq=568 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x1c data=None]",
+        "  x_value: wb_rsp.read_data seq=574 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x1c data=None]",
+        "  x_value: wb_rsp.read_data seq=862 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x32 data=None]",
+        "  x_value: wb_rsp.read_data seq=866 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x32 data=None]",
+        "  x_value: wb_rsp.read_data seq=890 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x32 data=None]",
+        "  x_value: wb_rsp.read_data seq=894 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x32 data=None]"
+      ]
+    }
+  ],
+  "log": "Validation/reports/paths/path_03_read_return_sim.log",
+  "observed_trace": "Validation/reports/paths/path_03_read_return_observed.jsonl"
+}

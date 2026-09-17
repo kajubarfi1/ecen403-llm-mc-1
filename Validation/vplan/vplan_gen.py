@@ -155,6 +155,17 @@ def derive_csr_items(spec):
     return items
 
 
+def _max_interval_params():
+    """Timing parameters the SVA catalog treats as MAXIMUM intervals (tREFI)
+    rather than minimum separations; their boundary item reads differently."""
+    rules = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
+                         "sva", "sva_rules.json")
+    if not os.path.exists(rules):
+        return set()
+    with open(rules) as f:
+        return {r["param"] for r in json.load(f).get("max_interval_rules", [])}
+
+
 def derive_timing_items(spec):
     """Timing coverage items bound to the TIMING_* assertions.
 
@@ -175,14 +186,25 @@ def derive_timing_items(spec):
             if cat["name"].lower().startswith(param.lower() + " "):
                 fail_id = cat["id"]
                 break
+        if param in _max_interval_params():
+            # A maximum interval (tREFI) is approached from the other side:
+            # the boundary is a refresh POSTPONED past the interval, legal up
+            # to the spec's postpone budget.
+            req = (f"Stimulus shall drive the {param} interval to its boundary "
+                   f"({cycles} cycles at tCK={tm['tCK_ns']}ns): refreshes both "
+                   f"within the interval and postponed past it (within the "
+                   f"spec's postpone budget), so the maximum-interval assertion "
+                   f"is non-vacuous.")
+        else:
+            req = (f"Stimulus shall drive the {param} constraint to its boundary "
+                   f"({cycles} cycles at tCK={tm['tCK_ns']}ns), including the "
+                   f"exact-minimum legal spacing, so the corresponding assertion "
+                   f"is non-vacuous.")
         items.append(OrderedDict([
             ("id", f"VP_TIME_{idx:03d}"),
             ("title", f"{param} boundary exercised"),
             ("scope", "timing"),
-            ("requirement",
-             f"Stimulus shall drive the {param} constraint to its boundary "
-             f"({cycles} cycles at tCK={tm['tCK_ns']}ns), including the exact-minimum "
-             f"legal spacing, so the corresponding assertion is non-vacuous."),
+            ("requirement", req),
             ("spec_ref", f"timing_model.$derived_cycles.{key}"),
             ("failure_ref", fail_id),
             ("method", "random"),
