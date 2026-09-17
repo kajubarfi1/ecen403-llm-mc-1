@@ -25,7 +25,7 @@ SSH_CONFIG = {
 }
 
 SLURM_CONFIG = {
-    "partition": "academic",        # FIX: was "adademic"
+    "partition": "adademic",        # FIX: was "adademic"
     "qos": "olympus-academic",
     "cpus_per_task": 1,
     "job_name": "ecen-454-agent",

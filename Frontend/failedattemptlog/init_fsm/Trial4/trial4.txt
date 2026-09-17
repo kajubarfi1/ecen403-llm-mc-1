@@ -1,0 +1,78 @@
+TOOL:	xrun	25.03-s001: Started on Apr 15, 2026 at 18:38:16 EDT
+xrun: 25.03-s001: (c) Copyright 1995-2025 Cadence Design Systems, Inc.
+	Top level design units:
+		init_fsm_tb
+Loading snapshot worklib.init_fsm_tb:sv .................... Done
+xcelium> source /xcelium25.03/tools/xcelium/files/xmsimrc
+xcelium> run
+
+==========================================================
+  init_fsm_tb -- Enhanced JEDEC DDR3 Init Verification
+  Clock: 200.0 MHz (5.0 ns)    VCD: init_fsm_tb.vcd
+  Total sections: A-I (~35 tests)
+==========================================================
+
+  -- Section A: Normal Init Sequence --
+  [PASS] 1: A1: init_done asserted
+  [PASS] 2: A2: init_fail never asserted
+  [FAIL] 3: A3: FSM reached S_DONE (state=14)
+  [PASS] 4: A4: RESET# hold >= 40000 cyc [got 40000]
+  [PASS] 5: A5: CKE delay >= 100000 cyc [delta=100000]
+  [PASS] 6: A6: Exactly 4 MRS commands [got 4]
+  [PASS] 7: A7: MR order MR2(2)->MR3(3)->MR1(1)->MR0(0)
+
+  -- Section B: MR Register Values --
+  [PASS] 8: B1: MR2 addr = 0x0218 [exp 0x0218]
+  [PASS] 9: B2: MR3 addr = 0x0000 [exp 0x0000]
+  [PASS] 10: B3: MR1 addr = 0x0004 [exp 0x0004]
+  [PASS] 11: B4: MR0 addr = 0x1d34 [exp 0x1D34]
+  [PASS] 12: B5: All 4 MRS used CMD_MRS encoding (4'b0000)
+
+  -- Section C: ZQCL Command --
+  [PASS] 13: C1: ZQCL command issued
+  [PASS] 14: C2: ZQCL A10 = 1 (long calibration)
+  [PASS] 15: C3: ZQCL bank = 0
+
+  -- Section D: Signal Integrity --
+  [FAIL] 16: D1: No spurious cmd_valid in wait states [3 violations]
+  [FAIL] 17: D2: CKE low during RESET_LOW/HIGH [34 violations]
+  [FAIL] 18: D3: RESET# low in IDLE/RESET_LOW [100000 violations]
+  [FAIL] 19: D4: init_done only in S_DONE [5 violations]
+  [PASS] 20: D5: init_done is level (still high in S_DONE)
+  [FAIL] 21: D6: init_state output = 9 (expect 14)
+
+  -- Section E: Reset / Idle Behavior --
+  [PASS] 22: E1: FSM stays S_IDLE without enable
+  [PASS] 23: E2: init_done low in IDLE
+  [PASS] 24: E3: init_fail low in IDLE
+  [PASS] 25: E4: RESET# low in IDLE
+  [PASS] 26: E5: CKE low in IDLE
+  [PASS] 27: E6: cmd_valid low in IDLE
+
+  -- Section F: Enable Deassert Mid-Init --
+  [PASS] 28: F1: Init completes after enable deasserted
+  [PASS] 29: F2: init_fail not asserted
+
+  -- Section G: Reset Mid-Init --
+  [PASS] 30: G1: FSM returns to S_IDLE on async reset
+  [PASS] 31: G2: init_done deasserted after reset
+  [PASS] 32: G3: Re-init completes after mid-init reset
+  [PASS] 33: G4: MR order correct on re-init
+
+  -- Section H: Re-Init After Done --
+  [PASS] 34: H1: Second init completes
+  [PASS] 35: H2: 4 MRS on re-init [got 4]
+  [PASS] 36: H3: ZQCL issued on re-init
+
+  -- Section I: Late Enable --
+  [PASS] 37: I1: FSM still IDLE after 500 cyc no enable
+  [PASS] 38: I2: Init completes with late enable
+
+==========================================================
+  6 of 38 TESTS FAILED
+==========================================================
+
+Simulation complete via $finish(1) at time 4207322500 PS + 0
+./testbench.sv:482         $finish;
+xcelium> exit
+TOOL:	xrun	25.03-s001: Exiting on Apr 15, 2026 at 18:38:19 EDT  (total: 00:00:03)

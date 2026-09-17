@@ -1,19 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////
-// Module:    config_regs
-// File:      config_regs.sv
-// Generated: 2026-04-03 12:54:28
-// Agent:     Config/CSR Registers Agent (Phase 1)
-// Spec:      ddr3_mc_core_v2 rev golden_ddr3_1600k_x8_2lane_1rank
-// Schema:    2.0.0
-//
-// Description:
-//   11 CSR registers, 46 bit fields.
-//   Wishbone B4 classic slave on secondary CSR bus.
-//   Access types: RO, RW, RW1C, WO (self-clearing).
-//
-// Validation: CA-001 .. CA-004
-////////////////////////////////////////////////////////////////////////////////
-
 module config_regs #(
     parameter CSR_ADDR_W = 8,
     parameter CSR_DATA_W = 32
@@ -64,62 +48,121 @@ module config_regs #(
     output logic [28:0] cfg_bist_addr_start, output logic [28:0] cfg_bist_addr_end
 );
 
-    localparam logic [CSR_ADDR_W-1:0] ADDR_CTRL_STATUS          = 8'h00;
-    localparam logic [CSR_ADDR_W-1:0] ADDR_CTRL_CONFIG          = 8'h04;
-    localparam logic [CSR_ADDR_W-1:0] ADDR_TIMING_0             = 8'h08;
-    localparam logic [CSR_ADDR_W-1:0] ADDR_TIMING_1             = 8'h0C;
-    localparam logic [CSR_ADDR_W-1:0] ADDR_TIMING_2             = 8'h10;
-    localparam logic [CSR_ADDR_W-1:0] ADDR_TIMING_3             = 8'h14;
-    localparam logic [CSR_ADDR_W-1:0] ADDR_REFRESH_CONFIG       = 8'h18;
-    localparam logic [CSR_ADDR_W-1:0] ADDR_ERROR_STATUS         = 8'h1C;
-    localparam logic [CSR_ADDR_W-1:0] ADDR_BIST_CONFIG          = 8'h20;
-    localparam logic [CSR_ADDR_W-1:0] ADDR_BIST_ADDR_START      = 8'h24;
-    localparam logic [CSR_ADDR_W-1:0] ADDR_BIST_ADDR_END        = 8'h28;
+    // ========================================================================
+    // Register Address Map
+    // ========================================================================
+    localparam logic [7:0] ADDR_CTRL_STATUS          = 8'h00;
+    localparam logic [7:0] ADDR_CTRL_CONFIG          = 8'h04;
+    localparam logic [7:0] ADDR_TIMING_0             = 8'h08;
+    localparam logic [7:0] ADDR_TIMING_1             = 8'h0C;
+    localparam logic [7:0] ADDR_TIMING_2             = 8'h10;
+    localparam logic [7:0] ADDR_TIMING_3             = 8'h14;
+    localparam logic [7:0] ADDR_REFRESH_CONFIG       = 8'h18;
+    localparam logic [7:0] ADDR_ERROR_STATUS         = 8'h1C;
+    localparam logic [7:0] ADDR_BIST_CONFIG          = 8'h20;
+    localparam logic [7:0] ADDR_BIST_ADDR_START      = 8'h24;
+    localparam logic [7:0] ADDR_BIST_ADDR_END        = 8'h28;
 
-    logic [CSR_DATA_W-1:0] reg_ctrl_config;
-    logic [CSR_DATA_W-1:0] reg_timing_0;
-    logic [CSR_DATA_W-1:0] reg_timing_1;
-    logic [CSR_DATA_W-1:0] reg_timing_2;
-    logic [CSR_DATA_W-1:0] reg_timing_3;
-    logic [CSR_DATA_W-1:0] reg_refresh_config;
-    logic [CSR_DATA_W-1:0] reg_error_status;
-    logic [CSR_DATA_W-1:0] reg_bist_config;
-    logic [CSR_DATA_W-1:0] reg_bist_addr_start;
-    logic [CSR_DATA_W-1:0] reg_bist_addr_end;
+    // ========================================================================
+    // Register Storage
+    // ========================================================================
+    logic [31:0] reg_ctrl_config;
+    logic [31:0] reg_timing_0;
+    logic [31:0] reg_timing_1;
+    logic [31:0] reg_timing_2;
+    logic [31:0] reg_timing_3;
+    logic [31:0] reg_refresh_config;
+    logic [31:0] reg_error_status;
+    logic [31:0] reg_bist_config;
+    logic [31:0] reg_bist_addr_start;
+    logic [31:0] reg_bist_addr_end;
 
+    // ========================================================================
+    // Wishbone Bus Decode
+    // ========================================================================
     wire csr_req = csr_cyc_i & csr_stb_i;
     wire csr_wr  = csr_req & csr_we_i;
     wire csr_rd  = csr_req & ~csr_we_i;
+
+    // Address decode
+    logic addr_valid;
+    always_comb begin
+        addr_valid = 1'b0;
+        case (csr_adr_i)
+            ADDR_CTRL_STATUS,
+            ADDR_CTRL_CONFIG,
+            ADDR_TIMING_0,
+            ADDR_TIMING_1,
+            ADDR_TIMING_2,
+            ADDR_TIMING_3,
+            ADDR_REFRESH_CONFIG,
+            ADDR_ERROR_STATUS,
+            ADDR_BIST_CONFIG,
+            ADDR_BIST_ADDR_START,
+            ADDR_BIST_ADDR_END: addr_valid = 1'b1;
+            default: addr_valid = 1'b0;
+        endcase
+    end
+
+    // ========================================================================
+    // ACK Generation
+    // ========================================================================
     logic ack_r;
     always_ff @(posedge clk or negedge rst_n)
         if (!rst_n) ack_r <= 1'b0;
         else        ack_r <= csr_req & ~ack_r;
     assign csr_ack_o = ack_r;
 
-    logic addr_valid;
-    always_comb begin
-        addr_valid = 1'b0;
-        case (csr_adr_i)
-            ADDR_CTRL_STATUS         : addr_valid = 1'b1;
-            ADDR_CTRL_CONFIG         : addr_valid = 1'b1;
-            ADDR_TIMING_0            : addr_valid = 1'b1;
-            ADDR_TIMING_1            : addr_valid = 1'b1;
-            ADDR_TIMING_2            : addr_valid = 1'b1;
-            ADDR_TIMING_3            : addr_valid = 1'b1;
-            ADDR_REFRESH_CONFIG      : addr_valid = 1'b1;
-            ADDR_ERROR_STATUS        : addr_valid = 1'b1;
-            ADDR_BIST_CONFIG         : addr_valid = 1'b1;
-            ADDR_BIST_ADDR_START     : addr_valid = 1'b1;
-            ADDR_BIST_ADDR_END       : addr_valid = 1'b1;
-            default: addr_valid = 1'b0;
-        endcase
-    end
+    // ========================================================================
+    // Error Generation
+    // ========================================================================
     logic err_r;
     always_ff @(posedge clk or negedge rst_n)
         if (!rst_n) err_r <= 1'b0;
         else        err_r <= csr_req & ~addr_valid & ~ack_r;
     assign csr_err_o = err_r;
 
+    // ========================================================================
+    // Read Data Mux
+    // ========================================================================
+    logic [31:0] rdata_mux;
+    always_comb begin
+        rdata_mux = 32'h0;
+        case (csr_adr_i)
+            ADDR_CTRL_STATUS: begin
+                rdata_mux = {23'b0,
+                             sts_self_refresh_active,
+                             sts_ref_pending_cnt,
+                             sts_bist_fail,
+                             sts_bist_done,
+                             sts_cal_fail,
+                             sts_cal_done,
+                             sts_init_done};
+            end
+            ADDR_CTRL_CONFIG:       rdata_mux = reg_ctrl_config;
+            ADDR_TIMING_0:          rdata_mux = reg_timing_0;
+            ADDR_TIMING_1:          rdata_mux = reg_timing_1;
+            ADDR_TIMING_2:          rdata_mux = reg_timing_2;
+            ADDR_TIMING_3:          rdata_mux = reg_timing_3;
+            ADDR_REFRESH_CONFIG:    rdata_mux = reg_refresh_config;
+            ADDR_ERROR_STATUS:      rdata_mux = reg_error_status;
+            ADDR_BIST_CONFIG:       rdata_mux = reg_bist_config;
+            ADDR_BIST_ADDR_START:   rdata_mux = reg_bist_addr_start;
+            ADDR_BIST_ADDR_END:     rdata_mux = reg_bist_addr_end;
+            default:                rdata_mux = 32'h0;
+        endcase
+    end
+
+    // ========================================================================
+    // Read Data Output
+    // ========================================================================
+    always_ff @(posedge clk or negedge rst_n)
+        if (!rst_n) csr_dat_o <= 32'h0;
+        else if (csr_rd) csr_dat_o <= rdata_mux;
+
+    // ========================================================================
+    // Register Write Logic
+    // ========================================================================
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             reg_ctrl_config <= 32'h00000009;
@@ -133,137 +176,120 @@ module config_regs #(
             reg_bist_addr_start <= 32'h00000000;
             reg_bist_addr_end <= 32'h1FFFFFFF;
         end else begin
-            reg_ctrl_config[5:5] <= 1'b0;  // bist_start WO self-clear
-            reg_ctrl_config[6:6] <= 1'b0;  // force_refresh WO self-clear
-            reg_ctrl_config[7:7] <= 1'b0;  // force_self_ref WO self-clear
-            if (sts_ecc_ue_event) reg_error_status[16] <= 1'b1;
-            if (sts_ref_starve_event) reg_error_status[17] <= 1'b1;
-            if (sts_init_fail_event) reg_error_status[18] <= 1'b1;
+            // Self-clearing write-only bits
+            reg_ctrl_config[5] <= 1'b0;  // bist_start
+            reg_ctrl_config[6] <= 1'b0;  // force_refresh
+            reg_ctrl_config[7] <= 1'b0;  // force_self_ref
+
+            // RW1C error status flags - latch on event
+            if (sts_ecc_ue_event)
+                reg_error_status[16] <= 1'b1;
+            if (sts_ref_starve_event)
+                reg_error_status[17] <= 1'b1;
+            if (sts_init_fail_event)
+                reg_error_status[18] <= 1'b1;
+
+            // RO fields in ERROR_STATUS
+            reg_error_status[15:0] <= sts_ecc_ce_count;
+            reg_error_status[31:19] <= sts_bist_fail_addr;
+
+            // Write operations
             if (csr_wr && addr_valid) begin
                 case (csr_adr_i)
                     ADDR_CTRL_CONFIG: begin
-                        reg_ctrl_config[0] <= csr_dat_i[0];  // sched_policy
-                        reg_ctrl_config[1] <= csr_dat_i[1];  // row_policy
-                        reg_ctrl_config[3:2] <= csr_dat_i[3:2];  // self_ref_mode
-                        reg_ctrl_config[4] <= csr_dat_i[4];  // ecc_enable
-                        reg_ctrl_config[5] <= csr_dat_i[5];  // bist_start
-                        reg_ctrl_config[6] <= csr_dat_i[6];  // force_refresh
-                        reg_ctrl_config[7] <= csr_dat_i[7];  // force_self_ref
+                        if (csr_sel_i[0]) reg_ctrl_config[7:0]   <= csr_dat_i[7:0];
+                        if (csr_sel_i[1]) reg_ctrl_config[15:8]  <= csr_dat_i[15:8];
+                        if (csr_sel_i[2]) reg_ctrl_config[23:16] <= csr_dat_i[23:16];
+                        if (csr_sel_i[3]) reg_ctrl_config[31:24] <= csr_dat_i[31:24];
                     end
                     ADDR_TIMING_0: begin
-                        reg_timing_0[7:0] <= csr_dat_i[7:0];  // tRCD_nCK
-                        reg_timing_0[15:8] <= csr_dat_i[15:8];  // tRP_nCK
-                        reg_timing_0[23:16] <= csr_dat_i[23:16];  // tRAS_nCK
-                        reg_timing_0[31:24] <= csr_dat_i[31:24];  // tRC_nCK
+                        if (csr_sel_i[0]) reg_timing_0[7:0]   <= csr_dat_i[7:0];
+                        if (csr_sel_i[1]) reg_timing_0[15:8]  <= csr_dat_i[15:8];
+                        if (csr_sel_i[2]) reg_timing_0[23:16] <= csr_dat_i[23:16];
+                        if (csr_sel_i[3]) reg_timing_0[31:24] <= csr_dat_i[31:24];
                     end
                     ADDR_TIMING_1: begin
-                        reg_timing_1[7:0] <= csr_dat_i[7:0];  // tRRD_nCK
-                        reg_timing_1[15:8] <= csr_dat_i[15:8];  // tWTR_nCK
-                        reg_timing_1[23:16] <= csr_dat_i[23:16];  // tFAW_nCK
-                        reg_timing_1[31:24] <= csr_dat_i[31:24];  // tRFC_nCK
+                        if (csr_sel_i[0]) reg_timing_1[7:0]   <= csr_dat_i[7:0];
+                        if (csr_sel_i[1]) reg_timing_1[15:8]  <= csr_dat_i[15:8];
+                        if (csr_sel_i[2]) reg_timing_1[23:16] <= csr_dat_i[23:16];
+                        if (csr_sel_i[3]) reg_timing_1[31:24] <= csr_dat_i[31:24];
                     end
                     ADDR_TIMING_2: begin
-                        reg_timing_2[7:0] <= csr_dat_i[7:0];  // tWR_nCK
-                        reg_timing_2[15:8] <= csr_dat_i[15:8];  // tRTP_nCK
-                        reg_timing_2[23:16] <= csr_dat_i[23:16];  // CL_nCK
-                        reg_timing_2[31:24] <= csr_dat_i[31:24];  // CWL_nCK
+                        if (csr_sel_i[0]) reg_timing_2[7:0]   <= csr_dat_i[7:0];
+                        if (csr_sel_i[1]) reg_timing_2[15:8]  <= csr_dat_i[15:8];
+                        if (csr_sel_i[2]) reg_timing_2[23:16] <= csr_dat_i[23:16];
+                        if (csr_sel_i[3]) reg_timing_2[31:24] <= csr_dat_i[31:24];
                     end
                     ADDR_TIMING_3: begin
-                        reg_timing_3[7:0] <= csr_dat_i[7:0];  // tCCD_nCK
-                        reg_timing_3[31:8] <= csr_dat_i[31:8];  // tREFI_nCK
+                        if (csr_sel_i[0]) reg_timing_3[7:0]   <= csr_dat_i[7:0];
+                        if (csr_sel_i[1]) reg_timing_3[15:8]  <= csr_dat_i[15:8];
+                        if (csr_sel_i[2]) reg_timing_3[23:16] <= csr_dat_i[23:16];
+                        if (csr_sel_i[3]) reg_timing_3[31:24] <= csr_dat_i[31:24];
                     end
                     ADDR_REFRESH_CONFIG: begin
-                        reg_refresh_config[3:0] <= csr_dat_i[3:0];  // max_postpone
-                        reg_refresh_config[7:4] <= csr_dat_i[7:4];  // urgent_threshold
-                        reg_refresh_config[8] <= csr_dat_i[8];  // ref_priority
+                        if (csr_sel_i[0]) reg_refresh_config[7:0]   <= csr_dat_i[7:0];
+                        if (csr_sel_i[1]) reg_refresh_config[15:8]  <= csr_dat_i[15:8];
+                        if (csr_sel_i[2]) reg_refresh_config[23:16] <= csr_dat_i[23:16];
+                        if (csr_sel_i[3]) reg_refresh_config[31:24] <= csr_dat_i[31:24];
                     end
                     ADDR_ERROR_STATUS: begin
-                        if (csr_dat_i[16]) reg_error_status[16] <= 1'b0;
-                        if (csr_dat_i[17]) reg_error_status[17] <= 1'b0;
-                        if (csr_dat_i[18]) reg_error_status[18] <= 1'b0;
+                        // RW1C: clear on write-1
+                        if (csr_sel_i[2]) begin
+                            if (csr_dat_i[16]) reg_error_status[16] <= 1'b0;
+                            if (csr_dat_i[17]) reg_error_status[17] <= 1'b0;
+                            if (csr_dat_i[18]) reg_error_status[18] <= 1'b0;
+                        end
                     end
                     ADDR_BIST_CONFIG: begin
-                        reg_bist_config[2:0] <= csr_dat_i[2:0];  // bist_pattern
-                        reg_bist_config[3] <= csr_dat_i[3];  // bist_addr_mode
+                        if (csr_sel_i[0]) reg_bist_config[7:0]   <= csr_dat_i[7:0];
+                        if (csr_sel_i[1]) reg_bist_config[15:8]  <= csr_dat_i[15:8];
+                        if (csr_sel_i[2]) reg_bist_config[23:16] <= csr_dat_i[23:16];
+                        if (csr_sel_i[3]) reg_bist_config[31:24] <= csr_dat_i[31:24];
                     end
                     ADDR_BIST_ADDR_START: begin
-                        reg_bist_addr_start[28:0] <= csr_dat_i[28:0];  // start_addr
+                        if (csr_sel_i[0]) reg_bist_addr_start[7:0]   <= csr_dat_i[7:0];
+                        if (csr_sel_i[1]) reg_bist_addr_start[15:8]  <= csr_dat_i[15:8];
+                        if (csr_sel_i[2]) reg_bist_addr_start[23:16] <= csr_dat_i[23:16];
+                        if (csr_sel_i[3]) reg_bist_addr_start[31:24] <= csr_dat_i[31:24];
                     end
                     ADDR_BIST_ADDR_END: begin
-                        reg_bist_addr_end[28:0] <= csr_dat_i[28:0];  // end_addr
+                        if (csr_sel_i[0]) reg_bist_addr_end[7:0]   <= csr_dat_i[7:0];
+                        if (csr_sel_i[1]) reg_bist_addr_end[15:8]  <= csr_dat_i[15:8];
+                        if (csr_sel_i[2]) reg_bist_addr_end[23:16] <= csr_dat_i[23:16];
+                        if (csr_sel_i[3]) reg_bist_addr_end[31:24] <= csr_dat_i[31:24];
                     end
-                    default: ;
+                    default: begin
+                        // CTRL_STATUS is read-only, writes ignored
+                    end
                 endcase
             end
         end
     end
 
-    logic [CSR_DATA_W-1:0] rdata_mux;
-    always_comb begin
-        rdata_mux = 32'h0;
-        case (csr_adr_i)
-            ADDR_CTRL_STATUS: begin
-                rdata_mux = 32'h0;
-                rdata_mux[0] = sts_init_done;
-                rdata_mux[1] = sts_cal_done;
-                rdata_mux[2] = sts_cal_fail;
-                rdata_mux[3] = sts_bist_done;
-                rdata_mux[4] = sts_bist_fail;
-                rdata_mux[7:5] = sts_ref_pending_cnt;
-                rdata_mux[8] = sts_self_refresh_active;
-                rdata_mux[31:9] = 23'b0;
-            end
-            ADDR_CTRL_CONFIG: begin
-                rdata_mux = reg_ctrl_config;
-            end
-            ADDR_TIMING_0: begin
-                rdata_mux = reg_timing_0;
-            end
-            ADDR_TIMING_1: begin
-                rdata_mux = reg_timing_1;
-            end
-            ADDR_TIMING_2: begin
-                rdata_mux = reg_timing_2;
-            end
-            ADDR_TIMING_3: begin
-                rdata_mux = reg_timing_3;
-            end
-            ADDR_REFRESH_CONFIG: begin
-                rdata_mux = reg_refresh_config;
-            end
-            ADDR_ERROR_STATUS: begin
-                rdata_mux = reg_error_status;
-            end
-            ADDR_BIST_CONFIG: begin
-                rdata_mux = reg_bist_config;
-            end
-            ADDR_BIST_ADDR_START: begin
-                rdata_mux = reg_bist_addr_start;
-            end
-            ADDR_BIST_ADDR_END: begin
-                rdata_mux = reg_bist_addr_end;
-            end
-            default: rdata_mux = 32'hDEAD_BEEF;
-        endcase
-    end
-    always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n) csr_dat_o <= 32'h0;
-        else if (csr_rd) csr_dat_o <= rdata_mux;
-
-    assign cfg_tRCD_nCK = reg_timing_0[7:0];   assign cfg_tRP_nCK  = reg_timing_0[15:8];
-    assign cfg_tRAS_nCK = reg_timing_0[23:16];  assign cfg_tRC_nCK  = reg_timing_0[31:24];
-    assign cfg_tRRD_nCK = reg_timing_1[7:0];   assign cfg_tWTR_nCK = reg_timing_1[15:8];
-    assign cfg_tFAW_nCK = reg_timing_1[23:16];  assign cfg_tRFC_nCK = reg_timing_1[31:24];
-    assign cfg_tWR_nCK  = reg_timing_2[7:0];   assign cfg_tRTP_nCK = reg_timing_2[15:8];
-    assign cfg_CL_nCK   = reg_timing_2[23:16];  assign cfg_CWL_nCK  = reg_timing_2[31:24];
-    assign cfg_tCCD_nCK = reg_timing_3[7:0];   assign cfg_tREFI_nCK = reg_timing_3[31:8];
-    assign cfg_sched_policy   = reg_ctrl_config[0];
-    assign cfg_row_policy     = reg_ctrl_config[1];
-    assign cfg_self_ref_mode  = reg_ctrl_config[3:2];
-    assign cfg_ecc_enable     = reg_ctrl_config[4];
-    assign cfg_bist_start     = reg_ctrl_config[5];
-    assign cfg_force_refresh  = reg_ctrl_config[6];
-    assign cfg_force_self_ref = reg_ctrl_config[7];
+    // ========================================================================
+    // Config Output Assignments
+    // ========================================================================
+    assign cfg_tRCD_nCK         = reg_timing_0[7:0];
+    assign cfg_tRP_nCK          = reg_timing_0[15:8];
+    assign cfg_tRAS_nCK         = reg_timing_0[23:16];
+    assign cfg_tRC_nCK          = reg_timing_0[31:24];
+    assign cfg_tRRD_nCK         = reg_timing_1[7:0];
+    assign cfg_tWTR_nCK         = reg_timing_1[15:8];
+    assign cfg_tFAW_nCK         = reg_timing_1[23:16];
+    assign cfg_tRFC_nCK         = reg_timing_1[31:24];
+    assign cfg_tWR_nCK          = reg_timing_2[7:0];
+    assign cfg_tRTP_nCK         = reg_timing_2[15:8];
+    assign cfg_CL_nCK           = reg_timing_2[23:16];
+    assign cfg_CWL_nCK          = reg_timing_2[31:24];
+    assign cfg_tCCD_nCK         = reg_timing_3[7:0];
+    assign cfg_tREFI_nCK        = reg_timing_3[31:8];
+    assign cfg_sched_policy     = reg_ctrl_config[0];
+    assign cfg_row_policy       = reg_ctrl_config[1];
+    assign cfg_self_ref_mode    = reg_ctrl_config[3:2];
+    assign cfg_ecc_enable       = reg_ctrl_config[4];
+    assign cfg_bist_start       = reg_ctrl_config[5];
+    assign cfg_force_refresh    = reg_ctrl_config[6];
+    assign cfg_force_self_ref   = reg_ctrl_config[7];
     assign cfg_max_postpone     = reg_refresh_config[3:0];
     assign cfg_urgent_threshold = reg_refresh_config[7:4];
     assign cfg_ref_priority     = reg_refresh_config[8];
@@ -272,26 +298,22 @@ module config_regs #(
     assign cfg_bist_addr_start  = reg_bist_addr_start[28:0];
     assign cfg_bist_addr_end    = reg_bist_addr_end[28:0];
 
+    // ========================================================================
+    // SVA Assertions
+    // ========================================================================
     // synopsys translate_off
-    // synthesis translate_off
     property p_rw_retain;
+        logic [31:0] written_value;
         @(posedge clk) disable iff (!rst_n)
-        (csr_wr && csr_adr_i == ADDR_TIMING_0) |=> (reg_timing_0[7:0] == $past(csr_dat_i[7:0]));
+        (csr_wr && addr_valid && (csr_adr_i == ADDR_TIMING_0), written_value = csr_dat_i) |=> (reg_timing_0 == written_value);
     endproperty
-    assert property (p_rw_retain) else $error("[CA-001] RW register did not retain value");
+    assert property (p_rw_retain) else $error("TIMING_0 not retained after write");
+
     property p_bad_addr;
         @(posedge clk) disable iff (!rst_n)
         (csr_req && !addr_valid) |=> csr_err_o;
     endproperty
-    assert property (p_bad_addr) else $error("[CA-004] No error on invalid address");
-    covergroup cg_csr @(posedge clk);
-        option.per_instance = 1;
-        cp_write : coverpoint (csr_wr && addr_valid);
-        cp_read  : coverpoint (csr_rd && addr_valid);
-        cp_err   : coverpoint csr_err_o;
-    endgroup
-    cg_csr cg_inst = new();
-    // synthesis translate_on
+    assert property (p_bad_addr) else $error("Invalid address did not produce error");
     // synopsys translate_on
 
 endmodule

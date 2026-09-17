@@ -12,7 +12,7 @@
 |    PHASE1RTL/          .sv + _tb.sv + _manifest.json per module      |
 |    VALIDATIONREPORT/   validation reports + lint + sim reports        |
 |                                                                      |
-|  Modules: init_fsm, config_regs, wb_port                            |
+|  Modules: init_fsm (LLM), config_regs (LLM), wb_port (deterministic)|
 +======================================================================+
 """
 import json, os, sys, shutil, operator, glob, getpass, traceback
@@ -31,7 +31,7 @@ for _rel in [".", "Agents/Phase_1_Agents", "Agents/Phase_2_Agents",
 from langgraph.graph import StateGraph, END
 from wb_port_agent import WishbonePortAgent
 from config_regs_agent import ConfigRegsAgent
-from init_fsm_agent import InitFsmAgent
+from Frontend.Agents.init_fsm_agent import InitFsmAgent
 from phase1_validation_agent import ValidationAgent as Phase1ValidationAgent
 from lint_agent import LintAgent
 
@@ -63,6 +63,14 @@ def setup_output_dirs(base_dir):
     return dirs
 
 
+def _latest_retry_instructions(_old: dict, new: dict) -> dict:
+    """Reducer for retry_instructions: each validation pass fully replaces the
+    previous attempt's feedback. With operator.or_ a module that started passing
+    on a later attempt kept a stale 'fix these failures' entry forever, so it
+    would be regenerated against failures that no longer existed."""
+    return new
+
+
 class GraphState(TypedDict):
     spec_path: str
     output_dir: str
@@ -73,12 +81,23 @@ class GraphState(TypedDict):
     attempt: int
     validation_result: dict
     failed_modules: list
-    retry_instructions: Annotated[dict, operator.or_]
+    retry_instructions: Annotated[dict, _latest_retry_instructions]
     history: Annotated[list, operator.add]
     lint_result: dict
     sim_result: dict
     pipeline_status: str
     ssh_password: str
+
+
+# ===================================================
+# START NODE (fans out to 3 generators in parallel)
+# ===================================================
+def start(state: GraphState) -> dict:
+    """No-op entry node. Exists solely so the three generators
+    can be reached via parallel edges from a single entry point."""
+    attempt = state.get("attempt", 1)
+    print(f"\n  Starting Phase 1 generation (attempt {attempt})...")
+    return {}
 
 
 # ===================================================
@@ -94,24 +113,56 @@ def _log_gen(mod, attempt, instr):
 
 
 def gen_init_fsm(state: GraphState) -> dict:
-    _log_gen("init_fsm", state.get("attempt", 1), state.get("retry_instructions", {}).get("init_fsm"))
-    r = InitFsmAgent(state["spec_path"], state["phase1_rtl_dir"]).run()
-    return {"modules": {"init_fsm": r.get("manifest", {})},
-            "rtl_files": {"init_fsm": r.get("rtl_path", str(Path(state["phase1_rtl_dir"]) / "init_fsm.sv"))}}
+    attempt = state.get("attempt", 1)
+    ri = state.get("retry_instructions", {}).get("init_fsm")
+    _log_gen("init_fsm", attempt, ri)
+
+    # Pass retry_instructions so the LLM knows what failed
+    r = InitFsmAgent(
+        state["spec_path"],
+        state["phase1_rtl_dir"],
+        retry_instructions=ri,
+    ).run()
+
+    return {
+        "modules": {"init_fsm": r.get("manifest", {})},
+        "rtl_files": {"init_fsm": r.get("rtl_path",
+                      str(Path(state["phase1_rtl_dir"]) / "init_fsm.sv"))},
+    }
 
 
 def gen_config_regs(state: GraphState) -> dict:
-    _log_gen("config_regs", state.get("attempt", 1), state.get("retry_instructions", {}).get("config_regs"))
-    r = ConfigRegsAgent(state["spec_path"], state["phase1_rtl_dir"]).run()
-    return {"modules": {"config_regs": r.get("manifest", {})},
-            "rtl_files": {"config_regs": r.get("rtl_path", str(Path(state["phase1_rtl_dir"]) / "config_regs.sv"))}}
+    attempt = state.get("attempt", 1)
+    ri = state.get("retry_instructions", {}).get("config_regs")
+    _log_gen("config_regs", attempt, ri)
+
+    # Pass retry_instructions so the LLM knows what failed
+    r = ConfigRegsAgent(
+        state["spec_path"],
+        state["phase1_rtl_dir"],
+        retry_instructions=ri,
+    ).run()
+
+    return {
+        "modules": {"config_regs": r.get("manifest", {})},
+        "rtl_files": {"config_regs": r.get("rtl_path",
+                      str(Path(state["phase1_rtl_dir"]) / "config_regs.sv"))},
+    }
 
 
 def gen_wb_port(state: GraphState) -> dict:
-    _log_gen("wb_port", state.get("attempt", 1), state.get("retry_instructions", {}).get("wb_port"))
+    attempt = state.get("attempt", 1)
+    ri = state.get("retry_instructions", {}).get("wb_port")
+    _log_gen("wb_port", attempt, ri)
+
+    # wb_port is deterministic -- no retry_instructions needed
     r = WishbonePortAgent(state["spec_path"], state["phase1_rtl_dir"]).run()
-    return {"modules": {"wb_port": r.get("manifest", {})},
-            "rtl_files": {"wb_port": r.get("rtl_path", str(Path(state["phase1_rtl_dir"]) / "wb_port.sv"))}}
+
+    return {
+        "modules": {"wb_port": r.get("manifest", {})},
+        "rtl_files": {"wb_port": r.get("rtl_path",
+                      str(Path(state["phase1_rtl_dir"]) / "wb_port.sv"))},
+    }
 
 
 # ===================================================
@@ -290,7 +341,6 @@ def _write_behavioral_report(val_dir, sim_results, all_passed):
             L(f"")
             continue
 
-        # List all passing tests
         if pass_lines:
             L(f"  PASSING TESTS ({len(pass_lines)}):")
             L(f"  ----------------------------------------------------------------")
@@ -298,7 +348,6 @@ def _write_behavioral_report(val_dir, sim_results, all_passed):
                 L(f"    + {line}")
             L(f"")
 
-        # List all failing tests (prominently)
         if fail_lines:
             L(f"  FAILING TESTS ({len(fail_lines)}):")
             L(f"  ****************************************************************")
@@ -307,7 +356,6 @@ def _write_behavioral_report(val_dir, sim_results, all_passed):
             L(f"  ****************************************************************")
             L(f"")
 
-        # Assertion errors from Xcelium
         if assertion_errors:
             L(f"  XCELIUM ASSERTION ERRORS ({len(assertion_errors)}):")
             L(f"  ----------------------------------------------------------------")
@@ -315,7 +363,6 @@ def _write_behavioral_report(val_dir, sim_results, all_passed):
                 L(f"    ! {line}")
             L(f"")
 
-        # If failed with no parsed test lines, show raw output tail
         if status == "FAIL" and not fail_lines:
             full = result.get("full_output", "")
             if full:
@@ -328,7 +375,6 @@ def _write_behavioral_report(val_dir, sim_results, all_passed):
 
         L(f"")
 
-    # Summary table
     L(f"================================================================")
     L(f"  SUMMARY")
     L(f"================================================================")
@@ -381,7 +427,6 @@ def sim_gate(state: GraphState) -> dict:
     rtl_dir = Path(state["phase1_rtl_dir"])
     val_dir = Path(state["validation_dir"])
 
-    # Check if sim agent is available
     if not HAS_SIM_AGENT:
         print(f"  SKIP: paramiko not installed -- simulation skipped")
         print(f"  Install with: pip install paramiko")
@@ -390,7 +435,6 @@ def sim_gate(state: GraphState) -> dict:
             print(f"    xrun {mod}.sv {mod}_tb.sv -timescale 1ns/1ps -sysv -access +rw")
         return {"sim_result": {"status": "SKIPPED", "reason": "paramiko not installed"}}
 
-    # Check SSH credentials
     password = state.get("ssh_password", "")
     username = SSH_CONFIG.get("username", "")
     if not username:
@@ -398,7 +442,6 @@ def sim_gate(state: GraphState) -> dict:
         print(f"  Set OLYMPUS_USER env var or update SSH_CONFIG in pipeline")
         return {"sim_result": {"status": "SKIPPED", "reason": "no SSH username"}}
 
-    # Connect
     agent = CadenceSSHAgent(ssh_config=SSH_CONFIG)
     try:
         print(f"  Connecting to {SSH_CONFIG['hostname']} as {username}...")
@@ -409,12 +452,10 @@ def sim_gate(state: GraphState) -> dict:
         print(f"  Simulation can be run manually on the cluster.")
         return {"sim_result": {"status": "SKIPPED", "reason": f"SSH failed: {e}"}}
 
-    # Run simulations
     sim_results = {}
     all_passed = True
 
     try:
-        # Upload all RTL + TB files
         print(f"\n  Uploading files...")
         files_to_upload = []
         for mod in P1_MODULES:
@@ -429,13 +470,11 @@ def sim_gate(state: GraphState) -> dict:
             agent.upload_files(files_to_upload)
             print(f"  Uploaded {len(files_to_upload)} files")
 
-        # Run each module
         for mod in P1_MODULES:
             sv_file = f"{mod}.sv"
             tb_file = f"{mod}_tb.sv"
             log_file = f"{mod}_xrun.log"
 
-            # Check both files exist remotely
             check = agent._head_exec(f"ls {agent.work_dir}/{sv_file} {agent.work_dir}/{tb_file} 2>/dev/null")
             if check["exit_code"] != 0:
                 print(f"  SKIP: {mod} -- missing files on remote")
@@ -444,9 +483,6 @@ def sim_gate(state: GraphState) -> dict:
 
             print(f"\n  Running {mod}...")
 
-            # Run xrun AND read the log in a SINGLE srun call.
-            # This ensures everything happens on the same compute node.
-            # The log is created, then cat'd back through srun stdout.
             xrun_cmd = (
                 f"cd {agent.work_dir} && "
                 f"xrun {sv_file} {tb_file} "
@@ -464,17 +500,14 @@ def sim_gate(state: GraphState) -> dict:
             raw = result["stdout"]
             srun_stderr = result["stderr"]
 
-            # Parse: extract exit code and log content from the structured output
             exit_code = 1
             stdout = ""
 
             if "===XRUN_LOG_START===" in raw and "===XRUN_LOG_END===" in raw:
-                # Extract log content between markers
                 log_start = raw.index("===XRUN_LOG_START===") + len("===XRUN_LOG_START===")
                 log_end = raw.index("===XRUN_LOG_END===")
                 stdout = raw[log_start:log_end].strip()
 
-                # Extract exit code between EXIT markers
                 if "===XRUN_EXIT===" in raw:
                     exit_section = raw[raw.index("===XRUN_EXIT===") + len("===XRUN_EXIT==="):log_start - len("===XRUN_LOG_START===")]
                     for line in exit_section.strip().split("\n"):
@@ -482,7 +515,6 @@ def sim_gate(state: GraphState) -> dict:
                         if line.isdigit():
                             exit_code = int(line)
             else:
-                # Markers not found -- srun may have failed entirely
                 stdout = raw
                 print(f"    [DEBUG] No log markers found in srun output ({len(raw)} chars)")
                 if raw:
@@ -493,7 +525,6 @@ def sim_gate(state: GraphState) -> dict:
 
             print(f"    Read {len(stdout)} chars, exit={exit_code}")
 
-            # Parse results
             passed = False
             test_count = 0
             fail_count = 0
@@ -553,7 +584,6 @@ def sim_gate(state: GraphState) -> dict:
                 "log_file": f"{mod}_xrun.log",
             }
 
-        # Clean up
         agent.clean_work_dir()
 
     except Exception as e:
@@ -564,7 +594,6 @@ def sim_gate(state: GraphState) -> dict:
     finally:
         agent.disconnect()
 
-    # Write sim report (JSON)
     sim_report = {
         "status": "PASS" if all_passed else "FAIL",
         "modules": {m: {k: v for k, v in r.items() if k != "full_output"}
@@ -575,10 +604,8 @@ def sim_gate(state: GraphState) -> dict:
     report_path = val_dir / "sim_report.json"
     report_path.write_text(json.dumps(sim_report, indent=2))
 
-    # Write behavioral validation report (TXT)
     _write_behavioral_report(val_dir, sim_results, all_passed)
 
-    # Summary
     print(f"\n  {'=' * 50}")
     if all_passed:
         print(f"  SIM GATE PASSED -- all modules passed behavioral sim")
@@ -597,7 +624,6 @@ def sim_gate(state: GraphState) -> dict:
 def route_after_sim(state: GraphState) -> Literal["success", "sim_failure"]:
     sim = state.get("sim_result", {})
     status = sim.get("status", "SKIPPED")
-    # SKIPPED counts as pass (user can run manually)
     if status in ("PASS", "SKIPPED"):
         return "success"
     else:
@@ -674,7 +700,6 @@ def success(state: GraphState) -> dict:
 
 
 def _print_human_review_banner(failure_stage, state):
-    """Print a large, unmissable failure banner requiring human review."""
     vd = state.get("validation_dir", "VALIDATIONREPORT")
     rd = state.get("phase1_rtl_dir", "PHASE1RTL")
 
@@ -711,13 +736,11 @@ def _print_human_review_banner(failure_stage, state):
 
 
 def final_failure(state: GraphState) -> dict:
-    """Validation or lint failure after max retries."""
     failed = state.get("failed_modules", [])
     history = state.get("history", [])
     lint = state.get("lint_result", {})
     ri = state.get("retry_instructions", {})
 
-    # Determine failure stage
     if lint and lint.get("status") == "FAIL":
         failure_stage = "LINT GATE"
     elif failed:
@@ -764,7 +787,6 @@ def final_failure(state: GraphState) -> dict:
                   f"{h['overall']} ({h['passed']}/{h['total']}) -- failed: {fails}")
         print(f"  {'-' * 50}")
 
-    # Write error report
     report = {
         "status": "FAIL", "pipeline": "phase1",
         "failure_stage": failure_stage,
@@ -791,7 +813,6 @@ def final_failure(state: GraphState) -> dict:
 
 
 def sim_failure(state: GraphState) -> dict:
-    """Behavioral sim failure -- structural checks passed but RTL has bugs."""
     sim = state.get("sim_result", {})
     history = state.get("history", [])
 
@@ -858,6 +879,8 @@ def sim_failure(state: GraphState) -> dict:
 def build_graph():
     g = StateGraph(GraphState)
 
+    # Nodes
+    g.add_node("start", start)
     g.add_node("gen_init_fsm", gen_init_fsm)
     g.add_node("gen_config_regs", gen_config_regs)
     g.add_node("gen_wb_port", gen_wb_port)
@@ -869,12 +892,13 @@ def build_graph():
     g.add_node("final_failure", final_failure)
     g.add_node("sim_failure", sim_failure)
 
-    # Entry: 3 agents parallel
-    g.set_entry_point("gen_init_fsm")
-    g.set_entry_point("gen_config_regs")
-    g.set_entry_point("gen_wb_port")
+    # Single entry point fans out to 3 generators in parallel
+    g.set_entry_point("start")
+    g.add_edge("start", "gen_init_fsm")
+    g.add_edge("start", "gen_config_regs")
+    g.add_edge("start", "gen_wb_port")
 
-    # Converge into validation
+    # All 3 generators converge into validation
     g.add_edge("gen_init_fsm", "validate_p1")
     g.add_edge("gen_config_regs", "validate_p1")
     g.add_edge("gen_wb_port", "validate_p1")
@@ -885,7 +909,7 @@ def build_graph():
          "p1_increment_retry": "p1_increment_retry",
          "final_failure": "final_failure"})
 
-    # Retry -> back to generators
+    # Retry -> fan out to all 3 generators in parallel
     g.add_edge("p1_increment_retry", "gen_init_fsm")
     g.add_edge("p1_increment_retry", "gen_config_regs")
     g.add_edge("p1_increment_retry", "gen_wb_port")
@@ -924,7 +948,6 @@ if __name__ == "__main__":
     out = input("Output dir (Enter for ./output): ").strip() or "./output"
     dirs = setup_output_dirs(out)
 
-    # SSH credentials for sim gate
     ssh_password = ""
     if HAS_SIM_AGENT:
         username = SSH_CONFIG.get("username", "")

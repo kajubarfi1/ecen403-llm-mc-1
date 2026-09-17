@@ -1,24 +1,42 @@
 #!/usr/bin/env python3
 """
-╔══════════════════════════════════════════════════════════════════════╗
-║                 BANK TRACKER AGENT                                   ║
-║  Phase 2 — Depends on: Config Registers (config_regs)                ║
-║  Generates: bank_tracker.sv + bank_tracker_manifest.json             ║
-║                                                                      ║
-║  8 independent bank state machines (IDLE/ACTIVE/PRECHARGING).        ║
-║  Tracks open row per bank, 14 timing counters.                       ║
-║  Outputs per-bank permission bits (act/rd/wr/pre_allowed).           ║
-╚══════════════════════════════════════════════════════════════════════╝
++======================================================================+
+|                 BANK TRACKER AGENT  (LLM-driven)                     |
+|  Phase 2 -- Depends on: Config Registers (config_regs)               |
+|  Generates: bank_tracker.sv + bank_tracker_manifest.json             |
+|                                                                      |
+|  8 independent bank state machines (IDLE/ACTIVE/PRECHARGING).        |
+|  Tracks open row per bank, 14 timing counters.                       |
+|  Outputs per-bank permission bits (act/rd/wr/pre_allowed).           |
+|                                                                      |
+|  HYBRID DETERMINISM PATTERN:                                         |
+|    - RTL generation:   LLM-driven (Claude API)                       |
+|    - Manifest:         DETERMINISTIC (Python)                        |
++======================================================================+
 """
 
-import json, sys, os, math
+import json, sys, os, math, re, time
 from pathlib import Path
 from datetime import datetime
+
+try:
+    import anthropic
+    _HAS_ANTHROPIC = True
+except ImportError:
+    _HAS_ANTHROPIC = False
 
 
 class BankTrackerAgent:
 
-    def __init__(self, spec_path: str, output_dir: str = "./output"):
+    def __init__(
+        self,
+        spec_path: str,
+        output_dir: str = "./output",
+        retry_instructions: dict = None,
+        model: str = None,
+        temperature: float = 0.7,
+        max_attempts: int = 3,
+    ):
         self.spec_path = spec_path
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -32,32 +50,40 @@ class BankTrackerAgent:
         self.dc  = self.tm["$derived_cycles"]
         self.p   = self._derive()
 
+        # LLM config
+        self.retry_instructions = retry_instructions
+        self.model = model or os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-5")
+        self.temperature = 0.3 if retry_instructions else temperature
+        self.max_attempts = max_attempts
+
+    # ==================================================================
+    # DETERMINISTIC: parameter derivation
+    # ==================================================================
     def _derive(self) -> dict:
         p = {}
-        p["ROW_BITS"]   = self.geo["row_bits"]
-        p["BANK_BITS"]  = self.geo["bank_bits"]
-        p["NUM_BANKS"]  = 2 ** p["BANK_BITS"]
-        p["BANK_BITS"]  = p["BANK_BITS"]
+        p["ROW_BITS"]  = self.geo["row_bits"]
+        p["BANK_BITS"] = self.geo["bank_bits"]
+        p["NUM_BANKS"] = 2 ** p["BANK_BITS"]
 
-        # Timing counter values (from $derived_cycles)
         timing_params = [
             "tRCD_nCK", "tRP_nCK", "tRAS_nCK", "tRC_nCK",
             "tRRD_nCK", "tFAW_nCK", "tWTR_nCK", "tWR_nCK",
-            "tRTP_nCK", "tCCD_nCK", "tRFC_nCK"
+            "tRTP_nCK", "tCCD_nCK", "tRFC_nCK",
         ]
         for tp in timing_params:
             p[tp] = self.dc[tp]
 
-        # Counter width — must hold the largest value (tRFC=128 or tREFI=6240)
         max_val = max(p[tp] for tp in timing_params)
         p["CTR_WIDTH"] = max(1, max_val.bit_length())
 
-        # FAW tracking needs a 4-deep shift register of timestamps
         p["FAW_DEPTH"] = 4
         p["TREFI_nCK"] = self.dc["tREFI_nCK"]
 
         return p
 
+    # ==================================================================
+    # DETERMINISTIC: validation
+    # ==================================================================
     def validate(self) -> list:
         errors = []
         p = self.p
@@ -67,305 +93,408 @@ class BankTrackerAgent:
             errors.append(f"tRCD must be >= 1, got {p['tRCD_nCK']}")
         return errors
 
-    def generate_rtl(self) -> str:
+    # ==================================================================
+    # LLM: contract (LARGE -- this is the most structural module)
+    # ==================================================================
+    def _validator_contract(self) -> str:
         p = self.p
-        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
         return f"""\
-////////////////////////////////////////////////////////////////////////////////
-// Module:    bank_tracker
-// File:      bank_tracker.sv
-// Generated: {ts}
-// Agent:     Bank Tracker Agent (Phase 2)
-// Spec:      {self.spec.get('design_id', 'N/A')} rev {self.spec.get('revision', 'N/A')}
-//
-// Description:
-//   {p['NUM_BANKS']} independent bank state machines tracking IDLE/ACTIVE/PRECHARGING.
-//   Maintains open row per bank ({p['ROW_BITS']}-bit), 14 timing counters.
-//   Outputs per-bank permission bits for the scheduler.
-//   All timing loaded from cfg_* buses (runtime-programmable via CSRs).
-//
-// Dependency: Config Registers (cfg_tRCD_nCK, cfg_tRP_nCK, etc.)
-// Validation: BT-001 .. BT-006
-////////////////////////////////////////////////////////////////////////////////
+============================================================
+HARD NAMING CONTRACT -- VIOLATING ANY RULE REJECTS THE OUTPUT
+============================================================
 
-module bank_tracker #(
-    parameter NUM_BANKS  = {p['NUM_BANKS']},
-    parameter BANK_BITS  = {p['BANK_BITS']},
-    parameter ROW_BITS   = {p['ROW_BITS']},
-    parameter CTR_WIDTH  = {p['CTR_WIDTH']}
-) (
-    // ────────────── Clock / Reset ──────────────
-    input  logic                       clk,
-    input  logic                       rst_n,
+Module declaration MUST be exactly:
+    module bank_tracker #(
+        parameter NUM_BANKS  = {p['NUM_BANKS']},
+        parameter BANK_BITS  = {p['BANK_BITS']},
+        parameter ROW_BITS   = {p['ROW_BITS']},
+        parameter CTR_WIDTH  = {p['CTR_WIDTH']}
+    ) (
 
-    // ────────────── Command feedback (from cmd_gen) ──────────────
-    input  logic                       cmd_act_valid,    // ACT issued this cycle
-    input  logic [BANK_BITS-1:0]       cmd_act_bank,     // which bank was activated
-    input  logic [ROW_BITS-1:0]        cmd_act_row,      // which row was activated
-    input  logic                       cmd_pre_valid,    // PRE issued
-    input  logic [BANK_BITS-1:0]       cmd_pre_bank,
-    input  logic                       cmd_pre_all,      // precharge all banks
-    input  logic                       cmd_rd_valid,     // RD issued
-    input  logic [BANK_BITS-1:0]       cmd_rd_bank,
-    input  logic                       cmd_wr_valid,     // WR issued
-    input  logic [BANK_BITS-1:0]       cmd_wr_bank,
-    input  logic                       cmd_ref_valid,    // REF issued (all banks)
+Port list (exact names -- the testbench uses `dut(.*)`, so names MUST match):
 
-    // ────────────── Config inputs (from config_regs) ──────────────
-    input  logic [7:0]                 cfg_tRCD_nCK,
-    input  logic [7:0]                 cfg_tRP_nCK,
-    input  logic [7:0]                 cfg_tRAS_nCK,
-    input  logic [7:0]                 cfg_tRC_nCK,
-    input  logic [7:0]                 cfg_tRRD_nCK,
-    input  logic [7:0]                 cfg_tFAW_nCK,
-    input  logic [7:0]                 cfg_tWTR_nCK,
-    input  logic [7:0]                 cfg_tWR_nCK,
-    input  logic [7:0]                 cfg_tRTP_nCK,
-    input  logic [7:0]                 cfg_tCCD_nCK,
-    input  logic [7:0]                 cfg_tRFC_nCK,
+  input  logic                       clk
+  input  logic                       rst_n
 
-    // ────────────── Per-bank status outputs (to scheduler) ──────────────
-    output logic [NUM_BANKS-1:0]       bank_is_active,       // 1 = bank has open row
-    output logic [ROW_BITS-1:0]        bank_open_row [NUM_BANKS],  // open row per bank
-    output logic [NUM_BANKS-1:0]       bank_act_allowed,     // safe to ACT
-    output logic [NUM_BANKS-1:0]       bank_rd_allowed,      // safe to RD
-    output logic [NUM_BANKS-1:0]       bank_wr_allowed,      // safe to WR
-    output logic [NUM_BANKS-1:0]       bank_pre_allowed,     // safe to PRE
-    output logic                       all_banks_idle,       // all banks precharged
-    output logic                       faw_allows_act        // tFAW window not full
-);
+  input  logic                       cmd_act_valid
+  input  logic [BANK_BITS-1:0]       cmd_act_bank
+  input  logic [ROW_BITS-1:0]        cmd_act_row
+  input  logic                       cmd_pre_valid
+  input  logic [BANK_BITS-1:0]       cmd_pre_bank
+  input  logic                       cmd_pre_all
+  input  logic                       cmd_rd_valid
+  input  logic [BANK_BITS-1:0]       cmd_rd_bank
+  input  logic                       cmd_wr_valid
+  input  logic [BANK_BITS-1:0]       cmd_wr_bank
+  input  logic                       cmd_ref_valid
 
-    // ================================================================
-    // Bank state enum
-    // ================================================================
-    typedef enum logic [1:0] {{
-        BANK_IDLE    = 2'b00,
-        BANK_ACTIVE  = 2'b01,
-        BANK_PRECHAR = 2'b10
-    }} bank_state_t;
+  input  logic [7:0]                 cfg_tRCD_nCK
+  input  logic [7:0]                 cfg_tRP_nCK
+  input  logic [7:0]                 cfg_tRAS_nCK
+  input  logic [7:0]                 cfg_tRC_nCK
+  input  logic [7:0]                 cfg_tRRD_nCK
+  input  logic [7:0]                 cfg_tFAW_nCK
+  input  logic [7:0]                 cfg_tWTR_nCK
+  input  logic [7:0]                 cfg_tWR_nCK
+  input  logic [7:0]                 cfg_tRTP_nCK
+  input  logic [7:0]                 cfg_tCCD_nCK
+  input  logic [7:0]                 cfg_tRFC_nCK
 
-    // ================================================================
-    // Per-bank storage
-    // ================================================================
-    bank_state_t            bk_state   [NUM_BANKS];
-    logic [ROW_BITS-1:0]    bk_row     [NUM_BANKS];
+  output logic [NUM_BANKS-1:0]       bank_is_active
+  output logic [ROW_BITS-1:0]        bank_open_row [NUM_BANKS]
+  output logic [NUM_BANKS-1:0]       bank_act_allowed
+  output logic [NUM_BANKS-1:0]       bank_rd_allowed
+  output logic [NUM_BANKS-1:0]       bank_wr_allowed
+  output logic [NUM_BANKS-1:0]       bank_pre_allowed
+  output logic                       all_banks_idle
+  output logic                       faw_allows_act
 
-    // Per-bank timing counters (count down to 0)
-    logic [CTR_WIDTH-1:0]   ctr_rcd    [NUM_BANKS];  // ACT → RD/WR
-    logic [CTR_WIDTH-1:0]   ctr_rp     [NUM_BANKS];  // PRE → ACT
-    logic [CTR_WIDTH-1:0]   ctr_ras    [NUM_BANKS];  // ACT → PRE (minimum)
-    logic [CTR_WIDTH-1:0]   ctr_rc     [NUM_BANKS];  // ACT → ACT (same bank)
-    logic [CTR_WIDTH-1:0]   ctr_wtr    [NUM_BANKS];  // WR → RD
-    logic [CTR_WIDTH-1:0]   ctr_wr     [NUM_BANKS];  // WR → PRE
-    logic [CTR_WIDTH-1:0]   ctr_rtp    [NUM_BANKS];  // RD → PRE
+RULES:
+  1. Parameter names: NUM_BANKS, BANK_BITS, ROW_BITS, CTR_WIDTH --
+     use these exact identifiers, with literal values:
+       NUM_BANKS  = {p['NUM_BANKS']}
+       BANK_BITS  = {p['BANK_BITS']}
+       ROW_BITS   = {p['ROW_BITS']}
+       CTR_WIDTH  = {p['CTR_WIDTH']}
+  2. Define a 3-state enum with at least these two members:
+       BANK_IDLE, BANK_ACTIVE
+     (a third state like BANK_PRECHAR is allowed but not required by TB)
+  3. Per-bank counter array names (one element per bank, REQUIRED NAMES):
+       ctr_rcd, ctr_rp, ctr_ras, ctr_rc, ctr_wtr, ctr_wr, ctr_rtp
+  4. Global counter names (shared across banks, REQUIRED NAMES):
+       ctr_rrd, ctr_ccd, ctr_rfc
+  5. The word "faw" MUST appear in the RTL (FAW tracking).
+  6. Include at least one `always_ff @(posedge clk ...)` block and at
+     least one `always_comb` block.
+  7. End with `endmodule`.
 
-    // Global timing counters
-    logic [CTR_WIDTH-1:0]   ctr_rrd;                  // ACT → ACT (different bank)
-    logic [CTR_WIDTH-1:0]   ctr_ccd;                  // CAS → CAS
-    logic [CTR_WIDTH-1:0]   ctr_rfc;                  // REF → any command
+BEHAVIORAL REQUIREMENTS (the testbench relies on these EXACT semantics):
 
-    // FAW tracking: circular buffer of last 4 ACT timestamps
-    logic [CTR_WIDTH-1:0]   faw_pipe [{p['FAW_DEPTH']}];
-    logic [1:0]             faw_idx;
+  RESET BEHAVIOR:
+    * All banks start in BANK_IDLE with row=0 and all counters=0.
+    * bank_is_active   == 8'h00       (no bank active)
+    * bank_act_allowed == 8'hFF       (all 8 banks ready to ACT)
+    * all_banks_idle   == 1
+    * faw_allows_act   == 1
 
-    // ================================================================
-    // Counter decrement — all counters decrement each cycle
-    // ================================================================
-    integer i;
+  ACT COMMAND (cmd_act_valid pulse, 1 cycle):
+    * Next cycle: bk_state[cmd_act_bank] <= BANK_ACTIVE
+    *             bk_row[cmd_act_bank]   <= cmd_act_row
+    *             ctr_rcd[cmd_act_bank]  <= cfg_tRCD_nCK
+    *             ctr_ras[cmd_act_bank]  <= cfg_tRAS_nCK
+    *             ctr_rc[cmd_act_bank]   <= cfg_tRC_nCK
+    *             ctr_rrd (global)       <= cfg_tRRD_nCK
+    *             FAW window gets a new entry with cfg_tFAW_nCK
+    * tRCD must elapse before RD/WR to that bank is allowed.
 
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            for (i = 0; i < NUM_BANKS; i++) begin
-                bk_state[i]  <= BANK_IDLE;
-                bk_row[i]    <= '0;
-                ctr_rcd[i]   <= '0;
-                ctr_rp[i]    <= '0;
-                ctr_ras[i]   <= '0;
-                ctr_rc[i]    <= '0;
-                ctr_wtr[i]   <= '0;
-                ctr_wr[i]    <= '0;
-                ctr_rtp[i]   <= '0;
-            end
-            ctr_rrd  <= '0;
-            ctr_ccd  <= '0;
-            ctr_rfc  <= '0;
-            faw_idx  <= '0;
-            for (i = 0; i < {p['FAW_DEPTH']}; i++)
-                faw_pipe[i] <= '0;
-        end else begin
+  PRE COMMAND:
+    * cmd_pre_all=1: all banks with state==BANK_ACTIVE go to IDLE.
+    * cmd_pre_all=0: just bk_state[cmd_pre_bank] goes to IDLE.
+    * ctr_rp[bank] loads cfg_tRP_nCK. Bank cannot re-ACT until rp==0.
 
-            // Decrement all nonzero counters
-            for (i = 0; i < NUM_BANKS; i++) begin
-                if (|ctr_rcd[i])  ctr_rcd[i]  <= ctr_rcd[i]  - 1'b1;
-                if (|ctr_rp[i])   ctr_rp[i]   <= ctr_rp[i]   - 1'b1;
-                if (|ctr_ras[i])  ctr_ras[i]  <= ctr_ras[i]  - 1'b1;
-                if (|ctr_rc[i])   ctr_rc[i]   <= ctr_rc[i]   - 1'b1;
-                if (|ctr_wtr[i])  ctr_wtr[i]  <= ctr_wtr[i]  - 1'b1;
-                if (|ctr_wr[i])   ctr_wr[i]   <= ctr_wr[i]   - 1'b1;
-                if (|ctr_rtp[i])  ctr_rtp[i]  <= ctr_rtp[i]  - 1'b1;
-            end
-            if (|ctr_rrd) ctr_rrd <= ctr_rrd - 1'b1;
-            if (|ctr_ccd) ctr_ccd <= ctr_ccd - 1'b1;
-            if (|ctr_rfc) ctr_rfc <= ctr_rfc - 1'b1;
+  RD COMMAND:
+    * ctr_ccd (global) loads cfg_tCCD_nCK.
+    * ctr_rtp[cmd_rd_bank] loads cfg_tRTP_nCK.
+    * After RD, bank_rd_allowed[b] goes to 0 for tCCD, then returns to 1.
 
-            // Shift FAW pipe
-            for (i = 0; i < {p['FAW_DEPTH']}; i++)
-                if (|faw_pipe[i]) faw_pipe[i] <= faw_pipe[i] - 1'b1;
+  WR COMMAND:
+    * ctr_ccd (global) loads cfg_tCCD_nCK.
+    * ctr_wtr[cmd_wr_bank] loads cfg_tWTR_nCK.
+    * ctr_wr[cmd_wr_bank]  loads cfg_tWR_nCK.
 
-            // ──── ACT command ────
-            if (cmd_act_valid) begin
-                bk_state[cmd_act_bank]  <= BANK_ACTIVE;
-                bk_row[cmd_act_bank]    <= cmd_act_row;
-                ctr_rcd[cmd_act_bank]   <= {{CTR_WIDTH{{1'b0}}}} | cfg_tRCD_nCK;
-                ctr_ras[cmd_act_bank]   <= {{CTR_WIDTH{{1'b0}}}} | cfg_tRAS_nCK;
-                ctr_rc[cmd_act_bank]    <= {{CTR_WIDTH{{1'b0}}}} | cfg_tRC_nCK;
-                ctr_rrd                 <= {{CTR_WIDTH{{1'b0}}}} | cfg_tRRD_nCK;
-                // FAW: record new ACT
-                faw_pipe[faw_idx]       <= {{CTR_WIDTH{{1'b0}}}} | cfg_tFAW_nCK;
-                faw_idx                 <= faw_idx + 1'b1;
-            end
+  REF COMMAND (auto refresh):
+    * ctr_rfc (global) loads cfg_tRFC_nCK.
+    * All banks forced to BANK_IDLE.
+    * During tRFC, bank_act_allowed == 8'h00 for every bank.
 
-            // ──── PRE command ────
-            if (cmd_pre_valid) begin
-                if (cmd_pre_all) begin
-                    for (i = 0; i < NUM_BANKS; i++) begin
-                        bk_state[i] <= BANK_PRECHAR;
-                        ctr_rp[i]   <= {{CTR_WIDTH{{1'b0}}}} | cfg_tRP_nCK;
-                    end
-                end else begin
-                    bk_state[cmd_pre_bank] <= BANK_PRECHAR;
-                    ctr_rp[cmd_pre_bank]   <= {{CTR_WIDTH{{1'b0}}}} | cfg_tRP_nCK;
-                end
-            end
+  PERMISSION OUTPUTS (always_comb, per bank):
+    bank_is_active[i]   = (bk_state[i] == BANK_ACTIVE)
+    bank_open_row[i]    = bk_row[i]
+    bank_act_allowed[i] = (bk_state[i] == BANK_IDLE)
+                        && (ctr_rc[i]  == 0)
+                        && (ctr_rp[i]  == 0)
+                        && (ctr_rrd    == 0)
+                        && (ctr_rfc    == 0)
+                        && faw_allows_act
+    bank_rd_allowed[i]  = (bk_state[i] == BANK_ACTIVE)
+                        && (ctr_rcd[i] == 0)
+                        && (ctr_ccd    == 0)
+                        && (ctr_rfc    == 0)
+    bank_wr_allowed[i]  = (bk_state[i] == BANK_ACTIVE)
+                        && (ctr_rcd[i] == 0)
+                        && (ctr_ccd    == 0)
+                        && (ctr_rfc    == 0)
+    bank_pre_allowed[i] = (bk_state[i] == BANK_ACTIVE)
+                        && (ctr_ras[i] == 0)
+                        && (ctr_rtp[i] == 0)
+                        && (ctr_wr[i]  == 0)
+                        && (ctr_wtr[i] == 0)
+                        && (ctr_rfc    == 0)
 
-            // ──── PRE → IDLE transition when tRP expires ────
-            for (i = 0; i < NUM_BANKS; i++)
-                if (bk_state[i] == BANK_PRECHAR && ctr_rp[i] == '0)
-                    bk_state[i] <= BANK_IDLE;
+  FAW (4 ACTs within tFAW window):
+    * Maintain a circular buffer `faw_pipe` of {p['FAW_DEPTH']} slots.
+    * Each slot holds a CTR_WIDTH-wide countdown timer.
+    * On cmd_act_valid, place cfg_tFAW_nCK into the next slot (round robin).
+    * Every cycle, decrement any non-zero slot.
+    * faw_allows_act = 1 iff AT LEAST ONE slot is currently 0.
+      In other words: faw_allows_act = (faw_pipe[0]==0) || (faw_pipe[1]==0)
+                                    || (faw_pipe[2]==0) || (faw_pipe[3]==0)
 
-            // ──── RD command ────
-            if (cmd_rd_valid) begin
-                ctr_ccd             <= {{CTR_WIDTH{{1'b0}}}} | cfg_tCCD_nCK;
-                ctr_rtp[cmd_rd_bank] <= {{CTR_WIDTH{{1'b0}}}} | cfg_tRTP_nCK;
-            end
+  COUNTER DECREMENT:
+    Every cycle, each non-zero counter (per-bank and global) decrements by 1.
+    When a command loads a counter, it overrides the decrement on that cycle.
 
-            // ──── WR command ────
-            if (cmd_wr_valid) begin
-                ctr_ccd             <= {{CTR_WIDTH{{1'b0}}}} | cfg_tCCD_nCK;
-                ctr_wtr[cmd_wr_bank] <= {{CTR_WIDTH{{1'b0}}}} | cfg_tWTR_nCK;
-                ctr_wr[cmd_wr_bank]  <= {{CTR_WIDTH{{1'b0}}}} | cfg_tWR_nCK;
-            end
+IMPLEMENTATION GUIDANCE (you choose the implementation):
 
-            // ──── REF command ────
-            if (cmd_ref_valid) begin
-                ctr_rfc <= {{CTR_WIDTH{{1'b0}}}} | cfg_tRFC_nCK;
-                // All banks return to idle after refresh
-                for (i = 0; i < NUM_BANKS; i++)
-                    bk_state[i] <= BANK_IDLE;
-            end
-        end
-    end
+  STATE ENCODING:
+    Define an enum type for bank state with at least BANK_IDLE and
+    BANK_ACTIVE members. You may add additional states (e.g. precharge
+    in-progress). Choose your own encoding values.
 
-    // ================================================================
-    // Permission outputs — combinational
-    // ================================================================
-    always_comb begin
-        for (int j = 0; j < NUM_BANKS; j++) begin
-            bank_is_active[j]   = (bk_state[j] == BANK_ACTIVE);
-            bank_open_row[j]    = bk_row[j];
+  INTERNAL SIGNALS:
+    You need per-bank state, per-bank open row tracking, per-bank timing
+    counters for tRCD/tRP/tRAS/tRC/tWTR/tWR/tRTP, and global timing
+    counters for tRRD/tCCD/tRFC. Name them as you see fit, but the
+    required counter names listed in RULES above (ctr_rcd, ctr_rp, etc.)
+    must still be used so the validator can check them.
 
-            // ACT allowed: bank idle, tRC/tRRD/tRFC expired, FAW not full
-            bank_act_allowed[j] = (bk_state[j] == BANK_IDLE)
-                                && (ctr_rc[j]  == '0)
-                                && (ctr_rp[j]  == '0)
-                                && (ctr_rrd    == '0)
-                                && (ctr_rfc    == '0)
-                                && faw_allows_act;
+  FAW IMPLEMENTATION:
+    Implement tFAW tracking using any approach you prefer -- circular
+    buffer, shift register, or timestamp window. Whatever you choose,
+    expose the result as faw_allows_act. The signal name faw_pipe is
+    not required -- use whatever internal structure makes sense.
 
-            // RD allowed: bank active, tRCD expired, tCCD expired
-            bank_rd_allowed[j]  = (bk_state[j] == BANK_ACTIVE)
-                                && (ctr_rcd[j] == '0)
-                                && (ctr_ccd    == '0)
-                                && (ctr_rfc    == '0);
+  all_banks_idle:
+    Drive all_banks_idle high when no bank has an active row. Implement
+    this however you prefer -- reduction, for loop, explicit per-bank
+    check, etc.
 
-            // WR allowed: bank active, tRCD expired, tCCD expired
-            bank_wr_allowed[j]  = (bk_state[j] == BANK_ACTIVE)
-                                && (ctr_rcd[j] == '0)
-                                && (ctr_ccd    == '0)
-                                && (ctr_rfc    == '0);
+  faw_allows_act:
+    Drive faw_allows_act high when an ACT is permitted by the tFAW
+    window constraint. The semantics: no more than 4 ACTs may occur
+    within any tFAW-cycle window.
 
-            // PRE allowed: bank active, tRAS expired, tRTP/tWR expired
-            bank_pre_allowed[j] = (bk_state[j] == BANK_ACTIVE)
-                                && (ctr_ras[j] == '0)
-                                && (ctr_rtp[j] == '0)
-                                && (ctr_wr[j]  == '0)
-                                && (ctr_wtr[j] == '0)
-                                && (ctr_rfc    == '0);
-        end
-    end
-
-    // All banks idle
-    assign all_banks_idle = (bk_state[0] == BANK_IDLE) && (bk_state[1] == BANK_IDLE)
-                         && (bk_state[2] == BANK_IDLE) && (bk_state[3] == BANK_IDLE)
-                         && (bk_state[4] == BANK_IDLE) && (bk_state[5] == BANK_IDLE)
-                         && (bk_state[6] == BANK_IDLE) && (bk_state[7] == BANK_IDLE);
-
-    // FAW: allows ACT if oldest window entry has expired
-    assign faw_allows_act = (faw_pipe[faw_idx] == '0);
-
-    // ================================================================
-    // SVA — simulation only
-    // ================================================================
-    // synopsys translate_off
-    // synthesis translate_off
-
-    // BT-001: No RD/WR to idle bank
-    property p_no_rd_idle;
-        @(posedge clk) disable iff (!rst_n)
-        cmd_rd_valid |-> (bk_state[cmd_rd_bank] == BANK_ACTIVE);
-    endproperty
-    assert property (p_no_rd_idle) else $error("[BT-001] RD to non-active bank");
-
-    property p_no_wr_idle;
-        @(posedge clk) disable iff (!rst_n)
-        cmd_wr_valid |-> (bk_state[cmd_wr_bank] == BANK_ACTIVE);
-    endproperty
-    assert property (p_no_wr_idle) else $error("[BT-001] WR to non-active bank");
-
-    // BT-003: tRCD respected
-    property p_trcd;
-        @(posedge clk) disable iff (!rst_n)
-        (cmd_rd_valid || cmd_wr_valid) |-> (ctr_rcd[cmd_rd_valid ? cmd_rd_bank : cmd_wr_bank] == '0);
-    endproperty
-    assert property (p_trcd) else $error("[BT-003] tRCD violation");
-
-    // BT-005: tFAW check
-    property p_faw;
-        @(posedge clk) disable iff (!rst_n)
-        cmd_act_valid |-> faw_allows_act;
-    endproperty
-    assert property (p_faw) else $error("[BT-005] tFAW violation");
-
-    // Coverage
-    covergroup cg_bt @(posedge clk);
-        option.per_instance = 1;
-        cp_act      : coverpoint cmd_act_valid;
-        cp_pre      : coverpoint cmd_pre_valid;
-        cp_pre_all  : coverpoint cmd_pre_all;
-        cp_rd       : coverpoint cmd_rd_valid;
-        cp_wr       : coverpoint cmd_wr_valid;
-        cp_ref      : coverpoint cmd_ref_valid;
-        cp_all_idle : coverpoint all_banks_idle;
-    endgroup
-    cg_bt cg_inst = new();
-
-    // synthesis translate_on
-    // synopsys translate_on
-
-endmodule
+You may add SVA and covergroups inside translate_off guards.
+============================================================
 """
 
+    # ==================================================================
+    # LLM: prompt
+    # ==================================================================
+    def _build_prompt(self) -> str:
+        p = self.p
+
+        base = f"""\
+You are generating SystemVerilog RTL for a DDR3 memory controller bank
+tracker module. This is the most structurally complex Phase 2 block --
+it maintains 8 per-bank state machines and a large set of DDR3 timing
+counters.
+
+SPEC PARAMETERS (all from $derived_cycles at 400 MHz DDR clock):
+  NUM_BANKS   = {p['NUM_BANKS']}
+  BANK_BITS   = {p['BANK_BITS']}
+  ROW_BITS    = {p['ROW_BITS']}
+  CTR_WIDTH   = {p['CTR_WIDTH']}
+  FAW_DEPTH   = {p['FAW_DEPTH']}
+
+  Timing (nCK at the controller clock):
+    tRCD = {p['tRCD_nCK']}   tRP  = {p['tRP_nCK']}   tRAS = {p['tRAS_nCK']}
+    tRC  = {p['tRC_nCK']}   tRRD = {p['tRRD_nCK']}   tFAW = {p['tFAW_nCK']}
+    tWTR = {p['tWTR_nCK']}   tWR  = {p['tWR_nCK']}   tRTP = {p['tRTP_nCK']}
+    tCCD = {p['tCCD_nCK']}   tRFC = {p['tRFC_nCK']}
+
+DESCRIPTION:
+  bank_tracker models all DDR3 bank-level timing constraints. It receives
+  single-cycle command-valid pulses from the scheduler (cmd_act_valid,
+  cmd_pre_valid, cmd_rd_valid, cmd_wr_valid, cmd_ref_valid) and tells
+  the scheduler, via combinational permission vectors, which operations
+  are legal on which banks THIS cycle.
+
+  Each bank has its own state (IDLE or ACTIVE), its own open row, and
+  its own set of bank-local timing counters. Shared timing counters
+  (tRRD, tCCD, tRFC) apply across banks.
+
+  tFAW is implemented as a {p['FAW_DEPTH']}-slot circular window of
+  countdown timers. Each ACT loads one slot with cfg_tFAW_nCK. An ACT is
+  only allowed if at least one slot is currently at 0.
+
+{self._validator_contract()}
+
+Generate the complete `bank_tracker.sv` file. Include a header comment
+block, the module declaration with parameters, port list, the state enum,
+all required internal declarations, the always_ff block that maintains
+state/counters/FAW, the always_comb block that drives the permission
+outputs, and the two assign statements for `faw_allows_act` and
+`all_banks_idle`, and `endmodule`. Do not include a testbench.
+
+Return the SystemVerilog code inside a single ```systemverilog code block.
+"""
+
+        if self.retry_instructions:
+            failed = self.retry_instructions.get("failed_checks", [])
+            msg = self.retry_instructions.get("message", "Previous attempt failed")
+            fb = f"\n\n============================================================\n"
+            fb += f"RETRY FEEDBACK ({msg}):\n"
+            fb += f"============================================================\n"
+            fb += "Validation failures from previous attempt:\n\n"
+            for chk in failed[:15]:
+                fb += f"  [{chk.get('id','?')}] {chk.get('name','?')}\n"
+                fb += f"    expected: {chk.get('expected','?')}\n"
+                fb += f"    actual:   {chk.get('actual','?')}\n"
+            fb += "\nRe-read the HARD NAMING CONTRACT and fix these failures.\n"
+            base += fb
+
+        return base
+
+    # ==================================================================
+    # LLM: call
+    # ==================================================================
+    def _call_llm(self, prompt: str) -> str:
+        if not _HAS_ANTHROPIC:
+            raise RuntimeError("anthropic package not installed.")
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise RuntimeError("ANTHROPIC_API_KEY not set.")
+        client = anthropic.Anthropic(api_key=api_key)
+        resp = client.messages.create(
+            model=self.model,
+            max_tokens=8192,  # bank_tracker is large
+            temperature=self.temperature,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        return "".join(b.text for b in resp.content if hasattr(b, "text"))
+
+    # ==================================================================
+    # LLM: extract
+    # ==================================================================
+    def _extract_sv(self, out: str) -> str:
+        for pat in [
+            r"```systemverilog\s*\n(.*?)```",
+            r"```sv\s*\n(.*?)```",
+            r"```verilog\s*\n(.*?)```",
+            r"```\s*\n(.*?)```",
+        ]:
+            m = re.search(pat, out, re.DOTALL)
+            if m:
+                return m.group(1).strip()
+        m = re.search(r"(module\s+bank_tracker\b.*?endmodule)", out, re.DOTALL)
+        if m:
+            return m.group(1).strip()
+        raise ValueError("No SystemVerilog code block found.")
+
+    # ==================================================================
+    # LLM: sanity checks
+    # ==================================================================
+    def _sv_sanity_check(self, rtl: str) -> list:
+        p = self.p
+        problems = []
+        rtl_no_sva = re.sub(
+            r"//\s*(?:synopsys|synthesis)\s+translate_off.*?//\s*(?:synopsys|synthesis)\s+translate_on",
+            "", rtl, flags=re.DOTALL,
+        )
+
+        # Guard 1: module / endmodule
+        if "module bank_tracker" not in rtl:
+            problems.append("module bank_tracker not found")
+        if "endmodule" not in rtl:
+            problems.append("endmodule missing")
+
+        # Guard 2: parameter literals
+        for pname, pval in [
+            ("NUM_BANKS", p["NUM_BANKS"]),
+            ("BANK_BITS", p["BANK_BITS"]),
+            ("ROW_BITS",  p["ROW_BITS"]),
+            ("CTR_WIDTH", p["CTR_WIDTH"]),
+        ]:
+            if not re.search(rf"parameter\s+{pname}\s*=\s*{pval}\b", rtl):
+                problems.append(f"parameter {pname} = {pval} not found")
+
+        # Guard 3: required cmd_* input ports (TB uses dut(.*))
+        required_cmd = [
+            "cmd_act_valid", "cmd_act_bank", "cmd_act_row",
+            "cmd_pre_valid", "cmd_pre_bank", "cmd_pre_all",
+            "cmd_rd_valid",  "cmd_rd_bank",
+            "cmd_wr_valid",  "cmd_wr_bank",
+            "cmd_ref_valid",
+        ]
+        for s in required_cmd:
+            if s not in rtl:
+                problems.append(f"cmd port `{s}` missing")
+
+        # Guard 4: required cfg_* ports
+        required_cfg = [
+            "cfg_tRCD_nCK", "cfg_tRP_nCK", "cfg_tRAS_nCK", "cfg_tRC_nCK",
+            "cfg_tRRD_nCK", "cfg_tFAW_nCK", "cfg_tWTR_nCK", "cfg_tWR_nCK",
+            "cfg_tRTP_nCK", "cfg_tCCD_nCK", "cfg_tRFC_nCK",
+        ]
+        for s in required_cfg:
+            if s not in rtl:
+                problems.append(f"cfg port `{s}` missing")
+
+        # Guard 5: required output signals
+        required_out = [
+            "bank_is_active", "bank_open_row",
+            "bank_act_allowed", "bank_rd_allowed",
+            "bank_wr_allowed", "bank_pre_allowed",
+            "all_banks_idle", "faw_allows_act",
+        ]
+        for s in required_out:
+            if s not in rtl:
+                problems.append(f"output port `{s}` missing")
+
+        # Guard 6: state enum members
+        for s in ["BANK_IDLE", "BANK_ACTIVE"]:
+            if s not in rtl:
+                problems.append(f"enum member `{s}` missing")
+
+        # Guard 7: per-bank counter names
+        for s in ["ctr_rcd", "ctr_rp", "ctr_ras", "ctr_rc",
+                  "ctr_wtr", "ctr_wr", "ctr_rtp"]:
+            if s not in rtl:
+                problems.append(f"per-bank counter `{s}` missing")
+
+        # Guard 8: global counter names
+        for s in ["ctr_rrd", "ctr_ccd", "ctr_rfc"]:
+            if s not in rtl:
+                problems.append(f"global counter `{s}` missing")
+
+        # Guard 9: FAW mentioned
+        if "faw" not in rtl.lower():
+            problems.append("FAW logic missing ('faw' not found in RTL)")
+
+        # Guard 10: faw tracking present (any implementation)
+        if "faw" not in rtl.lower():
+            problems.append("FAW tracking logic missing ('faw' not found in RTL)")
+
+        # Guard 11: always_ff and always_comb both present
+        if not re.search(r"always_ff\s*@\s*\(\s*posedge\s+clk", rtl):
+            problems.append("always_ff @(posedge clk ...) block missing")
+        if "always_comb" not in rtl:
+            problems.append("always_comb block missing (permission outputs)")
+
+        # Guard 12: faw_allows_act must be driven (any implementation)
+        if not re.search(r"faw_allows_act", rtl_no_sva):
+            problems.append("faw_allows_act signal missing")
+
+        # Guard 13: all_banks_idle must be driven (any implementation)
+        if not re.search(r"all_banks_idle", rtl_no_sva):
+            problems.append("all_banks_idle signal missing")
+
+        # Guard 14: no NBA on combinational output vectors
+        # (may be indexed: `bank_is_active[j] <= ...` in a for loop)
+        for comb_out in ["bank_is_active", "bank_act_allowed",
+                         "bank_rd_allowed", "bank_wr_allowed",
+                         "bank_pre_allowed"]:
+            if re.search(rf"\b{comb_out}(\s*\[[^\]]*\])?\s*<=", rtl_no_sva):
+                problems.append(
+                    f"{comb_out} must be combinational (assign or always_comb, not NBA)"
+                )
+
+        return problems
+
+    # ==================================================================
+    # DETERMINISTIC: manifest
+    # ==================================================================
     def generate_manifest(self) -> dict:
         p = self.p
         return {
@@ -374,7 +503,7 @@ endmodule
             "dependencies": ["config_regs"],
             "parameters": {
                 "NUM_BANKS": p["NUM_BANKS"], "BANK_BITS": p["BANK_BITS"],
-                "ROW_BITS": p["ROW_BITS"], "CTR_WIDTH": p["CTR_WIDTH"],
+                "ROW_BITS":  p["ROW_BITS"],  "CTR_WIDTH": p["CTR_WIDTH"],
             },
             "ports": {
                 "clock_reset": [
@@ -384,67 +513,131 @@ endmodule
                 "cmd_feedback": [
                     {"name": "cmd_act_valid", "width": 1, "dir": "input"},
                     {"name": "cmd_act_bank", "width": p["BANK_BITS"], "dir": "input"},
-                    {"name": "cmd_act_row", "width": p["ROW_BITS"], "dir": "input"},
+                    {"name": "cmd_act_row",  "width": p["ROW_BITS"],  "dir": "input"},
                     {"name": "cmd_pre_valid", "width": 1, "dir": "input"},
                     {"name": "cmd_pre_bank", "width": p["BANK_BITS"], "dir": "input"},
-                    {"name": "cmd_pre_all", "width": 1, "dir": "input"},
+                    {"name": "cmd_pre_all",  "width": 1, "dir": "input"},
                     {"name": "cmd_rd_valid", "width": 1, "dir": "input"},
-                    {"name": "cmd_rd_bank", "width": p["BANK_BITS"], "dir": "input"},
+                    {"name": "cmd_rd_bank",  "width": p["BANK_BITS"], "dir": "input"},
                     {"name": "cmd_wr_valid", "width": 1, "dir": "input"},
-                    {"name": "cmd_wr_bank", "width": p["BANK_BITS"], "dir": "input"},
+                    {"name": "cmd_wr_bank",  "width": p["BANK_BITS"], "dir": "input"},
                     {"name": "cmd_ref_valid", "width": 1, "dir": "input"},
                 ],
                 "config_in": [
-                    {"name": f"cfg_{n}_nCK", "width": 8, "dir": "input", "source": f"config_regs.cfg_{n}_nCK"}
-                    for n in ["tRCD","tRP","tRAS","tRC","tRRD","tFAW","tWTR","tWR","tRTP","tCCD","tRFC"]
+                    {"name": f"cfg_{n}_nCK", "width": 8, "dir": "input",
+                     "source": f"config_regs.cfg_{n}_nCK"}
+                    for n in ["tRCD", "tRP", "tRAS", "tRC", "tRRD", "tFAW",
+                             "tWTR", "tWR", "tRTP", "tCCD", "tRFC"]
                 ],
                 "status_out": [
-                    {"name": "bank_is_active", "width": p["NUM_BANKS"], "dir": "output"},
-                    {"name": "bank_open_row", "width": f"{p['NUM_BANKS']}x{p['ROW_BITS']}", "dir": "output"},
+                    {"name": "bank_is_active",   "width": p["NUM_BANKS"], "dir": "output"},
+                    {"name": "bank_open_row",    "width": f"{p['NUM_BANKS']}x{p['ROW_BITS']}", "dir": "output"},
                     {"name": "bank_act_allowed", "width": p["NUM_BANKS"], "dir": "output"},
-                    {"name": "bank_rd_allowed", "width": p["NUM_BANKS"], "dir": "output"},
-                    {"name": "bank_wr_allowed", "width": p["NUM_BANKS"], "dir": "output"},
+                    {"name": "bank_rd_allowed",  "width": p["NUM_BANKS"], "dir": "output"},
+                    {"name": "bank_wr_allowed",  "width": p["NUM_BANKS"], "dir": "output"},
                     {"name": "bank_pre_allowed", "width": p["NUM_BANKS"], "dir": "output"},
-                    {"name": "all_banks_idle", "width": 1, "dir": "output"},
-                    {"name": "faw_allows_act", "width": 1, "dir": "output"},
+                    {"name": "all_banks_idle",   "width": 1, "dir": "output"},
+                    {"name": "faw_allows_act",   "width": 1, "dir": "output"},
                 ],
             },
         }
 
+    # ==================================================================
+    # MAIN
+    # ==================================================================
     def run(self) -> dict:
         hdr = "=" * 62
-        print(f"{hdr}\n  BANK TRACKER AGENT\n  Spec: {self.spec_path}\n{hdr}")
-        print("\n[1/4] Validating …")
+        mode = "LLM (retry)" if self.retry_instructions else "LLM (cold)"
+        print(f"{hdr}\n  BANK TRACKER AGENT -- {mode}")
+        print(f"  Model:   {self.model}")
+        print(f"  Temp:    {self.temperature}")
+        print(f"  Spec:    {self.spec_path}\n{hdr}")
+
+        print("\n[1/4] Validating spec ...")
         errs = self.validate()
         if errs:
-            for e in errs: print(f"  ✗ {e}")
+            for e in errs:
+                print(f"  x {e}")
             return {"status": "error", "errors": errs}
-        print("  ✓ Valid")
-        for k,v in self.p.items(): print(f"    {k:20s} = {v}")
-        print("\n[2/4] Generating RTL …")
-        rtl = self.generate_rtl()
-        print(f"  ✓ {len(rtl.splitlines())} lines")
-        print("\n[3/4] Manifest …")
+        print("  + Valid")
+        for k, v in self.p.items():
+            print(f"    {k:12s} = {v}")
+
+        print("\n[2/4] Generating RTL via LLM ...")
+        rtl = None
+        last_problems = []
+        prompt = self._build_prompt()
+
+        for attempt in range(1, self.max_attempts + 1):
+            print(f"  -> Attempt {attempt}/{self.max_attempts} "
+                  f"(temp={self.temperature})...")
+            try:
+                llm_out = self._call_llm(prompt)
+                candidate = self._extract_sv(llm_out)
+            except Exception as e:
+                print(f"  x LLM call failed: {e}")
+                if attempt == self.max_attempts:
+                    return {"status": "error",
+                            "errors": [f"LLM call failed: {e}"]}
+                time.sleep(2)
+                continue
+
+            problems = self._sv_sanity_check(candidate)
+            if not problems:
+                rtl = candidate
+                print(f"  + RTL passed sanity check ({len(rtl.splitlines())} lines)")
+                break
+
+            print(f"  x sanity check failed ({len(problems)} issue(s)):")
+            for pr in problems[:8]:
+                print(f"    - {pr}")
+            last_problems = problems
+
+            feedback = (
+                "\n\nYour previous output failed local sanity checks:\n"
+                + "\n".join(f"  - {x}" for x in problems[:15])
+                + "\n\nFix these issues. Follow the HARD NAMING CONTRACT exactly."
+            )
+            prompt = self._build_prompt() + feedback
+            self.temperature = max(0.2, self.temperature - 0.2)
+
+        if rtl is None:
+            return {"status": "error",
+                    "errors": [f"RTL generation failed after {self.max_attempts} attempts"],
+                    "last_problems": last_problems}
+
+        print("\n[3/4] Manifest ...")
         manifest = self.generate_manifest()
-        print(f"  ✓ {sum(len(v) for v in manifest['ports'].values())} ports")
-        print("\n[4/4] Writing …")
-        (self.output_dir / "bank_tracker.sv").write_text(rtl)
-        (self.output_dir / "bank_tracker_manifest.json").write_text(json.dumps(manifest, indent=2))
-        print(f"  ✓ {self.output_dir}/bank_tracker.sv")
-        print(f"  ✓ {self.output_dir}/bank_tracker_manifest.json")
-        print(f"\n{hdr}\n  DONE — bank_tracker.sv\n{hdr}")
-        return {"status": "success", "module": "bank_tracker", "phase": 2,
-                "lines": len(rtl.splitlines()), "manifest": manifest}
+        n_ports = sum(len(v) for v in manifest["ports"].values())
+        print(f"  + {n_ports} ports")
+
+        print("\n[4/4] Writing files ...")
+        sv_path = self.output_dir / "bank_tracker.sv"
+        mf_path = self.output_dir / "bank_tracker_manifest.json"
+        sv_path.write_text(rtl)
+        mf_path.write_text(json.dumps(manifest, indent=2))
+        print(f"  + {sv_path}")
+        print(f"  + {mf_path}")
+
+        print(f"\n{hdr}\n  DONE -- bank_tracker.sv\n{hdr}")
+        return {
+            "status": "success",
+            "module": "bank_tracker",
+            "phase": 2,
+            "lines": len(rtl.splitlines()),
+            "manifest": manifest,
+            "rtl_path": str(sv_path),
+        }
 
 
 if __name__ == "__main__":
-    print("╔══════════════════════════════════════════════╗")
-    print("║   BANK TRACKER AGENT  (Phase 2)             ║")
-    print("╚══════════════════════════════════════════════╝\n")
+    print("+==============================================+")
+    print("|   BANK TRACKER AGENT  (LLM, Phase 2)         |")
+    print("+==============================================+\n")
     spec = input("Enter path to spec JSON: ").strip()
     if not spec or not os.path.isfile(spec):
         print(f"Error: invalid path '{spec}'"); sys.exit(1)
     out = input("Output directory (Enter for ./output): ").strip() or "./output"
     print()
     r = BankTrackerAgent(spec, out).run()
-    sys.exit(0 if r["status"]=="success" else 1)
+    sys.exit(0 if r["status"] == "success" else 1)

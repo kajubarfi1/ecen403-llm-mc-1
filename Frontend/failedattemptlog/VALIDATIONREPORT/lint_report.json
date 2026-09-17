@@ -1,0 +1,314 @@
+{
+  "timestamp": "2026-04-20T19:52:55.276463",
+  "manifest_dir": "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/failedattemptlog/VALIDATIONREPORT/lint_combined",
+  "modules_checked": [
+    "addr_decoder",
+    "bank_tracker",
+    "calibration",
+    "config_regs",
+    "init_fsm",
+    "refresh_ctrl",
+    "wb_port"
+  ],
+  "connections_checked": 19,
+  "status": "PASS",
+  "errors": [],
+  "warnings": [
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: addr_decoder.dec_row (w=15) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: addr_decoder.dec_bank (w=3) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: addr_decoder.dec_col (w=10) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: addr_decoder.dec_rank (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: bank_tracker.bank_is_active (w=8) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: bank_tracker.bank_open_row (w=8x15) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: bank_tracker.bank_act_allowed (w=8) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: bank_tracker.bank_rd_allowed (w=8) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: bank_tracker.bank_wr_allowed (w=8) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: bank_tracker.bank_pre_allowed (w=8) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: bank_tracker.all_banks_idle (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: bank_tracker.faw_allows_act (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: calibration.cal_done (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: calibration.cal_fail (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: calibration.zqcs_req (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: config_regs.csr_ack_o (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: config_regs.csr_dat_o (w=32) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: config_regs.csr_err_o (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: config_regs.cfg_CL_nCK (w=8) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: config_regs.cfg_CWL_nCK (w=8) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: config_regs.cfg_sched_policy (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: config_regs.cfg_row_policy (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: config_regs.cfg_self_ref_mode (w=2) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: config_regs.cfg_ecc_enable (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: config_regs.cfg_bist_start (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: config_regs.cfg_force_self_ref (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: config_regs.cfg_bist_pattern (w=3) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: config_regs.cfg_bist_addr_mode (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: config_regs.cfg_bist_addr_start (w=29) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: config_regs.cfg_bist_addr_end (w=29) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: init_fsm.init_fail (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: init_fsm.init_cmd_valid (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: init_fsm.init_cmd (w=4) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: init_fsm.init_addr (w=15) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: init_fsm.init_bank (w=3) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: init_fsm.init_cke (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: init_fsm.init_reset_n (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: init_fsm.init_state (w=4) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: refresh_ctrl.ref_required (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: refresh_ctrl.ref_urgent (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: refresh_ctrl.ref_pending_cnt (w=3) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: refresh_ctrl.ref_starve_flag (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: wb_port.wb_ack_o (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: wb_port.wb_dat_o (w=32) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: wb_port.wb_stall_o (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: wb_port.wb_err_o (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: wb_port.req_valid (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: wb_port.req_we (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: wb_port.req_wdata (w=32) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: wb_port.req_wmask (w=4) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: wb_port.req_aux (w=4) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-007",
+      "severity": "WARNING",
+      "message": "refresh_ctrl uses init_fsm.init_done but 'init_fsm' not in its dependencies list"
+    }
+  ],
+  "info": [
+    "L-001 OK: addr_decoder.req_addr <- wb_port.req_addr (w=29)",
+    "L-001 OK: bank_tracker.cfg_tRCD_nCK <- config_regs.cfg_tRCD_nCK (w=8)",
+    "L-001 OK: bank_tracker.cfg_tRP_nCK <- config_regs.cfg_tRP_nCK (w=8)",
+    "L-001 OK: bank_tracker.cfg_tRAS_nCK <- config_regs.cfg_tRAS_nCK (w=8)",
+    "L-001 OK: bank_tracker.cfg_tRC_nCK <- config_regs.cfg_tRC_nCK (w=8)",
+    "L-001 OK: bank_tracker.cfg_tRRD_nCK <- config_regs.cfg_tRRD_nCK (w=8)",
+    "L-001 OK: bank_tracker.cfg_tFAW_nCK <- config_regs.cfg_tFAW_nCK (w=8)",
+    "L-001 OK: bank_tracker.cfg_tWTR_nCK <- config_regs.cfg_tWTR_nCK (w=8)",
+    "L-001 OK: bank_tracker.cfg_tWR_nCK <- config_regs.cfg_tWR_nCK (w=8)",
+    "L-001 OK: bank_tracker.cfg_tRTP_nCK <- config_regs.cfg_tRTP_nCK (w=8)",
+    "L-001 OK: bank_tracker.cfg_tCCD_nCK <- config_regs.cfg_tCCD_nCK (w=8)",
+    "L-001 OK: bank_tracker.cfg_tRFC_nCK <- config_regs.cfg_tRFC_nCK (w=8)",
+    "L-001 OK: calibration.init_done <- init_fsm.init_done (w=1)",
+    "L-001 OK: refresh_ctrl.init_done <- init_fsm.init_done (w=1)",
+    "L-001 OK: refresh_ctrl.cfg_force_refresh <- config_regs.cfg_force_refresh (w=1)",
+    "L-001 OK: refresh_ctrl.cfg_tREFI_nCK <- config_regs.cfg_tREFI_nCK (w=24)",
+    "L-001 OK: refresh_ctrl.cfg_max_postpone <- config_regs.cfg_max_postpone (w=4)",
+    "L-001 OK: refresh_ctrl.cfg_urgent_threshold <- config_regs.cfg_urgent_threshold (w=4)",
+    "L-001 OK: refresh_ctrl.cfg_ref_priority <- config_regs.cfg_ref_priority (w=1)",
+    "L-003 OK: ROW_BITS=15 consistent across ['addr_decoder', 'bank_tracker', 'wb_port']",
+    "L-003 OK: ADDR_WIDTH=29 consistent across ['addr_decoder', 'wb_port']",
+    "L-003 OK: BANK_BITS=3 consistent across ['addr_decoder', 'bank_tracker']",
+    "L-003 OK: COL_BITS=10 consistent across ['addr_decoder']",
+    "L-003 OK: DDR_ADDR_W=15 consistent across ['init_fsm']",
+    "L-003 OK: DDR_BANK_W=3 consistent across ['init_fsm']",
+    "L-003 OK: DATA_WIDTH=32 consistent across ['wb_port']",
+    "L-003 OK: SEL_WIDTH=4 consistent across ['wb_port']",
+    "L-003 OK: AUX_WIDTH=4 consistent across ['wb_port']",
+    "L-005 OK: No dependency cycles"
+  ],
+  "summary": {
+    "errors": 0,
+    "warnings": 52,
+    "passed": 29
+  }
+}

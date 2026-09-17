@@ -1,0 +1,299 @@
+{
+  "resolved_choices": {
+    "command_queue_depth": 16,
+    "lookahead_depth": 8,
+    "address_mapping": "row-bank-column",
+    "burst_length": 8,
+    "host_data_width": 32,
+    "read_buffer_depth": 16,
+    "write_buffer_depth": 16,
+    "interface_type": "wishbone_pipelined",
+    "self_refresh_mode": "auto",
+    "target_frequency_mhz": 167,
+    "area_optimization_goal": "balanced",
+    "power_optimization_goal": "balanced",
+    "pipeline_latency_cycles": 2,
+    "speed_grade": "DDR3-1333",
+    "density": "2Gb",
+    "device_width": "x8",
+    "ranks": 1,
+    "byte_lanes": 2,
+    "ecc_mode": 0,
+    "scheduler_policy": "fr_fcfs",
+    "row_policy": "open_page"
+  },
+  "assumptions": [],
+  "rationale": "",
+  "warnings": [],
+  "consistency_checks": [
+    {
+      "name": "tRC == tRAS + tRP",
+      "pass": true,
+      "detail": "49.5 == 36.0 + 13.5"
+    },
+    {
+      "name": "tRRD >= max(4*tCK, page floor)",
+      "pass": true,
+      "detail": "7.5 vs 7.5"
+    },
+    {
+      "name": "tWTR >= max(4*tCK, 7.5ns)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "tRTP >= max(4*tCK, 7.5ns)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "tFAW >= 4*tRRD",
+      "pass": true,
+      "detail": "45.0 >= 30.0"
+    },
+    {
+      "name": "tCCD == 4*tCK",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "timing.tCK_ns == clocking.ddr_clock_period_ns",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "controller_period / ddr_period == clock_ratio",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "tRCD_nCK == ceil(tRCD/tCK)",
+      "pass": true,
+      "detail": "9 == 9"
+    },
+    {
+      "name": "tRP_nCK == ceil(tRP/tCK)",
+      "pass": true,
+      "detail": "9 == 9"
+    },
+    {
+      "name": "tRAS_nCK == ceil(tRAS/tCK)",
+      "pass": true,
+      "detail": "24 == 24"
+    },
+    {
+      "name": "tRC_nCK == ceil(tRC/tCK)",
+      "pass": true,
+      "detail": "33 == 33"
+    },
+    {
+      "name": "tRFC_nCK == ceil(tRFC/tCK)",
+      "pass": true,
+      "detail": "107 == 107"
+    },
+    {
+      "name": "tFAW_nCK == ceil(tFAW/tCK)",
+      "pass": true,
+      "detail": "30 == 30"
+    },
+    {
+      "name": "tRRD_nCK == ceil(tRRD/tCK)",
+      "pass": true,
+      "detail": "5 == 5"
+    },
+    {
+      "name": "tWR_nCK == ceil(tWR/tCK)",
+      "pass": true,
+      "detail": "10 == 10"
+    },
+    {
+      "name": "tWTR_nCK == ceil(tWTR/tCK)",
+      "pass": true,
+      "detail": "5 == 5"
+    },
+    {
+      "name": "tRTP_nCK == ceil(tRTP/tCK)",
+      "pass": true,
+      "detail": "5 == 5"
+    },
+    {
+      "name": "tCCD_nCK == ceil(tCCD/tCK)",
+      "pass": true,
+      "detail": "4 == 4"
+    },
+    {
+      "name": "tREFI_nCK == ceil(tREFI/tCK)",
+      "pass": true,
+      "detail": "5200 == 5200"
+    },
+    {
+      "name": "MR0.cas_latency_cycles == timing.CL_cycles",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "MR2.cas_write_latency_cycles == timing.CWL_cycles",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "MR0.write_recovery_ns == timing.tWR",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "host.address_width_bits == geometry sum",
+      "pass": true,
+      "detail": "29 == 29"
+    },
+    {
+      "name": "address_width_bits == log2(channel_capacity_bytes)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "queue_index_bits == log2(command_queue_depth)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "tXPR_ns == max(5*tCK, tRFC+10ns)",
+      "pass": true,
+      "detail": "170.0 == 170.0"
+    }
+  ],
+  "modifiability": {
+    "legend": {
+      "isolated": "Change the value freely. No RTL structure/port/width change -- at most a constant, a CSR reset value, or a backend hint. Safe to sweep.",
+      "regen_local": "A few modules' parameters (widths, depths) change and those modules regenerate, but port names and the cross-module interface stay stable.",
+      "structural": "Bus/address widths, geometry or port lists change; ripples across most modules and the cross-phase lint must re-pass.",
+      "unsupported": "Current RTL agents do not implement this axis; the compiler rejects it."
+    },
+    "buckets": {
+      "isolated": [
+        {
+          "parameter": "area_optimization_goal",
+          "effect": "Backend synthesis hint only. Frontend RTL agents ignore it."
+        },
+        {
+          "parameter": "power_optimization_goal",
+          "effect": "Backend synthesis hint only. Frontend RTL agents ignore it."
+        },
+        {
+          "parameter": "target_frequency_mhz",
+          "effect": "Backend timing-closure goal. No RTL change as long as it stays >= the controller clock the speed grade needs."
+        },
+        {
+          "parameter": "max_postpone_count",
+          "effect": "Refresh policy constant + REFRESH_CONFIG reset value. Fits the existing 4-bit CSR field; no port change."
+        },
+        {
+          "parameter": "urgent_threshold",
+          "effect": "Refresh policy constant + REFRESH_CONFIG reset value. Existing 4-bit field."
+        },
+        {
+          "parameter": "bist_config",
+          "effect": "BIST pattern / address range. Existing CSR fields, no port change."
+        },
+        {
+          "parameter": "error_handling",
+          "effect": "Behavioural selectors in refresh_ctrl / data_path; no interface change."
+        },
+        {
+          "parameter": "reset_hold_us",
+          "effect": "Counter compare value in init_fsm. No port change while it fits the counter width."
+        },
+        {
+          "parameter": "cke_delay_us",
+          "effect": "Counter compare value in init_fsm."
+        },
+        {
+          "parameter": "periodic_zqcs_interval",
+          "effect": "Counter compare value in calibration / scheduler."
+        }
+      ],
+      "regen_local": [
+        {
+          "parameter": "command_queue_depth",
+          "effect": "Drives queue_index_bits -> cmd_queue + scheduler parameter widths. Port names stable. Must be a power of 2."
+        },
+        {
+          "parameter": "lookahead_depth",
+          "effect": "Drives lookahead_index_bits -> scheduler. Port names stable."
+        },
+        {
+          "parameter": "read_buffer_depth",
+          "effect": "wb_port / data_path read-return FIFO depth. Local parameter."
+        },
+        {
+          "parameter": "write_buffer_depth",
+          "effect": "wb_port / data_path write FIFO depth. Local parameter."
+        },
+        {
+          "parameter": "scheduler_policy",
+          "effect": "scheduler behaviour + CTRL_CONFIG.sched_policy reset bit (bit already exists). No port change."
+        },
+        {
+          "parameter": "row_policy",
+          "effect": "scheduler / bank_tracker behaviour + CTRL_CONFIG.row_policy reset bit. No port change."
+        },
+        {
+          "parameter": "self_refresh_mode",
+          "effect": "refresh_ctrl behaviour + CTRL_CONFIG.self_ref_mode reset field. No port change."
+        },
+        {
+          "parameter": "address_mapping",
+          "effect": "addr_decoder bit-slicing logic changes; its port list stays the same."
+        },
+        {
+          "parameter": "pipeline_latency_cycles",
+          "effect": "Adds/removes pipeline registers -> latency_model + data_path. Interface stable."
+        }
+      ],
+      "structural": [
+        {
+          "parameter": "speed_grade",
+          "effect": "Every timing constant, tCK, all clock periods, CL/CWL, mode registers, TIMING_* CSR reset values, latency model. Touches timing / init_fsm / config_regs / scheduler / bank_tracker / data_path."
+        },
+        {
+          "parameter": "density",
+          "effect": "Changes row_bits -> address_width_bits -> addr_decoder, bank_tracker, every module carrying a row-address port, and the BIST address range. tRFC also changes."
+        },
+        {
+          "parameter": "byte_lanes",
+          "effect": "Changes channel_data_width -> data_path packing, phy_interface, addr_decoder, host burst sizing, capacity/address width."
+        },
+        {
+          "parameter": "device_width",
+          "effect": "x8 vs x16 changes page size -> column_bits, row_bits, channel width. Ripples like density."
+        },
+        {
+          "parameter": "burst_length",
+          "effect": "BL4 vs BL8 changes tCCD, data-beat count, data_path packing and the latency model."
+        },
+        {
+          "parameter": "host_data_width",
+          "effect": "wb_port bus width, wb_sel width, data_path pack_mode, and every host-facing port."
+        },
+        {
+          "parameter": "interface_type",
+          "effect": "wishbone_classic vs _pipelined changes the wb_port protocol FSM and stall semantics."
+        },
+        {
+          "parameter": "ecc_mode",
+          "effect": "ECC on consumes a byte lane and widens the data_path with SEC-DED logic; changes channel data width and ERROR_STATUS use."
+        }
+      ],
+      "unsupported": [
+        {
+          "parameter": "ranks",
+          "effect": "ranks > 1: current RTL agents assume a single rank (bank_tracker / addr_decoder have no rank dimension, no ODT / rank-switch handling)."
+        },
+        {
+          "parameter": "num_ports",
+          "effect": "num_ports > 1: only a single Wishbone host port is implemented (no arbiter instancing in wb_port)."
+        }
+      ]
+    }
+  }
+}

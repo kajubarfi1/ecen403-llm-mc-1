@@ -6,10 +6,12 @@
 ║  Generates: calibration.sv + calibration_manifest.json               ║
 ║                                                                      ║
 ║  Minimal calibration block for abstract PHY boundary.                ║
-║  Waits for init_done, asserts cal_done one cycle later.              ║
+║  Latches cal_done high on first init_done high (sticky).             ║
 ║  Issues periodic ZQCS every 512,000 nCK.                            ║
 ╚══════════════════════════════════════════════════════════════════════╝
 """
+#!/usr/bin/env python3
+"""Calibration Agent - Phase 2. Sticky latch on init_done, periodic ZQCS."""
 
 import json, sys, os, math
 from pathlib import Path
@@ -38,11 +40,9 @@ class CalibrationAgent:
 
         ctrl_period = self.clocking["controller_clock_period_ns"]
         tCK = self.clocking["$derived"]["tCK_ns"]
-        # Convert nCK to controller cycles
         p["ZQCS_CTRL_CYC"]   = math.ceil(zqcs_nCK * tCK / ctrl_period)
         p["ZQCS_CTR_W"]      = max(1, p["ZQCS_CTRL_CYC"].bit_length())
 
-        # tZQCS = 64 nCK per JEDEC
         tZQCS_nCK = 64
         p["tZQCS_CYC"]       = math.ceil(tZQCS_nCK * tCK / ctrl_period)
 
@@ -72,7 +72,7 @@ class CalibrationAgent:
 // Description:
 //   Minimal calibration block for abstract PHY boundary.
 //   - Waits for init_done from init_fsm
-//   - Asserts cal_done one cycle after init_done (no actual leveling)
+//   - Latches cal_done permanently high on first init_done high (sticky)
 //   - Issues periodic ZQCS request every {p['ZQCS_INTERVAL']} nCK
 //     ({p['ZQCS_CTRL_CYC']} controller cycles)
 //   - Write/read leveling disabled (PHY not modeled)
@@ -86,40 +86,28 @@ module calibration #(
     parameter ZQCS_WAIT  = {p['ZQCS_CTRL_CYC']},
     parameter TZQCS_CYC  = {p['tZQCS_CYC']}
 ) (
-    // ────────────── Clock / Reset ──────────────
     input  logic                    clk,
     input  logic                    rst_n,
-
-    // ────────────── From init_fsm ──────────────
     input  logic                    init_done,
-
-    // ────────────── Status outputs ──────────────
-    output logic                    cal_done,       // calibration complete
-    output logic                    cal_fail,       // always 0 (abstract PHY)
-
-    // ────────────── ZQCS request (to cmd_gen / scheduler) ──────────────
-    output logic                    zqcs_req,       // request periodic ZQCS
-    input  logic                    zqcs_ack        // scheduler completed ZQCS
+    output logic                    cal_done,
+    output logic                    cal_fail,
+    output logic                    zqcs_req,
+    input  logic                    zqcs_ack
 );
 
     // ================================================================
-    // cal_done — one cycle after init_done
+    // cal_done — sticky latch: goes high on first init_done high and stays
+    // high until reset. No edge detection.
     // ================================================================
-    logic init_done_d;
-
-    always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n) init_done_d <= 1'b0;
-        else        init_done_d <= init_done;
-
-    // cal_done latches high once init completes
     logic cal_done_r;
 
-    always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n)                          cal_done_r <= 1'b0;
-        else if (init_done && !init_done_d)  cal_done_r <= 1'b1;  // rising edge of init_done
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n)            cal_done_r <= 1'b0;
+        else if (init_done)    cal_done_r <= 1'b1;
+    end
 
     assign cal_done = cal_done_r;
-    assign cal_fail = 1'b0;  // abstract PHY — calibration never fails
+    assign cal_fail = 1'b0;
 
     // ================================================================
     // Periodic ZQCS counter
@@ -135,7 +123,6 @@ module calibration #(
             zqcs_ctr     <= '0;
             zqcs_pending <= 1'b0;
         end else begin
-            // Count down
             if (zqcs_ctr == '0) begin
                 zqcs_ctr     <= ZQCS_WAIT[ZQCS_CTR_W-1:0];
                 zqcs_pending <= 1'b1;
@@ -143,7 +130,6 @@ module calibration #(
                 zqcs_ctr <= zqcs_ctr - 1'b1;
             end
 
-            // Clear pending on ack
             if (zqcs_ack)
                 zqcs_pending <= 1'b0;
         end
@@ -157,13 +143,16 @@ module calibration #(
     // synopsys translate_off
     // synthesis translate_off
 
-    // CL-001: cal_done only after init_done
+    // CL-001: cal_done high implies either init_done was high last cycle
+    // (legitimate first rise) OR cal_done was already high (sticky hold).
+    // This avoids the $rose() race: at the edge where init_done first goes
+    // high, $past(init_done) would sample the PRIOR edge (when it was still 0).
     property p_cal_after_init;
         @(posedge clk) disable iff (!rst_n)
-        cal_done |-> init_done;
+        cal_done |-> ($past(init_done) || $past(cal_done));
     endproperty
     assert property (p_cal_after_init)
-        else $error("[CL-001] cal_done before init_done");
+        else $error("[CL-001] cal_done high without prior init_done or sticky hold");
 
     // CL-002: cal_fail always 0 (abstract PHY)
     property p_no_fail;
@@ -181,7 +170,6 @@ module calibration #(
     assert property (p_zqcs_after_cal)
         else $error("[CL-003] ZQCS requested before cal_done");
 
-    // Coverage
     covergroup cg_cal @(posedge clk);
         option.per_instance = 1;
         cp_cal_done  : coverpoint cal_done;

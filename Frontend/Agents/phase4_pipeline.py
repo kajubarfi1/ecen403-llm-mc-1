@@ -74,6 +74,14 @@ def setup_output_dirs(base_dir):
     return dirs
 
 
+def _latest_retry_instructions(_old: dict, new: dict) -> dict:
+    """Reducer for retry_instructions: each validation pass fully replaces the
+    previous attempt's feedback. With operator.or_ a module that started passing
+    on a later attempt kept a stale 'fix these failures' entry forever, so it
+    would be regenerated against failures that no longer existed."""
+    return new
+
+
 class GraphState(TypedDict):
     spec_path: str
     output_dir: str
@@ -87,12 +95,23 @@ class GraphState(TypedDict):
     attempt: int
     validation_result: dict
     failed_modules: list
-    retry_instructions: Annotated[dict, operator.or_]
+    retry_instructions: Annotated[dict, _latest_retry_instructions]
     history: Annotated[list, operator.add]
     lint_result: dict
     sim_result: dict
     pipeline_status: str
     ssh_password: str
+
+
+# ===================================================
+# START NODE (single generator; kept for parity with phases 1-3)
+# ===================================================
+def start(state: GraphState) -> dict:
+    """No-op entry node. Phase 4 has only one generator, so this is
+    purely for structural parity with the other phase pipelines."""
+    attempt = state.get("attempt", 1)
+    print(f"\n  Starting Phase 4 generation (attempt {attempt})...")
+    return {}
 
 
 # ===================================================
@@ -797,6 +816,7 @@ def sim_failure(state: GraphState) -> dict:
 def build_graph():
     g = StateGraph(GraphState)
 
+    g.add_node("start", start)
     g.add_node("gen_data_path", gen_data_path)
     g.add_node("validate_p4", validate_p4)
     g.add_node("p4_increment_retry", p4_increment_retry)
@@ -806,8 +826,9 @@ def build_graph():
     g.add_node("final_failure", final_failure)
     g.add_node("sim_failure", sim_failure)
 
-    # Entry: single agent
-    g.set_entry_point("gen_data_path")
+    # Entry: single start node -> single generator
+    g.set_entry_point("start")
+    g.add_edge("start", "gen_data_path")
 
     # Agent -> validation
     g.add_edge("gen_data_path", "validate_p4")

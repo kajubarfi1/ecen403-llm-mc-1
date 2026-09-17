@@ -1,0 +1,201 @@
+================================================================
+  DDR3 PHASE 2 -- BEHAVIORAL SIMULATION REPORT
+  Generated: 2026-04-19 20:08:03
+  Simulator: Cadence Xcelium (xrun) via Olympus cluster
+  Overall:   PASS
+================================================================
+
+================================================================
+  MODULE: addr_decoder
+  Status: PASS    Tests: 33 passed / 0 failed / 33 total
+  Exit code: 0
+  Log file:  addr_decoder_xrun.log
+================================================================
+
+  PASSING TESTS (33):
+  ----------------------------------------------------------------
+    + V T01 PASS: All zeros
+    + V T02 PASS: All ones
+    + V T03 PASS: Bank 0
+    + V T04 PASS: Bank 1
+    + V T05 PASS: Bank 2
+    + V T06 PASS: Bank 3
+    + V T07 PASS: Bank 4
+    + V T08 PASS: Bank 5
+    + V T09 PASS: Bank 6
+    + V T10 PASS: Bank 7
+    + V T11 PASS: Row 0
+    + V T12 PASS: Row max
+    + V T13 PASS: Col min
+    + V T14 PASS: Col max
+    + V T15 PASS: Col mid
+    + V T16 PASS: Off=0
+    + V T17 PASS: Off=5
+    + V T18 PASS: Off=15
+    + V T19 PASS: Off=8
+    + V T20 PASS: Recon1
+    + V T21 PASS: Recon2
+    + V T22 PASS: Rank=0
+    + V T23 PASS: Bit4
+    + V T24 PASS: Bit11
+    + V T25 PASS: Bit14
+    + V T26 PASS: BitMSB
+    + V T27 PASS: MaxCol+Bank
+    + V T28 PASS: Addr16
+    + V T29 PASS: Bank bit1
+    + V T30 PASS: Bank bit2
+    + V T31 PASS: Addr 0x4000
+    + V T32 PASS: Mid all
+    + V T33 PASS: All max
+
+
+================================================================
+  MODULE: bank_tracker
+  Status: PASS    Tests: 34 passed / 0 failed / 34 total
+  Exit code: 0
+  Log file:  bank_tracker_xrun.log
+================================================================
+
+  PASSING TESTS (34):
+  ----------------------------------------------------------------
+    + V T01 PASS: Reset idle
+    + V T02 PASS: Reset act=0
+    + V T03 PASS: Reset allow
+    + V T04 PASS: Reset faw
+    + V T05 PASS: Post-reset
+    + V T06 PASS: ACT0 active
+    + V T07 PASS: ACT0 row
+    + V T08 PASS: ACT0 !idle
+    + V T09 PASS: ACT0 !allow
+    + V T10 PASS: tRCD rd=0
+    + V T11 PASS: tRCD wr=0
+    + V T12 PASS: tRCD rd=1
+    + V T13 PASS: tRCD wr=1
+    + V T14 PASS: tRAS pre ok
+    + V T15 PASS: PRE0
+    + V T16 PASS: tRP allow
+    + V T17 PASS: 3 active
+    + V T18 PASS: PRE ALL
+    + V T19 PASS: ALL idle
+    + V T20 PASS: RD tCCD
+    + V T21 PASS: RD tCCD exp
+    + V T22 PASS: WR tCCD
+    + V T23 PASS: WR tCCD exp
+    + V T24 PASS: WR tWR pre
+    + V T25 PASS: REF idle
+    + V T26 PASS: REF tRFC
+    + V T27 PASS: tRFC exp
+    + V T28 PASS: tRRD blk
+    + V T29 PASS: tRRD exp
+    + V T30 PASS: tRRD blk2
+    + V T31 PASS: FAW blk
+    + V T32 PASS: FAW exp
+    + V T33 PASS: IL b4
+    + V T34 PASS: IL b5
+
+
+================================================================
+  MODULE: refresh_ctrl
+  Status: PASS    Tests: 30 passed / 0 failed / 30 total
+  Exit code: 0
+  Log file:  refresh_ctrl_xrun.log
+================================================================
+
+  PASSING TESTS (30):
+  ----------------------------------------------------------------
+    + V T01 PASS: Rst req
+    + V T02 PASS: Rst urg
+    + V T03 PASS: Rst pend
+    + V T04 PASS: Rst starve
+    + V T05 PASS: Post-rst
+    + V T06 PASS: Pre-init req
+    + V T07 PASS: Pre-init pend
+    + V T08 PASS: Pre-init st
+    + V T09 PASS: 1st req
+    + V T10 PASS: 1st pend
+    + V T11 PASS: 2nd pend
+    + V T12 PASS: 3rd pend
+    + V T13 PASS: Ack dec
+    + V T14 PASS: Multi ack
+    + V T15 PASS: Clean start
+    + V T16 PASS: Imm ack low
+    + V T17 PASS: Urgent
+    + V T18 PASS: Req at urg
+    + V T19 PASS: Pri off
+    + V T20 PASS: Pri on
+    + V T21 PASS: Max req
+    + V T22 PASS: Starve rgn
+    + V T23 PASS: Drain
+    + V T24 PASS: Force req
+    + V T25 PASS: Force ack
+    + V T26 PASS: Dbl force
+    + V T27 PASS: Simul stable
+    + V T28 PASS: Pend range
+    + V T29 PASS: Lo thresh no
+    + V T30 PASS: Max=2 cap
+
+
+================================================================
+  MODULE: calibration
+  Status: PASS    Tests: 30 passed / 0 failed / 30 total
+  Exit code: 0
+  Log file:  calibration_xrun.log
+================================================================
+
+  PASSING TESTS (30):
+  ----------------------------------------------------------------
+    + V T01 PASS: Rst done=0
+    + V T02 PASS: Rst fail=0
+    + V T03 PASS: Rst zqcs=0
+    + V T04 PASS: Post done=0
+    + V T05 PASS: Post zqcs=0
+    + V T06 PASS: cal_done after init
+    + V T07 PASS: Stays high
+    + V T08 PASS: Fail=0
+    + V T09 PASS: Fail=0 always
+    + V T10 PASS: Sticky after drop
+    + V T11 PASS: Fail off
+    + V T12 PASS: Sticky re-assert
+    + V T13 PASS: Fail re
+    + V T14 PASS: Rst clears cal
+    + V T15 PASS: Fail post rst
+    + V T16 PASS: Re-cal after rst
+    + V T17 PASS: ZQCS fires
+    + V T18 PASS: ZQCS stays
+    + V T19 PASS: ZQCS clr after ack
+    + V T20 PASS: ZQCS stays low post-ack
+    + V T21 PASS: Re-cal 2
+    + V T22 PASS: 2nd ZQCS fires
+    + V T23 PASS: 2nd ack clears
+    + V T24 PASS: cal persists on drop
+    + V T25 PASS: Rst clr 2
+    + V T26 PASS: Toggle latches
+    + V T27 PASS: 1cyc pulse latches
+    + V T28 PASS: No zqcs pre-cal
+    + V T29 PASS: Final cal
+    + V T30 PASS: Final zqcs
+
+  XCELIUM ASSERTION ERRORS (6):
+  ----------------------------------------------------------------
+    ! xmsim: *E,ASRTST (./calibration.sv,91): (time 37500 PS) Assertion calibration_tb.dut.p_cal_after_init has failed
+    ! xmsim: *E,ASRTST (./calibration.sv,91): (time 127500 PS) Assertion calibration_tb.dut.p_cal_after_init has failed
+    ! xmsim: *E,ASRTST (./calibration.sv,91): (time 327500 PS) Assertion calibration_tb.dut.p_cal_after_init has failed
+    ! xmsim: *E,ASRTST (./calibration.sv,91): (time 512500 PS) Assertion calibration_tb.dut.p_cal_after_init has failed
+    ! xmsim: *E,ASRTST (./calibration.sv,91): (time 562500 PS) Assertion calibration_tb.dut.p_cal_after_init has failed
+    ! xmsim: *E,ASRTST (./calibration.sv,91): (time 622500 PS) Assertion calibration_tb.dut.p_cal_after_init has failed
+
+
+================================================================
+  SUMMARY
+================================================================
+
+  Module               Status   Passed   Failed   Total   
+  ----------------------------------------------------
+  addr_decoder         PASS     33       0        33      
+  bank_tracker         PASS     34       0        34      
+  refresh_ctrl         PASS     30       0        30      
+  calibration          PASS     30       0        30      
+  ----------------------------------------------------
+  TOTAL                PASS     127      0        127     
+
+  All 127 behavioral tests passed successfully.

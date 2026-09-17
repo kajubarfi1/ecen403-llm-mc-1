@@ -1,0 +1,80 @@
+[2026-04-16 16:45:13 UTC] xrun -Q -unbuffered '-timescale' '1ns/1ns' '-sysv' '-access' '+rw' design.sv testbench.sv  
+TOOL:	xrun	25.03-s001: Started on Apr 16, 2026 at 12:45:14 EDT
+xrun: 25.03-s001: (c) Copyright 1995-2025 Cadence Design Systems, Inc.
+	Top level design units:
+		config_regs_tb
+Loading snapshot worklib.config_regs_tb:sv .................... Done
+xcelium> source /xcelium25.03/tools/xcelium/files/xmsimrc
+xcelium> run
+
+==========================================================
+  config_regs_tb -- CSR Register Verification
+  11 registers, 32-bit data bus
+==========================================================
+
+  -- Section A: Reset Values --
+  [PASS] 1: A1: CTRL_STATUS reset = 0x00000000
+  [PASS] 2: A2: CTRL_CONFIG reset = 0x00000009
+  [PASS] 3: A3: TIMING_0 reset = 0x271c0b0b
+  [PASS] 4: A4: TIMING_1 reset = 0x80200606
+  [PASS] 5: A5: TIMING_2 reset = 0x080b060c
+  [PASS] 6: A6: TIMING_3 reset = 0x00186004
+  [PASS] 7: A7: REFRESH_CONFIG reset = 0x00000168
+  [PASS] 8: A8: ERROR_STATUS reset = 0x00000000
+  [PASS] 9: A9: BIST_CONFIG reset = 0x00000000
+  [PASS] 10: A10: BIST_ADDR_START reset = 0x00000000
+  [PASS] 11: A11: BIST_ADDR_END reset = 0x1fffffff
+
+  -- Section B: Write / Readback --
+  [PASS] 12: B1: CTRL_CONFIG write/readback (0x0000001f, WO masked)
+  [PASS] 13: B2: TIMING_0 write/readback
+  [PASS] 14: B3: TIMING_1 write/readback
+  [PASS] 15: B4: TIMING_2 write/readback
+  [PASS] 16: B5: TIMING_3 write/readback
+  [PASS] 17: B6: REFRESH_CONFIG write/readback
+  [PASS] 18: B7: BIST_CONFIG write/readback
+  [PASS] 19: B8: BIST_ADDR_START write/readback
+  [PASS] 20: B9: BIST_ADDR_END write/readback
+
+  -- Section C: CTRL_STATUS (RO) --
+  [PASS] 21: C1: CTRL_STATUS reflects inputs (0x000000a3)
+  [PASS] 22: C2: CTRL_STATUS ignores writes
+
+  -- Section D: WO Self-Clearing --
+  [PASS] 23: D1: bist_start self-clears (bit5=0)
+  [PASS] 24: D2: force_refresh self-clears (bit6=0)
+
+  -- Section E: RW1C (ERROR_STATUS) --
+  [PASS] 25: E1: ecc_ue latched (0x00010000)
+  [PASS] 26: E2: ecc_ue W1C clears (0x00000000)
+  [PASS] 27: E3: Flag stays clear
+
+  -- Section F: Error Handling --
+  [PASS] 28: F1: Invalid addr error
+xmsim: *E,ASRTST (./design.sv,314): (time 822500 PS) Assertion config_regs_tb.dut.assert_p_bad_addr has failed
+Invalid address did not produce csr_err_o
+  [PASS] 29: F2: Valid addr no error
+
+  -- Section G: cfg_* Outputs --
+  [PASS] 30: G1: cfg_tRCD_nCK=0x11
+  [PASS] 31: G2: cfg_sched_policy=1
+  [PASS] 32: G3: cfg_max_postpone=10
+
+  -- Section H: Reset --
+  [PASS] 33: H1: TIMING_0 reset (0x271c0b0b)
+  [PASS] 34: H2: Normal after reset
+
+  -- Section I: Edge Cases --
+  [PASS] 35: I1: Back-to-back TIMING_0
+  [PASS] 36: I2: Back-to-back TIMING_1
+
+==========================================================
+  ALL 36 TESTS PASSED
+==========================================================
+
+Simulation complete via $finish(1) at time 1157500 PS + 0
+./testbench.sv:252         $display(""); $finish;
+xcelium> exit
+TOOL:	xrun	25.03-s001: Exiting on Apr 16, 2026 at 12:45:16 EDT  (total: 00:00:02)
+Exit code expected: 0, received: 1
+Done

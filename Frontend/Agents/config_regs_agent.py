@@ -1,38 +1,62 @@
 #!/usr/bin/env python3
 """
 +======================================================================+
-|                 CONFIG / CSR REGISTERS AGENT                         |
+|             CONFIG / CSR REGISTERS AGENT  (LLM-driven)               |
 |                                                                      |
-|  Phase 1 RTL Generation Agent                                        |
+|  Phase 1 RTL Generation Agent -- Claude-powered                      |
 |  Generates: config_regs.sv + config_regs_tb.sv                      |
 |             + config_regs_manifest.json                              |
 |                                                                      |
-|  Dependencies: None (Phase 1)                                        |
+|  Drop-in replacement for the deterministic template-based agent.     |
+|  - Same constructor signature (+ optional retry_instructions)        |
+|  - Same run() return shape                                           |
+|  - Same output filenames                                             |
+|  - Testbench generation is DETERMINISTIC (kept from original)        |
+|  - Manifest is deterministic (same port contract)                    |
+|                                                                      |
+|  Determinism strategy (hybrid):                                      |
+|    - Register names, offsets, reset values, access types, field      |
+|      bit ranges, cfg_* output mappings are derived in Python and     |
+|      embedded as HARD NAMING CONTRACT in the LLM prompt.             |
+|    - LLM gets freedom over coding style, always_ff/comb structure,   |
+|      comments, SVA assertion style, coverage, etc.                   |
+|    - Temperature: 0.7 cold start, 0.3 on retry.                     |
+|                                                                      |
+|  Dependencies: anthropic (pip install anthropic)                     |
 |                                                                      |
 |  Spec sections consumed:                                             |
 |    csr_register_map, controller_architecture, clocking_model         |
 |                                                                      |
-|  Testbench: ~35 tests across 9 sections (A-I)                       |
-|    A: Reset values             B: Write/readback                     |
-|    C: RO behavior              D: WO self-clearing                   |
-|    E: RW1C latch/clear         F: Error handling                     |
-|    G: cfg_* output prop        H: Reset mid-transaction              |
-|    I: Edge cases                                                     |
-|                                                                      |
-|  Validation checks: CA-001 through CA-004                            |
+|  Validation checks this must pass: V-RTL-10 .. V-RTL-15, V-JED-10   |
 +======================================================================+
 """
 
+from __future__ import annotations
+
 import json
-import sys
 import os
+import re
+import time
+import sys
 from pathlib import Path
 from datetime import datetime
+from typing import Optional
 
 
 class ConfigRegsAgent:
 
-    def __init__(self, spec_path: str, output_dir: str = "./output"):
+    # ================================================================
+    # Construction
+    # ================================================================
+    def __init__(
+        self,
+        spec_path: str,
+        output_dir: str = "./output",
+        retry_instructions: Optional[dict] = None,
+        model: Optional[str] = None,
+        temperature: float = 0.7,
+        max_attempts: int = 3,
+    ):
         self.spec_path = spec_path
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -45,8 +69,16 @@ class ConfigRegsAgent:
         self.clocking  = self.spec["clocking_model"]
         self.registers = self.csr["registers"]
 
+        self.retry_instructions = retry_instructions
+        self.model = model or os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-5")
+        self.temperature = temperature
+        self.max_attempts = max_attempts
+
         self.p = self._derive_parameters()
 
+    # ================================================================
+    # Parameter derivation (deterministic, from spec)
+    # ================================================================
     def _derive_parameters(self) -> dict:
         p = {}
         p["CSR_ADDR_W"]   = self.csr["address_width_bits"]
@@ -58,8 +90,35 @@ class ConfigRegsAgent:
         total_fields = sum(len(r["fields"]) for r in self.registers)
         p["TOTAL_FIELDS"] = total_fields
 
+        # Pre-compute register table for prompt
+        p["REG_TABLE"] = []
+        for r in self.registers:
+            off = int(r["offset"], 16) if isinstance(r["offset"], str) else r["offset"]
+            rst = int(r["reset_value"], 16) if isinstance(r["reset_value"], str) else r["reset_value"]
+            fields = []
+            for f in r["fields"]:
+                fa = f.get("access", r["access"])
+                fields.append({
+                    "name": f["name"],
+                    "bits": f["bits"],
+                    "access": fa,
+                    "description": f.get("description", ""),
+                })
+            p["REG_TABLE"].append({
+                "name": r["name"],
+                "offset": off,
+                "offset_hex": f"0x{off:02X}",
+                "reset_value": rst,
+                "reset_hex": f"0x{rst:08X}",
+                "access": r["access"],
+                "fields": fields,
+            })
+
         return p
 
+    # ================================================================
+    # Validation (same as original — catches spec errors early)
+    # ================================================================
     def validate(self) -> list:
         errors = []
         p = self.p
@@ -71,7 +130,7 @@ class ConfigRegsAgent:
 
         offsets = set()
         for r in self.registers:
-            off = int(r["offset"], 16)
+            off = int(r["offset"], 16) if isinstance(r["offset"], str) else r["offset"]
             if off % 4 != 0:
                 errors.append(f"Register {r['name']} offset {r['offset']} not 4-byte aligned")
             if off in offsets:
@@ -108,6 +167,9 @@ class ConfigRegsAgent:
         msb, lsb = self._bit_range(bits_str)
         return msb - lsb + 1
 
+    # ================================================================
+    # Status input / RW1C event name mappings (deterministic)
+    # ================================================================
     def _status_input_name(self, field_name: str) -> str:
         mapping = {
             "init_done": "sts_init_done", "cal_done": "sts_cal_done",
@@ -126,319 +188,489 @@ class ConfigRegsAgent:
         return mapping.get(field_name, "1'b0")
 
     # ================================================================
-    # RTL generation (identical logic to original, just reformatted)
+    # HARD NAMING CONTRACT — everything the validator regex-matches
     # ================================================================
-    def generate_rtl(self) -> str:
+    def _validator_contract(self) -> str:
         p = self.p
-        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
         lines = []
         L = lines.append
 
-        L(f"////////////////////////////////////////////////////////////////////////////////")
-        L(f"// Module:    config_regs")
-        L(f"// File:      config_regs.sv")
-        L(f"// Generated: {ts}")
-        L(f"// Agent:     Config/CSR Registers Agent (Phase 1)")
-        L(f"// Spec:      {self.spec.get('design_id', 'N/A')} rev {self.spec.get('revision', 'N/A')}")
-        L(f"// Schema:    {self.spec.get('schema_version', 'N/A')}")
-        L(f"//")
-        L(f"// Description:")
-        L(f"//   {p['NUM_REGS']} CSR registers, {p['TOTAL_FIELDS']} bit fields.")
-        L(f"//   Wishbone B4 classic slave on secondary CSR bus.")
-        L(f"//   Access types: RO, RW, RW1C, WO (self-clearing).")
-        L(f"//")
-        L(f"// Validation: CA-001 .. CA-004")
-        L(f"////////////////////////////////////////////////////////////////////////////////")
-        L(f"")
-        L(f"module config_regs #(")
-        L(f"    parameter CSR_ADDR_W = {p['CSR_ADDR_W']},")
-        L(f"    parameter CSR_DATA_W = {p['CSR_DATA_W']}")
-        L(f") (")
-        L(f"    input  logic                    clk,")
-        L(f"    input  logic                    rst_n,")
-        L(f"")
-        L(f"    // CSR Wishbone Slave")
-        L(f"    input  logic                    csr_cyc_i,")
-        L(f"    input  logic                    csr_stb_i,")
-        L(f"    input  logic                    csr_we_i,")
-        L(f"    input  logic [CSR_ADDR_W-1:0]   csr_adr_i,")
-        L(f"    input  logic [CSR_DATA_W-1:0]   csr_dat_i,")
-        L(f"    input  logic [3:0]              csr_sel_i,")
-        L(f"    output logic                    csr_ack_o,")
-        L(f"    output logic [CSR_DATA_W-1:0]   csr_dat_o,")
-        L(f"    output logic                    csr_err_o,")
-        L(f"")
-        L(f"    // Status inputs")
-        L(f"    input  logic                    sts_init_done,")
-        L(f"    input  logic                    sts_cal_done,")
-        L(f"    input  logic                    sts_cal_fail,")
-        L(f"    input  logic                    sts_bist_done,")
-        L(f"    input  logic                    sts_bist_fail,")
-        L(f"    input  logic [2:0]              sts_ref_pending_cnt,")
-        L(f"    input  logic                    sts_self_refresh_active,")
-        L(f"    input  logic [15:0]             sts_ecc_ce_count,")
-        L(f"    input  logic                    sts_ecc_ue_event,")
-        L(f"    input  logic                    sts_ref_starve_event,")
-        L(f"    input  logic                    sts_init_fail_event,")
-        L(f"    input  logic [12:0]             sts_bist_fail_addr,")
-        L(f"")
-        L(f"    // Config outputs")
-        L(f"    output logic [7:0]  cfg_tRCD_nCK, output logic [7:0]  cfg_tRP_nCK,")
-        L(f"    output logic [7:0]  cfg_tRAS_nCK, output logic [7:0]  cfg_tRC_nCK,")
-        L(f"    output logic [7:0]  cfg_tRRD_nCK, output logic [7:0]  cfg_tWTR_nCK,")
-        L(f"    output logic [7:0]  cfg_tFAW_nCK, output logic [7:0]  cfg_tRFC_nCK,")
-        L(f"    output logic [7:0]  cfg_tWR_nCK,  output logic [7:0]  cfg_tRTP_nCK,")
-        L(f"    output logic [7:0]  cfg_CL_nCK,   output logic [7:0]  cfg_CWL_nCK,")
-        L(f"    output logic [7:0]  cfg_tCCD_nCK, output logic [23:0] cfg_tREFI_nCK,")
-        L(f"    output logic        cfg_sched_policy, output logic     cfg_row_policy,")
-        L(f"    output logic [1:0]  cfg_self_ref_mode, output logic    cfg_ecc_enable,")
-        L(f"    output logic        cfg_bist_start, output logic       cfg_force_refresh,")
-        L(f"    output logic        cfg_force_self_ref,")
-        L(f"    output logic [3:0]  cfg_max_postpone, output logic [3:0] cfg_urgent_threshold,")
-        L(f"    output logic        cfg_ref_priority,")
-        L(f"    output logic [2:0]  cfg_bist_pattern, output logic     cfg_bist_addr_mode,")
-        L(f"    output logic [28:0] cfg_bist_addr_start, output logic [28:0] cfg_bist_addr_end")
-        L(f");")
-        L(f"")
+        L("=" * 72)
+        L("HARD NAMING CONTRACT — MANDATORY VERBATIM STRINGS")
+        L("The downstream validator uses regex / substring matching on the")
+        L("generated .sv file. If ANY of these names, values, or patterns")
+        L("are missing or renamed, validation WILL fail.")
+        L("=" * 72)
+        L("")
 
-        # Register offsets
-        for r in self.registers:
-            L(f"    localparam logic [CSR_ADDR_W-1:0] ADDR_{r['name']:20s} = {p['CSR_ADDR_W']}'h{int(r['offset'], 16):02X};")
-        L(f"")
+        # Module declaration
+        L("MODULE NAME: config_regs")
+        L(f"PARAMETERS:  CSR_ADDR_W = {p['CSR_ADDR_W']}, CSR_DATA_W = {p['CSR_DATA_W']}")
+        L("  These MUST appear as: parameter CSR_ADDR_W = N, parameter CSR_DATA_W = N")
+        L("  in the #(...) parameter block of the module header.")
+        L("")
 
-        # Register storage
-        for r in self.registers:
-            if r["access"] != "RO":
-                L(f"    logic [CSR_DATA_W-1:0] reg_{r['name'].lower()};")
-        L(f"")
+        # Register address localparams
+        L("REGISTER ADDRESS LOCALPARAMS (must appear exactly as shown):")
+        for rt in p["REG_TABLE"]:
+            L(f"  localparam ... ADDR_{rt['name']:20s} = {p['CSR_ADDR_W']}'h{rt['offset']:02X};")
+        L("")
 
-        # Handshake
-        L(f"    wire csr_req = csr_cyc_i & csr_stb_i;")
-        L(f"    wire csr_wr  = csr_req & csr_we_i;")
-        L(f"    wire csr_rd  = csr_req & ~csr_we_i;")
-        L(f"    logic ack_r;")
-        L(f"    always_ff @(posedge clk or negedge rst_n)")
-        L(f"        if (!rst_n) ack_r <= 1'b0;")
-        L(f"        else        ack_r <= csr_req & ~ack_r;")
-        L(f"    assign csr_ack_o = ack_r;")
-        L(f"")
+        # Reset values
+        L("REGISTER RESET VALUES (must appear in reset block as hex literals):")
+        for rt in p["REG_TABLE"]:
+            if rt["access"] != "RO":
+                L(f"  reg_{rt['name'].lower()} <= 32'h{rt['reset_value']:08X};")
+        L("")
 
-        # Address decode
-        L(f"    logic addr_valid;")
-        L(f"    always_comb begin")
-        L(f"        addr_valid = 1'b0;")
-        L(f"        case (csr_adr_i)")
-        for r in self.registers:
-            L(f"            ADDR_{r['name']:20s}: addr_valid = 1'b1;")
-        L(f"            default: addr_valid = 1'b0;")
-        L(f"        endcase")
-        L(f"    end")
-        L(f"    logic err_r;")
-        L(f"    always_ff @(posedge clk or negedge rst_n)")
-        L(f"        if (!rst_n) err_r <= 1'b0;")
-        L(f"        else        err_r <= csr_req & ~addr_valid & ~ack_r;")
-        L(f"    assign csr_err_o = err_r;")
-        L(f"")
+        # Access types
+        L("ACCESS TYPES PER REGISTER:")
+        for rt in p["REG_TABLE"]:
+            L(f"  {rt['name']:20s}  offset={rt['offset_hex']}  access={rt['access']}  reset={rt['reset_hex']}")
+            for f in rt["fields"]:
+                L(f"    field: {f['name']:25s}  bits=[{f['bits']}]  access={f['access']}")
+        L("")
 
-        # Write logic
-        L(f"    always_ff @(posedge clk or negedge rst_n) begin")
-        L(f"        if (!rst_n) begin")
-        for r in self.registers:
-            if r["access"] == "RO":
-                continue
-            L(f"            reg_{r['name'].lower()} <= 32'h{int(r['reset_value'], 16):08X};")
-        L(f"        end else begin")
+        # RO register — CTRL_STATUS
+        L("READ-ONLY REGISTER: CTRL_STATUS (offset 0x00)")
+        L("  This register reads live status inputs, NOT a stored register.")
+        L("  Fields map to status input ports:")
+        L("    init_done            -> sts_init_done")
+        L("    cal_done             -> sts_cal_done")
+        L("    cal_fail             -> sts_cal_fail")
+        L("    bist_done            -> sts_bist_done")
+        L("    bist_fail            -> sts_bist_fail")
+        L("    ref_pending_cnt[2:0] -> sts_ref_pending_cnt")
+        L("    self_refresh_active  -> sts_self_refresh_active")
+        L("    reserved[31:8]       -> 23'b0 (hard-wired zero)")
+        L("  Writes to CTRL_STATUS must be IGNORED.")
+        L("")
 
-        # Self-clearing WO
-        for r in self.registers:
-            for f in r["fields"]:
-                if f.get("access") == "WO":
-                    msb, lsb = self._bit_range(f["bits"])
-                    L(f"            reg_{r['name'].lower()}[{msb}:{lsb}] <= {self._bit_width(f['bits'])}'b0;  // {f['name']} WO self-clear")
+        # RW1C register — ERROR_STATUS
+        L("RW1C REGISTER: ERROR_STATUS (offset 0x1C)")
+        L("  Fields latch on event pulse, clear on write-1:")
+        L("    ecc_ue_flag    [16]  <- sts_ecc_ue_event     (W1C)")
+        L("    ref_starve_flag[17]  <- sts_ref_starve_event  (W1C)")
+        L("    init_fail_flag [18]  <- sts_init_fail_event   (W1C)")
+        L("    ecc_ce_count [15:0]  <- sts_ecc_ce_count      (RO)")
+        L("    bist_fail_addr[31:19]<- sts_bist_fail_addr    (RO)")
+        L("")
 
-        # RW1C latches
-        for r in self.registers:
-            if r["access"] != "RW1C":
-                continue
-            for f in r["fields"]:
-                if f.get("access") == "RW1C":
-                    msb, lsb = self._bit_range(f["bits"])
-                    evt = self._rw1c_event_name(f["name"])
-                    L(f"            if ({evt}) reg_{r['name'].lower()}[{msb}] <= 1'b1;")
+        # WO self-clearing fields
+        L("WRITE-ONCE SELF-CLEARING FIELDS (in CTRL_CONFIG @ 0x04):")
+        L("  bist_start     [5]   — WO, must self-clear to 0 one cycle after write")
+        L("  force_refresh  [6]   — WO, must self-clear to 0 one cycle after write")
+        L("  force_self_ref [7]   — WO, must self-clear to 0 one cycle after write")
+        L("")
 
-        # Bus writes
-        L(f"            if (csr_wr && addr_valid) begin")
-        L(f"                case (csr_adr_i)")
-        for r in self.registers:
-            if r["access"] == "RO":
-                continue
-            L(f"                    ADDR_{r['name']}: begin")
-            if r["access"] == "RW1C":
-                for f in r["fields"]:
-                    msb, lsb = self._bit_range(f["bits"])
-                    if f.get("access") == "RW1C":
-                        L(f"                        if (csr_dat_i[{msb}]) reg_{r['name'].lower()}[{msb}] <= 1'b0;")
-            else:
-                for f in r["fields"]:
-                    msb, lsb = self._bit_range(f["bits"])
-                    fa = f.get("access", r["access"])
-                    if fa in ("RW", "WO"):
-                        if msb == lsb:
-                            L(f"                        reg_{r['name'].lower()}[{msb}] <= csr_dat_i[{msb}];  // {f['name']}")
-                        else:
-                            L(f"                        reg_{r['name'].lower()}[{msb}:{lsb}] <= csr_dat_i[{msb}:{lsb}];  // {f['name']}")
-            L(f"                    end")
-        L(f"                    default: ;")
-        L(f"                endcase")
-        L(f"            end")
-        L(f"        end")
-        L(f"    end")
-        L(f"")
+        # cfg_* output assignments
+        L("CFG OUTPUT PORT ASSIGNMENTS (must appear as assign statements):")
+        L("  assign cfg_tRCD_nCK         = reg_timing_0[7:0];")
+        L("  assign cfg_tRP_nCK          = reg_timing_0[15:8];")
+        L("  assign cfg_tRAS_nCK         = reg_timing_0[23:16];")
+        L("  assign cfg_tRC_nCK          = reg_timing_0[31:24];")
+        L("  assign cfg_tRRD_nCK         = reg_timing_1[7:0];")
+        L("  assign cfg_tWTR_nCK         = reg_timing_1[15:8];")
+        L("  assign cfg_tFAW_nCK         = reg_timing_1[23:16];")
+        L("  assign cfg_tRFC_nCK         = reg_timing_1[31:24];")
+        L("  assign cfg_tWR_nCK          = reg_timing_2[7:0];")
+        L("  assign cfg_tRTP_nCK         = reg_timing_2[15:8];")
+        L("  assign cfg_CL_nCK           = reg_timing_2[23:16];")
+        L("  assign cfg_CWL_nCK          = reg_timing_2[31:24];")
+        L("  assign cfg_tCCD_nCK         = reg_timing_3[7:0];")
+        L("  assign cfg_tREFI_nCK        = reg_timing_3[31:8];")
+        L("  assign cfg_sched_policy     = reg_ctrl_config[0];")
+        L("  assign cfg_row_policy       = reg_ctrl_config[1];")
+        L("  assign cfg_self_ref_mode    = reg_ctrl_config[3:2];")
+        L("  assign cfg_ecc_enable       = reg_ctrl_config[4];")
+        L("  assign cfg_bist_start       = reg_ctrl_config[5];")
+        L("  assign cfg_force_refresh    = reg_ctrl_config[6];")
+        L("  assign cfg_force_self_ref   = reg_ctrl_config[7];")
+        L("  assign cfg_max_postpone     = reg_refresh_config[3:0];")
+        L("  assign cfg_urgent_threshold = reg_refresh_config[7:4];")
+        L("  assign cfg_ref_priority     = reg_refresh_config[8];")
+        L("  assign cfg_bist_pattern     = reg_bist_config[2:0];")
+        L("  assign cfg_bist_addr_mode   = reg_bist_config[3];")
+        L("  assign cfg_bist_addr_start  = reg_bist_addr_start[28:0];")
+        L("  assign cfg_bist_addr_end    = reg_bist_addr_end[28:0];")
+        L("")
 
-        # Read mux
-        L(f"    logic [CSR_DATA_W-1:0] rdata_mux;")
-        L(f"    always_comb begin")
-        L(f"        rdata_mux = 32'h0;")
-        L(f"        case (csr_adr_i)")
-        for r in self.registers:
-            L(f"            ADDR_{r['name']}: begin")
-            if r["access"] == "RO":
-                L(f"                rdata_mux = 32'h0;")
-                for f in r["fields"]:
-                    msb, lsb = self._bit_range(f["bits"])
-                    src = self._status_input_name(f["name"])
-                    if msb == lsb:
-                        L(f"                rdata_mux[{msb}] = {src};")
-                    else:
-                        L(f"                rdata_mux[{msb}:{lsb}] = {src};")
-            else:
-                L(f"                rdata_mux = reg_{r['name'].lower()};")
-            L(f"            end")
-        L(f"            default: rdata_mux = 32'hDEAD_BEEF;")
-        L(f"        endcase")
-        L(f"    end")
-        L(f"    always_ff @(posedge clk or negedge rst_n)")
-        L(f"        if (!rst_n) csr_dat_o <= 32'h0;")
-        L(f"        else if (csr_rd) csr_dat_o <= rdata_mux;")
-        L(f"")
-
-        # cfg_* outputs
-        L(f"    assign cfg_tRCD_nCK = reg_timing_0[7:0];   assign cfg_tRP_nCK  = reg_timing_0[15:8];")
-        L(f"    assign cfg_tRAS_nCK = reg_timing_0[23:16];  assign cfg_tRC_nCK  = reg_timing_0[31:24];")
-        L(f"    assign cfg_tRRD_nCK = reg_timing_1[7:0];   assign cfg_tWTR_nCK = reg_timing_1[15:8];")
-        L(f"    assign cfg_tFAW_nCK = reg_timing_1[23:16];  assign cfg_tRFC_nCK = reg_timing_1[31:24];")
-        L(f"    assign cfg_tWR_nCK  = reg_timing_2[7:0];   assign cfg_tRTP_nCK = reg_timing_2[15:8];")
-        L(f"    assign cfg_CL_nCK   = reg_timing_2[23:16];  assign cfg_CWL_nCK  = reg_timing_2[31:24];")
-        L(f"    assign cfg_tCCD_nCK = reg_timing_3[7:0];   assign cfg_tREFI_nCK = reg_timing_3[31:8];")
-        L(f"    assign cfg_sched_policy   = reg_ctrl_config[0];")
-        L(f"    assign cfg_row_policy     = reg_ctrl_config[1];")
-        L(f"    assign cfg_self_ref_mode  = reg_ctrl_config[3:2];")
-        L(f"    assign cfg_ecc_enable     = reg_ctrl_config[4];")
-        L(f"    assign cfg_bist_start     = reg_ctrl_config[5];")
-        L(f"    assign cfg_force_refresh  = reg_ctrl_config[6];")
-        L(f"    assign cfg_force_self_ref = reg_ctrl_config[7];")
-        L(f"    assign cfg_max_postpone     = reg_refresh_config[3:0];")
-        L(f"    assign cfg_urgent_threshold = reg_refresh_config[7:4];")
-        L(f"    assign cfg_ref_priority     = reg_refresh_config[8];")
-        L(f"    assign cfg_bist_pattern     = reg_bist_config[2:0];")
-        L(f"    assign cfg_bist_addr_mode   = reg_bist_config[3];")
-        L(f"    assign cfg_bist_addr_start  = reg_bist_addr_start[28:0];")
-        L(f"    assign cfg_bist_addr_end    = reg_bist_addr_end[28:0];")
-        L(f"")
+        # Mandatory handshake code
+        L("=" * 72)
+        L("MANDATORY WISHBONE HANDSHAKE — COPY THIS CODE VERBATIM")
+        L("=" * 72)
+        L("The testbench relies on the EXACT timing of this handshake pattern.")
+        L("Using a different implementation (e.g. directly registering csr_ack_o")
+        L("instead of using an internal ack_r with continuous assign) will cause")
+        L("ALL read tests to fail due to Xcelium event scheduling differences.")
+        L("")
+        L("You MUST use these EXACT signal definitions and handshake blocks:")
+        L("")
+        L("  // --- Bus request decode (use 'wire', not 'logic' with assign) ---")
+        L("  wire csr_req = csr_cyc_i & csr_stb_i;")
+        L("  wire csr_wr  = csr_req & csr_we_i;")
+        L("  wire csr_rd  = csr_req & ~csr_we_i;")
+        L("")
+        L("  // --- ACK generation (internal register + continuous assign) ---")
+        L("  logic ack_r;")
+        L("  always_ff @(posedge clk or negedge rst_n)")
+        L("      if (!rst_n) ack_r <= 1'b0;")
+        L("      else        ack_r <= csr_req & ~ack_r;")
+        L("  assign csr_ack_o = ack_r;")
+        L("")
+        L("  // --- Error generation (internal register + continuous assign) ---")
+        L("  logic err_r;")
+        L("  always_ff @(posedge clk or negedge rst_n)")
+        L("      if (!rst_n) err_r <= 1'b0;")
+        L("      else        err_r <= csr_req & ~addr_valid & ~ack_r;")
+        L("  assign csr_err_o = err_r;")
+        L("")
+        L("  // --- Read data output (latch on csr_rd, hold value) ---")
+        L("  always_ff @(posedge clk or negedge rst_n)")
+        L("      if (!rst_n) csr_dat_o <= 32'h0;")
+        L("      else if (csr_rd) csr_dat_o <= rdata_mux;")
+        L("")
+        L("CRITICAL RULES FOR THE HANDSHAKE:")
+        L("  1. csr_ack_o MUST be driven by 'assign csr_ack_o = ack_r;'")
+        L("     Do NOT use 'csr_ack_o <=' in any always_ff block.")
+        L("  2. csr_err_o MUST be driven by 'assign csr_err_o = err_r;'")
+        L("     Do NOT use 'csr_err_o <=' in any always_ff block.")
+        L("  3. csr_dat_o MUST latch on 'csr_rd' (no addr_valid gate).")
+        L("     Do NOT add an 'else' clause that clears csr_dat_o to 0.")
+        L("  4. ack_r feedback MUST use '~ack_r', NOT '~csr_ack_o'.")
+        L("  5. The read data mux MUST be named 'rdata_mux' (not 'rd_data',")
+        L("     'read_data', etc.) — the sanity checker looks for this name.")
+        L("  6. Write logic MUST gate on 'csr_wr && addr_valid'.")
+        L("  7. Do NOT put ack, err, and dat_o in the same always_ff block.")
+        L("     Each gets its own always_ff as shown above.")
+        L("")
 
         # SVA
-        L(f"    // synopsys translate_off")
-        L(f"    // synthesis translate_off")
-        L(f"    property p_rw_retain;")
-        L(f"        @(posedge clk) disable iff (!rst_n)")
-        L(f"        (csr_wr && csr_adr_i == ADDR_TIMING_0) |=> (reg_timing_0[7:0] == $past(csr_dat_i[7:0]));")
-        L(f"    endproperty")
-        L(f"    assert property (p_rw_retain) else $error(\"[CA-001] RW register did not retain value\");")
-        L(f"    property p_bad_addr;")
-        L(f"        @(posedge clk) disable iff (!rst_n)")
-        L(f"        (csr_req && !addr_valid) |=> csr_err_o;")
-        L(f"    endproperty")
-        L(f"    assert property (p_bad_addr) else $error(\"[CA-004] No error on invalid address\");")
-        L(f"    covergroup cg_csr @(posedge clk);")
-        L(f"        option.per_instance = 1;")
-        L(f"        cp_write : coverpoint (csr_wr && addr_valid);")
-        L(f"        cp_read  : coverpoint (csr_rd && addr_valid);")
-        L(f"        cp_err   : coverpoint csr_err_o;")
-        L(f"    endgroup")
-        L(f"    cg_csr cg_inst = new();")
-        L(f"    // synthesis translate_on")
-        L(f"    // synopsys translate_on")
-        L(f"")
-        L(f"endmodule")
+        L("SVA ASSERTIONS (must include at minimum):")
+        L("  p_rw_retain  — after writing TIMING_0, the value is retained next cycle")
+        L("  p_bad_addr   — invalid address request produces csr_err_o")
+        L("  Wrap assertions in // synopsys translate_off / // synopsys translate_on")
+        L("")
 
         return "\n".join(lines)
 
     # ================================================================
-    # Testbench generation
+    # Required ports (full module header — LLM must not alter)
+    # ================================================================
+    def _required_ports(self) -> str:
+        p = self.p
+        return f"""MANDATORY MODULE HEADER — copy this EXACTLY as the module declaration.
+Do NOT rename, reorder, add, or remove any port. Do NOT drop the #(parameter ...) block.
+
+module config_regs #(
+    parameter CSR_ADDR_W = {p['CSR_ADDR_W']},
+    parameter CSR_DATA_W = {p['CSR_DATA_W']}
+) (
+    input  logic                    clk,
+    input  logic                    rst_n,
+
+    // CSR Wishbone Slave
+    input  logic                    csr_cyc_i,
+    input  logic                    csr_stb_i,
+    input  logic                    csr_we_i,
+    input  logic [CSR_ADDR_W-1:0]   csr_adr_i,
+    input  logic [CSR_DATA_W-1:0]   csr_dat_i,
+    input  logic [3:0]              csr_sel_i,
+    output logic                    csr_ack_o,
+    output logic [CSR_DATA_W-1:0]   csr_dat_o,
+    output logic                    csr_err_o,
+
+    // Status inputs
+    input  logic                    sts_init_done,
+    input  logic                    sts_cal_done,
+    input  logic                    sts_cal_fail,
+    input  logic                    sts_bist_done,
+    input  logic                    sts_bist_fail,
+    input  logic [2:0]              sts_ref_pending_cnt,
+    input  logic                    sts_self_refresh_active,
+    input  logic [15:0]             sts_ecc_ce_count,
+    input  logic                    sts_ecc_ue_event,
+    input  logic                    sts_ref_starve_event,
+    input  logic                    sts_init_fail_event,
+    input  logic [12:0]             sts_bist_fail_addr,
+
+    // Config outputs
+    output logic [7:0]  cfg_tRCD_nCK, output logic [7:0]  cfg_tRP_nCK,
+    output logic [7:0]  cfg_tRAS_nCK, output logic [7:0]  cfg_tRC_nCK,
+    output logic [7:0]  cfg_tRRD_nCK, output logic [7:0]  cfg_tWTR_nCK,
+    output logic [7:0]  cfg_tFAW_nCK, output logic [7:0]  cfg_tRFC_nCK,
+    output logic [7:0]  cfg_tWR_nCK,  output logic [7:0]  cfg_tRTP_nCK,
+    output logic [7:0]  cfg_CL_nCK,   output logic [7:0]  cfg_CWL_nCK,
+    output logic [7:0]  cfg_tCCD_nCK, output logic [23:0] cfg_tREFI_nCK,
+    output logic        cfg_sched_policy, output logic     cfg_row_policy,
+    output logic [1:0]  cfg_self_ref_mode, output logic    cfg_ecc_enable,
+    output logic        cfg_bist_start, output logic       cfg_force_refresh,
+    output logic        cfg_force_self_ref,
+    output logic [3:0]  cfg_max_postpone, output logic [3:0] cfg_urgent_threshold,
+    output logic        cfg_ref_priority,
+    output logic [2:0]  cfg_bist_pattern, output logic     cfg_bist_addr_mode,
+    output logic [28:0] cfg_bist_addr_start, output logic [28:0] cfg_bist_addr_end
+);"""
+
+    # ================================================================
+    # LLM prompt for RTL generation
+    # ================================================================
+    def _build_prompt(self) -> str:
+        p = self.p
+        contract = self._validator_contract()
+        ports = self._required_ports()
+
+        retry_section = ""
+        if self.retry_instructions:
+            fails = self.retry_instructions.get("validation_failures", [])
+            if fails:
+                retry_section = (
+                    "\n\n" + "=" * 72 + "\n"
+                    "RETRY — YOUR PREVIOUS OUTPUT FAILED THESE CHECKS:\n"
+                    + "=" * 72 + "\n"
+                )
+                for chk in fails:
+                    retry_section += (
+                        f"  [{chk.get('id','?')}] {chk.get('name','?')}\n"
+                        f"    expected: {chk.get('expected','?')}\n"
+                        f"    actual:   {chk.get('actual','?')}\n"
+                    )
+                retry_section += "\nFix these specific issues. Do NOT change anything that was passing.\n"
+
+        prompt = f"""You are a senior digital design engineer. Generate a COMPLETE, synthesizable
+SystemVerilog file for a CSR (Control/Status Register) block for a DDR3-1600
+memory controller.
+
+The module implements {p['NUM_REGS']} memory-mapped registers on a Wishbone B4
+classic slave interface. It provides configuration outputs (cfg_*) to the rest
+of the controller and reads live status inputs (sts_*).
+
+{contract}
+
+{ports}
+
+CRITICAL RULES:
+1. Output the COMPLETE file from `module config_regs` to `endmodule`.
+2. Wrap in ```systemverilog ... ``` fences.
+3. Every name, offset, reset value, and bit slice listed in the HARD NAMING
+   CONTRACT must appear VERBATIM in the output. The validator uses substring
+   and regex matching — even a 1-character difference fails.
+4. Register storage names MUST be reg_<lowercase_name> (e.g., reg_timing_0).
+5. The parameter block #(parameter CSR_ADDR_W = ..., parameter CSR_DATA_W = ...)
+   MUST be present. Do NOT drop it.
+6. cfg_* output assignments MUST use the exact register bit slices shown.
+7. Include SVA assertions p_rw_retain and p_bad_addr wrapped in translate_off.
+8. Must compile cleanly with Cadence xrun -sysv.
+9. No prose before or after — just the SystemVerilog in a code fence.
+{retry_section}"""
+
+        return prompt
+
+    # ================================================================
+    # LLM API call (Anthropic, with exponential backoff)
+    # ================================================================
+    def _call_llm(self, prompt: str) -> str:
+        try:
+            from anthropic import Anthropic
+        except ImportError:
+            raise RuntimeError("pip install anthropic  (required for LLM-driven agent)")
+
+        client = Anthropic()
+        last_err = None
+
+        for attempt in range(1, self.max_attempts + 1):
+            try:
+                resp = client.messages.create(
+                    model=self.model,
+                    max_tokens=8192,
+                    temperature=self.temperature,
+                    messages=[{"role": "user", "content": prompt}],
+                )
+                return resp.content[0].text
+            except Exception as e:
+                last_err = e
+                wait = min(2 ** attempt, 30)
+                print(f"  ! LLM call attempt {attempt} failed: {e}")
+                print(f"    Retrying in {wait}s ...")
+                time.sleep(wait)
+
+        raise RuntimeError(f"LLM call failed after {self.max_attempts} attempts: {last_err}")
+
+    # ================================================================
+    # Extract SystemVerilog from markdown code fence
+    # ================================================================
+    @staticmethod
+    def _extract_sv(text: str) -> str:
+        for tag in ("systemverilog", "verilog", "sv", ""):
+            pat = rf"```{tag}\s*\n(.*?)```" if tag else r"```\s*\n(.*?)```"
+            m = re.search(pat, text, re.DOTALL)
+            if m:
+                return m.group(1).strip() + "\n"
+        return text.strip() + "\n"
+
+    # ================================================================
+    # Sanity checks (catch LLM mistakes before writing to disk)
+    # ================================================================
+    def _sv_sanity_check(self, rtl: str) -> Optional[str]:
+        """Returns an error string if the RTL has obvious problems, else None."""
+        if "module config_regs" not in rtl:
+            return "Missing `module config_regs` declaration."
+
+        if "#(" not in rtl:
+            return (
+                "Missing #(parameter ...) block. The module MUST have "
+                "#(parameter CSR_ADDR_W = ..., parameter CSR_DATA_W = ...) "
+                "before the port list."
+            )
+
+        if f"CSR_DATA_W" not in rtl or f"CSR_ADDR_W" not in rtl:
+            return "Missing CSR_DATA_W or CSR_ADDR_W parameter."
+
+        # Check all register address localparams are present
+        for rt in self.p["REG_TABLE"]:
+            addr_name = f"ADDR_{rt['name']}"
+            if addr_name not in rtl:
+                return f"Missing localparam {addr_name} for register {rt['name']}."
+
+        # Check all non-RO register storage names
+        for rt in self.p["REG_TABLE"]:
+            if rt["access"] != "RO":
+                reg_name = f"reg_{rt['name'].lower()}"
+                if reg_name not in rtl:
+                    return f"Missing register storage {reg_name}."
+
+        # Check reset values for non-RO registers
+        for rt in self.p["REG_TABLE"]:
+            if rt["access"] != "RO" and rt["reset_value"] != 0:
+                hex_val = f"{rt['reset_value']:08X}"
+                if hex_val.lower() not in rtl.lower() and hex_val.upper() not in rtl.upper():
+                    return f"Missing reset value 0x{hex_val} for {rt['name']}."
+
+        # Check key cfg_* outputs
+        for cfg_name in ["cfg_tRCD_nCK", "cfg_sched_policy", "cfg_max_postpone",
+                         "cfg_bist_start", "cfg_bist_addr_start"]:
+            if cfg_name not in rtl:
+                return f"Missing cfg_* output assignment for {cfg_name}."
+
+        # Check SVA assertions
+        if "p_rw_retain" not in rtl:
+            return "Missing SVA assertion p_rw_retain."
+        if "p_bad_addr" not in rtl:
+            return "Missing SVA assertion p_bad_addr."
+
+        # Check error output
+        if "csr_err_o" not in rtl:
+            return "Missing csr_err_o error output."
+
+        # Check ack output
+        if "csr_ack_o" not in rtl:
+            return "Missing csr_ack_o acknowledge output."
+
+        # ── Handshake pattern guards ──
+        # The deterministic TB requires a specific ack/err/dat_o pattern.
+        # LLM-generated alternatives are logically equivalent but cause
+        # Xcelium scheduling mismatches that make ALL reads return 0.
+
+        # GUARD 1: ack must use internal ack_r + continuous assign
+        if "assign csr_ack_o" not in rtl:
+            return (
+                "HANDSHAKE BUG: csr_ack_o must be driven by "
+                "'assign csr_ack_o = ack_r;' (continuous assign from internal "
+                "register). Do NOT use 'csr_ack_o <=' in any always_ff block. "
+                "See the MANDATORY WISHBONE HANDSHAKE section in the contract."
+            )
+
+        # GUARD 2: must have ack_r internal register
+        if "ack_r" not in rtl:
+            return (
+                "HANDSHAKE BUG: Missing internal 'ack_r' register. "
+                "The ack pattern must be: logic ack_r; always_ff: ack_r <= ...; "
+                "assign csr_ack_o = ack_r;"
+            )
+
+        # GUARD 3: reject direct registered ack (the pattern that breaks)
+        if re.search(r"csr_ack_o\s*<=", rtl):
+            return (
+                "HANDSHAKE BUG: Found 'csr_ack_o <=' (direct NBA on output). "
+                "This causes reads to return 0x00000000 due to Xcelium scheduling. "
+                "Use 'ack_r <=' internally and 'assign csr_ack_o = ack_r;' instead."
+            )
+
+        # GUARD 4: reject direct registered err
+        if re.search(r"csr_err_o\s*<=", rtl):
+            return (
+                "HANDSHAKE BUG: Found 'csr_err_o <=' (direct NBA on output). "
+                "Use 'err_r <=' internally and 'assign csr_err_o = err_r;' instead."
+            )
+
+        # GUARD 5: read mux must be named rdata_mux
+        if "rdata_mux" not in rtl:
+            return (
+                "HANDSHAKE BUG: Read data mux must be named 'rdata_mux'. "
+                "Found a different name (rd_data, read_data, etc). "
+                "Use: always_comb begin rdata_mux = ...; and "
+                "else if (csr_rd) csr_dat_o <= rdata_mux;"
+            )
+
+        # GUARD 6: csr_dat_o must NOT have an else clause clearing to 0
+        # Pattern: "else" followed by "csr_dat_o" followed by "<= 32'h0" on nearby lines
+        if re.search(r"else\s+(begin\s+)?csr_dat_o\s*<=\s*32'h0", rtl):
+            return (
+                "HANDSHAKE BUG: csr_dat_o must HOLD its value between reads. "
+                "Found an 'else csr_dat_o <= 32'h0' clause that clears the "
+                "output every non-read cycle. Remove the else clause."
+            )
+
+        return None
+
+    # ================================================================
+    # Testbench generation — DETERMINISTIC (kept from original agent)
     # ================================================================
     def _tb_test_registry(self) -> list:
         """Returns ordered list of (id, description) for all TB tests."""
         tests = []
-        # A: Reset values
         for i, r in enumerate(self.registers):
-            tests.append((f"A{i+1}", f"{r['name']} reset = 0x{int(r['reset_value'], 16):08X}"))
-        # B: Write/readback for RW regs
+            tests.append((f"A{i+1}", f"{r['name']} reset = 0x{int(r['reset_value'], 16) if isinstance(r['reset_value'], str) else r['reset_value']:08X}"))
         bi = 1
         for r in self.registers:
             if r["access"] in ("RW", "RW1C") and r["access"] != "RO":
-                if r["name"] == "ERROR_STATUS":
-                    continue  # tested in E
-                if r["name"] == "CTRL_STATUS":
+                if r["name"] in ("ERROR_STATUS", "CTRL_STATUS"):
                     continue
                 tests.append((f"B{bi}", f"{r['name']} write/readback"))
                 bi += 1
-        # C: RO behavior
         tests.append(("C1", "CTRL_STATUS reflects status inputs"))
         tests.append(("C2", "CTRL_STATUS ignores writes (RO)"))
-        # D: WO self-clearing
         tests.append(("D1", "bist_start self-clears after 1 cycle"))
         tests.append(("D2", "force_refresh self-clears after 1 cycle"))
-        # E: RW1C
         tests.append(("E1", "ERROR_STATUS latches ecc_ue event"))
         tests.append(("E2", "ERROR_STATUS W1C clears ecc_ue flag"))
         tests.append(("E3", "ERROR_STATUS flag stays clear after W1C"))
-        # F: Error handling
         tests.append(("F1", "Invalid address returns error"))
         tests.append(("F2", "Valid address no error"))
-        # G: cfg_* outputs
         tests.append(("G1", "cfg_tRCD_nCK matches TIMING_0[7:0]"))
         tests.append(("G2", "cfg_sched_policy matches CTRL_CONFIG[0]"))
         tests.append(("G3", "cfg_max_postpone matches REFRESH_CONFIG[3:0]"))
-        # H: Reset
         tests.append(("H1", "Registers return to reset values after reset"))
         tests.append(("H2", "Normal operation after reset recovery"))
-        # I: Edge cases
         tests.append(("I1", "Back-to-back writes to different registers"))
         tests.append(("I2", "Readback after back-to-back writes correct"))
         return tests
 
     def generate_testbench(self) -> str:
-        """Read the standalone TB file and return it. The TB is generated
-        statically since CSR layout is spec-driven but the test structure
-        is fixed. The header includes the dynamic test registry."""
+        """Deterministic testbench generation — identical to the original
+        template-based agent. No LLM involved."""
         p = self.p
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         tests = self._tb_test_registry()
 
-        # Build the register reset-value checks and write/readback dynamically
-        rw_regs = [(r, int(r["offset"], 16)) for r in self.registers
-                   if r["access"] not in ("RO",) and r["name"] != "ERROR_STATUS"]
-
         lines = []
         L = lines.append
 
-        # Header with test list
         L(f"`timescale 1ns / 1ps")
         L(f"//==============================================================")
         L(f"// config_regs_tb.sv -- Enhanced testbench ({len(tests)} tests)")
         L(f"// Generated: {ts}")
-        L(f"// Agent:     Config/CSR Registers Agent (Phase 1)")
+        L(f"// Agent:     Config/CSR Registers Agent (Phase 1, LLM-driven)")
         L(f"//")
         L(f"// Sections:")
         L(f"//   A: Reset value verification ({p['NUM_REGS']} registers)")
@@ -463,8 +695,6 @@ class ConfigRegsAgent:
         L(f"    logic clk = 0;")
         L(f"    always #(CLK_PERIOD/2) clk = ~clk;")
         L(f"")
-
-        # Signal declarations
         L(f"    logic        rst_n;")
         L(f"    logic        csr_cyc_i, csr_stb_i, csr_we_i;")
         L(f"    logic [7:0]  csr_adr_i;")
@@ -481,8 +711,6 @@ class ConfigRegsAgent:
         L(f"    logic        sts_ecc_ue_event, sts_ref_starve_event, sts_init_fail_event;")
         L(f"    logic [12:0] sts_bist_fail_addr;")
         L(f"")
-
-        # cfg outputs
         L(f"    logic [7:0]  cfg_tRCD_nCK, cfg_tRP_nCK, cfg_tRAS_nCK, cfg_tRC_nCK;")
         L(f"    logic [7:0]  cfg_tRRD_nCK, cfg_tWTR_nCK, cfg_tFAW_nCK, cfg_tRFC_nCK;")
         L(f"    logic [7:0]  cfg_tWR_nCK, cfg_tRTP_nCK, cfg_CL_nCK, cfg_CWL_nCK;")
@@ -495,8 +723,6 @@ class ConfigRegsAgent:
         L(f"    logic [2:0]  cfg_bist_pattern; logic cfg_bist_addr_mode;")
         L(f"    logic [28:0] cfg_bist_addr_start, cfg_bist_addr_end;")
         L(f"")
-
-        # DUT instantiation
         L(f"    config_regs dut (")
         L(f"        .clk(clk), .rst_n(rst_n),")
         L(f"        .csr_cyc_i(csr_cyc_i), .csr_stb_i(csr_stb_i), .csr_we_i(csr_we_i),")
@@ -525,8 +751,6 @@ class ConfigRegsAgent:
         L(f"        .cfg_bist_addr_start(cfg_bist_addr_start), .cfg_bist_addr_end(cfg_bist_addr_end)")
         L(f"    );")
         L(f"")
-
-        # Infrastructure tasks
         L(f"    int pass_count=0, fail_count=0, total_tests=0;")
         L(f"    task automatic check(string name, logic condition);")
         L(f"        total_tests++;")
@@ -551,13 +775,8 @@ class ConfigRegsAgent:
         L(f"        repeat(5) @(posedge clk); rst_n=1; repeat(2) @(posedge clk);")
         L(f"    endtask")
         L(f"")
-
-        # Module-scope localparam (cannot be inside initial block)
-        L(f"    // CTRL_CONFIG bits [7:5] are WO self-clearing -- mask for readback comparison")
         L(f"    localparam [31:0] CTRL_CONFIG_WO_MASK = 32'hFFFFFF1F;")
         L(f"")
-
-        # Main test
         L(f"    initial begin")
         L(f"        $dumpfile(\"config_regs_tb.vcd\");")
         L(f"        $dumpvars(0, config_regs_tb);")
@@ -572,8 +791,8 @@ class ConfigRegsAgent:
         # Section A: Reset values
         L(f"        $display(\"\"); $display(\"  -- Section A: Reset Values --\");")
         for i, r in enumerate(self.registers):
-            off = int(r["offset"], 16)
-            rst = int(r["reset_value"], 16)
+            off = int(r["offset"], 16) if isinstance(r["offset"], str) else r["offset"]
+            rst = int(r["reset_value"], 16) if isinstance(r["reset_value"], str) else r["reset_value"]
             L(f"        csr_read(8'h{off:02X}, rdata); check($sformatf(\"A{i+1}: {r['name']} reset = 0x%08X\", rdata), rdata == 32'h{rst:08X});")
         L(f"")
 
@@ -586,7 +805,7 @@ class ConfigRegsAgent:
         for r in self.registers:
             if r["access"] == "RO" or r["name"] == "ERROR_STATUS":
                 continue
-            off = int(r["offset"], 16)
+            off = int(r["offset"], 16) if isinstance(r["offset"], str) else r["offset"]
             val = test_vals[vi % len(test_vals)]
             vi += 1
             L(f"        csr_write(8'h{off:02X}, 32'h{val:08X}); csr_read(8'h{off:02X}, rdata);")
@@ -683,7 +902,7 @@ class ConfigRegsAgent:
         return "\n".join(lines)
 
     # ================================================================
-    # Manifest
+    # Manifest (deterministic — same port contract as original)
     # ================================================================
     def generate_manifest(self) -> dict:
         p = self.p
@@ -771,7 +990,7 @@ class ConfigRegsAgent:
     # ================================================================
     def run(self) -> dict:
         hdr = "=" * 62
-        print(f"{hdr}\n  CONFIG / CSR REGISTERS AGENT\n  Spec: {self.spec_path}\n{hdr}")
+        print(f"{hdr}\n  CONFIG / CSR REGISTERS AGENT (LLM-driven)\n  Spec: {self.spec_path}\n  Model: {self.model}\n{hdr}")
 
         print("\n[1/5] Validating parameters ...")
         errs = self.validate()
@@ -781,14 +1000,33 @@ class ConfigRegsAgent:
             return {"status": "error", "errors": errs}
         print("  OK: All parameters valid")
         for k, v in self.p.items():
-            print(f"    {k:20s} = {v}")
+            if k != "REG_TABLE":
+                print(f"    {k:20s} = {v}")
 
-        print("\n[2/5] Generating RTL ...")
-        rtl = self.generate_rtl()
+        print("\n[2/5] Generating RTL via LLM ...")
+        prompt = self._build_prompt()
+        rtl = ""
+        local_attempts = 3
+        for local_try in range(1, local_attempts + 1):
+            rtl_text = self._call_llm(prompt)
+            rtl = self._extract_sv(rtl_text)
+            err = self._sv_sanity_check(rtl)
+            if err is None:
+                break
+            print(f"  ! Local sanity check failed (try {local_try}/{local_attempts}): {err}")
+            prompt = (
+                self._build_prompt()
+                + "\n\nYOUR LAST OUTPUT FAILED A LOCAL SYNTAX SANITY CHECK:\n"
+                + f"  {err}\n"
+                + "Regenerate the file fixing this specific issue."
+            )
+        else:
+            print(f"  ! WARNING: sanity check still failing after {local_attempts} tries. "
+                  f"Writing anyway; xrun will likely fail.")
         rtl_lines = len(rtl.splitlines())
         print(f"  OK: {rtl_lines} lines of SystemVerilog")
 
-        print("\n[3/5] Generating testbench ...")
+        print("\n[3/5] Generating testbench (deterministic) ...")
         tb = self.generate_testbench()
         tb_lines = len(tb.splitlines())
         tests = self._tb_test_registry()
@@ -830,6 +1068,7 @@ class ConfigRegsAgent:
 if __name__ == "__main__":
     print("+=============================================+")
     print("|   CONFIG / CSR REGISTERS AGENT  (Phase 1)   |")
+    print("|   LLM-driven (Claude API)                   |")
     print("+=============================================+")
     print()
     spec_path = input("Enter path to spec JSON: ").strip()
