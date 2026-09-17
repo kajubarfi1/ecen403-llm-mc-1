@@ -47,6 +47,14 @@ def setup_output_dirs(base_dir):
     for d in dirs.values(): os.makedirs(d, exist_ok=True)
     return dirs
 
+def _latest_retry_instructions(_old: dict, new: dict) -> dict:
+    """Reducer for retry_instructions: each validation pass fully replaces the
+    previous attempt's feedback. With operator.or_ a module that started passing
+    on a later attempt kept a stale 'fix these failures' entry forever, so it
+    would be regenerated against failures that no longer existed."""
+    return new
+
+
 class GraphState(TypedDict):
     spec_path: str
     output_dir: str
@@ -59,10 +67,18 @@ class GraphState(TypedDict):
     attempt: int
     validation_result: dict
     failed_modules: list
-    retry_instructions: Annotated[dict, operator.or_]
+    retry_instructions: Annotated[dict, _latest_retry_instructions]
     history: Annotated[list, operator.add]
     lint_result: dict
     pipeline_status: str
+
+# ── START NODE (fans out to 3 generators in parallel) ──
+def start(state: GraphState) -> dict:
+    """No-op entry node. Exists solely so the three generators
+    can be reached via parallel edges from a single entry point."""
+    attempt = state.get("attempt", 1)
+    print(f"\n  Starting Phase 3 generation (attempt {attempt})...")
+    return {}
 
 # ── RTL GENERATION ──
 def gen_cmd_queue(state: GraphState) -> dict:
@@ -232,6 +248,7 @@ def final_failure(state: GraphState) -> dict:
 # ── BUILD GRAPH ──
 def build_graph():
     g = StateGraph(GraphState)
+    g.add_node("start", start)
     g.add_node("gen_cmd_queue", gen_cmd_queue)
     g.add_node("gen_scheduler", gen_scheduler)
     g.add_node("gen_cmd_gen", gen_cmd_gen)
@@ -241,10 +258,11 @@ def build_graph():
     g.add_node("success", success)
     g.add_node("final_failure", final_failure)
 
-    # Entry: 3 agents parallel
-    g.set_entry_point("gen_cmd_queue")
-    g.set_entry_point("gen_scheduler")
-    g.set_entry_point("gen_cmd_gen")
+    # Entry: single start node fans out to 3 agents in parallel
+    g.set_entry_point("start")
+    g.add_edge("start", "gen_cmd_queue")
+    g.add_edge("start", "gen_scheduler")
+    g.add_edge("start", "gen_cmd_gen")
 
     # Converge into validation
     g.add_edge("gen_cmd_queue", "validate_p3")

@@ -1,8 +1,8 @@
 `timescale 1ns / 1ps
 //==============================================================
 // config_regs_tb.sv -- Enhanced testbench (36 tests)
-// Generated: 2026-04-03 12:54:28
-// Agent:     Config/CSR Registers Agent (Phase 1)
+// Generated: 2026-04-21 15:06:36
+// Agent:     Config/CSR Registers Agent (Phase 1, LLM-driven)
 //
 // Sections:
 //   A: Reset value verification (11 registers)
@@ -141,7 +141,6 @@ module config_regs_tb;
         repeat(5) @(posedge clk); rst_n=1; repeat(2) @(posedge clk);
     endtask
 
-    // CTRL_CONFIG bits [7:5] are WO self-clearing -- mask for readback comparison
     localparam [31:0] CTRL_CONFIG_WO_MASK = 32'hFFFFFF1F;
 
     initial begin

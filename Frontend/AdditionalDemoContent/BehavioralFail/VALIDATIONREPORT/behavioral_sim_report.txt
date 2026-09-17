@@ -1,0 +1,159 @@
+================================================================
+  DDR3 PHASE 1 -- BEHAVIORAL SIMULATION REPORT
+  Generated: 2026-04-19 20:30:21
+  Simulator: Cadence Xcelium (xrun) via Olympus cluster
+  Overall:   FAIL
+================================================================
+
+================================================================
+  MODULE: init_fsm
+  Status: PASS    Tests: 11 passed / 0 failed / 11 total
+  Exit code: 0
+  Log file:  init_fsm_xrun.log
+================================================================
+
+  PASSING TESTS (11):
+  ----------------------------------------------------------------
+    + [PASS] 1: init_done asserted
+    + [PASS] 2: init_fail never asserted
+    + [PASS] 3: init_state reached 4'd14
+    + [PASS] 4: RESET# low for 40001 cycles (>= 40000)
+    + [PASS] 5: CKE low for 140001 cycles (>= 100000)
+    + [PASS] 6: Exactly 4 MRS commands issued
+    + [PASS] 7: MRS bank order correct (2->3->1->0)
+    + [PASS] 8: MRS address values correct
+    + [PASS] 9: ZQCL command issued (1 times)
+    + [PASS] 10: ZQCL addr[10] = 1
+    + [PASS] 11: No CKE violations during RESET# low
+
+
+================================================================
+  MODULE: config_regs
+  Status: FAIL    Tests: 34 passed / 2 failed / 36 total
+  Exit code: 0
+  Log file:  config_regs_xrun.log
+================================================================
+
+  PASSING TESTS (34):
+  ----------------------------------------------------------------
+    + [PASS] 1: A1: CTRL_STATUS reset = 0x00000000
+    + [PASS] 2: A2: CTRL_CONFIG reset = 0x00000009
+    + [PASS] 3: A3: TIMING_0 reset = 0x271c0b0b
+    + [PASS] 4: A4: TIMING_1 reset = 0x80200606
+    + [PASS] 5: A5: TIMING_2 reset = 0x080b060c
+    + [PASS] 6: A6: TIMING_3 reset = 0x00186004
+    + [PASS] 7: A7: REFRESH_CONFIG reset = 0x00000168
+    + [PASS] 8: A8: ERROR_STATUS reset = 0x00000000
+    + [PASS] 9: A9: BIST_CONFIG reset = 0x00000000
+    + [PASS] 10: A10: BIST_ADDR_START reset = 0x00000000
+    + [PASS] 11: A11: BIST_ADDR_END reset = 0x1fffffff
+    + [PASS] 12: B1: CTRL_CONFIG write/readback (0x0000001f, WO masked)
+    + [PASS] 13: B2: TIMING_0 write/readback
+    + [PASS] 14: B3: TIMING_1 write/readback
+    + [PASS] 15: B4: TIMING_2 write/readback
+    + [PASS] 16: B5: TIMING_3 write/readback
+    + [PASS] 17: B6: REFRESH_CONFIG write/readback
+    + [PASS] 18: B7: BIST_CONFIG write/readback
+    + [PASS] 19: B8: BIST_ADDR_START write/readback
+    + [PASS] 20: B9: BIST_ADDR_END write/readback
+    + [PASS] 21: C1: CTRL_STATUS reflects inputs (0x000000a3)
+    + [PASS] 22: C2: CTRL_STATUS ignores writes
+    + [PASS] 25: E1: ecc_ue latched (0x00010000)
+    + [PASS] 26: E2: ecc_ue W1C clears (0x00000000)
+    + [PASS] 27: E3: Flag stays clear
+    + [PASS] 28: F1: Invalid addr error
+    + [PASS] 29: F2: Valid addr no error
+    + [PASS] 30: G1: cfg_tRCD_nCK=0x11
+    + [PASS] 31: G2: cfg_sched_policy=1
+    + [PASS] 32: G3: cfg_max_postpone=10
+    + [PASS] 33: H1: TIMING_0 reset (0x271c0b0b)
+    + [PASS] 34: H2: Normal after reset
+    + [PASS] 35: I1: Back-to-back TIMING_0
+    + [PASS] 36: I2: Back-to-back TIMING_1
+
+  FAILING TESTS (2):
+  ****************************************************************
+  >>> [FAIL] 23: D1: bist_start self-clears (bit5=1)
+  >>> [FAIL] 24: D2: force_refresh self-clears (bit6=1)
+  ****************************************************************
+
+  XCELIUM ASSERTION ERRORS (1):
+  ----------------------------------------------------------------
+    ! xmsim: *E,ASRTST (./config_regs.sv,298): (time 822500 PS) Assertion config_regs_tb.dut.p_bad_addr has failed
+
+
+================================================================
+  MODULE: wb_port
+  Status: PASS    Tests: 32 passed / 0 failed / 32 total
+  Exit code: 0
+  Log file:  wb_port_xrun.log
+================================================================
+
+  PASSING TESTS (32):
+  ----------------------------------------------------------------
+    + [PASS] 1: A1: Single write - no error
+    + [PASS] 2: A2: req_valid seen [count=1]
+    + [PASS] 3: A3: Single read - ACK received
+    + [PASS] 4: A4: Read data = 0xcafe1234
+    + [PASS] 5: A5: Write at high address
+    + [PASS] 6: B1: 8-beat burst write completed
+    + [PASS] 7: B2: 8 req_valid pulses [got 8]
+    + [PASS] 8: B3: 8 ACKs for burst read [got 8]
+    + [PASS] 9: B4: 4-beat short burst [4]
+    + [PASS] 10: C1: Stall when req_ready=0
+    + [PASS] 11: C2: No ACK during stall
+    + [PASS] 12: C3: No req_valid during stall [0]
+    + [PASS] 13: C4: Completes after stall released
+    + [PASS] 14: C5: Stall tag FIFO full (15 reads)
+    + [PASS] 15: D1: No ACK when idle
+    + [PASS] 16: D2: No ACK CYC=1 STB=0
+    + [PASS] 17: D3: No req_valid idle [0]
+    + [PASS] 18: D4: No stall idle
+    + [PASS] 19: D5: No error idle
+    + [PASS] 20: E1: Error unaligned 0x01
+    + [PASS] 21: E2: No error aligned 0x04
+    + [PASS] 22: E3: Error unaligned 0x02
+    + [PASS] 23: F1: Write completes
+    + [PASS] 24: F2: Read data 0x55556666
+    + [PASS] 25: G1: 8 ACKs for 8 reads [8]
+    + [PASS] 26: H1: req_valid low
+    + [PASS] 27: H2: ack low
+    + [PASS] 28: H3: err low
+    + [PASS] 29: H4: Stall low after recovery
+    + [PASS] 30: H5: Write after reset
+    + [PASS] 31: I1: CYC drop mid-burst
+    + [PASS] 32: I2: Write after abort
+
+  XCELIUM ASSERTION ERRORS (14):
+  ----------------------------------------------------------------
+    ! xmsim: *E,ASRTST (./wb_port.sv,191): (time 307500 PS) Assertion wb_port_tb.dut.p_tag has failed
+    ! xmsim: *E,ASRTST (./wb_port.sv,191): (time 312500 PS) Assertion wb_port_tb.dut.p_tag has failed
+    ! xmsim: *E,ASRTST (./wb_port.sv,191): (time 317500 PS) Assertion wb_port_tb.dut.p_tag has failed
+    ! xmsim: *E,ASRTST (./wb_port.sv,191): (time 322500 PS) Assertion wb_port_tb.dut.p_tag has failed
+    ! xmsim: *E,ASRTST (./wb_port.sv,191): (time 327500 PS) Assertion wb_port_tb.dut.p_tag has failed
+    ! xmsim: *E,ASRTST (./wb_port.sv,191): (time 332500 PS) Assertion wb_port_tb.dut.p_tag has failed
+    ! xmsim: *E,ASRTST (./wb_port.sv,191): (time 337500 PS) Assertion wb_port_tb.dut.p_tag has failed
+    ! xmsim: *E,ASRTST (./wb_port.sv,191): (time 1067500 PS) Assertion wb_port_tb.dut.p_tag has failed
+    ! xmsim: *E,ASRTST (./wb_port.sv,191): (time 1072500 PS) Assertion wb_port_tb.dut.p_tag has failed
+    ! xmsim: *E,ASRTST (./wb_port.sv,191): (time 1077500 PS) Assertion wb_port_tb.dut.p_tag has failed
+    ! xmsim: *E,ASRTST (./wb_port.sv,191): (time 1082500 PS) Assertion wb_port_tb.dut.p_tag has failed
+    ! xmsim: *E,ASRTST (./wb_port.sv,191): (time 1087500 PS) Assertion wb_port_tb.dut.p_tag has failed
+    ! xmsim: *E,ASRTST (./wb_port.sv,191): (time 1092500 PS) Assertion wb_port_tb.dut.p_tag has failed
+    ! xmsim: *E,ASRTST (./wb_port.sv,191): (time 1097500 PS) Assertion wb_port_tb.dut.p_tag has failed
+
+
+================================================================
+  SUMMARY
+================================================================
+
+  Module               Status   Passed   Failed   Total   
+  ----------------------------------------------------
+  init_fsm             PASS     11       0        11      
+  config_regs          FAIL     34       2        36      
+  wb_port              PASS     32       0        32      
+  ----------------------------------------------------
+  TOTAL                FAIL     77       2        79      
+
+  ****************************************************************
+  *  2 TEST(S) FAILED -- HUMAN REVIEW REQUIRED             *
+  ****************************************************************
