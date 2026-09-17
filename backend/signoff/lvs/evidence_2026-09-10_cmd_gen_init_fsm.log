@@ -1,0 +1,32 @@
+=== cmd_gen ===
+GDS 2026-09-10 16:48
+PORT ddr_addr occurrences in 6_final.v: 32
+SYNTH_FRONTEND Executing SLANG frontend
+PREP taps=140 diodes=0 ties=4 feedthroughs=0 pin_aliases=1 lib_cells=28 missing_defs=[]
+RESULT cmd_gen INFO : Congratulations! Netlists match.
+XREF top Match compared: devices=0 nets=283 pins=102
+AUDIT pins_in_layout=106/106 pin_to_pin_feedthroughs=0/0 control_wrong_pairs_accepted=0
+DRC cmd_gen items=0
+--- negative controls on cmd_gen (each must FAIL) ---
+MUT swap CLK<->D on Xcmd_out_aux\[0\]$_DFFE_PN0P_ (sky130_fd_sc_hd__dfrtp_1)
+MUT delete X_079_ (sky130_fd_sc_hd__nor2b_1)
+RESULT neg_cmd_gen_swap_clk_d ERROR : Netlists don't match
+XREF top NoMatch compared: devices=0 nets=283 pins=102
+RESULT neg_cmd_gen_delete_cell ERROR : Netlists don't match
+XREF top NoMatch compared: devices=0 nets=283 pins=102
+=== init_fsm ===
+GDS 2026-09-10 16:48
+PORT init_addr occurrences in 6_final.v: 17
+SYNTH_FRONTEND Executing SLANG frontend
+PREP taps=99 diodes=0 ties=8 feedthroughs=0 pin_aliases=5 lib_cells=45 missing_defs=[]
+RESULT init_fsm INFO : Congratulations! Netlists match.
+XREF top Match compared: devices=0 nets=199 pins=28
+AUDIT pins_in_layout=36/36 pin_to_pin_feedthroughs=0/0 control_wrong_pairs_accepted=0
+DRC init_fsm items=0
+--- negative controls on init_fsm (each must FAIL) ---
+MUT swap CLK<->D on Xctr\[0\]$_DFFE_PN0P_ (sky130_fd_sc_hd__dfrtp_1)
+MUT delete Xoutput33 (sky130_fd_sc_hd__clkdlybuf4s50_1)
+RESULT neg_init_fsm_swap_clk_d ERROR : Netlists don't match
+XREF top NoMatch compared: devices=0 nets=199 pins=28
+RESULT neg_init_fsm_delete_cell ERROR : Netlists don't match
+XREF top NoMatch compared: devices=0 nets=199 pins=28

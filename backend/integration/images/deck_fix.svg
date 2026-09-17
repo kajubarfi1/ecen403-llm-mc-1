@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 640" width="1400" height="640" font-family="Segoe UI, Calibri, Arial, sans-serif">
+  <rect width="1400" height="640" fill="#ffffff"/>
+  <text x="30" y="48" font-size="36" font-weight="700" fill="#16243a">ORFS sky130hd LVS deck: 4 defects found and fixed</text>
+  <text x="30" y="78" font-size="20" fill="#5b6b7f">The deck shipped with OpenROAD-flow-scripts never produced a valid result. Three of these break any sky130hd design.</text>
+
+  <rect x="30"  y="96" width="660" height="428" fill="#fdf2f2"/>
+  <rect x="710" y="96" width="660" height="428" fill="#f0f9f4"/>
+  <rect x="30"  y="96" width="660" height="52" fill="#8c1d18"/>
+  <rect x="710" y="96" width="660" height="52" fill="#14532d"/>
+  <text x="360"  y="132" font-size="23" font-weight="600" fill="#ffffff" text-anchor="middle">As shipped</text>
+  <text x="1040" y="132" font-size="23" font-weight="600" fill="#ffffff" text-anchor="middle">Fixed deck</text>
+
+  <g font-size="20" fill="#16243a">
+    <text x="55" y="200">report() never wrote a database</text>
+    <text x="55" y="282">Pin labels never bound to metal —</text>
+    <text x="55" y="310">268 of 333 pins lost</text>
+    <text x="55" y="378">P-taps float: substrate never joins VSS,</text>
+    <text x="55" y="406">every cell bulk mismatches</text>
+    <text x="55" y="470">simplify purges pin-only nets —</text>
+    <text x="55" y="498">feedthroughs and unused ports deleted</text>
+  </g>
+  <g font-size="19" fill="#16243a" font-family="Consolas, Courier New, monospace">
+    <text x="735" y="200">report_lvs() emits the .lvsdb</text>
+    <text x="735" y="282">connect(METnPIN, METnTXT) and</text>
+    <text x="735" y="310">connect(METn, METnPIN), n = 1..5, LI</text>
+    <text x="735" y="392">connect_global(PTAP, VNB)</text>
+    <text x="735" y="470">make_top_level_pins + combine_devices,</text>
+    <text x="735" y="498">purge removed</text>
+  </g>
+
+  <g stroke="#d6dde5" stroke-width="1">
+    <line x1="30" y1="240" x2="690" y2="240"/><line x1="710" y1="240" x2="1370" y2="240"/>
+    <line x1="30" y1="336" x2="690" y2="336"/><line x1="710" y1="336" x2="1370" y2="336"/>
+    <line x1="30" y1="432" x2="690" y2="432"/><line x1="710" y1="432" x2="1370" y2="432"/>
+  </g>
+
+  <rect x="30"  y="536" width="660" height="66" fill="#8c1d18"/>
+  <rect x="710" y="536" width="660" height="66" fill="#14532d"/>
+  <text x="360"  y="577" font-size="22" font-weight="600" fill="#ffffff" text-anchor="middle">No valid LVS result, ever</text>
+  <text x="1040" y="568" font-size="22" font-weight="600" fill="#ffffff" text-anchor="middle">13,528 nets / 556 pins compared</text>
+  <text x="1040" y="593" font-size="20" fill="#c9e7d4" text-anchor="middle">full chip match, 11/11 blocks match</text>
+</svg>

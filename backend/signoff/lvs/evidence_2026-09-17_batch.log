@@ -1,0 +1,22 @@
+Sign-off results, batch run 2026-09-17, flow image openroad/orfs:latest (26Q1).
+Generated from agents/pipeline_out/validator/<block>/signoff/signoff_result.json.
+
+First batch produced entirely by the current code, with both provenance checks active:
+every layout below was built by the run that verified it (see README, "Stale-artifact
+failure and the two provenance checks"). Run at --max_workers 2; the 11-way default
+triggers a Docker bind-mount race that leaves the GDS merge unrun.
+
+Timing here is the first that includes port paths. Earlier logs timed only
+register-to-register paths, so their WNS and Fmax were optimistic.
+
+addr_decoder  DRC PASS 0  LVS PASS 31/31 bb=0  AUDIT PASS 60/60 pins, 25/25 feedthroughs, 0 wrong pairings accepted  STA N/A n/a (no timing paths)
+bank_tracker  DRC PASS 0  LVS PASS 4192/287 bb=4  AUDIT PASS 287/287 pins, 0/0 feedthroughs, 0 wrong pairings accepted  STA PASS 3.683 ns
+calibration   DRC PASS 0  LVS PASS 104/8 bb=0  AUDIT PASS 9/9 pins, 0/0 feedthroughs, 0 wrong pairings accepted  STA PASS 6.508 ns
+cmd_gen       DRC PASS 0  LVS PASS 282/102 bb=0  AUDIT PASS 106/106 pins, 0/0 feedthroughs, 0 wrong pairings accepted  STA PASS 6.363 ns
+cmd_queue     DRC PASS 0  LVS PASS 1995/595 bb=2  AUDIT PASS 595/595 pins, 0/0 feedthroughs, 0 wrong pairings accepted  STA PASS 5.424 ns
+config_regs   DRC PASS 0  LVS PASS 1229/333 bb=0  AUDIT PASS 333/333 pins, 0/0 feedthroughs, 0 wrong pairings accepted  STA PASS 5.211 ns
+data_path     DRC PASS 0  LVS PASS 2493/173 bb=0  AUDIT PASS 173/173 pins, 0/0 feedthroughs, 0 wrong pairings accepted  STA PASS 3.442 ns
+init_fsm      DRC PASS 0  LVS PASS 198/28 bb=1  AUDIT PASS 36/36 pins, 0/0 feedthroughs, 0 wrong pairings accepted  STA PASS 5.799 ns
+refresh_ctrl  DRC PASS 0  LVS PASS 222/46 bb=0  AUDIT PASS 46/46 pins, 0/0 feedthroughs, 0 wrong pairings accepted  STA PASS 4.252 ns
+scheduler     DRC PASS 0  LVS PASS 5094/753 bb=4  AUDIT PASS 754/754 pins, 0/0 feedthroughs, 0 wrong pairings accepted  STA PASS 0.886 ns
+wb_port       DRC PASS 0  LVS PASS 537/189 bb=0  AUDIT PASS 221/221 pins, 32/32 feedthroughs, 0 wrong pairings accepted  STA PASS 4.136 ns

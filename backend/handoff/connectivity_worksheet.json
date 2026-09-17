@@ -1,0 +1,599 @@
+{
+  "_README": "Connectivity worksheet for the DDR3 bundle set. For every entry below, decide: is this an internal edge or a top-level chip pin? For an internal edge, add \"source\": \"<producing_module>.<port>\" to the input port in its manifest. For a chip pin, leave it as-is \u2014 an input with no source is promoted to a top-level port. Regenerate with: python schema/validate_bundles.py --bundles_root bundles --worksheet handoff/connectivity_worksheet.json",
+  "generated_from": "bundles",
+  "declared_edges": 52,
+  "distinct_producer_ports": 50,
+  "slots_to_fill": 111,
+  "blocks": {
+    "addr_decoder": {
+      "bundle_dir": "addr_decoder",
+      "unsourced_inputs": [],
+      "unconsumed_outputs": [
+        {
+          "port": "dec_rank",
+          "width": 1
+        }
+      ],
+      "outputs_total": 4,
+      "outputs_consumed": 3
+    },
+    "bank_tracker": {
+      "bundle_dir": "bank_tracker",
+      "unsourced_inputs": [
+        {
+          "port": "cmd_act_bank",
+          "width": 3,
+          "group": "cmd_feedback"
+        },
+        {
+          "port": "cmd_act_row",
+          "width": 15,
+          "group": "cmd_feedback"
+        },
+        {
+          "port": "cmd_act_valid",
+          "width": 1,
+          "group": "cmd_feedback"
+        },
+        {
+          "port": "cmd_pre_all",
+          "width": 1,
+          "group": "cmd_feedback"
+        },
+        {
+          "port": "cmd_pre_bank",
+          "width": 3,
+          "group": "cmd_feedback"
+        },
+        {
+          "port": "cmd_pre_valid",
+          "width": 1,
+          "group": "cmd_feedback"
+        },
+        {
+          "port": "cmd_rd_bank",
+          "width": 3,
+          "group": "cmd_feedback"
+        },
+        {
+          "port": "cmd_rd_valid",
+          "width": 1,
+          "group": "cmd_feedback"
+        },
+        {
+          "port": "cmd_ref_valid",
+          "width": 1,
+          "group": "cmd_feedback"
+        },
+        {
+          "port": "cmd_wr_bank",
+          "width": 3,
+          "group": "cmd_feedback"
+        },
+        {
+          "port": "cmd_wr_valid",
+          "width": 1,
+          "group": "cmd_feedback"
+        }
+      ],
+      "unconsumed_outputs": [
+        {
+          "port": "all_banks_idle",
+          "width": 1
+        },
+        {
+          "port": "faw_allows_act",
+          "width": 1
+        }
+      ],
+      "outputs_total": 8,
+      "outputs_consumed": 6
+    },
+    "calibration": {
+      "bundle_dir": "calibration",
+      "unsourced_inputs": [
+        {
+          "port": "zqcs_ack",
+          "width": 1,
+          "group": "zqcs_if"
+        }
+      ],
+      "unconsumed_outputs": [
+        {
+          "port": "cal_done",
+          "width": 1
+        },
+        {
+          "port": "cal_fail",
+          "width": 1
+        },
+        {
+          "port": "zqcs_req",
+          "width": 1
+        }
+      ],
+      "outputs_total": 3,
+      "outputs_consumed": 0
+    },
+    "cmd_gen": {
+      "bundle_dir": "cmd_gen",
+      "unsourced_inputs": [],
+      "unconsumed_outputs": [
+        {
+          "port": "ddr_addr",
+          "width": 15
+        },
+        {
+          "port": "ddr_bank",
+          "width": 3
+        },
+        {
+          "port": "ddr_cke",
+          "width": 1
+        },
+        {
+          "port": "ddr_cmd",
+          "width": 4
+        },
+        {
+          "port": "ddr_odt",
+          "width": 1
+        },
+        {
+          "port": "ddr_reset_n",
+          "width": 1
+        },
+        {
+          "port": "fb_act_bank",
+          "width": 3
+        },
+        {
+          "port": "fb_act_row",
+          "width": 15
+        },
+        {
+          "port": "fb_act_valid",
+          "width": 1
+        },
+        {
+          "port": "fb_pre_valid",
+          "width": 1
+        },
+        {
+          "port": "fb_ref_valid",
+          "width": 1
+        }
+      ],
+      "outputs_total": 13,
+      "outputs_consumed": 2
+    },
+    "cmd_queue": {
+      "bundle_dir": "cmd_queue",
+      "unsourced_inputs": [
+        {
+          "port": "deq_grant",
+          "width": 1,
+          "group": "dequeue"
+        },
+        {
+          "port": "deq_idx",
+          "width": 4,
+          "group": "dequeue"
+        },
+        {
+          "port": "enq_aux",
+          "width": 4,
+          "group": "enqueue"
+        },
+        {
+          "port": "enq_valid",
+          "width": 1,
+          "group": "enqueue"
+        }
+      ],
+      "unconsumed_outputs": [
+        {
+          "port": "enq_ready",
+          "width": 1
+        },
+        {
+          "port": "queue_count",
+          "width": 5
+        },
+        {
+          "port": "queue_empty",
+          "width": 1
+        },
+        {
+          "port": "queue_full",
+          "width": 1
+        }
+      ],
+      "outputs_total": 10,
+      "outputs_consumed": 6
+    },
+    "config_regs": {
+      "bundle_dir": "config_regs",
+      "unsourced_inputs": [
+        {
+          "port": "csr_adr_i",
+          "width": 8,
+          "group": "csr_bus_in"
+        },
+        {
+          "port": "csr_cyc_i",
+          "width": 1,
+          "group": "csr_bus_in"
+        },
+        {
+          "port": "csr_dat_i",
+          "width": 32,
+          "group": "csr_bus_in"
+        },
+        {
+          "port": "csr_sel_i",
+          "width": 4,
+          "group": "csr_bus_in"
+        },
+        {
+          "port": "csr_stb_i",
+          "width": 1,
+          "group": "csr_bus_in"
+        },
+        {
+          "port": "csr_we_i",
+          "width": 1,
+          "group": "csr_bus_in"
+        },
+        {
+          "port": "sts_bist_done",
+          "width": 1,
+          "group": "status_in"
+        },
+        {
+          "port": "sts_bist_fail",
+          "width": 1,
+          "group": "status_in"
+        },
+        {
+          "port": "sts_bist_fail_addr",
+          "width": 13,
+          "group": "status_in"
+        },
+        {
+          "port": "sts_cal_done",
+          "width": 1,
+          "group": "status_in"
+        },
+        {
+          "port": "sts_cal_fail",
+          "width": 1,
+          "group": "status_in"
+        },
+        {
+          "port": "sts_ecc_ce_count",
+          "width": 16,
+          "group": "status_in"
+        },
+        {
+          "port": "sts_ecc_ue_event",
+          "width": 1,
+          "group": "status_in"
+        },
+        {
+          "port": "sts_init_done",
+          "width": 1,
+          "group": "status_in"
+        },
+        {
+          "port": "sts_init_fail_event",
+          "width": 1,
+          "group": "status_in"
+        },
+        {
+          "port": "sts_ref_pending_cnt",
+          "width": 3,
+          "group": "status_in"
+        },
+        {
+          "port": "sts_ref_starve_event",
+          "width": 1,
+          "group": "status_in"
+        },
+        {
+          "port": "sts_self_refresh_active",
+          "width": 1,
+          "group": "status_in"
+        }
+      ],
+      "unconsumed_outputs": [
+        {
+          "port": "cfg_bist_addr_end",
+          "width": 29
+        },
+        {
+          "port": "cfg_bist_addr_mode",
+          "width": 1
+        },
+        {
+          "port": "cfg_bist_addr_start",
+          "width": 29
+        },
+        {
+          "port": "cfg_bist_pattern",
+          "width": 3
+        },
+        {
+          "port": "cfg_bist_start",
+          "width": 1
+        },
+        {
+          "port": "cfg_ecc_enable",
+          "width": 1
+        },
+        {
+          "port": "cfg_force_self_ref",
+          "width": 1
+        },
+        {
+          "port": "cfg_row_policy",
+          "width": 1
+        },
+        {
+          "port": "cfg_sched_policy",
+          "width": 1
+        },
+        {
+          "port": "cfg_self_ref_mode",
+          "width": 2
+        },
+        {
+          "port": "csr_ack_o",
+          "width": 1
+        },
+        {
+          "port": "csr_dat_o",
+          "width": 32
+        },
+        {
+          "port": "csr_err_o",
+          "width": 1
+        }
+      ],
+      "outputs_total": 31,
+      "outputs_consumed": 18
+    },
+    "data_path": {
+      "bundle_dir": "data_path",
+      "unsourced_inputs": [
+        {
+          "port": "ddr_dq_i",
+          "width": 32,
+          "group": "ddr_phy"
+        },
+        {
+          "port": "ddr_dqs_i",
+          "width": 1,
+          "group": "ddr_phy"
+        }
+      ],
+      "unconsumed_outputs": [
+        {
+          "port": "ddr_dm_o",
+          "width": 4
+        },
+        {
+          "port": "ddr_dq_o",
+          "width": 32
+        },
+        {
+          "port": "ddr_dq_oe",
+          "width": 1
+        },
+        {
+          "port": "ddr_dqs_o",
+          "width": 1
+        },
+        {
+          "port": "ddr_dqs_oe",
+          "width": 1
+        },
+        {
+          "port": "rd_rsp_aux",
+          "width": 4
+        },
+        {
+          "port": "rd_rsp_data",
+          "width": 32
+        },
+        {
+          "port": "rd_rsp_valid",
+          "width": 1
+        },
+        {
+          "port": "wr_data_ready",
+          "width": 1
+        }
+      ],
+      "outputs_total": 9,
+      "outputs_consumed": 0
+    },
+    "init_fsm": {
+      "bundle_dir": "init_fsm",
+      "unsourced_inputs": [
+        {
+          "port": "enable",
+          "width": 1,
+          "group": "control"
+        }
+      ],
+      "unconsumed_outputs": [
+        {
+          "port": "init_addr",
+          "width": 15
+        },
+        {
+          "port": "init_bank",
+          "width": 3
+        },
+        {
+          "port": "init_cke",
+          "width": 1
+        },
+        {
+          "port": "init_cmd",
+          "width": 4
+        },
+        {
+          "port": "init_cmd_valid",
+          "width": 1
+        },
+        {
+          "port": "init_fail",
+          "width": 1
+        },
+        {
+          "port": "init_reset_n",
+          "width": 1
+        },
+        {
+          "port": "init_state",
+          "width": 4
+        }
+      ],
+      "outputs_total": 9,
+      "outputs_consumed": 1
+    },
+    "refresh_ctrl": {
+      "bundle_dir": "refresh_ctrl",
+      "unsourced_inputs": [
+        {
+          "port": "ref_ack",
+          "width": 1,
+          "group": "scheduler_if"
+        }
+      ],
+      "unconsumed_outputs": [
+        {
+          "port": "ref_pending_cnt",
+          "width": 3
+        },
+        {
+          "port": "ref_starve_flag",
+          "width": 1
+        }
+      ],
+      "outputs_total": 4,
+      "outputs_consumed": 2
+    },
+    "scheduler": {
+      "bundle_dir": "scheduler",
+      "unsourced_inputs": [],
+      "unconsumed_outputs": [
+        {
+          "port": "deq_grant",
+          "width": 1
+        },
+        {
+          "port": "deq_idx",
+          "width": 4
+        },
+        {
+          "port": "ref_ack",
+          "width": 1
+        }
+      ],
+      "outputs_total": 10,
+      "outputs_consumed": 7
+    },
+    "wb_port": {
+      "bundle_dir": "wb_port",
+      "unsourced_inputs": [
+        {
+          "port": "req_ready",
+          "width": 1,
+          "group": "internal_in"
+        },
+        {
+          "port": "rsp_aux",
+          "width": 4,
+          "group": "internal_in"
+        },
+        {
+          "port": "rsp_rdata",
+          "width": 32,
+          "group": "internal_in"
+        },
+        {
+          "port": "rsp_valid",
+          "width": 1,
+          "group": "internal_in"
+        },
+        {
+          "port": "wb_adr_i",
+          "width": 29,
+          "group": "external_in"
+        },
+        {
+          "port": "wb_bte_i",
+          "width": 2,
+          "group": "external_in"
+        },
+        {
+          "port": "wb_cti_i",
+          "width": 3,
+          "group": "external_in"
+        },
+        {
+          "port": "wb_cyc_i",
+          "width": 1,
+          "group": "external_in"
+        },
+        {
+          "port": "wb_dat_i",
+          "width": 32,
+          "group": "external_in"
+        },
+        {
+          "port": "wb_sel_i",
+          "width": 4,
+          "group": "external_in"
+        },
+        {
+          "port": "wb_stb_i",
+          "width": 1,
+          "group": "external_in"
+        },
+        {
+          "port": "wb_we_i",
+          "width": 1,
+          "group": "external_in"
+        }
+      ],
+      "unconsumed_outputs": [
+        {
+          "port": "req_aux",
+          "width": 4
+        },
+        {
+          "port": "wb_ack_o",
+          "width": 1
+        },
+        {
+          "port": "wb_dat_o",
+          "width": 32
+        },
+        {
+          "port": "wb_err_o",
+          "width": 1
+        },
+        {
+          "port": "wb_stall_o",
+          "width": 1
+        }
+      ],
+      "outputs_total": 10,
+      "outputs_consumed": 5
+    }
+  }
+}

@@ -1,0 +1,61 @@
+PREP taps=13 diodes=0 ties=4 feedthroughs=25 pin_aliases=0 lib_cells=0 missing_defs=[]
+BLACKBOXED_INSTANCES addr_decoder 0
+RESULT addr_decoder INFO : Congratulations! Netlists match.
+XREF top Match compared: devices=0 nets=31 pins=31
+AUDIT pins_in_layout=60/60 pin_to_pin_feedthroughs=25/25 control_wrong_pairs_accepted=0
+PREP taps=2310 diodes=5 ties=0 feedthroughs=0 pin_aliases=8 lib_cells=74 missing_defs=[]
+BLACKBOXED_INSTANCES bank_tracker 6
+RESULT bank_tracker INFO : Congratulations! Netlists match.
+XREF top Match compared: devices=0 nets=4220 pins=287
+AUDIT pins_in_layout=287/287 pin_to_pin_feedthroughs=0/0 control_wrong_pairs_accepted=0
+PREP taps=72 diodes=0 ties=1 feedthroughs=0 pin_aliases=0 lib_cells=21 missing_defs=[]
+BLACKBOXED_INSTANCES calibration 0
+RESULT calibration INFO : Congratulations! Netlists match.
+XREF top Match compared: devices=0 nets=147 pins=8
+AUDIT pins_in_layout=9/9 pin_to_pin_feedthroughs=0/0 control_wrong_pairs_accepted=0
+PREP taps=950 diodes=0 ties=0 feedthroughs=0 pin_aliases=0 lib_cells=67 missing_defs=[]
+BLACKBOXED_INSTANCES cmd_queue 4
+RESULT cmd_queue INFO : Congratulations! Netlists match.
+XREF top Match compared: devices=0 nets=1996 pins=595
+AUDIT pins_in_layout=595/595 pin_to_pin_feedthroughs=0/0 control_wrong_pairs_accepted=0
+PREP taps=773 diodes=0 ties=0 feedthroughs=0 pin_aliases=0 lib_cells=27 missing_defs=[]
+BLACKBOXED_INSTANCES config_regs 0
+RESULT config_regs INFO : Congratulations! Netlists match.
+XREF top Match compared: devices=0 nets=1883 pins=333
+AUDIT pins_in_layout=333/333 pin_to_pin_feedthroughs=0/0 control_wrong_pairs_accepted=0
+PREP taps=3167 diodes=3 ties=0 feedthroughs=0 pin_aliases=0 lib_cells=73 missing_defs=[]
+BLACKBOXED_INSTANCES data_path 0
+RESULT data_path INFO : Congratulations! Netlists match.
+XREF top Match compared: devices=0 nets=2663 pins=173
+AUDIT pins_in_layout=173/173 pin_to_pin_feedthroughs=0/0 control_wrong_pairs_accepted=0
+PREP taps=80 diodes=0 ties=0 feedthroughs=0 pin_aliases=0 lib_cells=38 missing_defs=[]
+BLACKBOXED_INSTANCES refresh_ctrl 0
+RESULT refresh_ctrl INFO : Congratulations! Netlists match.
+XREF top Match compared: devices=0 nets=222 pins=46
+AUDIT pins_in_layout=46/46 pin_to_pin_feedthroughs=0/0 control_wrong_pairs_accepted=0
+PREP taps=2204 diodes=26 ties=1 feedthroughs=0 pin_aliases=0 lib_cells=106 missing_defs=[]
+BLACKBOXED_INSTANCES scheduler 6
+RESULT scheduler INFO : Congratulations! Netlists match.
+XREF top Match compared: devices=0 nets=5090 pins=753
+AUDIT pins_in_layout=754/754 pin_to_pin_feedthroughs=0/0 control_wrong_pairs_accepted=0
+PREP taps=270 diodes=0 ties=0 feedthroughs=32 pin_aliases=0 lib_cells=39 missing_defs=[]
+BLACKBOXED_INSTANCES wb_port 0
+RESULT wb_port INFO : Congratulations! Netlists match.
+XREF top Match compared: devices=0 nets=538 pins=189
+AUDIT pins_in_layout=221/221 pin_to_pin_feedthroughs=32/32 control_wrong_pairs_accepted=0
+===== NEGATIVE CONTROLS (each must FAIL) =====
+MUT swap CLK<->D on Xack_r$_DFF_PN0_ (sky130_fd_sc_hd__dfrtp_1)
+MUT delete X_1302_ (sky130_fd_sc_hd__nand2_1)
+RESULT neg_config_regs_swap_clk_d ERROR : Netlists don't match
+XREF top NoMatch compared: devices=0 nets=1883 pins=333
+RESULT neg_config_regs_delete_cell ERROR : Netlists don't match
+XREF top NoMatch compared: devices=0 nets=1883 pins=333
+MUT swap CLK<->D on Xentry_aux\[0\]$_DFFE_PN0P_ (sky130_fd_sc_hd__dfrtp_1)
+MUT delete X_0787_ (sky130_fd_sc_hd__inv_1)
+RESULT neg_cmd_queue_swap_clk_d ERROR : Netlists don't match
+XREF top NoMatch compared: devices=0 nets=1996 pins=595
+RESULT neg_cmd_queue_delete_cell ERROR : Netlists don't match
+XREF top NoMatch compared: devices=0 nets=1996 pins=595
+MUT swap A1<->B1 on X_6485_ (sky130_fd_sc_hd__a21oi_2)
+RESULT neg_scheduler_blackbox_pin ERROR : Netlists don't match
+XREF top NoMatch compared: devices=0 nets=5090 pins=753
