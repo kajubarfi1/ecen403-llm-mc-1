@@ -1,0 +1,50 @@
+{
+  "module_name": "addr_decoder",
+  "file": "addr_decoder.sv",
+  "phase": 2,
+  "agent": "addr_decoder_agent",
+  "dependencies": [
+    "wb_port"
+  ],
+  "spec_version": "2.0.0",
+  "parameters": {
+    "ADDR_WIDTH": 29,
+    "ROW_BITS": 15,
+    "COL_BITS": 10,
+    "BANK_BITS": 3,
+    "RANK_BITS": 1,
+    "MAPPING": "row-bank-column"
+  },
+  "ports": {
+    "input": [
+      {
+        "name": "req_addr",
+        "width": 29,
+        "dir": "input",
+        "source": "wb_port.req_addr"
+      }
+    ],
+    "output": [
+      {
+        "name": "dec_row",
+        "width": 15,
+        "dir": "output"
+      },
+      {
+        "name": "dec_bank",
+        "width": 3,
+        "dir": "output"
+      },
+      {
+        "name": "dec_col",
+        "width": 10,
+        "dir": "output"
+      },
+      {
+        "name": "dec_rank",
+        "width": 1,
+        "dir": "output"
+      }
+    ]
+  }
+}
