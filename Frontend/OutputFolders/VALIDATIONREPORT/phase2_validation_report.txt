@@ -1,0 +1,58 @@
+======================================================================
+  DDR3 PHASE 2 VALIDATION REPORT
+  Generated: 2026-09-17 12:58:45
+  Spec:      /Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Spec/llmmc_microarchitecturespec_filled.json
+  RTL Dir:   /Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/PHASE2RTL
+  Attempt:   4 of 4
+======================================================================
+
+  OVERALL: FAIL  (33/35 checks)
+
+  + ADDR_DECODER: PASS (17/17)
+    + [V-AD-01] Module declared
+    + [V-AD-02] ADDR_WIDTH=29
+    + [V-AD-03] ROW_BITS=15
+    + [V-AD-04] COL_BITS=10
+    + [V-AD-05] BANK_BITS=3
+    + [V-AD-06] Input req_addr
+    + [V-AD-07] Output dec_row
+    + [V-AD-07] Output dec_bank
+    + [V-AD-07] Output dec_col
+    + [V-AD-07] Output dec_rank
+    + [V-AD-11] Combinational (no always_ff)
+    + [V-AD-12] No clock port
+    + [V-AD-13] Mapping 'row-bank-column'
+    + [V-AD-14] BL8 alignment
+    + [V-AD-15] Rank=0 single-rank
+    + [V-AD-16] endmodule
+    + [V-AD-17] assign statements
+
+  x BANK_TRACKER: ERROR (0/1)
+    x [V-BT-00] File exists
+      Expected: /Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/PHASE2RTL/bank_tracker.sv
+      Actual:   missing
+
+  x REFRESH_CTRL: ERROR (0/1)
+    x [V-RF-00] File exists
+      Expected: /Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/PHASE2RTL/refresh_ctrl.sv
+      Actual:   missing
+
+  + CALIBRATION: PASS (14/14)
+    + [V-CL-01] Module declared
+    + [V-CL-02] clk and rst_n
+    + [V-CL-03] Input init_done
+    + [V-CL-04] Output cal_done
+    + [V-CL-05] Output cal_fail
+    + [V-CL-06] cal_fail=0
+    + [V-CL-07] Output zqcs_req
+    + [V-CL-08] Input zqcs_ack
+    + [V-CL-09] ZQCS_WAIT=128000
+    + [V-CL-10] ZQCS counter
+    + [V-CL-11] cal_done latches
+    + [V-CL-12] ZQCS gated by cal_done
+    + [V-CL-13] always_ff
+    + [V-CL-14] endmodule
+
+  + CROSS_MODULE: PASS (2/2)
+    + [V-XM-03] calibration has init_done
+    + [V-XM-05] addr_decoder ADDR_WIDTH=29

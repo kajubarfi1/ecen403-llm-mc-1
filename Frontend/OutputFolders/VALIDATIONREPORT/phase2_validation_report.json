@@ -1,0 +1,298 @@
+{
+  "timestamp": "2026-09-17T12:58:43.854577",
+  "spec": "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Spec/llmmc_microarchitecturespec_filled.json",
+  "phase": 2,
+  "modules": {
+    "addr_decoder": {
+      "status": "PASS",
+      "passed": 17,
+      "total": 17,
+      "checks": [
+        {
+          "id": "V-AD-01",
+          "name": "Module declared",
+          "pass": true,
+          "expected": "module addr_decoder",
+          "actual": "found"
+        },
+        {
+          "id": "V-AD-02",
+          "name": "ADDR_WIDTH=29",
+          "pass": true,
+          "expected": "29",
+          "actual": "29"
+        },
+        {
+          "id": "V-AD-03",
+          "name": "ROW_BITS=15",
+          "pass": true,
+          "expected": "15",
+          "actual": "15"
+        },
+        {
+          "id": "V-AD-04",
+          "name": "COL_BITS=10",
+          "pass": true,
+          "expected": "10",
+          "actual": "10"
+        },
+        {
+          "id": "V-AD-05",
+          "name": "BANK_BITS=3",
+          "pass": true,
+          "expected": "3",
+          "actual": "3"
+        },
+        {
+          "id": "V-AD-06",
+          "name": "Input req_addr",
+          "pass": true,
+          "expected": "input req_addr",
+          "actual": "found"
+        },
+        {
+          "id": "V-AD-07",
+          "name": "Output dec_row",
+          "pass": true,
+          "expected": "output dec_row",
+          "actual": "found"
+        },
+        {
+          "id": "V-AD-07",
+          "name": "Output dec_bank",
+          "pass": true,
+          "expected": "output dec_bank",
+          "actual": "found"
+        },
+        {
+          "id": "V-AD-07",
+          "name": "Output dec_col",
+          "pass": true,
+          "expected": "output dec_col",
+          "actual": "found"
+        },
+        {
+          "id": "V-AD-07",
+          "name": "Output dec_rank",
+          "pass": true,
+          "expected": "output dec_rank",
+          "actual": "found"
+        },
+        {
+          "id": "V-AD-11",
+          "name": "Combinational (no always_ff)",
+          "pass": true,
+          "expected": "no always_ff",
+          "actual": "clean"
+        },
+        {
+          "id": "V-AD-12",
+          "name": "No clock port",
+          "pass": true,
+          "expected": "no clk",
+          "actual": "clean"
+        },
+        {
+          "id": "V-AD-13",
+          "name": "Mapping 'row-bank-column'",
+          "pass": true,
+          "expected": "row-bank-column",
+          "actual": "found"
+        },
+        {
+          "id": "V-AD-14",
+          "name": "BL8 alignment",
+          "pass": true,
+          "expected": "col[2:0]=0",
+          "actual": "found"
+        },
+        {
+          "id": "V-AD-15",
+          "name": "Rank=0 single-rank",
+          "pass": true,
+          "expected": "dec_rank=0",
+          "actual": "found"
+        },
+        {
+          "id": "V-AD-16",
+          "name": "endmodule",
+          "pass": true,
+          "expected": "endmodule",
+          "actual": "found"
+        },
+        {
+          "id": "V-AD-17",
+          "name": "assign statements",
+          "pass": true,
+          "expected": ">=3 assigns",
+          "actual": "4 assigns"
+        }
+      ]
+    },
+    "bank_tracker": {
+      "status": "ERROR",
+      "passed": 0,
+      "total": 1,
+      "checks": [
+        {
+          "id": "V-BT-00",
+          "pass": false,
+          "name": "File exists",
+          "expected": "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "actual": "missing"
+        }
+      ]
+    },
+    "refresh_ctrl": {
+      "status": "ERROR",
+      "passed": 0,
+      "total": 1,
+      "checks": [
+        {
+          "id": "V-RF-00",
+          "pass": false,
+          "name": "File exists",
+          "expected": "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
+          "actual": "missing"
+        }
+      ]
+    },
+    "calibration": {
+      "status": "PASS",
+      "passed": 14,
+      "total": 14,
+      "checks": [
+        {
+          "id": "V-CL-01",
+          "name": "Module declared",
+          "pass": true,
+          "expected": "module calibration",
+          "actual": "found"
+        },
+        {
+          "id": "V-CL-02",
+          "name": "clk and rst_n",
+          "pass": true,
+          "expected": "input clk,rst_n",
+          "actual": "found"
+        },
+        {
+          "id": "V-CL-03",
+          "name": "Input init_done",
+          "pass": true,
+          "expected": "input init_done",
+          "actual": "found"
+        },
+        {
+          "id": "V-CL-04",
+          "name": "Output cal_done",
+          "pass": true,
+          "expected": "output cal_done",
+          "actual": "found"
+        },
+        {
+          "id": "V-CL-05",
+          "name": "Output cal_fail",
+          "pass": true,
+          "expected": "output cal_fail",
+          "actual": "found"
+        },
+        {
+          "id": "V-CL-06",
+          "name": "cal_fail=0",
+          "pass": true,
+          "expected": "cal_fail=0",
+          "actual": "found"
+        },
+        {
+          "id": "V-CL-07",
+          "name": "Output zqcs_req",
+          "pass": true,
+          "expected": "output zqcs_req",
+          "actual": "found"
+        },
+        {
+          "id": "V-CL-08",
+          "name": "Input zqcs_ack",
+          "pass": true,
+          "expected": "input zqcs_ack",
+          "actual": "found"
+        },
+        {
+          "id": "V-CL-09",
+          "name": "ZQCS_WAIT=128000",
+          "pass": true,
+          "expected": "128000",
+          "actual": "128000"
+        },
+        {
+          "id": "V-CL-10",
+          "name": "ZQCS counter",
+          "pass": true,
+          "expected": "counter",
+          "actual": "found"
+        },
+        {
+          "id": "V-CL-11",
+          "name": "cal_done latches",
+          "pass": true,
+          "expected": "latch",
+          "actual": "found"
+        },
+        {
+          "id": "V-CL-12",
+          "name": "ZQCS gated by cal_done",
+          "pass": true,
+          "expected": "gated",
+          "actual": "found"
+        },
+        {
+          "id": "V-CL-13",
+          "name": "always_ff",
+          "pass": true,
+          "expected": "sequential",
+          "actual": "found"
+        },
+        {
+          "id": "V-CL-14",
+          "name": "endmodule",
+          "pass": true,
+          "expected": "endmodule",
+          "actual": "found"
+        }
+      ]
+    },
+    "cross_module": {
+      "status": "PASS",
+      "passed": 2,
+      "total": 2,
+      "checks": [
+        {
+          "id": "V-XM-03",
+          "name": "calibration has init_done",
+          "pass": true,
+          "expected": "input init_done",
+          "actual": "found"
+        },
+        {
+          "id": "V-XM-05",
+          "name": "addr_decoder ADDR_WIDTH=29",
+          "pass": true,
+          "expected": "29",
+          "actual": "29"
+        }
+      ]
+    }
+  },
+  "overall": {
+    "status": "FAIL",
+    "total_passed": 33,
+    "total_checks": 35
+  },
+  "testbenches": [
+    "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/PHASE2RTL/addr_decoder_tb.sv",
+    "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/PHASE2RTL/bank_tracker_tb.sv",
+    "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/PHASE2RTL/refresh_ctrl_tb.sv",
+    "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/PHASE2RTL/calibration_tb.sv"
+  ]
+}

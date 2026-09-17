@@ -1,15 +1,157 @@
 {
-  "timestamp": "2026-04-21T15:06:52.661557",
-  "manifest_dir": "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/PHASE1RTL",
+  "timestamp": "2026-09-17T13:01:32.309628",
+  "manifest_dir": "/Users/lehanar/Desktop/ECEN403/ecen403-llm-mc-1/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4",
   "modules_checked": [
+    "addr_decoder",
+    "calibration",
+    "cmd_gen",
+    "cmd_queue",
     "config_regs",
+    "data_path",
     "init_fsm",
+    "scheduler",
     "wb_port"
   ],
-  "connections_checked": 0,
-  "status": "PASS",
-  "errors": [],
+  "connections_checked": 35,
+  "status": "FAIL",
+  "errors": [
+    {
+      "check": "L-002",
+      "severity": "ERROR",
+      "message": "scheduler.bank_is_active references unknown module 'bank_tracker'"
+    },
+    {
+      "check": "L-002",
+      "severity": "ERROR",
+      "message": "scheduler.bank_open_row references unknown module 'bank_tracker'"
+    },
+    {
+      "check": "L-002",
+      "severity": "ERROR",
+      "message": "scheduler.bank_act_allowed references unknown module 'bank_tracker'"
+    },
+    {
+      "check": "L-002",
+      "severity": "ERROR",
+      "message": "scheduler.bank_rd_allowed references unknown module 'bank_tracker'"
+    },
+    {
+      "check": "L-002",
+      "severity": "ERROR",
+      "message": "scheduler.bank_wr_allowed references unknown module 'bank_tracker'"
+    },
+    {
+      "check": "L-002",
+      "severity": "ERROR",
+      "message": "scheduler.bank_pre_allowed references unknown module 'bank_tracker'"
+    },
+    {
+      "check": "L-002",
+      "severity": "ERROR",
+      "message": "scheduler.ref_required references unknown module 'refresh_ctrl'"
+    },
+    {
+      "check": "L-002",
+      "severity": "ERROR",
+      "message": "scheduler.ref_urgent references unknown module 'refresh_ctrl'"
+    }
+  ],
   "warnings": [
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: addr_decoder.dec_rank (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: calibration.cal_done (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: calibration.cal_fail (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: calibration.zqcs_req (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: cmd_gen.ddr_cmd (w=4) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: cmd_gen.ddr_addr (w=15) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: cmd_gen.ddr_bank (w=3) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: cmd_gen.ddr_cke (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: cmd_gen.ddr_reset_n (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: cmd_gen.ddr_odt (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: cmd_gen.fb_act_valid (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: cmd_gen.fb_act_bank (w=3) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: cmd_gen.fb_act_row (w=15) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: cmd_gen.fb_pre_valid (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: cmd_gen.fb_ref_valid (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: cmd_queue.enq_ready (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: cmd_queue.queue_full (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: cmd_queue.queue_empty (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: cmd_queue.queue_count (w=5) \u2014 not consumed by any module"
+    },
     {
       "check": "L-006",
       "severity": "WARNING",
@@ -74,16 +216,6 @@
       "check": "L-006",
       "severity": "WARNING",
       "message": "Dangling output: config_regs.cfg_tRTP_nCK (w=8) \u2014 not consumed by any module"
-    },
-    {
-      "check": "L-006",
-      "severity": "WARNING",
-      "message": "Dangling output: config_regs.cfg_CL_nCK (w=8) \u2014 not consumed by any module"
-    },
-    {
-      "check": "L-006",
-      "severity": "WARNING",
-      "message": "Dangling output: config_regs.cfg_CWL_nCK (w=8) \u2014 not consumed by any module"
     },
     {
       "check": "L-006",
@@ -168,7 +300,47 @@
     {
       "check": "L-006",
       "severity": "WARNING",
-      "message": "Dangling output: init_fsm.init_done (w=1) \u2014 not consumed by any module"
+      "message": "Dangling output: data_path.wr_data_ready (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: data_path.rd_rsp_valid (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: data_path.rd_rsp_data (w=32) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: data_path.rd_rsp_aux (w=4) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: data_path.ddr_dq_o (w=32) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: data_path.ddr_dq_oe (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: data_path.ddr_dm_o (w=4) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: data_path.ddr_dqs_o (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: data_path.ddr_dqs_oe (w=1) \u2014 not consumed by any module"
     },
     {
       "check": "L-006",
@@ -213,6 +385,21 @@
     {
       "check": "L-006",
       "severity": "WARNING",
+      "message": "Dangling output: scheduler.ref_ack (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: scheduler.deq_grant (w=1) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
+      "message": "Dangling output: scheduler.deq_idx (w=4) \u2014 not consumed by any module"
+    },
+    {
+      "check": "L-006",
+      "severity": "WARNING",
       "message": "Dangling output: wb_port.wb_ack_o (w=1) \u2014 not consumed by any module"
     },
     {
@@ -233,47 +420,51 @@
     {
       "check": "L-006",
       "severity": "WARNING",
-      "message": "Dangling output: wb_port.req_valid (w=1) \u2014 not consumed by any module"
-    },
-    {
-      "check": "L-006",
-      "severity": "WARNING",
-      "message": "Dangling output: wb_port.req_we (w=1) \u2014 not consumed by any module"
-    },
-    {
-      "check": "L-006",
-      "severity": "WARNING",
-      "message": "Dangling output: wb_port.req_addr (w=29) \u2014 not consumed by any module"
-    },
-    {
-      "check": "L-006",
-      "severity": "WARNING",
-      "message": "Dangling output: wb_port.req_wdata (w=32) \u2014 not consumed by any module"
-    },
-    {
-      "check": "L-006",
-      "severity": "WARNING",
-      "message": "Dangling output: wb_port.req_wmask (w=4) \u2014 not consumed by any module"
-    },
-    {
-      "check": "L-006",
-      "severity": "WARNING",
       "message": "Dangling output: wb_port.req_aux (w=4) \u2014 not consumed by any module"
     }
   ],
   "info": [
-    "L-003 OK: DDR_ADDR_W=15 consistent across ['init_fsm']",
-    "L-003 OK: DDR_BANK_W=3 consistent across ['init_fsm']",
-    "L-003 OK: ROW_BITS=15 consistent across ['wb_port']",
-    "L-003 OK: ADDR_WIDTH=29 consistent across ['wb_port']",
-    "L-003 OK: DATA_WIDTH=32 consistent across ['wb_port']",
-    "L-003 OK: SEL_WIDTH=4 consistent across ['wb_port']",
-    "L-003 OK: AUX_WIDTH=4 consistent across ['wb_port']",
+    "L-001 OK: addr_decoder.req_addr <- wb_port.req_addr (w=29)",
+    "L-001 OK: calibration.init_done <- init_fsm.init_done (w=1)",
+    "L-001 OK: cmd_gen.sched_valid <- scheduler.cmd_valid (w=1)",
+    "L-001 OK: cmd_gen.sched_type <- scheduler.cmd_type (w=4)",
+    "L-001 OK: cmd_gen.sched_row <- scheduler.cmd_row (w=15)",
+    "L-001 OK: cmd_gen.sched_col <- scheduler.cmd_col (w=10)",
+    "L-001 OK: cmd_gen.sched_bank <- scheduler.cmd_bank (w=3)",
+    "L-001 OK: cmd_gen.sched_we <- scheduler.cmd_we (w=1)",
+    "L-001 OK: cmd_gen.sched_aux <- scheduler.cmd_aux (w=4)",
+    "L-001 OK: cmd_queue.enq_row <- addr_decoder.dec_row (w=15)",
+    "L-001 OK: cmd_queue.enq_col <- addr_decoder.dec_col (w=10)",
+    "L-001 OK: cmd_queue.enq_bank <- addr_decoder.dec_bank (w=3)",
+    "L-001 OK: cmd_queue.enq_we <- wb_port.req_we (w=1)",
+    "L-001 OK: data_path.cmd_wr_valid <- cmd_gen.fb_wr_valid (w=1)",
+    "L-001 OK: data_path.cmd_rd_valid <- cmd_gen.fb_rd_valid (w=1)",
+    "L-001 OK: data_path.cmd_aux <- scheduler.cmd_aux (w=4)",
+    "L-001 OK: data_path.wr_data_valid <- wb_port.req_valid (w=1)",
+    "L-001 OK: data_path.wr_data <- wb_port.req_wdata (w=32)",
+    "L-001 OK: data_path.wr_mask <- wb_port.req_wmask (w=4)",
+    "L-001 OK: data_path.cfg_CL_nCK <- config_regs.cfg_CL_nCK (w=8)",
+    "L-001 OK: data_path.cfg_CWL_nCK <- config_regs.cfg_CWL_nCK (w=8)",
+    "L-001 OK: scheduler.q_valid <- cmd_queue.entry_valid (w=16)",
+    "L-001 OK: scheduler.q_row <- cmd_queue.entry_row (w=16x15)",
+    "L-001 OK: scheduler.q_col <- cmd_queue.entry_col (w=16x10)",
+    "L-001 OK: scheduler.q_bank <- cmd_queue.entry_bank (w=16x3)",
+    "L-001 OK: scheduler.q_we <- cmd_queue.entry_we (w=16x1)",
+    "L-001 OK: scheduler.q_aux <- cmd_queue.entry_aux (w=16x4)",
+    "L-003 OK: ROW_BITS=15 consistent across ['addr_decoder', 'cmd_gen', 'cmd_queue', 'scheduler', 'wb_port']",
+    "L-003 OK: ADDR_WIDTH=29 consistent across ['addr_decoder', 'wb_port']",
+    "L-003 OK: BANK_BITS=3 consistent across ['addr_decoder', 'cmd_gen', 'cmd_queue', 'scheduler']",
+    "L-003 OK: COL_BITS=10 consistent across ['addr_decoder', 'cmd_gen', 'cmd_queue', 'scheduler']",
+    "L-003 OK: AUX_WIDTH=4 consistent across ['cmd_gen', 'cmd_queue', 'data_path', 'scheduler', 'wb_port']",
+    "L-003 OK: DDR_ADDR_W=15 consistent across ['cmd_gen', 'init_fsm']",
+    "L-003 OK: DDR_BANK_W=3 consistent across ['cmd_gen', 'init_fsm']",
+    "L-003 OK: DATA_WIDTH=32 consistent across ['cmd_queue', 'data_path', 'wb_port']",
+    "L-003 OK: SEL_WIDTH=4 consistent across ['data_path', 'wb_port']",
     "L-005 OK: No dependency cycles"
   ],
   "summary": {
-    "errors": 0,
-    "warnings": 50,
-    "passed": 8
+    "errors": 8,
+    "warnings": 73,
+    "passed": 37
   }
 }

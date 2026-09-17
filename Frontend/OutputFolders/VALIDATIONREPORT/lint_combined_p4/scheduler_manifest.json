@@ -1,0 +1,179 @@
+{
+  "module_name": "scheduler",
+  "file": "scheduler.sv",
+  "phase": 3,
+  "agent": "scheduler_agent",
+  "dependencies": [
+    "cmd_queue",
+    "bank_tracker",
+    "refresh_ctrl"
+  ],
+  "spec_version": "2.0.0",
+  "parameters": {
+    "DEPTH": 16,
+    "IDX_BITS": 4,
+    "ROW_BITS": 15,
+    "COL_BITS": 10,
+    "BANK_BITS": 3,
+    "NUM_BANKS": 8,
+    "AUX_WIDTH": 4,
+    "POLICY": "fr_fcfs",
+    "ROW_POLICY": "open_page"
+  },
+  "ports": {
+    "clock_reset": [
+      {
+        "name": "clk",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "rst_n",
+        "width": 1,
+        "dir": "input"
+      }
+    ],
+    "queue_lookahead": [
+      {
+        "name": "q_valid",
+        "width": 16,
+        "dir": "input",
+        "source": "cmd_queue.entry_valid"
+      },
+      {
+        "name": "q_row",
+        "width": "16x15",
+        "dir": "input",
+        "source": "cmd_queue.entry_row"
+      },
+      {
+        "name": "q_col",
+        "width": "16x10",
+        "dir": "input",
+        "source": "cmd_queue.entry_col"
+      },
+      {
+        "name": "q_bank",
+        "width": "16x3",
+        "dir": "input",
+        "source": "cmd_queue.entry_bank"
+      },
+      {
+        "name": "q_we",
+        "width": "16x1",
+        "dir": "input",
+        "source": "cmd_queue.entry_we"
+      },
+      {
+        "name": "q_aux",
+        "width": "16x4",
+        "dir": "input",
+        "source": "cmd_queue.entry_aux"
+      }
+    ],
+    "bank_status": [
+      {
+        "name": "bank_is_active",
+        "width": 8,
+        "dir": "input",
+        "source": "bank_tracker.bank_is_active"
+      },
+      {
+        "name": "bank_open_row",
+        "width": "8x15",
+        "dir": "input",
+        "source": "bank_tracker.bank_open_row"
+      },
+      {
+        "name": "bank_act_allowed",
+        "width": 8,
+        "dir": "input",
+        "source": "bank_tracker.bank_act_allowed"
+      },
+      {
+        "name": "bank_rd_allowed",
+        "width": 8,
+        "dir": "input",
+        "source": "bank_tracker.bank_rd_allowed"
+      },
+      {
+        "name": "bank_wr_allowed",
+        "width": 8,
+        "dir": "input",
+        "source": "bank_tracker.bank_wr_allowed"
+      },
+      {
+        "name": "bank_pre_allowed",
+        "width": 8,
+        "dir": "input",
+        "source": "bank_tracker.bank_pre_allowed"
+      }
+    ],
+    "refresh_if": [
+      {
+        "name": "ref_required",
+        "width": 1,
+        "dir": "input",
+        "source": "refresh_ctrl.ref_required"
+      },
+      {
+        "name": "ref_urgent",
+        "width": 1,
+        "dir": "input",
+        "source": "refresh_ctrl.ref_urgent"
+      },
+      {
+        "name": "ref_ack",
+        "width": 1,
+        "dir": "output"
+      }
+    ],
+    "cmd_out": [
+      {
+        "name": "cmd_valid",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "cmd_type",
+        "width": 4,
+        "dir": "output"
+      },
+      {
+        "name": "cmd_row",
+        "width": 15,
+        "dir": "output"
+      },
+      {
+        "name": "cmd_col",
+        "width": 10,
+        "dir": "output"
+      },
+      {
+        "name": "cmd_bank",
+        "width": 3,
+        "dir": "output"
+      },
+      {
+        "name": "cmd_we",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "cmd_aux",
+        "width": 4,
+        "dir": "output"
+      },
+      {
+        "name": "deq_grant",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "deq_idx",
+        "width": 4,
+        "dir": "output"
+      }
+    ]
+  }
+}
