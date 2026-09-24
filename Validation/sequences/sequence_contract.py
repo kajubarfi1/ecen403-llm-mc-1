@@ -54,18 +54,15 @@ IDENT = __import__("re").compile(r"^[A-Za-z_][A-Za-z0-9_$]*$")
 
 def _manifest_width(block, port):
     """Width of a port not in any schema (e.g. a held byte-enable), from the
-    block's newest manifest — the design's own declaration."""
-    import glob
-    paths = sorted(glob.glob(os.path.join(ROOT, "Frontend", "**",
-                                          f"{block}_manifest.json"),
-                             recursive=True),
-                   key=lambda p: -os.path.getmtime(p))
-    for mp in paths[:1]:
-        with open(mp) as f:
-            for group in json.load(f)["ports"].values():
-                for p in group:
-                    if p["name"] == port:
-                        return p["width"]
+    block's manifest in the declared RTL drop — the design's own declaration."""
+    sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
+    import rtl_drop as RD
+    try:
+        ports = RD.manifest_ports(block)
+    except RD.DropError as e:
+        raise SequenceError(str(e))
+    if port in ports:
+        return ports[port]["width"]
     raise SequenceError(
         f"drive declaration names port {port!r}, but block {block!r}'s "
         f"manifest has no such port.")

@@ -1,0 +1,367 @@
+{
+  "$schema": "validation-spec-swap/1",
+  "generated_utc": "2026-09-24T16:29:42.471906+00:00",
+  "baseline": {
+    "revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "design_id": "ddr3_mc_core_v2"
+  },
+  "candidate": {
+    "path": "builds/ddr3_mc_800_x8_1lane_1rank/microarch_spec.json",
+    "revision": "compiled_ddr3800_x8_1lane_1rank",
+    "design_id": "ddr3_mc_800_x8_1lane_1rank"
+  },
+  "code_edits": 0,
+  "intake_baseline": {
+    "rc": 1,
+    "gaps": [
+      "CSR_READ_BYTE_ENABLES",
+      "CSR_STATUS_READ_SAMPLING",
+      "CSR_UNMAPPED_READ_DATA",
+      "CSR_UNMAPPED_WRITE",
+      "DDR_DM_POLARITY",
+      "INIT_TMOD",
+      "INIT_TMRD",
+      "INTERFACE_CONTRACTS",
+      "TAXONOMY_NAMES_TIMING_PARAMS",
+      "TAXONOMY_SCHEDULER_FAMILY"
+    ]
+  },
+  "width_gate_baseline": {
+    "rc": 1,
+    "findings": 2,
+    "summary": [
+      "23 width rule(s): 21 ok, 2 mismatch, 0 unchecked",
+      "MISMATCH  data_path.ddr_dq_o",
+      "MISMATCH  data_path.ddr_dq_i"
+    ],
+    "details": [
+      {
+        "scope": "data_path",
+        "severity": "critical",
+        "title": "data_path.ddr_dq_o is 32 bits; the spec declares 16"
+      },
+      {
+        "scope": "data_path",
+        "severity": "critical",
+        "title": "data_path.ddr_dq_i is 32 bits; the spec declares 16"
+      }
+    ]
+  },
+  "intake_candidate": {
+    "rc": 1,
+    "gaps": [
+      "CSR_READ_BYTE_ENABLES",
+      "CSR_STATUS_READ_SAMPLING",
+      "CSR_UNMAPPED_READ_DATA",
+      "CSR_UNMAPPED_WRITE",
+      "DDR_DM_POLARITY",
+      "INIT_TMOD",
+      "INIT_TMRD",
+      "INTERFACE_CONTRACTS",
+      "TAXONOMY_NAMES_TIMING_PARAMS",
+      "TAXONOMY_SCHEDULER_FAMILY"
+    ]
+  },
+  "width_gate_candidate": {
+    "rc": 1,
+    "findings": 2,
+    "summary": [
+      "23 width rule(s): 21 ok, 2 mismatch, 0 unchecked",
+      "MISMATCH  data_path.ddr_dq_o",
+      "MISMATCH  data_path.ddr_dq_i"
+    ],
+    "details": [
+      {
+        "scope": "data_path",
+        "severity": "critical",
+        "title": "data_path.ddr_dq_o is 32 bits; the spec declares 8"
+      },
+      {
+        "scope": "data_path",
+        "severity": "critical",
+        "title": "data_path.ddr_dq_i is 32 bits; the spec declares 8"
+      }
+    ]
+  },
+  "tree_restored": true,
+  "generators": [
+    {
+      "generator": "Validation/txn/schema_gen.py",
+      "rc_baseline": 0,
+      "rc_candidate": 0,
+      "last_line_candidate": "wrote Validation/txn/generated/schemas.json"
+    },
+    {
+      "generator": "Validation/txn/monitor_gen.py",
+      "rc_baseline": 0,
+      "rc_candidate": 0,
+      "last_line_candidate": "  monitors_bind.sv     26 bind statement(s)"
+    },
+    {
+      "generator": "Validation/sva/sva_gen.py",
+      "rc_baseline": 0,
+      "rc_candidate": 0,
+      "last_line_candidate": "  wrote Validation/sva/generated/init_fsm_sva_bind.sv"
+    },
+    {
+      "generator": "Validation/sva/coverage_gen.py",
+      "rc_baseline": 0,
+      "rc_candidate": 0,
+      "last_line_candidate": "  vplan asks for 43 coverage item(s) across 8 covergroup(s); this generator covers cg_timing only."
+    },
+    {
+      "generator": "Validation/sva/block_coverage_gen.py",
+      "rc_baseline": 0,
+      "rc_candidate": 0,
+      "last_line_candidate": "  20 generated, 0 skipped, 23 timing points via coverage_gen.py"
+    },
+    {
+      "generator": "Validation/vplan/vplan_gen.py",
+      "rc_baseline": 0,
+      "rc_candidate": 0,
+      "last_line_candidate": "wrote /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/vplan/vplan.json"
+    },
+    {
+      "generator": "Validation/refmodel/spec_register_model.py",
+      "rc_baseline": 0,
+      "rc_candidate": 0,
+      "last_line_candidate": "ALL TESTS PASSED"
+    }
+  ],
+  "files": {
+    "changed": {
+      "sva/generated/bank_tracker_fcov.sv": {
+        "lines_removed": 0,
+        "lines_added": 0,
+        "header_only": true,
+        "sample": []
+      },
+      "sva/generated/cmd_gen_coverage.sv": {
+        "lines_removed": 37,
+        "lines_added": 28,
+        "header_only": false,
+        "sample": [
+          {
+            "baseline": "// tRCD = 13.75ns = 3 cycle(s) at 5.0ns. The at_minimum bin is",
+            "candidate": "// tRCD = 15.0ns = 2 cycle(s) at 10.0ns. The at_minimum bin is"
+          },
+          {
+            "baseline": "bins at_minimum   = {3};",
+            "candidate": "// tRP = 15.0ns = 2 cycle(s) at 10.0ns. The at_minimum bin is"
+          },
+          {
+            "baseline": "bins above_minimum = {[4:254]};",
+            "candidate": "// tRAS = 37.5ns = 4 cycle(s) at 10.0ns. The at_minimum bin is"
+          },
+          {
+            "baseline": "illegal_bins below_minimum = {[0:2]};",
+            "candidate": "bins at_minimum   = {4};"
+          },
+          {
+            "baseline": "// tRP = 13.75ns = 3 cycle(s) at 5.0ns. The at_minimum bin is",
+            "candidate": "bins above_minimum = {[5:254]};"
+          },
+          {
+            "baseline": "bins at_minimum   = {3};",
+            "candidate": "illegal_bins below_minimum = {[0:3]};"
+          }
+        ]
+      },
+      "sva/generated/cmd_gen_sva.sv": {
+        "lines_removed": 54,
+        "lines_added": 29,
+        "header_only": false,
+        "sample": [
+          {
+            "baseline": "// Bound: tRCD = 13.75ns; at a 5.0ns controller clock that is",
+            "candidate": "// Bound: tRCD = 15.0ns; at a 10.0ns controller clock that is"
+          },
+          {
+            "baseline": "// ceil(13.75/5.0) = 3 cycle(s) of separation, so 2 cycle(s)",
+            "candidate": "// ceil(15.0/10.0) = 2 cycle(s) of separation, so 1 cycle(s)"
+          },
+          {
+            "baseline": "((ddr_cmd == 4'b0011), b = ddr_bank) |=> !((ddr_cmd == 4'b0101 || ddr_cmd == 4'b0100) && (ddr_bank == b))[*2];",
+            "candidate": "((ddr_cmd == 4'b0011), b = ddr_bank) |=> !((ddr_cmd == 4'b0101 || ddr_cmd == 4'b0100) && (ddr_bank == b))[*1];"
+          },
+          {
+            "baseline": "// Bound: tRP = 13.75ns; at a 5.0ns controller clock that is",
+            "candidate": "// Bound: tRP = 15.0ns; at a 10.0ns controller clock that is"
+          },
+          {
+            "baseline": "// ceil(13.75/5.0) = 3 cycle(s) of separation, so 2 cycle(s)",
+            "candidate": "// ceil(15.0/10.0) = 2 cycle(s) of separation, so 1 cycle(s)"
+          },
+          {
+            "baseline": "((ddr_cmd == 4'b0010), b = ddr_bank) |=> !((ddr_cmd == 4'b0011) && (ddr_bank == b))[*2];",
+            "candidate": "((ddr_cmd == 4'b0010), b = ddr_bank) |=> !((ddr_cmd == 4'b0011) && (ddr_bank == b))[*1];"
+          }
+        ]
+      },
+      "sva/generated/cmd_queue_fcov.sv": {
+        "lines_removed": 0,
+        "lines_added": 0,
+        "header_only": true,
+        "sample": []
+      },
+      "sva/generated/config_regs_fcov.sv": {
+        "lines_removed": 0,
+        "lines_added": 0,
+        "header_only": true,
+        "sample": []
+      },
+      "sva/generated/data_path_fcov.sv": {
+        "lines_removed": 0,
+        "lines_added": 0,
+        "header_only": true,
+        "sample": []
+      },
+      "sva/generated/init_fsm_fcov.sv": {
+        "lines_removed": 0,
+        "lines_added": 0,
+        "header_only": true,
+        "sample": []
+      },
+      "sva/generated/init_fsm_sva.sv": {
+        "lines_removed": 2,
+        "lines_added": 2,
+        "header_only": false,
+        "sample": [
+          {
+            "baseline": "// Bound: initialization_sequence.tZQinit_ns = 640.0ns; at a 5.0ns controller clock that is",
+            "candidate": "// Bound: initialization_sequence.tZQinit_ns = 1280.0ns; at a 10.0ns controller clock that is"
+          },
+          {
+            "baseline": "// ceil(640.0/5.0) = 128 cycle(s) of separation, so 127 cycle(s)",
+            "candidate": "// ceil(1280.0/10.0) = 128 cycle(s) of separation, so 127 cycle(s)"
+          }
+        ]
+      },
+      "sva/generated/refresh_ctrl_fcov.sv": {
+        "lines_removed": 0,
+        "lines_added": 0,
+        "header_only": true,
+        "sample": []
+      },
+      "txn/generated/schemas.json": {
+        "lines_removed": 0,
+        "lines_added": 0,
+        "header_only": true,
+        "sample": []
+      },
+      "vplan/vplan.json": {
+        "lines_removed": 22,
+        "lines_added": 19,
+        "header_only": false,
+        "sample": [
+          {
+            "baseline": "\"requirement\": \"Stimulus shall drive the tCCD constraint to its boundary (4 cycles at tCK=1.25ns), including the exact-minimum legal spacing, so the corresponding assertion is non-vacuous.\",",
+            "candidate": "\"requirement\": \"Stimulus shall drive the tCCD constraint to its boundary (4 cycles at tCK=2.5ns), including the exact-minimum legal spacing, so the corresponding assertion is non-vacuous.\","
+          },
+          {
+            "baseline": "\"requirement\": \"Stimulus shall drive the tFAW constraint to its boundary (32 cycles at tCK=1.25ns), including the exact-minimum legal spacing, so the corresponding assertion is non-vacuous.\",",
+            "candidate": "\"requirement\": \"Stimulus shall drive the tFAW constraint to its boundary (16 cycles at tCK=2.5ns), including the exact-minimum legal spacing, so the corresponding assertion is non-vacuous.\","
+          },
+          {
+            "baseline": "\"target_cycles\": 32,",
+            "candidate": "\"target_cycles\": 16,"
+          },
+          {
+            "baseline": "\"requirement\": \"Stimulus shall drive the tRAS constraint to its boundary (28 cycles at tCK=1.25ns), including the exact-minimum legal spacing, so the corresponding assertion is non-vacuous.\",",
+            "candidate": "\"requirement\": \"Stimulus shall drive the tRAS constraint to its boundary (15 cycles at tCK=2.5ns), including the exact-minimum legal spacing, so the corresponding assertion is non-vacuous.\","
+          },
+          {
+            "baseline": "\"target_cycles\": 28,",
+            "candidate": "\"target_cycles\": 15,"
+          },
+          {
+            "baseline": "\"requirement\": \"Stimulus shall drive the tRCD constraint to its boundary (11 cycles at tCK=1.25ns), including the exact-minimum legal spacing, so the corresponding assertion is non-vacuous.\",",
+            "candidate": "\"requirement\": \"Stimulus shall drive the tRCD constraint to its boundary (6 cycles at tCK=2.5ns), including the exact-minimum legal spacing, so the corresponding assertion is non-vacuous.\","
+          }
+        ]
+      }
+    },
+    "unchanged": [
+      "sva/generated/bank_tracker_fcov_bind.sv",
+      "sva/generated/cmd_gen_coverage_bind.sv",
+      "sva/generated/cmd_gen_sva_bind.sv",
+      "sva/generated/cmd_queue_fcov_bind.sv",
+      "sva/generated/config_regs_fcov_bind.sv",
+      "sva/generated/data_path_fcov_bind.sv",
+      "sva/generated/init_fsm_fcov_bind.sv",
+      "sva/generated/init_fsm_sva_bind.sv",
+      "sva/generated/refresh_ctrl_fcov_bind.sv",
+      "txn/generated/monitors/cal_status_monitor.sv",
+      "txn/generated/monitors/cal_zqcs_monitor.sv",
+      "txn/generated/monitors/cfg_refresh_monitor.sv",
+      "txn/generated/monitors/cfg_timing_monitor.sv",
+      "txn/generated/monitors/chain_monitors_bind.sv",
+      "txn/generated/monitors/config_regs_monitors_bind.sv",
+      "txn/generated/monitors/cq_deq_monitor.sv",
+      "txn/generated/monitors/cq_enq_monitor.sv",
+      "txn/generated/monitors/csr_monitor.sv",
+      "txn/generated/monitors/csr_rsp_monitor.sv",
+      "txn/generated/monitors/csr_sts_level_monitor.sv",
+      "txn/generated/monitors/csr_sts_monitor.sv",
+      "txn/generated/monitors/ddr_cmd_monitor.sv",
+      "txn/generated/monitors/ddr_rd_beat_monitor.sv",
+      "txn/generated/monitors/ddr_wr_beat_monitor.sv",
+      "txn/generated/monitors/dp_cmd_monitor.sv",
+      "txn/generated/monitors/dp_rd_rsp_monitor.sv",
+      "txn/generated/monitors/dp_wr_monitor.sv",
+      "txn/generated/monitors/init_cmd_monitor.sv",
+      "txn/generated/monitors/init_status_monitor.sv",
+      "txn/generated/monitors/monitors_bind.sv",
+      "txn/generated/monitors/refresh_ack_monitor.sv",
+      "txn/generated/monitors/refresh_req_monitor.sv",
+      "txn/generated/monitors/req_monitor.sv",
+      "txn/generated/monitors/sched_cmd_monitor.sv",
+      "txn/generated/monitors/sched_deq_monitor.sv",
+      "txn/generated/monitors/sched_in_monitor.sv",
+      "txn/generated/monitors/wb_monitor.sv",
+      "txn/generated/monitors/wb_rsp_monitor.sv"
+    ],
+    "only_baseline": [],
+    "only_candidate": []
+  },
+  "sva_unenforceable_at_clock": {
+    "baseline": [
+      "TIMING_010"
+    ],
+    "candidate": [
+      "TIMING_005",
+      "TIMING_007",
+      "TIMING_009",
+      "TIMING_010"
+    ],
+    "new_in_candidate": [
+      "TIMING_005",
+      "TIMING_007",
+      "TIMING_009"
+    ]
+  },
+  "literal_scan": {
+    "baseline_literals": {
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "design_id": "ddr3_mc_core_v2",
+      "tCK_ns": "1.25ns",
+      "controller_clock_period_ns": "5.0ns",
+      "tREFI_nCK": "6240",
+      "speed_bin": "DDR3-1600K (11-11-11)"
+    },
+    "surviving_hits": []
+  },
+  "what_moved": {
+    "sva_bounds": true,
+    "coverage_bins": true,
+    "vplan_targets": true
+  },
+  "checks": {
+    "all_generators_pass_on_candidate": true,
+    "bounds_and_bins_changed": true,
+    "no_baseline_literal_survives": true,
+    "tree_restored": true,
+    "zero_code_edits": true
+  },
+  "verdict": "pass"
+}

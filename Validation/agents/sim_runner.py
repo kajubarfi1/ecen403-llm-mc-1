@@ -86,6 +86,21 @@ CADENCE_ENV = (
 # failure, not a passing design.
 
 
+
+def _password_from_setup_env():
+    """OLYMPUS_PASSWORD from Validation/setup.env when it is not exported.
+    The file is written by hand as `KEY = "value"` (spaces, quotes), which a
+    shell cannot `source`, so tolerate that form here rather than require an
+    export nobody remembers to do."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "setup.env")
+    try:
+        with open(path) as f:
+            txt = f.read()
+    except OSError:
+        return None
+    m = re.search(r'^\s*OLYMPUS_PASSWORD\s*=\s*"?([^"\n]*?)"?\s*$', txt, re.M)
+    return m.group(1) if m and m.group(1) else None
+
 class CadenceSSHAgent:
 
     def __init__(self, ssh_config=SSH_CONFIG, slurm_config=SLURM_CONFIG,
@@ -113,7 +128,8 @@ class CadenceSSHAgent:
             kwargs["key_filename"] = self.ssh["key_path"]
         else:
             # Check env var, then explicit password, then prompt
-            pw = password or os.environ.get("OLYMPUS_PASSWORD")
+            pw = (password or os.environ.get("OLYMPUS_PASSWORD")
+                  or _password_from_setup_env())
             if pw:
                 kwargs["password"] = pw
 
@@ -457,7 +473,7 @@ def main():
     if args.command is None:
         args.command = "sanity"
 
-    password = os.environ.get("OLYMPUS_PASSWORD")
+    password = os.environ.get("OLYMPUS_PASSWORD") or _password_from_setup_env()
     if not password:
         password = getpass.getpass("Enter Olympus password: ")
     agent = CadenceSSHAgent()

@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "spec_source": "ddr3_mc_core_v2",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "item_count": 38,
+  "item_count": 39,
   "items": [
     {
       "id": "VP_FAIL_001",
@@ -850,6 +850,27 @@
       "status": "covered",
       "derived": true,
       "target_cycles": 6,
+      "tests": []
+    },
+    {
+      "id": "VP_FLOW_001",
+      "title": "Command queue back-pressure exercised",
+      "scope": "cmd_queue",
+      "requirement": "Stimulus shall present more than 16 outstanding requests (controller_architecture.command_queue_depth) so the queue fills and back-pressure to the host port is exercised; no accepted request may be lost while it is asserted.",
+      "spec_ref": "controller_architecture.command_queue_depth",
+      "failure_ref": null,
+      "method": "directed",
+      "coverage_items": [
+        {
+          "type": "functional",
+          "name": "cg_cmd_queue.cp_backpressure_exercised",
+          "goal": 100
+        }
+      ],
+      "priority": "major",
+      "status": "covered",
+      "derived": true,
+      "queue_depth": 16,
       "tests": []
     }
   ]

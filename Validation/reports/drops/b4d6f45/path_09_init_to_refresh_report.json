@@ -1,0 +1,66 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_09_init_to_refresh",
+  "strategy": "invariant",
+  "verdict": "pass",
+  "timestamp": "2026-09-18T18:39:42.536346",
+  "blocks": [
+    "config_regs",
+    "init_fsm",
+    "refresh_ctrl"
+  ],
+  "sequence": null,
+  "stimulus_generator": null,
+  "autonomous": true,
+  "window_cycles": 180000,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "b4d6f45",
+    "roots": [
+      "Frontend/OutputFolders"
+    ],
+    "blocks": {
+      "config_regs": {
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/config_regs_manifest.json"
+      },
+      "init_fsm": {
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/init_fsm.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/init_fsm_manifest.json"
+      },
+      "refresh_ctrl": {
+        "rtl": "Frontend/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined/refresh_ctrl_manifest.json"
+      }
+    }
+  },
+  "stages": [
+    {
+      "stage": "init_fsm",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "init_fsm",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA"
+    },
+    {
+      "stage": "refresh_ctrl",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "refresh_ctrl",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA"
+    },
+    {
+      "stage": "(path-level)",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_09_init_to_refresh_checker.py",
+      "scope": "path_09_init_to_refresh",
+      "verdict": "pass",
+      "summary": "scope=path_09_init_to_refresh  strategy=invariant  status=pass  (27 transactions, no rule broken)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/paths/path_09_init_to_refresh_sim.log",
+  "observed_trace": "Validation/reports/paths/path_09_init_to_refresh_observed.jsonl"
+}

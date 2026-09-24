@@ -69,9 +69,17 @@ def generate(schemas, catalog, scope, n_drives=19, seed=0, only_kinds=None):
             w = info["width"]
             if fname == "type":
                 vals[fname] = rng.choice(cmds)
-            elif isinstance(w, int):
-                # keep values modest so they are plausible rather than extreme
+            elif isinstance(w, int) and w <= 8:
+                # a small address space (a register bus): stay near the
+                # mapped region so most accesses land on something
                 vals[fname] = rng.randrange(0, min(1 << w, 64))
+            elif isinstance(w, int):
+                # Full width. The old cap of 64 on every field meant a 29-bit
+                # host address never left bank 0 / row 0, so no row conflict,
+                # bank switch or precharge ever happened in a "random" run
+                # — and seeded bank/row faults were undetectable. Address
+                # coverage has to span the map the spec describes.
+                vals[fname] = rng.randrange(0, 1 << w)
             else:
                 vals[fname] = 0
         steps.append({"op": "drive", "iface": iface, "kind": kind,

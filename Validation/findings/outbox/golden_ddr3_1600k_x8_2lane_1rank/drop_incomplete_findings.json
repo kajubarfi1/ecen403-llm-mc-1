@@ -1,0 +1,36 @@
+{
+  "$schema": "validation-findings/1",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "finding_count": 1,
+  "findings": [
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "drop_incomplete",
+      "scope": "Frontend/OutputFolders",
+      "severity": "major",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "RTL drop 082af8e ships 9 of 11 blocks: bank_tracker and refresh_ctrl are missing",
+      "detail": "The 2026-09-17 Frontend drop (git 082af8e) provides RTL and manifests for wb_port, addr_decoder, cmd_queue, scheduler, cmd_gen, init_fsm, calibration, config_regs and data_path, but no bank_tracker.sv or refresh_ctrl.sv and no manifests for them under Frontend/OutputFolders. Copies exist only under Frontend/failedattemptlog/, which validation does not read. Every integration path that instantiates the scheduler requires both blocks (integration_map requires: scheduler -> cmd_queue, bank_tracker, refresh_ctrl), so 17 of 20 paths cannot be built from this drop alone. Validation is temporarily taking the two blocks from a snapshot of the previous complete drop (dce7b40, kept under Validation/rtl_snapshots/) and stamping that provenance into every run report. Please regenerate the two blocks into Frontend/OutputFolders so the drop is self-contained. Separately, the drop tree now contains 79 demo / failed-attempt copies of block RTL beside the canonical output; validation now resolves blocks only through declared drop roots (Validation/spec/rtl_drop.json) so those copies cannot be picked up by mistake.",
+      "evidence": {
+        "drop_commit": "082af8e",
+        "missing_rtl": [
+          "bank_tracker.sv",
+          "refresh_ctrl.sv"
+        ],
+        "missing_manifests": [
+          "bank_tracker_manifest.json",
+          "refresh_ctrl_manifest.json"
+        ],
+        "present_only_under": [
+          "Frontend/failedattemptlog/PHASE2RTL/",
+          "Frontend/failedattemptlog/Phase2/PHASE2RTL/"
+        ],
+        "fallback": "Validation/rtl_snapshots/2026-08-26_dce7b40",
+        "resolver_check": "python3 Validation/structural/rtl_drop.py"
+      },
+      "status": "resolved",
+      "resolution": "Frontend drop b4d6f45 (2026-09-17) adds bank_tracker.sv and refresh_ctrl.sv with manifests under Frontend/OutputFolders/PHASE2RTL and VALIDATIONREPORT/lint_combined. Both are byte-identical to the dce7b40 copies validation had been using, so no re-validation was needed. The snapshot root was removed from Validation/spec/rtl_drop.json and Validation/rtl_snapshots/ deleted."
+    }
+  ]
+}

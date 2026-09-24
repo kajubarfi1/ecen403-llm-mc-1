@@ -292,7 +292,7 @@ class TestStrategyFromPathDefs(unittest.TestCase):
             strategy_for_scope("path_04_scheduler_bank_loop", self.PATH_DEFS),
             "invariant")
         self.assertEqual(
-            strategy_for_scope("path_07_backpressure", self.PATH_DEFS), "exact")
+            strategy_for_scope("path_06_scheduler_dequeue", self.PATH_DEFS), "exact")
 
     def test_unknown_scope_falls_back_to_default(self):
         self.assertEqual(

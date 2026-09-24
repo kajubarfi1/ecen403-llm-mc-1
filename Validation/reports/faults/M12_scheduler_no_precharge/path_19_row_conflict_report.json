@@ -1,0 +1,92 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_19_row_conflict",
+  "strategy": "invariant",
+  "verdict": "fail",
+  "timestamp": "2026-09-17T19:03:05.790189",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/runs/faults/M12_scheduler_no_precharge/path_19_row_conflict/path_19_row_conflict_seed1.json",
+  "stimulus_generator": "random",
+  "autonomous": false,
+  "window_cycles": 64,
+  "rtl_drop": {
+    "git_head": "b4d6f45",
+    "roots": [
+      "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/PHASE2RTL/addr_decoder.sv",
+        "manifest": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/addr_decoder_manifest.json"
+      },
+      "bank_tracker": {
+        "rtl": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/PHASE2RTL/bank_tracker.sv",
+        "manifest": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined/bank_tracker_manifest.json"
+      },
+      "cmd_gen": {
+        "rtl": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/PHASE3RTL/cmd_gen.sv",
+        "manifest": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/cmd_gen_manifest.json"
+      },
+      "cmd_queue": {
+        "rtl": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/PHASE3RTL/cmd_queue.sv",
+        "manifest": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/cmd_queue_manifest.json"
+      },
+      "config_regs": {
+        "rtl": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/config_regs_manifest.json"
+      },
+      "data_path": {
+        "rtl": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/PHASE4RTL/data_path.sv",
+        "manifest": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/data_path_manifest.json"
+      },
+      "refresh_ctrl": {
+        "rtl": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined/refresh_ctrl_manifest.json"
+      },
+      "scheduler": {
+        "rtl": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+        "manifest": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/scheduler_manifest.json"
+      },
+      "wb_port": {
+        "rtl": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+        "manifest": "Validation/faults/work/M12_scheduler_no_precharge/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/wb_port_manifest.json"
+      }
+    }
+  },
+  "stages": [
+    {
+      "stage": "(path-level)",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_19_row_conflict_checker.py",
+      "scope": "path_19_row_conflict",
+      "verdict": "fail",
+      "summary": "scope=path_19_row_conflict  strategy=invariant  status=fail  violations=33",
+      "detail": [
+        "  PROTO_002 (double_activate): ACTIVATE issued to bank 0 which already has row 20803 active @ [ddr_cmd.command addr=0x5143 bank=0x0 cmd=0x3]",
+        "  PROTO_002 (double_activate): ACTIVATE issued to bank 0 which already has row 20803 active @ [ddr_cmd.command addr=0x5143 bank=0x0 cmd=0x3]",
+        "  SCHED_002 (spurious_cas): WR to bank 4 col 696 (open row 27092) matches no enqueued request. Pending requests in bank: [(25546, 80, 1), (24982, 824, 1), (19881, 480, 1), (24282, 600, 1)] @ [ddr_cmd.command addr=0x2b8 bank=0x4 cmd=0x4]",
+        "  SCHED_002 (spurious_cas): WR to bank 0 col 560 (open row 20803) matches no enqueued request. Pending requests in bank: [(11164, 40, 1), (30025, 888, 1)] @ [ddr_cmd.command addr=0x230 bank=0x0 cmd=0x4]",
+        "  PROTO_002 (double_activate): ACTIVATE issued to bank 5 which already has row 7922 active @ [ddr_cmd.command addr=0x1ef2 bank=0x5 cmd=0x3]",
+        "  PROTO_002 (double_activate): ACTIVATE issued to bank 5 which already has row 7922 active @ [ddr_cmd.command addr=0x1ef2 bank=0x5 cmd=0x3]",
+        "  PROTO_002 (double_activate): ACTIVATE issued to bank 1 which already has row 23152 active @ [ddr_cmd.command addr=0x5a70 bank=0x1 cmd=0x3]",
+        "  PROTO_002 (double_activate): ACTIVATE issued to bank 1 which already has row 23152 active @ [ddr_cmd.command addr=0x5a70 bank=0x1 cmd=0x3]",
+        "  SCHED_002 (spurious_cas): WR to bank 5 col 152 (open row 7922) matches no enqueued request. Pending requests in bank: [(5666, 936, 1)] @ [ddr_cmd.command addr=0x98 bank=0x5 cmd=0x4]",
+        "  SCHED_002 (spurious_cas): WR to bank 1 col 408 (open row 23152) matches no enqueued request. Pending requests in bank: [] @ [ddr_cmd.command addr=0x198 bank=0x1 cmd=0x4]",
+        "  PROTO_002 (double_activate): ACTIVATE issued to bank 2 which already has row 27924 active @ [ddr_cmd.command addr=0x6d14 bank=0x2 cmd=0x3]",
+        "  PROTO_002 (double_activate): ACTIVATE issued to bank 2 which already has row 27924 active @ [ddr_cmd.command addr=0x6d14 bank=0x2 cmd=0x3]"
+      ]
+    }
+  ],
+  "log": "Validation/reports/faults/M12_scheduler_no_precharge/path_19_row_conflict_sim.log",
+  "observed_trace": "Validation/reports/faults/M12_scheduler_no_precharge/path_19_row_conflict_observed.jsonl"
+}

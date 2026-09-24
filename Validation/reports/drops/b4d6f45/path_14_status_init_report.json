@@ -1,0 +1,53 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_14_status_init",
+  "strategy": "composed",
+  "verdict": "pass",
+  "timestamp": "2026-09-18T18:39:43.490450",
+  "blocks": [
+    "config_regs",
+    "init_fsm"
+  ],
+  "sequence": "Validation/sequences/generated/path_14_status_init_seed1.json",
+  "stimulus_generator": "status_poll",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "b4d6f45",
+    "roots": [
+      "Frontend/OutputFolders"
+    ],
+    "blocks": {
+      "config_regs": {
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/config_regs_manifest.json"
+      },
+      "init_fsm": {
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/init_fsm.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/init_fsm_manifest.json"
+      }
+    }
+  },
+  "stages": [
+    {
+      "stage": "init_fsm",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "init_fsm",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA"
+    },
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "pass",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=160/160  (160 output transaction(s) matched)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/paths/path_14_status_init_sim.log",
+  "observed_trace": "Validation/reports/paths/path_14_status_init_observed.jsonl"
+}

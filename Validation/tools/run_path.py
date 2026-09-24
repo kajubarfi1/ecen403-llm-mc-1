@@ -71,10 +71,12 @@ def run_local(cmd):
 
 
 def rtl_file(block):
-    paths = sorted(glob.glob(os.path.join(ROOT, "Frontend", "**",
-                                          f"{block}.sv"), recursive=True),
-                   key=lambda p: -os.path.getmtime(p))
-    return paths[0] if paths else None
+    import rtl_drop as RD
+    try:
+        return RD.rtl_file(block)
+    except RD.DropError as e:
+        print(f"  {e}")
+        return None
 
 
 def generated_checkers(blocks):
@@ -191,11 +193,23 @@ def main() -> int:
                          "path's settle_cycles / window_cycles")
     ap.add_argument("--stimulus", default=None,
                     choices=["random", "register_walk", "status_poll",
-                             "refresh_stress"],
+                             "refresh_stress", "burst"],
                     help="override the path's stimulus_generator")
     ap.add_argument("--no-coverage", action="store_true")
     ap.add_argument("--prep-only", action="store_true")
     ap.add_argument("--timeout", type=int, default=900)
+    ap.add_argument("--tag", default=None,
+                    help="run under runs/<tag>/<path> locally and remotely, "
+                         "so a side experiment (seeded fault, what-if drop) "
+                         "never collides with the baseline run")
+    ap.add_argument("--judge-only", action="store_true",
+                    help="do not simulate: re-judge the existing trace in the "
+                         "report dir (after a checker or predictor was "
+                         "regenerated) and rewrite the report")
+    ap.add_argument("--report-dir", default=None,
+                    help="where to write the report/log/trace (default "
+                         "Validation/reports/paths; a tagged run must not "
+                         "overwrite the baseline reports)")
     args = ap.parse_args()
 
     with open(CATALOG) as f:
@@ -251,7 +265,8 @@ def main() -> int:
     # used to share seq_driver.sv / chain_harness.sv, so two runs in flight
     # at once overwrote each other's driver mid-upload and the harness
     # elaborated against the wrong module ports.
-    work = os.path.join(SEQ_GEN, "runs", args.path)
+    run_id = f"runs/{args.tag}/{args.path}" if args.tag else f"runs/{args.path}"
+    work = os.path.join(SEQ_GEN, *run_id.split("/"))
     os.makedirs(work, exist_ok=True)
     seq_path = args.sequence
     generator = None
@@ -265,7 +280,7 @@ def main() -> int:
         print(out.strip())
     else:
         if not seq_path:
-            seq_path = os.path.join(SEQ_GEN,
+            seq_path = os.path.join(work if args.tag else SEQ_GEN,
                                     f"{args.path}_seed{args.seed}.json")
             rc, out, generator = SS.generate_sequence(
                 pdef, entry, seq_path, seed=args.seed, drives=args.drives,
@@ -340,41 +355,53 @@ def main() -> int:
         print("\n  --prep-only: stopping before the cluster run.")
         return 0
 
-    # --- simulate ----------------------------------------------------------
-    agent = CadenceSSHAgent(work_subdir=f"runs/{args.path}")
-    try:
-        agent.connect(password=load_password())
-        agent.clean_work_dir()
-        uploads = (rtl + stub_files + driver_files
-                   + [harness, bind_path] + mon_files + fcov_files)
-        agent.upload_files(uploads)
-        cov = ""
-        if not args.no_coverage:
-            with open(CCF) as f:
-                agent.write_remote_file("cov_conf.ccf", f.read())
-            cov = (f"-coverage A -covoverwrite -covfile ./cov_conf.ccf "
-                   f"-covtest {args.path}")
-        names = " ".join(os.path.basename(p) for p in uploads)
-        cmd = (f"xrun -sv -access +rwc -timescale 1ns/1ps -clean {cov} "
-               f"{names} -top chain_harness 2>&1")
-        print(f"\nRunning: xrun ... -top chain_harness  "
-              f"({len(uploads)} file(s))")
-        res = agent.run_sim(cmd, timeout=args.timeout)
-        stdout = res.get("stdout", "")
-    except Exception as e:
-        print(f"\nRUN FAILED: {e}")
-        import traceback
-        traceback.print_exc()
-        return 2
-    finally:
-        agent.disconnect()
-
-    rep_dir = os.path.join(ROOT, "Validation", "reports", "paths")
+    rep_dir = args.report_dir or os.path.join(ROOT, "Validation", "reports",
+                                              "paths")
     os.makedirs(rep_dir, exist_ok=True)
     log_path = os.path.join(rep_dir, f"{args.path}_sim.log")
-    with open(log_path, "w") as f:
-        f.write(stdout)
-    print(f"  log -> {os.path.relpath(log_path, ROOT)}")
+
+    # --- simulate ----------------------------------------------------------
+    if args.judge_only:
+        # A regenerated checker or predictor changes the verdict, not the
+        # waveform: re-judge the trace this path already produced.
+        if not os.path.exists(log_path):
+            print(f"--judge-only: no previous log at "
+                  f"{os.path.relpath(log_path, ROOT)}")
+            return 2
+        with open(log_path, errors="replace") as f:
+            stdout = f.read()
+        print(f"\n  --judge-only: re-judging {os.path.relpath(log_path, ROOT)}")
+    else:
+        agent = CadenceSSHAgent(work_subdir=run_id)
+        try:
+            agent.connect(password=load_password())
+            agent.clean_work_dir()
+            uploads = (rtl + stub_files + driver_files
+                       + [harness, bind_path] + mon_files + fcov_files)
+            agent.upload_files(uploads)
+            cov = ""
+            if not args.no_coverage:
+                with open(CCF) as f:
+                    agent.write_remote_file("cov_conf.ccf", f.read())
+                cov = (f"-coverage A -covoverwrite -covfile ./cov_conf.ccf "
+                       f"-covtest {args.path}")
+            names = " ".join(os.path.basename(p) for p in uploads)
+            cmd = (f"xrun -sv -access +rwc -timescale 1ns/1ps -clean {cov} "
+                   f"{names} -top chain_harness 2>&1")
+            print(f"\nRunning: xrun ... -top chain_harness  "
+                  f"({len(uploads)} file(s))")
+            res = agent.run_sim(cmd, timeout=args.timeout)
+            stdout = res.get("stdout", "")
+        except Exception as e:
+            print(f"\nRUN FAILED: {e}")
+            import traceback
+            traceback.print_exc()
+            return 2
+        finally:
+            agent.disconnect()
+        with open(log_path, "w") as f:
+            f.write(stdout)
+        print(f"  log -> {os.path.relpath(log_path, ROOT)}")
 
     # *E,ASRTST is a runtime assertion failure — evidence about the design,
     # not a broken build. Everything else with *E/*F stops the run.
@@ -468,6 +495,8 @@ def main() -> int:
         "stimulus_generator": generator,
         "autonomous": autonomous,
         "window_cycles": args.settle,
+        "coverage_collected": not args.no_coverage,
+        "rtl_drop": __import__("rtl_drop").stamp(blocks),
         "stages": results,
         "log": os.path.relpath(log_path, ROOT),
         "observed_trace": os.path.relpath(trace, ROOT),
@@ -475,7 +504,38 @@ def main() -> int:
     with open(os.path.join(rep_dir, f"{args.path}_report.json"), "w") as f:
         json.dump(report, f, indent=2)
     print(f"\n  path verdict : {worst.upper()}")
-    print(f"  report -> Validation/reports/paths/{args.path}_report.json")
+    print(f"  report -> {os.path.relpath(os.path.join(rep_dir, args.path + '_report.json'), ROOT)}")
+
+    # Single-hop paths judged as one stage of THIS run get their own report,
+    # derived from that stage, so every path is first-class downstream.
+    for dep in pdefs.values():
+        ji = dep.get("judged_in")
+        if not ji or ji["host"] != args.path:
+            continue
+        st = next((s for s in results if s["stage"] == ji["stage"]), None)
+        if st is None:
+            print(f"  (judged_in: {dep['id']} names stage {ji['stage']!r}, "
+                  f"which this run did not judge)")
+            continue
+        derived = {
+            "$schema": "validation-path-run/1",
+            "path": dep["id"], "strategy": dep["check_strategy"],
+            "verdict": {"pass": "pass", "fail": "fail"}.get(st["verdict"],
+                                                              "incomplete"),
+            "timestamp": report["timestamp"],
+            "blocks": dep["blocks"],
+            "derived_from": {"host": args.path, "stage": ji["stage"]},
+            "sequence": report["sequence"],
+            "stimulus_generator": generator,
+            "stages": [st],
+            "log": report["log"], "observed_trace": report["observed_trace"],
+            "rtl_drop": report["rtl_drop"],
+            "coverage_collected": report["coverage_collected"],
+        }
+        with open(os.path.join(rep_dir, f"{dep['id']}_report.json"), "w") as f:
+            json.dump(derived, f, indent=2)
+        print(f"  derived {dep['id']:34} {derived['verdict'].upper():5} "
+              f"from stage {ji['stage']}")
     return 0 if worst in ("pass", "observed") else 1
 
 

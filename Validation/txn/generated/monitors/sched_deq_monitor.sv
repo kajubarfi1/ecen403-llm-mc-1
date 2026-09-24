@@ -4,7 +4,7 @@
 //
 // Interface : sched_deq   (Queue-slot grants issued by the scheduler)
 // Block     : scheduler
-// Manifest  : Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/scheduler_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

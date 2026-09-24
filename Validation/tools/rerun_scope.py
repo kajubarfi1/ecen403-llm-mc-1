@@ -77,10 +77,13 @@ def run_local(cmd):
 def find_rtl(scope):
     """The block's newest RTL under Frontend/ — no hand-kept table to
     fall out of date."""
-    paths = sorted(glob.glob(os.path.join(ROOT, "Frontend", "**",
-                                          f"{scope}.sv"), recursive=True),
-                   key=lambda p: -os.path.getmtime(p))
-    return paths[0] if paths else None
+    sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
+    import rtl_drop as RD
+    try:
+        return RD.rtl_file(scope)
+    except RD.DropError as e:
+        print(f"  {e}")
+        return None
 
 
 def scope_monitors(scope, catalog):
@@ -153,7 +156,7 @@ def main() -> int:
 
     rtl = find_rtl(scope)
     if not rtl:
-        print(f"no {scope}.sv found under Frontend/ — nothing to validate.")
+        print(f"no {scope}.sv found in the declared RTL drop — nothing to validate.")
         return 1
 
     model = pick_model(scope)

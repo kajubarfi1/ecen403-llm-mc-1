@@ -1,0 +1,52 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_16_status_refresh",
+  "strategy": "composed",
+  "verdict": "pass",
+  "timestamp": "2026-09-17T18:53:49.966847",
+  "blocks": [
+    "config_regs",
+    "refresh_ctrl"
+  ],
+  "sequence": "Validation/sequences/generated/runs/faults/M08_config_regs_starve_flag_lost/path_16_status_refresh/path_16_status_refresh_seed1.json",
+  "stimulus_generator": "status_poll",
+  "autonomous": false,
+  "window_cycles": 64,
+  "rtl_drop": {
+    "git_head": "b4d6f45",
+    "roots": [
+      "Validation/faults/work/M08_config_regs_starve_flag_lost/Frontend/OutputFolders"
+    ],
+    "blocks": {
+      "config_regs": {
+        "rtl": "Validation/faults/work/M08_config_regs_starve_flag_lost/Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Validation/faults/work/M08_config_regs_starve_flag_lost/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/config_regs_manifest.json"
+      },
+      "refresh_ctrl": {
+        "rtl": "Validation/faults/work/M08_config_regs_starve_flag_lost/Frontend/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "Validation/faults/work/M08_config_regs_starve_flag_lost/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined/refresh_ctrl_manifest.json"
+      }
+    }
+  },
+  "stages": [
+    {
+      "stage": "refresh_ctrl",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "refresh_ctrl",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA"
+    },
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "pass",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=120/120  (120 output transaction(s) matched)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/faults/M08_config_regs_starve_flag_lost/path_16_status_refresh_sim.log",
+  "observed_trace": "Validation/reports/faults/M08_config_regs_starve_flag_lost/path_16_status_refresh_observed.jsonl"
+}

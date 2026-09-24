@@ -4,7 +4,7 @@
 //
 // Interface : ddr_rd_beat   (Read data beats arriving from the DDR PHY: dq sampled while the incoming strobe is high.)
 // Block     : data_path
-// Manifest  : Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/data_path_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

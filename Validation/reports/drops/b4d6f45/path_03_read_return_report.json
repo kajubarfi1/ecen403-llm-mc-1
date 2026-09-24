@@ -1,0 +1,115 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_03_read_return",
+  "strategy": "composed",
+  "verdict": "fail",
+  "timestamp": "2026-09-18T18:39:36.354811",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_03_read_return_seed1.json",
+  "stimulus_generator": "random",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "b4d6f45",
+    "roots": [
+      "Frontend/OutputFolders"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "Frontend/OutputFolders/PHASE2RTL/addr_decoder.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/addr_decoder_manifest.json"
+      },
+      "bank_tracker": {
+        "rtl": "Frontend/OutputFolders/PHASE2RTL/bank_tracker.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined/bank_tracker_manifest.json"
+      },
+      "cmd_gen": {
+        "rtl": "Frontend/OutputFolders/PHASE3RTL/cmd_gen.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/cmd_gen_manifest.json"
+      },
+      "cmd_queue": {
+        "rtl": "Frontend/OutputFolders/PHASE3RTL/cmd_queue.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/cmd_queue_manifest.json"
+      },
+      "config_regs": {
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/config_regs_manifest.json"
+      },
+      "data_path": {
+        "rtl": "Frontend/OutputFolders/PHASE4RTL/data_path.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/data_path_manifest.json"
+      },
+      "refresh_ctrl": {
+        "rtl": "Frontend/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined/refresh_ctrl_manifest.json"
+      },
+      "scheduler": {
+        "rtl": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/scheduler_manifest.json"
+      },
+      "wb_port": {
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/wb_port_manifest.json"
+      }
+    }
+  },
+  "stages": [
+    {
+      "stage": "data_path",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/data_path_predictor.py",
+      "scope": "data_path",
+      "verdict": "fail",
+      "summary": "scope=data_path  strategy=exact  status=fail  matched=9/48  missing=37 unexpected=21 value=2  violations=20",
+      "detail": [
+        "  DATA_001 (x_value): dp_rd_rsp.response seq=536 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  DATA_001 (x_value): dp_rd_rsp.response seq=544 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  DATA_001 (x_value): dp_rd_rsp.response seq=605 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  DATA_001 (x_value): dp_rd_rsp.response seq=609 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  DATA_001 (x_value): dp_rd_rsp.response seq=636 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  DATA_001 (x_value): dp_rd_rsp.response seq=641 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  DATA_001 (x_value): dp_rd_rsp.response seq=668 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  DATA_001 (x_value): dp_rd_rsp.response seq=675 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  DATA_001 (x_value): dp_rd_rsp.response seq=1013 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  DATA_001 (x_value): dp_rd_rsp.response seq=1018 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  DATA_001 (x_value): dp_rd_rsp.response seq=1047 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]",
+        "  DATA_001 (x_value): dp_rd_rsp.response seq=1053 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]"
+      ]
+    },
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "fail",
+      "summary": "scope=wb_port  strategy=exact  status=fail  matched=32/104  missing=20 value=52  violations=20",
+      "detail": [
+        "  DATA_001 (x_value): wb_rsp.read_data seq=533 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x1b03f53d data=None]",
+        "  DATA_001 (x_value): wb_rsp.read_data seq=540 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0xe30323f data=None]",
+        "  DATA_001 (x_value): wb_rsp.read_data seq=603 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0xeeadb0e data=None]",
+        "  DATA_001 (x_value): wb_rsp.read_data seq=607 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0xeeadb0e data=None]",
+        "  DATA_001 (x_value): wb_rsp.read_data seq=633 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0xe00822a data=None]",
+        "  DATA_001 (x_value): wb_rsp.read_data seq=639 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0xe00822a data=None]",
+        "  DATA_001 (x_value): wb_rsp.read_data seq=665 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0xe00822a data=None]",
+        "  DATA_001 (x_value): wb_rsp.read_data seq=672 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x160165d data=None]",
+        "  DATA_001 (x_value): wb_rsp.read_data seq=1011 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x192cb4af data=None]",
+        "  DATA_001 (x_value): wb_rsp.read_data seq=1016 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x192cb4af data=None]",
+        "  DATA_001 (x_value): wb_rsp.read_data seq=1044 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x192cb4af data=None]",
+        "  DATA_001 (x_value): wb_rsp.read_data seq=1051 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x192cb4af data=None]"
+      ]
+    }
+  ],
+  "log": "Validation/reports/paths/path_03_read_return_sim.log",
+  "observed_trace": "Validation/reports/paths/path_03_read_return_observed.jsonl"
+}

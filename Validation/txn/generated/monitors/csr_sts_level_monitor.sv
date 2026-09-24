@@ -4,7 +4,7 @@
 //
 // Interface : csr_sts_level   (Hardware status LEVELS reflected in the CSR status registers. Unlike csr_sts these are not pulses: they carry continuously-valid state that read-only status fields mirror. A predictor cannot model those fields without seeing them, which is why 7 CTRL_STATUS reads were unattributable before this interface existed.)
 // Block     : config_regs
-// Manifest  : Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/config_regs_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

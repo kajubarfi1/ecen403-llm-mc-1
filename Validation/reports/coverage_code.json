@@ -1,16 +1,36 @@
 {
   "$schema": "validation-code-coverage/1",
-  "generated_utc": "2026-09-17T17:18:48.059708Z",
+  "generated_utc": "2026-09-24T17:14:53.578344Z",
   "runs": [
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_work/scope/path_01_write_cmd",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_02_read_cmd/cov_work/scope/path_02_read_cmd",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_03_read_return/cov_work/scope/path_03_read_return",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_04_scheduler_bank_loop/cov_work/scope/path_04_scheduler_bank_loop",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_05_scheduler_refresh_loop/cov_work/scope/path_05_scheduler_refresh_loop",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_07_backpressure/cov_work/scope/path_07_backpressure",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_08_init_to_cal/cov_work/scope/path_08_init_to_cal",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_09_init_to_refresh/cov_work/scope/path_09_init_to_refresh",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_12_csr_timing_to_scheduling/cov_work/scope/path_12_csr_timing_to_scheduling",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_13_csr_refresh_to_scheduling/cov_work/scope/path_13_csr_refresh_to_scheduling",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_14_status_init/cov_work/scope/path_14_status_init",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_15_status_cal/cov_work/scope/path_15_status_cal",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_16_status_refresh/cov_work/scope/path_16_status_refresh",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_17_full_boot/cov_work/scope/path_17_full_boot",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_18_full_write/cov_work/scope/path_18_full_write",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_19_row_conflict/cov_work/scope/path_19_row_conflict",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_20_refresh_preempt/cov_work/scope/path_20_refresh_preempt"
+  ],
+  "run_globs": [
     "/home/ugrads/j/jacobz/vmanager_session/*/cov_work/scope/*",
     "/home/ugrads/j/jacobz/cadence_agent_work/cov_work/scope/*",
     "/home/ugrads/j/jacobz/cadence_agent_work/runs/*/cov_work/scope/*"
   ],
+  "since": "2026-09-24T11:45:00",
   "merge": "imc merge -initial_model union_all",
   "design_total": {
-    "covered": 4019,
-    "total": 5508,
-    "percent": 72.97
+    "covered": 4102,
+    "total": 5462,
+    "percent": 75.1
   },
   "per_module": {
     "addr_decoder": {
@@ -19,64 +39,54 @@
       "percent": 93.1
     },
     "bank_tracker": {
-      "covered": 834,
-      "total": 1110,
-      "percent": 75.14
+      "covered": 871,
+      "total": 1109,
+      "percent": 78.54
     },
     "calibration": {
-      "covered": 61,
-      "total": 68,
-      "percent": 89.71
+      "covered": 53,
+      "total": 59,
+      "percent": 89.83
     },
     "cmd_gen": {
-      "covered": 110,
+      "covered": 106,
       "total": 115,
-      "percent": 95.65
+      "percent": 92.17
     },
     "cmd_queue": {
-      "covered": 665,
+      "covered": 697,
       "total": 1193,
-      "percent": 55.74
+      "percent": 58.42
     },
     "config_regs": {
-      "covered": 644,
-      "total": 783,
-      "percent": 82.25
-    },
-    "cov_probe": {
-      "covered": 10,
-      "total": 11,
-      "percent": 90.91
+      "covered": 843,
+      "total": 894,
+      "percent": 94.3
     },
     "data_path": {
-      "covered": 318,
-      "total": 400,
-      "percent": 79.5
+      "covered": 302,
+      "total": 394,
+      "percent": 76.65
     },
     "init_fsm": {
-      "covered": 179,
-      "total": 205,
-      "percent": 87.32
+      "covered": 151,
+      "total": 169,
+      "percent": 89.35
     },
     "refresh_ctrl": {
-      "covered": 129,
-      "total": 134,
-      "percent": 96.27
+      "covered": 114,
+      "total": 118,
+      "percent": 96.61
     },
     "scheduler": {
-      "covered": 619,
+      "covered": 635,
       "total": 889,
-      "percent": 69.63
-    },
-    "seq_harness": {
-      "covered": 41,
-      "total": 75,
-      "percent": 54.67
+      "percent": 71.43
     },
     "wb_port": {
-      "covered": 355,
-      "total": 467,
-      "percent": 76.02
+      "covered": 276,
+      "total": 464,
+      "percent": 59.48
     }
   },
   "testbench_excluded": [
@@ -89,11 +99,8 @@
     "chain_harness",
     "cmd_gen_coverage",
     "cmd_gen_sva",
-    "cmd_gen_sva_tb",
+    "cmd_queue_fcov",
     "config_regs_fcov",
-    "config_regs_tb",
-    "config_regs_txn_harness",
-    "cov_probe_tb",
     "cq_deq_monitor",
     "cq_enq_monitor",
     "csr_monitor",

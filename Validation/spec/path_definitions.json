@@ -776,25 +776,33 @@
         "cmd_queue.sv"
       ],
       "check_strategy": "exact",
-      "check_strategy_reason": "scheduler grant -> cmd_queue dequeue is a direct two-block handshake",
+      "check_strategy_reason": "scheduler grant -> cmd_queue dequeue is a direct two-block handshake Judged as the cmd_queue+scheduler stage of path_01 (same hop, same checker); its report is derived from that run.",
       "stimulus_kinds": [
         "write"
-      ]
+      ],
+      "judged_in": {
+        "host": "path_01_write_cmd",
+        "stage": "cmd_queue+scheduler"
+      }
     },
     {
       "id": "path_07_backpressure",
       "name": "Command Queue → Wishbone Backpressure",
       "category": "flow_control",
       "blocks": [
+        "wb_port",
+        "addr_decoder",
         "cmd_queue",
-        "wb_port"
+        "scheduler"
       ],
       "connections_used": [
         "conn_12"
       ],
       "rtl_files": [
+        "wb_port.sv",
+        "addr_decoder.sv",
         "cmd_queue.sv",
-        "wb_port.sv"
+        "scheduler.sv"
       ],
       "entry_boundary": {
         "type": "internal",
@@ -811,11 +819,13 @@
           "wb_stall_o"
         ]
       },
-      "check_strategy": "exact",
-      "check_strategy_reason": "wb_port <-> cmd_queue occupancy and stall are exactly predictable",
+      "check_strategy": "composed",
+      "check_strategy_reason": "Back-pressure only exists when the queue is full, so the path drives a burst of more than command_queue_depth writes with no idle cycles. wb_port is judged exactly (every accepted request must be forwarded once), and the cmd_queue+scheduler stage's conservation rules prove no accepted request is lost while the host is stalled. cg_cmd_queue.cp_backpressure_exercised proves the stall actually happened.",
       "stimulus_kinds": [
         "write"
-      ]
+      ],
+      "stimulus_generator": "burst",
+      "settle_cycles": 3000
     },
     {
       "id": "path_08_init_to_cal",
@@ -891,10 +901,14 @@
         ]
       },
       "check_strategy": "exact",
-      "check_strategy_reason": "CSR write -> cfg_* broadcast to bank_tracker; directly predictable",
+      "check_strategy_reason": "CSR write -> cfg_* broadcast to bank_tracker; directly predictable Judged as the config_regs stage of path_12 (cfg_timing stream); report derived from that run.",
       "stimulus_kinds": [
         "write"
-      ]
+      ],
+      "judged_in": {
+        "host": "path_12_csr_timing_to_scheduling",
+        "stage": "config_regs"
+      }
     },
     {
       "id": "path_11_csr_to_refresh",
@@ -930,10 +944,14 @@
         ]
       },
       "check_strategy": "exact",
-      "check_strategy_reason": "CSR write -> cfg_* broadcast to refresh_ctrl",
+      "check_strategy_reason": "CSR write -> cfg_* broadcast to refresh_ctrl Judged as the config_regs stage of path_13 (cfg_refresh stream); report derived from that run.",
       "stimulus_kinds": [
         "write"
-      ]
+      ],
+      "judged_in": {
+        "host": "path_13_csr_refresh_to_scheduling",
+        "stage": "config_regs"
+      }
     },
     {
       "id": "path_12_csr_timing_to_scheduling",
@@ -1091,7 +1109,8 @@
         "addr_decoder",
         "cmd_queue",
         "scheduler",
-        "cmd_gen"
+        "cmd_gen",
+        "data_path"
       ],
       "connections_used": [
         "conn_01",
@@ -1105,7 +1124,8 @@
         "addr_decoder.sv",
         "cmd_queue.sv",
         "scheduler.sv",
-        "cmd_gen.sv"
+        "cmd_gen.sv",
+        "data_path.sv"
       ],
       "entry_boundary": {
         "type": "external",
@@ -1129,7 +1149,7 @@
         ]
       },
       "check_strategy": "composed",
-      "check_strategy_reason": "end-to-end write, still feed-forward for a single request",
+      "check_strategy_reason": "end-to-end write, still feed-forward for a single request data_path is a judged stage: the write beats on the DDR side are predicted from the accepted host writes, so a pack/mask fault is caught here rather than only at the model gate.",
       "stimulus_kinds": [
         "write",
         "read"
@@ -1216,5 +1236,6 @@
     "data_path_manifest_missing": true
   },
   "$comment_check_strategy": "check_strategy selects how a scope is verified: exact (one predictor, exact comparison), composed (chained predictors down a feed-forward path), invariant (legality rules — used where many orderings are legal, so prediction would fail against correct RTL), observe (autonomous DUT; monitors and SVA carry the check). Read as data by the orchestrator; never inferred from a scope name.",
-  "$comment_stimulus": "stimulus_generator names the directed generator for the path (register_walk, status_poll, refresh_stress); absent means constrained-random on the entry stream (register_walk for a CSR entry at seed 1). window_cycles is the observation window for a path with no driver; settle_cycles the drain after the driver finishes."
+  "$comment_stimulus": "stimulus_generator names the directed generator for the path (register_walk, status_poll, refresh_stress); absent means constrained-random on the entry stream (register_walk for a CSR entry at seed 1). window_cycles is the observation window for a path with no driver; settle_cycles the drain after the driver finishes.",
+  "$comment_judged_in": "judged_in: a single-hop path whose check is exactly one stage of a longer path's run. run_path.py writes a derived report for it whenever the host path is judged, so every path has a report and every downstream tool (compare_drops, the fault matrix, the cockpit) sees all of them as first-class."
 }

@@ -1,0 +1,30 @@
+{
+  "$schema": "validation-findings/1",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "finding_count": 1,
+  "findings": [
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "rtl_defect",
+      "scope": "config_regs",
+      "severity": "major",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "taxonomy_id": "CSR_001",
+      "rtl_drop": "b4d6f45 (config_regs.sv regenerated 2026-09-17, agent init_fsm_agent_llm)",
+      "title": "Regression: regenerated config_regs stores writes to reserved (RO) bits of RW registers",
+      "detail": "The previous config_regs (drop dce7b40) masked every write to the fields the register map declares; the regenerated one stores all 32 bits. Under the register walk, writing 0xFFFFFFFF / 0xA5A5A5A5 / 0x5A5A5A5A reads back unmasked on every RW register that has a reserved RO field: REFRESH_CONFIG (0x18, fields in bits 8:0, expected 0x1ff read 0xffffffff), CTRL_CONFIG (0x04, expected 0x1f read 0xffffff1f — the WO self-clearing bits are still handled), BIST_CONFIG (0x20, expected 0xf read 0xffffffff), BIST_ADDR_START and BIST_ADDR_END (0x24 / 0x28, 29-bit fields, expected 0x1fffffff read 0xffffffff). 15 of the 16 config_regs mismatches in paths 12 and 13 are this defect; the 16th is the previously filed status-read sampling question. VP_CSR_001 (RO field semantics: writes ignored) covers reserved fields; the gate-accepted register-map predictor caught it on the first run of the new drop, which is the closed loop working as intended.",
+      "evidence": {
+        "paths": ["path_12_csr_timing_to_scheduling", "path_13_csr_refresh_to_scheduling"],
+        "stage": "config_regs (exact) matched 87/103, was 102/103 on drop dce7b40",
+        "stimulus": "Validation/sequences/register_walk.py",
+        "reports": ["Validation/reports/paths/path_12_csr_timing_to_scheduling_report.json"],
+        "registers": {"REFRESH_CONFIG": "0x1ff -> 0xffffffff", "CTRL_CONFIG": "0x1f -> 0xffffff1f",
+                      "BIST_CONFIG": "0xf -> 0xffffffff", "BIST_ADDR_START": "0x1fffffff -> 0xffffffff",
+                      "BIST_ADDR_END": "0x1fffffff -> 0xffffffff"},
+        "rtl_diff_hint": "confirmed at source: dce7b40 config_regs.sv line 176 wrote reg_refresh_config[3:0], [7:4], [8] per field; b4d6f45 line 230 writes reg_refresh_config[7:0] / [15:8] / ... per byte lane under csr_sel_i, so reserved bits 31:9 take the written value. The byte-lane structure is an improvement (the old RTL ignored csr_sel_i); the field mask was lost in the rewrite."
+      },
+      "status": "open"
+    }
+  ]
+}

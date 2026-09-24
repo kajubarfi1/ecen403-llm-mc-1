@@ -1,0 +1,244 @@
+{
+  "$schema": "validation-fault-catalog/1",
+  "$comment": "Seeded design faults: realistic single-point bugs injected into a COPY of the canonical RTL drop, one at a time, to measure whether the whole validation stack (monitors, harness, generated SVA, coverage sampling, scoreboard, checkers) detects them and blames the right block. Each fault is a literal text substitution that must match the block's RTL exactly once \u2014 a mutation that does not apply is an error, never a silent pass. `expect` names the detectors that should fire, in the signature vocabulary of seed_faults.py: id:<taxonomy or rule id>, assert:<generated assertion label>, illegal:<coverpoint>, stage:<stage name> (a stage newly failing), matched:<stage> (an exact stage matching fewer transactions), log:<marker>. Detection is DIFFERENTIAL against the baseline reports of the same drop, because the drop is already broken: a fault is killed only when a detector appears that the baseline did not show, or an expected detector's count grows.",
+  "drop_root": "Frontend2/OutputFolders",
+  "faults": [
+    {
+      "id": "M01_cmd_gen_bank_stuck",
+      "block": "cmd_gen",
+      "file": "PHASE3RTL/cmd_gen.sv",
+      "description": "ACTIVATE always targets bank 0 (bank field dropped on the DDR pins).",
+      "from": "ddr_bank     <= sched_bank;\n                        fb_act_valid <= 1'b1;",
+      "to": "ddr_bank     <= '0;\n                        fb_act_valid <= 1'b1;",
+      "expect": [
+        "stage:cmd_gen",
+        "assert:a_PROTO_001"
+      ],
+      "paths": [
+        "path_01_write_cmd"
+      ]
+    },
+    {
+      "id": "M02_cmd_gen_act_encoded_as_pre",
+      "block": "cmd_gen",
+      "file": "PHASE3RTL/cmd_gen.sv",
+      "description": "ACTIVATE is driven with the PRECHARGE pin encoding.",
+      "from": "ddr_cmd      <= DDR_ACT;",
+      "to": "ddr_cmd      <= DDR_PRE;",
+      "expect": [
+        "stage:cmd_gen",
+        "assert:a_PROTO_001"
+      ],
+      "paths": [
+        "path_01_write_cmd"
+      ]
+    },
+    {
+      "id": "M03_bank_tracker_tras_short",
+      "block": "bank_tracker",
+      "file": "PHASE2RTL/bank_tracker.sv",
+      "description": "tRAS timer loaded with 1 instead of the configured value; PRECHARGE follows ACTIVATE too early. (Replaces a tRCD fault that was equivalent: at this clock tRCD is 3 cycles and the ACT->CAS pipeline is structurally longer, so no timer bug can violate it.)",
+      "from": "ctr_ras[gi] <= cfg_tRAS_nCK[CTR_WIDTH-1:0];",
+      "to": "ctr_ras[gi] <= CTR_WIDTH'(1);",
+      "expect": [
+        "assert:a_TIMING_003",
+        "illegal:cp_tras_spacing"
+      ],
+      "paths": [
+        "path_19_row_conflict"
+      ],
+      "reseeded": "2026-09-24: block rewritten in the Frontend2 drop (c8ac792); same fault, new site"
+    },
+    {
+      "id": "M04_bank_tracker_trrd_zero",
+      "block": "bank_tracker",
+      "file": "PHASE2RTL/bank_tracker.sv",
+      "description": "tRRD timer never loaded; ACTIVATEs to different banks may be back-to-back. (Replaces a tRC fault that was equivalent: tRC = tRAS + tRP, and both are enforced separately, so a broken tRC timer alone cannot produce a violation.)",
+      "from": "ctr_rrd <= cfg_tRRD_nCK[CTR_WIDTH-1:0];",
+      "to": "ctr_rrd <= '0;",
+      "expect": [
+        "assert:a_TIMING_005",
+        "illegal:cp_trrd_spacing"
+      ],
+      "paths": [
+        "path_19_row_conflict"
+      ],
+      "reseeded": "2026-09-24: block rewritten in the Frontend2 drop (c8ac792); same fault, new site"
+    },
+    {
+      "id": "M05_refresh_never_requested",
+      "block": "refresh_ctrl",
+      "file": "PHASE2RTL/refresh_ctrl.sv",
+      "description": "The tREFI tick is never raised; no refresh is ever requested.",
+      "from": "refi_tick <= 1'b1;",
+      "to": "refi_tick <= 1'b0;",
+      "expect": [
+        "id:REF_004"
+      ],
+      "paths": [
+        "path_09_init_to_refresh"
+      ]
+    },
+    {
+      "id": "M06_refresh_pending_runaway",
+      "block": "refresh_ctrl",
+      "file": "PHASE2RTL/refresh_ctrl.sv",
+      "description": "An acknowledge increments the postpone counter instead of decrementing it.",
+      "from": "postpone_cnt <= postpone_cnt - 1'b1;",
+      "to": "postpone_cnt <= postpone_cnt + 1'b1;",
+      "expect": [
+        "id:REF_001"
+      ],
+      "paths": [
+        "path_05_scheduler_refresh_loop"
+      ]
+    },
+    {
+      "id": "M07_config_regs_reset_value",
+      "block": "config_regs",
+      "file": "PHASE1RTL/config_regs.sv",
+      "description": "TIMING_0 resets to a value one off the spec's reset value.",
+      "from": "reg_timing_0 <= 32'h271C0B0B;",
+      "to": "reg_timing_0 <= 32'h271C0B0C;",
+      "expect": [
+        "matched:config_regs"
+      ],
+      "paths": [
+        "path_12_csr_timing_to_scheduling"
+      ]
+    },
+    {
+      "id": "M08_config_regs_rw1c_settable",
+      "block": "config_regs",
+      "file": "PHASE1RTL/config_regs.sv",
+      "description": "RW1C flag becomes settable by a bus write (write-1 sets instead of clears). (Replaces a lost-latch fault that was unobservable: the starvation event is unreachable in this RTL, see the ref_pending_cnt width finding.)",
+      "from": "csr_dat_i[17]) ref_starve_flag_r <= 1'b0;",
+      "to": "csr_dat_i[17]) ref_starve_flag_r <= 1'b1;",
+      "expect": [
+        "matched:config_regs"
+      ],
+      "paths": [
+        "path_12_csr_timing_to_scheduling"
+      ],
+      "reseeded": "2026-09-24: block rewritten in the Frontend2 drop (c8ac792); same fault, new site"
+    },
+    {
+      "id": "M09_addr_decoder_bank_slice",
+      "block": "addr_decoder",
+      "file": "PHASE2RTL/addr_decoder.sv",
+      "description": "Bank bits taken from the wrong address slice.",
+      "from": "assign dec_bank = req_addr[13:11];",
+      "to": "assign dec_bank = req_addr[16:14];",
+      "expect": [
+        "stage:addr_decoder"
+      ],
+      "paths": [
+        "path_01_write_cmd"
+      ]
+    },
+    {
+      "id": "M10_wb_port_we_inverted",
+      "block": "wb_port",
+      "file": "PHASE1RTL/wb_port.sv",
+      "description": "Write-enable inverted on the internal request.",
+      "from": "req_we    <= wb_we_i;",
+      "to": "req_we    <= ~wb_we_i;",
+      "expect": [
+        "stage:wb_port"
+      ],
+      "paths": [
+        "path_01_write_cmd"
+      ]
+    },
+    {
+      "id": "M11_cmd_queue_row_corrupted",
+      "block": "cmd_queue",
+      "file": "PHASE3RTL/cmd_queue.sv",
+      "description": "Row address stored inverted on enqueue. (Detected only after SCHED_004 \u2014 ACTIVATE row must correspond to a pending request \u2014 was added to the stage rules and the checker regenerated: the first draft of the suite found a rule gap, not an RTL gap.)",
+      "from": "mem_row[free_slot]   <= enq_row;",
+      "to": "mem_row[free_slot]   <= ~enq_row;",
+      "expect": [
+        "id:SCHED_004"
+      ],
+      "paths": [
+        "path_01_write_cmd"
+      ]
+    },
+    {
+      "id": "M12_scheduler_no_precharge",
+      "block": "scheduler",
+      "file": "PHASE3RTL/scheduler.sv",
+      "description": "Row conflicts are never resolved: the PRECHARGE branch is unreachable.",
+      "from": "if (bank_is_active[b] && bank_pre_allowed[b]) begin",
+      "to": "if (1'b0 && bank_is_active[b] && bank_pre_allowed[b]) begin",
+      "expect": [
+        "id:SCHED_001",
+        "log:DRIVER_STALL",
+        "log:HARNESS_TIMEOUT"
+      ],
+      "paths": [
+        "path_19_row_conflict"
+      ],
+      "masked_by": "scheduler_regrant (open): the baseline already drops requests (19 enqueued, 16 dequeued) through the slot re-grant defect, so this fault's dropped requests add 3 to a count that is already non-zero. Re-testable once that defect is fixed."
+    },
+    {
+      "id": "M13_data_path_dm_polarity",
+      "block": "data_path",
+      "file": "PHASE4RTL/data_path.sv",
+      "description": "DDR data mask driven with host byte-enable polarity (not inverted).",
+      "from": "? ~wr_msk_r : '0;",
+      "to": "? wr_msk_r : '0;",
+      "expect": [
+        "stage:data_path",
+        "matched:data_path"
+      ],
+      "paths": [
+        "path_18_full_write"
+      ],
+      "masked_by": "data_path_width (open): the design drives 32-bit beats where the spec's pack_32_to_16 predicts 16-bit halves, so every write beat already mismatches on data; a mask-only change cannot alter the verdict. Re-testable once that defect is fixed."
+    },
+    {
+      "id": "M14_init_fsm_skip_mr2",
+      "block": "init_fsm",
+      "file": "PHASE1RTL/init_fsm.sv",
+      "description": "Init sequence skips MR2 (goes straight to MR3).",
+      "from": "? S_MR2        : S_TXPR_WAIT;",
+      "to": "? S_MR3        : S_TXPR_WAIT;",
+      "expect": [
+        "id:INIT_001",
+        "id:INIT_003"
+      ],
+      "paths": [
+        "path_08_init_to_cal"
+      ],
+      "reseeded": "2026-09-24: block rewritten in the Frontend2 drop (c8ac792); same fault, new site"
+    },
+    {
+      "id": "M15_calibration_early_done",
+      "block": "calibration",
+      "file": "PHASE2RTL/calibration.sv",
+      "description": "cal_done asserted without waiting for init_done.",
+      "from": "else if (init_done)    cal_done_r <= 1'b1;",
+      "to": "else                   cal_done_r <= 1'b1;",
+      "expect": [
+        "id:CAL_001"
+      ],
+      "paths": [
+        "path_08_init_to_cal"
+      ]
+    }
+  ],
+  "$equivalent_note": "Three first-draft faults were 'equivalent mutants' \u2014 unobservable by construction, not missed by a check: tRCD/tRP timer bugs cannot violate a 3-cycle bound the command pipeline already exceeds, and the refresh-starvation latch never fires because the event is unreachable in this RTL. They were replaced; the reasoning is kept in each replacement's description.",
+  "$lessons": [
+    "Stimulus: the first run left 8 faults alive because random host addresses were capped at 63 (bank 0, row 0 forever). Fixed in closure/random_sequence.py; four faults died immediately. A detection rate is only as good as the stimulus reaching the fault.",
+    "Rule gap: M11 (row corrupted in the queue) was invisible until SCHED_004 (ACTIVATE row must correspond to a pending request) was added to the stage rules and the checkers regenerated. The suite found a hole in the checks, which is its purpose.",
+    "Scorer vocabulary: M12 was detected by the checker (request_not_serviced) but not recognised because the scorer only matched taxonomy-style ids. Violation lines now lead with the taxonomy id and the scorer accepts any rule token.",
+    "Equivalent mutants: tRCD/tRP timer bugs cannot violate a 3-cycle bound the command pipeline already exceeds; tRC = tRAS + tRP so a tRC-only bug cannot show; the starvation latch never fires because the event is unreachable. Replaced with tRAS, tRRD and an RW1C-settable fault.",
+    "M04 (tRRD zero) was caught by the tFAW window assertion rather than tRRD: with no tRRD hold-off the fifth ACTIVATE lands inside tFAW first. M06 (postpone runaway) was caught by tRFC rather than REF_001: the REF_001 checker compares against the SPEC's max_postpone_count while the refresh-stress stimulus reprograms the CSR to 2 \u2014 the checker should observe cfg_refresh. Filed as a checker to-do.",
+    "Masked faults (M12, M13) are re-tested automatically when the masking defect closes: the scorer reports them apart and never counts them as kills."
+  ],
+  "$todo": [
+    "cmd_queue_scheduler / scheduler / path_05 / path_20 checkers should take cfg_refresh as an input stream so REF_001 uses the programmed postpone budget, not the spec constant."
+  ],
+  "$reseed_note": "Fault sites are literal text; when a block is regenerated the site moves. Check applicability with tests/test_seed_faults.py before trusting a matrix."
+}

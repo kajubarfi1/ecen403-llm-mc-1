@@ -1,0 +1,132 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_01_write_cmd",
+  "strategy": "composed",
+  "verdict": "fail",
+  "timestamp": "2026-09-17T19:03:05.701397",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/runs/faults/M10_wb_port_we_inverted/path_01_write_cmd/path_01_write_cmd_seed1.json",
+  "stimulus_generator": "random",
+  "autonomous": false,
+  "window_cycles": 64,
+  "rtl_drop": {
+    "git_head": "b4d6f45",
+    "roots": [
+      "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/PHASE2RTL/addr_decoder.sv",
+        "manifest": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/addr_decoder_manifest.json"
+      },
+      "bank_tracker": {
+        "rtl": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/PHASE2RTL/bank_tracker.sv",
+        "manifest": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined/bank_tracker_manifest.json"
+      },
+      "cmd_gen": {
+        "rtl": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/PHASE3RTL/cmd_gen.sv",
+        "manifest": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/cmd_gen_manifest.json"
+      },
+      "cmd_queue": {
+        "rtl": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/PHASE3RTL/cmd_queue.sv",
+        "manifest": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/cmd_queue_manifest.json"
+      },
+      "config_regs": {
+        "rtl": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/config_regs_manifest.json"
+      },
+      "data_path": {
+        "rtl": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/PHASE4RTL/data_path.sv",
+        "manifest": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/data_path_manifest.json"
+      },
+      "refresh_ctrl": {
+        "rtl": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined/refresh_ctrl_manifest.json"
+      },
+      "scheduler": {
+        "rtl": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+        "manifest": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/scheduler_manifest.json"
+      },
+      "wb_port": {
+        "rtl": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+        "manifest": "Validation/faults/work/M10_wb_port_we_inverted/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/wb_port_manifest.json"
+      }
+    }
+  },
+  "stages": [
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "fail",
+      "summary": "scope=wb_port  strategy=exact  status=fail  matched=15/57  missing=23 value=19  violations=4",
+      "detail": [
+        "  req[13] value: predicted [req.request addr=0xb data=0x38 mask=0x3 we=0x1] but observed [req.request addr=0xb data=0x38 mask=0x3 we=0x0]",
+        "  req[14] value: predicted [req.request addr=0x2f data=0x3e mask=0x0 we=0x1] but observed [req.request addr=0x2f data=0x3e mask=0x0 we=0x0]",
+        "  req[15] value: predicted [req.request addr=0x27 data=0x32 mask=0x5 we=0x1] but observed [req.request addr=0x27 data=0x32 mask=0x5 we=0x0]",
+        "  req[16] value: predicted [req.request addr=0x1 data=0x19 mask=0x7 we=0x1] but observed [req.request addr=0x1 data=0x19 mask=0x7 we=0x0]",
+        "  req[17] value: predicted [req.request addr=0x1 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x2d data=0x3a mask=0x8 we=0x0]",
+        "  req[18] value: predicted [req.request addr=0x1 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x31 data=0x10 mask=0x6 we=0x0]",
+        "  req[19] missing: predicted [req.request addr=0x2d data=0x3a mask=0x8 we=0x1] but the design produced nothing",
+        "  ... and 22 more",
+        "  DATA_001 (x_value): wb_rsp.read_data seq=341 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x31 data=None]",
+        "  DATA_001 (x_value): wb_rsp.read_data seq=345 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x31 data=None]",
+        "  DATA_001 (x_value): wb_rsp.read_data seq=363 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x31 data=None]",
+        "  DATA_001 (x_value): wb_rsp.read_data seq=367 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x31 data=None]"
+      ]
+    },
+    {
+      "stage": "addr_decoder",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
+      "scope": "addr_decoder",
+      "verdict": "pass",
+      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)",
+      "detail": []
+    },
+    {
+      "stage": "cmd_queue+scheduler",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
+      "scope": "cmd_queue_scheduler",
+      "verdict": "fail",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=12",
+      "detail": [
+        "  PROTO_002 (double_activate): ACTIVATE to bank 0 which already has row 0 active @ [sched_cmd.command aux=0x0 bank=0x0 col=0x0 row=0x0 type=0x1 we=0x0]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 0 which already has row 0 active @ [sched_cmd.command aux=0x0 bank=0x0 col=0x0 row=0x0 type=0x1 we=0x0]",
+        "  SCHED_002 (cas_no_matching_request): RD to bank 0 row 0 col 24 matches no enqueued request @ [sched_cmd.command aux=0x5 bank=0x0 col=0x18 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002 (cas_no_matching_request): RD to bank 0 row 0 col 0 matches no enqueued request @ [sched_cmd.command aux=0x9 bank=0x0 col=0x0 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002 (cas_no_matching_request): RD to bank 0 row 0 col 0 matches no enqueued request @ [sched_cmd.command aux=0xb bank=0x0 col=0x0 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002 (cas_no_matching_request): RD to bank 0 row 0 col 0 matches no enqueued request @ [sched_cmd.command aux=0xb bank=0x0 col=0x0 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002 (cas_no_matching_request): RD to bank 0 row 0 col 24 matches no enqueued request @ [sched_cmd.command aux=0xc bank=0x0 col=0x18 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002 (cas_no_matching_request): RD to bank 0 row 0 col 0 matches no enqueued request @ [sched_cmd.command aux=0xd bank=0x0 col=0x0 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002 (cas_no_matching_request): RD to bank 0 row 0 col 0 matches no enqueued request @ [sched_cmd.command aux=0xd bank=0x0 col=0x0 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002 (cas_no_matching_request): RD to bank 0 row 0 col 16 matches no enqueued request @ [sched_cmd.command aux=0xe bank=0x0 col=0x10 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002 (cas_no_matching_request): RD to bank 0 row 0 col 16 matches no enqueued request @ [sched_cmd.command aux=0xf bank=0x0 col=0x10 row=0x0 type=0x2 we=0x0]",
+        "  SCHED_002 (cas_no_matching_request): RD to bank 0 row 0 col 16 matches no enqueued request @ [sched_cmd.command aux=0xf bank=0x0 col=0x10 row=0x0 type=0x2 we=0x0]"
+      ]
+    },
+    {
+      "stage": "cmd_gen",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
+      "scope": "cmd_gen",
+      "verdict": "pass",
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=34/34  (34 output transaction(s) matched)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/faults/M10_wb_port_we_inverted/path_01_write_cmd_sim.log",
+  "observed_trace": "Validation/reports/faults/M10_wb_port_we_inverted/path_01_write_cmd_observed.jsonl"
+}

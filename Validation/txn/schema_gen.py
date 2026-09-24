@@ -31,7 +31,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 CATALOG = os.path.join(HERE, "interface_catalog.json")
 OUT_DIR = os.path.join(HERE, "generated")
-FRONTEND_ROOT = os.path.join(ROOT, "Frontend", "OutputFolders")
+# Default only; resolve() consults the declared drop (Validation/spec/rtl_drop.json)
+# first, and this constant is the first declared root so the two never disagree.
+def _first_drop_root():
+    sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
+    import rtl_drop as RD
+    rs = RD.roots()
+    return rs[0] if rs else os.path.join(ROOT, "Frontend2", "OutputFolders")
+FRONTEND_ROOT = _first_drop_root()
 SPEC_PATH = os.path.join(ROOT, "Validation", "spec",
                          "llmmc_microarchitecturespec_filled.json")
 
@@ -54,15 +61,24 @@ def discover_manifest(frontend_root: str, block: str):
     is the current generation. Returns (path, alternates) so callers can
     report that older copies exist.
     """
-    target = f"{block}_manifest.json"
-    found = []
-    for dirpath, _dirnames, filenames in os.walk(frontend_root):
-        if target in filenames:
-            found.append(os.path.join(dirpath, target))
-    if not found:
+    # The declared drop (Validation/spec/rtl_drop.json) decides, not a walk of
+    # the whole Frontend tree: that tree now also holds demo and failed
+    # copies of the same blocks. `frontend_root` is kept for callers that
+    # pass it, but the resolver's roots are authoritative.
+    sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
+    import rtl_drop as RD
+    try:
+        chosen = RD.manifest_file(block)
+    except RD.DropError:
         return None, []
-    found.sort(key=lambda p: (-os.path.getmtime(p), p))
-    return found[0], found[1:]
+    target = f"{block}_manifest.json"
+    others = []
+    for root in RD.roots():
+        for dirpath, _d, filenames in os.walk(root):
+            p = os.path.join(dirpath, target)
+            if target in filenames and p != chosen:
+                others.append(p)
+    return chosen, sorted(others)
 
 
 def manifest_ports(path: str):

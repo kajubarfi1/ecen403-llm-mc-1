@@ -1,0 +1,141 @@
+{
+  "$schema": "validation-findings/1",
+  "generated_by": "integration_map_gen.py",
+  "findings": [
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "manifest_gap",
+      "scope": "bank_tracker",
+      "severity": "minor",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "bank_tracker manifest declares no `source` on 7 consumer port(s) the design wires",
+      "detail": "Ports cmd_act_valid, cmd_act_bank, cmd_act_row, cmd_pre_valid, cmd_rd_valid, cmd_wr_valid, cmd_ref_valid are inputs that the integrated design drives from another block, but the manifest does not say from where. Validation carries these edges by hand in integration_overrides.json; the backend's set gate lists them as unresolved slots. Add `\"source\": \"<block>.<port>\"` to each.",
+      "evidence": {
+        "block": "bank_tracker",
+        "ports": [
+          "cmd_act_valid",
+          "cmd_act_bank",
+          "cmd_act_row",
+          "cmd_pre_valid",
+          "cmd_rd_valid",
+          "cmd_wr_valid",
+          "cmd_ref_valid"
+        ]
+      },
+      "status": "open"
+    },
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "manifest_gap",
+      "scope": "cmd_queue",
+      "severity": "minor",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "cmd_queue manifest declares no `source` on 4 consumer port(s) the design wires",
+      "detail": "Ports enq_valid, enq_aux, deq_grant, deq_idx are inputs that the integrated design drives from another block, but the manifest does not say from where. Validation carries these edges by hand in integration_overrides.json; the backend's set gate lists them as unresolved slots. Add `\"source\": \"<block>.<port>\"` to each.",
+      "evidence": {
+        "block": "cmd_queue",
+        "ports": [
+          "enq_valid",
+          "enq_aux",
+          "deq_grant",
+          "deq_idx"
+        ]
+      },
+      "status": "open"
+    },
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "manifest_gap",
+      "scope": "config_regs",
+      "severity": "minor",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "config_regs manifest declares no `source` on 5 consumer port(s) the design wires",
+      "detail": "Ports sts_init_done, sts_cal_done, sts_cal_fail, sts_ref_pending_cnt, sts_init_fail_event are inputs that the integrated design drives from another block, but the manifest does not say from where. Validation carries these edges by hand in integration_overrides.json; the backend's set gate lists them as unresolved slots. Add `\"source\": \"<block>.<port>\"` to each.",
+      "evidence": {
+        "block": "config_regs",
+        "ports": [
+          "sts_init_done",
+          "sts_cal_done",
+          "sts_cal_fail",
+          "sts_ref_pending_cnt",
+          "sts_init_fail_event"
+        ]
+      },
+      "status": "open"
+    },
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "manifest_gap",
+      "scope": "refresh_ctrl",
+      "severity": "minor",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "refresh_ctrl manifest declares no `source` on 1 consumer port(s) the design wires",
+      "detail": "Ports ref_ack are inputs that the integrated design drives from another block, but the manifest does not say from where. Validation carries these edges by hand in integration_overrides.json; the backend's set gate lists them as unresolved slots. Add `\"source\": \"<block>.<port>\"` to each.",
+      "evidence": {
+        "block": "refresh_ctrl",
+        "ports": [
+          "ref_ack"
+        ]
+      },
+      "status": "open"
+    },
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "manifest_gap",
+      "scope": "wb_port",
+      "severity": "minor",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "wb_port manifest declares no `source` on 4 consumer port(s) the design wires",
+      "detail": "Ports req_ready, rsp_valid, rsp_rdata, rsp_aux are inputs that the integrated design drives from another block, but the manifest does not say from where. Validation carries these edges by hand in integration_overrides.json; the backend's set gate lists them as unresolved slots. Add `\"source\": \"<block>.<port>\"` to each.",
+      "evidence": {
+        "block": "wb_port",
+        "ports": [
+          "req_ready",
+          "rsp_valid",
+          "rsp_rdata",
+          "rsp_aux"
+        ]
+      },
+      "status": "open"
+    },
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "manifest_wrong_source",
+      "scope": "data_path",
+      "severity": "major",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "data_path.cmd_aux declares source scheduler.cmd_aux, but the design needs glue",
+      "detail": "The manifest says data_path.cmd_aux is driven directly by scheduler.cmd_aux. It is not: cmd_gen's feedback carries no aux tag, but data_path needs the issued command's aux to tag read responses (rd_rsp_aux). Registered one cycle to align with the registered fb_rd_valid/fb_wr_valid pulses. Same missing-feedback-signal gap as the bank workaround \u2014 covered by the filed fb-bank finding; the design wants fb_aux. Driver used: scheduler.cmd_aux. Either the RTL should consume scheduler.cmd_aux as declared, or the manifest should stop claiming a direct connection.",
+      "evidence": {
+        "consumer": "data_path.cmd_aux",
+        "declared_source": "scheduler.cmd_aux",
+        "driver": "scheduler.cmd_aux",
+        "kind": "glue"
+      },
+      "status": "open"
+    },
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "manifest_wrong_source",
+      "scope": "data_path",
+      "severity": "major",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "data_path.wr_data_valid declares source wb_port.req_valid, but the design needs expr_glue",
+      "detail": "The manifest says data_path.wr_data_valid is driven directly by wb_port.req_valid. It is not: data_path buffers a write word when wb_port's write request is ACCEPTED (valid && we && ready). No single design port carries that event; it is the same accept condition cmd_queue enqueues on. Driver used: wb_port.req_valid && wb_port.req_we && cmd_queue.enq_ready. Either the RTL should consume wb_port.req_valid as declared, or the manifest should stop claiming a direct connection.",
+      "evidence": {
+        "consumer": "data_path.wr_data_valid",
+        "declared_source": "wb_port.req_valid",
+        "driver": "wb_port.req_valid && wb_port.req_we && cmd_queue.enq_ready",
+        "kind": "expr_glue"
+      },
+      "status": "open"
+    }
+  ]
+}

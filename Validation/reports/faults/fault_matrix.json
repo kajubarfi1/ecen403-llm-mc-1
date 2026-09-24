@@ -1,0 +1,498 @@
+{
+  "$schema": "validation-fault-matrix/1",
+  "generated_utc": "2026-09-18T00:03:30.472289Z",
+  "drop_root": "Frontend/OutputFolders",
+  "faults_total": 15,
+  "faults_killed": 13,
+  "faults_masked": [
+    "M12_scheduler_no_precharge",
+    "M13_data_path_dm_polarity"
+  ],
+  "faults_survived": [],
+  "rows": [
+    {
+      "fault": "M01_cmd_gen_bank_stuck",
+      "block": "cmd_gen",
+      "path": "path_01_write_cmd",
+      "description": "ACTIVATE always targets bank 0 (bank field dropped on the DDR pins).",
+      "expect": [
+        "stage:cmd_gen",
+        "assert:a_PROTO_001"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [
+        "assert:a_PROTO_001"
+      ],
+      "expected_missed": [
+        "stage:cmd_gen"
+      ],
+      "new": {
+        "assert:a_PROTO_001": 14,
+        "assert:a_TIMING_003": 1
+      },
+      "grew": {
+        "assert:a_PROTO_002": [
+          13,
+          22
+        ]
+      },
+      "fewer_matched": {
+        "matched:cmd_gen": [
+          42,
+          20
+        ]
+      },
+      "blamed_stages": [
+        "cmd_gen"
+      ],
+      "blame_names_block": true,
+      "baseline_verdict": "fail",
+      "mutant_verdict": "fail"
+    },
+    {
+      "fault": "M02_cmd_gen_act_encoded_as_pre",
+      "block": "cmd_gen",
+      "path": "path_01_write_cmd",
+      "description": "ACTIVATE is driven with the PRECHARGE pin encoding.",
+      "expect": [
+        "stage:cmd_gen",
+        "assert:a_PROTO_001"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [
+        "assert:a_PROTO_001"
+      ],
+      "expected_missed": [
+        "stage:cmd_gen"
+      ],
+      "new": {
+        "assert:a_PROTO_001": 29
+      },
+      "grew": {
+        "id:SCHED_002": [
+          5,
+          10
+        ]
+      },
+      "fewer_matched": {
+        "matched:cmd_gen": [
+          42,
+          31
+        ]
+      },
+      "blamed_stages": [
+        "cmd_gen"
+      ],
+      "blame_names_block": true,
+      "baseline_verdict": "fail",
+      "mutant_verdict": "fail"
+    },
+    {
+      "fault": "M03_bank_tracker_tras_short",
+      "block": "bank_tracker",
+      "path": "path_19_row_conflict",
+      "description": "tRAS timer loaded with 1 instead of the configured value; PRECHARGE follows ACTIVATE too early. (Replaces a tRCD fault that was equivalent: at this clock tRCD is 3 cycles and the ACT->CAS pipeline is structurally longer, so no timer bug can violate it.)",
+      "expect": [
+        "assert:a_TIMING_003",
+        "illegal:cp_tras_spacing"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [
+        "assert:a_TIMING_003"
+      ],
+      "expected_missed": [
+        "illegal:cp_tras_spacing"
+      ],
+      "new": {
+        "assert:a_TIMING_003": 48,
+        "assert:p_stall_hold": 3,
+        "log:DRIVER_STALL": 3
+      },
+      "grew": {
+        "violations:(path-level)": [
+          30,
+          112
+        ],
+        "assert:a_TIMING_004": [
+          13,
+          96
+        ],
+        "assert:a_PROTO_002": [
+          13,
+          96
+        ]
+      },
+      "fewer_matched": {},
+      "blamed_stages": [],
+      "blame_names_block": true,
+      "baseline_verdict": "fail",
+      "mutant_verdict": "fail"
+    },
+    {
+      "fault": "M04_bank_tracker_trrd_zero",
+      "block": "bank_tracker",
+      "path": "path_19_row_conflict",
+      "description": "tRRD timer never loaded; ACTIVATEs to different banks may be back-to-back. (Replaces a tRC fault that was equivalent: tRC = tRAS + tRP, and both are enforced separately, so a broken tRC timer alone cannot produce a violation.)",
+      "expect": [
+        "assert:a_TIMING_005",
+        "illegal:cp_trrd_spacing"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [],
+      "expected_missed": [
+        "assert:a_TIMING_005",
+        "illegal:cp_trrd_spacing"
+      ],
+      "new": {
+        "assert:a_TIMING_006": 8
+      },
+      "grew": {},
+      "fewer_matched": {},
+      "blamed_stages": [],
+      "blame_names_block": true,
+      "baseline_verdict": "fail",
+      "mutant_verdict": "fail"
+    },
+    {
+      "fault": "M05_refresh_never_requested",
+      "block": "refresh_ctrl",
+      "path": "path_09_init_to_refresh",
+      "description": "The tREFI tick is never raised; no refresh is ever requested.",
+      "expect": [
+        "id:REF_004"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [
+        "id:REF_004"
+      ],
+      "expected_missed": [],
+      "new": {
+        "stage:(path-level)": 1,
+        "violations:(path-level)": 1,
+        "id:REF_004": 1
+      },
+      "grew": {},
+      "fewer_matched": {},
+      "blamed_stages": [
+        "(path-level)"
+      ],
+      "blame_names_block": true,
+      "baseline_verdict": "pass",
+      "mutant_verdict": "fail"
+    },
+    {
+      "fault": "M06_refresh_pending_runaway",
+      "block": "refresh_ctrl",
+      "path": "path_05_scheduler_refresh_loop",
+      "description": "An acknowledge increments the postpone counter instead of decrementing it.",
+      "expect": [
+        "id:REF_001"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [],
+      "expected_missed": [
+        "id:REF_001"
+      ],
+      "new": {},
+      "grew": {
+        "violations:(path-level)": [
+          37,
+          336
+        ],
+        "assert:a_TIMING_011": [
+          24,
+          330
+        ]
+      },
+      "fewer_matched": {},
+      "blamed_stages": [],
+      "blame_names_block": true,
+      "baseline_verdict": "fail",
+      "mutant_verdict": "fail"
+    },
+    {
+      "fault": "M07_config_regs_reset_value",
+      "block": "config_regs",
+      "path": "path_12_csr_timing_to_scheduling",
+      "description": "TIMING_0 resets to a value one off the spec's reset value.",
+      "expect": [
+        "matched:config_regs"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [
+        "matched:config_regs"
+      ],
+      "expected_missed": [],
+      "new": {},
+      "grew": {},
+      "fewer_matched": {
+        "matched:config_regs": [
+          87,
+          86
+        ]
+      },
+      "blamed_stages": [
+        "config_regs"
+      ],
+      "blame_names_block": true,
+      "baseline_verdict": "fail",
+      "mutant_verdict": "fail"
+    },
+    {
+      "fault": "M08_config_regs_rw1c_settable",
+      "block": "config_regs",
+      "path": "path_12_csr_timing_to_scheduling",
+      "description": "RW1C flag becomes settable by a bus write (write-1 sets instead of clears). (Replaces a lost-latch fault that was unobservable: the starvation event is unreachable in this RTL, see the ref_pending_cnt width finding.)",
+      "expect": [
+        "matched:config_regs"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [
+        "matched:config_regs"
+      ],
+      "expected_missed": [],
+      "new": {},
+      "grew": {},
+      "fewer_matched": {
+        "matched:config_regs": [
+          87,
+          84
+        ]
+      },
+      "blamed_stages": [
+        "config_regs"
+      ],
+      "blame_names_block": true,
+      "baseline_verdict": "fail",
+      "mutant_verdict": "fail"
+    },
+    {
+      "fault": "M09_addr_decoder_bank_slice",
+      "block": "addr_decoder",
+      "path": "path_01_write_cmd",
+      "description": "Bank bits taken from the wrong address slice.",
+      "expect": [
+        "stage:addr_decoder"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [
+        "stage:addr_decoder"
+      ],
+      "expected_missed": [],
+      "new": {
+        "stage:addr_decoder": 1
+      },
+      "grew": {},
+      "fewer_matched": {
+        "matched:addr_decoder": [
+          19,
+          2
+        ],
+        "matched:cmd_gen": [
+          42,
+          41
+        ]
+      },
+      "blamed_stages": [
+        "addr_decoder",
+        "cmd_gen"
+      ],
+      "blame_names_block": true,
+      "baseline_verdict": "fail",
+      "mutant_verdict": "fail"
+    },
+    {
+      "fault": "M10_wb_port_we_inverted",
+      "block": "wb_port",
+      "path": "path_01_write_cmd",
+      "description": "Write-enable inverted on the internal request.",
+      "expect": [
+        "stage:wb_port"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [
+        "stage:wb_port"
+      ],
+      "expected_missed": [],
+      "new": {
+        "stage:wb_port": 1,
+        "violations:wb_port": 4,
+        "id:DATA_001": 4,
+        "assert:p_tag_no_overflow": 104,
+        "assert:p_tag": 19
+      },
+      "grew": {
+        "id:SCHED_002": [
+          5,
+          10
+        ]
+      },
+      "fewer_matched": {
+        "matched:wb_port": [
+          19,
+          15
+        ],
+        "matched:cmd_gen": [
+          42,
+          34
+        ]
+      },
+      "blamed_stages": [
+        "cmd_gen",
+        "wb_port"
+      ],
+      "blame_names_block": true,
+      "baseline_verdict": "fail",
+      "mutant_verdict": "fail"
+    },
+    {
+      "fault": "M11_cmd_queue_row_corrupted",
+      "block": "cmd_queue",
+      "path": "path_01_write_cmd",
+      "description": "Row address stored inverted on enqueue. (Detected only after SCHED_004 \u2014 ACTIVATE row must correspond to a pending request \u2014 was added to the stage rules and the checker regenerated: the first draft of the suite found a rule gap, not an RTL gap.)",
+      "expect": [
+        "id:SCHED_004"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [
+        "id:SCHED_004"
+      ],
+      "expected_missed": [],
+      "new": {
+        "id:SCHED_004": 5
+      },
+      "grew": {
+        "violations:cmd_queue+scheduler": [
+          30,
+          72
+        ]
+      },
+      "fewer_matched": {},
+      "blamed_stages": [],
+      "blame_names_block": true,
+      "baseline_verdict": "fail",
+      "mutant_verdict": "fail"
+    },
+    {
+      "fault": "M12_scheduler_no_precharge",
+      "block": "scheduler",
+      "path": "path_19_row_conflict",
+      "description": "Row conflicts are never resolved: the PRECHARGE branch is unreachable.",
+      "expect": [
+        "id:SCHED_001",
+        "log:DRIVER_STALL",
+        "log:HARNESS_TIMEOUT"
+      ],
+      "masked_by": "scheduler_regrant (open): the baseline already drops requests (19 enqueued, 16 dequeued) through the slot re-grant defect, so this fault's dropped requests add 3 to a count that is already non-zero. Re-testable once that defect is fixed.",
+      "killed": false,
+      "expected_hit": [],
+      "expected_missed": [
+        "id:SCHED_001",
+        "log:DRIVER_STALL",
+        "log:HARNESS_TIMEOUT"
+      ],
+      "new": {},
+      "grew": {},
+      "fewer_matched": {},
+      "blamed_stages": [],
+      "blame_names_block": true,
+      "baseline_verdict": "fail",
+      "mutant_verdict": "fail"
+    },
+    {
+      "fault": "M13_data_path_dm_polarity",
+      "block": "data_path",
+      "path": "path_18_full_write",
+      "description": "DDR data mask driven with host byte-enable polarity (not inverted).",
+      "expect": [
+        "stage:data_path",
+        "matched:data_path"
+      ],
+      "masked_by": "data_path_width (open): the design drives 32-bit beats where the spec's pack_32_to_16 predicts 16-bit halves, so every write beat already mismatches on data; a mask-only change cannot alter the verdict. Re-testable once that defect is fixed.",
+      "killed": false,
+      "expected_hit": [],
+      "expected_missed": [
+        "stage:data_path",
+        "matched:data_path"
+      ],
+      "new": {},
+      "grew": {},
+      "fewer_matched": {},
+      "blamed_stages": [],
+      "blame_names_block": true,
+      "baseline_verdict": "fail",
+      "mutant_verdict": "fail"
+    },
+    {
+      "fault": "M14_init_fsm_skip_mr2",
+      "block": "init_fsm",
+      "path": "path_08_init_to_cal",
+      "description": "Init sequence skips MR2 (goes straight to MR3).",
+      "expect": [
+        "id:INIT_001",
+        "id:INIT_003"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [
+        "id:INIT_001",
+        "id:INIT_003"
+      ],
+      "expected_missed": [],
+      "new": {
+        "stage:(path-level)": 1,
+        "violations:(path-level)": 6,
+        "id:INIT_001": 4,
+        "id:INIT_003": 2
+      },
+      "grew": {},
+      "fewer_matched": {},
+      "blamed_stages": [
+        "(path-level)"
+      ],
+      "blame_names_block": true,
+      "baseline_verdict": "pass",
+      "mutant_verdict": "fail"
+    },
+    {
+      "fault": "M15_calibration_early_done",
+      "block": "calibration",
+      "path": "path_08_init_to_cal",
+      "description": "cal_done asserted without waiting for init_done.",
+      "expect": [
+        "id:CAL_001"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [
+        "id:CAL_001"
+      ],
+      "expected_missed": [],
+      "new": {
+        "stage:(path-level)": 1,
+        "violations:(path-level)": 1,
+        "id:CAL_001": 1,
+        "assert:p_cal_after_init": 1
+      },
+      "grew": {},
+      "fewer_matched": {},
+      "blamed_stages": [
+        "(path-level)"
+      ],
+      "blame_names_block": true,
+      "baseline_verdict": "pass",
+      "mutant_verdict": "fail"
+    }
+  ]
+}

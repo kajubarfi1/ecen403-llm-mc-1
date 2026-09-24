@@ -132,8 +132,14 @@ class Violation:
     txns: list = field(default_factory=list)   # the transactions involved
 
     def __str__(self):
+        # The taxonomy id leads when there is one: it is the stable check id
+        # every consumer (dashboards, the fault scorer, the Frontend's retry
+        # contract) keys on; the checker's own rule name rides along.
         where = " ".join(str(t) for t in self.txns[:3])
-        return f"{self.rule}: {self.detail}{(' @ ' + where) if where else ''}"
+        head = (f"{self.taxonomy_id} ({self.rule})"
+                if self.taxonomy_id and self.taxonomy_id != self.rule
+                else self.rule)
+        return f"{head}: {self.detail}{(' @ ' + where) if where else ''}"
 
     def to_dict(self):
         return {"rule": self.rule, "detail": self.detail,

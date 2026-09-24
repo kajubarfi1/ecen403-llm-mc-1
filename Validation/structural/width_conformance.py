@@ -53,20 +53,13 @@ def spec_value(spec, path):
 
 
 def manifest_ports(block):
-    """{port: width} for a block, from its newest manifest."""
-    paths = sorted(glob.glob(os.path.join(ROOT, "Frontend", "**",
-                                          f"{block}_manifest.json"),
-                             recursive=True),
-                   key=lambda p: -os.path.getmtime(p))
-    if not paths:
+    """{port: width} for a block, from its manifest in the declared RTL drop;
+    None when the drop does not provide the block."""
+    import rtl_drop as RD
+    try:
+        return {n: p["width"] for n, p in RD.manifest_ports(block).items()}
+    except RD.DropError:
         return None
-    with open(paths[0]) as f:
-        m = json.load(f)
-    out = {}
-    for group in m["ports"].values():
-        for p in group:
-            out[p["name"]] = p["width"]
-    return out
 
 
 def check(spec, rules):

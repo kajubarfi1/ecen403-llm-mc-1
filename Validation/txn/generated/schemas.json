@@ -5,7 +5,7 @@
   "interfaces": {
     "csr": {
       "block": "config_regs",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/config_regs_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
       "description": "CSR request stream (address + write data) into config_regs",
       "kinds": {
         "write": {
@@ -31,7 +31,7 @@
     },
     "wb": {
       "block": "wb_port",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/wb_port_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json",
       "description": "Host Wishbone request stream into wb_port",
       "kinds": {
         "write": {
@@ -62,7 +62,7 @@
     },
     "req": {
       "block": "wb_port",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/wb_port_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json",
       "description": "Internal request descriptors wb_port emits toward cmd_queue",
       "kinds": {
         "request": {
@@ -91,7 +91,7 @@
     },
     "ddr_cmd": {
       "block": "cmd_gen",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/cmd_gen_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json",
       "description": "Pin-level DDR3 command stream out of cmd_gen",
       "kinds": {
         "command": {
@@ -115,7 +115,7 @@
     },
     "csr_rsp": {
       "block": "config_regs",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/config_regs_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
       "description": "CSR response stream (read data / error status) out of config_regs",
       "kinds": {
         "read_data": {
@@ -151,7 +151,7 @@
     },
     "wb_rsp": {
       "block": "wb_port",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/wb_port_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json",
       "description": "Host Wishbone response stream out of wb_port",
       "kinds": {
         "read_data": {
@@ -170,7 +170,7 @@
     },
     "init_cmd": {
       "block": "init_fsm",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/init_fsm_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE1RTL/init_fsm_manifest.json",
       "description": "DDR3 command stream issued by the initialisation FSM",
       "kinds": {
         "command": {
@@ -194,7 +194,7 @@
     },
     "init_status": {
       "block": "init_fsm",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/init_fsm_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE1RTL/init_fsm_manifest.json",
       "description": "Initialisation completion event",
       "kinds": {
         "done": {
@@ -213,7 +213,7 @@
     },
     "refresh_req": {
       "block": "refresh_ctrl",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/refresh_ctrl_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json",
       "description": "Refresh request raised by the refresh controller",
       "kinds": {
         "request": {
@@ -237,7 +237,7 @@
     },
     "refresh_ack": {
       "block": "refresh_ctrl",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/refresh_ctrl_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json",
       "description": "Scheduler acknowledgement consumed by the refresh controller",
       "kinds": {
         "ack": {
@@ -251,7 +251,7 @@
     },
     "cal_zqcs": {
       "block": "calibration",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/calibration_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE2RTL/calibration_manifest.json",
       "description": "ZQ short-calibration request issued by the calibration block",
       "kinds": {
         "request": {}
@@ -259,7 +259,7 @@
     },
     "cal_status": {
       "block": "calibration",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/calibration_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE2RTL/calibration_manifest.json",
       "description": "Calibration completion event",
       "kinds": {
         "done": {
@@ -273,7 +273,7 @@
     },
     "cq_enq": {
       "block": "cmd_queue",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/cmd_queue_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json",
       "description": "Request descriptors entering the command queue",
       "kinds": {
         "enqueue": {
@@ -302,7 +302,7 @@
     },
     "cq_deq": {
       "block": "cmd_queue",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/cmd_queue_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json",
       "description": "Entries retired from the command queue on a scheduler grant",
       "kinds": {
         "dequeue": {
@@ -316,7 +316,7 @@
     },
     "sched_cmd": {
       "block": "scheduler",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/scheduler_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json",
       "description": "Commands selected by the FR-FCFS scheduler",
       "kinds": {
         "command": {
@@ -355,7 +355,7 @@
     },
     "sched_deq": {
       "block": "scheduler",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/scheduler_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json",
       "description": "Queue-slot grants issued by the scheduler",
       "kinds": {
         "grant": {
@@ -369,7 +369,7 @@
     },
     "dp_wr": {
       "block": "data_path",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/data_path_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json",
       "description": "Host write data accepted by the data path",
       "kinds": {
         "write": {
@@ -388,7 +388,7 @@
     },
     "dp_rd_rsp": {
       "block": "data_path",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/data_path_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json",
       "description": "Read response data returned toward the host",
       "kinds": {
         "response": {
@@ -407,7 +407,7 @@
     },
     "csr_sts": {
       "block": "config_regs",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/config_regs_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
       "description": "Hardware status events latched into the CSR status registers. These are a genuine INPUT stream: they set RW1C flag fields that the bus can only clear, so a predictor that cannot see them cannot model those registers. Discovered when an agent-generated predictor disagreed with real silicon on ERROR_STATUS bits 16-18 \u2014 neither was wrong; the observation was incomplete.",
       "kinds": {
         "event": {
@@ -431,7 +431,7 @@
     },
     "csr_sts_level": {
       "block": "config_regs",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/config_regs_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
       "description": "Hardware status LEVELS reflected in the CSR status registers. Unlike csr_sts these are not pulses: they carry continuously-valid state that read-only status fields mirror. A predictor cannot model those fields without seeing them, which is why 7 CTRL_STATUS reads were unattributable before this interface existed.",
       "kinds": {
         "state": {
@@ -485,7 +485,7 @@
     },
     "sched_in": {
       "block": "cmd_gen",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/cmd_gen_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json",
       "description": "Scheduler decisions driven into cmd_gen. This is the stimulus surface for the timing scope: what a sequence drives in order to produce a DDR command stream on ddr_cmd, which the assertions and coverage then observe.",
       "kinds": {
         "command": {
@@ -524,7 +524,7 @@
     },
     "cfg_timing": {
       "block": "config_regs",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/config_regs_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
       "description": "Timing configuration broadcast from the CSR block to bank_tracker. A LEVEL stream: values persist and downstream reloads counters from them, so the transaction is the change, not the cycle.",
       "kinds": {
         "update": {
@@ -588,7 +588,7 @@
     },
     "cfg_refresh": {
       "block": "config_regs",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/config_regs_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
       "description": "Refresh configuration broadcast from the CSR block to refresh_ctrl. Level stream, change-qualified.",
       "kinds": {
         "update": {
@@ -622,7 +622,7 @@
     },
     "dp_cmd": {
       "block": "data_path",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/data_path_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json",
       "description": "Data-movement commands driven into the data path: send a write burst or capture a read burst.",
       "kinds": {
         "read": {
@@ -643,7 +643,7 @@
     },
     "ddr_rd_beat": {
       "block": "data_path",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/data_path_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json",
       "description": "Read data beats arriving from the DDR PHY: dq sampled while the incoming strobe is high.",
       "kinds": {
         "beat": {
@@ -657,7 +657,7 @@
     },
     "ddr_wr_beat": {
       "block": "data_path",
-      "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/data_path_manifest.json",
+      "manifest": "Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json",
       "description": "Write data beats driven toward the DDR PHY while the data output enable is asserted.",
       "kinds": {
         "beat": {

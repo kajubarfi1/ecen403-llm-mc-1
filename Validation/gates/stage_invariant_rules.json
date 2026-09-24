@@ -10,7 +10,8 @@
     "CAL_001": "Calibration reported complete (cal_done) before initialisation completed (init_done).",
     "CAL_002": "Periodic ZQ short calibration (ZQCS) requested before calibration completed.",
     "REF_003": "Refresh requested before initialisation completed: the tREFI timer must not run until init_done.",
-    "REF_004": "No refresh requested after initialisation completed (end of trace): the refresh timer never ran, so tREFI cannot be honoured."
+    "REF_004": "No refresh requested after initialisation completed (end of trace): the refresh timer never ran, so tREFI cannot be honoured.",
+    "SCHED_004": "ACTIVATE issued to a row that no pending request in that bank asked for (row address corrupted or mis-associated between queue and scheduler)."
   },
   "stages": {
     "cmd_queue_scheduler": {
@@ -394,6 +395,73 @@
             ]
           ],
           "why": "REFRESH issues while bank 2 still has an open row."
+        },
+        {
+          "id": "SCHED_004",
+          "requirement": "Every ACTIVATE must open a row that some pending (enqueued, not yet issued) request in that bank asked for. An ACTIVATE to any other row is a corrupted or mis-associated row address.",
+          "legal": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 2,
+                "row": 5
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "WR",
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "ACT",
+                "bank": 2,
+                "row": 9
+              }
+            ],
+            [
+              "sched_cmd",
+              "command",
+              {
+                "type": "WR",
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ]
+          ],
+          "why": "Bank 2 was asked for row 5 but ACTIVATE opened row 9; the write that follows lands in the wrong row. The CAS alone looks legal, so only the ACTIVATE reveals it."
         }
       ]
     },
@@ -1353,6 +1421,71 @@
             ]
           ],
           "why": "The second ACTIVATE to bank 2 has no PRECHARGE before it."
+        },
+        {
+          "id": "SCHED_004",
+          "requirement": "Every ACTIVATE must open a row that some pending (enqueued, not yet issued) request in that bank asked for. An ACTIVATE to any other row is a corrupted or mis-associated row address.",
+          "legal": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 2,
+                "addr": 5
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "WR",
+                "bank": 2,
+                "addr": 8
+              }
+            ]
+          ],
+          "violating": [
+            [
+              "cq_enq",
+              "enqueue",
+              {
+                "row": 5,
+                "bank": 2,
+                "col": 8,
+                "we": 1
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "ACT",
+                "bank": 2,
+                "addr": 9
+              }
+            ],
+            [
+              "ddr_cmd",
+              "command",
+              {
+                "cmd": "WR",
+                "bank": 2,
+                "addr": 8
+              }
+            ]
+          ],
+          "why": "Bank 2 was asked for row 5 but ACTIVATE opened row 9; the write that follows lands in the wrong row. The CAS alone looks legal, so only the ACTIVATE reveals it."
         }
       ]
     },
@@ -2189,5 +2322,57 @@
         }
       ]
     }
+  },
+  "rule_owners": {
+    "$comment": "Which block a violation of each rule implicates, for the feedback loop's localizer. The first entry is the primary owner (the generator to patch); further entries are candidates when the mechanism could sit on either side of an interface. Derived from what each rule observes: conservation rules implicate the issuer, bank-state rules the scheduler, refresh-service rules the scheduler, init ordering the init FSM.",
+    "SCHED_001": [
+      "scheduler",
+      "cmd_queue"
+    ],
+    "SCHED_002": [
+      "scheduler",
+      "cmd_queue"
+    ],
+    "SCHED_003": [
+      "scheduler"
+    ],
+    "SCHED_004": [
+      "cmd_queue",
+      "scheduler"
+    ],
+    "PROTO_001": [
+      "scheduler",
+      "bank_tracker"
+    ],
+    "PROTO_002": [
+      "scheduler",
+      "bank_tracker"
+    ],
+    "REF_001": [
+      "scheduler",
+      "refresh_ctrl"
+    ],
+    "REF_002": [
+      "scheduler",
+      "bank_tracker"
+    ],
+    "REF_003": [
+      "refresh_ctrl"
+    ],
+    "REF_004": [
+      "refresh_ctrl"
+    ],
+    "INIT_001": [
+      "init_fsm"
+    ],
+    "INIT_003": [
+      "init_fsm"
+    ],
+    "CAL_001": [
+      "calibration"
+    ],
+    "CAL_002": [
+      "calibration"
+    ]
   }
 }
