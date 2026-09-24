@@ -1,0 +1,1896 @@
+{
+  "schema": "validation-findings/2",
+  "drop": "b4d6f45",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "generated_utc": "2026-09-18T23:40:10.594479Z",
+  "reports": "Validation/reports/paths",
+  "finding_count": 24,
+  "findings": [
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/DATA_001",
+      "kind": "rtl_defect",
+      "check_id": "DATA_001",
+      "taxonomy_id": "DATA_001",
+      "detectors": [
+        "invariant:data_path:x_value"
+      ],
+      "owner_module": "data_path",
+      "owner_candidates": [
+        "data_path"
+      ],
+      "severity": "critical",
+      "confidence": "observed",
+      "title": "data_path: DATA_001",
+      "requirement": "Read data returned to host does not match expected value from reference model.",
+      "spec_ref": "failure_taxonomy.categories[DATA_001]",
+      "expected": "Read data returned to host does not match expected value from reference model.",
+      "actual": "dp_rd_rsp.response seq=375 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface",
+      "detector": "invariant:data_path:x_value",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 256,
+          "signal": "rd_rsp_data",
+          "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 257,
+          "signal": "rd_rsp_aux",
+          "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_03_read_return",
+        "path_18_full_write"
+      ],
+      "occurrences": 34,
+      "repro": {
+        "path": "path_03_read_return",
+        "command": "python3 Validation/tools/run_path.py --path path_03_read_return",
+        "sequence": "Validation/sequences/generated/path_03_read_return_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_03_read_return",
+        "log": "Validation/reports/paths/path_03_read_return_sim.log",
+        "trace": "Validation/reports/paths/path_03_read_return_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "DATA_001 (x_value): dp_rd_rsp.response seq=375 carries X/Z on ['aux', 'data'] \u2014 the design drove an undefined value onto a monitored interface @ [dp_rd_rsp.response aux=None data=None]"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE4RTL/data_path.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_read_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_width_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/MISMATCH/ddr_wr_beat[data,mask]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/ddr_wr_beat[data,mask]",
+      "taxonomy_id": "DATA_001",
+      "detectors": [
+        "exact:data_path:value",
+        "exact:data_path:missing"
+      ],
+      "owner_module": "data_path",
+      "owner_candidates": [
+        "data_path"
+      ],
+      "severity": "critical",
+      "confidence": "observed",
+      "title": "data_path: MISMATCH/ddr_wr_beat[data,mask]",
+      "requirement": "data_path must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "ddr_wr_beat.beat data=0xc616 mask=0x3",
+      "actual": "ddr_wr_beat.beat data=0xc9e9c616 mask=0xc",
+      "detector": "exact:data_path:value",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 162,
+          "signal": "ddr_dq_o",
+          "text": "assign ddr_dq_o   = wr_dat_r;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 164,
+          "signal": "ddr_dm_o",
+          "text": "assign ddr_dm_o   = (wr_state == WR_DRIVE) ? ~wr_msk_r : '0;  // DM active-high masks"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_18_full_write"
+      ],
+      "occurrences": 20,
+      "repro": {
+        "path": "path_18_full_write",
+        "command": "python3 Validation/tools/run_path.py --path path_18_full_write",
+        "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_18_full_write",
+        "log": "Validation/reports/paths/path_18_full_write_sim.log",
+        "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "ddr_wr_beat[0] value: predicted [ddr_wr_beat.beat data=0xc616 mask=0x3] but observed [ddr_wr_beat.beat data=0xc9e9c616 mask=0xc]"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE4RTL/data_path.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_read_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_width_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/MISMATCH/dp_rd_rsp[aux,data]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/dp_rd_rsp[aux,data]",
+      "taxonomy_id": "DATA_001",
+      "detectors": [
+        "exact:data_path:unexpected"
+      ],
+      "owner_module": "data_path",
+      "owner_candidates": [
+        "data_path"
+      ],
+      "severity": "critical",
+      "confidence": "observed",
+      "title": "data_path: MISMATCH/dp_rd_rsp[aux,data]",
+      "requirement": "data_path must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "transaction predicted on dp_rd_rsp",
+      "actual": "the design produced [dp_rd_rsp.response aux=0x2 data=0x0] with nothing predicted",
+      "detector": "exact:data_path:unexpected",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 162,
+          "signal": "ddr_dq_o",
+          "text": "assign ddr_dq_o   = wr_dat_r;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 256,
+          "signal": "rd_rsp_data",
+          "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 257,
+          "signal": "rd_rsp_aux",
+          "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 164,
+          "signal": "ddr_dm_o",
+          "text": "assign ddr_dm_o   = (wr_state == WR_DRIVE) ? ~wr_msk_r : '0;  // DM active-high masks"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_03_read_return"
+      ],
+      "occurrences": 19,
+      "repro": {
+        "path": "path_03_read_return",
+        "command": "python3 Validation/tools/run_path.py --path path_03_read_return",
+        "sequence": "Validation/sequences/generated/path_03_read_return_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_03_read_return",
+        "log": "Validation/reports/paths/path_03_read_return_sim.log",
+        "trace": "Validation/reports/paths/path_03_read_return_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "dp_rd_rsp[3] unexpected: the design produced [dp_rd_rsp.response aux=0x2 data=0x0] with nothing predicted"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE4RTL/data_path.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_read_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_width_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/MISMATCH/dp_rd_rsp[aux]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/dp_rd_rsp[aux]",
+      "taxonomy_id": "DATA_001",
+      "detectors": [
+        "exact:data_path:value"
+      ],
+      "owner_module": "data_path",
+      "owner_candidates": [
+        "data_path"
+      ],
+      "severity": "critical",
+      "confidence": "observed",
+      "title": "data_path: MISMATCH/dp_rd_rsp[aux]",
+      "requirement": "data_path must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "dp_rd_rsp.response aux=0x1 data=0x0",
+      "actual": "dp_rd_rsp.response aux=0x2 data=0x0",
+      "detector": "exact:data_path:value",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 256,
+          "signal": "rd_rsp_data",
+          "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 257,
+          "signal": "rd_rsp_aux",
+          "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_03_read_return"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "path": "path_03_read_return",
+        "command": "python3 Validation/tools/run_path.py --path path_03_read_return",
+        "sequence": "Validation/sequences/generated/path_03_read_return_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_03_read_return",
+        "log": "Validation/reports/paths/path_03_read_return_sim.log",
+        "trace": "Validation/reports/paths/path_03_read_return_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "dp_rd_rsp[2] value: predicted [dp_rd_rsp.response aux=0x1 data=0x0] but observed [dp_rd_rsp.response aux=0x2 data=0x0]"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE4RTL/data_path.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_read_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_width_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/PROTO_002",
+      "kind": "rtl_defect",
+      "check_id": "PROTO_002",
+      "taxonomy_id": "PROTO_002",
+      "detectors": [
+        "invariant:cmd_queue+scheduler:double_activate",
+        "assertion:a_PROTO_002",
+        "invariant:(path-level):PROTO_002",
+        "invariant:(path-level):double_activate"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler",
+        "bank_tracker"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "scheduler: PROTO_002",
+      "requirement": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE.",
+      "spec_ref": "failure_taxonomy.categories[PROTO_002]",
+      "expected": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE.",
+      "actual": "ACTIVATE to bank 6 which already has row 4135 active",
+      "detector": "invariant:cmd_queue+scheduler:double_activate",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 152,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= CMD_NOP;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 163,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= sel_type;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 176,
+          "signal": "cmd_row",
+          "text": "cmd_row  <= q_row[sel_idx];"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 177,
+          "signal": "cmd_col",
+          "text": "cmd_col  <= q_col[sel_idx];"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_01_write_cmd",
+        "path_02_read_cmd",
+        "path_03_read_return",
+        "path_04_scheduler_bank_loop",
+        "path_05_scheduler_refresh_loop",
+        "path_06_scheduler_dequeue",
+        "path_07_backpressure",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 2279,
+      "repro": {
+        "path": "path_01_write_cmd",
+        "command": "python3 Validation/tools/run_path.py --path path_01_write_cmd",
+        "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_01_write_cmd",
+        "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+        "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "PROTO_002 (double_activate): ACTIVATE to bank 6 which already has row 4135 active @ [sched_cmd.command aux=0x0 bank=0x6 col=0x98 row=0x1027 type=0x1 we=0x1]"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/TIMING_004",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_004",
+      "taxonomy_id": "TIMING_004",
+      "detectors": [
+        "assertion:a_TIMING_004"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler",
+        "bank_tracker"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "scheduler: TIMING_004",
+      "requirement": "ACTIVATE issued before tRC elapsed after previous ACTIVATE to same bank.",
+      "spec_ref": "timing_model.tRC",
+      "expected": "ACTIVATE issued before tRC elapsed after previous ACTIVATE to same bank.",
+      "actual": "fired 13x; first: xmsim: *E,ASRTST (./cmd_gen_sva.sv,80): (time 707500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004 has failed",
+      "detector": "assertion:a_TIMING_004",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 152,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= CMD_NOP;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 163,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= sel_type;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 176,
+          "signal": "cmd_row",
+          "text": "cmd_row  <= q_row[sel_idx];"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 177,
+          "signal": "cmd_col",
+          "text": "cmd_col  <= q_col[sel_idx];"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_01_write_cmd",
+        "path_02_read_cmd",
+        "path_03_read_return",
+        "path_04_scheduler_bank_loop",
+        "path_05_scheduler_refresh_loop",
+        "path_06_scheduler_dequeue",
+        "path_07_backpressure",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 2132,
+      "repro": {
+        "path": "path_01_write_cmd",
+        "command": "python3 Validation/tools/run_path.py --path path_01_write_cmd",
+        "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_01_write_cmd",
+        "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+        "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "xmsim: *E,ASRTST (./cmd_gen_sva.sv,80): (time 707500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004 has failed"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/TIMING_005",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_005",
+      "taxonomy_id": "TIMING_005",
+      "detectors": [
+        "assertion:a_TIMING_005"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler",
+        "bank_tracker"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "scheduler: TIMING_005",
+      "requirement": "ACTIVATE to different bank before tRRD elapsed.",
+      "spec_ref": "timing_model.tRRD",
+      "expected": "ACTIVATE to different bank before tRRD elapsed.",
+      "actual": "fired 3x; first: xmsim: *E,ASRTST (./cmd_gen_sva.sv,95): (time 947500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005 has failed",
+      "detector": "assertion:a_TIMING_005",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 152,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= CMD_NOP;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 163,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= sel_type;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 176,
+          "signal": "cmd_row",
+          "text": "cmd_row  <= q_row[sel_idx];"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 177,
+          "signal": "cmd_col",
+          "text": "cmd_col  <= q_col[sel_idx];"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_01_write_cmd",
+        "path_04_scheduler_bank_loop",
+        "path_05_scheduler_refresh_loop",
+        "path_06_scheduler_dequeue",
+        "path_07_backpressure",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 182,
+      "repro": {
+        "path": "path_01_write_cmd",
+        "command": "python3 Validation/tools/run_path.py --path path_01_write_cmd",
+        "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_01_write_cmd",
+        "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+        "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "xmsim: *E,ASRTST (./cmd_gen_sva.sv,95): (time 947500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005 has failed"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/TIMING_007",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_007",
+      "taxonomy_id": "TIMING_007",
+      "detectors": [
+        "assertion:a_TIMING_007"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler",
+        "bank_tracker"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "scheduler: TIMING_007",
+      "requirement": "READ issued before tWTR elapsed after last WRITE data burst.",
+      "spec_ref": "timing_model.tWTR",
+      "expected": "READ issued before tWTR elapsed after last WRITE data burst.",
+      "actual": "fired 1x; first: xmsim: *E,ASRTST (./cmd_gen_sva.sv,109): (time 1017500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_007 has failed",
+      "detector": "assertion:a_TIMING_007",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 152,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= CMD_NOP;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 163,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= sel_type;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 176,
+          "signal": "cmd_row",
+          "text": "cmd_row  <= q_row[sel_idx];"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 177,
+          "signal": "cmd_col",
+          "text": "cmd_col  <= q_col[sel_idx];"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_18_full_write"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "path": "path_18_full_write",
+        "command": "python3 Validation/tools/run_path.py --path path_18_full_write",
+        "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_18_full_write",
+        "log": "Validation/reports/paths/path_18_full_write_sim.log",
+        "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "xmsim: *E,ASRTST (./cmd_gen_sva.sv,109): (time 1017500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_007 has failed"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/TIMING_009",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_009",
+      "taxonomy_id": "TIMING_009",
+      "detectors": [
+        "assertion:a_TIMING_009"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler",
+        "bank_tracker"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "scheduler: TIMING_009",
+      "requirement": "PRECHARGE issued before tRTP elapsed after READ command.",
+      "spec_ref": "timing_model.tRTP",
+      "expected": "PRECHARGE issued before tRTP elapsed after READ command.",
+      "actual": "fired 1x; first: xmsim: *E,ASRTST (./cmd_gen_sva.sv,139): (time 1022500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_009 has failed",
+      "detector": "assertion:a_TIMING_009",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 152,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= CMD_NOP;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 163,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= sel_type;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 176,
+          "signal": "cmd_row",
+          "text": "cmd_row  <= q_row[sel_idx];"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 177,
+          "signal": "cmd_col",
+          "text": "cmd_col  <= q_col[sel_idx];"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_02_read_cmd",
+        "path_03_read_return",
+        "path_18_full_write"
+      ],
+      "occurrences": 3,
+      "repro": {
+        "path": "path_02_read_cmd",
+        "command": "python3 Validation/tools/run_path.py --path path_02_read_cmd",
+        "sequence": "Validation/sequences/generated/path_02_read_cmd_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_02_read_cmd",
+        "log": "Validation/reports/paths/path_02_read_cmd_sim.log",
+        "trace": "Validation/reports/paths/path_02_read_cmd_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "xmsim: *E,ASRTST (./cmd_gen_sva.sv,139): (time 1022500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_009 has failed"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/TIMING_011",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_011",
+      "taxonomy_id": "TIMING_011",
+      "detectors": [
+        "assertion:a_TIMING_011"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler",
+        "bank_tracker",
+        "refresh_ctrl"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "scheduler: TIMING_011",
+      "requirement": "Command issued before tRFC elapsed after REFRESH.",
+      "spec_ref": "timing_model.tRFC",
+      "expected": "Command issued before tRFC elapsed after REFRESH.",
+      "actual": "fired 1x; first: xmsim: *E,ASRTST (./cmd_gen_sva.sv,156): (time 47500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011 has failed",
+      "detector": "assertion:a_TIMING_011",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 152,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= CMD_NOP;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 163,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= sel_type;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 176,
+          "signal": "cmd_row",
+          "text": "cmd_row  <= q_row[sel_idx];"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 177,
+          "signal": "cmd_col",
+          "text": "cmd_col  <= q_col[sel_idx];"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_01_write_cmd",
+        "path_02_read_cmd",
+        "path_03_read_return",
+        "path_04_scheduler_bank_loop",
+        "path_05_scheduler_refresh_loop",
+        "path_06_scheduler_dequeue",
+        "path_07_backpressure",
+        "path_10_csr_to_timing",
+        "path_11_csr_to_refresh",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 72,
+      "repro": {
+        "path": "path_01_write_cmd",
+        "command": "python3 Validation/tools/run_path.py --path path_01_write_cmd",
+        "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_01_write_cmd",
+        "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+        "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "xmsim: *E,ASRTST (./cmd_gen_sva.sv,156): (time 47500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011 has failed"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/DATA_001",
+      "kind": "rtl_defect",
+      "check_id": "DATA_001",
+      "taxonomy_id": "DATA_001",
+      "detectors": [
+        "invariant:wb_port:x_value"
+      ],
+      "owner_module": "wb_port",
+      "owner_candidates": [
+        "wb_port"
+      ],
+      "severity": "critical",
+      "confidence": "observed",
+      "title": "wb_port: DATA_001",
+      "requirement": "Read data returned to host does not match expected value from reference model.",
+      "spec_ref": "failure_taxonomy.categories[DATA_001]",
+      "expected": "Read data returned to host does not match expected value from reference model.",
+      "actual": "wb_rsp.read_data seq=373 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface",
+      "detector": "invariant:wb_port:x_value",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 159,
+          "signal": "wb_dat_o",
+          "text": "assign wb_dat_o = rsp_rdata;"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_02_read_cmd",
+        "path_03_read_return",
+        "path_18_full_write"
+      ],
+      "occurrences": 53,
+      "repro": {
+        "path": "path_02_read_cmd",
+        "command": "python3 Validation/tools/run_path.py --path path_02_read_cmd",
+        "sequence": "Validation/sequences/generated/path_02_read_cmd_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_02_read_cmd",
+        "log": "Validation/reports/paths/path_02_read_cmd_sim.log",
+        "trace": "Validation/reports/paths/path_02_read_cmd_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "DATA_001 (x_value): wb_rsp.read_data seq=373 carries X/Z on ['data'] \u2014 the design drove an undefined value onto a monitored interface @ [wb_rsp.read_data addr=0x16db9b8 data=None]"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/MISMATCH/req[addr,data,mask,we]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/req[addr,data,mask,we]",
+      "taxonomy_id": "DATA_001",
+      "detectors": [
+        "exact:wb_port:unexpected"
+      ],
+      "owner_module": "wb_port",
+      "owner_candidates": [
+        "wb_port"
+      ],
+      "severity": "critical",
+      "confidence": "observed",
+      "title": "wb_port: MISMATCH/req[addr,data,mask,we]",
+      "requirement": "wb_port must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "transaction predicted on req",
+      "actual": "the design produced [req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0] with nothing predicted",
+      "detector": "exact:wb_port:unexpected",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 142,
+          "signal": "req_we",
+          "text": "req_we    <= wb_we_i;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 143,
+          "signal": "req_addr",
+          "text": "req_addr  <= wb_adr_i;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 144,
+          "signal": "req_wdata",
+          "text": "req_wdata <= wb_dat_i;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 145,
+          "signal": "req_wmask",
+          "text": "req_wmask <= wb_sel_i;"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_18_full_write"
+      ],
+      "occurrences": 13,
+      "repro": {
+        "path": "path_18_full_write",
+        "command": "python3 Validation/tools/run_path.py --path path_18_full_write",
+        "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_18_full_write",
+        "log": "Validation/reports/paths/path_18_full_write_sim.log",
+        "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "req[5] unexpected: the design produced [req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0] with nothing predicted"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/MISMATCH/req[addr,data,mask]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/req[addr,data,mask]",
+      "taxonomy_id": "DATA_001",
+      "detectors": [
+        "exact:wb_port:value"
+      ],
+      "owner_module": "wb_port",
+      "owner_candidates": [
+        "wb_port"
+      ],
+      "severity": "critical",
+      "confidence": "observed",
+      "title": "wb_port: MISMATCH/req[addr,data,mask]",
+      "requirement": "wb_port must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "req.request addr=0x184b9da5 data=0x0 mask=0xf we=0x0",
+      "actual": "req.request addr=0x18f2a0a3 data=0xc9e9c616 mask=0x3 we=0x0",
+      "detector": "exact:wb_port:value",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 142,
+          "signal": "req_we",
+          "text": "req_we    <= wb_we_i;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 143,
+          "signal": "req_addr",
+          "text": "req_addr  <= wb_adr_i;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 144,
+          "signal": "req_wdata",
+          "text": "req_wdata <= wb_dat_i;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 145,
+          "signal": "req_wmask",
+          "text": "req_wmask <= wb_sel_i;"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_18_full_write"
+      ],
+      "occurrences": 2,
+      "repro": {
+        "path": "path_18_full_write",
+        "command": "python3 Validation/tools/run_path.py --path path_18_full_write",
+        "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_18_full_write",
+        "log": "Validation/reports/paths/path_18_full_write_sim.log",
+        "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "req[6] value: predicted [req.request addr=0x184b9da5 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x18f2a0a3 data=0xc9e9c616 mask=0x3 we=0x0]"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/MISMATCH/req[addr,mask]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/req[addr,mask]",
+      "taxonomy_id": "DATA_001",
+      "detectors": [
+        "exact:wb_port:value"
+      ],
+      "owner_module": "wb_port",
+      "owner_candidates": [
+        "wb_port"
+      ],
+      "severity": "critical",
+      "confidence": "observed",
+      "title": "wb_port: MISMATCH/req[addr,mask]",
+      "requirement": "wb_port must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "req.request addr=0x1fb5355e data=0x0 mask=0xf we=0x0",
+      "actual": "req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0",
+      "detector": "exact:wb_port:value",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 142,
+          "signal": "req_we",
+          "text": "req_we    <= wb_we_i;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 143,
+          "signal": "req_addr",
+          "text": "req_addr  <= wb_adr_i;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 144,
+          "signal": "req_wdata",
+          "text": "req_wdata <= wb_dat_i;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 145,
+          "signal": "req_wmask",
+          "text": "req_wmask <= wb_sel_i;"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_02_read_cmd",
+        "path_03_read_return",
+        "path_18_full_write"
+      ],
+      "occurrences": 39,
+      "repro": {
+        "path": "path_02_read_cmd",
+        "command": "python3 Validation/tools/run_path.py --path path_02_read_cmd",
+        "sequence": "Validation/sequences/generated/path_02_read_cmd_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_02_read_cmd",
+        "log": "Validation/reports/paths/path_02_read_cmd_sim.log",
+        "trace": "Validation/reports/paths/path_02_read_cmd_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "req[2] value: predicted [req.request addr=0x1fb5355e data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0]"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/MISMATCH/req[mask]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/req[mask]",
+      "taxonomy_id": "DATA_001",
+      "detectors": [
+        "exact:wb_port:value"
+      ],
+      "owner_module": "wb_port",
+      "owner_candidates": [
+        "wb_port"
+      ],
+      "severity": "critical",
+      "confidence": "observed",
+      "title": "wb_port: MISMATCH/req[mask]",
+      "requirement": "wb_port must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "req.request addr=0x409f134 data=0x0 mask=0xf we=0x0",
+      "actual": "req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0",
+      "detector": "exact:wb_port:value",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 142,
+          "signal": "req_we",
+          "text": "req_we    <= wb_we_i;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 143,
+          "signal": "req_addr",
+          "text": "req_addr  <= wb_adr_i;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 144,
+          "signal": "req_wdata",
+          "text": "req_wdata <= wb_dat_i;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 145,
+          "signal": "req_wmask",
+          "text": "req_wmask <= wb_sel_i;"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_02_read_cmd",
+        "path_03_read_return",
+        "path_18_full_write"
+      ],
+      "occurrences": 6,
+      "repro": {
+        "path": "path_02_read_cmd",
+        "command": "python3 Validation/tools/run_path.py --path path_02_read_cmd",
+        "sequence": "Validation/sequences/generated/path_02_read_cmd_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_02_read_cmd",
+        "log": "Validation/reports/paths/path_02_read_cmd_sim.log",
+        "trace": "Validation/reports/paths/path_02_read_cmd_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "req[0] value: predicted [req.request addr=0x409f134 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0]"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "cmd_gen/MISMATCH/ddr_cmd[addr]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/ddr_cmd[addr]",
+      "taxonomy_id": "PROTO_003",
+      "detectors": [
+        "exact:cmd_gen:value"
+      ],
+      "owner_module": "cmd_gen",
+      "owner_candidates": [
+        "cmd_gen"
+      ],
+      "severity": "major",
+      "confidence": "observed",
+      "title": "cmd_gen: MISMATCH/ddr_cmd[addr]",
+      "requirement": "cmd_gen must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "ddr_cmd.command addr=0x38c0 bank=0x6 cmd=0x2",
+      "actual": "ddr_cmd.command addr=0x0 bank=0x6 cmd=0x2",
+      "detector": "exact:cmd_gen:value",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/cmd_gen.sv",
+          "line": 85,
+          "signal": "ddr_cmd",
+          "text": "ddr_cmd      <= DDR_NOP;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/cmd_gen.sv",
+          "line": 107,
+          "signal": "ddr_cmd",
+          "text": "ddr_cmd      <= DDR_NOP;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/cmd_gen.sv",
+          "line": 122,
+          "signal": "ddr_cmd",
+          "text": "ddr_cmd      <= DDR_ACT;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/cmd_gen.sv",
+          "line": 123,
+          "signal": "ddr_addr",
+          "text": "ddr_addr     <= sched_row[DDR_ADDR_W-1:0];"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_01_write_cmd",
+        "path_02_read_cmd",
+        "path_18_full_write",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 80,
+      "repro": {
+        "path": "path_01_write_cmd",
+        "command": "python3 Validation/tools/run_path.py --path path_01_write_cmd",
+        "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_01_write_cmd",
+        "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+        "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "ddr_cmd[12] value: predicted [ddr_cmd.command addr=0x38c0 bank=0x6 cmd=0x2] but observed [ddr_cmd.command addr=0x0 bank=0x6 cmd=0x2]"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE3RTL/cmd_gen.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/integration_fb_bank_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/REF_002",
+      "kind": "rtl_defect",
+      "check_id": "REF_002",
+      "taxonomy_id": "REF_002",
+      "detectors": [
+        "invariant:(path-level):REF_002"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler",
+        "bank_tracker"
+      ],
+      "severity": "major",
+      "confidence": "observed",
+      "title": "scheduler: REF_002",
+      "requirement": "REFRESH issued while one or more banks are still active (not precharged).",
+      "spec_ref": "failure_taxonomy.categories[REF_002]",
+      "expected": "REFRESH issued while one or more banks are still active (not precharged).",
+      "actual": "REFRESH issued while banks [0, 1, 6, 7] are still active (not precharged)",
+      "detector": "invariant:(path-level):REF_002",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 152,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= CMD_NOP;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 163,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= sel_type;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 176,
+          "signal": "cmd_row",
+          "text": "cmd_row  <= q_row[sel_idx];"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 177,
+          "signal": "cmd_col",
+          "text": "cmd_col  <= q_col[sel_idx];"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_05_scheduler_refresh_loop",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 31,
+      "repro": {
+        "path": "path_05_scheduler_refresh_loop",
+        "command": "python3 Validation/tools/run_path.py --path path_05_scheduler_refresh_loop",
+        "sequence": "Validation/sequences/generated/path_05_scheduler_refresh_loop_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_05_scheduler_refresh_loop",
+        "log": "Validation/reports/paths/path_05_scheduler_refresh_loop_sim.log",
+        "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "REF_002: REFRESH issued while banks [0, 1, 6, 7] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/SCHED_002",
+      "kind": "rtl_defect",
+      "check_id": "SCHED_002",
+      "taxonomy_id": "SCHED_002",
+      "detectors": [
+        "invariant:cmd_queue+scheduler:cas_no_matching_request",
+        "invariant:(path-level):spurious_cas"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler",
+        "cmd_queue"
+      ],
+      "severity": "major",
+      "confidence": "observed",
+      "title": "scheduler: SCHED_002",
+      "requirement": "No CAS command may issue that matches no enqueued request.",
+      "spec_ref": null,
+      "expected": "No CAS command may issue that matches no enqueued request.",
+      "actual": "WR to bank 6 row 4135 col 152 matches no enqueued request",
+      "detector": "invariant:cmd_queue+scheduler:cas_no_matching_request",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 152,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= CMD_NOP;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 163,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= sel_type;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 176,
+          "signal": "cmd_row",
+          "text": "cmd_row  <= q_row[sel_idx];"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 177,
+          "signal": "cmd_col",
+          "text": "cmd_col  <= q_col[sel_idx];"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_01_write_cmd",
+        "path_02_read_cmd",
+        "path_06_scheduler_dequeue",
+        "path_07_backpressure",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 50,
+      "repro": {
+        "path": "path_01_write_cmd",
+        "command": "python3 Validation/tools/run_path.py --path path_01_write_cmd",
+        "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_01_write_cmd",
+        "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+        "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "SCHED_002 (cas_no_matching_request): WR to bank 6 row 4135 col 152 matches no enqueued request @ [sched_cmd.command aux=0x0 bank=0x6 col=0x98 row=0x1027 type=0x3 we=0x1]"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "config_regs/MISMATCH/csr_rsp[data]@BIST_ADDR_END",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/csr_rsp[data]@BIST_ADDR_END",
+      "taxonomy_id": "CSR_001",
+      "detectors": [
+        "exact:config_regs:value"
+      ],
+      "owner_module": "config_regs",
+      "owner_candidates": [
+        "config_regs"
+      ],
+      "severity": "minor",
+      "confidence": "observed",
+      "title": "config_regs: MISMATCH/csr_rsp[data]@BIST_ADDR_END",
+      "requirement": "config_regs must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "csr_rsp.read_data addr=0x28 data=0x1fffffff err=0x0",
+      "actual": "csr_rsp.read_data addr=0x28 data=0xffffffff err=0x0",
+      "detector": "exact:config_regs:value",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 123,
+          "signal": "csr_err_o",
+          "text": "assign csr_err_o = err_r;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 160,
+          "signal": "csr_dat_o",
+          "text": "if (!rst_n) csr_dat_o <= 32'h0;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 161,
+          "signal": "csr_dat_o",
+          "text": "else if (csr_rd) csr_dat_o <= rdata_mux;"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_10_csr_to_timing",
+        "path_11_csr_to_refresh",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling"
+      ],
+      "occurrences": 12,
+      "repro": {
+        "path": "path_10_csr_to_timing",
+        "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+        "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+        "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+        "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "csr_rsp[92] value: predicted [csr_rsp.read_data addr=0x28 data=0x1fffffff err=0x0] but observed [csr_rsp.read_data addr=0x28 data=0xffffffff err=0x0]"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_reserved_bits_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "config_regs/MISMATCH/csr_rsp[data]@BIST_ADDR_START",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/csr_rsp[data]@BIST_ADDR_START",
+      "taxonomy_id": "CSR_001",
+      "detectors": [
+        "exact:config_regs:value"
+      ],
+      "owner_module": "config_regs",
+      "owner_candidates": [
+        "config_regs"
+      ],
+      "severity": "minor",
+      "confidence": "observed",
+      "title": "config_regs: MISMATCH/csr_rsp[data]@BIST_ADDR_START",
+      "requirement": "config_regs must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "csr_rsp.read_data addr=0x24 data=0x1fffffff err=0x0",
+      "actual": "csr_rsp.read_data addr=0x24 data=0xffffffff err=0x0",
+      "detector": "exact:config_regs:value",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 123,
+          "signal": "csr_err_o",
+          "text": "assign csr_err_o = err_r;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 160,
+          "signal": "csr_dat_o",
+          "text": "if (!rst_n) csr_dat_o <= 32'h0;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 161,
+          "signal": "csr_dat_o",
+          "text": "else if (csr_rd) csr_dat_o <= rdata_mux;"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_10_csr_to_timing",
+        "path_11_csr_to_refresh",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling"
+      ],
+      "occurrences": 12,
+      "repro": {
+        "path": "path_10_csr_to_timing",
+        "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+        "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+        "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+        "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "csr_rsp[83] value: predicted [csr_rsp.read_data addr=0x24 data=0x1fffffff err=0x0] but observed [csr_rsp.read_data addr=0x24 data=0xffffffff err=0x0]"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_reserved_bits_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "config_regs/MISMATCH/csr_rsp[data]@BIST_CONFIG",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/csr_rsp[data]@BIST_CONFIG",
+      "taxonomy_id": "CSR_001",
+      "detectors": [
+        "exact:config_regs:value"
+      ],
+      "owner_module": "config_regs",
+      "owner_candidates": [
+        "config_regs"
+      ],
+      "severity": "minor",
+      "confidence": "observed",
+      "title": "config_regs: MISMATCH/csr_rsp[data]@BIST_CONFIG",
+      "requirement": "config_regs must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "csr_rsp.read_data addr=0x20 data=0xf err=0x0",
+      "actual": "csr_rsp.read_data addr=0x20 data=0xffffffff err=0x0",
+      "detector": "exact:config_regs:value",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 123,
+          "signal": "csr_err_o",
+          "text": "assign csr_err_o = err_r;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 160,
+          "signal": "csr_dat_o",
+          "text": "if (!rst_n) csr_dat_o <= 32'h0;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 161,
+          "signal": "csr_dat_o",
+          "text": "else if (csr_rd) csr_dat_o <= rdata_mux;"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_10_csr_to_timing",
+        "path_11_csr_to_refresh",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling"
+      ],
+      "occurrences": 12,
+      "repro": {
+        "path": "path_10_csr_to_timing",
+        "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+        "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+        "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+        "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "csr_rsp[74] value: predicted [csr_rsp.read_data addr=0x20 data=0xf err=0x0] but observed [csr_rsp.read_data addr=0x20 data=0xffffffff err=0x0]"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_reserved_bits_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "config_regs/MISMATCH/csr_rsp[data]@CTRL_CONFIG",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/csr_rsp[data]@CTRL_CONFIG",
+      "taxonomy_id": "CSR_001",
+      "detectors": [
+        "exact:config_regs:value"
+      ],
+      "owner_module": "config_regs",
+      "owner_candidates": [
+        "config_regs"
+      ],
+      "severity": "minor",
+      "confidence": "observed",
+      "title": "config_regs: MISMATCH/csr_rsp[data]@CTRL_CONFIG",
+      "requirement": "config_regs must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "csr_rsp.read_data addr=0x4 data=0x1f err=0x0",
+      "actual": "csr_rsp.read_data addr=0x4 data=0xffffff1f err=0x0",
+      "detector": "exact:config_regs:value",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 123,
+          "signal": "csr_err_o",
+          "text": "assign csr_err_o = err_r;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 160,
+          "signal": "csr_dat_o",
+          "text": "if (!rst_n) csr_dat_o <= 32'h0;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 161,
+          "signal": "csr_dat_o",
+          "text": "else if (csr_rd) csr_dat_o <= rdata_mux;"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_10_csr_to_timing",
+        "path_11_csr_to_refresh",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling"
+      ],
+      "occurrences": 12,
+      "repro": {
+        "path": "path_10_csr_to_timing",
+        "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+        "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+        "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+        "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "csr_rsp[11] value: predicted [csr_rsp.read_data addr=0x4 data=0x1f err=0x0] but observed [csr_rsp.read_data addr=0x4 data=0xffffff1f err=0x0]"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_reserved_bits_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "config_regs/MISMATCH/csr_rsp[data]@CTRL_STATUS",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/csr_rsp[data]@CTRL_STATUS",
+      "taxonomy_id": "CSR_001",
+      "detectors": [
+        "exact:config_regs:value"
+      ],
+      "owner_module": "config_regs",
+      "owner_candidates": [
+        "config_regs"
+      ],
+      "severity": "minor",
+      "confidence": "observed",
+      "title": "config_regs: MISMATCH/csr_rsp[data]@CTRL_STATUS",
+      "requirement": "config_regs must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "csr_rsp.read_data addr=0x0 data=0x0 err=0x0",
+      "actual": "csr_rsp.read_data addr=0x0 data=0x20 err=0x0",
+      "detector": "exact:config_regs:value",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 123,
+          "signal": "csr_err_o",
+          "text": "assign csr_err_o = err_r;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 160,
+          "signal": "csr_dat_o",
+          "text": "if (!rst_n) csr_dat_o <= 32'h0;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 161,
+          "signal": "csr_dat_o",
+          "text": "else if (csr_rd) csr_dat_o <= rdata_mux;"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_10_csr_to_timing",
+        "path_11_csr_to_refresh",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling"
+      ],
+      "occurrences": 4,
+      "repro": {
+        "path": "path_10_csr_to_timing",
+        "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+        "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+        "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+        "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "csr_rsp[0] value: predicted [csr_rsp.read_data addr=0x0 data=0x0 err=0x0] but observed [csr_rsp.read_data addr=0x0 data=0x20 err=0x0]"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_reserved_bits_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "config_regs/MISMATCH/csr_rsp[data]@REFRESH_CONFIG",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/csr_rsp[data]@REFRESH_CONFIG",
+      "taxonomy_id": "CSR_001",
+      "detectors": [
+        "exact:config_regs:value"
+      ],
+      "owner_module": "config_regs",
+      "owner_candidates": [
+        "config_regs"
+      ],
+      "severity": "minor",
+      "confidence": "observed",
+      "title": "config_regs: MISMATCH/csr_rsp[data]@REFRESH_CONFIG",
+      "requirement": "config_regs must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "csr_rsp.read_data addr=0x18 data=0x1ff err=0x0",
+      "actual": "csr_rsp.read_data addr=0x18 data=0xffffffff err=0x0",
+      "detector": "exact:config_regs:value",
+      "anchor": [
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 123,
+          "signal": "csr_err_o",
+          "text": "assign csr_err_o = err_r;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 160,
+          "signal": "csr_dat_o",
+          "text": "if (!rst_n) csr_dat_o <= 32'h0;"
+        },
+        {
+          "file": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 161,
+          "signal": "csr_dat_o",
+          "text": "else if (csr_rd) csr_dat_o <= rdata_mux;"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_10_csr_to_timing",
+        "path_11_csr_to_refresh",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling"
+      ],
+      "occurrences": 12,
+      "repro": {
+        "path": "path_10_csr_to_timing",
+        "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+        "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+        "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+        "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "csr_rsp[56] value: predicted [csr_rsp.read_data addr=0x18 data=0x1ff err=0x0] but observed [csr_rsp.read_data addr=0x18 data=0xffffffff err=0x0]"
+        }
+      },
+      "drop": {
+        "git_head": "b4d6f45",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "b4d6f45",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_reserved_bits_findings.json"
+      ]
+    }
+  ],
+  "resolved": []
+}

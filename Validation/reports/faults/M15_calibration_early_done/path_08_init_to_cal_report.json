@@ -1,0 +1,63 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_08_init_to_cal",
+  "strategy": "invariant",
+  "verdict": "fail",
+  "timestamp": "2026-09-17T19:03:06.101827",
+  "blocks": [
+    "calibration",
+    "init_fsm"
+  ],
+  "sequence": null,
+  "stimulus_generator": null,
+  "autonomous": true,
+  "window_cycles": 180000,
+  "rtl_drop": {
+    "git_head": "b4d6f45",
+    "roots": [
+      "Validation/faults/work/M15_calibration_early_done/Frontend/OutputFolders"
+    ],
+    "blocks": {
+      "calibration": {
+        "rtl": "Validation/faults/work/M15_calibration_early_done/Frontend/OutputFolders/PHASE2RTL/calibration.sv",
+        "manifest": "Validation/faults/work/M15_calibration_early_done/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/calibration_manifest.json"
+      },
+      "init_fsm": {
+        "rtl": "Validation/faults/work/M15_calibration_early_done/Frontend/OutputFolders/PHASE1RTL/init_fsm.sv",
+        "manifest": "Validation/faults/work/M15_calibration_early_done/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/init_fsm_manifest.json"
+      }
+    }
+  },
+  "stages": [
+    {
+      "stage": "init_fsm",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "init_fsm",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA"
+    },
+    {
+      "stage": "calibration",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "calibration",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA"
+    },
+    {
+      "stage": "(path-level)",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_08_init_to_cal_checker.py",
+      "scope": "path_08_init_to_cal",
+      "verdict": "fail",
+      "summary": "scope=path_08_init_to_cal  strategy=invariant  status=fail  violations=1",
+      "detail": [
+        "scope=path_08_init_to_cal  strategy=invariant  status=fail  violations=1",
+        "  CAL_001: cal_done raised before init_done observed @ [cal_status.done fail=0x0]"
+      ]
+    }
+  ],
+  "log": "Validation/reports/faults/M15_calibration_early_done/path_08_init_to_cal_sim.log",
+  "observed_trace": "Validation/reports/faults/M15_calibration_early_done/path_08_init_to_cal_observed.jsonl"
+}

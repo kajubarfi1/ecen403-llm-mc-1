@@ -60,20 +60,15 @@ class HarnessError(Exception):
 
 
 def manifest_ports(scope):
-    paths = sorted(glob.glob(os.path.join(ROOT, "Frontend", "**",
-                                          f"{scope}_manifest.json"),
-                             recursive=True),
-                   key=lambda p: -os.path.getmtime(p))
-    if not paths:
-        raise HarnessError(f"no manifest found for block {scope!r} under "
-                           f"Frontend/ — the harness cannot know its ports.")
-    with open(paths[0]) as f:
-        m = json.load(f)
-    ports = []
-    for group in m["ports"].values():
-        for p in group:
-            ports.append((p["name"], p["width"], p["dir"]))
-    return ports, paths[0]
+    sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
+    import rtl_drop as RD
+    try:
+        path = RD.manifest_file(scope)
+        ports = [(n, p["width"], p["dir"])
+                 for n, p in RD.manifest_ports(scope).items()]
+    except RD.DropError as e:
+        raise HarnessError(f"{e} — the harness cannot know its ports.")
+    return ports, path
 
 
 def driver_ports(seq, schemas, catalog):

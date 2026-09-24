@@ -54,6 +54,7 @@ SEQ_GEN = os.path.join(ROOT, "Validation", "sequences", "generated")
 # models inside these runs and add no distinct stimulus, so they are not
 # separate sim tests.
 RUNNABLE = ["path_01_write_cmd", "path_02_read_cmd", "path_03_read_return",
+            "path_07_backpressure",
             "path_12_csr_timing_to_scheduling",
             "path_13_csr_refresh_to_scheduling", "path_18_full_write",
             "path_04_scheduler_bank_loop", "path_05_scheduler_refresh_loop",
@@ -150,11 +151,9 @@ def prepare(path_id, tdir, pdefs, imap, seed=1, drives=19, test_name=None):
     if rc != 0:
         raise SystemExit(f"{path_id}: collateral generation failed\n{out[-400:]}")
 
-    import glob as g
+    import rtl_drop as RD
     for b in blocks:
-        rtl = sorted(g.glob(os.path.join(ROOT, "Frontend", "**", f"{b}.sv"),
-                            recursive=True), key=lambda p: -os.path.getmtime(p))
-        files.append(rtl[0])
+        files.append(RD.rtl_file(b))        # DropError if the drop lacks it
     files += [os.path.join(ROOT, s["source"]) for s in imap.get("stubs", [])
               if s.get("when_block") in blocks]
     # driver + harness were generated straight into tdir; only the rest is copied

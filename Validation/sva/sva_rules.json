@@ -214,5 +214,28 @@
       "state_rules": [],
       "max_interval_rules": []
     }
-  ]
+  ],
+  "rule_owners": {
+    "$comment": "Primary owner first, then candidates. Command-spacing rules are decided by the scheduler on permissions computed by bank_tracker; the assertion is bound to cmd_gen only because that is where the pins are.",
+    "TIMING_*": [
+      "scheduler",
+      "bank_tracker"
+    ],
+    "TIMING_011": [
+      "scheduler",
+      "bank_tracker",
+      "refresh_ctrl"
+    ],
+    "TIMING_012": [
+      "scheduler",
+      "refresh_ctrl"
+    ],
+    "PROTO_*": [
+      "scheduler",
+      "bank_tracker"
+    ],
+    "INIT_002": [
+      "init_fsm"
+    ]
+  }
 }

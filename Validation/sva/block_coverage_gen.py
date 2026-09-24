@@ -59,15 +59,12 @@ class CovGenError(Exception):
 # ---------------------------------------------------------------------------
 
 def manifest_ports(block):
-    paths = sorted(glob.glob(os.path.join(ROOT, "Frontend", "**",
-                                          f"{block}_manifest.json"),
-                             recursive=True),
-                   key=lambda p: -os.path.getmtime(p))
-    if not paths:
-        raise CovGenError(f"no manifest for block {block!r}")
-    with open(paths[0]) as f:
-        m = json.load(f)
-    return {p["name"]: p["width"] for g in m["ports"].values() for p in g}
+    sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
+    import rtl_drop as RD
+    try:
+        return {n: p["width"] for n, p in RD.manifest_ports(block).items()}
+    except RD.DropError as e:
+        raise CovGenError(str(e))
 
 
 def numeric(sv):

@@ -4,7 +4,7 @@
 //
 // Interface : refresh_ack   (Scheduler acknowledgement consumed by the refresh controller)
 // Block     : refresh_ctrl
-// Manifest  : Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/refresh_ctrl_manifest.json
+// Manifest  : Frontend/OutputFolders/VALIDATIONREPORT/lint_combined/refresh_ctrl_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

@@ -54,25 +54,20 @@ class WiringError(Exception):
 
 
 def manifest_ports(block):
-    paths = sorted(glob.glob(os.path.join(ROOT, "Frontend", "**",
-                                          f"{block}_manifest.json"),
-                             recursive=True),
-                   key=lambda p: -os.path.getmtime(p))
-    if not paths:
-        raise WiringError(f"no manifest for block {block!r}")
-    with open(paths[0]) as f:
-        m = json.load(f)
-    return {p["name"]: (p["width"], p["dir"])
-            for g in m["ports"].values() for p in g}
+    import rtl_drop as RD
+    try:
+        return {n: (p["width"], p["dir"])
+                for n, p in RD.manifest_ports(block).items()}
+    except RD.DropError as e:
+        raise WiringError(str(e))
 
 
 def rtl_file(block):
-    paths = sorted(glob.glob(os.path.join(ROOT, "Frontend", "**",
-                                          f"{block}.sv"), recursive=True),
-                   key=lambda p: -os.path.getmtime(p))
-    if not paths:
-        raise WiringError(f"no {block}.sv under Frontend/")
-    return paths[0]
+    import rtl_drop as RD
+    try:
+        return RD.rtl_file(block)
+    except RD.DropError as e:
+        raise WiringError(str(e))
 
 
 def net_decl(name, width):

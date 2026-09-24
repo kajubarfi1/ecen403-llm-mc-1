@@ -1,0 +1,68 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_09_init_to_refresh",
+  "strategy": "invariant",
+  "verdict": "fail",
+  "timestamp": "2026-09-17T19:03:04.841240",
+  "blocks": [
+    "config_regs",
+    "init_fsm",
+    "refresh_ctrl"
+  ],
+  "sequence": null,
+  "stimulus_generator": null,
+  "autonomous": true,
+  "window_cycles": 180000,
+  "rtl_drop": {
+    "git_head": "b4d6f45",
+    "roots": [
+      "Validation/faults/work/M05_refresh_never_requested/Frontend/OutputFolders"
+    ],
+    "blocks": {
+      "config_regs": {
+        "rtl": "Validation/faults/work/M05_refresh_never_requested/Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Validation/faults/work/M05_refresh_never_requested/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/config_regs_manifest.json"
+      },
+      "init_fsm": {
+        "rtl": "Validation/faults/work/M05_refresh_never_requested/Frontend/OutputFolders/PHASE1RTL/init_fsm.sv",
+        "manifest": "Validation/faults/work/M05_refresh_never_requested/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/init_fsm_manifest.json"
+      },
+      "refresh_ctrl": {
+        "rtl": "Validation/faults/work/M05_refresh_never_requested/Frontend/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "Validation/faults/work/M05_refresh_never_requested/Frontend/OutputFolders/VALIDATIONREPORT/lint_combined/refresh_ctrl_manifest.json"
+      }
+    }
+  },
+  "stages": [
+    {
+      "stage": "init_fsm",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "init_fsm",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA"
+    },
+    {
+      "stage": "refresh_ctrl",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "refresh_ctrl",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA"
+    },
+    {
+      "stage": "(path-level)",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_09_init_to_refresh_checker.py",
+      "scope": "path_09_init_to_refresh",
+      "verdict": "fail",
+      "summary": "scope=path_09_init_to_refresh  strategy=invariant  status=fail  violations=1",
+      "detail": [
+        "scope=path_09_init_to_refresh  strategy=invariant  status=fail  violations=1",
+        "  REF_004: No refresh request raised after init_done: controller cannot honour tREFI without requesting refresh @ [init_status.done fail=0x0 state=0xe]"
+      ]
+    }
+  ],
+  "log": "Validation/reports/faults/M05_refresh_never_requested/path_09_init_to_refresh_sim.log",
+  "observed_trace": "Validation/reports/faults/M05_refresh_never_requested/path_09_init_to_refresh_observed.jsonl"
+}

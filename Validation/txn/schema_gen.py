@@ -54,15 +54,24 @@ def discover_manifest(frontend_root: str, block: str):
     is the current generation. Returns (path, alternates) so callers can
     report that older copies exist.
     """
-    target = f"{block}_manifest.json"
-    found = []
-    for dirpath, _dirnames, filenames in os.walk(frontend_root):
-        if target in filenames:
-            found.append(os.path.join(dirpath, target))
-    if not found:
+    # The declared drop (Validation/spec/rtl_drop.json) decides, not a walk of
+    # the whole Frontend tree: that tree now also holds demo and failed
+    # copies of the same blocks. `frontend_root` is kept for callers that
+    # pass it, but the resolver's roots are authoritative.
+    sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
+    import rtl_drop as RD
+    try:
+        chosen = RD.manifest_file(block)
+    except RD.DropError:
         return None, []
-    found.sort(key=lambda p: (-os.path.getmtime(p), p))
-    return found[0], found[1:]
+    target = f"{block}_manifest.json"
+    others = []
+    for root in RD.roots():
+        for dirpath, _d, filenames in os.walk(root):
+            p = os.path.join(dirpath, target)
+            if target in filenames and p != chosen:
+                others.append(p)
+    return chosen, sorted(others)
 
 
 def manifest_ports(path: str):

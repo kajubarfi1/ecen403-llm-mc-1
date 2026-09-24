@@ -1,0 +1,88 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_11_csr_to_refresh",
+  "strategy": "exact",
+  "verdict": "fail",
+  "timestamp": "2026-09-18T18:39:43.199230",
+  "blocks": [
+    "config_regs",
+    "refresh_ctrl"
+  ],
+  "derived_from": {
+    "host": "path_13_csr_refresh_to_scheduling",
+    "stage": "config_regs"
+  },
+  "sequence": "Validation/sequences/generated/path_13_csr_refresh_to_scheduling_seed1.json",
+  "stimulus_generator": "register_walk",
+  "stages": [
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "fail",
+      "summary": "scope=config_regs  strategy=exact  status=fail  matched=87/103  WAIVED=2 field comparison(s)  value=16",
+      "detail": [
+        "  csr_rsp[56] value: predicted [csr_rsp.read_data addr=0x18 data=0x1ff err=0x0] but observed [csr_rsp.read_data addr=0x18 data=0xffffffff err=0x0]",
+        "  csr_rsp[60] value: predicted [csr_rsp.read_data addr=0x18 data=0x1a5 err=0x0] but observed [csr_rsp.read_data addr=0x18 data=0xa5a5a5a5 err=0x0]",
+        "  csr_rsp[62] value: predicted [csr_rsp.read_data addr=0x18 data=0x5a err=0x0] but observed [csr_rsp.read_data addr=0x18 data=0x5a5a5a5a err=0x0]",
+        "  csr_rsp[74] value: predicted [csr_rsp.read_data addr=0x20 data=0xf err=0x0] but observed [csr_rsp.read_data addr=0x20 data=0xffffffff err=0x0]",
+        "  csr_rsp[78] value: predicted [csr_rsp.read_data addr=0x20 data=0x5 err=0x0] but observed [csr_rsp.read_data addr=0x20 data=0xa5a5a5a5 err=0x0]",
+        "  csr_rsp[80] value: predicted [csr_rsp.read_data addr=0x20 data=0xa err=0x0] but observed [csr_rsp.read_data addr=0x20 data=0x5a5a5a5a err=0x0]",
+        "  csr_rsp[83] value: predicted [csr_rsp.read_data addr=0x24 data=0x1fffffff err=0x0] but observed [csr_rsp.read_data addr=0x24 data=0xffffffff err=0x0]",
+        "  csr_rsp[87] value: predicted [csr_rsp.read_data addr=0x24 data=0x5a5a5a5 err=0x0] but observed [csr_rsp.read_data addr=0x24 data=0xa5a5a5a5 err=0x0]",
+        "  csr_rsp[89] value: predicted [csr_rsp.read_data addr=0x24 data=0x1a5a5a5a err=0x0] but observed [csr_rsp.read_data addr=0x24 data=0x5a5a5a5a err=0x0]",
+        "  csr_rsp[92] value: predicted [csr_rsp.read_data addr=0x28 data=0x1fffffff err=0x0] but observed [csr_rsp.read_data addr=0x28 data=0xffffffff err=0x0]",
+        "  csr_rsp[96] value: predicted [csr_rsp.read_data addr=0x28 data=0x5a5a5a5 err=0x0] but observed [csr_rsp.read_data addr=0x28 data=0xa5a5a5a5 err=0x0]",
+        "  csr_rsp[98] value: predicted [csr_rsp.read_data addr=0x28 data=0x1a5a5a5a err=0x0] but observed [csr_rsp.read_data addr=0x28 data=0x5a5a5a5a err=0x0]"
+      ]
+    }
+  ],
+  "log": "Validation/reports/paths/path_13_csr_refresh_to_scheduling_sim.log",
+  "observed_trace": "Validation/reports/paths/path_13_csr_refresh_to_scheduling_observed.jsonl",
+  "rtl_drop": {
+    "git_head": "b4d6f45",
+    "roots": [
+      "Frontend/OutputFolders"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "Frontend/OutputFolders/PHASE2RTL/addr_decoder.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/addr_decoder_manifest.json"
+      },
+      "bank_tracker": {
+        "rtl": "Frontend/OutputFolders/PHASE2RTL/bank_tracker.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined/bank_tracker_manifest.json"
+      },
+      "cmd_gen": {
+        "rtl": "Frontend/OutputFolders/PHASE3RTL/cmd_gen.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/cmd_gen_manifest.json"
+      },
+      "cmd_queue": {
+        "rtl": "Frontend/OutputFolders/PHASE3RTL/cmd_queue.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/cmd_queue_manifest.json"
+      },
+      "config_regs": {
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/config_regs_manifest.json"
+      },
+      "data_path": {
+        "rtl": "Frontend/OutputFolders/PHASE4RTL/data_path.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/data_path_manifest.json"
+      },
+      "refresh_ctrl": {
+        "rtl": "Frontend/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined/refresh_ctrl_manifest.json"
+      },
+      "scheduler": {
+        "rtl": "Frontend/OutputFolders/PHASE3RTL/scheduler.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/scheduler_manifest.json"
+      },
+      "wb_port": {
+        "rtl": "Frontend/OutputFolders/PHASE1RTL/wb_port.sv",
+        "manifest": "Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/wb_port_manifest.json"
+      }
+    }
+  },
+  "coverage_collected": true
+}

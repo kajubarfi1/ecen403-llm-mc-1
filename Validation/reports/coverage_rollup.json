@@ -1,12 +1,12 @@
 {
   "$schema": "validation-coverage-rollup/1",
-  "generated_utc": "2026-09-17T17:19:51.059729+00:00",
+  "generated_utc": "2026-09-18T01:00:06.472034+00:00",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "vplan_items": 38,
-  "coverpoints_measured": 79,
+  "vplan_items": 39,
+  "coverpoints_measured": 80,
   "summary": {
     "covered": 34,
-    "partial": 4
+    "partial": 5
   },
   "items": [
     {
@@ -803,6 +803,28 @@
         }
       ],
       "short_of_goal": [],
+      "not_measured": []
+    },
+    {
+      "id": "VP_FLOW_001",
+      "title": "Command queue back-pressure exercised",
+      "scope": "cmd_queue",
+      "method": "directed",
+      "priority": "major",
+      "prior_status": "not_started",
+      "status": "partial",
+      "coverage": [
+        {
+          "name": "cg_cmd_queue.cp_backpressure_exercised",
+          "goal": 100,
+          "measured": 0.0,
+          "bins": "0/1",
+          "state": "short"
+        }
+      ],
+      "short_of_goal": [
+        "cg_cmd_queue.cp_backpressure_exercised 0.0% of 100%"
+      ],
       "not_measured": []
     }
   ]

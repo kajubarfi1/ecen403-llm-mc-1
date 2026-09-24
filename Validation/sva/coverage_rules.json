@@ -11,27 +11,78 @@
   "covergroups": {
     "cg_csr_access": {
       "block": "config_regs",
-      "bus": {"iface": "csr", "write_kind": "write", "read_kind": "read"},
+      "bus": {
+        "iface": "csr",
+        "write_kind": "write",
+        "read_kind": "read"
+      },
       "register_map": "csr_register_map",
       "coverpoints": {
-        "cp_ro_fields":   {"recipe": "register_access", "on": "write", "access": ["RO"]},
-        "cp_rw_fields":   {"recipe": "register_access", "on": "write", "access": ["RW"]},
-        "cp_rw1c_fields": {"recipe": "register_access", "on": "write", "access": ["RW1C"]},
-        "cp_wo_fields":   {"recipe": "register_access", "on": "write", "access": ["WO"], "field_level": true},
-        "cross_ro_x_wdata_pattern":   {"recipe": "cross_pattern", "with": "cp_ro_fields"},
-        "cross_rw_x_wdata_pattern":   {"recipe": "cross_pattern", "with": "cp_rw_fields"},
-        "cross_rw1c_x_wdata_pattern": {"recipe": "cross_pattern", "with": "cp_rw1c_fields"},
-        "cross_wo_x_wdata_pattern":   {"recipe": "cross_pattern", "with": "cp_wo_fields"},
-        "cp_reset_checked": {"recipe": "first_read_after_reset"},
-        "cp_unmapped_addr": {"recipe": "unmapped_access"}
+        "cp_ro_fields": {
+          "recipe": "register_access",
+          "on": "write",
+          "access": [
+            "RO"
+          ]
+        },
+        "cp_rw_fields": {
+          "recipe": "register_access",
+          "on": "write",
+          "access": [
+            "RW"
+          ]
+        },
+        "cp_rw1c_fields": {
+          "recipe": "register_access",
+          "on": "write",
+          "access": [
+            "RW1C"
+          ]
+        },
+        "cp_wo_fields": {
+          "recipe": "register_access",
+          "on": "write",
+          "access": [
+            "WO"
+          ],
+          "field_level": true
+        },
+        "cross_ro_x_wdata_pattern": {
+          "recipe": "cross_pattern",
+          "with": "cp_ro_fields"
+        },
+        "cross_rw_x_wdata_pattern": {
+          "recipe": "cross_pattern",
+          "with": "cp_rw_fields"
+        },
+        "cross_rw1c_x_wdata_pattern": {
+          "recipe": "cross_pattern",
+          "with": "cp_rw1c_fields"
+        },
+        "cross_wo_x_wdata_pattern": {
+          "recipe": "cross_pattern",
+          "with": "cp_wo_fields"
+        },
+        "cp_reset_checked": {
+          "recipe": "first_read_after_reset"
+        },
+        "cp_unmapped_addr": {
+          "recipe": "unmapped_access"
+        }
       }
     },
     "cg_config_regs": {
       "block": "config_regs",
-      "bus": {"iface": "csr", "write_kind": "write", "read_kind": "read"},
+      "bus": {
+        "iface": "csr",
+        "write_kind": "write",
+        "read_kind": "read"
+      },
       "register_map": "csr_register_map",
       "coverpoints": {
-        "cp_csr_001_exercised": {"recipe": "access_violation_attempt"}
+        "cp_csr_001_exercised": {
+          "recipe": "access_violation_attempt"
+        }
       }
     },
     "cg_refresh": {
@@ -54,11 +105,14 @@
       "block": "init_fsm",
       "coverpoints": {
         "cp_init_001_exercised": {
-          "recipe": "occurred", "iface": "init_cmd", "command": "MRS",
+          "recipe": "occurred",
+          "iface": "init_cmd",
+          "command": "MRS",
           "why": "A mode-register command was issued; ordering (INIT_001) can only be judged once there is an order to judge."
         },
         "cp_init_002_exercised": {
-          "recipe": "occurred", "iface": "init_status",
+          "recipe": "occurred",
+          "iface": "init_status",
           "why": "The init sequence ran to completion, so every inter-step delay (INIT_002) has been exercised."
         }
       }
@@ -67,11 +121,13 @@
       "block": "bank_tracker",
       "coverpoints": {
         "cp_proto_001_exercised": {
-          "recipe": "occurred", "expr": "cmd_rd_valid || cmd_wr_valid",
+          "recipe": "occurred",
+          "expr": "cmd_rd_valid || cmd_wr_valid",
           "why": "A CAS was issued; PROTO_001 (CAS to an idle bank) is only checkable once CAS commands exist."
         },
         "cp_proto_002_exercised": {
-          "recipe": "occurred", "expr": "cmd_act_valid",
+          "recipe": "occurred",
+          "expr": "cmd_act_valid",
           "why": "An ACTIVATE was issued; PROTO_002 (double activate) needs at least one."
         }
       }
@@ -80,12 +136,25 @@
       "block": "data_path",
       "coverpoints": {
         "cp_data_001_exercised": {
-          "recipe": "occurred", "iface": "dp_rd_rsp",
+          "recipe": "occurred",
+          "iface": "dp_rd_rsp",
           "why": "A read response reached the host side, so read data was compared (DATA_001)."
         },
         "cp_data_002_exercised": {
-          "recipe": "occurred", "iface": "dp_cmd", "kind": "read",
+          "recipe": "occurred",
+          "iface": "dp_cmd",
+          "kind": "read",
           "why": "A read was issued, so read latency was measurable (DATA_002)."
+        }
+      }
+    },
+    "cg_cmd_queue": {
+      "block": "cmd_queue",
+      "coverpoints": {
+        "cp_backpressure_exercised": {
+          "recipe": "occurred",
+          "expr": "enq_valid && !enq_ready",
+          "why": "A request was presented while the queue could not accept it: the only cycle in which back-pressure (and the host stall it must cause) is tested. Without it path_07 passes vacuously."
         }
       }
     }

@@ -1,0 +1,14 @@
+{
+  "$schema": "validation-rtl-drop/1",
+  "$comment": "Where the RTL under validation comes from. Every tool that needs a block's RTL or manifest resolves it through Validation/structural/rtl_drop.py using ONLY these roots, in order — never by 'newest file anywhere under Frontend/'. The Frontend tree also carries demo copies, failed attempts and trial directories of the same blocks; a lookup that could land on one of those would validate the wrong design without saying so. A block absent from every root is a missing block, reported as such, never substituted.",
+  "roots": [
+    "Frontend/OutputFolders"
+  ],
+  "$roots_note": "Add a second root only when a drop is incomplete: a Validation-owned snapshot of an earlier complete drop (git archive <commit> <paths> | tar -x -C Validation/rtl_snapshots/<date>_<commit>/), listed AFTER the canonical root so it is reached only for blocks the canonical drop lacks. Every run report stamps which root each block came from. This was needed for drop 082af8e (no bank_tracker / refresh_ctrl) and retired at b4d6f45 when the Frontend supplied them.",
+  "manifest_dirs_preferred": [
+    "VALIDATIONREPORT/lint_combined_p4",
+    "VALIDATIONREPORT/lint_combined_p3",
+    "VALIDATIONREPORT/lint_combined"
+  ],
+  "$manifest_note": "The Frontend writes one manifest per generation phase and a consolidated copy per lint pass; the consolidated copies are the drop's own statement of the final port list, so they are preferred. A block with no consolidated manifest falls back to its phase manifest inside the same root."
+}

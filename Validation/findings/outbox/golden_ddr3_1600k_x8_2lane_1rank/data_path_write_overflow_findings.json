@@ -1,0 +1,27 @@
+{
+  "$schema": "validation-findings/1",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "finding_count": 1,
+  "findings": [
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "rtl_defect",
+      "scope": "data_path",
+      "severity": "critical",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "taxonomy_id": "DATA_001",
+      "rtl_drop": "b4d6f45",
+      "title": "Write data dropped under back-to-back host writes: data_path buffers 31 of 32 accepted writes",
+      "detail": "Under the back-pressure stimulus (32 host writes with no idle cycles against a 16-deep command queue, path_07_backpressure) wb_port accepted all 32 writes and forwarded 32 requests, but data_path's write buffer captured only 31 (dp_wr.write = 31 against req.request = 32) and its own assertion p_wr_no_overflow fired once. The command for the dropped write is still issued, so the DRAM would be written with stale or undefined data. The write buffer must either be sized for the queue depth or back-pressure the host port when full; today the host port stalls on the command queue but not on the data buffer. This is distinct from the previously filed read-return defect (duplicate / X-valued responses) although both live in data_path.",
+      "evidence": {
+        "path": "path_07_backpressure",
+        "stimulus": "Validation/sequences/burst.py (2 x command_queue_depth writes, zero idle)",
+        "trace_counts": {"wb.write": 32, "req.request": 32, "dp_wr.write": 31},
+        "design_assertion": "p_wr_no_overflow x1",
+        "report": "Validation/reports/paths/path_07_backpressure_report.json"
+      },
+      "status": "open"
+    }
+  ]
+}
