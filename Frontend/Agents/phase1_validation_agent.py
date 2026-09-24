@@ -980,7 +980,14 @@ endmodule
         ]
         print(f"\n\033[1m  ── TESTBENCH GENERATION ──\033[0m")
         for filename, gen_fn in tb_files:
-            tb_path = self.output_dir / filename
+            # Written to rtl_dir (not output_dir/validation_dir) -- sim_gate
+            # in phase1_pipeline.py reads {mod}_tb.sv from phase1_rtl_dir, and
+            # _remove_validation_tbs() deletes any stray *_tb.sv left in
+            # validation_dir right after this runs. Writing here previously
+            # meant every testbench got generated then immediately deleted,
+            # so sim_gate always found the files "missing" and skipped every
+            # module without ever actually simulating anything.
+            tb_path = self.rtl_dir / filename
             try:
                 tb_content = gen_fn()
                 tb_path.write_text(tb_content)

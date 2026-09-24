@@ -49,42 +49,44 @@ module config_regs #(
 );
 
     // ========================================================================
-    // Register Address Map
+    // Register address map
     // ========================================================================
-    localparam logic [7:0] ADDR_CTRL_STATUS          = 8'h00;
-    localparam logic [7:0] ADDR_CTRL_CONFIG          = 8'h04;
-    localparam logic [7:0] ADDR_TIMING_0             = 8'h08;
-    localparam logic [7:0] ADDR_TIMING_1             = 8'h0C;
-    localparam logic [7:0] ADDR_TIMING_2             = 8'h10;
-    localparam logic [7:0] ADDR_TIMING_3             = 8'h14;
-    localparam logic [7:0] ADDR_REFRESH_CONFIG       = 8'h18;
-    localparam logic [7:0] ADDR_ERROR_STATUS         = 8'h1C;
-    localparam logic [7:0] ADDR_BIST_CONFIG          = 8'h20;
-    localparam logic [7:0] ADDR_BIST_ADDR_START      = 8'h24;
-    localparam logic [7:0] ADDR_BIST_ADDR_END        = 8'h28;
+    localparam [CSR_ADDR_W-1:0] ADDR_CTRL_STATUS          = 8'h00;
+    localparam [CSR_ADDR_W-1:0] ADDR_CTRL_CONFIG          = 8'h04;
+    localparam [CSR_ADDR_W-1:0] ADDR_TIMING_0             = 8'h08;
+    localparam [CSR_ADDR_W-1:0] ADDR_TIMING_1             = 8'h0C;
+    localparam [CSR_ADDR_W-1:0] ADDR_TIMING_2             = 8'h10;
+    localparam [CSR_ADDR_W-1:0] ADDR_TIMING_3             = 8'h14;
+    localparam [CSR_ADDR_W-1:0] ADDR_REFRESH_CONFIG       = 8'h18;
+    localparam [CSR_ADDR_W-1:0] ADDR_ERROR_STATUS         = 8'h1C;
+    localparam [CSR_ADDR_W-1:0] ADDR_BIST_CONFIG          = 8'h20;
+    localparam [CSR_ADDR_W-1:0] ADDR_BIST_ADDR_START      = 8'h24;
+    localparam [CSR_ADDR_W-1:0] ADDR_BIST_ADDR_END        = 8'h28;
 
     // ========================================================================
-    // Register Storage
+    // Register storage
     // ========================================================================
-    logic [31:0] reg_ctrl_config;
-    logic [31:0] reg_timing_0;
-    logic [31:0] reg_timing_1;
-    logic [31:0] reg_timing_2;
-    logic [31:0] reg_timing_3;
-    logic [31:0] reg_refresh_config;
-    logic [31:0] reg_error_status;
-    logic [31:0] reg_bist_config;
-    logic [31:0] reg_bist_addr_start;
-    logic [31:0] reg_bist_addr_end;
+    logic [CSR_DATA_W-1:0] reg_ctrl_config;
+    logic [CSR_DATA_W-1:0] reg_timing_0;
+    logic [CSR_DATA_W-1:0] reg_timing_1;
+    logic [CSR_DATA_W-1:0] reg_timing_2;
+    logic [CSR_DATA_W-1:0] reg_timing_3;
+    logic [CSR_DATA_W-1:0] reg_refresh_config;
+    logic [CSR_DATA_W-1:0] reg_error_status;
+    logic [CSR_DATA_W-1:0] reg_bist_config;
+    logic [CSR_DATA_W-1:0] reg_bist_addr_start;
+    logic [CSR_DATA_W-1:0] reg_bist_addr_end;
 
     // ========================================================================
-    // Wishbone Bus Decode
+    // Bus request decode (use 'wire', not 'logic' with assign)
     // ========================================================================
     wire csr_req = csr_cyc_i & csr_stb_i;
     wire csr_wr  = csr_req & csr_we_i;
     wire csr_rd  = csr_req & ~csr_we_i;
 
+    // ========================================================================
     // Address decode
+    // ========================================================================
     logic addr_valid;
     always_comb begin
         addr_valid = 1'b0;
@@ -105,7 +107,7 @@ module config_regs #(
     end
 
     // ========================================================================
-    // ACK Generation
+    // ACK generation (internal register + continuous assign)
     // ========================================================================
     logic ack_r;
     always_ff @(posedge clk or negedge rst_n)
@@ -114,7 +116,7 @@ module config_regs #(
     assign csr_ack_o = ack_r;
 
     // ========================================================================
-    // Error Generation
+    // Error generation (internal register + continuous assign)
     // ========================================================================
     logic err_r;
     always_ff @(posedge clk or negedge rst_n)
@@ -123,11 +125,11 @@ module config_regs #(
     assign csr_err_o = err_r;
 
     // ========================================================================
-    // Read Data Mux
+    // Read data multiplexer
     // ========================================================================
-    logic [31:0] rdata_mux;
+    logic [CSR_DATA_W-1:0] rdata_mux;
     always_comb begin
-        rdata_mux = 32'h0;
+        rdata_mux = 32'h00000000;
         case (csr_adr_i)
             ADDR_CTRL_STATUS: begin
                 rdata_mux = {23'b0,
@@ -139,29 +141,29 @@ module config_regs #(
                              sts_cal_done,
                              sts_init_done};
             end
-            ADDR_CTRL_CONFIG:       rdata_mux = reg_ctrl_config;
-            ADDR_TIMING_0:          rdata_mux = reg_timing_0;
-            ADDR_TIMING_1:          rdata_mux = reg_timing_1;
-            ADDR_TIMING_2:          rdata_mux = reg_timing_2;
-            ADDR_TIMING_3:          rdata_mux = reg_timing_3;
-            ADDR_REFRESH_CONFIG:    rdata_mux = reg_refresh_config;
-            ADDR_ERROR_STATUS:      rdata_mux = reg_error_status;
-            ADDR_BIST_CONFIG:       rdata_mux = reg_bist_config;
-            ADDR_BIST_ADDR_START:   rdata_mux = reg_bist_addr_start;
-            ADDR_BIST_ADDR_END:     rdata_mux = reg_bist_addr_end;
-            default:                rdata_mux = 32'h0;
+            ADDR_CTRL_CONFIG:     rdata_mux = reg_ctrl_config;
+            ADDR_TIMING_0:        rdata_mux = reg_timing_0;
+            ADDR_TIMING_1:        rdata_mux = reg_timing_1;
+            ADDR_TIMING_2:        rdata_mux = reg_timing_2;
+            ADDR_TIMING_3:        rdata_mux = reg_timing_3;
+            ADDR_REFRESH_CONFIG:  rdata_mux = reg_refresh_config;
+            ADDR_ERROR_STATUS:    rdata_mux = reg_error_status;
+            ADDR_BIST_CONFIG:     rdata_mux = reg_bist_config;
+            ADDR_BIST_ADDR_START: rdata_mux = reg_bist_addr_start;
+            ADDR_BIST_ADDR_END:   rdata_mux = reg_bist_addr_end;
+            default:              rdata_mux = 32'h00000000;
         endcase
     end
 
     // ========================================================================
-    // Read Data Output
+    // Read data output (latch on csr_rd, hold value)
     // ========================================================================
     always_ff @(posedge clk or negedge rst_n)
         if (!rst_n) csr_dat_o <= 32'h0;
         else if (csr_rd) csr_dat_o <= rdata_mux;
 
     // ========================================================================
-    // Register Write Logic
+    // Register write logic
     // ========================================================================
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -176,12 +178,12 @@ module config_regs #(
             reg_bist_addr_start <= 32'h00000000;
             reg_bist_addr_end <= 32'h1FFFFFFF;
         end else begin
-            // Self-clearing write-only bits
+            // Self-clearing fields in CTRL_CONFIG
             reg_ctrl_config[5] <= 1'b0;  // bist_start
             reg_ctrl_config[6] <= 1'b0;  // force_refresh
             reg_ctrl_config[7] <= 1'b0;  // force_self_ref
 
-            // RW1C error status flags - latch on event
+            // RW1C fields in ERROR_STATUS - latch on event
             if (sts_ecc_ue_event)
                 reg_error_status[16] <= 1'b1;
             if (sts_ref_starve_event)
@@ -189,13 +191,16 @@ module config_regs #(
             if (sts_init_fail_event)
                 reg_error_status[18] <= 1'b1;
 
-            // RO fields in ERROR_STATUS
+            // Update read-only fields in ERROR_STATUS
             reg_error_status[15:0] <= sts_ecc_ce_count;
             reg_error_status[31:19] <= sts_bist_fail_addr;
 
             // Write operations
             if (csr_wr && addr_valid) begin
                 case (csr_adr_i)
+                    ADDR_CTRL_STATUS: begin
+                        // Read-only register, ignore writes
+                    end
                     ADDR_CTRL_CONFIG: begin
                         if (csr_sel_i[0]) reg_ctrl_config[7:0]   <= csr_dat_i[7:0];
                         if (csr_sel_i[1]) reg_ctrl_config[15:8]  <= csr_dat_i[15:8];
@@ -233,7 +238,7 @@ module config_regs #(
                         if (csr_sel_i[3]) reg_refresh_config[31:24] <= csr_dat_i[31:24];
                     end
                     ADDR_ERROR_STATUS: begin
-                        // RW1C: clear on write-1
+                        // RW1C fields - clear on write-1
                         if (csr_sel_i[2]) begin
                             if (csr_dat_i[16]) reg_error_status[16] <= 1'b0;
                             if (csr_dat_i[17]) reg_error_status[17] <= 1'b0;
@@ -259,7 +264,6 @@ module config_regs #(
                         if (csr_sel_i[3]) reg_bist_addr_end[31:24] <= csr_dat_i[31:24];
                     end
                     default: begin
-                        // CTRL_STATUS is read-only, writes ignored
                     end
                 endcase
             end
@@ -267,7 +271,7 @@ module config_regs #(
     end
 
     // ========================================================================
-    // Config Output Assignments
+    // Configuration output assignments
     // ========================================================================
     assign cfg_tRCD_nCK         = reg_timing_0[7:0];
     assign cfg_tRP_nCK          = reg_timing_0[15:8];
@@ -307,13 +311,15 @@ module config_regs #(
         @(posedge clk) disable iff (!rst_n)
         (csr_wr && addr_valid && (csr_adr_i == ADDR_TIMING_0), written_value = csr_dat_i) |=> (reg_timing_0 == written_value);
     endproperty
-    assert property (p_rw_retain) else $error("TIMING_0 not retained after write");
+    assert_p_rw_retain: assert property (p_rw_retain)
+        else $error("TIMING_0 register did not retain written value");
 
     property p_bad_addr;
         @(posedge clk) disable iff (!rst_n)
-        (csr_req && !addr_valid) |=> csr_err_o;
+        (csr_req && !addr_valid) |-> ##1 csr_err_o;
     endproperty
-    assert property (p_bad_addr) else $error("Invalid address did not produce error");
+    assert_p_bad_addr: assert property (p_bad_addr)
+        else $error("Invalid address did not produce error signal");
     // synopsys translate_on
 
 endmodule

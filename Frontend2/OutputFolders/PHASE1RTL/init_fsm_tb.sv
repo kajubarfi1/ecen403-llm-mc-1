@@ -4,7 +4,7 @@ module init_fsm_tb;
     logic clk = 0;
     always #(CLK_PERIOD/2) clk = ~clk;
 
-    logic rst_n, init_done, init_fail, init_cmd_valid;
+    logic rst_n, enable, init_done, init_fail, init_cmd_valid;
     logic [3:0] init_cmd;
     logic [14:0] init_addr;
     logic [2:0] init_bank;
@@ -37,7 +37,7 @@ module init_fsm_tb;
 
     initial begin
         $dumpfile("init_fsm_tb.vcd"); $dumpvars(0, init_fsm_tb);
-        rst_n=0; repeat(10) @(posedge clk); rst_n=1;
+        rst_n=0; enable=0; repeat(10) @(posedge clk); rst_n=1; enable=1;
         fork
             wait(init_done);
             begin repeat(140662) @(posedge clk); $display("[FAIL] TIMEOUT"); end
@@ -54,6 +54,13 @@ module init_fsm_tb;
             check("MR order 2->3->1->0", mr_bank_order[0]==3'd2 && mr_bank_order[1]==3'd3 && mr_bank_order[2]==3'd1 && mr_bank_order[3]==3'd0);
         else check("MR order (insufficient cmds)", 0);
         check("Sequence completed", init_done===1'b1);
+
+        // Spec-derived MR encoding checks -- computed independently of the
+        // RTL (see _encode_mr0..3), not extracted from it.
+        check($sformatf("MR0 encoding matches spec (exp 15'h1D34)"), dut.MR0_VAL === 15'h1D34);
+        check($sformatf("MR1 encoding matches spec (exp 15'h0004)"), dut.MR1_VAL === 15'h0004);
+        check($sformatf("MR2 encoding matches spec (exp 15'h0218)"), dut.MR2_VAL === 15'h0218);
+        check($sformatf("MR3 encoding matches spec (exp 15'h0000)"), dut.MR3_VAL === 15'h0000);
 
         if (fail_count==0) $display("ALL %0d TESTS PASSED", total_tests);
         else $display("%0d of %0d TESTS FAILED", fail_count, total_tests);

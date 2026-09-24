@@ -1,8 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    wb_port
 // File:      wb_port.sv
-// Generated: 2026-09-24 08:45:16
-// Agent:     Wishbone Port Interface Agent (Phase 1)
+// Generated: 2026-09-24 10:34:43
+// Generator:     Wishbone Port Interface Generator (Phase 1)
 // Spec:      ddr3_mc_core_v2 rev golden_ddr3_1600k_x8_2lane_1rank
 //
 // Description:
@@ -22,7 +22,7 @@ module wb_port #(
     parameter QUEUE_DEPTH    = 16,
     parameter BURST_CTR_W    = 4,
     parameter TAG_FIFO_DEPTH = 16,
-    parameter TAG_PTR_W      = 5
+    parameter TAG_PTR_W      = 4
 ) (
     input  logic                    clk,
     input  logic                    rst_n,

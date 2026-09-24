@@ -1,0 +1,84 @@
+{
+  "status": "FAIL",
+  "pipeline": "phase1",
+  "failure_stage": "BEHAVIORAL_SIMULATION",
+  "sim_result": {
+    "status": "FAIL",
+    "modules": {
+      "init_fsm": {
+        "status": "FAIL",
+        "exit_code": 0,
+        "test_count": 7,
+        "pass_count": 1,
+        "fail_count": 7,
+        "pass_lines": [
+          "[PASS] init_fail not asserted"
+        ],
+        "fail_lines": [
+          "[FAIL] TIMEOUT",
+          "[FAIL] Reset hold >= 40000 cyc (got 0)",
+          "[FAIL] CKE delay >= 100000 cyc",
+          "[FAIL] init_done asserted",
+          "[FAIL] 4 MRS commands (got 0)",
+          "[FAIL] MR order (insufficient cmds)",
+          "[FAIL] Sequence completed"
+        ],
+        "assertion_errors": [],
+        "log_file": "init_fsm_xrun.log"
+      },
+      "config_regs": {
+        "status": "FAIL",
+        "exit_code": 0,
+        "test_count": 0,
+        "pass_count": 0,
+        "fail_count": 0,
+        "pass_lines": [],
+        "fail_lines": [],
+        "assertion_errors": [
+          "xmelab: *E,CUVPOM (./config_regs_tb.sv,14|57): Port name 'csr_addr_i' of instance 'config_regs_tb.dut' is invalid or has multiple connections and the instantiated module is defined in file '/home/ugrads/l/lehanar57/cadence_agent_work/config_regs.sv'.",
+          "xrun: *E,ELBERR: Error (*E) or soft error (*SE) occurred during elaboration (status 1), exiting."
+        ],
+        "log_file": "config_regs_xrun.log"
+      },
+      "wb_port": {
+        "status": "FAIL",
+        "exit_code": 0,
+        "test_count": 4,
+        "pass_count": 2,
+        "fail_count": 2,
+        "pass_lines": [
+          "[PASS] Single write OK",
+          "[PASS] Stall when backend busy"
+        ],
+        "fail_lines": [
+          "[FAIL] ACK deasserted when idle",
+          "[FAIL] No ACK when CYC=1 STB=0"
+        ],
+        "assertion_errors": [],
+        "log_file": "wb_port_xrun.log"
+      }
+    },
+    "timestamp": "2026-09-24T08:46:26.555642",
+    "server": "olympus.ece.tamu.edu"
+  },
+  "failed_modules": [
+    "init_fsm",
+    "config_regs",
+    "wb_port"
+  ],
+  "history": [
+    {
+      "phase": 1,
+      "attempt": 1,
+      "timestamp": "2026-09-24T08:46:13.975101",
+      "overall": "PASS",
+      "passed": 94,
+      "total": 94,
+      "failed_modules": [],
+      "failed_checks": []
+    }
+  ],
+  "requires_human_review": true,
+  "note": "Static validation and lint passed. RTL has functional bugs.",
+  "timestamp": "2026-09-24T08:46:26.560141"
+}
