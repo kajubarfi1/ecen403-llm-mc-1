@@ -34,6 +34,12 @@ import os
 from pathlib import Path
 from datetime import datetime
 
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_SCRIPTS_DIR = os.path.dirname(_HERE)
+if _SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPTS_DIR)
+from manifest_stamp import stamp
+
 
 class WishbonePortGenerator:
 
@@ -794,6 +800,7 @@ class WishbonePortGenerator:
     def generate_manifest(self) -> dict:
         p = self.p
         return {
+            **stamp(self.spec),
             "module_name": "wb_port",
             "file": "wb_port.sv",
             "phase": 1,
@@ -841,10 +848,14 @@ class WishbonePortGenerator:
                     {"name": "req_aux",   "width": p["AUX_WIDTH"],  "dir": "output"},
                 ],
                 "internal_in": [
-                    {"name": "req_ready", "width": 1,               "dir": "input"},
-                    {"name": "rsp_valid", "width": 1,               "dir": "input"},
-                    {"name": "rsp_rdata", "width": p["DATA_WIDTH"], "dir": "input"},
-                    {"name": "rsp_aux",   "width": p["AUX_WIDTH"],  "dir": "input"},
+                    {"name": "req_ready", "width": 1,               "dir": "input",
+                     "source": "cmd_queue.enq_ready"},
+                    {"name": "rsp_valid", "width": 1,               "dir": "input",
+                     "source": "data_path.rd_rsp_valid"},
+                    {"name": "rsp_rdata", "width": p["DATA_WIDTH"], "dir": "input",
+                     "source": "data_path.rd_rsp_data"},
+                    {"name": "rsp_aux",   "width": p["AUX_WIDTH"],  "dir": "input",
+                     "source": "data_path.rd_rsp_aux"},
                 ],
             },
             "assertions": [

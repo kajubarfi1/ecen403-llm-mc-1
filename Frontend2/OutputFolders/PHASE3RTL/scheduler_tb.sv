@@ -50,6 +50,27 @@ module scheduler_tb;
         bank_open_row[b]=row;
     endtask
 
+    // Poll for the next issued command instead of hand-counting cycles --
+    // a single-entry grant is a genuine one-cycle pulse once recently-
+    // granted entries are masked (see Defect 1 fix), so a fixed wc(N)
+    // followed by a direct check is fragile against exactly which cycle
+    // the pulse lands on.
+    task automatic wait_cmd(output logic got, output logic [3:0] captured_type,
+                             output logic [BANK_BITS-1:0] captured_bank,
+                             output logic captured_deq, output logic [IDX_BITS-1:0] captured_idx,
+                             input int max_cyc);
+        int cyc;
+        got = 0;
+        for (cyc = 0; cyc < max_cyc; cyc++) begin
+            @(posedge clk);
+            if (cmd_valid) begin
+                got = 1; captured_type = cmd_type; captured_bank = cmd_bank;
+                captured_deq = deq_grant; captured_idx = deq_idx;
+                break;
+            end
+        end
+    endtask
+
     initial begin
         $display("\n== scheduler_tb ==\n");
         rst_n=0; clear_queue(); set_bank_idle(); ref_required=0; ref_urgent=0;
@@ -68,10 +89,14 @@ module scheduler_tb;
         // T06–T08: Row-hit read
         clear_queue(); set_bank_idle(); set_bank_active(3'd0, 14'd100);
         q_valid[0]=1; q_row[0]=14'd100; q_col[0]=10'd50; q_bank[0]=3'd0; q_we[0]=0; q_aux[0]=4'd1;
-        wc(2);
-        check("RowHit RD: valid",    cmd_valid===1);
-        check("RowHit RD: type=RD",  cmd_type===CMD_RD);
-        check("RowHit RD: deq",      deq_grant===1);
+        begin
+            logic got; logic [3:0] ctype; logic [BANK_BITS-1:0] cbank;
+            logic cdeq; logic [IDX_BITS-1:0] cidx;
+            wait_cmd(got, ctype, cbank, cdeq, cidx, 5);
+            check("RowHit RD: valid",    got);
+            check("RowHit RD: type=RD",  got && ctype===CMD_RD);
+            check("RowHit RD: deq",      got && cdeq===1);
+        end
 
         // T09–T11: Row-hit write
         clear_queue(); set_bank_idle(); set_bank_active(3'd2, 14'd200);
@@ -96,8 +121,10 @@ module scheduler_tb;
         check("RowMiss act: PRE",    cmd_type===CMD_PRE);
         check("RowMiss act: bank=1", cmd_bank===3'd1);
 
-        // T17–T18: Urgent refresh preempts
-        clear_queue(); set_bank_idle(); set_bank_active(3'd0, 14'd100);
+        // T17–T18: Urgent refresh preempts (banks already idle -- REF fires
+        // immediately. The "active bank forces PRE first" case is its own
+        // scenario, covered by RefBlock T35-38 below -- Defect 5 fix).
+        clear_queue(); set_bank_idle();
         q_valid[0]=1; q_row[0]=14'd100; q_bank[0]=3'd0; q_we[0]=0;
         ref_urgent=1;
         wc(2);
@@ -113,26 +140,39 @@ module scheduler_tb;
         check("NormRef: ref_ack",    ref_ack===1);
         ref_required=0; wc(2);
 
-        // T21–T23: FR-FCFS priority (row-hit over row-miss)
+        // T21–T23: FR-FCFS priority (row-hit over row-miss). Poll for the
+        // FIRST command issued -- with two CAS-ready-or-better candidates,
+        // a fixed multi-cycle wait can land after the scheduler has already
+        // moved on to the second entry (see Defect 1 fix: a granted entry
+        // is masked from re-selection starting the very next cycle, so
+        // whichever entry wins first is only observable for one cycle).
         clear_queue(); set_bank_idle(); set_bank_active(3'd0, 14'd100);
         bank_rd_allowed=8'hFF; bank_wr_allowed=8'hFF;
         // Entry 0: row-miss (different row)
         q_valid[0]=1; q_row[0]=14'd999; q_bank[0]=3'd0; q_we[0]=0;
         // Entry 1: row-hit
         q_valid[1]=1; q_row[1]=14'd100; q_bank[1]=3'd0; q_we[1]=0;
-        wc(2);
-        check("FRFCFS: picks hit",   cmd_type===CMD_RD);
-        check("FRFCFS: idx=1",       deq_idx===1);
-        check("FRFCFS: deq",         deq_grant===1);
+        begin
+            logic got; logic [3:0] ctype; logic [BANK_BITS-1:0] cbank;
+            logic cdeq; logic [IDX_BITS-1:0] cidx;
+            wait_cmd(got, ctype, cbank, cdeq, cidx, 5);
+            check("FRFCFS: picks hit",   got && ctype===CMD_RD);
+            check("FRFCFS: idx=1",       got && cidx===1);
+            check("FRFCFS: deq",         got && cdeq===1);
+        end
 
         // T24–T25: Multiple banks
         clear_queue(); set_bank_idle();
         set_bank_active(3'd0, 14'd10); set_bank_active(3'd3, 14'd30);
         q_valid[0]=1; q_row[0]=14'd10; q_bank[0]=3'd0; q_we[0]=0;
         q_valid[1]=1; q_row[1]=14'd30; q_bank[1]=3'd3; q_we[1]=1;
-        wc(2);
-        check("MultiBank: valid",    cmd_valid===1);
-        check("MultiBank: first",    deq_idx===0);  // FCFS picks entry 0
+        begin
+            logic got; logic [3:0] ctype; logic [BANK_BITS-1:0] cbank;
+            logic cdeq; logic [IDX_BITS-1:0] cidx;
+            wait_cmd(got, ctype, cbank, cdeq, cidx, 5);
+            check("MultiBank: valid",    got);
+            check("MultiBank: first",    got && cidx===0);  // FCFS picks entry 0
+        end
 
         // T26–T27: Timing blocks — bank not ready
         clear_queue(); set_bank_idle(); set_bank_active(3'd5, 14'd500);
@@ -159,6 +199,38 @@ module scheduler_tb;
         check("Aux: passthrough",    cmd_aux===4'hB);
         check("Aux: col",            cmd_col===10'd77);
         check("Aux: row",            cmd_row===14'd42);
+
+        // T33-T34: Regrant guard -- cmd_queue lags one cycle behind a
+        // grant (q_valid stays 1 for one more cycle than the real queue
+        // would show), so the scheduler itself must not re-select/re-grant
+        // the same entry during that window.
+        clear_queue(); set_bank_idle(); set_bank_active(3'd0, 14'd700);
+        q_valid[0]=1; q_row[0]=14'd700; q_bank[0]=3'd0; q_we[0]=0;
+        begin
+            logic got; logic [3:0] ctype; logic [BANK_BITS-1:0] cbank;
+            logic cdeq; logic [IDX_BITS-1:0] cidx;
+            wait_cmd(got, ctype, cbank, cdeq, cidx, 5);
+            check("Regrant: first grant", got && cdeq && cidx===0);
+        end
+        // q_valid[0] intentionally left high here -- simulating cmd_queue
+        // not having caught up yet. One more cycle: the just-granted entry
+        // must not be immediately re-selected (nothing else is valid, so
+        // deq_grant should now read 0).
+        @(posedge clk);
+        check("Regrant: no re-grant next cycle", !(deq_grant===1'b1 && deq_idx===0));
+
+        // T35-T38: Urgent refresh with an open bank must force-precharge
+        // it first, never issue REF while any bank is still active.
+        clear_queue(); set_bank_idle(); set_bank_active(3'd3, 14'd800);
+        ref_urgent=1;
+        wc(2);
+        check("RefBlock: PRE not REF while active", cmd_type===CMD_PRE);
+        check("RefBlock: PRE targets active bank",  cmd_bank===3'd3);
+        set_bank_idle();  // simulate bank_tracker clearing the bank post-PRE
+        wc(2);
+        check("RefBlock: REF once banks idle",  cmd_type===CMD_REF);
+        check("RefBlock: ref_ack",              ref_ack===1);
+        ref_urgent=0; wc(2);
 
         $display("\n== %0d/%0d passed ==\n", pass_count, pass_count+fail_count);
         $finish;

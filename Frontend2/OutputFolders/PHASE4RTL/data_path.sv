@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    data_path
 // File:      data_path.sv
-// Generated: 2026-09-24 10:36:16
+// Generated: 2026-09-24 13:02:05
 // Generator:     Data Path / Alignment Generator (Phase 3)
 // Spec:      ddr3_mc_core_v2 rev golden_ddr3_1600k_x8_2lane_1rank
 //
@@ -13,7 +13,7 @@
 //   Alignment: 4:1 ratio, 2 ctrl cycles per BL8 burst.
 //
 // Key parameters:
-//   DATA_WIDTH=32, DQ_WIDTH=8, BL=8
+//   DATA_WIDTH=32, DQ_WIDTH=16, BL=8
 //   CL=11 nCK (3 ctrl), CWL=8 nCK (2 ctrl)
 //   AUX_WIDTH=4, RD_FIFO_DEPTH=16
 //
@@ -22,13 +22,14 @@
 
 module data_path #(
     parameter DATA_WIDTH       = 32,
-    parameter DQ_WIDTH         = 8,
-    parameter DM_WIDTH         = 4,
+    parameter DQ_WIDTH         = 16,
+    parameter DM_WIDTH         = 2,
     parameter SEL_WIDTH        = 4,
     parameter AUX_WIDTH        = 4,
     parameter BURST_LEN        = 8,
     parameter CLK_RATIO        = 4,
     parameter BURST_CTRL_CYC   = 2,
+    parameter WORD_BEATS       = 2,
     parameter RD_FIFO_DEPTH    = 16,
     parameter FIFO_PTR_W       = 4,
     parameter CL_CTRL_DEFAULT  = 3,
@@ -58,10 +59,13 @@ module data_path #(
     input  logic [7:0]              cfg_CL_nCK,       // CAS read latency
     input  logic [7:0]              cfg_CWL_nCK,      // CAS write latency
 
-    // DDR3 PHY interface (directly to DRAM pins)
-    output logic [DATA_WIDTH-1:0]   ddr_dq_o,         // write data to DRAM
+    // DDR3 PHY interface (directly to DRAM pins) -- DQ_WIDTH-wide,
+    // the real physical channel width, NOT DATA_WIDTH (the host word
+    // width). A host word packs onto the channel over WORD_BEATS
+    // cycles (32-bit host word / 16-bit channel = 2 beats).
+    output logic [DQ_WIDTH-1:0]     ddr_dq_o,         // write data to DRAM
     output logic                    ddr_dq_oe,        // DQ output enable
-    input  logic [DATA_WIDTH-1:0]   ddr_dq_i,         // read data from DRAM
+    input  logic [DQ_WIDTH-1:0]     ddr_dq_i,         // read data from DRAM
     output logic [DM_WIDTH-1:0]     ddr_dm_o,         // data mask
     output logic                    ddr_dqs_o,        // DQS strobe out
     output logic                    ddr_dqs_oe,       // DQS output enable
@@ -148,7 +152,7 @@ module data_path #(
                     wr_burst_ctr <= '0;
                 end
                 WR_DRIVE: begin
-                    if (wr_burst_ctr == BURST_CTRL_CYC[1:0] - 1'b1)
+                    if (wr_burst_ctr == WORD_BEATS[1:0] - 1'b1)
                         wr_state <= WR_IDLE;
                     else
                         wr_burst_ctr <= wr_burst_ctr + 1'b1;
@@ -158,10 +162,29 @@ module data_path #(
         end
     end
 
-    // Write data to DDR pins
-    assign ddr_dq_o   = wr_dat_r;
+    // Write data to DDR pins -- wr_dat_r is DATA_WIDTH-wide (one
+    // host word); drive it onto the DQ_WIDTH-wide channel over
+    // WORD_BEATS beats, low beat first (pack_32_to_16, little-
+    // endian: low half of the word goes out first).
+    always_comb begin
+        ddr_dq_o = wr_dat_r[DQ_WIDTH-1:0];
+        for (int wb = 0; wb < WORD_BEATS; wb++)
+            if (wr_burst_ctr == wb[1:0])
+                ddr_dq_o = wr_dat_r[(wb+1)*DQ_WIDTH-1 -: DQ_WIDTH];
+    end
     assign ddr_dq_oe  = (wr_state == WR_DRIVE);
-    assign ddr_dm_o   = (wr_state == WR_DRIVE) ? ~wr_msk_r : '0;  // DM active-high masks
+
+    // Data mask, sliced the same way -- BYTES_PER_BEAT host-side
+    // sel bits per channel beat.
+    localparam int BYTES_PER_BEAT = DQ_WIDTH / 8;
+    logic [BYTES_PER_BEAT-1:0] dm_beat;
+    always_comb begin
+        dm_beat = wr_msk_r[BYTES_PER_BEAT-1:0];
+        for (int wb = 0; wb < WORD_BEATS; wb++)
+            if (wr_burst_ctr == wb[1:0])
+                dm_beat = wr_msk_r[(wb+1)*BYTES_PER_BEAT-1 -: BYTES_PER_BEAT];
+    end
+    assign ddr_dm_o   = (wr_state == WR_DRIVE) ? ~dm_beat : '0;  // DM active-high masks
     assign ddr_dqs_o  = (wr_state == WR_DRIVE);  // simplified: DQS toggles during drive
     assign ddr_dqs_oe = (wr_state == WR_DRIVE);
 
@@ -211,7 +234,7 @@ module data_path #(
                     rd_burst_ctr <= '0;
                 end
                 RD_CAPTURE: begin
-                    if (rd_burst_ctr == BURST_CTRL_CYC[1:0] - 1'b1)
+                    if (rd_burst_ctr == WORD_BEATS[1:0] - 1'b1)
                         rd_state <= RD_IDLE;
                     else
                         rd_burst_ctr <= rd_burst_ctr + 1'b1;
@@ -234,14 +257,35 @@ module data_path #(
     wire  [FIFO_PTR_W:0] rd_count = rd_wptr - rd_rptr;
     wire                  rd_empty = (rd_count == 0);
 
-    // Push captured read data
+    // Assemble WORD_BEATS channel-width captures into one
+    // DATA_WIDTH host word before pushing -- pushing per beat
+    // (the old behavior) put WORD_BEATS separate, each only
+    // partially-real entries into the FIFO per read, which is
+    // what showed up downstream as duplicate/X-valued read
+    // responses (see Defect 2, Frontend2/VALIDATION_INTEGRATION_
+    // PLAN.md). Low beat first (pack_32_to_16, little-endian).
     wire rd_capture_valid = (rd_state == RD_CAPTURE);
+    wire rd_word_complete = rd_capture_valid && (rd_burst_ctr == WORD_BEATS[1:0] - 1'b1);
+
+    logic [DATA_WIDTH-1:0] rd_shift_r;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n)
+            rd_shift_r <= '0;
+        else if (rd_capture_valid && rd_burst_ctr != WORD_BEATS[1:0] - 1'b1)
+            rd_shift_r[(rd_burst_ctr+1)*DQ_WIDTH-1 -: DQ_WIDTH] <= ddr_dq_i;
+    end
+
+    // Final beat combines the just-arrived ddr_dq_i directly with
+    // the earlier beats already shifted into rd_shift_r -- avoids
+    // a spurious extra cycle of latency for the last beat.
+    wire [DATA_WIDTH-1:0] rd_word_assembled =
+        {ddr_dq_i, rd_shift_r[DATA_WIDTH-DQ_WIDTH-1:0]};
 
     always_ff @(posedge clk or negedge rst_n)
         if (!rst_n)
             rd_wptr <= '0;
-        else if (rd_capture_valid) begin
-            rd_fifo[rd_wptr[FIFO_PTR_W-1:0]] <= '{data: ddr_dq_i, aux: rd_aux_r};
+        else if (rd_word_complete) begin
+            rd_fifo[rd_wptr[FIFO_PTR_W-1:0]] <= '{data: rd_word_assembled, aux: rd_aux_r};
             rd_wptr <= rd_wptr + 1'b1;
         end
 

@@ -5,10 +5,12 @@
       "status": "PASS",
       "errors": [],
       "warnings": [
-        "%Warning-UNUSED: data_path.sv:68: Signal is not used: 'ddr_dqs_i'"
+        "%Warning-WIDTH: data_path.sv:275: Operator ADD expects 32 or 5 bits on the LHS, but LHS's VARREF 'rd_burst_ctr' generates 2 bits.",
+        "%Warning-UNUSED: data_path.sv:72: Signal is not used: 'ddr_dqs_i'",
+        "%Warning-UNUSED: data_path.sv:270: Bits of signal are not used: 'rd_shift_r'[31:16]"
       ],
-      "raw_output": "%Warning-UNUSED: data_path.sv:68: Signal is not used: 'ddr_dqs_i'\n                                : ... In instance data_path\n    input  logic                    ddr_dqs_i          \n                                    ^~~~~~~~~\n                 ... Use \"/* verilator lint_off UNUSED */\" and lint_on around source to disable this message.\n%Error: Exiting due to 1 warning(s)"
+      "raw_output": "%Warning-WIDTH: data_path.sv:275: Operator ADD expects 32 or 5 bits on the LHS, but LHS's VARREF 'rd_burst_ctr' generates 2 bits.\n                                : ... In instance data_path\n            rd_shift_r[(rd_burst_ctr+1)*DQ_WIDTH-1 -: DQ_WIDTH] <= ddr_dq_i;\n                                    ^\n                ... Use \"/* verilator lint_off WIDTH */\" and lint_on around source to disable this message.\n%Warning-UNUSED: data_path.sv:72: Signal is not used: 'ddr_dqs_i'\n                                : ... In instance data_path\n    input  logic                    ddr_dqs_i          \n                                    ^~~~~~~~~\n%Warning-UNUSED: data_path.sv:270: Bits of signal are not used: 'rd_shift_r'[31:16]\n                                 : ... In instance data_path\n    logic [DATA_WIDTH-1:0] rd_shift_r;\n                           ^~~~~~~~~~\n%Error: Exiting due to 3 warning(s)"
     }
   },
-  "timestamp": "2026-09-24T10:36:20.149936"
+  "timestamp": "2026-09-24T13:02:08.181399"
 }

@@ -24,6 +24,12 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_SCRIPTS_DIR = os.path.dirname(_HERE)
+if _SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPTS_DIR)
+from manifest_stamp import stamp
+
 
 class InitFsmGenerator:
 
@@ -245,6 +251,7 @@ endmodule
     def generate_manifest(self) -> dict:
         p = self.p
         return {
+            **stamp(self.spec),
             "module_name": "init_fsm",
             "file": "init_fsm.sv",
             "phase": 1,

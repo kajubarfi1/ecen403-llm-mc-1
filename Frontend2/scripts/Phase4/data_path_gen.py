@@ -36,6 +36,12 @@ import math
 from pathlib import Path
 from datetime import datetime
 
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_SCRIPTS_DIR = os.path.dirname(_HERE)
+if _SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPTS_DIR)
+from manifest_stamp import stamp
+
 
 class DataPathGenerator:
 
@@ -74,21 +80,41 @@ class DataPathGenerator:
         p["SEL_WIDTH"]    = p["DATA_WIDTH"] // self.host["granularity_bits"]
         p["AUX_WIDTH"]    = self.ctrl_arch["aux_width"]
 
-        # DDR PHY widths
-        p["DQ_WIDTH"]     = self.data_path.get("dq_width_bits", 8)
-        p["DQS_PAIRS"]    = self.data_path.get("dqs_pairs", p["DATA_WIDTH"] // 8)
-        p["DM_WIDTH"]     = p["DQS_PAIRS"]  # one DM per byte lane
+        # DDR PHY widths -- the real physical DQ bus width is
+        # data_path_mapping.ddr_channel_width_bits (device_width_bits x
+        # byte_lanes, e.g. 8 x 2 = 16 for this spec's x8/2-lane config),
+        # NOT the host word width. The generator used to read a field
+        # named "dq_width_bits", which doesn't exist anywhere in the spec
+        # schema, so it always silently fell back to a hardcoded default
+        # (8) and the port itself was hardcoded to DATA_WIDTH regardless
+        # of that parameter's value anyway -- ddr_dq_o/ddr_dq_i were 32
+        # bits (the host word width) instead of 16 (the real channel
+        # width), with no actual per-beat pack/unpack logic at all (see
+        # Defect 2, Frontend2/VALIDATION_INTEGRATION_PLAN.md).
+        p["DQ_WIDTH"]     = self.data_path.get(
+            "ddr_channel_width_bits",
+            self.geometry.get("device_width_bits", 8) * self.geometry.get("byte_lanes", 1))
+        p["DQS_PAIRS"]    = max(1, p["DQ_WIDTH"] // 8)  # one DQS pair per byte lane on the real channel
+        p["DM_WIDTH"]     = p["DQS_PAIRS"]  # one DM bit per byte lane
 
         # Burst
         p["BURST_LEN"]    = self.host["max_burst_length"]  # 8 for BL8
         p["BEATS_PER_CYC"] = p["CLK_RATIO"]  # 4 DDR transfers per ctrl cycle
 
-        # For BL8 with 4:1 ratio: 8 transfers = 2 controller cycles
+        # For BL8 with 4:1 ratio: 8 transfers = 2 controller cycles. This is
+        # a fact about the DDR command's burst length vs. the clock ratio --
+        # independent of how a host word packs onto the (possibly narrower)
+        # channel, see WORD_BEATS below. Kept for documentation/manifest
+        # continuity; no longer drives the write/read FSM cycle counts.
         p["BURST_CTRL_CYCLES"] = p["BURST_LEN"] // p["BEATS_PER_CYC"]
 
-        # Serialization: each ctrl cycle we push/pull BEATS_PER_CYC * DQ_WIDTH bits
-        # = 4 * 8 = 32 bits = DATA_WIDTH (this is the alignment)
-        p["PHY_DATA_WIDTH"] = p["BEATS_PER_CYC"] * p["DQ_WIDTH"]
+        # How many channel-width beats one host word actually takes to
+        # pack/unpack (pack_32_to_16 => 2). This -- not BURST_CTRL_CYCLES --
+        # is what the write-drive and read-capture FSMs below are sized on.
+        if p["DATA_WIDTH"] % p["DQ_WIDTH"] != 0:
+            p["WORD_BEATS"] = None  # validate() reports this as an error
+        else:
+            p["WORD_BEATS"] = p["DATA_WIDTH"] // p["DQ_WIDTH"]
 
         # CAS latency in controller cycles (for read data timing)
         derived_cyc = self.timing.get("$derived_cycles", {})
@@ -136,9 +162,11 @@ class DataPathGenerator:
     def validate(self) -> list:
         errors = []
         p = self.p
-        if p["DATA_WIDTH"] != p["PHY_DATA_WIDTH"]:
-            errors.append(f"DATA_WIDTH ({p['DATA_WIDTH']}) != PHY_DATA_WIDTH ({p['PHY_DATA_WIDTH']}): "
-                          f"clock ratio and DQ width don't produce matching bus width")
+        if p["WORD_BEATS"] is None:
+            errors.append(f"DATA_WIDTH ({p['DATA_WIDTH']}) is not a whole multiple of "
+                          f"DQ_WIDTH ({p['DQ_WIDTH']}) -- can't pack a host word onto the channel")
+        elif p["WORD_BEATS"] not in (1, 2, 3, 4):
+            errors.append(f"WORD_BEATS ({p['WORD_BEATS']}) must be 1-4 to fit the 2-bit beat counter")
         if p["BURST_LEN"] != 8:
             errors.append(f"BURST_LEN must be 8 for DDR3 BL8, got {p['BURST_LEN']}")
         if p["CLK_RATIO"] != 4:
@@ -192,6 +220,7 @@ class DataPathGenerator:
         L(f"    parameter BURST_LEN        = {p['BURST_LEN']},")
         L(f"    parameter CLK_RATIO        = {p['CLK_RATIO']},")
         L(f"    parameter BURST_CTRL_CYC   = {p['BURST_CTRL_CYCLES']},")
+        L(f"    parameter WORD_BEATS       = {p['WORD_BEATS']},")
         L(f"    parameter RD_FIFO_DEPTH    = {p['RD_FIFO_DEPTH']},")
         L(f"    parameter FIFO_PTR_W       = {p['FIFO_PTR_W']},")
         L(f"    parameter CL_CTRL_DEFAULT  = {p['CL_CTRL']},")
@@ -221,10 +250,13 @@ class DataPathGenerator:
         L(f"    input  logic [7:0]              cfg_CL_nCK,       // CAS read latency")
         L(f"    input  logic [7:0]              cfg_CWL_nCK,      // CAS write latency")
         L(f"")
-        L(f"    // DDR3 PHY interface (directly to DRAM pins)")
-        L(f"    output logic [DATA_WIDTH-1:0]   ddr_dq_o,         // write data to DRAM")
+        L(f"    // DDR3 PHY interface (directly to DRAM pins) -- DQ_WIDTH-wide,")
+        L(f"    // the real physical channel width, NOT DATA_WIDTH (the host word")
+        L(f"    // width). A host word packs onto the channel over WORD_BEATS")
+        L(f"    // cycles ({p['DATA_WIDTH']}-bit host word / {p['DQ_WIDTH']}-bit channel = {p['WORD_BEATS']} beats).")
+        L(f"    output logic [DQ_WIDTH-1:0]     ddr_dq_o,         // write data to DRAM")
         L(f"    output logic                    ddr_dq_oe,        // DQ output enable")
-        L(f"    input  logic [DATA_WIDTH-1:0]   ddr_dq_i,         // read data from DRAM")
+        L(f"    input  logic [DQ_WIDTH-1:0]     ddr_dq_i,         // read data from DRAM")
         L(f"    output logic [DM_WIDTH-1:0]     ddr_dm_o,         // data mask")
         L(f"    output logic                    ddr_dqs_o,        // DQS strobe out")
         L(f"    output logic                    ddr_dqs_oe,       // DQS output enable")
@@ -315,7 +347,7 @@ class DataPathGenerator:
         L(f"                    wr_burst_ctr <= '0;")
         L(f"                end")
         L(f"                WR_DRIVE: begin")
-        L(f"                    if (wr_burst_ctr == BURST_CTRL_CYC[1:0] - 1'b1)")
+        L(f"                    if (wr_burst_ctr == WORD_BEATS[1:0] - 1'b1)")
         L(f"                        wr_state <= WR_IDLE;")
         L(f"                    else")
         L(f"                        wr_burst_ctr <= wr_burst_ctr + 1'b1;")
@@ -327,10 +359,29 @@ class DataPathGenerator:
         L(f"")
 
         # ── DDR write outputs ──
-        L(f"    // Write data to DDR pins")
-        L(f"    assign ddr_dq_o   = wr_dat_r;")
+        L(f"    // Write data to DDR pins -- wr_dat_r is DATA_WIDTH-wide (one")
+        L(f"    // host word); drive it onto the DQ_WIDTH-wide channel over")
+        L(f"    // WORD_BEATS beats, low beat first (pack_32_to_16, little-")
+        L(f"    // endian: low half of the word goes out first).")
+        L(f"    always_comb begin")
+        L(f"        ddr_dq_o = wr_dat_r[DQ_WIDTH-1:0];")
+        L(f"        for (int wb = 0; wb < WORD_BEATS; wb++)")
+        L(f"            if (wr_burst_ctr == wb[1:0])")
+        L(f"                ddr_dq_o = wr_dat_r[(wb+1)*DQ_WIDTH-1 -: DQ_WIDTH];")
+        L(f"    end")
         L(f"    assign ddr_dq_oe  = (wr_state == WR_DRIVE);")
-        L(f"    assign ddr_dm_o   = (wr_state == WR_DRIVE) ? ~wr_msk_r : '0;  // DM active-high masks")
+        L(f"")
+        L(f"    // Data mask, sliced the same way -- BYTES_PER_BEAT host-side")
+        L(f"    // sel bits per channel beat.")
+        L(f"    localparam int BYTES_PER_BEAT = DQ_WIDTH / 8;")
+        L(f"    logic [BYTES_PER_BEAT-1:0] dm_beat;")
+        L(f"    always_comb begin")
+        L(f"        dm_beat = wr_msk_r[BYTES_PER_BEAT-1:0];")
+        L(f"        for (int wb = 0; wb < WORD_BEATS; wb++)")
+        L(f"            if (wr_burst_ctr == wb[1:0])")
+        L(f"                dm_beat = wr_msk_r[(wb+1)*BYTES_PER_BEAT-1 -: BYTES_PER_BEAT];")
+        L(f"    end")
+        L(f"    assign ddr_dm_o   = (wr_state == WR_DRIVE) ? ~dm_beat : '0;  // DM active-high masks")
         L(f"    assign ddr_dqs_o  = (wr_state == WR_DRIVE);  // simplified: DQS toggles during drive")
         L(f"    assign ddr_dqs_oe = (wr_state == WR_DRIVE);")
         L(f"")
@@ -382,7 +433,7 @@ class DataPathGenerator:
         L(f"                    rd_burst_ctr <= '0;")
         L(f"                end")
         L(f"                RD_CAPTURE: begin")
-        L(f"                    if (rd_burst_ctr == BURST_CTRL_CYC[1:0] - 1'b1)")
+        L(f"                    if (rd_burst_ctr == WORD_BEATS[1:0] - 1'b1)")
         L(f"                        rd_state <= RD_IDLE;")
         L(f"                    else")
         L(f"                        rd_burst_ctr <= rd_burst_ctr + 1'b1;")
@@ -407,14 +458,35 @@ class DataPathGenerator:
         L(f"    wire  [FIFO_PTR_W:0] rd_count = rd_wptr - rd_rptr;")
         L(f"    wire                  rd_empty = (rd_count == 0);")
         L(f"")
-        L(f"    // Push captured read data")
+        L(f"    // Assemble WORD_BEATS channel-width captures into one")
+        L(f"    // DATA_WIDTH host word before pushing -- pushing per beat")
+        L(f"    // (the old behavior) put WORD_BEATS separate, each only")
+        L(f"    // partially-real entries into the FIFO per read, which is")
+        L(f"    // what showed up downstream as duplicate/X-valued read")
+        L(f"    // responses (see Defect 2, Frontend2/VALIDATION_INTEGRATION_")
+        L(f"    // PLAN.md). Low beat first (pack_32_to_16, little-endian).")
         L(f"    wire rd_capture_valid = (rd_state == RD_CAPTURE);")
+        L(f"    wire rd_word_complete = rd_capture_valid && (rd_burst_ctr == WORD_BEATS[1:0] - 1'b1);")
+        L(f"")
+        L(f"    logic [DATA_WIDTH-1:0] rd_shift_r;")
+        L(f"    always_ff @(posedge clk or negedge rst_n) begin")
+        L(f"        if (!rst_n)")
+        L(f"            rd_shift_r <= '0;")
+        L(f"        else if (rd_capture_valid && rd_burst_ctr != WORD_BEATS[1:0] - 1'b1)")
+        L(f"            rd_shift_r[(rd_burst_ctr+1)*DQ_WIDTH-1 -: DQ_WIDTH] <= ddr_dq_i;")
+        L(f"    end")
+        L(f"")
+        L(f"    // Final beat combines the just-arrived ddr_dq_i directly with")
+        L(f"    // the earlier beats already shifted into rd_shift_r -- avoids")
+        L(f"    // a spurious extra cycle of latency for the last beat.")
+        L(f"    wire [DATA_WIDTH-1:0] rd_word_assembled =")
+        L(f"        {{ddr_dq_i, rd_shift_r[DATA_WIDTH-DQ_WIDTH-1:0]}};")
         L(f"")
         L(f"    always_ff @(posedge clk or negedge rst_n)")
         L(f"        if (!rst_n)")
         L(f"            rd_wptr <= '0;")
-        L(f"        else if (rd_capture_valid) begin")
-        L(f"            rd_fifo[rd_wptr[FIFO_PTR_W-1:0]] <= '{{data: ddr_dq_i, aux: rd_aux_r}};")
+        L(f"        else if (rd_word_complete) begin")
+        L(f"            rd_fifo[rd_wptr[FIFO_PTR_W-1:0]] <= '{{data: rd_word_assembled, aux: rd_aux_r}};")
         L(f"            rd_wptr <= rd_wptr + 1'b1;")
         L(f"        end")
         L(f"")
@@ -545,10 +617,12 @@ class DataPathGenerator:
         L(f"")
         L(f"    localparam real CLK_PERIOD = {p['CTRL_PERIOD']};")
         L(f"    localparam DATA_WIDTH = {p['DATA_WIDTH']};")
+        L(f"    localparam DQ_WIDTH   = {p['DQ_WIDTH']};")
         L(f"    localparam SEL_WIDTH  = {p['SEL_WIDTH']};")
         L(f"    localparam AUX_WIDTH  = {p['AUX_WIDTH']};")
         L(f"    localparam DM_WIDTH   = {p['DM_WIDTH']};")
         L(f"    localparam BURST_CTRL_CYC = {p['BURST_CTRL_CYCLES']};")
+        L(f"    localparam WORD_BEATS = {p['WORD_BEATS']};")
         L(f"")
         L(f"    logic clk = 0;")
         L(f"    always #(CLK_PERIOD/2) clk = ~clk;")
@@ -566,10 +640,35 @@ class DataPathGenerator:
         L(f"    logic [DATA_WIDTH-1:0] rd_rsp_data;")
         L(f"    logic [AUX_WIDTH-1:0] rd_rsp_aux;")
         L(f"    logic [7:0] cfg_CL_nCK, cfg_CWL_nCK;")
-        L(f"    logic [DATA_WIDTH-1:0] ddr_dq_o, ddr_dq_i;")
+        L(f"    logic [DQ_WIDTH-1:0] ddr_dq_o;")
         L(f"    logic ddr_dq_oe;")
         L(f"    logic [DM_WIDTH-1:0] ddr_dm_o;")
         L(f"    logic ddr_dqs_o, ddr_dqs_oe, ddr_dqs_i;")
+        L(f"")
+        L(f"    // ddr_dq_i is DQ_WIDTH-wide -- a host word takes WORD_BEATS")
+        L(f"    // beats to arrive (low half first, pack_32_to_16). Rather than")
+        L(f"    // hand-computing the exact capture-edge cycle count for each")
+        L(f"    // beat (fragile -- that exact class of arithmetic is what")
+        L(f"    // caused a real bug earlier this session), drive ddr_dq_i")
+        L(f"    // straight off the DUT's own beat counter via hierarchical")
+        L(f"    // reference: whichever cycle the DUT is actually sampling,")
+        L(f"    // the right half is already present. test_rd_word is what")
+        L(f"    // issue_rd_cmd_data()/hw_reset() set.")
+        L(f"    logic [DATA_WIDTH-1:0] test_rd_word;")
+        L(f"    logic [DQ_WIDTH-1:0]   ddr_dq_i;")
+        L(f"    assign ddr_dq_i = (dut.rd_burst_ctr == 2'd0)")
+        L(f"                      ? test_rd_word[DQ_WIDTH-1:0]")
+        L(f"                      : test_rd_word[DATA_WIDTH-1:DQ_WIDTH];")
+        L(f"")
+        L(f"    // Monitors -- capture every driven write beat / DM beat so")
+        L(f"    // Section B/F can check real per-beat values instead of a")
+        L(f"    // structural placeholder.")
+        L(f"    logic [DQ_WIDTH-1:0] wr_beat_q [$];")
+        L(f"    logic [DM_WIDTH-1:0] dm_beat_q [$];")
+        L(f"    always @(posedge clk) if (ddr_dq_oe) begin")
+        L(f"        wr_beat_q.push_back(ddr_dq_o);")
+        L(f"        dm_beat_q.push_back(ddr_dm_o);")
+        L(f"    end")
         L(f"")
 
         # DUT
@@ -598,7 +697,8 @@ class DataPathGenerator:
         L(f"        rst_n = 0;")
         L(f"        cmd_wr_valid = 0; cmd_rd_valid = 0; cmd_aux = 0;")
         L(f"        wr_data_valid = 0; wr_data = 0; wr_mask = 0;")
-        L(f"        ddr_dq_i = 0; ddr_dqs_i = 0;")
+        L(f"        test_rd_word = 0; ddr_dqs_i = 0;")
+        L(f"        wr_beat_q.delete(); dm_beat_q.delete();")
         L(f"        cfg_CL_nCK = 8'd{p['CL']}; cfg_CWL_nCK = 8'd{p['CWL']};")
         L(f"        repeat (5) @(posedge clk);")
         L(f"        rst_n = 1;")
@@ -634,7 +734,7 @@ class DataPathGenerator:
         L(f"    // data was never captured (always read back as the reset")
         L(f"    // default instead of the injected value).")
         L(f"    task automatic issue_rd_cmd_data(input [AUX_WIDTH-1:0] aux, input [DATA_WIDTH-1:0] data);")
-        L(f"        ddr_dq_i = data;")
+        L(f"        test_rd_word = data;")
         L(f"        @(posedge clk);")
         L(f"        cmd_rd_valid = 1; cmd_aux = aux;")
         L(f"        @(posedge clk);")
@@ -686,20 +786,22 @@ class DataPathGenerator:
         L(f"        check(\"B1: Data enters write buffer\", 1);")
         L(f"        issue_wr_cmd({p['AUX_WIDTH']}'d0);")
         L(f"        // Wait for CWL latency + drive")
-        L(f"        repeat ({p['CWL_CTRL']} + 5) @(posedge clk);")
-        L(f"        begin")
-        L(f"            logic saw_oe;")
-        L(f"            saw_oe = 0;")
-        L(f"            // Check recent history")
-        L(f"            // The DQ should have been driven at some point")
-        L(f"            saw_oe = 1; // We trust the FSM ran through WR_DRIVE")
-        L(f"            check(\"B2: cmd_wr_valid triggers DQ drive\", saw_oe);")
-        L(f"        end")
-        L(f"        check(\"B3: ddr_dq_o matches data\", 1);  // structural check")
+        L(f"        repeat ({p['CWL_CTRL']} + {p['WORD_BEATS']} + 5) @(posedge clk);")
+        L(f"        check($sformatf(\"B2: %0d beats driven [exp {p['WORD_BEATS']}]\", wr_beat_q.size()),")
+        L(f"              wr_beat_q.size()=={p['WORD_BEATS']});")
+        _dq_mask = (1 << p['DQ_WIDTH']) - 1
+        _test_word = 0xDEADBEEF
+        _hex_digits = (p['DQ_WIDTH'] + 3) // 4
+        for _beat in range(p['WORD_BEATS']):
+            _expected = (_test_word >> (_beat * p['DQ_WIDTH'])) & _dq_mask
+            L(f'        check($sformatf("B3.{_beat}: beat {_beat} = 0x%0{_hex_digits}X [exp 0x{_expected:0{_hex_digits}X}]",')
+            L(f"              (wr_beat_q.size() > {_beat}) ? wr_beat_q[{_beat}] : 'x),")
+            L(f"              (wr_beat_q.size() > {_beat}) && (wr_beat_q[{_beat}] == {p['DQ_WIDTH']}'h{_expected:0{_hex_digits}X}));")
         L(f"        // After burst completes, OE should be off")
         L(f"        repeat (5) @(posedge clk);")
         L(f"        check(\"B4: ddr_dq_oe deasserted after burst\", ddr_dq_oe===1'b0);")
-        L(f"        check(\"B5: Burst lasted BURST_CTRL_CYC cycles\", 1);  // structural")
+        L(f"        check($sformatf(\"B5: exactly WORD_BEATS beats driven [%0d]\", wr_beat_q.size()),")
+        L(f"              wr_beat_q.size()=={p['WORD_BEATS']});")
         L(f"")
 
         # Section C: Single read
@@ -716,7 +818,7 @@ class DataPathGenerator:
         L(f"            check($sformatf(\"C3: rd_rsp_data=0x%08X\", rdata), got && rdata==32'hCAFE1234);")
         L(f"            check($sformatf(\"C4: rd_rsp_aux=%0d [exp 7]\", raux), got && raux=={p['AUX_WIDTH']}'d7);")
         L(f"        end")
-        L(f"        ddr_dq_i = 0;")
+        L(f"        test_rd_word = 0;")
         L(f"")
 
         # Section D: BL8 burst write
@@ -742,29 +844,44 @@ class DataPathGenerator:
         L(f"            check(\"E1: 2 words captured\", got);")
         L(f"            check(\"E2: Responses delivered\", got);")
         L(f"        end")
-        L(f"        ddr_dq_i = 0;")
+        L(f"        test_rd_word = 0;")
         L(f"")
 
         # Section F: Write mask
         L(f"        $display(\"\"); $display(\"  -- Section F: Write Mask (DM) --\");")
+        _bytes_per_beat = p['DQ_WIDTH'] // 8
+
+        def _dm_beats(sel_value):
+            beats = []
+            for b in range(p['WORD_BEATS']):
+                sl = (sel_value >> (b * _bytes_per_beat)) & ((1 << _bytes_per_beat) - 1)
+                beats.append((~sl) & ((1 << _bytes_per_beat) - 1))
+            return beats
+
         L(f"        hw_reset();")
         L(f"        push_wr_data(32'hFFFFFFFF, {p['SEL_WIDTH']}'hF);  // all lanes enabled")
         L(f"        issue_wr_cmd({p['AUX_WIDTH']}'d0);")
-        L(f"        repeat ({p['CWL_CTRL']} + 3) @(posedge clk);")
-        L(f"        check(\"F1: DM propagates from mask\", 1);")
-        L(f"        repeat (5) @(posedge clk);")
+        L(f"        repeat ({p['CWL_CTRL']} + {p['WORD_BEATS']} + 5) @(posedge clk);")
+        for _beat, _exp in enumerate(_dm_beats(0xF)):
+            L(f'        check($sformatf("F1.{_beat}: DM beat {_beat} = 0x%0X [exp 0x{_exp:X}]",')
+            L(f"              (dm_beat_q.size() > {_beat}) ? dm_beat_q[{_beat}] : 'x),")
+            L(f"              (dm_beat_q.size() > {_beat}) && (dm_beat_q[{_beat}] == {p['DM_WIDTH']}'h{_exp:X}));")
         L(f"")
         L(f"        hw_reset();")
         L(f"        push_wr_data(32'hFFFFFFFF, {p['SEL_WIDTH']}'hF);")
         L(f"        issue_wr_cmd({p['AUX_WIDTH']}'d0);")
-        L(f"        repeat ({p['CWL_CTRL']} + 3) @(posedge clk);")
-        L(f"        check(\"F2: DM=0 when mask=F (no masking)\", 1);")
+        L(f"        repeat ({p['CWL_CTRL']} + {p['WORD_BEATS']} + 5) @(posedge clk);")
+        L(f'        check($sformatf("F2: DM all-zero when mask=F [beats=%0d]", dm_beat_q.size()),')
+        L(f"              dm_beat_q.size()=={p['WORD_BEATS']} && dm_beat_q[0]=={p['DM_WIDTH']}'h0 && dm_beat_q[{p['WORD_BEATS']-1}]=={p['DM_WIDTH']}'h0);")
         L(f"")
         L(f"        hw_reset();")
         L(f"        push_wr_data(32'hFFFFFFFF, {p['SEL_WIDTH']}'h5);  // byte 0,2 enabled, 1,3 masked")
         L(f"        issue_wr_cmd({p['AUX_WIDTH']}'d0);")
-        L(f"        repeat ({p['CWL_CTRL']} + 3) @(posedge clk);")
-        L(f"        check(\"F3: DM active for masked lanes\", 1);")
+        L(f"        repeat ({p['CWL_CTRL']} + {p['WORD_BEATS']} + 5) @(posedge clk);")
+        for _beat, _exp in enumerate(_dm_beats(0x5)):
+            L(f'        check($sformatf("F3.{_beat}: DM beat {_beat} = 0x%0X [exp 0x{_exp:X}]",')
+            L(f"              (dm_beat_q.size() > {_beat}) ? dm_beat_q[{_beat}] : 'x),")
+            L(f"              (dm_beat_q.size() > {_beat}) && (dm_beat_q[{_beat}] == {p['DM_WIDTH']}'h{_exp:X}));")
         L(f"")
 
         # Section G: Aux tag
@@ -778,7 +895,7 @@ class DataPathGenerator:
         L(f"            wait_rd_rsp(got, rdata, raux, {p['CL_CTRL']} + BURST_CTRL_CYC + 10);")
         L(f"            check($sformatf(\"G1: Aux tag=%0d [exp 5]\", raux), got && raux=={p['AUX_WIDTH']}'d5);")
         L(f"        end")
-        L(f"        ddr_dq_i = 0;")
+        L(f"        test_rd_word = 0;")
         L(f"")
         L(f"        // Drain FIFO before next read")
         L(f"        repeat (10) @(posedge clk);")
@@ -791,7 +908,7 @@ class DataPathGenerator:
         L(f"            wait_rd_rsp(got, rdata, raux, {p['CL_CTRL']} + BURST_CTRL_CYC + 10);")
         L(f"            check($sformatf(\"G2: Different aux=%0d [exp 9]\", raux), got && raux=={p['AUX_WIDTH']}'d9);")
         L(f"        end")
-        L(f"        ddr_dq_i = 0;")
+        L(f"        test_rd_word = 0;")
         L(f"")
 
         # Section H: Back-to-back
@@ -812,7 +929,7 @@ class DataPathGenerator:
         L(f"            wait_rd_rsp(got, rdata, raux, {p['CL_CTRL']} + BURST_CTRL_CYC + 10);")
         L(f"            check(\"H2: Read responses in order\", got);")
         L(f"        end")
-        L(f"        ddr_dq_i = 0;")
+        L(f"        test_rd_word = 0;")
         L(f"")
         L(f"        hw_reset();")
         L(f"        push_wr_data(32'hEEEE0000, {p['SEL_WIDTH']}'hF);")
@@ -820,7 +937,7 @@ class DataPathGenerator:
         L(f"        repeat ({p['CWL_CTRL']} + BURST_CTRL_CYC + 2) @(posedge clk);")
         L(f"        issue_rd_cmd_data({p['AUX_WIDTH']}'d2, 32'hFEED0000);")
         L(f"        repeat ({p['CL_CTRL']} + BURST_CTRL_CYC + 10) @(posedge clk);")
-        L(f"        ddr_dq_i = 0;")
+        L(f"        test_rd_word = 0;")
         L(f"        check(\"H3: Write then read no interference\", 1);")
         L(f"")
         L(f"        // Fill write buffer to test backpressure")
@@ -852,6 +969,7 @@ class DataPathGenerator:
     def generate_manifest(self) -> dict:
         p = self.p
         return {
+            **stamp(self.spec),
             "module_name": "data_path",
             "file": "data_path.sv",
             "phase": 3,
@@ -867,6 +985,7 @@ class DataPathGenerator:
                 "BURST_LEN": p["BURST_LEN"],
                 "CLK_RATIO": p["CLK_RATIO"],
                 "BURST_CTRL_CYC": p["BURST_CTRL_CYCLES"],
+                "WORD_BEATS": p["WORD_BEATS"],
                 "RD_FIFO_DEPTH": p["RD_FIFO_DEPTH"],
                 "CL": p["CL"],
                 "CWL": p["CWL"],
@@ -899,9 +1018,9 @@ class DataPathGenerator:
                     {"name": "cfg_CWL_nCK", "width": 8, "dir": "input", "source": "config_regs.cfg_CWL_nCK"},
                 ],
                 "ddr_phy": [
-                    {"name": "ddr_dq_o", "width": p["DATA_WIDTH"], "dir": "output"},
+                    {"name": "ddr_dq_o", "width": p["DQ_WIDTH"], "dir": "output"},
                     {"name": "ddr_dq_oe", "width": 1, "dir": "output"},
-                    {"name": "ddr_dq_i", "width": p["DATA_WIDTH"], "dir": "input"},
+                    {"name": "ddr_dq_i", "width": p["DQ_WIDTH"], "dir": "input"},
                     {"name": "ddr_dm_o", "width": p["DM_WIDTH"], "dir": "output"},
                     {"name": "ddr_dqs_o", "width": 1, "dir": "output"},
                     {"name": "ddr_dqs_oe", "width": 1, "dir": "output"},

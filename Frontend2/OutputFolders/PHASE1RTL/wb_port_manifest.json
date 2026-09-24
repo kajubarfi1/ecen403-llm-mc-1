@@ -1,4 +1,7 @@
 {
+  "git_commit": "fd2a561795ec86a2aa5628363c28d361ce0d2279",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "generated_utc": "2026-09-24T18:00:47.924285+00:00",
   "module_name": "wb_port",
   "file": "wb_port.sv",
   "phase": 1,
@@ -129,22 +132,26 @@
       {
         "name": "req_ready",
         "width": 1,
-        "dir": "input"
+        "dir": "input",
+        "source": "cmd_queue.enq_ready"
       },
       {
         "name": "rsp_valid",
         "width": 1,
-        "dir": "input"
+        "dir": "input",
+        "source": "data_path.rd_rsp_valid"
       },
       {
         "name": "rsp_rdata",
         "width": 32,
-        "dir": "input"
+        "dir": "input",
+        "source": "data_path.rd_rsp_data"
       },
       {
         "name": "rsp_aux",
         "width": 4,
-        "dir": "input"
+        "dir": "input",
+        "source": "data_path.rd_rsp_aux"
       }
     ]
   },

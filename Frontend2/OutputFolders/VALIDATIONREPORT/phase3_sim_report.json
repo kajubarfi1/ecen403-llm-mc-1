@@ -46,8 +46,8 @@
     },
     "scheduler": {
       "status": "PASS",
-      "test_count": 31,
-      "pass_count": 31,
+      "test_count": 37,
+      "pass_count": 37,
       "fail_count": 0,
       "pass_lines": [
         "V T01 PASS: Reset: !valid",
@@ -80,7 +80,13 @@
         "V T28 PASS: Blocked: NOP ok",
         "V T29 PASS: Aux: passthrough",
         "V T30 PASS: Aux: col",
-        "V T31 PASS: Aux: row"
+        "V T31 PASS: Aux: row",
+        "V T32 PASS: Regrant: first grant",
+        "V T33 PASS: Regrant: no re-grant next cycle",
+        "V T34 PASS: RefBlock: PRE not REF while active",
+        "V T35 PASS: RefBlock: PRE targets active bank",
+        "V T36 PASS: RefBlock: REF once banks idle",
+        "V T37 PASS: RefBlock: ref_ack"
       ],
       "fail_lines": [],
       "assertion_errors": [],
@@ -134,6 +140,6 @@
       "log_file": "cmd_gen_xrun.log"
     }
   },
-  "timestamp": "2026-09-24T10:36:13.521793",
+  "timestamp": "2026-09-24T13:02:04.390785",
   "server": "olympus.ece.tamu.edu"
 }

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    cmd_queue
-// Generated: 2026-09-24 10:35:49
+// Generated: 2026-09-24 13:01:43
 // Generator:     Command Queue Generator (Phase 3)
 //
 // 16-deep command queue. Accepts decoded requests from addr_decoder,

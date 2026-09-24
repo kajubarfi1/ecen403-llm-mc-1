@@ -116,27 +116,32 @@ module config_regs #(
     logic [31:0] reg_refresh_config;
     always_ff @(posedge clk or negedge rst_n)
         if (!rst_n) reg_refresh_config <= 32'h00000168;
-        else if (csr_wr && addr_valid && csr_adr_i == ADDR_REFRESH_CONFIG) reg_refresh_config <= csr_dat_i;
+        else if (csr_wr && addr_valid && csr_adr_i == ADDR_REFRESH_CONFIG)
+            reg_refresh_config <= (csr_dat_i & 32'h000001FF) | (reg_refresh_config & 32'hFFFFFE00);  // reserved bits pinned
 
     logic [31:0] reg_bist_config;
     always_ff @(posedge clk or negedge rst_n)
         if (!rst_n) reg_bist_config <= 32'h00000000;
-        else if (csr_wr && addr_valid && csr_adr_i == ADDR_BIST_CONFIG) reg_bist_config <= csr_dat_i;
+        else if (csr_wr && addr_valid && csr_adr_i == ADDR_BIST_CONFIG)
+            reg_bist_config <= (csr_dat_i & 32'h0000000F) | (reg_bist_config & 32'hFFFFFFF0);  // reserved bits pinned
 
     logic [31:0] reg_bist_addr_start;
     always_ff @(posedge clk or negedge rst_n)
         if (!rst_n) reg_bist_addr_start <= 32'h00000000;
-        else if (csr_wr && addr_valid && csr_adr_i == ADDR_BIST_ADDR_START) reg_bist_addr_start <= csr_dat_i;
+        else if (csr_wr && addr_valid && csr_adr_i == ADDR_BIST_ADDR_START)
+            reg_bist_addr_start <= (csr_dat_i & 32'h1FFFFFFF) | (reg_bist_addr_start & 32'hE0000000);  // reserved bits pinned
 
     logic [31:0] reg_bist_addr_end;
     always_ff @(posedge clk or negedge rst_n)
         if (!rst_n) reg_bist_addr_end <= 32'h1FFFFFFF;
-        else if (csr_wr && addr_valid && csr_adr_i == ADDR_BIST_ADDR_END) reg_bist_addr_end <= csr_dat_i;
+        else if (csr_wr && addr_valid && csr_adr_i == ADDR_BIST_ADDR_END)
+            reg_bist_addr_end <= (csr_dat_i & 32'h1FFFFFFF) | (reg_bist_addr_end & 32'hE0000000);  // reserved bits pinned
 
     logic [31:0] reg_ctrl_config;
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) reg_ctrl_config <= 32'h00000009;
-        else if (csr_wr && addr_valid && csr_adr_i == ADDR_CTRL_CONFIG) reg_ctrl_config <= csr_dat_i;
+        else if (csr_wr && addr_valid && csr_adr_i == ADDR_CTRL_CONFIG)
+            reg_ctrl_config <= (csr_dat_i & 32'h000000FF) | (reg_ctrl_config & 32'hFFFFFF00);  // reserved bits pinned
         else begin
             reg_ctrl_config[5] <= 1'b0;  // bist_start self-clear
             reg_ctrl_config[6] <= 1'b0;  // force_refresh self-clear

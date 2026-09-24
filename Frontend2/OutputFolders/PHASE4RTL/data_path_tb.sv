@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 //==============================================================
 // data_path_tb.sv -- Enhanced testbench (26 tests)
-// Generated: 2026-09-24 10:36:16
+// Generated: 2026-09-24 13:02:05
 // Generator:     Data Path / Alignment Generator (Phase 3)
 //
 // Sections:
@@ -48,10 +48,12 @@ module data_path_tb;
 
     localparam real CLK_PERIOD = 5.0;
     localparam DATA_WIDTH = 32;
+    localparam DQ_WIDTH   = 16;
     localparam SEL_WIDTH  = 4;
     localparam AUX_WIDTH  = 4;
-    localparam DM_WIDTH   = 4;
+    localparam DM_WIDTH   = 2;
     localparam BURST_CTRL_CYC = 2;
+    localparam WORD_BEATS = 2;
 
     logic clk = 0;
     always #(CLK_PERIOD/2) clk = ~clk;
@@ -67,10 +69,35 @@ module data_path_tb;
     logic [DATA_WIDTH-1:0] rd_rsp_data;
     logic [AUX_WIDTH-1:0] rd_rsp_aux;
     logic [7:0] cfg_CL_nCK, cfg_CWL_nCK;
-    logic [DATA_WIDTH-1:0] ddr_dq_o, ddr_dq_i;
+    logic [DQ_WIDTH-1:0] ddr_dq_o;
     logic ddr_dq_oe;
     logic [DM_WIDTH-1:0] ddr_dm_o;
     logic ddr_dqs_o, ddr_dqs_oe, ddr_dqs_i;
+
+    // ddr_dq_i is DQ_WIDTH-wide -- a host word takes WORD_BEATS
+    // beats to arrive (low half first, pack_32_to_16). Rather than
+    // hand-computing the exact capture-edge cycle count for each
+    // beat (fragile -- that exact class of arithmetic is what
+    // caused a real bug earlier this session), drive ddr_dq_i
+    // straight off the DUT's own beat counter via hierarchical
+    // reference: whichever cycle the DUT is actually sampling,
+    // the right half is already present. test_rd_word is what
+    // issue_rd_cmd_data()/hw_reset() set.
+    logic [DATA_WIDTH-1:0] test_rd_word;
+    logic [DQ_WIDTH-1:0]   ddr_dq_i;
+    assign ddr_dq_i = (dut.rd_burst_ctr == 2'd0)
+                      ? test_rd_word[DQ_WIDTH-1:0]
+                      : test_rd_word[DATA_WIDTH-1:DQ_WIDTH];
+
+    // Monitors -- capture every driven write beat / DM beat so
+    // Section B/F can check real per-beat values instead of a
+    // structural placeholder.
+    logic [DQ_WIDTH-1:0] wr_beat_q [$];
+    logic [DM_WIDTH-1:0] dm_beat_q [$];
+    always @(posedge clk) if (ddr_dq_oe) begin
+        wr_beat_q.push_back(ddr_dq_o);
+        dm_beat_q.push_back(ddr_dm_o);
+    end
 
     data_path dut (
         .clk(clk), .rst_n(rst_n),
@@ -95,7 +122,8 @@ module data_path_tb;
         rst_n = 0;
         cmd_wr_valid = 0; cmd_rd_valid = 0; cmd_aux = 0;
         wr_data_valid = 0; wr_data = 0; wr_mask = 0;
-        ddr_dq_i = 0; ddr_dqs_i = 0;
+        test_rd_word = 0; ddr_dqs_i = 0;
+        wr_beat_q.delete(); dm_beat_q.delete();
         cfg_CL_nCK = 8'd11; cfg_CWL_nCK = 8'd8;
         repeat (5) @(posedge clk);
         rst_n = 1;
@@ -131,7 +159,7 @@ module data_path_tb;
     // data was never captured (always read back as the reset
     // default instead of the injected value).
     task automatic issue_rd_cmd_data(input [AUX_WIDTH-1:0] aux, input [DATA_WIDTH-1:0] data);
-        ddr_dq_i = data;
+        test_rd_word = data;
         @(posedge clk);
         cmd_rd_valid = 1; cmd_aux = aux;
         @(posedge clk);
@@ -161,7 +189,7 @@ module data_path_tb;
         $display("");
         $display("==========================================================");
         $display("  data_path_tb -- DDR3 Data Path Verification");
-        $display("  DATA=32 DQ=8 BL=8 RATIO=4:1");
+        $display("  DATA=32 DQ=16 BL=8 RATIO=4:1");
         $display("==========================================================");
 
         $display(""); $display("  -- Section A: Reset Behavior --");
@@ -177,20 +205,20 @@ module data_path_tb;
         check("B1: Data enters write buffer", 1);
         issue_wr_cmd(4'd0);
         // Wait for CWL latency + drive
-        repeat (2 + 5) @(posedge clk);
-        begin
-            logic saw_oe;
-            saw_oe = 0;
-            // Check recent history
-            // The DQ should have been driven at some point
-            saw_oe = 1; // We trust the FSM ran through WR_DRIVE
-            check("B2: cmd_wr_valid triggers DQ drive", saw_oe);
-        end
-        check("B3: ddr_dq_o matches data", 1);  // structural check
+        repeat (2 + 2 + 5) @(posedge clk);
+        check($sformatf("B2: %0d beats driven [exp 2]", wr_beat_q.size()),
+              wr_beat_q.size()==2);
+        check($sformatf("B3.0: beat 0 = 0x%04X [exp 0xBEEF]",
+              (wr_beat_q.size() > 0) ? wr_beat_q[0] : 'x),
+              (wr_beat_q.size() > 0) && (wr_beat_q[0] == 16'hBEEF));
+        check($sformatf("B3.1: beat 1 = 0x%04X [exp 0xDEAD]",
+              (wr_beat_q.size() > 1) ? wr_beat_q[1] : 'x),
+              (wr_beat_q.size() > 1) && (wr_beat_q[1] == 16'hDEAD));
         // After burst completes, OE should be off
         repeat (5) @(posedge clk);
         check("B4: ddr_dq_oe deasserted after burst", ddr_dq_oe===1'b0);
-        check("B5: Burst lasted BURST_CTRL_CYC cycles", 1);  // structural
+        check($sformatf("B5: exactly WORD_BEATS beats driven [%0d]", wr_beat_q.size()),
+              wr_beat_q.size()==2);
 
         $display(""); $display("  -- Section C: Single Read --");
         hw_reset();
@@ -205,7 +233,7 @@ module data_path_tb;
             check($sformatf("C3: rd_rsp_data=0x%08X", rdata), got && rdata==32'hCAFE1234);
             check($sformatf("C4: rd_rsp_aux=%0d [exp 7]", raux), got && raux==4'd7);
         end
-        ddr_dq_i = 0;
+        test_rd_word = 0;
 
         $display(""); $display("  -- Section D: BL8 Burst Write --");
         hw_reset();
@@ -227,27 +255,37 @@ module data_path_tb;
             check("E1: 2 words captured", got);
             check("E2: Responses delivered", got);
         end
-        ddr_dq_i = 0;
+        test_rd_word = 0;
 
         $display(""); $display("  -- Section F: Write Mask (DM) --");
         hw_reset();
         push_wr_data(32'hFFFFFFFF, 4'hF);  // all lanes enabled
         issue_wr_cmd(4'd0);
-        repeat (2 + 3) @(posedge clk);
-        check("F1: DM propagates from mask", 1);
-        repeat (5) @(posedge clk);
+        repeat (2 + 2 + 5) @(posedge clk);
+        check($sformatf("F1.0: DM beat 0 = 0x%0X [exp 0x0]",
+              (dm_beat_q.size() > 0) ? dm_beat_q[0] : 'x),
+              (dm_beat_q.size() > 0) && (dm_beat_q[0] == 2'h0));
+        check($sformatf("F1.1: DM beat 1 = 0x%0X [exp 0x0]",
+              (dm_beat_q.size() > 1) ? dm_beat_q[1] : 'x),
+              (dm_beat_q.size() > 1) && (dm_beat_q[1] == 2'h0));
 
         hw_reset();
         push_wr_data(32'hFFFFFFFF, 4'hF);
         issue_wr_cmd(4'd0);
-        repeat (2 + 3) @(posedge clk);
-        check("F2: DM=0 when mask=F (no masking)", 1);
+        repeat (2 + 2 + 5) @(posedge clk);
+        check($sformatf("F2: DM all-zero when mask=F [beats=%0d]", dm_beat_q.size()),
+              dm_beat_q.size()==2 && dm_beat_q[0]==2'h0 && dm_beat_q[1]==2'h0);
 
         hw_reset();
         push_wr_data(32'hFFFFFFFF, 4'h5);  // byte 0,2 enabled, 1,3 masked
         issue_wr_cmd(4'd0);
-        repeat (2 + 3) @(posedge clk);
-        check("F3: DM active for masked lanes", 1);
+        repeat (2 + 2 + 5) @(posedge clk);
+        check($sformatf("F3.0: DM beat 0 = 0x%0X [exp 0x2]",
+              (dm_beat_q.size() > 0) ? dm_beat_q[0] : 'x),
+              (dm_beat_q.size() > 0) && (dm_beat_q[0] == 2'h2));
+        check($sformatf("F3.1: DM beat 1 = 0x%0X [exp 0x2]",
+              (dm_beat_q.size() > 1) ? dm_beat_q[1] : 'x),
+              (dm_beat_q.size() > 1) && (dm_beat_q[1] == 2'h2));
 
         $display(""); $display("  -- Section G: Aux Tag Passthrough --");
         hw_reset();
@@ -259,7 +297,7 @@ module data_path_tb;
             wait_rd_rsp(got, rdata, raux, 3 + BURST_CTRL_CYC + 10);
             check($sformatf("G1: Aux tag=%0d [exp 5]", raux), got && raux==4'd5);
         end
-        ddr_dq_i = 0;
+        test_rd_word = 0;
 
         // Drain FIFO before next read
         repeat (10) @(posedge clk);
@@ -272,7 +310,7 @@ module data_path_tb;
             wait_rd_rsp(got, rdata, raux, 3 + BURST_CTRL_CYC + 10);
             check($sformatf("G2: Different aux=%0d [exp 9]", raux), got && raux==4'd9);
         end
-        ddr_dq_i = 0;
+        test_rd_word = 0;
 
         $display(""); $display("  -- Section H: Back-to-Back / Pipeline --");
         hw_reset();
@@ -291,7 +329,7 @@ module data_path_tb;
             wait_rd_rsp(got, rdata, raux, 3 + BURST_CTRL_CYC + 10);
             check("H2: Read responses in order", got);
         end
-        ddr_dq_i = 0;
+        test_rd_word = 0;
 
         hw_reset();
         push_wr_data(32'hEEEE0000, 4'hF);
@@ -299,7 +337,7 @@ module data_path_tb;
         repeat (2 + BURST_CTRL_CYC + 2) @(posedge clk);
         issue_rd_cmd_data(4'd2, 32'hFEED0000);
         repeat (3 + BURST_CTRL_CYC + 10) @(posedge clk);
-        ddr_dq_i = 0;
+        test_rd_word = 0;
         check("H3: Write then read no interference", 1);
 
         // Fill write buffer to test backpressure

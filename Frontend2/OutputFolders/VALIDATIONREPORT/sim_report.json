@@ -25,8 +25,8 @@
     },
     "config_regs": {
       "status": "PASS",
-      "test_count": 36,
-      "pass_count": 36,
+      "test_count": 41,
+      "pass_count": 41,
       "fail_count": 0,
       "pass_lines": [
         "[PASS] 1: A1: CTRL_STATUS reset = 0x00000000",
@@ -64,12 +64,17 @@
         "[PASS] 33: H1: TIMING_0 reset (0x271c0b0b)",
         "[PASS] 34: H2: Normal after reset",
         "[PASS] 35: I1: Back-to-back TIMING_0",
-        "[PASS] 36: I2: Back-to-back TIMING_1"
+        "[PASS] 36: I2: Back-to-back TIMING_1",
+        "[PASS] 37: J1: CTRL_CONFIG reserved bits pinned (0x0000001f)",
+        "[PASS] 38: J2: REFRESH_CONFIG reserved bits pinned (0x000001ff)",
+        "[PASS] 39: J3: BIST_CONFIG reserved bits pinned (0x0000000f)",
+        "[PASS] 40: J4: BIST_ADDR_START reserved bits pinned (0x1fffffff)",
+        "[PASS] 41: J5: BIST_ADDR_END reserved bits pinned (0x1fffffff)"
       ],
       "fail_lines": [],
       "assertion_errors": [
-        "xmsim: *E,ASRTST (./config_regs.sv,225): (time 822500 PS) Assertion config_regs_tb.dut.p_bad_addr has failed (2 cycles, starting 817500 PS)",
-        "xmsim: *E,ASRTST (./config_regs.sv,225): (time 832500 PS) Assertion config_regs_tb.dut.p_bad_addr has failed (2 cycles, starting 827500 PS)"
+        "xmsim: *E,ASRTST (./config_regs.sv,230): (time 822500 PS) Assertion config_regs_tb.dut.p_bad_addr has failed (2 cycles, starting 817500 PS)",
+        "xmsim: *E,ASRTST (./config_regs.sv,230): (time 832500 PS) Assertion config_regs_tb.dut.p_bad_addr has failed (2 cycles, starting 827500 PS)"
       ],
       "log_file": "config_regs_xrun.log"
     },
@@ -89,6 +94,6 @@
       "log_file": "wb_port_xrun.log"
     }
   },
-  "timestamp": "2026-09-24T10:35:07.341876",
+  "timestamp": "2026-09-24T13:01:10.320197",
   "server": "olympus.ece.tamu.edu"
 }

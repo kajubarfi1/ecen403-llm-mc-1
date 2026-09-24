@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 //==============================================================
 // config_regs_tb.sv -- Enhanced testbench (36 tests)
-// Generated: 2026-09-24 10:34:43
+// Generated: 2026-09-24 13:00:47
 // Generator: config_regs_gen.py (Phase 1, deterministic script)
 //==============================================================
 module config_regs_tb;
@@ -192,6 +192,24 @@ module config_regs_tb;
         csr_write(8'h08, 32'hAAAAAAAA); csr_write(8'h0C, 32'hBBBBBBBB);
         csr_read(8'h08, rdata); check("I1: Back-to-back TIMING_0", rdata==32'hAAAAAAAA);
         csr_read(8'h0C, rdata); check("I2: Back-to-back TIMING_1", rdata==32'hBBBBBBBB);
+
+        $display(""); $display("  -- Section J: Reserved Bits Pinned on Write --");
+        hw_reset();
+        csr_write(8'h04, 32'hFFFFFFFF); csr_read(8'h04, rdata);
+        check($sformatf("J1: CTRL_CONFIG reserved bits pinned (0x%08X)", rdata),
+              (rdata & 32'hFFFFFF00) == (32'h00000009 & 32'hFFFFFF00));
+        csr_write(8'h18, 32'hFFFFFFFF); csr_read(8'h18, rdata);
+        check($sformatf("J2: REFRESH_CONFIG reserved bits pinned (0x%08X)", rdata),
+              (rdata & 32'hFFFFFE00) == (32'h00000168 & 32'hFFFFFE00));
+        csr_write(8'h20, 32'hFFFFFFFF); csr_read(8'h20, rdata);
+        check($sformatf("J3: BIST_CONFIG reserved bits pinned (0x%08X)", rdata),
+              (rdata & 32'hFFFFFFF0) == (32'h00000000 & 32'hFFFFFFF0));
+        csr_write(8'h24, 32'hFFFFFFFF); csr_read(8'h24, rdata);
+        check($sformatf("J4: BIST_ADDR_START reserved bits pinned (0x%08X)", rdata),
+              (rdata & 32'hE0000000) == (32'h00000000 & 32'hE0000000));
+        csr_write(8'h28, 32'hFFFFFFFF); csr_read(8'h28, rdata);
+        check($sformatf("J5: BIST_ADDR_END reserved bits pinned (0x%08X)", rdata),
+              (rdata & 32'hE0000000) == (32'h1FFFFFFF & 32'hE0000000));
 
         $display("");
         $display("==========================================================");

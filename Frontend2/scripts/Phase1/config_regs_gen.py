@@ -26,6 +26,12 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional
 
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_SCRIPTS_DIR = os.path.dirname(_HERE)
+if _SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPTS_DIR)
+from manifest_stamp import stamp
+
 
 class ConfigRegsGenerator:
 
@@ -69,16 +75,35 @@ class ConfigRegsGenerator:
             off = int(r["offset"], 16) if isinstance(r["offset"], str) else r["offset"]
             rst = int(r["reset_value"], 16) if isinstance(r["reset_value"], str) else r["reset_value"]
             fields = []
+            covered_bits = set()
+            reserved_bits = set()
             for f in r["fields"]:
                 fa = f.get("access", r["access"])
                 fields.append({
                     "name": f["name"], "bits": f["bits"],
                     "access": fa, "description": f.get("description", ""),
                 })
+                fbits = self._parse_bits(f["bits"])
+                covered_bits |= fbits
+                # Every register in this spec already declares its unused
+                # positions as an explicit field literally named "reserved"
+                # -- treat those (and any gap bits not covered by ANY
+                # field, belt-and-suspenders) as non-writable. Writes to
+                # them must not be stored (see Defect 8,
+                # Frontend2/VALIDATION_INTEGRATION_PLAN.md: this masking
+                # did not exist at all in this generator, a regression
+                # against an earlier version that had it).
+                if f["name"].strip().lower() == "reserved":
+                    reserved_bits |= fbits
+            reserved_bits |= {bit for bit in range(32) if bit not in covered_bits}
+            reserved_mask = 0
+            for bit in reserved_bits:
+                reserved_mask |= (1 << bit)
             p["REG_TABLE"].append({
                 "name": r["name"], "offset": off, "offset_hex": f"0x{off:02X}",
                 "reset_value": rst, "reset_hex": f"0x{rst:08X}",
                 "access": r["access"], "fields": fields,
+                "reserved_mask": reserved_mask,
             })
         return p
 
@@ -215,10 +240,17 @@ class ConfigRegsGenerator:
                     if rt["name"] not in ("CTRL_STATUS", "CTRL_CONFIG", "ERROR_STATUS")]
         for rt in plain_rw:
             reg = f"reg_{rt['name'].lower()}"
+            rmask = rt["reserved_mask"]
             L(f"    logic [31:0] {reg};")
             L(f"    always_ff @(posedge clk or negedge rst_n)")
             L(f"        if (!rst_n) {reg} <= 32'h{rt['reset_value']:08X};")
-            L(f"        else if (csr_wr && addr_valid && csr_adr_i == ADDR_{rt['name']}) {reg} <= csr_dat_i;")
+            if rmask:
+                keep_mask = rmask & 0xFFFFFFFF
+                take_mask = (~rmask) & 0xFFFFFFFF
+                L(f"        else if (csr_wr && addr_valid && csr_adr_i == ADDR_{rt['name']})")
+                L(f"            {reg} <= (csr_dat_i & 32'h{take_mask:08X}) | ({reg} & 32'h{keep_mask:08X});  // reserved bits pinned")
+            else:
+                L(f"        else if (csr_wr && addr_valid && csr_adr_i == ADDR_{rt['name']}) {reg} <= csr_dat_i;")
             L("")
 
         # CTRL_CONFIG: plain RW, but bits 5/6/7 (bist_start, force_refresh,
@@ -226,10 +258,17 @@ class ConfigRegsGenerator:
         # of source (see WRITE-ONCE SELF-CLEARING FIELDS in the original
         # HARD NAMING CONTRACT).
         cc = reg_by_name["CTRL_CONFIG"]
+        cc_rmask = cc["reserved_mask"]
+        cc_keep = cc_rmask & 0xFFFFFFFF
+        cc_take = (~cc_rmask) & 0xFFFFFFFF
         L(f"    logic [31:0] reg_ctrl_config;")
         L(f"    always_ff @(posedge clk or negedge rst_n) begin")
         L(f"        if (!rst_n) reg_ctrl_config <= 32'h{cc['reset_value']:08X};")
-        L(f"        else if (csr_wr && addr_valid && csr_adr_i == ADDR_CTRL_CONFIG) reg_ctrl_config <= csr_dat_i;")
+        if cc_rmask:
+            L(f"        else if (csr_wr && addr_valid && csr_adr_i == ADDR_CTRL_CONFIG)")
+            L(f"            reg_ctrl_config <= (csr_dat_i & 32'h{cc_take:08X}) | (reg_ctrl_config & 32'h{cc_keep:08X});  // reserved bits pinned")
+        else:
+            L(f"        else if (csr_wr && addr_valid && csr_adr_i == ADDR_CTRL_CONFIG) reg_ctrl_config <= csr_dat_i;")
         L(f"        else begin")
         L(f"            reg_ctrl_config[5] <= 1'b0;  // bist_start self-clear")
         L(f"            reg_ctrl_config[6] <= 1'b0;  // force_refresh self-clear")
@@ -549,6 +588,20 @@ class ConfigRegsGenerator:
         L(f'        csr_read(8\'h08, rdata); check("I1: Back-to-back TIMING_0", rdata==32\'hAAAAAAAA);')
         L(f'        csr_read(8\'h0C, rdata); check("I2: Back-to-back TIMING_1", rdata==32\'hBBBBBBBB);')
         L(f"")
+        L(f'        $display(""); $display("  -- Section J: Reserved Bits Pinned on Write --");')
+        L(f"        hw_reset();")
+        ji = 1
+        for rt in p["REG_TABLE"]:
+            rmask = rt["reserved_mask"]
+            if rmask == 0 or rt["access"] not in ("RW", "RW1C") or rt["name"] == "ERROR_STATUS":
+                continue
+            off = rt["offset"]
+            rst = rt["reset_value"]
+            L(f"        csr_write(8'h{off:02X}, 32'hFFFFFFFF); csr_read(8'h{off:02X}, rdata);")
+            L(f'        check($sformatf("J{ji}: {rt["name"]} reserved bits pinned (0x%08X)", rdata),')
+            L(f"              (rdata & 32'h{rmask:08X}) == (32'h{rst:08X} & 32'h{rmask:08X}));")
+            ji += 1
+        L(f"")
         L(f'        $display("");')
         L(f'        $display("==========================================================");')
         L(f'        if (fail_count==0) $display("  ALL %0d TESTS PASSED", total_tests);')
@@ -566,6 +619,7 @@ class ConfigRegsGenerator:
     def generate_manifest(self) -> dict:
         p = self.p
         return {
+            **stamp(self.spec),
             "module_name": "config_regs", "file": "config_regs.sv",
             "phase": 1, "agent": "config_regs_gen",
             "spec_version": self.spec.get("schema_version"),
@@ -593,17 +647,23 @@ class ConfigRegsGenerator:
                     {"name": "csr_err_o", "width": 1, "dir": "output"},
                 ],
                 "status_in": [
-                    {"name": "sts_init_done", "width": 1, "dir": "input"},
-                    {"name": "sts_cal_done", "width": 1, "dir": "input"},
-                    {"name": "sts_cal_fail", "width": 1, "dir": "input"},
+                    {"name": "sts_init_done", "width": 1, "dir": "input",
+                     "source": "init_fsm.init_done"},
+                    {"name": "sts_cal_done", "width": 1, "dir": "input",
+                     "source": "calibration.cal_done"},
+                    {"name": "sts_cal_fail", "width": 1, "dir": "input",
+                     "source": "calibration.cal_fail"},
                     {"name": "sts_bist_done", "width": 1, "dir": "input"},
                     {"name": "sts_bist_fail", "width": 1, "dir": "input"},
-                    {"name": "sts_ref_pending_cnt", "width": 3, "dir": "input"},
+                    {"name": "sts_ref_pending_cnt", "width": 3, "dir": "input",
+                     "source": "refresh_ctrl.ref_pending_cnt"},
                     {"name": "sts_self_refresh_active", "width": 1, "dir": "input"},
                     {"name": "sts_ecc_ce_count", "width": 16, "dir": "input"},
                     {"name": "sts_ecc_ue_event", "width": 1, "dir": "input"},
-                    {"name": "sts_ref_starve_event", "width": 1, "dir": "input"},
-                    {"name": "sts_init_fail_event", "width": 1, "dir": "input"},
+                    {"name": "sts_ref_starve_event", "width": 1, "dir": "input",
+                     "source": "refresh_ctrl.ref_starve_flag"},
+                    {"name": "sts_init_fail_event", "width": 1, "dir": "input",
+                     "source": "init_fsm.init_fail"},
                     {"name": "sts_bist_fail_addr", "width": 13, "dir": "input"},
                 ],
                 "config_out": [

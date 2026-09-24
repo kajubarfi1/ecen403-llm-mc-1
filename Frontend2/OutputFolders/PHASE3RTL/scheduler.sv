@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    scheduler
-// Generated: 2026-09-24 10:35:49
+// Generated: 2026-09-24 13:01:43
 // Generator:     Scheduler Generator (Phase 3)
 //
 // FR-FCFS (First-Ready First-Come-First-Served) scheduler.
@@ -72,13 +72,25 @@ module scheduler #(
     logic [DEPTH-1:0] is_cas_ready;  // bank active + row hit + timing ok
     logic [DEPTH-1:0] is_act_needed; // bank idle or wrong row
 
+    // JEDEC: REF is only legal once every bank is precharged.
+    wire all_banks_idle = ~(|bank_is_active);
+
     always_comb begin
         for (int i = 0; i < DEPTH; i++) begin
             logic [BANK_BITS-1:0] b;
+            logic recently_granted;
             b = q_bank[i];
+            // deq_grant/deq_idx are this module's OWN registered outputs
+            // from last cycle -- cmd_queue's own q_valid/q_row/... won't
+            // reflect the dequeue for (at least) one more cycle after that,
+            // so without this guard the same entry gets re-selected and
+            // re-granted every cycle until the queue catches up (observed:
+            // 19 enqueued, 16 dequeued -- see
+            // Frontend2/VALIDATION_INTEGRATION_PLAN.md Defect 1).
+            recently_granted = deq_grant && (deq_idx == i[IDX_BITS-1:0]);
             is_row_hit[i]   = q_valid[i] && bank_is_active[b] &&
                                (bank_open_row[b] == q_row[i]);
-            is_cas_ready[i] = is_row_hit[i] &&
+            is_cas_ready[i] = is_row_hit[i] && !recently_granted &&
                                (q_we[i] ? bank_wr_allowed[b] : bank_rd_allowed[b]);
             is_act_needed[i] = q_valid[i] && (!bank_is_active[b] ||
                                (bank_open_row[b] != q_row[i]));
@@ -92,18 +104,44 @@ module scheduler #(
     logic [IDX_BITS-1:0]     sel_idx;
     logic [3:0]              sel_type;
     logic                    sel_is_ref;
+    // Most commands source row/col/bank/we/aux from the winning queue entry
+    // (q_*[sel_idx]). A refresh-driven forced PRE (below) isn't tied to any
+    // queue entry -- it only carries a bank -- so this flag picks which
+    // source the output-registration stage uses.
+    logic                    sel_from_queue;
+    logic [BANK_BITS-1:0]    sel_bank;
 
     always_comb begin
-        sel_valid  = 1'b0;
-        sel_idx    = '0;
-        sel_type   = CMD_NOP;
-        sel_is_ref = 1'b0;
+        sel_valid      = 1'b0;
+        sel_idx        = '0;
+        sel_type       = CMD_NOP;
+        sel_is_ref     = 1'b0;
+        sel_from_queue = 1'b1;
+        sel_bank       = '0;
 
-        // Priority 1: Urgent refresh preempts everything
+        // Priority 1: Urgent refresh. JEDEC requires every bank precharged
+        // before REF -- if any bank is still open, force-precharge it
+        // (lowest-numbered active + precharge-ready bank) instead of
+        // issuing REF early; only issue REF once all_banks_idle. If the
+        // active bank(s) aren't precharge-ready yet (tRAS/tWR/etc. still
+        // counting down), this cycle is a NOP and the next cycle retries --
+        // never a raw un-gated REF (see Defect 5 in
+        // Frontend2/VALIDATION_INTEGRATION_PLAN.md).
         if (ref_urgent) begin
-            sel_valid  = 1'b1;
-            sel_type   = CMD_REF;
-            sel_is_ref = 1'b1;
+            if (all_banks_idle) begin
+                sel_valid  = 1'b1;
+                sel_type   = CMD_REF;
+                sel_is_ref = 1'b1;
+            end else begin
+                for (int b = 0; b < NUM_BANKS; b++) begin
+                    if (bank_is_active[b] && bank_pre_allowed[b] && !sel_valid) begin
+                        sel_valid      = 1'b1;
+                        sel_type       = CMD_PRE;
+                        sel_from_queue = 1'b0;
+                        sel_bank       = b[BANK_BITS-1:0];
+                    end
+                end
+            end
         end
         // Priority 2: Row-hit CAS (first-come = lowest index)
         else begin
@@ -134,11 +172,23 @@ module scheduler #(
                     end
                 end
             end
-            // Priority 4: Normal refresh (when no other work)
+            // Priority 4: Normal refresh (when no other work) -- same
+            // idle-gate / force-precharge-first behavior as urgent refresh.
             if (!sel_valid && ref_required) begin
-                sel_valid  = 1'b1;
-                sel_type   = CMD_REF;
-                sel_is_ref = 1'b1;
+                if (all_banks_idle) begin
+                    sel_valid  = 1'b1;
+                    sel_type   = CMD_REF;
+                    sel_is_ref = 1'b1;
+                end else begin
+                    for (int b = 0; b < NUM_BANKS; b++) begin
+                        if (bank_is_active[b] && bank_pre_allowed[b] && !sel_valid) begin
+                            sel_valid      = 1'b1;
+                            sel_type       = CMD_PRE;
+                            sel_from_queue = 1'b0;
+                            sel_bank       = b[BANK_BITS-1:0];
+                        end
+                    end
+                end
             end
         end
     end
@@ -168,6 +218,14 @@ module scheduler #(
                 if (sel_is_ref) begin
                     ref_ack  <= 1'b1;
                     cmd_bank <= '0;
+                    cmd_row  <= '0;
+                    cmd_col  <= '0;
+                    cmd_we   <= 1'b0;
+                    cmd_aux  <= '0;
+                end else if (!sel_from_queue) begin
+                    // Forced precharge ahead of refresh -- bank only, no
+                    // backing queue entry, so nothing to dequeue.
+                    cmd_bank <= sel_bank;
                     cmd_row  <= '0;
                     cmd_col  <= '0;
                     cmd_we   <= 1'b0;

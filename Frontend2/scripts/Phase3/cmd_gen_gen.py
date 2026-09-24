@@ -10,6 +10,12 @@ import json, os, sys, math
 from pathlib import Path
 from datetime import datetime
 
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_SCRIPTS_DIR = os.path.dirname(_HERE)
+if _SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPTS_DIR)
+from manifest_stamp import stamp
+
 
 class CmdGenGenerator:
     def __init__(self, spec_path, output_dir="./output"):
@@ -340,6 +346,7 @@ endmodule
     def generate_manifest(self):
         p = self.p
         return {
+            **stamp(self.spec),
             "module_name": "cmd_gen", "file": "cmd_gen.sv",
             "phase": 3, "generator": "cmd_gen_gen",
             "dependencies": ["scheduler", "bank_tracker"],

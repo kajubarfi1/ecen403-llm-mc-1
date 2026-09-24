@@ -1,4 +1,7 @@
 {
+  "git_commit": "fd2a561795ec86a2aa5628363c28d361ce0d2279",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "generated_utc": "2026-09-24T18:00:47.920250+00:00",
   "module_name": "config_regs",
   "file": "config_regs.sv",
   "phase": 1,
@@ -77,17 +80,20 @@
       {
         "name": "sts_init_done",
         "width": 1,
-        "dir": "input"
+        "dir": "input",
+        "source": "init_fsm.init_done"
       },
       {
         "name": "sts_cal_done",
         "width": 1,
-        "dir": "input"
+        "dir": "input",
+        "source": "calibration.cal_done"
       },
       {
         "name": "sts_cal_fail",
         "width": 1,
-        "dir": "input"
+        "dir": "input",
+        "source": "calibration.cal_fail"
       },
       {
         "name": "sts_bist_done",
@@ -102,7 +108,8 @@
       {
         "name": "sts_ref_pending_cnt",
         "width": 3,
-        "dir": "input"
+        "dir": "input",
+        "source": "refresh_ctrl.ref_pending_cnt"
       },
       {
         "name": "sts_self_refresh_active",
@@ -122,12 +129,14 @@
       {
         "name": "sts_ref_starve_event",
         "width": 1,
-        "dir": "input"
+        "dir": "input",
+        "source": "refresh_ctrl.ref_starve_flag"
       },
       {
         "name": "sts_init_fail_event",
         "width": 1,
-        "dir": "input"
+        "dir": "input",
+        "source": "init_fsm.init_fail"
       },
       {
         "name": "sts_bist_fail_addr",

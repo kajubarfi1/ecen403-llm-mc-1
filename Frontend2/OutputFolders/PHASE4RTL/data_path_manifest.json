@@ -1,4 +1,7 @@
 {
+  "git_commit": "fd2a561795ec86a2aa5628363c28d361ce0d2279",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "generated_utc": "2026-09-24T18:02:05.293037+00:00",
   "module_name": "data_path",
   "file": "data_path.sv",
   "phase": 3,
@@ -7,13 +10,14 @@
   "design_id": "ddr3_mc_core_v2",
   "parameters": {
     "DATA_WIDTH": 32,
-    "DQ_WIDTH": 8,
-    "DM_WIDTH": 4,
+    "DQ_WIDTH": 16,
+    "DM_WIDTH": 2,
     "SEL_WIDTH": 4,
     "AUX_WIDTH": 4,
     "BURST_LEN": 8,
     "CLK_RATIO": 4,
     "BURST_CTRL_CYC": 2,
+    "WORD_BEATS": 2,
     "RD_FIFO_DEPTH": 16,
     "CL": 11,
     "CWL": 8
@@ -112,7 +116,7 @@
     "ddr_phy": [
       {
         "name": "ddr_dq_o",
-        "width": 32,
+        "width": 16,
         "dir": "output"
       },
       {
@@ -122,12 +126,12 @@
       },
       {
         "name": "ddr_dq_i",
-        "width": 32,
+        "width": 16,
         "dir": "input"
       },
       {
         "name": "ddr_dm_o",
-        "width": 4,
+        "width": 2,
         "dir": "output"
       },
       {
