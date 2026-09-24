@@ -31,7 +31,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 CATALOG = os.path.join(HERE, "interface_catalog.json")
 OUT_DIR = os.path.join(HERE, "generated")
-FRONTEND_ROOT = os.path.join(ROOT, "Frontend", "OutputFolders")
+# Default only; resolve() consults the declared drop (Validation/spec/rtl_drop.json)
+# first, and this constant is the first declared root so the two never disagree.
+def _first_drop_root():
+    sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
+    import rtl_drop as RD
+    rs = RD.roots()
+    return rs[0] if rs else os.path.join(ROOT, "Frontend2", "OutputFolders")
+FRONTEND_ROOT = _first_drop_root()
 SPEC_PATH = os.path.join(ROOT, "Validation", "spec",
                          "llmmc_microarchitecturespec_filled.json")
 

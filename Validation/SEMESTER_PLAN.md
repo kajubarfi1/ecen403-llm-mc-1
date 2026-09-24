@@ -31,6 +31,70 @@ schemas changed only in their provenance header, which is expected (they are
 manifest-driven) but means a spec-only change to queue depth or lookahead is not
 reflected in bins until the RTL drop for that spec exists.
 
+**Progress (2026-09-24, Phase B started).** Olympus rejects both the stored
+password and the local key, and no simulator or formal tool is installed on
+this machine, so every sim/coverage/JasperGold item waits on credentials.
+Started with the local item: the integration map is now DERIVED from manifest
+`source` fields (`structural/integration_map_gen.py`, run by `validate_drop.py`
+step 3). 50 of the 71 edges come from manifests; the 21 the manifests lack
+live in `structural/integration_overrides.json` with glue/expr_glue/ties/
+requires/stubs, and each is a filed finding (`findings/outbox/
+integration_map_findings.json`: 5 manifest-gap findings covering 21 ports in
+wb_port, cmd_queue, bank_tracker, refresh_ctrl, config_regs; 2 wrong-source
+findings where data_path's manifest claims a direct driver the design cannot
+use). Proof of equivalence: same 71-edge set, and all 17 runnable chain
+harnesses regenerate byte-identical. `--check` detects a stale map;
+`tests/test_integration_map_gen.py` (8 tests) pins the behaviour. UberDDR3 is
+fetched to the scratchpad for the known-good target: it vendors the Micron
+DDR3 model (`testbench/ddr3.sv`), is a 4:1 controller at 83–100 MHz with
+SPEED_BIN presets for 1066/1333/1600, and ships SymbiYosys formal for its
+Wishbone slave — the spec for its configuration is the next local step.
+
+**Drop switch (2026-09-24).** From now on RTL drops come from
+`Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the
+schema generator's default root and `faults/fault_catalog.json` now point
+there; `Frontend/OutputFolders` is history. First Frontend2 drop = c8ac792
+(HEAD 1fea117): same 11 blocks, byte-identical port lists, widths and
+`source` coverage as b4d6f45; config_regs, init_fsm, bank_tracker and
+refresh_ctrl are rewrites, the other seven changed only their headers.
+Structural regression (`reports/validate_drop/1fea117_structural_only.log`):
+9/9 catalogue blocks resolve; intake still 10 gaps; integration map, schemas,
+monitors, SVA, coverage, vplan regenerate clean; wiring check 75/75; width
+gate still fails on data_path DQ (32 vs 16, finding stays open); the five
+status/boot chains reported BROKEN by `check_path_chains.py` are identical on
+the old drop (catalogue has no config_regs status interfaces; pre-existing).
+Static read of the rewrites: config_regs still has no reserved-bit write
+mask (regression likely still open), scheduler re-grant code unchanged,
+data_path width unchanged. Four seeded-fault sites moved with the rewrites
+and were re-seeded (15/15 apply, all unique). **Simulation half not run:**
+Olympus rejects the stored password and the local key; path runs, coverage,
+findings v2 and the drop comparison wait on that.
+
+**Regression on the first Frontend2 drop (2026-09-24, 1fea117 vs b4d6f45).**
+Olympus login works once the password is parsed from `setup.env` correctly
+(`sim_runner.py` now reads that file itself; the `KEY = "value"` form is not
+shell-sourceable, which is all the earlier auth failures were). 17 paths in
+1.0 min: 6 pass / 11 fail, no errors. Result after fixing three measurement
+artifacts (below): **3 paths improved, 14 unchanged, 0 regressions.**
+path_02/03/18: the X-valued data violations in wb_port and data_path are gone
+and matched transactions rose (wb_port 32→52 of 104, data_path 9→26 of 48),
+so `wb_port/DATA_001` and `data_path/DATA_001` auto-resolved
+(`resolved_in: 1fea117`) — the first findings closed by a Frontend drop.
+22 findings stay open (scheduler 8, config_regs 6, wb_port 4, data_path 3,
+cmd_gen 1); the rewrites of bank_tracker / refresh_ctrl / init_fsm changed
+no verdict. Code coverage 75.1% (init_fsm 46.6→89.4%, wb_port 76.0→59.5%,
+others within ±4); vplan 27/39 covered, 12 partial.
+Artifacts fixed: (1) snapshots archived only the JSON reports, not sim logs
+or traces, so every assertion key looked *new* against the old drop —
+`compare_drops.py --snapshot` now archives both, the comparison ignores
+log-derived keys when only one side has a log, and b4d6f45 was backfilled
+from the determinism re-run; (2) `emit_findings.py` resolved by taxonomy id
+(every MISMATCH is DATA_001, so nothing ever resolved) — now by finding id
+against the previous outbox; (3) `measure_coverage.py` merged every run ever
+kept on the cluster, so a rewritten block counted old+new code (46% headline)
+— `--since <run start>` restricts the merge to the drop's own runs and
+`validate_drop.py` passes it.
+
 ---
 
 ## 1. Where the three subsystems actually are
@@ -124,12 +188,13 @@ written signoff bar, thin random stimulus.
 
 ## 3. Design improvements worth making
 
-1. **One connectivity source of truth.** The backend's set gate and my
-   integration map both describe the same 75 edges from different files.
-   Manifests' `source` fields should generate `integration_map.json`; my
-   `glue`/`expr_glue`/`ties` remain only for what the manifests cannot say,
-   and each such entry is itself a finding against the Frontend. This also
-   removes 111 of Dawson's worksheet slots the moment phase 1 gets `source`.
+1. **One connectivity source of truth.** *(Done 2026-09-24 on our side.)*
+   `integration_map.json` is generated from manifest `source` fields by
+   `structural/integration_map_gen.py`; `glue`/`expr_glue`/`ties` and the
+   edges manifests do not yet declare live in `integration_overrides.json`,
+   and each such edge is a filed finding against the Frontend. The residue
+   shrinks (and the generator flags redundant overrides) as phase-1 manifests
+   gain `source`; that same change empties Dawson's 111 worksheet slots.
 2. **Top-level DUT mode.** When an assembled `ddr3_controller.sv` exists
    (Frontend2 step 4 or Dawson's `generate_top`), the path harnesses should
    instantiate it and bind monitors hierarchically, so the wiring under test
@@ -258,7 +323,7 @@ Exit criterion for each phase is stated so progress is measurable.
 6. Coverage has no targets or exclusion policy → signoff document.
 7. No regression history → `compare_drops`, nightly vManager with trend.
 8. Findings are hand-assembled → feedback loop steps 1–3.
-9. Integration map is hand-written → derive from `source`.
+9. ~~Integration map is hand-written → derive from `source`.~~ Done; 21 edges still carried as overrides until phase-1/2 manifests declare them.
 10. Don't-care fields (PRE address) counted as mismatches → declared masks +
     intake rule.
 11. Only one spec ever run → second preset spec.

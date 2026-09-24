@@ -156,7 +156,7 @@ def main() -> int:
 
     rtl = find_rtl(scope)
     if not rtl:
-        print(f"no {scope}.sv found under Frontend/ — nothing to validate.")
+        print(f"no {scope}.sv found in the declared RTL drop — nothing to validate.")
         return 1
 
     model = pick_model(scope)

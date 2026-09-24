@@ -332,6 +332,22 @@ def snapshot_signatures():
     return out
 
 
+
+def previous_outbox(spec_rev, head):
+    """(drop_head, findings_v2 doc) of the newest outbox drop before `head`
+    for this spec revision, by generation time; None when there is none."""
+    cands = []
+    for f in glob.glob(os.path.join(OUTBOX, spec_rev, "*", "findings_v2.json")):
+        d = load(f, {})
+        h = d.get("drop") or os.path.basename(os.path.dirname(f))
+        if h != head and d.get("generated_utc"):
+            cands.append((d["generated_utc"], h, d))
+    if not cands:
+        return None
+    cands.sort()
+    _, h, d = cands[-1]
+    return h, d
+
 def history_for(check_id, detector, snaps, current_head):
     tid = check_id.split("/")[0]
     keys = {f"id:{tid}", f"id:{check_id.split('/')[-1]}"}
@@ -420,20 +436,25 @@ def emit(reports_dir, out_dir=None):
             if f["confidence"] != "confirmed" and ev["confidence"] == "confirmed":
                 f["confidence"] = "confirmed"       # the evidence list says why
 
-    # resolved: present in the latest snapshot but absent now
+    # resolved: a finding (owner/check id) that the previous drop's outbox
+    # carried as open and this drop no longer raises. Keyed on the finding id,
+    # not the taxonomy id — several findings share a taxonomy (every MISMATCH
+    # is DATA_001), so a taxonomy key never goes absent while any survive.
     resolved = []
-    if snaps:
-        last_head, _, last_keys = snaps[-1]
-        if last_head != head:
-            now_keys = {f"id:{f['taxonomy_id']}" for f in findings.values()} | \
-                       {f"id:{f['check_id'].split('/')[-1]}" for f in findings.values()}
-            for k in sorted(last_keys):
-                if k.startswith("id:") and k not in now_keys:
-                    resolved.append({"schema": "validation-findings/2",
-                                     "id": f"?/{k[3:]}", "check_id": k[3:],
-                                     "status": "resolved", "resolved_in": head,
-                                     "last_seen": last_head,
-                                     "note": "present in the previous drop's reports, absent now"})
+    prev = previous_outbox(spec.get("revision", "unknown"), head)
+    if prev:
+        prev_head, prev_doc = prev
+        now_ids = {f["id"] for f in findings.values()}
+        for pf in prev_doc.get("findings", []):
+            if pf.get("status", "open") == "open" and pf["id"] not in now_ids:
+                resolved.append({**{k: pf[k] for k in ("schema", "id", "kind", "check_id",
+                                                        "taxonomy_id", "owner_module",
+                                                        "severity", "title", "paths")
+                                    if k in pf},
+                                 "status": "resolved", "resolved_in": head,
+                                 "last_seen": prev_head,
+                                 "first_seen": pf.get("first_seen"),
+                                 "note": f"open in drop {prev_head}, not raised by drop {head}"})
 
     order = {"critical": 0, "major": 1, "minor": 2}
     out = sorted(findings.values(),

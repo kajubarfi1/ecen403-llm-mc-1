@@ -1,0 +1,442 @@
+{
+  "$schema": "validation-drop-comparison/1",
+  "a": {
+    "dir": "Validation/reports/drops/b4d6f45",
+    "drop_head": "b4d6f45"
+  },
+  "b": {
+    "dir": "Validation/reports/paths",
+    "drop_head": "1fea117"
+  },
+  "strict": false,
+  "generated_utc": "2026-09-24T17:08:31.505449Z",
+  "rows": [
+    {
+      "path": "path_01_write_cmd",
+      "kind": "regression",
+      "new": {
+        "assert:a_PROTO_002": 13,
+        "assert:a_TIMING_004": 13,
+        "assert:a_TIMING_005": 3,
+        "assert:a_TIMING_011": 1,
+        "assert:p_sel_nonzero_write": 1,
+        "illegal:cp_tccd_spacing": 7,
+        "illegal:cp_tfaw_spacing": 13,
+        "illegal:cp_trc_spacing": 13,
+        "illegal:cp_trfc_spacing": 1,
+        "illegal:cp_trrd_spacing": 13
+      },
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "fail",
+        "fail"
+      ]
+    },
+    {
+      "path": "path_02_read_cmd",
+      "kind": "changed",
+      "new": {
+        "assert:a_PROTO_002": 34,
+        "assert:a_TIMING_004": 34,
+        "assert:a_TIMING_009": 1,
+        "assert:a_TIMING_011": 1,
+        "assert:p_stall_hold": 13,
+        "assert:p_tag": 45,
+        "illegal:cp_tccd_spacing": 44,
+        "illegal:cp_tfaw_spacing": 34,
+        "illegal:cp_trc_spacing": 34,
+        "illegal:cp_trfc_spacing": 1,
+        "illegal:cp_trrd_spacing": 34,
+        "illegal:cp_trtp_spacing": 2
+      },
+      "gone": {
+        "id:DATA_001": 12,
+        "violations:wb_port": 20
+      },
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {
+        "matched:wb_port": [
+          32,
+          52
+        ]
+      },
+      "verdict": [
+        "fail",
+        "fail"
+      ]
+    },
+    {
+      "path": "path_03_read_return",
+      "kind": "changed",
+      "new": {
+        "assert:a_PROTO_002": 34,
+        "assert:a_TIMING_004": 34,
+        "assert:a_TIMING_009": 1,
+        "assert:a_TIMING_011": 1,
+        "assert:p_stall_hold": 13,
+        "assert:p_tag": 45,
+        "illegal:cp_tccd_spacing": 44,
+        "illegal:cp_tfaw_spacing": 34,
+        "illegal:cp_trc_spacing": 34,
+        "illegal:cp_trfc_spacing": 1,
+        "illegal:cp_trrd_spacing": 34,
+        "illegal:cp_trtp_spacing": 2
+      },
+      "gone": {
+        "id:DATA_001": 24,
+        "violations:data_path": 20,
+        "violations:wb_port": 20
+      },
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {
+        "matched:data_path": [
+          9,
+          26
+        ],
+        "matched:wb_port": [
+          32,
+          52
+        ]
+      },
+      "verdict": [
+        "fail",
+        "fail"
+      ]
+    },
+    {
+      "path": "path_04_scheduler_bank_loop",
+      "kind": "regression",
+      "new": {
+        "assert:a_PROTO_002": 13,
+        "assert:a_TIMING_004": 13,
+        "assert:a_TIMING_005": 3,
+        "assert:a_TIMING_011": 1,
+        "assert:p_sel_nonzero_write": 1,
+        "illegal:cp_tccd_spacing": 7,
+        "illegal:cp_tfaw_spacing": 13,
+        "illegal:cp_trc_spacing": 13,
+        "illegal:cp_trfc_spacing": 1,
+        "illegal:cp_trrd_spacing": 13
+      },
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "fail",
+        "fail"
+      ]
+    },
+    {
+      "path": "path_05_scheduler_refresh_loop",
+      "kind": "regression",
+      "new": {
+        "assert:a_PROTO_002": 987,
+        "assert:a_TIMING_004": 965,
+        "assert:a_TIMING_005": 83,
+        "assert:a_TIMING_011": 24,
+        "assert:p_wr_no_overflow": 82,
+        "illegal:cp_tccd_spacing": 516,
+        "illegal:cp_tfaw_spacing": 965,
+        "illegal:cp_trc_spacing": 965,
+        "illegal:cp_trfc_spacing": 22,
+        "illegal:cp_trrd_spacing": 965
+      },
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "fail",
+        "fail"
+      ]
+    },
+    {
+      "path": "path_06_scheduler_dequeue",
+      "kind": "same",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "fail",
+        "fail"
+      ]
+    },
+    {
+      "path": "path_07_backpressure",
+      "kind": "regression",
+      "new": {
+        "assert:a_PROTO_002": 55,
+        "assert:a_TIMING_004": 55,
+        "assert:a_TIMING_005": 3,
+        "assert:a_TIMING_011": 1,
+        "assert:p_wr_no_overflow": 1,
+        "illegal:cp_tccd_spacing": 29,
+        "illegal:cp_tfaw_spacing": 55,
+        "illegal:cp_trc_spacing": 55,
+        "illegal:cp_trfc_spacing": 1,
+        "illegal:cp_trrd_spacing": 55
+      },
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "fail",
+        "fail"
+      ]
+    },
+    {
+      "path": "path_08_init_to_cal",
+      "kind": "same",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "pass",
+        "pass"
+      ]
+    },
+    {
+      "path": "path_09_init_to_refresh",
+      "kind": "same",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "pass",
+        "pass"
+      ]
+    },
+    {
+      "path": "path_10_csr_to_timing",
+      "kind": "same",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "fail",
+        "fail"
+      ]
+    },
+    {
+      "path": "path_11_csr_to_refresh",
+      "kind": "same",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "fail",
+        "fail"
+      ]
+    },
+    {
+      "path": "path_12_csr_timing_to_scheduling",
+      "kind": "regression",
+      "new": {
+        "assert:a_TIMING_011": 4,
+        "illegal:cp_trfc_spacing": 4
+      },
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "fail",
+        "fail"
+      ]
+    },
+    {
+      "path": "path_13_csr_refresh_to_scheduling",
+      "kind": "regression",
+      "new": {
+        "assert:a_TIMING_011": 4,
+        "illegal:cp_trfc_spacing": 4
+      },
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "fail",
+        "fail"
+      ]
+    },
+    {
+      "path": "path_14_status_init",
+      "kind": "same",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "pass",
+        "pass"
+      ]
+    },
+    {
+      "path": "path_15_status_cal",
+      "kind": "same",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "pass",
+        "pass"
+      ]
+    },
+    {
+      "path": "path_16_status_refresh",
+      "kind": "same",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "pass",
+        "pass"
+      ]
+    },
+    {
+      "path": "path_17_full_boot",
+      "kind": "same",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "pass",
+        "pass"
+      ]
+    },
+    {
+      "path": "path_18_full_write",
+      "kind": "changed",
+      "new": {
+        "assert:a_PROTO_002": 27,
+        "assert:a_TIMING_004": 27,
+        "assert:a_TIMING_005": 1,
+        "assert:a_TIMING_007": 1,
+        "assert:a_TIMING_009": 1,
+        "assert:a_TIMING_011": 1,
+        "assert:p_stall_hold": 7,
+        "assert:p_tag": 23,
+        "illegal:cp_tccd_spacing": 36,
+        "illegal:cp_tfaw_spacing": 27,
+        "illegal:cp_trc_spacing": 27,
+        "illegal:cp_trfc_spacing": 1,
+        "illegal:cp_trrd_spacing": 27,
+        "illegal:cp_trtp_spacing": 2
+      },
+      "gone": {
+        "id:DATA_001": 24,
+        "violations:data_path": 14,
+        "violations:wb_port": 13
+      },
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {
+        "matched:data_path": [
+          15,
+          20
+        ],
+        "matched:wb_port": [
+          23,
+          31
+        ]
+      },
+      "verdict": [
+        "fail",
+        "fail"
+      ]
+    },
+    {
+      "path": "path_19_row_conflict",
+      "kind": "regression",
+      "new": {
+        "assert:a_PROTO_002": 13,
+        "assert:a_TIMING_004": 13,
+        "assert:a_TIMING_005": 3,
+        "assert:a_TIMING_011": 1,
+        "assert:p_sel_nonzero_write": 1,
+        "illegal:cp_tccd_spacing": 7,
+        "illegal:cp_tfaw_spacing": 13,
+        "illegal:cp_trc_spacing": 13,
+        "illegal:cp_trfc_spacing": 1,
+        "illegal:cp_trrd_spacing": 13
+      },
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "fail",
+        "fail"
+      ]
+    },
+    {
+      "path": "path_20_refresh_preempt",
+      "kind": "regression",
+      "new": {
+        "assert:a_PROTO_002": 987,
+        "assert:a_TIMING_004": 965,
+        "assert:a_TIMING_005": 83,
+        "assert:a_TIMING_011": 24,
+        "assert:p_wr_no_overflow": 82,
+        "illegal:cp_tccd_spacing": 516,
+        "illegal:cp_tfaw_spacing": 965,
+        "illegal:cp_trc_spacing": 965,
+        "illegal:cp_trfc_spacing": 22,
+        "illegal:cp_trrd_spacing": 965
+      },
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "fail",
+        "fail"
+      ]
+    }
+  ]
+}

@@ -4,7 +4,7 @@
 //
 // Interface : cal_status   (Calibration completion event)
 // Block     : calibration
-// Manifest  : Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/calibration_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE2RTL/calibration_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

@@ -1,0 +1,291 @@
+{"iface": "wb_rsp", "kind": "reset", "fields": {}, "seq": 0, "time_ns": 0}
+{"iface": "wb", "kind": "reset", "fields": {}, "seq": 1, "time_ns": 0}
+{"iface": "req", "kind": "reset", "fields": {}, "seq": 2, "time_ns": 0}
+{"iface": "sched_deq", "kind": "reset", "fields": {}, "seq": 3, "time_ns": 0}
+{"iface": "sched_cmd", "kind": "reset", "fields": {}, "seq": 4, "time_ns": 0}
+{"iface": "refresh_req", "kind": "reset", "fields": {}, "seq": 5, "time_ns": 0}
+{"iface": "refresh_ack", "kind": "reset", "fields": {}, "seq": 6, "time_ns": 0}
+{"iface": "dp_wr", "kind": "reset", "fields": {}, "seq": 7, "time_ns": 0}
+{"iface": "dp_rd_rsp", "kind": "reset", "fields": {}, "seq": 8, "time_ns": 0}
+{"iface": "dp_cmd", "kind": "reset", "fields": {}, "seq": 9, "time_ns": 0}
+{"iface": "ddr_wr_beat", "kind": "reset", "fields": {}, "seq": 10, "time_ns": 0}
+{"iface": "ddr_rd_beat", "kind": "reset", "fields": {}, "seq": 11, "time_ns": 0}
+{"iface": "csr_sts_level", "kind": "reset", "fields": {}, "seq": 12, "time_ns": 0}
+{"iface": "csr_sts", "kind": "reset", "fields": {}, "seq": 13, "time_ns": 0}
+{"iface": "csr_rsp", "kind": "reset", "fields": {}, "seq": 14, "time_ns": 0}
+{"iface": "csr", "kind": "reset", "fields": {}, "seq": 15, "time_ns": 0}
+{"iface": "cfg_timing", "kind": "reset", "fields": {}, "seq": 16, "time_ns": 0}
+{"iface": "cfg_refresh", "kind": "reset", "fields": {}, "seq": 17, "time_ns": 0}
+{"iface": "cq_enq", "kind": "reset", "fields": {}, "seq": 18, "time_ns": 0}
+{"iface": "cq_deq", "kind": "reset", "fields": {}, "seq": 19, "time_ns": 0}
+{"iface": "sched_in", "kind": "reset", "fields": {}, "seq": 20, "time_ns": 0}
+{"iface": "ddr_cmd", "kind": "reset", "fields": {}, "seq": 21, "time_ns": 0}
+{"iface": "cfg_timing", "kind": "update", "fields": {"tccd": 4, "tfaw": 32, "tras": 28, "trc": 39, "trcd": 11, "trfc": 128, "trp": 11, "trrd": 6, "trtp": 6, "twr": 12, "twtr": 6}, "seq": 22, "time_ns": 24000}
+{"iface": "cfg_refresh", "kind": "update", "fields": {"force_refresh": 0, "max_postpone": 8, "priority": 1, "trefi": 6240, "urgent_threshold": 6}, "seq": 23, "time_ns": 24000}
+{"iface": "refresh_req", "kind": "request", "fields": {"pending": 1, "starve": 0, "urgent": 0}, "seq": 24, "time_ns": 29000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 1, "self_refresh": 0}, "seq": 25, "time_ns": 29000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 26, "time_ns": 34000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 1}, "seq": 27, "time_ns": 34000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 28, "time_ns": 34000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 29, "time_ns": 39000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 0}, "seq": 30, "time_ns": 39000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 31, "time_ns": 39000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 0, "data": 32, "err": 0}, "seq": 32, "time_ns": 39000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 0}, "seq": 33, "time_ns": 39000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 34, "time_ns": 39000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 35, "time_ns": 39000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 36, "time_ns": 44000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 0, "err": 0}, "seq": 37, "time_ns": 59000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 0, "data": 4294967295}, "seq": 38, "time_ns": 59000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 0, "data": 0, "err": 0}, "seq": 39, "time_ns": 79000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 0}, "seq": 40, "time_ns": 79000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 0, "err": 0}, "seq": 41, "time_ns": 99000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 0, "data": 0}, "seq": 42, "time_ns": 99000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 0, "data": 0, "err": 0}, "seq": 43, "time_ns": 119000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 0}, "seq": 44, "time_ns": 119000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 0, "err": 0}, "seq": 45, "time_ns": 139000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 0, "data": 2779096485}, "seq": 46, "time_ns": 139000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 0, "data": 0, "err": 0}, "seq": 47, "time_ns": 159000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 0}, "seq": 48, "time_ns": 159000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 0, "err": 0}, "seq": 49, "time_ns": 179000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 0, "data": 1515870810}, "seq": 50, "time_ns": 179000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 0, "data": 0, "err": 0}, "seq": 51, "time_ns": 199000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 0}, "seq": 52, "time_ns": 199000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 4, "data": 9, "err": 0}, "seq": 53, "time_ns": 219000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 4}, "seq": 54, "time_ns": 219000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 4, "err": 0}, "seq": 55, "time_ns": 239000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 4, "data": 4294967295}, "seq": 56, "time_ns": 239000}
+{"iface": "cfg_refresh", "kind": "update", "fields": {"force_refresh": 1, "max_postpone": 8, "priority": 1, "trefi": 6240, "urgent_threshold": 6}, "seq": 57, "time_ns": 239000}
+{"iface": "refresh_req", "kind": "request", "fields": {"pending": 1, "starve": 0, "urgent": 0}, "seq": 58, "time_ns": 244000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 1, "self_refresh": 0}, "seq": 59, "time_ns": 244000}
+{"iface": "cfg_refresh", "kind": "update", "fields": {"force_refresh": 0, "max_postpone": 8, "priority": 1, "trefi": 6240, "urgent_threshold": 6}, "seq": 60, "time_ns": 244000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 61, "time_ns": 249000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 1}, "seq": 62, "time_ns": 249000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 63, "time_ns": 249000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 64, "time_ns": 254000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 0}, "seq": 65, "time_ns": 254000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 66, "time_ns": 254000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 67, "time_ns": 254000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 68, "time_ns": 254000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 4, "data": 4294967071, "err": 0}, "seq": 69, "time_ns": 259000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 4}, "seq": 70, "time_ns": 259000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 71, "time_ns": 259000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 4, "err": 0}, "seq": 72, "time_ns": 279000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 4, "data": 0}, "seq": 73, "time_ns": 279000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 4, "data": 0, "err": 0}, "seq": 74, "time_ns": 299000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 4}, "seq": 75, "time_ns": 299000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 4, "err": 0}, "seq": 76, "time_ns": 319000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 4, "data": 2779096485}, "seq": 77, "time_ns": 319000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 4, "data": 2779096325, "err": 0}, "seq": 78, "time_ns": 339000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 4}, "seq": 79, "time_ns": 339000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 4, "err": 0}, "seq": 80, "time_ns": 359000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 4, "data": 1515870810}, "seq": 81, "time_ns": 359000}
+{"iface": "cfg_refresh", "kind": "update", "fields": {"force_refresh": 1, "max_postpone": 8, "priority": 1, "trefi": 6240, "urgent_threshold": 6}, "seq": 82, "time_ns": 359000}
+{"iface": "refresh_req", "kind": "request", "fields": {"pending": 1, "starve": 0, "urgent": 0}, "seq": 83, "time_ns": 364000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 1, "self_refresh": 0}, "seq": 84, "time_ns": 364000}
+{"iface": "cfg_refresh", "kind": "update", "fields": {"force_refresh": 0, "max_postpone": 8, "priority": 1, "trefi": 6240, "urgent_threshold": 6}, "seq": 85, "time_ns": 364000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 86, "time_ns": 369000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 1}, "seq": 87, "time_ns": 369000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 88, "time_ns": 369000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 89, "time_ns": 374000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 0}, "seq": 90, "time_ns": 374000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 91, "time_ns": 374000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 92, "time_ns": 374000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 93, "time_ns": 374000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 4, "data": 1515870746, "err": 0}, "seq": 94, "time_ns": 379000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 4}, "seq": 95, "time_ns": 379000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 96, "time_ns": 379000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 8, "data": 656149259, "err": 0}, "seq": 97, "time_ns": 399000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 8}, "seq": 98, "time_ns": 399000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 8, "err": 0}, "seq": 99, "time_ns": 419000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 8, "data": 4294967295}, "seq": 100, "time_ns": 419000}
+{"iface": "cfg_timing", "kind": "update", "fields": {"tccd": 4, "tfaw": 32, "tras": 255, "trc": 255, "trcd": 255, "trfc": 128, "trp": 255, "trrd": 6, "trtp": 6, "twr": 12, "twtr": 6}, "seq": 101, "time_ns": 419000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 8, "data": 4294967295, "err": 0}, "seq": 102, "time_ns": 439000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 8}, "seq": 103, "time_ns": 439000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 8, "err": 0}, "seq": 104, "time_ns": 459000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 8, "data": 0}, "seq": 105, "time_ns": 459000}
+{"iface": "cfg_timing", "kind": "update", "fields": {"tccd": 4, "tfaw": 32, "tras": 0, "trc": 0, "trcd": 0, "trfc": 128, "trp": 0, "trrd": 6, "trtp": 6, "twr": 12, "twtr": 6}, "seq": 106, "time_ns": 459000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 8, "data": 0, "err": 0}, "seq": 107, "time_ns": 479000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 8}, "seq": 108, "time_ns": 479000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 8, "err": 0}, "seq": 109, "time_ns": 499000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 8, "data": 2779096485}, "seq": 110, "time_ns": 499000}
+{"iface": "cfg_timing", "kind": "update", "fields": {"tccd": 4, "tfaw": 32, "tras": 165, "trc": 165, "trcd": 165, "trfc": 128, "trp": 165, "trrd": 6, "trtp": 6, "twr": 12, "twtr": 6}, "seq": 111, "time_ns": 499000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 8, "data": 2779096485, "err": 0}, "seq": 112, "time_ns": 519000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 8}, "seq": 113, "time_ns": 519000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 8, "err": 0}, "seq": 114, "time_ns": 539000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 8, "data": 1515870810}, "seq": 115, "time_ns": 539000}
+{"iface": "cfg_timing", "kind": "update", "fields": {"tccd": 4, "tfaw": 32, "tras": 90, "trc": 90, "trcd": 90, "trfc": 128, "trp": 90, "trrd": 6, "trtp": 6, "twr": 12, "twtr": 6}, "seq": 116, "time_ns": 539000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 8, "data": 1515870810, "err": 0}, "seq": 117, "time_ns": 559000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 8}, "seq": 118, "time_ns": 559000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 12, "data": 2149582342, "err": 0}, "seq": 119, "time_ns": 579000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 12}, "seq": 120, "time_ns": 579000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 12, "err": 0}, "seq": 121, "time_ns": 599000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 12, "data": 4294967295}, "seq": 122, "time_ns": 599000}
+{"iface": "cfg_timing", "kind": "update", "fields": {"tccd": 4, "tfaw": 255, "tras": 90, "trc": 90, "trcd": 90, "trfc": 255, "trp": 90, "trrd": 255, "trtp": 6, "twr": 12, "twtr": 255}, "seq": 123, "time_ns": 599000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 12, "data": 4294967295, "err": 0}, "seq": 124, "time_ns": 619000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 12}, "seq": 125, "time_ns": 619000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 12, "err": 0}, "seq": 126, "time_ns": 639000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 12, "data": 0}, "seq": 127, "time_ns": 639000}
+{"iface": "cfg_timing", "kind": "update", "fields": {"tccd": 4, "tfaw": 0, "tras": 90, "trc": 90, "trcd": 90, "trfc": 0, "trp": 90, "trrd": 0, "trtp": 6, "twr": 12, "twtr": 0}, "seq": 128, "time_ns": 639000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 12, "data": 0, "err": 0}, "seq": 129, "time_ns": 659000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 12}, "seq": 130, "time_ns": 659000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 12, "err": 0}, "seq": 131, "time_ns": 679000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 12, "data": 2779096485}, "seq": 132, "time_ns": 679000}
+{"iface": "cfg_timing", "kind": "update", "fields": {"tccd": 4, "tfaw": 165, "tras": 90, "trc": 90, "trcd": 90, "trfc": 165, "trp": 90, "trrd": 165, "trtp": 6, "twr": 12, "twtr": 165}, "seq": 133, "time_ns": 679000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 12, "data": 2779096485, "err": 0}, "seq": 134, "time_ns": 699000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 12}, "seq": 135, "time_ns": 699000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 12, "err": 0}, "seq": 136, "time_ns": 719000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 12, "data": 1515870810}, "seq": 137, "time_ns": 719000}
+{"iface": "cfg_timing", "kind": "update", "fields": {"tccd": 4, "tfaw": 90, "tras": 90, "trc": 90, "trcd": 90, "trfc": 90, "trp": 90, "trrd": 90, "trtp": 6, "twr": 12, "twtr": 90}, "seq": 138, "time_ns": 719000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 12, "data": 1515870810, "err": 0}, "seq": 139, "time_ns": 739000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 12}, "seq": 140, "time_ns": 739000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 16, "data": 134940172, "err": 0}, "seq": 141, "time_ns": 759000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 16}, "seq": 142, "time_ns": 759000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 16, "err": 0}, "seq": 143, "time_ns": 779000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 16, "data": 4294967295}, "seq": 144, "time_ns": 779000}
+{"iface": "cfg_timing", "kind": "update", "fields": {"tccd": 4, "tfaw": 90, "tras": 90, "trc": 90, "trcd": 90, "trfc": 90, "trp": 90, "trrd": 90, "trtp": 255, "twr": 255, "twtr": 90}, "seq": 145, "time_ns": 779000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 16, "data": 4294967295, "err": 0}, "seq": 146, "time_ns": 799000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 16}, "seq": 147, "time_ns": 799000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 16, "err": 0}, "seq": 148, "time_ns": 819000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 16, "data": 0}, "seq": 149, "time_ns": 819000}
+{"iface": "cfg_timing", "kind": "update", "fields": {"tccd": 4, "tfaw": 90, "tras": 90, "trc": 90, "trcd": 90, "trfc": 90, "trp": 90, "trrd": 90, "trtp": 0, "twr": 0, "twtr": 90}, "seq": 150, "time_ns": 819000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 16, "data": 0, "err": 0}, "seq": 151, "time_ns": 839000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 16}, "seq": 152, "time_ns": 839000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 16, "err": 0}, "seq": 153, "time_ns": 859000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 16, "data": 2779096485}, "seq": 154, "time_ns": 859000}
+{"iface": "cfg_timing", "kind": "update", "fields": {"tccd": 4, "tfaw": 90, "tras": 90, "trc": 90, "trcd": 90, "trfc": 90, "trp": 90, "trrd": 90, "trtp": 165, "twr": 165, "twtr": 90}, "seq": 155, "time_ns": 859000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 16, "data": 2779096485, "err": 0}, "seq": 156, "time_ns": 879000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 16}, "seq": 157, "time_ns": 879000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 16, "err": 0}, "seq": 158, "time_ns": 899000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 16, "data": 1515870810}, "seq": 159, "time_ns": 899000}
+{"iface": "cfg_timing", "kind": "update", "fields": {"tccd": 4, "tfaw": 90, "tras": 90, "trc": 90, "trcd": 90, "trfc": 90, "trp": 90, "trrd": 90, "trtp": 90, "twr": 90, "twtr": 90}, "seq": 160, "time_ns": 899000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 16, "data": 1515870810, "err": 0}, "seq": 161, "time_ns": 919000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 16}, "seq": 162, "time_ns": 919000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 20, "data": 1597444, "err": 0}, "seq": 163, "time_ns": 939000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 20}, "seq": 164, "time_ns": 939000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 20, "err": 0}, "seq": 165, "time_ns": 959000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 20, "data": 4294967295}, "seq": 166, "time_ns": 959000}
+{"iface": "cfg_timing", "kind": "update", "fields": {"tccd": 255, "tfaw": 90, "tras": 90, "trc": 90, "trcd": 90, "trfc": 90, "trp": 90, "trrd": 90, "trtp": 90, "twr": 90, "twtr": 90}, "seq": 167, "time_ns": 959000}
+{"iface": "cfg_refresh", "kind": "update", "fields": {"force_refresh": 0, "max_postpone": 8, "priority": 1, "trefi": 16777215, "urgent_threshold": 6}, "seq": 168, "time_ns": 959000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 20, "data": 4294967295, "err": 0}, "seq": 169, "time_ns": 979000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 20}, "seq": 170, "time_ns": 979000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 20, "err": 0}, "seq": 171, "time_ns": 999000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 20, "data": 0}, "seq": 172, "time_ns": 999000}
+{"iface": "cfg_timing", "kind": "update", "fields": {"tccd": 0, "tfaw": 90, "tras": 90, "trc": 90, "trcd": 90, "trfc": 90, "trp": 90, "trrd": 90, "trtp": 90, "twr": 90, "twtr": 90}, "seq": 173, "time_ns": 999000}
+{"iface": "cfg_refresh", "kind": "update", "fields": {"force_refresh": 0, "max_postpone": 8, "priority": 1, "trefi": 0, "urgent_threshold": 6}, "seq": 174, "time_ns": 999000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 20, "data": 0, "err": 0}, "seq": 175, "time_ns": 1019000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 20}, "seq": 176, "time_ns": 1019000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 20, "err": 0}, "seq": 177, "time_ns": 1039000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 20, "data": 2779096485}, "seq": 178, "time_ns": 1039000}
+{"iface": "cfg_timing", "kind": "update", "fields": {"tccd": 165, "tfaw": 90, "tras": 90, "trc": 90, "trcd": 90, "trfc": 90, "trp": 90, "trrd": 90, "trtp": 90, "twr": 90, "twtr": 90}, "seq": 179, "time_ns": 1039000}
+{"iface": "cfg_refresh", "kind": "update", "fields": {"force_refresh": 0, "max_postpone": 8, "priority": 1, "trefi": 10855845, "urgent_threshold": 6}, "seq": 180, "time_ns": 1039000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 20, "data": 2779096485, "err": 0}, "seq": 181, "time_ns": 1059000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 20}, "seq": 182, "time_ns": 1059000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 20, "err": 0}, "seq": 183, "time_ns": 1079000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 20, "data": 1515870810}, "seq": 184, "time_ns": 1079000}
+{"iface": "cfg_timing", "kind": "update", "fields": {"tccd": 90, "tfaw": 90, "tras": 90, "trc": 90, "trcd": 90, "trfc": 90, "trp": 90, "trrd": 90, "trtp": 90, "twr": 90, "twtr": 90}, "seq": 185, "time_ns": 1079000}
+{"iface": "cfg_refresh", "kind": "update", "fields": {"force_refresh": 0, "max_postpone": 8, "priority": 1, "trefi": 5921370, "urgent_threshold": 6}, "seq": 186, "time_ns": 1079000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 20, "data": 1515870810, "err": 0}, "seq": 187, "time_ns": 1099000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 20}, "seq": 188, "time_ns": 1099000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 24, "data": 360, "err": 0}, "seq": 189, "time_ns": 1119000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 24}, "seq": 190, "time_ns": 1119000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 24, "err": 0}, "seq": 191, "time_ns": 1139000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 24, "data": 4294967295}, "seq": 192, "time_ns": 1139000}
+{"iface": "cfg_refresh", "kind": "update", "fields": {"force_refresh": 0, "max_postpone": 15, "priority": 1, "trefi": 5921370, "urgent_threshold": 15}, "seq": 193, "time_ns": 1139000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 24, "data": 4294967295, "err": 0}, "seq": 194, "time_ns": 1159000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 24}, "seq": 195, "time_ns": 1159000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 24, "err": 0}, "seq": 196, "time_ns": 1179000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 24, "data": 0}, "seq": 197, "time_ns": 1179000}
+{"iface": "cfg_refresh", "kind": "update", "fields": {"force_refresh": 0, "max_postpone": 0, "priority": 0, "trefi": 5921370, "urgent_threshold": 0}, "seq": 198, "time_ns": 1179000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 24, "data": 0, "err": 0}, "seq": 199, "time_ns": 1199000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 24}, "seq": 200, "time_ns": 1199000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 24, "err": 0}, "seq": 201, "time_ns": 1219000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 24, "data": 2779096485}, "seq": 202, "time_ns": 1219000}
+{"iface": "cfg_refresh", "kind": "update", "fields": {"force_refresh": 0, "max_postpone": 5, "priority": 1, "trefi": 5921370, "urgent_threshold": 10}, "seq": 203, "time_ns": 1219000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 24, "data": 2779096485, "err": 0}, "seq": 204, "time_ns": 1239000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 24}, "seq": 205, "time_ns": 1239000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 24, "err": 0}, "seq": 206, "time_ns": 1259000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 24, "data": 1515870810}, "seq": 207, "time_ns": 1259000}
+{"iface": "cfg_refresh", "kind": "update", "fields": {"force_refresh": 0, "max_postpone": 10, "priority": 0, "trefi": 5921370, "urgent_threshold": 5}, "seq": 208, "time_ns": 1259000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 24, "data": 1515870810, "err": 0}, "seq": 209, "time_ns": 1279000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 24}, "seq": 210, "time_ns": 1279000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 28, "data": 0, "err": 0}, "seq": 211, "time_ns": 1299000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 28}, "seq": 212, "time_ns": 1299000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 28, "err": 0}, "seq": 213, "time_ns": 1319000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 28, "data": 4294967295}, "seq": 214, "time_ns": 1319000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 28, "data": 0, "err": 0}, "seq": 215, "time_ns": 1339000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 28}, "seq": 216, "time_ns": 1339000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 28, "err": 0}, "seq": 217, "time_ns": 1359000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 28, "data": 0}, "seq": 218, "time_ns": 1359000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 28, "data": 0, "err": 0}, "seq": 219, "time_ns": 1379000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 28}, "seq": 220, "time_ns": 1379000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 28, "err": 0}, "seq": 221, "time_ns": 1399000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 28, "data": 2779096485}, "seq": 222, "time_ns": 1399000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 28, "data": 0, "err": 0}, "seq": 223, "time_ns": 1419000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 28}, "seq": 224, "time_ns": 1419000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 28, "err": 0}, "seq": 225, "time_ns": 1439000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 28, "data": 1515870810}, "seq": 226, "time_ns": 1439000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 28, "data": 0, "err": 0}, "seq": 227, "time_ns": 1459000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 28}, "seq": 228, "time_ns": 1459000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 32, "data": 0, "err": 0}, "seq": 229, "time_ns": 1479000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 32}, "seq": 230, "time_ns": 1479000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 32, "err": 0}, "seq": 231, "time_ns": 1499000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 32, "data": 4294967295}, "seq": 232, "time_ns": 1499000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 32, "data": 4294967295, "err": 0}, "seq": 233, "time_ns": 1519000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 32}, "seq": 234, "time_ns": 1519000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 32, "err": 0}, "seq": 235, "time_ns": 1539000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 32, "data": 0}, "seq": 236, "time_ns": 1539000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 32, "data": 0, "err": 0}, "seq": 237, "time_ns": 1559000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 32}, "seq": 238, "time_ns": 1559000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 32, "err": 0}, "seq": 239, "time_ns": 1579000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 32, "data": 2779096485}, "seq": 240, "time_ns": 1579000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 32, "data": 2779096485, "err": 0}, "seq": 241, "time_ns": 1599000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 32}, "seq": 242, "time_ns": 1599000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 32, "err": 0}, "seq": 243, "time_ns": 1619000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 32, "data": 1515870810}, "seq": 244, "time_ns": 1619000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 32, "data": 1515870810, "err": 0}, "seq": 245, "time_ns": 1639000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 32}, "seq": 246, "time_ns": 1639000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 36, "data": 0, "err": 0}, "seq": 247, "time_ns": 1659000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 36}, "seq": 248, "time_ns": 1659000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 36, "err": 0}, "seq": 249, "time_ns": 1679000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 36, "data": 4294967295}, "seq": 250, "time_ns": 1679000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 36, "data": 4294967295, "err": 0}, "seq": 251, "time_ns": 1699000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 36}, "seq": 252, "time_ns": 1699000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 36, "err": 0}, "seq": 253, "time_ns": 1719000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 36, "data": 0}, "seq": 254, "time_ns": 1719000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 36, "data": 0, "err": 0}, "seq": 255, "time_ns": 1739000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 36}, "seq": 256, "time_ns": 1739000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 36, "err": 0}, "seq": 257, "time_ns": 1759000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 36, "data": 2779096485}, "seq": 258, "time_ns": 1759000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 36, "data": 2779096485, "err": 0}, "seq": 259, "time_ns": 1779000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 36}, "seq": 260, "time_ns": 1779000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 36, "err": 0}, "seq": 261, "time_ns": 1799000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 36, "data": 1515870810}, "seq": 262, "time_ns": 1799000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 36, "data": 1515870810, "err": 0}, "seq": 263, "time_ns": 1819000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 36}, "seq": 264, "time_ns": 1819000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 40, "data": 536870911, "err": 0}, "seq": 265, "time_ns": 1839000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 40}, "seq": 266, "time_ns": 1839000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 40, "err": 0}, "seq": 267, "time_ns": 1859000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 40, "data": 4294967295}, "seq": 268, "time_ns": 1859000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 40, "data": 4294967295, "err": 0}, "seq": 269, "time_ns": 1879000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 40}, "seq": 270, "time_ns": 1879000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 40, "err": 0}, "seq": 271, "time_ns": 1899000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 40, "data": 0}, "seq": 272, "time_ns": 1899000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 40, "data": 0, "err": 0}, "seq": 273, "time_ns": 1919000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 40}, "seq": 274, "time_ns": 1919000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 40, "err": 0}, "seq": 275, "time_ns": 1939000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 40, "data": 2779096485}, "seq": 276, "time_ns": 1939000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 40, "data": 2779096485, "err": 0}, "seq": 277, "time_ns": 1959000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 40}, "seq": 278, "time_ns": 1959000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 40, "err": 0}, "seq": 279, "time_ns": 1979000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 40, "data": 1515870810}, "seq": 280, "time_ns": 1979000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 40, "data": 1515870810, "err": 0}, "seq": 281, "time_ns": 1999000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 40}, "seq": 282, "time_ns": 1999000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 44, "data": 0, "err": 1}, "seq": 283, "time_ns": 2019000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 44}, "seq": 284, "time_ns": 2019000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 44, "err": 1}, "seq": 285, "time_ns": 2039000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 44, "data": 1515870810}, "seq": 286, "time_ns": 2039000}
+{"iface": "csr_rsp", "kind": "read_data", "fields": {"addr": 252, "data": 0, "err": 1}, "seq": 287, "time_ns": 2059000}
+{"iface": "csr", "kind": "read", "fields": {"addr": 252}, "seq": 288, "time_ns": 2059000}
+{"iface": "csr_rsp", "kind": "write_ack", "fields": {"addr": 252, "err": 1}, "seq": 289, "time_ns": 2079000}
+{"iface": "csr", "kind": "write", "fields": {"addr": 252, "data": 1515870810}, "seq": 290, "time_ns": 2079000}

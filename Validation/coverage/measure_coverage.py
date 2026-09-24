@@ -71,6 +71,17 @@ def nums(node):
     return (int(m.group(1)), int(m.group(2))) if m else (0, 0)
 
 
+
+def select_runs_since(agent, run_globs, since):
+    """Expand the remote globs and keep only run directories whose coverage
+    data was written at or after `since` (remote local time)."""
+    cmd = ("for g in " + " ".join(run_globs) + "; do [ -d \"$g\" ] && "
+           f"[ -n \"$(find \"$g\" -type f -newermt '{since}' -print -quit)\" ] && echo \"$g\"; "
+           "done 2>/dev/null")
+    r = agent._head_exec(cmd, timeout=120)      # plain SSH on the head node; no Slurm needed
+    out = r["stdout"] if isinstance(r, dict) else (r[0] if isinstance(r, tuple) else str(r))
+    return [l.strip() for l in out.splitlines() if l.strip().startswith("/")]
+
 def merge_and_report(agent, run_globs, label):
     """imc: merge -> load -> report_metrics; returns local tree.json path."""
     remote_db = f"/home/ugrads/j/jacobz/cov_merged_{label}"
@@ -126,12 +137,24 @@ def main() -> int:
     ap.add_argument("--rollup", action="store_true",
                     help="also roll the covergroups in the same report up "
                          "to the vplan (coverage_rollup.py)")
+    ap.add_argument("--since", metavar="YYYY-MM-DDTHH:MM:SS",
+                    help="merge only run directories modified at or after this "
+                         "time (the drop run's start). Without it the globs "
+                         "union every run ever kept on the cluster, including "
+                         "runs of OLDER drops, and a rewritten block is counted "
+                         "twice (old code + new code) with only the new half hit.")
     args = ap.parse_args()
 
     agent = CadenceSSHAgent()
     agent.connect(password=password())
     try:
-        tree = merge_and_report(agent, args.runs, args.label)
+        runs = args.runs
+        if args.since:
+            runs = select_runs_since(agent, args.runs, args.since)
+            print(f"  {len(runs)} coverage run(s) modified since {args.since}")
+            if not runs:
+                raise SystemExit("no coverage runs newer than --since; nothing to merge")
+        tree = merge_and_report(agent, runs, args.label)
     finally:
         agent.disconnect()
 
@@ -154,7 +177,9 @@ def main() -> int:
     payload = {
         "$schema": "validation-code-coverage/1",
         "generated_utc": datetime.utcnow().isoformat() + "Z",
-        "runs": args.runs,
+        "runs": runs,
+        "run_globs": args.runs,
+        "since": args.since,
         "merge": "imc merge -initial_model union_all",
         "design_total": {"covered": dh, "total": dt,
                          "percent": round(100 * dh / dt, 2) if dt else None},

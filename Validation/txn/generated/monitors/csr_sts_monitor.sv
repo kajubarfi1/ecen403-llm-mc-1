@@ -4,7 +4,7 @@
 //
 // Interface : csr_sts   (Hardware status events latched into the CSR status registers. These are a genuine INPUT stream: they set RW1C flag fields that the bus can only clear, so a predictor that cannot see them cannot model those registers. Discovered when an agent-generated predictor disagreed with real silicon on ERROR_STATUS bits 16-18 — neither was wrong; the observation was incomplete.)
 // Block     : config_regs
-// Manifest  : Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/config_regs_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

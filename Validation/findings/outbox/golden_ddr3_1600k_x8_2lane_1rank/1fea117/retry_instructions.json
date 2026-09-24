@@ -1,0 +1,1291 @@
+{
+  "$schema": "validation-retry-instructions/1",
+  "status": "FAIL",
+  "pipeline": "validation",
+  "drop": "1fea117",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "generated_utc": "2026-09-24T17:14:28.792593Z",
+  "failed_modules": [
+    "cmd_gen",
+    "config_regs",
+    "data_path",
+    "scheduler",
+    "wb_port"
+  ],
+  "retry_instructions": {
+    "data_path": {
+      "module": "data_path",
+      "attempt": null,
+      "drop": "1fea117",
+      "failed_checks": [
+        {
+          "id": "MISMATCH/ddr_wr_beat[data,mask]",
+          "name": "data_path must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "ddr_wr_beat.beat data=0xc616 mask=0x3",
+          "actual": "ddr_wr_beat.beat data=0xc9e9c616 mask=0xc",
+          "severity": "critical",
+          "confidence": "observed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 162,
+              "signal": "ddr_dq_o",
+              "text": "assign ddr_dq_o   = wr_dat_r;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 164,
+              "signal": "ddr_dm_o",
+              "text": "assign ddr_dm_o   = (wr_state == WR_DRIVE) ? ~wr_msk_r : '0;  // DM active-high masks"
+            }
+          ],
+          "owner_candidates": [
+            "data_path"
+          ],
+          "occurrences": 20,
+          "paths": [
+            "path_18_full_write"
+          ],
+          "repro": {
+            "path": "path_18_full_write",
+            "command": "python3 Validation/tools/run_path.py --path path_18_full_write",
+            "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_18_full_write",
+            "log": "Validation/reports/paths/path_18_full_write_sim.log",
+            "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "ddr_wr_beat[0] value: predicted [ddr_wr_beat.beat data=0xc616 mask=0x3] but observed [ddr_wr_beat.beat data=0xc9e9c616 mask=0xc]"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "data_path/MISMATCH/ddr_wr_beat[data,mask]"
+        },
+        {
+          "id": "MISMATCH/dp_rd_rsp[aux,data]",
+          "name": "data_path must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "transaction predicted on dp_rd_rsp",
+          "actual": "the design produced [dp_rd_rsp.response aux=0x2 data=0x0] with nothing predicted",
+          "severity": "critical",
+          "confidence": "observed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 162,
+              "signal": "ddr_dq_o",
+              "text": "assign ddr_dq_o   = wr_dat_r;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 256,
+              "signal": "rd_rsp_data",
+              "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 257,
+              "signal": "rd_rsp_aux",
+              "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
+            }
+          ],
+          "owner_candidates": [
+            "data_path"
+          ],
+          "occurrences": 19,
+          "paths": [
+            "path_03_read_return"
+          ],
+          "repro": {
+            "path": "path_03_read_return",
+            "command": "python3 Validation/tools/run_path.py --path path_03_read_return",
+            "sequence": "Validation/sequences/generated/path_03_read_return_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_03_read_return",
+            "log": "Validation/reports/paths/path_03_read_return_sim.log",
+            "trace": "Validation/reports/paths/path_03_read_return_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "dp_rd_rsp[3] unexpected: the design produced [dp_rd_rsp.response aux=0x2 data=0x0] with nothing predicted"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "data_path/MISMATCH/dp_rd_rsp[aux,data]"
+        },
+        {
+          "id": "MISMATCH/dp_rd_rsp[aux]",
+          "name": "data_path must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "dp_rd_rsp.response aux=0x1 data=0x0",
+          "actual": "dp_rd_rsp.response aux=0x2 data=0x0",
+          "severity": "critical",
+          "confidence": "observed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 256,
+              "signal": "rd_rsp_data",
+              "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 257,
+              "signal": "rd_rsp_aux",
+              "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
+            }
+          ],
+          "owner_candidates": [
+            "data_path"
+          ],
+          "occurrences": 1,
+          "paths": [
+            "path_03_read_return"
+          ],
+          "repro": {
+            "path": "path_03_read_return",
+            "command": "python3 Validation/tools/run_path.py --path path_03_read_return",
+            "sequence": "Validation/sequences/generated/path_03_read_return_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_03_read_return",
+            "log": "Validation/reports/paths/path_03_read_return_sim.log",
+            "trace": "Validation/reports/paths/path_03_read_return_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "dp_rd_rsp[2] value: predicted [dp_rd_rsp.response aux=0x1 data=0x0] but observed [dp_rd_rsp.response aux=0x2 data=0x0]"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "data_path/MISMATCH/dp_rd_rsp[aux]"
+        }
+      ],
+      "message": "3 check(s) failed on drop 1fea117; 0 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+    },
+    "scheduler": {
+      "module": "scheduler",
+      "attempt": null,
+      "drop": "1fea117",
+      "failed_checks": [
+        {
+          "id": "PROTO_002",
+          "name": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE.",
+          "pass": false,
+          "expected": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE.",
+          "actual": "ACTIVATE to bank 6 which already has row 4135 active",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": "failure_taxonomy.categories[PROTO_002]",
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 152,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= CMD_NOP;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 163,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= sel_type;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 176,
+              "signal": "cmd_row",
+              "text": "cmd_row  <= q_row[sel_idx];"
+            }
+          ],
+          "owner_candidates": [
+            "scheduler",
+            "bank_tracker"
+          ],
+          "occurrences": 2279,
+          "paths": [
+            "path_01_write_cmd",
+            "path_02_read_cmd",
+            "path_03_read_return",
+            "path_04_scheduler_bank_loop",
+            "path_05_scheduler_refresh_loop",
+            "path_06_scheduler_dequeue",
+            "path_07_backpressure",
+            "path_18_full_write",
+            "path_19_row_conflict",
+            "path_20_refresh_preempt"
+          ],
+          "repro": {
+            "path": "path_01_write_cmd",
+            "command": "python3 Validation/tools/run_path.py --path path_01_write_cmd",
+            "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_01_write_cmd",
+            "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+            "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "PROTO_002 (double_activate): ACTIVATE to bank 6 which already has row 4135 active @ [sched_cmd.command aux=0x0 bank=0x6 col=0x98 row=0x1027 type=0x1 we=0x1]"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "scheduler/PROTO_002"
+        },
+        {
+          "id": "TIMING_004",
+          "name": "ACTIVATE issued before tRC elapsed after previous ACTIVATE to same bank.",
+          "pass": false,
+          "expected": "ACTIVATE issued before tRC elapsed after previous ACTIVATE to same bank.",
+          "actual": "fired 13x; first: xmsim: *E,ASRTST (./cmd_gen_sva.sv,80): (time 707500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004 has failed",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": "timing_model.tRC",
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 152,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= CMD_NOP;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 163,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= sel_type;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 176,
+              "signal": "cmd_row",
+              "text": "cmd_row  <= q_row[sel_idx];"
+            }
+          ],
+          "owner_candidates": [
+            "scheduler",
+            "bank_tracker"
+          ],
+          "occurrences": 2132,
+          "paths": [
+            "path_01_write_cmd",
+            "path_02_read_cmd",
+            "path_03_read_return",
+            "path_04_scheduler_bank_loop",
+            "path_05_scheduler_refresh_loop",
+            "path_06_scheduler_dequeue",
+            "path_07_backpressure",
+            "path_18_full_write",
+            "path_19_row_conflict",
+            "path_20_refresh_preempt"
+          ],
+          "repro": {
+            "path": "path_01_write_cmd",
+            "command": "python3 Validation/tools/run_path.py --path path_01_write_cmd",
+            "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_01_write_cmd",
+            "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+            "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "xmsim: *E,ASRTST (./cmd_gen_sva.sv,80): (time 707500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004 has failed"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "scheduler/TIMING_004"
+        },
+        {
+          "id": "TIMING_005",
+          "name": "ACTIVATE to different bank before tRRD elapsed.",
+          "pass": false,
+          "expected": "ACTIVATE to different bank before tRRD elapsed.",
+          "actual": "fired 3x; first: xmsim: *E,ASRTST (./cmd_gen_sva.sv,95): (time 947500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005 has failed",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": "timing_model.tRRD",
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 152,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= CMD_NOP;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 163,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= sel_type;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 176,
+              "signal": "cmd_row",
+              "text": "cmd_row  <= q_row[sel_idx];"
+            }
+          ],
+          "owner_candidates": [
+            "scheduler",
+            "bank_tracker"
+          ],
+          "occurrences": 182,
+          "paths": [
+            "path_01_write_cmd",
+            "path_04_scheduler_bank_loop",
+            "path_05_scheduler_refresh_loop",
+            "path_06_scheduler_dequeue",
+            "path_07_backpressure",
+            "path_18_full_write",
+            "path_19_row_conflict",
+            "path_20_refresh_preempt"
+          ],
+          "repro": {
+            "path": "path_01_write_cmd",
+            "command": "python3 Validation/tools/run_path.py --path path_01_write_cmd",
+            "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_01_write_cmd",
+            "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+            "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "xmsim: *E,ASRTST (./cmd_gen_sva.sv,95): (time 947500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005 has failed"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "scheduler/TIMING_005"
+        },
+        {
+          "id": "TIMING_007",
+          "name": "READ issued before tWTR elapsed after last WRITE data burst.",
+          "pass": false,
+          "expected": "READ issued before tWTR elapsed after last WRITE data burst.",
+          "actual": "fired 1x; first: xmsim: *E,ASRTST (./cmd_gen_sva.sv,109): (time 1017500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_007 has failed",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": "timing_model.tWTR",
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 152,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= CMD_NOP;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 163,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= sel_type;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 176,
+              "signal": "cmd_row",
+              "text": "cmd_row  <= q_row[sel_idx];"
+            }
+          ],
+          "owner_candidates": [
+            "scheduler",
+            "bank_tracker"
+          ],
+          "occurrences": 1,
+          "paths": [
+            "path_18_full_write"
+          ],
+          "repro": {
+            "path": "path_18_full_write",
+            "command": "python3 Validation/tools/run_path.py --path path_18_full_write",
+            "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_18_full_write",
+            "log": "Validation/reports/paths/path_18_full_write_sim.log",
+            "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "xmsim: *E,ASRTST (./cmd_gen_sva.sv,109): (time 1017500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_007 has failed"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "scheduler/TIMING_007"
+        },
+        {
+          "id": "TIMING_009",
+          "name": "PRECHARGE issued before tRTP elapsed after READ command.",
+          "pass": false,
+          "expected": "PRECHARGE issued before tRTP elapsed after READ command.",
+          "actual": "fired 1x; first: xmsim: *E,ASRTST (./cmd_gen_sva.sv,139): (time 1022500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_009 has failed",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": "timing_model.tRTP",
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 152,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= CMD_NOP;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 163,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= sel_type;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 176,
+              "signal": "cmd_row",
+              "text": "cmd_row  <= q_row[sel_idx];"
+            }
+          ],
+          "owner_candidates": [
+            "scheduler",
+            "bank_tracker"
+          ],
+          "occurrences": 3,
+          "paths": [
+            "path_02_read_cmd",
+            "path_03_read_return",
+            "path_18_full_write"
+          ],
+          "repro": {
+            "path": "path_02_read_cmd",
+            "command": "python3 Validation/tools/run_path.py --path path_02_read_cmd",
+            "sequence": "Validation/sequences/generated/path_02_read_cmd_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_02_read_cmd",
+            "log": "Validation/reports/paths/path_02_read_cmd_sim.log",
+            "trace": "Validation/reports/paths/path_02_read_cmd_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "xmsim: *E,ASRTST (./cmd_gen_sva.sv,139): (time 1022500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_009 has failed"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "scheduler/TIMING_009"
+        },
+        {
+          "id": "TIMING_011",
+          "name": "Command issued before tRFC elapsed after REFRESH.",
+          "pass": false,
+          "expected": "Command issued before tRFC elapsed after REFRESH.",
+          "actual": "fired 1x; first: xmsim: *E,ASRTST (./cmd_gen_sva.sv,156): (time 47500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011 has failed",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": "timing_model.tRFC",
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 152,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= CMD_NOP;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 163,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= sel_type;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 176,
+              "signal": "cmd_row",
+              "text": "cmd_row  <= q_row[sel_idx];"
+            }
+          ],
+          "owner_candidates": [
+            "scheduler",
+            "bank_tracker",
+            "refresh_ctrl"
+          ],
+          "occurrences": 72,
+          "paths": [
+            "path_01_write_cmd",
+            "path_02_read_cmd",
+            "path_03_read_return",
+            "path_04_scheduler_bank_loop",
+            "path_05_scheduler_refresh_loop",
+            "path_06_scheduler_dequeue",
+            "path_07_backpressure",
+            "path_10_csr_to_timing",
+            "path_11_csr_to_refresh",
+            "path_12_csr_timing_to_scheduling",
+            "path_13_csr_refresh_to_scheduling",
+            "path_18_full_write",
+            "path_19_row_conflict",
+            "path_20_refresh_preempt"
+          ],
+          "repro": {
+            "path": "path_01_write_cmd",
+            "command": "python3 Validation/tools/run_path.py --path path_01_write_cmd",
+            "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_01_write_cmd",
+            "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+            "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "xmsim: *E,ASRTST (./cmd_gen_sva.sv,156): (time 47500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011 has failed"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "scheduler/TIMING_011"
+        },
+        {
+          "id": "REF_002",
+          "name": "REFRESH issued while one or more banks are still active (not precharged).",
+          "pass": false,
+          "expected": "REFRESH issued while one or more banks are still active (not precharged).",
+          "actual": "REFRESH issued while banks [0, 1, 6, 7] are still active (not precharged)",
+          "severity": "major",
+          "confidence": "observed",
+          "spec_ref": "failure_taxonomy.categories[REF_002]",
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 152,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= CMD_NOP;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 163,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= sel_type;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 176,
+              "signal": "cmd_row",
+              "text": "cmd_row  <= q_row[sel_idx];"
+            }
+          ],
+          "owner_candidates": [
+            "scheduler",
+            "bank_tracker"
+          ],
+          "occurrences": 31,
+          "paths": [
+            "path_05_scheduler_refresh_loop",
+            "path_20_refresh_preempt"
+          ],
+          "repro": {
+            "path": "path_05_scheduler_refresh_loop",
+            "command": "python3 Validation/tools/run_path.py --path path_05_scheduler_refresh_loop",
+            "sequence": "Validation/sequences/generated/path_05_scheduler_refresh_loop_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_05_scheduler_refresh_loop",
+            "log": "Validation/reports/paths/path_05_scheduler_refresh_loop_sim.log",
+            "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "REF_002: REFRESH issued while banks [0, 1, 6, 7] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "scheduler/REF_002"
+        },
+        {
+          "id": "SCHED_002",
+          "name": "No CAS command may issue that matches no enqueued request.",
+          "pass": false,
+          "expected": "No CAS command may issue that matches no enqueued request.",
+          "actual": "WR to bank 6 row 4135 col 152 matches no enqueued request",
+          "severity": "major",
+          "confidence": "observed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 152,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= CMD_NOP;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 163,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= sel_type;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "line": 176,
+              "signal": "cmd_row",
+              "text": "cmd_row  <= q_row[sel_idx];"
+            }
+          ],
+          "owner_candidates": [
+            "scheduler",
+            "cmd_queue"
+          ],
+          "occurrences": 50,
+          "paths": [
+            "path_01_write_cmd",
+            "path_02_read_cmd",
+            "path_06_scheduler_dequeue",
+            "path_07_backpressure",
+            "path_18_full_write",
+            "path_19_row_conflict",
+            "path_20_refresh_preempt"
+          ],
+          "repro": {
+            "path": "path_01_write_cmd",
+            "command": "python3 Validation/tools/run_path.py --path path_01_write_cmd",
+            "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_01_write_cmd",
+            "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+            "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "SCHED_002 (cas_no_matching_request): WR to bank 6 row 4135 col 152 matches no enqueued request @ [sched_cmd.command aux=0x0 bank=0x6 col=0x98 row=0x1027 type=0x3 we=0x1]"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "scheduler/SCHED_002"
+        }
+      ],
+      "message": "8 check(s) failed on drop 1fea117; 6 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+    },
+    "wb_port": {
+      "module": "wb_port",
+      "attempt": null,
+      "drop": "1fea117",
+      "failed_checks": [
+        {
+          "id": "MISMATCH/req[addr,data,mask,we]",
+          "name": "wb_port must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "transaction predicted on req",
+          "actual": "the design produced [req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0] with nothing predicted",
+          "severity": "critical",
+          "confidence": "observed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 142,
+              "signal": "req_we",
+              "text": "req_we    <= wb_we_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 143,
+              "signal": "req_addr",
+              "text": "req_addr  <= wb_adr_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 144,
+              "signal": "req_wdata",
+              "text": "req_wdata <= wb_dat_i;"
+            }
+          ],
+          "owner_candidates": [
+            "wb_port"
+          ],
+          "occurrences": 13,
+          "paths": [
+            "path_18_full_write"
+          ],
+          "repro": {
+            "path": "path_18_full_write",
+            "command": "python3 Validation/tools/run_path.py --path path_18_full_write",
+            "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_18_full_write",
+            "log": "Validation/reports/paths/path_18_full_write_sim.log",
+            "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "req[5] unexpected: the design produced [req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0] with nothing predicted"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "wb_port/MISMATCH/req[addr,data,mask,we]"
+        },
+        {
+          "id": "MISMATCH/req[addr,data,mask]",
+          "name": "wb_port must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "req.request addr=0x184b9da5 data=0x0 mask=0xf we=0x0",
+          "actual": "req.request addr=0x18f2a0a3 data=0xc9e9c616 mask=0x3 we=0x0",
+          "severity": "critical",
+          "confidence": "observed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 142,
+              "signal": "req_we",
+              "text": "req_we    <= wb_we_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 143,
+              "signal": "req_addr",
+              "text": "req_addr  <= wb_adr_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 144,
+              "signal": "req_wdata",
+              "text": "req_wdata <= wb_dat_i;"
+            }
+          ],
+          "owner_candidates": [
+            "wb_port"
+          ],
+          "occurrences": 2,
+          "paths": [
+            "path_18_full_write"
+          ],
+          "repro": {
+            "path": "path_18_full_write",
+            "command": "python3 Validation/tools/run_path.py --path path_18_full_write",
+            "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_18_full_write",
+            "log": "Validation/reports/paths/path_18_full_write_sim.log",
+            "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "req[6] value: predicted [req.request addr=0x184b9da5 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x18f2a0a3 data=0xc9e9c616 mask=0x3 we=0x0]"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "wb_port/MISMATCH/req[addr,data,mask]"
+        },
+        {
+          "id": "MISMATCH/req[addr,mask]",
+          "name": "wb_port must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "req.request addr=0x1fb5355e data=0x0 mask=0xf we=0x0",
+          "actual": "req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0",
+          "severity": "critical",
+          "confidence": "observed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 142,
+              "signal": "req_we",
+              "text": "req_we    <= wb_we_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 143,
+              "signal": "req_addr",
+              "text": "req_addr  <= wb_adr_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 144,
+              "signal": "req_wdata",
+              "text": "req_wdata <= wb_dat_i;"
+            }
+          ],
+          "owner_candidates": [
+            "wb_port"
+          ],
+          "occurrences": 39,
+          "paths": [
+            "path_02_read_cmd",
+            "path_03_read_return",
+            "path_18_full_write"
+          ],
+          "repro": {
+            "path": "path_02_read_cmd",
+            "command": "python3 Validation/tools/run_path.py --path path_02_read_cmd",
+            "sequence": "Validation/sequences/generated/path_02_read_cmd_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_02_read_cmd",
+            "log": "Validation/reports/paths/path_02_read_cmd_sim.log",
+            "trace": "Validation/reports/paths/path_02_read_cmd_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "req[2] value: predicted [req.request addr=0x1fb5355e data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0]"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "wb_port/MISMATCH/req[addr,mask]"
+        },
+        {
+          "id": "MISMATCH/req[mask]",
+          "name": "wb_port must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "req.request addr=0x409f134 data=0x0 mask=0xf we=0x0",
+          "actual": "req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0",
+          "severity": "critical",
+          "confidence": "observed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 142,
+              "signal": "req_we",
+              "text": "req_we    <= wb_we_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 143,
+              "signal": "req_addr",
+              "text": "req_addr  <= wb_adr_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 144,
+              "signal": "req_wdata",
+              "text": "req_wdata <= wb_dat_i;"
+            }
+          ],
+          "owner_candidates": [
+            "wb_port"
+          ],
+          "occurrences": 6,
+          "paths": [
+            "path_02_read_cmd",
+            "path_03_read_return",
+            "path_18_full_write"
+          ],
+          "repro": {
+            "path": "path_02_read_cmd",
+            "command": "python3 Validation/tools/run_path.py --path path_02_read_cmd",
+            "sequence": "Validation/sequences/generated/path_02_read_cmd_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_02_read_cmd",
+            "log": "Validation/reports/paths/path_02_read_cmd_sim.log",
+            "trace": "Validation/reports/paths/path_02_read_cmd_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "req[0] value: predicted [req.request addr=0x409f134 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0]"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "wb_port/MISMATCH/req[mask]"
+        }
+      ],
+      "message": "4 check(s) failed on drop 1fea117; 0 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+    },
+    "cmd_gen": {
+      "module": "cmd_gen",
+      "attempt": null,
+      "drop": "1fea117",
+      "failed_checks": [
+        {
+          "id": "MISMATCH/ddr_cmd[addr]",
+          "name": "cmd_gen must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "ddr_cmd.command addr=0x38c0 bank=0x6 cmd=0x2",
+          "actual": "ddr_cmd.command addr=0x0 bank=0x6 cmd=0x2",
+          "severity": "major",
+          "confidence": "observed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen.sv",
+              "line": 85,
+              "signal": "ddr_cmd",
+              "text": "ddr_cmd      <= DDR_NOP;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen.sv",
+              "line": 107,
+              "signal": "ddr_cmd",
+              "text": "ddr_cmd      <= DDR_NOP;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen.sv",
+              "line": 122,
+              "signal": "ddr_cmd",
+              "text": "ddr_cmd      <= DDR_ACT;"
+            }
+          ],
+          "owner_candidates": [
+            "cmd_gen"
+          ],
+          "occurrences": 80,
+          "paths": [
+            "path_01_write_cmd",
+            "path_02_read_cmd",
+            "path_18_full_write",
+            "path_20_refresh_preempt"
+          ],
+          "repro": {
+            "path": "path_01_write_cmd",
+            "command": "python3 Validation/tools/run_path.py --path path_01_write_cmd",
+            "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_01_write_cmd",
+            "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+            "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "ddr_cmd[12] value: predicted [ddr_cmd.command addr=0x38c0 bank=0x6 cmd=0x2] but observed [ddr_cmd.command addr=0x0 bank=0x6 cmd=0x2]"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "cmd_gen/MISMATCH/ddr_cmd[addr]"
+        }
+      ],
+      "message": "1 check(s) failed on drop 1fea117; 0 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+    },
+    "config_regs": {
+      "module": "config_regs",
+      "attempt": null,
+      "drop": "1fea117",
+      "failed_checks": [
+        {
+          "id": "MISMATCH/csr_rsp[data]@BIST_ADDR_END",
+          "name": "config_regs must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "csr_rsp.read_data addr=0x28 data=0x1fffffff err=0x0",
+          "actual": "csr_rsp.read_data addr=0x28 data=0xffffffff err=0x0",
+          "severity": "minor",
+          "confidence": "observed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 93,
+              "signal": "csr_err_o",
+              "text": "assign csr_err_o = err_r;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 185,
+              "signal": "csr_dat_o",
+              "text": "if (!rst_n) csr_dat_o <= 32'h0;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 186,
+              "signal": "csr_dat_o",
+              "text": "else if (csr_rd) csr_dat_o <= rdata_mux;"
+            }
+          ],
+          "owner_candidates": [
+            "config_regs"
+          ],
+          "occurrences": 12,
+          "paths": [
+            "path_10_csr_to_timing",
+            "path_11_csr_to_refresh",
+            "path_12_csr_timing_to_scheduling",
+            "path_13_csr_refresh_to_scheduling"
+          ],
+          "repro": {
+            "path": "path_10_csr_to_timing",
+            "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+            "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+            "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+            "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "csr_rsp[92] value: predicted [csr_rsp.read_data addr=0x28 data=0x1fffffff err=0x0] but observed [csr_rsp.read_data addr=0x28 data=0xffffffff err=0x0]"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "config_regs/MISMATCH/csr_rsp[data]@BIST_ADDR_END"
+        },
+        {
+          "id": "MISMATCH/csr_rsp[data]@BIST_ADDR_START",
+          "name": "config_regs must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "csr_rsp.read_data addr=0x24 data=0x1fffffff err=0x0",
+          "actual": "csr_rsp.read_data addr=0x24 data=0xffffffff err=0x0",
+          "severity": "minor",
+          "confidence": "observed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 93,
+              "signal": "csr_err_o",
+              "text": "assign csr_err_o = err_r;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 185,
+              "signal": "csr_dat_o",
+              "text": "if (!rst_n) csr_dat_o <= 32'h0;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 186,
+              "signal": "csr_dat_o",
+              "text": "else if (csr_rd) csr_dat_o <= rdata_mux;"
+            }
+          ],
+          "owner_candidates": [
+            "config_regs"
+          ],
+          "occurrences": 12,
+          "paths": [
+            "path_10_csr_to_timing",
+            "path_11_csr_to_refresh",
+            "path_12_csr_timing_to_scheduling",
+            "path_13_csr_refresh_to_scheduling"
+          ],
+          "repro": {
+            "path": "path_10_csr_to_timing",
+            "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+            "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+            "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+            "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "csr_rsp[83] value: predicted [csr_rsp.read_data addr=0x24 data=0x1fffffff err=0x0] but observed [csr_rsp.read_data addr=0x24 data=0xffffffff err=0x0]"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "config_regs/MISMATCH/csr_rsp[data]@BIST_ADDR_START"
+        },
+        {
+          "id": "MISMATCH/csr_rsp[data]@BIST_CONFIG",
+          "name": "config_regs must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "csr_rsp.read_data addr=0x20 data=0xf err=0x0",
+          "actual": "csr_rsp.read_data addr=0x20 data=0xffffffff err=0x0",
+          "severity": "minor",
+          "confidence": "observed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 93,
+              "signal": "csr_err_o",
+              "text": "assign csr_err_o = err_r;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 185,
+              "signal": "csr_dat_o",
+              "text": "if (!rst_n) csr_dat_o <= 32'h0;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 186,
+              "signal": "csr_dat_o",
+              "text": "else if (csr_rd) csr_dat_o <= rdata_mux;"
+            }
+          ],
+          "owner_candidates": [
+            "config_regs"
+          ],
+          "occurrences": 12,
+          "paths": [
+            "path_10_csr_to_timing",
+            "path_11_csr_to_refresh",
+            "path_12_csr_timing_to_scheduling",
+            "path_13_csr_refresh_to_scheduling"
+          ],
+          "repro": {
+            "path": "path_10_csr_to_timing",
+            "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+            "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+            "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+            "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "csr_rsp[74] value: predicted [csr_rsp.read_data addr=0x20 data=0xf err=0x0] but observed [csr_rsp.read_data addr=0x20 data=0xffffffff err=0x0]"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "config_regs/MISMATCH/csr_rsp[data]@BIST_CONFIG"
+        },
+        {
+          "id": "MISMATCH/csr_rsp[data]@CTRL_CONFIG",
+          "name": "config_regs must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "csr_rsp.read_data addr=0x4 data=0x1f err=0x0",
+          "actual": "csr_rsp.read_data addr=0x4 data=0xffffff1f err=0x0",
+          "severity": "minor",
+          "confidence": "observed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 93,
+              "signal": "csr_err_o",
+              "text": "assign csr_err_o = err_r;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 185,
+              "signal": "csr_dat_o",
+              "text": "if (!rst_n) csr_dat_o <= 32'h0;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 186,
+              "signal": "csr_dat_o",
+              "text": "else if (csr_rd) csr_dat_o <= rdata_mux;"
+            }
+          ],
+          "owner_candidates": [
+            "config_regs"
+          ],
+          "occurrences": 12,
+          "paths": [
+            "path_10_csr_to_timing",
+            "path_11_csr_to_refresh",
+            "path_12_csr_timing_to_scheduling",
+            "path_13_csr_refresh_to_scheduling"
+          ],
+          "repro": {
+            "path": "path_10_csr_to_timing",
+            "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+            "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+            "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+            "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "csr_rsp[11] value: predicted [csr_rsp.read_data addr=0x4 data=0x1f err=0x0] but observed [csr_rsp.read_data addr=0x4 data=0xffffff1f err=0x0]"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "config_regs/MISMATCH/csr_rsp[data]@CTRL_CONFIG"
+        },
+        {
+          "id": "MISMATCH/csr_rsp[data]@CTRL_STATUS",
+          "name": "config_regs must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "csr_rsp.read_data addr=0x0 data=0x0 err=0x0",
+          "actual": "csr_rsp.read_data addr=0x0 data=0x20 err=0x0",
+          "severity": "minor",
+          "confidence": "observed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 93,
+              "signal": "csr_err_o",
+              "text": "assign csr_err_o = err_r;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 185,
+              "signal": "csr_dat_o",
+              "text": "if (!rst_n) csr_dat_o <= 32'h0;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 186,
+              "signal": "csr_dat_o",
+              "text": "else if (csr_rd) csr_dat_o <= rdata_mux;"
+            }
+          ],
+          "owner_candidates": [
+            "config_regs"
+          ],
+          "occurrences": 4,
+          "paths": [
+            "path_10_csr_to_timing",
+            "path_11_csr_to_refresh",
+            "path_12_csr_timing_to_scheduling",
+            "path_13_csr_refresh_to_scheduling"
+          ],
+          "repro": {
+            "path": "path_10_csr_to_timing",
+            "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+            "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+            "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+            "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "csr_rsp[0] value: predicted [csr_rsp.read_data addr=0x0 data=0x0 err=0x0] but observed [csr_rsp.read_data addr=0x0 data=0x20 err=0x0]"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "config_regs/MISMATCH/csr_rsp[data]@CTRL_STATUS"
+        },
+        {
+          "id": "MISMATCH/csr_rsp[data]@REFRESH_CONFIG",
+          "name": "config_regs must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "csr_rsp.read_data addr=0x18 data=0x1ff err=0x0",
+          "actual": "csr_rsp.read_data addr=0x18 data=0xffffffff err=0x0",
+          "severity": "minor",
+          "confidence": "observed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 93,
+              "signal": "csr_err_o",
+              "text": "assign csr_err_o = err_r;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 185,
+              "signal": "csr_dat_o",
+              "text": "if (!rst_n) csr_dat_o <= 32'h0;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+              "line": 186,
+              "signal": "csr_dat_o",
+              "text": "else if (csr_rd) csr_dat_o <= rdata_mux;"
+            }
+          ],
+          "owner_candidates": [
+            "config_regs"
+          ],
+          "occurrences": 12,
+          "paths": [
+            "path_10_csr_to_timing",
+            "path_11_csr_to_refresh",
+            "path_12_csr_timing_to_scheduling",
+            "path_13_csr_refresh_to_scheduling"
+          ],
+          "repro": {
+            "path": "path_10_csr_to_timing",
+            "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+            "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+            "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+            "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "csr_rsp[56] value: predicted [csr_rsp.read_data addr=0x18 data=0x1ff err=0x0] but observed [csr_rsp.read_data addr=0x18 data=0xffffffff err=0x0]"
+            }
+          },
+          "introduced_in": null,
+          "finding_id": "config_regs/MISMATCH/csr_rsp[data]@REFRESH_CONFIG"
+        }
+      ],
+      "message": "6 check(s) failed on drop 1fea117; 0 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+    }
+  },
+  "resolved_since_previous_drop": [
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/DATA_001",
+      "kind": "rtl_defect",
+      "check_id": "DATA_001",
+      "taxonomy_id": "DATA_001",
+      "owner_module": "data_path",
+      "severity": "critical",
+      "title": "data_path: DATA_001",
+      "paths": [
+        "path_03_read_return",
+        "path_18_full_write"
+      ],
+      "status": "resolved",
+      "resolved_in": "1fea117",
+      "last_seen": "b4d6f45",
+      "first_seen": "b4d6f45",
+      "note": "open in drop b4d6f45, not raised by drop 1fea117"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/DATA_001",
+      "kind": "rtl_defect",
+      "check_id": "DATA_001",
+      "taxonomy_id": "DATA_001",
+      "owner_module": "wb_port",
+      "severity": "critical",
+      "title": "wb_port: DATA_001",
+      "paths": [
+        "path_02_read_cmd",
+        "path_03_read_return",
+        "path_18_full_write"
+      ],
+      "status": "resolved",
+      "resolved_in": "1fea117",
+      "last_seen": "b4d6f45",
+      "first_seen": "b4d6f45",
+      "note": "open in drop b4d6f45, not raised by drop 1fea117"
+    }
+  ],
+  "requires_human_review": false,
+  "source": "Validation/findings/emit_findings.py -> retry_adapter.py"
+}

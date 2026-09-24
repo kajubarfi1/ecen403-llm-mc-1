@@ -8,9 +8,10 @@ happen, with each step's exit criterion enforced before the next:
   1. resolve     every block resolves through the declared drop roots
   2. intake      the spec answers the questions the intake gate asks
                  (gaps are reported and filed; --strict-intake stops here)
-  3. regenerate  schemas, monitors, SVA, coverage models from the drop's
-                 manifests and the spec (deterministic; a port change shows
-                 up here, not as a silent miswire later)
+  3. regenerate  integration map (from manifest `source` fields), schemas,
+                 monitors, SVA, coverage models from the drop's manifests and
+                 the spec (deterministic; a port change shows up here, not as
+                 a silent miswire later)
   4. run         every runnable path on Olympus, N at a time; derived
                  reports for the single-hop paths fall out of their hosts
   5. rollup      merge coverage, write vplan statuses
@@ -121,8 +122,10 @@ def main() -> int:
 
     # 3. regenerate ------------------------------------------------------------
     if not args.skip_regenerate:
-        banner(3, "regenerate schemas, monitors, SVA, coverage from the drop")
-        for cmd in ("python3 Validation/txn/schema_gen.py",
+        banner(3, "regenerate integration map, schemas, monitors, SVA, coverage from the drop")
+        for cmd in ("python3 Validation/structural/integration_map_gen.py --findings "
+                    "Validation/findings/outbox/integration_map_findings.json",
+                    "python3 Validation/txn/schema_gen.py",
                     "python3 Validation/txn/monitor_gen.py",
                     "python3 Validation/sva/sva_gen.py",
                     "python3 Validation/sva/coverage_gen.py",
@@ -163,8 +166,9 @@ def main() -> int:
     # 5. rollup ----------------------------------------------------------------
     if not args.skip_rollup and not args.skip_sim:
         banner(5, "coverage rollup")
-        rc, out = sh("python3 Validation/coverage/measure_coverage.py --rollup",
-                     log, check=False, timeout=1800)
+        since = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(t0 - 60))
+        rc, out = sh(f"python3 Validation/coverage/measure_coverage.py --rollup "
+                     f"--since {since}", log, check=False, timeout=1800)
         m = re.search(r"imc report: (\S+)", out)
         tot = re.search(r"DESIGN TOTAL\s+(\S+)\s+([\d.]+%)", out)
         if m:

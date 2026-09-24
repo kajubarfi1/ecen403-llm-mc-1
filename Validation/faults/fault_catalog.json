@@ -1,7 +1,7 @@
 {
   "$schema": "validation-fault-catalog/1",
   "$comment": "Seeded design faults: realistic single-point bugs injected into a COPY of the canonical RTL drop, one at a time, to measure whether the whole validation stack (monitors, harness, generated SVA, coverage sampling, scoreboard, checkers) detects them and blames the right block. Each fault is a literal text substitution that must match the block's RTL exactly once \u2014 a mutation that does not apply is an error, never a silent pass. `expect` names the detectors that should fire, in the signature vocabulary of seed_faults.py: id:<taxonomy or rule id>, assert:<generated assertion label>, illegal:<coverpoint>, stage:<stage name> (a stage newly failing), matched:<stage> (an exact stage matching fewer transactions), log:<marker>. Detection is DIFFERENTIAL against the baseline reports of the same drop, because the drop is already broken: a fault is killed only when a detector appears that the baseline did not show, or an expected detector's count grows.",
-  "drop_root": "Frontend/OutputFolders",
+  "drop_root": "Frontend2/OutputFolders",
   "faults": [
     {
       "id": "M01_cmd_gen_bank_stuck",
@@ -38,30 +38,32 @@
       "block": "bank_tracker",
       "file": "PHASE2RTL/bank_tracker.sv",
       "description": "tRAS timer loaded with 1 instead of the configured value; PRECHARGE follows ACTIVATE too early. (Replaces a tRCD fault that was equivalent: at this clock tRCD is 3 cycles and the ACT->CAS pipeline is structurally longer, so no timer bug can violate it.)",
-      "from": "ctr_ras[cmd_act_bank]  <= cfg_tRAS_nCK;",
-      "to": "ctr_ras[cmd_act_bank]  <= 8'd1;",
+      "from": "ctr_ras[gi] <= cfg_tRAS_nCK[CTR_WIDTH-1:0];",
+      "to": "ctr_ras[gi] <= CTR_WIDTH'(1);",
       "expect": [
         "assert:a_TIMING_003",
         "illegal:cp_tras_spacing"
       ],
       "paths": [
         "path_19_row_conflict"
-      ]
+      ],
+      "reseeded": "2026-09-24: block rewritten in the Frontend2 drop (c8ac792); same fault, new site"
     },
     {
       "id": "M04_bank_tracker_trrd_zero",
       "block": "bank_tracker",
       "file": "PHASE2RTL/bank_tracker.sv",
       "description": "tRRD timer never loaded; ACTIVATEs to different banks may be back-to-back. (Replaces a tRC fault that was equivalent: tRC = tRAS + tRP, and both are enforced separately, so a broken tRC timer alone cannot produce a violation.)",
-      "from": "ctr_rrd                <= cfg_tRRD_nCK;",
-      "to": "ctr_rrd                <= 8'd0;",
+      "from": "ctr_rrd <= cfg_tRRD_nCK[CTR_WIDTH-1:0];",
+      "to": "ctr_rrd <= '0;",
       "expect": [
         "assert:a_TIMING_005",
         "illegal:cp_trrd_spacing"
       ],
       "paths": [
         "path_19_row_conflict"
-      ]
+      ],
+      "reseeded": "2026-09-24: block rewritten in the Frontend2 drop (c8ac792); same fault, new site"
     },
     {
       "id": "M05_refresh_never_requested",
@@ -110,14 +112,15 @@
       "block": "config_regs",
       "file": "PHASE1RTL/config_regs.sv",
       "description": "RW1C flag becomes settable by a bus write (write-1 sets instead of clears). (Replaces a lost-latch fault that was unobservable: the starvation event is unreachable in this RTL, see the ref_pending_cnt width finding.)",
-      "from": "if (csr_dat_i[17]) reg_error_status[17] <= 1'b0;",
-      "to": "reg_error_status[17] <= csr_dat_i[17];",
+      "from": "csr_dat_i[17]) ref_starve_flag_r <= 1'b0;",
+      "to": "csr_dat_i[17]) ref_starve_flag_r <= 1'b1;",
       "expect": [
         "matched:config_regs"
       ],
       "paths": [
         "path_12_csr_timing_to_scheduling"
-      ]
+      ],
+      "reseeded": "2026-09-24: block rewritten in the Frontend2 drop (c8ac792); same fault, new site"
     },
     {
       "id": "M09_addr_decoder_bank_slice",
@@ -199,15 +202,16 @@
       "block": "init_fsm",
       "file": "PHASE1RTL/init_fsm.sv",
       "description": "Init sequence skips MR2 (goes straight to MR3).",
-      "from": "next_state   = S_MR2;",
-      "to": "next_state   = S_MR3;",
+      "from": "? S_MR2        : S_TXPR_WAIT;",
+      "to": "? S_MR3        : S_TXPR_WAIT;",
       "expect": [
         "id:INIT_001",
         "id:INIT_003"
       ],
       "paths": [
         "path_08_init_to_cal"
-      ]
+      ],
+      "reseeded": "2026-09-24: block rewritten in the Frontend2 drop (c8ac792); same fault, new site"
     },
     {
       "id": "M15_calibration_early_done",
@@ -235,5 +239,6 @@
   ],
   "$todo": [
     "cmd_queue_scheduler / scheduler / path_05 / path_20 checkers should take cfg_refresh as an input stream so REF_001 uses the programmed postpone budget, not the spec constant."
-  ]
+  ],
+  "$reseed_note": "Fault sites are literal text; when a block is regenerated the site moves. Check applicability with tests/test_seed_faults.py before trusting a matrix."
 }

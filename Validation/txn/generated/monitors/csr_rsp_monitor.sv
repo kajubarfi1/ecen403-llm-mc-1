@@ -4,7 +4,7 @@
 //
 // Interface : csr_rsp   (CSR response stream (read data / error status) out of config_regs)
 // Block     : config_regs
-// Manifest  : Frontend/OutputFolders/VALIDATIONREPORT/lint_combined_p4/config_regs_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

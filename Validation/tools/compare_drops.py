@@ -136,6 +136,15 @@ def stimulus_steps(rep):
         return [s for s in json.load(f).get("steps", [])]
 
 
+
+def backfilled(d):
+    """True when the snapshot in `d` records backfilled logs (SNAPSHOT.json)."""
+    try:
+        with open(os.path.join(d, "SNAPSHOT.json")) as f:
+            return bool(json.load(f).get("backfilled"))
+    except (OSError, ValueError):
+        return False
+
 def compare(a_dir, b_dir, strict=False):
     rows = []
     for p in sorted(set(paths_in(a_dir)) | set(paths_in(b_dir))):
@@ -153,6 +162,25 @@ def compare(a_dir, b_dir, strict=False):
         if st_a is not None and st_b is not None and st_a != st_b:
             notes.append("stimulus differs (the sequence generator or seed "
                          "changed between the runs)")
+        # Assertion / illegal-bin / log-marker keys come from the sim log.
+        # When only one side archived its log, those keys are evidence of
+        # what was kept, not of what the design did: drop them on both sides.
+        log_a = os.path.exists(os.path.join(a_dir, f"{p}_sim.log"))
+        log_b = os.path.exists(os.path.join(b_dir, f"{p}_sim.log"))
+        if log_a != log_b:
+            notes.append("sim log archived on one side only; assertion, "
+                         "illegal-bin and log-marker keys ignored")
+            drop = ("assert:", "illegal:", "log:")
+            sa = {k: v for k, v in sa.items() if not k.startswith(drop)}
+            sb = {k: v for k, v in sb.items() if not k.startswith(drop)}
+        # A backfilled snapshot took its logs from an earlier run of the same
+        # drop, possibly under an older coverage model: illegal-bin keys then
+        # reflect which bins existed, not what the design did.
+        if backfilled(a_dir) != backfilled(b_dir):
+            notes.append("one side's sim logs are backfilled from an earlier run "
+                         "(coverage model may differ); illegal-bin keys ignored")
+            sa = {k: v for k, v in sa.items() if not k.startswith("illegal:")}
+            sb = {k: v for k, v in sb.items() if not k.startswith("illegal:")}
         cov_a = ra.get("coverage_collected", True)
         cov_b = rb.get("coverage_collected", True)
         if cov_a != cov_b:
@@ -183,6 +211,13 @@ def snapshot(src, dest_root):
     for f in glob.glob(os.path.join(src, "*_report.json")):
         shutil.copy(f, dest)
         n += 1
+    # The evidence the signature reads lives beside the report: the sim log
+    # (assertion / illegal-bin counts) and the observed trace (strict diff).
+    # A snapshot without them compares asymmetrically against a live run —
+    # every assertion looks "new" — so they are archived too.
+    for pat in ("*_sim.log", "*_observed.jsonl"):
+        for f in glob.glob(os.path.join(src, pat)):
+            shutil.copy(f, dest)
     with open(os.path.join(dest, "SNAPSHOT.json"), "w") as f:
         json.dump({"drop_head": head, "taken_utc": datetime.utcnow().isoformat() + "Z",
                    "reports": n, "source": os.path.relpath(src, ROOT)}, f, indent=2)
