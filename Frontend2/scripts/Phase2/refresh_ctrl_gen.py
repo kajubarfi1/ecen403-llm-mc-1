@@ -199,7 +199,7 @@ endmodule
                 "scheduler_if": [
                     {"name": "ref_required", "width": 1, "dir": "output"},
                     {"name": "ref_urgent", "width": 1, "dir": "output"},
-                    {"name": "ref_ack", "width": 1, "dir": "input"},
+                    {"name": "ref_ack", "width": 1, "dir": "input", "source": "scheduler.ref_ack"},
                 ],
                 "status_out": [
                     {"name": "ref_pending_cnt", "width": 3, "dir": "output"},

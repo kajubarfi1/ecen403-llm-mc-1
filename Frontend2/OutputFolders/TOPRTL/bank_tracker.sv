@@ -1,101 +1,11 @@
-#!/usr/bin/env python3
-"""
-BANK TRACKER -- RTL Generation Script (Phase 2, deterministic)
-
-Replaces the LLM-driven Frontend/Agents/bank_tracker_agent.py. The most
-structurally complex Phase 2 block (8 per-bank state machines, shared
-timing counters, a tFAW window), but its own "HARD NAMING CONTRACT" plus
-"BEHAVIORAL REQUIREMENTS" sections already pinned down exact reset values,
-exact per-command register updates, and exact combinational permission
-formulas -- the "you choose the implementation" language only mattered
-because an LLM needed room to phrase a state machine; a script just needs
-one correct implementation of the same spec. This is that implementation.
-"""
-
-import json
-import os
-import sys
-from pathlib import Path
-from typing import Optional
-
-_HERE = os.path.dirname(os.path.abspath(__file__))
-_SCRIPTS_DIR = os.path.dirname(_HERE)
-if _SCRIPTS_DIR not in sys.path:
-    sys.path.insert(0, _SCRIPTS_DIR)
-from manifest_stamp import stamp
-
-
-class BankTrackerGenerator:
-
-    def __init__(self, spec_path: str, output_dir: str = "./output",
-                 retry_instructions: Optional[dict] = None):
-        # retry_instructions accepted for pipeline call-signature compatibility
-        # only -- a deterministic generator has nothing to retry against.
-        self.spec_path = spec_path
-        self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(parents=True, exist_ok=True)
-
-        with open(spec_path) as f:
-            self.spec = json.load(f)
-
-        self.geo = self.spec["memory_geometry"]
-        self.ca = self.spec["controller_architecture"]
-        self.tm = self.spec["timing_model"]
-        self.dc = self.tm["$derived_cycles"]
-        self.p = self._derive()
-
-    # ==================================================================
-    # Parameter derivation (unchanged from the original agent)
-    # ==================================================================
-    def _derive(self) -> dict:
-        p = {}
-        p["ROW_BITS"] = self.geo["row_bits"]
-        p["BANK_BITS"] = self.geo["bank_bits"]
-        p["NUM_BANKS"] = 2 ** p["BANK_BITS"]
-
-        timing_params = [
-            "tRCD_nCK", "tRP_nCK", "tRAS_nCK", "tRC_nCK",
-            "tRRD_nCK", "tFAW_nCK", "tWTR_nCK", "tWR_nCK",
-            "tRTP_nCK", "tCCD_nCK", "tRFC_nCK",
-        ]
-        for tp in timing_params:
-            p[tp] = self.dc[tp]
-
-        max_val = max(p[tp] for tp in timing_params)
-        p["CTR_WIDTH"] = max(1, max_val.bit_length())
-
-        p["FAW_DEPTH"] = 4
-        p["TREFI_nCK"] = self.dc["tREFI_nCK"]
-        return p
-
-    # ==================================================================
-    # Validation (unchanged)
-    # ==================================================================
-    def validate(self) -> list:
-        errors = []
-        p = self.p
-        if p["NUM_BANKS"] != 8:
-            errors.append(f"Expected 8 banks for DDR3, got {p['NUM_BANKS']}")
-        if p["tRCD_nCK"] < 1:
-            errors.append(f"tRCD must be >= 1, got {p['tRCD_nCK']}")
-        return errors
-
-    # ==================================================================
-    # RTL generation -- direct construction of the one implementation
-    # that satisfies the contract's behavioral requirements. No LLM.
-    # ==================================================================
-    def generate_rtl(self) -> str:
-        p = self.p
-        nb, bb, rb, cw = p["NUM_BANKS"], p["BANK_BITS"], p["ROW_BITS"], p["CTR_WIDTH"]
-
-        return f"""// bank_tracker.sv -- 8 independent per-bank state machines, DDR3 bank
+// bank_tracker.sv -- 8 independent per-bank state machines, DDR3 bank
 // timing constraints (tRCD/tRP/tRAS/tRC/tWTR/tWR/tRTP per bank; tRRD/tCCD/
 // tRFC shared), tFAW 4-ACT rolling window, combinational permission vectors.
 module bank_tracker #(
-    parameter NUM_BANKS  = {nb},
-    parameter BANK_BITS  = {bb},
-    parameter ROW_BITS   = {rb},
-    parameter CTR_WIDTH  = {cw}
+    parameter NUM_BANKS  = 8,
+    parameter BANK_BITS  = 3,
+    parameter ROW_BITS   = 15,
+    parameter CTR_WIDTH  = 8
 ) (
     input  logic                       clk,
     input  logic                       rst_n,
@@ -134,10 +44,10 @@ module bank_tracker #(
     output logic                       faw_allows_act
 );
 
-    typedef enum logic [1:0] {{
+    typedef enum logic [1:0] {
         BANK_IDLE   = 2'd0,
         BANK_ACTIVE = 2'd1
-    }} bank_state_t;
+    } bank_state_t;
 
     bank_state_t          bk_state [NUM_BANKS];
     logic [ROW_BITS-1:0]  bk_row   [NUM_BANKS];
@@ -258,7 +168,7 @@ module bank_tracker #(
     // cfg_tFAW_nCK -- written after the decrement loop so the load wins
     // on the cycle it lands. faw_allows_act is high iff at least one slot
     // is currently at 0 (fewer than 4 ACTs pending in the window).
-    localparam int FAW_DEPTH = {p['FAW_DEPTH']};
+    localparam int FAW_DEPTH = 4;
     logic [CTR_WIDTH-1:0] faw_pipe [FAW_DEPTH];
     logic [1:0]           faw_wptr;
 
@@ -311,97 +221,3 @@ module bank_tracker #(
     assign all_banks_idle = ~(|bank_is_active);
 
 endmodule
-"""
-
-    # ==================================================================
-    # Manifest (unchanged from the original)
-    # ==================================================================
-    def generate_manifest(self) -> dict:
-        p = self.p
-        return {
-            **stamp(self.spec),
-            "module_name": "bank_tracker", "file": "bank_tracker.sv",
-            "phase": 2, "generator": "bank_tracker_gen",
-            "dependencies": ["config_regs"],
-            "parameters": {
-                "NUM_BANKS": p["NUM_BANKS"], "BANK_BITS": p["BANK_BITS"],
-                "ROW_BITS": p["ROW_BITS"], "CTR_WIDTH": p["CTR_WIDTH"],
-            },
-            "ports": {
-                "clock_reset": [
-                    {"name": "clk", "width": 1, "dir": "input"},
-                    {"name": "rst_n", "width": 1, "dir": "input"},
-                ],
-                "cmd_feedback": [
-                    {"name": "cmd_act_valid", "width": 1, "dir": "input", "source": "cmd_gen.fb_act_valid"},
-                    {"name": "cmd_act_bank", "width": p["BANK_BITS"], "dir": "input", "source": "cmd_gen.fb_act_bank"},
-                    {"name": "cmd_act_row", "width": p["ROW_BITS"], "dir": "input", "source": "cmd_gen.fb_act_row"},
-                    {"name": "cmd_pre_valid", "width": 1, "dir": "input", "source": "cmd_gen.fb_pre_valid"},
-                    {"name": "cmd_pre_bank", "width": p["BANK_BITS"], "dir": "input", "source": "cmd_gen.fb_pre_bank"},
-                    {"name": "cmd_pre_all", "width": 1, "dir": "input", "source": "cmd_gen.fb_pre_all"},
-                    {"name": "cmd_rd_valid", "width": 1, "dir": "input", "source": "cmd_gen.fb_rd_valid"},
-                    {"name": "cmd_rd_bank", "width": p["BANK_BITS"], "dir": "input", "source": "cmd_gen.fb_rd_bank"},
-                    {"name": "cmd_wr_valid", "width": 1, "dir": "input", "source": "cmd_gen.fb_wr_valid"},
-                    {"name": "cmd_wr_bank", "width": p["BANK_BITS"], "dir": "input", "source": "cmd_gen.fb_wr_bank"},
-                    {"name": "cmd_ref_valid", "width": 1, "dir": "input", "source": "cmd_gen.fb_ref_valid"},
-                ],
-                "config_in": [
-                    {"name": f"cfg_{n}_nCK", "width": 8, "dir": "input",
-                     "source": f"config_regs.cfg_{n}_nCK"}
-                    for n in ["tRCD", "tRP", "tRAS", "tRC", "tRRD", "tFAW",
-                              "tWTR", "tWR", "tRTP", "tCCD", "tRFC"]
-                ],
-                "status_out": [
-                    {"name": "bank_is_active", "width": p["NUM_BANKS"], "dir": "output"},
-                    {"name": "bank_open_row", "width": f"{p['NUM_BANKS']}x{p['ROW_BITS']}", "dir": "output"},
-                    {"name": "bank_act_allowed", "width": p["NUM_BANKS"], "dir": "output"},
-                    {"name": "bank_rd_allowed", "width": p["NUM_BANKS"], "dir": "output"},
-                    {"name": "bank_wr_allowed", "width": p["NUM_BANKS"], "dir": "output"},
-                    {"name": "bank_pre_allowed", "width": p["NUM_BANKS"], "dir": "output"},
-                    {"name": "all_banks_idle", "width": 1, "dir": "output"},
-                    {"name": "faw_allows_act", "width": 1, "dir": "output"},
-                ],
-            },
-        }
-
-    # ==================================================================
-    # Main entry point
-    # ==================================================================
-    def run(self) -> dict:
-        errs = self.validate()
-        if errs:
-            return {"status": "error", "errors": errs}
-
-        rtl = self.generate_rtl()
-        manifest = self.generate_manifest()
-
-        sv_path = self.output_dir / "bank_tracker.sv"
-        mf_path = self.output_dir / "bank_tracker_manifest.json"
-        sv_path.write_text(rtl)
-        mf_path.write_text(json.dumps(manifest, indent=2))
-
-        return {
-            "status": "success", "module": "bank_tracker", "phase": 2,
-            "lines": len(rtl.splitlines()), "manifest": manifest,
-            "rtl_path": str(sv_path), "manifest_path": str(mf_path),
-        }
-
-
-if __name__ == "__main__":
-    print("+==============================================+")
-    print("|   BANK TRACKER -- RTL Gen Script             |")
-    print("|   Deterministic (no LLM)                     |")
-    print("+==============================================+\n")
-    spec = input("Enter path to spec JSON: ").strip()
-    if not spec or not os.path.isfile(spec):
-        print(f"Error: invalid path '{spec}'")
-        sys.exit(1)
-    out = input("Output directory (Enter for ./output): ").strip() or "./output"
-    print()
-    r = BankTrackerGenerator(spec, out).run()
-    if r["status"] == "success":
-        print(f"  wrote {r['rtl_path']} ({r['lines']} lines)")
-        print(f"  wrote {r['manifest_path']}")
-    else:
-        print(f"  ERROR: {r['errors']}")
-    sys.exit(0 if r["status"] == "success" else 1)

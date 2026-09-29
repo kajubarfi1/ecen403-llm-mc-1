@@ -182,7 +182,22 @@ def main():
             for pn, _, _, rtl_subdir2 in PHASES:
                 print(f"    Phase {pn} RTL: {Path(output_dir) / rtl_subdir2}")
             print(f"\n    Validation reports: {Path(output_dir) / VALIDATION_DIR}\n")
-            sys.exit(0)
+
+            print(f"{'#' * 62}")
+            print("#  GENERATING TOP-LEVEL BUNDLE (ddr3_controller)")
+            print(f"{'#' * 62}\n")
+            top_rc = subprocess.run(
+                [PYTHON, str(Path(HERE) / "generate_top.py"),
+                 "--output-dir", output_dir, "--spec", spec_path],
+                env=os.environ.copy(),
+            ).returncode
+            if top_rc == 0:
+                print(f"\n    Top-level bundle: {Path(output_dir) / 'TOPRTL'}\n")
+            else:
+                print("\n    Top-level bundle generation FAILED -- see output above.")
+                print("    (The 4 phase RTL outputs above are still valid; only the")
+                print("    combined top-level bundle failed.)\n")
+            sys.exit(top_rc)
         # action == "continue" -> loop to next phase
 
 

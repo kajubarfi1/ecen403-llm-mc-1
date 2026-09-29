@@ -998,7 +998,7 @@ class DataPathGenerator:
                 "cmd_in": [
                     {"name": "cmd_wr_valid", "width": 1, "dir": "input", "source": "cmd_gen.fb_wr_valid"},
                     {"name": "cmd_rd_valid", "width": 1, "dir": "input", "source": "cmd_gen.fb_rd_valid"},
-                    {"name": "cmd_aux", "width": p["AUX_WIDTH"], "dir": "input", "source": "scheduler.cmd_aux"},
+                    {"name": "cmd_aux", "width": p["AUX_WIDTH"], "dir": "input", "source": "cmd_gen.cmd_out_aux"},
                 ],
                 "wr_data_in": [
                     {"name": "wr_data_valid", "width": 1, "dir": "input", "source": "wb_port.req_valid"},

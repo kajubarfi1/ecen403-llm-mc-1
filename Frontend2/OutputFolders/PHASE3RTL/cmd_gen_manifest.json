@@ -1,7 +1,8 @@
 {
-  "git_commit": "fd2a561795ec86a2aa5628363c28d361ce0d2279",
+  "git_commit": "5661e0394d265d95562aec1c2a160854863573e4",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "generated_utc": "2026-09-24T18:01:43.286124+00:00",
+  "generated_utc": "2026-09-24T18:43:38.134161+00:00",
+  "clock_period_ns": 5.0,
   "module_name": "cmd_gen",
   "file": "cmd_gen.sv",
   "phase": 3,
@@ -130,8 +131,23 @@
         "dir": "output"
       },
       {
+        "name": "fb_pre_bank",
+        "width": 3,
+        "dir": "output"
+      },
+      {
+        "name": "fb_pre_all",
+        "width": 1,
+        "dir": "output"
+      },
+      {
         "name": "fb_rd_valid",
         "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "fb_rd_bank",
+        "width": 3,
         "dir": "output"
       },
       {
@@ -140,8 +156,30 @@
         "dir": "output"
       },
       {
+        "name": "fb_wr_bank",
+        "width": 3,
+        "dir": "output"
+      },
+      {
         "name": "fb_ref_valid",
         "width": 1,
+        "dir": "output"
+      }
+    ],
+    "aux_passthrough": [
+      {
+        "name": "cmd_out_valid",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "cmd_out_we",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "cmd_out_aux",
+        "width": 4,
         "dir": "output"
       }
     ]

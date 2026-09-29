@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 //==============================================================
 // config_regs_tb.sv -- Enhanced testbench (36 tests)
-// Generated: 2026-09-24 13:00:47
+// Generated: 2026-09-24 13:46:11
 // Generator: config_regs_gen.py (Phase 1, deterministic script)
 //==============================================================
 module config_regs_tb;
