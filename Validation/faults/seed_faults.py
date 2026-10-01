@@ -64,17 +64,24 @@ def build(fault, drop_root):
     if os.path.exists(dst_root):
         shutil.rmtree(dst_root)
     shutil.copytree(src, dst)
-    target = os.path.join(dst, fault["file"])
-    with open(target) as f:
-        text = f.read()
-    n = text.count(fault["from"])
-    if n != 1:
-        raise FaultError(f"{fault['id']}: substitution matches {n} time(s) in "
-                         f"{fault['file']}; it must match exactly once. The "
-                         f"drop has changed under the catalog — update the "
-                         f"fault, do not skip it.")
-    with open(target, "w") as f:
-        f.write(text.replace(fault["from"], fault["to"]))
+    # One substitution (`file`/`from`/`to`) or several (`edits`, each with
+    # its own file and optional `count`): a fault that spans two blocks, or
+    # needs two sites in one, is still ONE injected bug.
+    edits = fault.get("edits") or [{"file": fault["file"], "from": fault["from"],
+                                    "to": fault["to"]}]
+    for e in edits:
+        target = os.path.join(dst, e.get("file", fault.get("file")))
+        with open(target) as f:
+            text = f.read()
+        want = e.get("count", 1)
+        n = text.count(e["from"])
+        if n != want:
+            raise FaultError(f"{fault['id']}: substitution matches {n} time(s) in "
+                             f"{os.path.relpath(target, dst)}; expected {want}. The "
+                             f"drop has changed under the catalog — update the "
+                             f"fault, do not skip it.")
+        with open(target, "w") as f:
+            f.write(text.replace(e["from"], e["to"]))
     return dst
 
 
@@ -175,10 +182,19 @@ def compare(base, mut, expect, block):
     killed = bool(detectors)
     hit = [e for e in expect if e in detectors]
     # blame: a newly failing stage, or a stage with new ids, naming the block
+    # -- or a new rule/assertion id whose declared owner (rule_owners, the
+    # table the feedback loop routes by) is the block. A spacing violation is
+    # bound to cmd_gen's pins but owned by the scheduler; the finding goes to
+    # the scheduler, so the seeded fault on the scheduler is blamed right.
     blamed = sorted({k.split(":", 1)[1] for k in new if k.startswith("stage:")}
                     | {k.split(":", 1)[1] for k in fewer})
+    owned = set()
+    for k in new:
+        if k.startswith(("id:", "assert:a_")):
+            tid = k.split(":", 1)[1].removeprefix("a_")
+            owned.update(_rule_owners(tid))
     blame_ok = (not blamed) or any(block in s or s == "(path-level)"
-                                   for s in blamed)
+                                   for s in blamed) or block in owned
     return {"killed": killed, "expected_hit": hit,
             "expected_missed": [e for e in expect if e not in detectors],
             "new": new, "grew": grew, "fewer_matched": fewer,
@@ -188,6 +204,32 @@ def compare(base, mut, expect, block):
 
 
 # --------------------------------------------------------------------------
+
+_OWNERS = None
+
+
+def _rule_owners(tid):
+    """Owners of a taxonomy id from the two rule_owners tables (exact id, then
+    family wildcard), the same lookup findings/emit_findings.py routes by."""
+    global _OWNERS
+    if _OWNERS is None:
+        _OWNERS = []
+        for f in (os.path.join(ROOT, "Validation", "gates", "stage_invariant_rules.json"),
+                  os.path.join(ROOT, "Validation", "sva", "sva_rules.json")):
+            try:
+                with open(f) as fh:
+                    _OWNERS.append({k: v for k, v in json.load(fh).get("rule_owners", {}).items()
+                                    if not k.startswith("$")})
+            except (OSError, ValueError):
+                pass
+    for table in _OWNERS:
+        if tid in table:
+            return list(table[tid])
+        fam = tid.split("_")[0] + "_*"
+        if fam in table:
+            return list(table[fam])
+    return []
+
 
 def main() -> int:
     ap = argparse.ArgumentParser()
@@ -299,11 +341,31 @@ def main() -> int:
           f"survived: {len(survived) or 'none'}")
 
     os.makedirs(REPORTS, exist_ok=True)
+    # a partial run (--only) replaces only the rows it re-scored; the rest
+    # of the matrix keeps its previous evidence for the ledger
+    if args.only and os.path.exists(MATRIX):
+        with open(MATRIX) as f:
+            prev = json.load(f)
+        ran = {r["fault"] for r in rows}
+        rows = [r for r in prev.get("rows", []) if r["fault"] not in ran] + rows
+        rows.sort(key=lambda r: (r["fault"], r["path"]))
+        by_fault = {}
+        for r in rows:
+            by_fault.setdefault(r["fault"], []).append(r)
+        faults_killed = sum(1 for rs in by_fault.values() if any(r.get("killed") for r in rs))
+        masked = sorted(fid for fid, rs in by_fault.items()
+                        if not any(r.get("killed") for r in rs)
+                        and any(r.get("masked_by") for r in rs))
+        survived = sorted(fid for fid, rs in by_fault.items()
+                          if not any(r.get("killed") for r in rs) and fid not in masked)
+        n_faults = len(by_fault)
+    else:
+        n_faults = len(by_fault)
     with open(MATRIX, "w") as f:
         json.dump({"$schema": "validation-fault-matrix/1",
                    "generated_utc": datetime.utcnow().isoformat() + "Z",
                    "drop_root": cat["drop_root"],
-                   "faults_total": len(by_fault), "faults_killed": faults_killed,
+                   "faults_total": n_faults, "faults_killed": faults_killed,
                    "faults_masked": masked, "faults_survived": survived,
                    "rows": rows}, f, indent=2)
     print(f"  wrote {os.path.relpath(MATRIX, ROOT)}")

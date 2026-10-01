@@ -111,6 +111,9 @@ def generate_sequence(pdef, entry, out, seed=1, drives=19, override=None,
                f"--drives {max(drives, 600)} --out {out}")
     elif gen == "burst":
         cmd = f"python3 Validation/sequences/burst.py --seed {seed} --out {out}"
+    elif gen == "random_v2":
+        cmd = (f"python3 Validation/closure/random_v2.py --scope {entry} "
+               f"--seed {seed} --drives {max(drives, 300)} --kinds {kinds} --out {out}")
     elif gen == "random":
         cmd = (f"python3 Validation/closure/random_sequence.py --scope {entry} "
                f"--seed {seed} --drives {drives} --kinds {kinds} --out {out}")

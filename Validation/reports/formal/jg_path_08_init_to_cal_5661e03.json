@@ -1,0 +1,123 @@
+{
+  "$schema": "validation-formal/1",
+  "generated_utc": "2026-09-30T20:18:46.664104+00:00",
+  "tool": "JasperGold (Olympus)",
+  "drop": "5661e03",
+  "path": "path_08_init_to_cal",
+  "blocks": [
+    "calibration",
+    "init_fsm"
+  ],
+  "top": "Validation/formal/chain_formal.sv",
+  "assertions_file": "Validation/sva/generated/cmd_gen_sva.sv",
+  "prove_time_limit": "30m",
+  "max_trace_length": 400,
+  "summary": {
+    "assertions": 7,
+    "proven": 2,
+    "cex": 0,
+    "undetermined": 5,
+    "bounded_proven": 0,
+    "covers": 5,
+    "covered": 0
+  },
+  "results": [
+    {
+      "property": "chain_formal.u_calibration.u_calibration_order_sva.a_CAL_001",
+      "short": "a_CAL_001",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "0.001 s"
+    },
+    {
+      "property": "chain_formal.u_calibration.u_calibration_order_sva.a_CAL_002",
+      "short": "a_CAL_002",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "0.001 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_002",
+      "short": "a_INIT_002",
+      "status": "undetermined",
+      "engine": "Bm",
+      "bound": "401",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_002_init_done",
+      "short": "a_INIT_002_init_done",
+      "status": "undetermined",
+      "engine": "Bm",
+      "bound": "401",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_001",
+      "short": "a_INIT_001",
+      "status": "undetermined",
+      "engine": "Bm",
+      "bound": "401",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_001_then",
+      "short": "a_INIT_001_then",
+      "status": "undetermined",
+      "engine": "Bm",
+      "bound": "401",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_003_init_done",
+      "short": "a_INIT_003_init_done",
+      "status": "undetermined",
+      "engine": "Bm",
+      "bound": "401",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_calibration.u_calibration_order_sva.c_CAL_001",
+      "short": "c_CAL_001",
+      "status": "undetermined",
+      "engine": "Bm",
+      "bound": "401",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_calibration.u_calibration_order_sva.c_CAL_002",
+      "short": "c_CAL_002",
+      "status": "undetermined",
+      "engine": "Bm",
+      "bound": "401",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_002",
+      "short": "c_INIT_002",
+      "status": "undetermined",
+      "engine": "Bm",
+      "bound": "401",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_002_init_done",
+      "short": "c_INIT_002_init_done",
+      "status": "undetermined",
+      "engine": "Bm",
+      "bound": "401",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_001",
+      "short": "c_INIT_001",
+      "status": "undetermined",
+      "engine": "Bm",
+      "bound": "401",
+      "time": null
+    }
+  ],
+  "raw_report": "Validation/reports/formal/jg_path_08_init_to_cal_5661e03_report.txt"
+}

@@ -251,9 +251,15 @@ def main() -> int:
     with open(CATALOG_PATH) as f:
         catalog = json.load(f)["interfaces"]
     with open(SCHEMA_PATH) as f:
-        schemas = json.load(f)["interfaces"]
+        sdoc = json.load(f)
+    schemas = sdoc["interfaces"]
     want = vplan_expects(VPLAN_PATH)
 
+    iface = rules["command_signals"]["interface"]
+    if iface not in schemas and any(x.startswith(iface + " ")
+                                    for x in sdoc.get("streams_without_block", [])):
+        print(f"  deferred: timing covergroup on {iface} (its block is not in the drop)")
+        return 0
     try:
         mod, src, bind, generated, skipped = generate(
             spec, rules, catalog, schemas, want)

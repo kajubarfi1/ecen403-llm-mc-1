@@ -93,18 +93,21 @@ def manifest_ports(path: str):
 
 
 def resolve(catalog_path=CATALOG, frontend_root=FRONTEND_ROOT,
-            spec_path=SPEC_PATH) -> dict:
+            spec_path=SPEC_PATH, allow_missing=False) -> dict:
     with open(catalog_path) as f:
         catalog = json.load(f)
     with open(spec_path) as f:
         spec = json.load(f)
 
-    errors = []
+    errors, skipped = [], []
     schemas = {}
     for iface, idef in catalog["interfaces"].items():
         block = idef["block"]
         mpath, alternates = discover_manifest(frontend_root, block)
         if mpath is None:
+            if allow_missing:
+                skipped.append(f"{iface} ({block})")
+                continue
             errors.append(f"{iface}: no manifest found for block {block!r} "
                           f"under {frontend_root}")
             continue
@@ -141,13 +144,20 @@ def resolve(catalog_path=CATALOG, frontend_root=FRONTEND_ROOT,
                     "after any spec or RTL/manifest change.",
         "spec_source": spec.get("design_id", "unknown"),
         "spec_revision": spec.get("revision", "unknown"),
+        "streams_without_block": skipped,
         "interfaces": schemas,
     }
 
 
 def main() -> int:
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--allow-missing", action="store_true",
+                    help="phase-partial drop: leave out the streams whose block "
+                         "has no manifest instead of failing")
+    args = ap.parse_args()
     try:
-        result = resolve()
+        result = resolve(allow_missing=args.allow_missing)
     except SchemaError as e:
         print(f"ERROR: {e}")
         return 1
@@ -163,6 +173,9 @@ def main() -> int:
         for kind, fields in s["kinds"].items():
             fs = ", ".join(f"{n}[{d['width']}]" for n, d in fields.items())
             print(f"    {kind:10} {fs}")
+    if result["streams_without_block"]:
+        print(f"\n  left out (block absent from the drop): "
+              + ", ".join(result["streams_without_block"]))
     print(f"\nwrote {os.path.relpath(out, ROOT)}")
     return 0
 

@@ -69,6 +69,9 @@ def adapt(doc):
             "paths": f["paths"],
             "repro": f["repro"],
             "introduced_in": f.get("introduced_in"),
+            "repair": f.get("repair"),
+            "fix": (f.get("mechanism") or {}).get("fix_hypothesis")
+                   if isinstance(f.get("mechanism"), dict) else None,
             "finding_id": f["id"],
         })
     for m in modules.values():
@@ -78,8 +81,11 @@ def adapt(doc):
                         f"model-free evidence. Fix the highest-severity check "
                         f"first; each carries the spec requirement, expected vs "
                         f"actual, source anchors and a reproduction command.")
+    untested = [{"finding_id": f["id"], "module": f["owner_module"], "check_id": f["check_id"],
+                 "note": f.get("note")} for f in doc["findings"] if f.get("status") == "untested"]
     return {
         "$schema": "validation-retry-instructions/1",
+        **({"untested_in_this_drop": untested} if untested else {}),
         "status": "FAIL" if modules else "PASS",
         "pipeline": "validation",
         "drop": doc["drop"],
@@ -105,6 +111,10 @@ def main() -> int:
     with open(fp) as f:
         doc = json.load(f)
     ri = adapt(doc)
+    ds = os.path.join(os.path.dirname(fp), "DROP_STATUS.json")
+    if os.path.exists(ds):
+        with open(ds) as f:
+            ri["drop_status"] = json.load(f)   # partial drop: what ran, what waits
     out = args.out or os.path.join(os.path.dirname(fp), "retry_instructions.json")
     with open(out, "w") as f:
         json.dump(ri, f, indent=2)

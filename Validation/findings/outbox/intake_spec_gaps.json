@@ -1,7 +1,7 @@
 {
   "$schema": "validation-findings/1",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "finding_count": 10,
+  "finding_count": 11,
   "findings": [
     {
       "source": "validation",
@@ -259,6 +259,30 @@
           }
         },
         "options": null
+      },
+      "status": "open"
+    },
+    {
+      "source": "validation",
+      "target": "spec",
+      "kind": "spec_gap",
+      "scope": "controller_architecture",
+      "severity": "major",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "[intake] May the scheduler open a row that no pending request has asked for yet (look-ahead / speculative ACTIVATE)?",
+      "detail": "controller_architecture.speculative_activate is not stated. A checker that forbids it fires on a correct look-ahead controller; one that allows it cannot flag a wasted ACTIVATE. Validation assumes 'allowed' until the spec says otherwise. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: SCHED_004 fired 314x on the known-good UberDDR3 reference (2026-09-29).",
+      "evidence": {
+        "rule": "SCHED_SPECULATIVE_ACTIVATE",
+        "status": "gap",
+        "proposed_patch": {
+          "controller_architecture": {
+            "speculative_activate": "<one of ['allowed', 'forbidden']>"
+          }
+        },
+        "options": [
+          "allowed",
+          "forbidden"
+        ]
       },
       "status": "open"
     }

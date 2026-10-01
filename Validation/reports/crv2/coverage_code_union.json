@@ -1,0 +1,145 @@
+{
+  "$schema": "validation-code-coverage/1",
+  "generated_utc": "2026-09-24T18:25:00.053731Z",
+  "runs": [
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_work/scope/path_01_write_cmd",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_02_read_cmd/cov_work/scope/path_02_read_cmd",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_03_read_return/cov_work/scope/path_03_read_return",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_04_scheduler_bank_loop/cov_work/scope/path_04_scheduler_bank_loop",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_05_scheduler_refresh_loop/cov_work/scope/path_05_scheduler_refresh_loop",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_07_backpressure/cov_work/scope/path_07_backpressure",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_08_init_to_cal/cov_work/scope/path_08_init_to_cal",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_09_init_to_refresh/cov_work/scope/path_09_init_to_refresh",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_12_csr_timing_to_scheduling/cov_work/scope/path_12_csr_timing_to_scheduling",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_13_csr_refresh_to_scheduling/cov_work/scope/path_13_csr_refresh_to_scheduling",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_14_status_init/cov_work/scope/path_14_status_init",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_15_status_cal/cov_work/scope/path_15_status_cal",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_16_status_refresh/cov_work/scope/path_16_status_refresh",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_17_full_boot/cov_work/scope/path_17_full_boot",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_18_full_write/cov_work/scope/path_18_full_write",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_19_row_conflict/cov_work/scope/path_19_row_conflict",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_20_refresh_preempt/cov_work/scope/path_20_refresh_preempt",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/crv2_s1/path_04_scheduler_bank_loop/cov_work/scope/path_04_scheduler_bank_loop",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/crv2_s1/path_07_backpressure/cov_work/scope/path_07_backpressure",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/crv2_s1/path_19_row_conflict/cov_work/scope/path_19_row_conflict",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/crv2_s2/path_04_scheduler_bank_loop/cov_work/scope/path_04_scheduler_bank_loop",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/crv2_s2/path_07_backpressure/cov_work/scope/path_07_backpressure",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/crv2_s2/path_19_row_conflict/cov_work/scope/path_19_row_conflict",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/crv2_s3/path_04_scheduler_bank_loop/cov_work/scope/path_04_scheduler_bank_loop",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/crv2_s3/path_07_backpressure/cov_work/scope/path_07_backpressure",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/crv2_s3/path_19_row_conflict/cov_work/scope/path_19_row_conflict",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/crv2_s4/path_04_scheduler_bank_loop/cov_work/scope/path_04_scheduler_bank_loop",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/crv2_s4/path_07_backpressure/cov_work/scope/path_07_backpressure",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/crv2_s4/path_19_row_conflict/cov_work/scope/path_19_row_conflict"
+  ],
+  "run_globs": [
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_*/cov_work/scope/*",
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/crv2_*/*/cov_work/scope/*"
+  ],
+  "since": "2026-09-24T11:45:00",
+  "merge": "imc merge -initial_model union_all",
+  "design_total": {
+    "covered": 4651,
+    "total": 5462,
+    "percent": 85.15
+  },
+  "per_module": {
+    "addr_decoder": {
+      "covered": 54,
+      "total": 58,
+      "percent": 93.1
+    },
+    "bank_tracker": {
+      "covered": 871,
+      "total": 1109,
+      "percent": 78.54
+    },
+    "calibration": {
+      "covered": 53,
+      "total": 59,
+      "percent": 89.83
+    },
+    "cmd_gen": {
+      "covered": 106,
+      "total": 115,
+      "percent": 92.17
+    },
+    "cmd_queue": {
+      "covered": 1063,
+      "total": 1193,
+      "percent": 89.1
+    },
+    "config_regs": {
+      "covered": 843,
+      "total": 894,
+      "percent": 94.3
+    },
+    "data_path": {
+      "covered": 302,
+      "total": 394,
+      "percent": 76.65
+    },
+    "init_fsm": {
+      "covered": 151,
+      "total": 169,
+      "percent": 89.35
+    },
+    "refresh_ctrl": {
+      "covered": 114,
+      "total": 118,
+      "percent": 96.61
+    },
+    "scheduler": {
+      "covered": 818,
+      "total": 889,
+      "percent": 92.01
+    },
+    "wb_port": {
+      "covered": 276,
+      "total": 464,
+      "percent": 59.48
+    }
+  },
+  "testbench_excluded": [
+    "$unit",
+    "bank_tracker_fcov",
+    "cal_status_monitor",
+    "cal_zqcs_monitor",
+    "cfg_refresh_monitor",
+    "cfg_timing_monitor",
+    "chain_harness",
+    "cmd_gen_coverage",
+    "cmd_gen_sva",
+    "cmd_queue_fcov",
+    "config_regs_fcov",
+    "cq_deq_monitor",
+    "cq_enq_monitor",
+    "csr_monitor",
+    "csr_rsp_monitor",
+    "csr_sts_level_monitor",
+    "csr_sts_monitor",
+    "data_path_fcov",
+    "ddr_cmd_monitor",
+    "ddr_rd_beat_monitor",
+    "ddr_wr_beat_monitor",
+    "dp_cmd_monitor",
+    "dp_rd_rsp_monitor",
+    "dp_wr_monitor",
+    "dram_stub",
+    "init_cmd_monitor",
+    "init_fsm_fcov",
+    "init_fsm_sva",
+    "init_status_monitor",
+    "refresh_ack_monitor",
+    "refresh_ctrl_fcov",
+    "refresh_req_monitor",
+    "req_monitor",
+    "sched_cmd_monitor",
+    "sched_deq_monitor",
+    "sched_in_monitor",
+    "seq_driver",
+    "wb_monitor",
+    "wb_rsp_monitor"
+  ],
+  "imc_report_dir": "/var/folders/cf/9xfxgjjd46g31957zb0jn43w0000gn/T/cov_union_x/cov_report_union"
+}

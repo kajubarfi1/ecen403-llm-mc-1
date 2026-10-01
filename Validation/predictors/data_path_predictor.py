@@ -21,6 +21,12 @@ class DataPathPredictor(TransactionPredictor):
         self.host_width_bits = dp_mapping.get('host_width_bits', 32)
         self.channel_width_bits = dp_mapping.get('ddr_channel_width_bits', 16)
         self.pack_mode = dp_mapping.get('pack_mode', 'pack_32_to_16')
+        # DDR data-mask polarity on the pins. JESD79-3: DM=1 MASKS the byte, so
+        # the JEDEC-correct pin value is the INVERSE of the host byte enable.
+        # The spec should state this (intake rule DDR_DM_POLARITY); when it is
+        # silent we predict the standard, because a model that carries the host
+        # enable through unchanged files a defect against every correct design.
+        self.dm_polarity = dp_mapping.get('ddr_dm_polarity', 'active_high_mask')
         self.endianness = dp_mapping.get('endianness', 'little')
         
         # Calculate beats per host word
@@ -92,7 +98,10 @@ class DataPathPredictor(TransactionPredictor):
             
             # Extract mask bits for this beat (2 bits per 16-bit beat)
             mask_shift = beat_idx * bytes_per_beat
-            beat_mask = (mask >> mask_shift) & ((1 << bytes_per_beat) - 1)
+            beat_en = (mask >> mask_shift) & ((1 << bytes_per_beat) - 1)
+            # pin value: DM=1 masks (JEDEC) -> inverse of the enable
+            beat_mask = ((~beat_en) & ((1 << bytes_per_beat) - 1)
+                         if self.dm_polarity == 'active_high_mask' else beat_en)
             
             out_txn = Txn(
                 iface='ddr_wr_beat',

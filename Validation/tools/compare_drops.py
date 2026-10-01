@@ -201,11 +201,11 @@ def compare(a_dir, b_dir, strict=False):
     return rows
 
 
-def snapshot(src, dest_root):
+def snapshot(src, dest_root, tag=None):
     head = drop_head(src) or subprocess.run(
         ["git", "rev-parse", "--short", "HEAD"], cwd=ROOT,
         capture_output=True, text=True).stdout.strip() or "unknown"
-    dest = os.path.join(dest_root, head)
+    dest = os.path.join(dest_root, head + (f"-{tag}" if tag else ""))
     os.makedirs(dest, exist_ok=True)
     n = 0
     for f in glob.glob(os.path.join(src, "*_report.json")):
@@ -233,10 +233,15 @@ def main() -> int:
     ap.add_argument("--snapshot", action="store_true",
                     help="copy reports/paths into reports/drops/<git_head>/")
     ap.add_argument("--json", help="write the comparison here")
+    ap.add_argument("--paths", nargs="*", default=None,
+                    help="compare only these paths (a partial drop ran a subset)")
+    ap.add_argument("--tag", default=None,
+                    help="snapshot suffix, e.g. 'partial', so a phase-partial run "
+                         "never becomes the reference for a complete drop")
     args = ap.parse_args()
 
     if args.snapshot:
-        dest, n = snapshot(args.b, DROPS)
+        dest, n = snapshot(args.b, DROPS, args.tag)
         print(f"  snapshot: {n} report(s) -> {os.path.relpath(dest, ROOT)}")
         return 0
     if not args.a:
@@ -245,6 +250,8 @@ def main() -> int:
     a_dir = args.a if os.path.isabs(args.a) else os.path.join(ROOT, args.a)
     b_dir = args.b if os.path.isabs(args.b) else os.path.join(ROOT, args.b)
     rows = compare(a_dir, b_dir, args.strict)
+    if args.paths is not None:
+        rows = [r for r in rows if r["path"] in set(args.paths)]
     ha, hb = drop_head(a_dir), drop_head(b_dir)
 
     print(f"  A: {os.path.relpath(a_dir, ROOT)}  (drop {ha})")

@@ -1,0 +1,66 @@
+{
+  "$schema": "validation-known-good-path-checkers/1",
+  "generated_utc": "2026-09-29T23:41:07.514061Z",
+  "reference": "UberDDR3 + Micron DDR3 model",
+  "spec": "builds/uberddr3_ddr3-667_x16_2lane_1rank/microarch_spec.json",
+  "host_requests": 9216,
+  "pin_commands": 14450,
+  "rows": [
+    {
+      "model": "Validation/predictors/path_19_row_conflict_checker.py",
+      "covers": [
+        "SCHED_001",
+        "SCHED_002",
+        "PROTO_001",
+        "PROTO_002",
+        "SCHED_004"
+      ],
+      "streams_absent": [],
+      "violations": 0,
+      "by_rule": {},
+      "error": null
+    },
+    {
+      "model": "Validation/predictors/path_20_refresh_preempt_checker.py",
+      "covers": [
+        "REF_002",
+        "SCHED_003",
+        "SCHED_001"
+      ],
+      "streams_absent": [
+        "refresh_req"
+      ],
+      "violations": 0,
+      "by_rule": {},
+      "error": null
+    },
+    {
+      "model": "Validation/predictors/second_opinion/path_19_row_conflict_checker.py",
+      "covers": [
+        "SCHED_001",
+        "SCHED_002",
+        "PROTO_001",
+        "PROTO_002",
+        "SCHED_004"
+      ],
+      "streams_absent": [],
+      "violations": 0,
+      "by_rule": {},
+      "error": null
+    },
+    {
+      "model": "Validation/predictors/second_opinion/path_20_refresh_preempt_checker.py",
+      "covers": [
+        "REF_002",
+        "SCHED_003",
+        "SCHED_001"
+      ],
+      "streams_absent": [
+        "refresh_req"
+      ],
+      "violations": 0,
+      "by_rule": {},
+      "error": null
+    }
+  ]
+}

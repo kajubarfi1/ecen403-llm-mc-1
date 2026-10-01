@@ -6,6 +6,14 @@
 > the first findings resolved by one of your drops. The 22 that remain are
 > the same defects listed in §2; the current package is now
 > `findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/1fea117/`.
+>
+> **Formal (JasperGold) on the composed command path, same day:** tRCD, tRP,
+> tRAS and tFAW are proven for every possible host sequence. Two new
+> critical defects that no simulation reached: the scheduler issues a READ to
+> a bank one cycle after precharging it, and a PRECHARGE one cycle after a
+> WRITE to the same bank (tWR). Traces and details:
+> `findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json`.
+> Both look like the slot re-grant root cause (priority 1 in §2).
 
 From Jacob (Validation) to Lehana (Frontend). Everything below is checkable:
 each item names the file that carries the evidence. Five asks, ordered by
@@ -199,3 +207,58 @@ python3 Validation/tools/validate_drop.py --skip-sim  # re-judge existing traces
 python3 Validation/tools/spec_swap_check.py --spec <candidate spec>   # prove generators follow a new spec
 python3 Validation/spec/spec_completeness.py --spec <spec> [--findings out.json]
 ```
+
+---
+
+## Reply to `Frontend2/VALIDATION_INTEGRATION_PLAN.md` (2026-09-24, drop `5661e03`)
+
+Thanks — the drop with your six changes went through the full regression twice
+(the second time after I fixed three things on my side that your changes exposed).
+Everything below is from `findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/5661e03/`.
+
+**Net result: 24 open findings → 15; 10 auto-resolved; 8 paths improved, 6 changed, 0 regressed.**
+Seeded faults: **15/15 killed, 0 masked** — your re-grant and DQ fixes unmasked the two the old defects were hiding. Formal re-proved: same 4 proven.
+
+### Confirmed fixed by your changes (auto-closed, nobody touched the ledger)
+| Your item | What closed |
+|---|---|
+| Scheduler re-grant | `scheduler/SCHED_002` (CAS with no matching request) on every command path; `TIMING_007` (tWTR) and `TIMING_009` (tRTP) no longer fire |
+| DQ width redesign | width gate 23/23 (was 21/23); `data_path/ddr_wr_beat[data,mask]` and `dp_rd_rsp[aux]` closed |
+| Reserved-bit masking | all five `config_regs/csr_rsp[data]@…` mismatches closed (BIST_ADDR_START/END, BIST_CONFIG, CTRL_CONFIG, REFRESH_CONFIG) |
+| Manifest stamps (C1) | every manifest carries git commit + spec revision; our snapshots now cite yours |
+| Phase-1 `source` (C4) | integration map: 60 of 72 edges now come from manifests (was 50); 9 of my 21 hand-carried edges deleted |
+
+### Three things that looked like your regressions but were mine — fixed on my side
+1. **`SCHED_001` "request dropped" (21 occurrences)** — end-of-window starvation: the harness
+   settle window was 64 cycles; with your re-grant guard the scheduler is slower and requests
+   were still queued when the trace ended. 0 at 400 cycles. All host-driven paths now settle 400.
+2. **`data_path/ddr_wr_beat[mask]` (14)** — my predictor carried the host byte-enable through
+   to the DM pins; you drive `~sel` (JESD79-3, DM=1 masks). Predictor now follows the standard
+   (and the spec field `ddr_dm_polarity` when it exists — intake rule DDR_DM_POLARITY).
+3. **`cmd_gen/ddr_cmd[addr]` PRE with a row address** — A0–A9 on a PRECHARGE are don't-care;
+   the scoreboard now compares only A10. (Residue of this one is real — see below.)
+
+### Still open, and what each needs
+| Finding | Count | Owner | Note |
+|---|---|---|---|
+| `scheduler/PROTO_002` double-ACTIVATE | 2308 on 10 paths | scheduler / bank_tracker | Unchanged. The scheduler issues ACT to a bank whose row is already open. Formal shows it 6 cycles from reset. |
+| `scheduler/TIMING_004` tRC, `TIMING_005` tRRD, `TIMING_011` tRFC | 2146 / 195 / 50 | bank_tracker gating | Unchanged; the `bank_*_allowed` outputs are not honoured (or timers not loaded) for these transitions. |
+| `formal/scheduler/PROTO_001`, `formal/scheduler/TIMING_008` | formal witnesses | scheduler | **Still reproduced by JasperGold on 5661e03** (RD one cycle after PRE to the same bank; PRE one cycle after WR). The re-grant guard did not close them. |
+| `cmd_gen/ddr_cmd[addr]` (residue, 74) | 4 paths | spec question | Before REFRESH you now force-precharge one bank at a time (A10=0); my model expects a precharge-ALL (A10=1). The spec's `refresh_policy` does not say which. Pick one and I will match it. |
+| `wb_port/req[…]` mismatches | 60 | spec gap + wb_port | Reads present `mask=0` where the model expects full enables (CSR_READ_BYTE_ENABLES, the decision in §3), plus addresses that do not match the presented request on the read paths. |
+| `data_path/dp_rd_rsp[aux,data]` | 4 | data_path | Two read responses returned with the wrong aux/data pairing on path_03/18 — down from 20 after your FIFO change, but not zero. |
+| `scheduler/REF_002` | 2 | scheduler | refresh serviced late on the refresh-preempt path. |
+| `config_regs/csr_rsp[data]@CTRL_STATUS` | 4 | spec gap | status_read_sampling decision (§3). |
+
+### Manifests: 12 consumer ports still carry no `source`
+cmd_queue (`enq_valid`, `enq_aux`, `deq_grant`, `deq_idx`), bank_tracker (the 7 `cmd_*`
+feedback inputs from cmd_gen), refresh_ctrl (`ref_ack`). These are real producers that
+exist today, so they are not in the "no producer yet" category. Filed in
+`findings/outbox/integration_map_findings.json`.
+
+### On the two deferred items
+- **Feedback agent (C3):** understood. The package keeps landing at
+  `outbox/<spec_revision>/<drop>/retry_instructions.json` per drop; whenever the agent exists
+  it can start from any drop's file. The formal findings are in it too (detector `formal:jaspergold`).
+- **Compiler completeness (C2):** agreed it is the spec track. The four CSR decisions are in §3
+  above; pick them once and both the compiler and my predictors follow.

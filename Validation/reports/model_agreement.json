@@ -1,0 +1,557 @@
+{
+  "$schema": "validation-model-agreement/1",
+  "generated_utc": "2026-10-01T16:22:54.540984Z",
+  "traces": 59,
+  "rows": [
+    {
+      "scope": "addr_decoder",
+      "kind": "predictor",
+      "traces": 42,
+      "agree": 42,
+      "disagree": 0,
+      "disagreements": []
+    },
+    {
+      "scope": "bank_tracker_scheduler",
+      "kind": "checker",
+      "traces": 57,
+      "agree": 53,
+      "disagree": 4,
+      "disagreements": [
+        {
+          "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+          "diffs": [
+            {
+              "id": "PROTO_002",
+              "primary_only": 0,
+              "second_only": 1,
+              "both": 946,
+              "primary_example": "PROTO_002 (double_activate): ACTIVATE issued to bank 5 which already has row 8805 active without intervening PRECHARGE @ [sched_cmd.command aux=0x0 bank=0x5 col=0x238 row=0x2265 type=0x1 we=0x1]",
+              "second_example": "PROTO_002 (double_activate): ACTIVATE issued to bank 5 which already has row 8805 active without intervening PRECHARGE @ [sched_cmd.command aux=0x0 bank=0x5 col=0x238 row=0x2265 type=0x1 we=0x1]"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/paths/path_20_refresh_preempt_observed.jsonl",
+          "diffs": [
+            {
+              "id": "PROTO_002",
+              "primary_only": 0,
+              "second_only": 1,
+              "both": 946,
+              "primary_example": "PROTO_002 (double_activate): ACTIVATE issued to bank 5 which already has row 8805 active without intervening PRECHARGE @ [sched_cmd.command aux=0x0 bank=0x5 col=0x238 row=0x2265 type=0x1 we=0x1]",
+              "second_example": "PROTO_002 (double_activate): ACTIVATE issued to bank 5 which already has row 8805 active without intervening PRECHARGE @ [sched_cmd.command aux=0x0 bank=0x5 col=0x238 row=0x2265 type=0x1 we=0x1]"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/repairs/baseline/path_05_scheduler_refresh_loop_observed.jsonl",
+          "diffs": [
+            {
+              "id": "PROTO_002",
+              "primary_only": 0,
+              "second_only": 1,
+              "both": 946,
+              "primary_example": "PROTO_002 (double_activate): ACTIVATE issued to bank 5 which already has row 8805 active without intervening PRECHARGE @ [sched_cmd.command aux=0x0 bank=0x5 col=0x238 row=0x2265 type=0x1 we=0x1]",
+              "second_example": "PROTO_002 (double_activate): ACTIVATE issued to bank 5 which already has row 8805 active without intervening PRECHARGE @ [sched_cmd.command aux=0x0 bank=0x5 col=0x238 row=0x2265 type=0x1 we=0x1]"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/repairs/baseline/path_20_refresh_preempt_observed.jsonl",
+          "diffs": [
+            {
+              "id": "PROTO_002",
+              "primary_only": 0,
+              "second_only": 1,
+              "both": 946,
+              "primary_example": "PROTO_002 (double_activate): ACTIVATE issued to bank 5 which already has row 8805 active without intervening PRECHARGE @ [sched_cmd.command aux=0x0 bank=0x5 col=0x238 row=0x2265 type=0x1 we=0x1]",
+              "second_example": "PROTO_002 (double_activate): ACTIVATE issued to bank 5 which already has row 8805 active without intervening PRECHARGE @ [sched_cmd.command aux=0x0 bank=0x5 col=0x238 row=0x2265 type=0x1 we=0x1]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scope": "cmd_queue_scheduler",
+      "kind": "checker",
+      "traces": 53,
+      "agree": 38,
+      "disagree": 15,
+      "disagreements": [
+        {
+          "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+          "diffs": [
+            {
+              "id": "SCHED_004",
+              "primary_only": 13,
+              "second_only": 13,
+              "both": 0,
+              "primary_example": "SCHED_004 (cas_wrong_row): WR issued with open row 21701 but request asked for row 26495 @ [sched_cmd.command aux=0x7 bank=0x3 col=0x190 row=0x54c5 type=0x3 we=0x1] [cq_enq.enqueue bank=0x3 col=0x190 ",
+              "second_example": "SCHED_004 (cas_wrong_row): WRITE to bank 3 col 400: request wanted row 26495 but row 21701 is open @ [cq_enq.enqueue bank=0x3 col=0x190 row=0x677f we=0x1] [sched_cmd.command aux=0x7 bank=0x3 col=0x190"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/paths/path_07_backpressure_observed.jsonl",
+          "diffs": [
+            {
+              "id": "SCHED_004",
+              "primary_only": 2,
+              "second_only": 2,
+              "both": 0,
+              "primary_example": "SCHED_004 (cas_wrong_row): WR issued with open row 25778 but request asked for row 22655 @ [sched_cmd.command aux=0x0 bank=0x6 col=0x250 row=0x64b2 type=0x3 we=0x1] [cq_enq.enqueue bank=0x6 col=0x250 ",
+              "second_example": "SCHED_004 (cas_wrong_row): WRITE to bank 6 col 592: request wanted row 22655 but row 25778 is open @ [cq_enq.enqueue bank=0x6 col=0x250 row=0x587f we=0x1] [sched_cmd.command aux=0x0 bank=0x6 col=0x250"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/paths/path_20_refresh_preempt_observed.jsonl",
+          "diffs": [
+            {
+              "id": "SCHED_004",
+              "primary_only": 13,
+              "second_only": 13,
+              "both": 0,
+              "primary_example": "SCHED_004 (cas_wrong_row): WR issued with open row 21701 but request asked for row 26495 @ [sched_cmd.command aux=0x7 bank=0x3 col=0x190 row=0x54c5 type=0x3 we=0x1] [cq_enq.enqueue bank=0x3 col=0x190 ",
+              "second_example": "SCHED_004 (cas_wrong_row): WRITE to bank 3 col 400: request wanted row 26495 but row 21701 is open @ [cq_enq.enqueue bank=0x3 col=0x190 row=0x677f we=0x1] [sched_cmd.command aux=0x7 bank=0x3 col=0x190"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/repairs/R01_scheduler_feedback_hold/path_05_scheduler_refresh_loop_observed.jsonl",
+          "diffs": [
+            {
+              "id": "SCHED_004",
+              "primary_only": 8,
+              "second_only": 8,
+              "both": 0,
+              "primary_example": "SCHED_004 (cas_wrong_row): WR issued with open row 21701 but request asked for row 26495 @ [sched_cmd.command aux=0x7 bank=0x3 col=0x190 row=0x54c5 type=0x3 we=0x1] [cq_enq.enqueue bank=0x3 col=0x190 ",
+              "second_example": "SCHED_004 (cas_wrong_row): WRITE to bank 3 col 400: request wanted row 26495 but row 21701 is open @ [cq_enq.enqueue bank=0x3 col=0x190 row=0x677f we=0x1] [sched_cmd.command aux=0x7 bank=0x3 col=0x190"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/repairs/R01_scheduler_feedback_hold/path_07_backpressure_observed.jsonl",
+          "diffs": [
+            {
+              "id": "SCHED_004",
+              "primary_only": 2,
+              "second_only": 2,
+              "both": 0,
+              "primary_example": "SCHED_004 (cas_wrong_row): WR issued with open row 25778 but request asked for row 22655 @ [sched_cmd.command aux=0x0 bank=0x6 col=0x250 row=0x64b2 type=0x3 we=0x1] [cq_enq.enqueue bank=0x6 col=0x250 ",
+              "second_example": "SCHED_004 (cas_wrong_row): WRITE to bank 6 col 592: request wanted row 22655 but row 25778 is open @ [cq_enq.enqueue bank=0x6 col=0x250 row=0x587f we=0x1] [sched_cmd.command aux=0x0 bank=0x6 col=0x250"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/repairs/R01_scheduler_feedback_hold/path_20_refresh_preempt_observed.jsonl",
+          "diffs": [
+            {
+              "id": "SCHED_004",
+              "primary_only": 8,
+              "second_only": 8,
+              "both": 0,
+              "primary_example": "SCHED_004 (cas_wrong_row): WR issued with open row 21701 but request asked for row 26495 @ [sched_cmd.command aux=0x7 bank=0x3 col=0x190 row=0x54c5 type=0x3 we=0x1] [cq_enq.enqueue bank=0x3 col=0x190 ",
+              "second_example": "SCHED_004 (cas_wrong_row): WRITE to bank 3 col 400: request wanted row 26495 but row 21701 is open @ [cq_enq.enqueue bank=0x3 col=0x190 row=0x677f we=0x1] [sched_cmd.command aux=0x7 bank=0x3 col=0x190"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scope": "config_regs",
+      "kind": "predictor",
+      "traces": 57,
+      "agree": 36,
+      "disagree": 21,
+      "disagreements": [
+        {
+          "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+          "diffs": [
+            {
+              "iface": "cfg_refresh",
+              "differing": 2,
+              "of": 2,
+              "first_index": 0,
+              "primary": "(nothing)",
+              "second": "update force_refresh=0x0 max_postpone=0x8 priority=0x1 trefi=0x200 urgent_threshold=0x6"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+          "diffs": [
+            {
+              "iface": "cfg_refresh",
+              "differing": 12,
+              "of": 12,
+              "first_index": 0,
+              "primary": "(nothing)",
+              "second": "update force_refresh=0x1 max_postpone=0x8 priority=0x1 trefi=0x1860 urgent_threshold=0x6"
+            },
+            {
+              "iface": "cfg_timing",
+              "differing": 16,
+              "of": 16,
+              "first_index": 0,
+              "primary": "(nothing)",
+              "second": "update tccd=0x4 tfaw=0x20 tras=0xff trc=0xff trcd=0xff trfc=0x80 trp=0xff trrd=0x6 trtp=0x6 twr=0xc twtr=0x6"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/paths/path_13_csr_refresh_to_scheduling_observed.jsonl",
+          "diffs": [
+            {
+              "iface": "cfg_refresh",
+              "differing": 12,
+              "of": 12,
+              "first_index": 0,
+              "primary": "(nothing)",
+              "second": "update force_refresh=0x1 max_postpone=0x8 priority=0x1 trefi=0x1860 urgent_threshold=0x6"
+            },
+            {
+              "iface": "cfg_timing",
+              "differing": 16,
+              "of": 16,
+              "first_index": 0,
+              "primary": "(nothing)",
+              "second": "update tccd=0x4 tfaw=0x20 tras=0xff trc=0xff trcd=0xff trfc=0x80 trp=0xff trrd=0x6 trtp=0x6 twr=0xc twtr=0x6"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/paths/path_20_refresh_preempt_observed.jsonl",
+          "diffs": [
+            {
+              "iface": "cfg_refresh",
+              "differing": 2,
+              "of": 2,
+              "first_index": 0,
+              "primary": "(nothing)",
+              "second": "update force_refresh=0x0 max_postpone=0x8 priority=0x1 trefi=0x200 urgent_threshold=0x6"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/paths/path_22_csr_standalone_observed.jsonl",
+          "diffs": [
+            {
+              "iface": "cfg_refresh",
+              "differing": 12,
+              "of": 12,
+              "first_index": 0,
+              "primary": "(nothing)",
+              "second": "update force_refresh=0x1 max_postpone=0x8 priority=0x1 trefi=0x1860 urgent_threshold=0x6"
+            },
+            {
+              "iface": "cfg_timing",
+              "differing": 16,
+              "of": 16,
+              "first_index": 0,
+              "primary": "(nothing)",
+              "second": "update tccd=0x4 tfaw=0x20 tras=0xff trc=0xff trcd=0xff trfc=0x80 trp=0xff trrd=0x6 trtp=0x6 twr=0xc twtr=0x6"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/repairs/R01_scheduler_feedback_hold/path_05_scheduler_refresh_loop_observed.jsonl",
+          "diffs": [
+            {
+              "iface": "cfg_refresh",
+              "differing": 2,
+              "of": 2,
+              "first_index": 0,
+              "primary": "(nothing)",
+              "second": "update force_refresh=0x0 max_postpone=0x8 priority=0x1 trefi=0x200 urgent_threshold=0x6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scope": "data_path",
+      "kind": "predictor",
+      "traces": 41,
+      "agree": 6,
+      "disagree": 35,
+      "disagreements": [
+        {
+          "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+          "diffs": [
+            {
+              "iface": "ddr_wr_beat",
+              "differing": 38,
+              "of": 38,
+              "first_index": 0,
+              "primary": "beat data=0x343c mask=0x0",
+              "second": "beat data=0x343c mask=0x3"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/paths/path_04_scheduler_bank_loop_observed.jsonl",
+          "diffs": [
+            {
+              "iface": "ddr_wr_beat",
+              "differing": 38,
+              "of": 38,
+              "first_index": 0,
+              "primary": "beat data=0x343c mask=0x0",
+              "second": "beat data=0x343c mask=0x3"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+          "diffs": [
+            {
+              "iface": "ddr_wr_beat",
+              "differing": 1036,
+              "of": 1036,
+              "first_index": 0,
+              "primary": "beat data=0xc4d1 mask=0x0",
+              "second": "beat data=0xc4d1 mask=0x3"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/paths/path_07_backpressure_observed.jsonl",
+          "diffs": [
+            {
+              "iface": "ddr_wr_beat",
+              "differing": 62,
+              "of": 62,
+              "first_index": 0,
+              "primary": "beat data=0xc4d1 mask=0x0",
+              "second": "beat data=0xc4d1 mask=0x3"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
+          "diffs": [
+            {
+              "iface": "ddr_wr_beat",
+              "differing": 20,
+              "of": 20,
+              "first_index": 0,
+              "primary": "beat data=0xc616 mask=0x0",
+              "second": "beat data=0xc616 mask=0x3"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/paths/path_19_row_conflict_observed.jsonl",
+          "diffs": [
+            {
+              "iface": "ddr_wr_beat",
+              "differing": 38,
+              "of": 38,
+              "first_index": 0,
+              "primary": "beat data=0x343c mask=0x0",
+              "second": "beat data=0x343c mask=0x3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scope": "path_04_scheduler_bank_loop",
+      "kind": "checker",
+      "traces": 0,
+      "agree": 0,
+      "disagree": 0,
+      "disagreements": []
+    },
+    {
+      "scope": "path_05_scheduler_refresh_loop",
+      "kind": "checker",
+      "traces": 53,
+      "agree": 53,
+      "disagree": 0,
+      "disagreements": []
+    },
+    {
+      "scope": "path_08_init_to_cal",
+      "kind": "checker",
+      "traces": 5,
+      "agree": 5,
+      "disagree": 0,
+      "disagreements": []
+    },
+    {
+      "scope": "path_09_init_to_refresh",
+      "kind": "checker",
+      "traces": 5,
+      "agree": 5,
+      "disagree": 0,
+      "disagreements": []
+    },
+    {
+      "scope": "path_19_row_conflict",
+      "kind": "checker",
+      "traces": 41,
+      "agree": 37,
+      "disagree": 4,
+      "disagreements": [
+        {
+          "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+          "diffs": [
+            {
+              "id": "PROTO_002",
+              "primary_only": 0,
+              "second_only": 1,
+              "both": 946,
+              "primary_example": "PROTO_002 (double_activate): ACTIVATE to bank 5 which already has row 8805 active @ [ddr_cmd.command addr=0x2265 bank=0x5 cmd=0x3]",
+              "second_example": "PROTO_002 (double_activate): ACT to bank 5 which already has row 8805 active; new row 8805 @ [ddr_cmd.command addr=0x2265 bank=0x5 cmd=0x3]"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/paths/path_20_refresh_preempt_observed.jsonl",
+          "diffs": [
+            {
+              "id": "PROTO_002",
+              "primary_only": 0,
+              "second_only": 1,
+              "both": 946,
+              "primary_example": "PROTO_002 (double_activate): ACTIVATE to bank 5 which already has row 8805 active @ [ddr_cmd.command addr=0x2265 bank=0x5 cmd=0x3]",
+              "second_example": "PROTO_002 (double_activate): ACT to bank 5 which already has row 8805 active; new row 8805 @ [ddr_cmd.command addr=0x2265 bank=0x5 cmd=0x3]"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/repairs/baseline/path_05_scheduler_refresh_loop_observed.jsonl",
+          "diffs": [
+            {
+              "id": "PROTO_002",
+              "primary_only": 0,
+              "second_only": 1,
+              "both": 946,
+              "primary_example": "PROTO_002 (double_activate): ACTIVATE to bank 5 which already has row 8805 active @ [ddr_cmd.command addr=0x2265 bank=0x5 cmd=0x3]",
+              "second_example": "PROTO_002 (double_activate): ACT to bank 5 which already has row 8805 active; new row 8805 @ [ddr_cmd.command addr=0x2265 bank=0x5 cmd=0x3]"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/repairs/baseline/path_20_refresh_preempt_observed.jsonl",
+          "diffs": [
+            {
+              "id": "PROTO_002",
+              "primary_only": 0,
+              "second_only": 1,
+              "both": 946,
+              "primary_example": "PROTO_002 (double_activate): ACTIVATE to bank 5 which already has row 8805 active @ [ddr_cmd.command addr=0x2265 bank=0x5 cmd=0x3]",
+              "second_example": "PROTO_002 (double_activate): ACT to bank 5 which already has row 8805 active; new row 8805 @ [ddr_cmd.command addr=0x2265 bank=0x5 cmd=0x3]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scope": "path_20_refresh_preempt",
+      "kind": "checker",
+      "traces": 53,
+      "agree": 53,
+      "disagree": 0,
+      "disagreements": []
+    },
+    {
+      "scope": "scheduler",
+      "kind": "checker",
+      "traces": 53,
+      "agree": 47,
+      "disagree": 6,
+      "disagreements": [
+        {
+          "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+          "diffs": [
+            {
+              "id": "REF_002",
+              "primary_only": 1,
+              "second_only": 1,
+              "both": 0,
+              "primary_example": "REF_002 (REFRESH issued while one or more banks are still active): REFRESH command issued with banks [2] still active (not precharged)",
+              "second_example": "REF_002 (refresh_during_active_bank): REFRESH issued while bank(s) [2] are still active (not precharged) @ [sched_cmd.command aux=0x0 bank=0x0 col=0x0 row=0x0 type=0x5 we=0x0]"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/paths/path_09_init_to_refresh_observed.jsonl",
+          "diffs": [
+            {
+              "id": "SCHED_003",
+              "primary_only": 1,
+              "second_only": 1,
+              "both": 0,
+              "primary_example": "SCHED_003 (Every refresh request must eventually be serviced with a REFRESH command): 1 refresh request(s) were never serviced with a REFRESH command",
+              "second_example": "SCHED_003 (refresh_request_not_serviced): 1 refresh request(s) not serviced with REFRESH command (observed: 1, serviced: 0) @ [refresh_req.request pending=0x1 starve=0x0 urgent=0x0]"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/paths/path_16_status_refresh_observed.jsonl",
+          "diffs": [
+            {
+              "id": "SCHED_003",
+              "primary_only": 1,
+              "second_only": 1,
+              "both": 0,
+              "primary_example": "SCHED_003 (Every refresh request must eventually be serviced with a REFRESH command): 1 refresh request(s) were never serviced with a REFRESH command",
+              "second_example": "SCHED_003 (refresh_request_not_serviced): 1 refresh request(s) not serviced with REFRESH command (observed: 1, serviced: 0) @ [refresh_req.request pending=0x1 starve=0x0 urgent=0x0]"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/paths/path_20_refresh_preempt_observed.jsonl",
+          "diffs": [
+            {
+              "id": "REF_002",
+              "primary_only": 1,
+              "second_only": 1,
+              "both": 0,
+              "primary_example": "REF_002 (REFRESH issued while one or more banks are still active): REFRESH command issued with banks [2] still active (not precharged)",
+              "second_example": "REF_002 (refresh_during_active_bank): REFRESH issued while bank(s) [2] are still active (not precharged) @ [sched_cmd.command aux=0x0 bank=0x0 col=0x0 row=0x0 type=0x5 we=0x0]"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/repairs/baseline/path_05_scheduler_refresh_loop_observed.jsonl",
+          "diffs": [
+            {
+              "id": "REF_002",
+              "primary_only": 1,
+              "second_only": 1,
+              "both": 0,
+              "primary_example": "REF_002 (REFRESH issued while one or more banks are still active): REFRESH command issued with banks [2] still active (not precharged)",
+              "second_example": "REF_002 (refresh_during_active_bank): REFRESH issued while bank(s) [2] are still active (not precharged) @ [sched_cmd.command aux=0x0 bank=0x0 col=0x0 row=0x0 type=0x5 we=0x0]"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/repairs/baseline/path_20_refresh_preempt_observed.jsonl",
+          "diffs": [
+            {
+              "id": "REF_002",
+              "primary_only": 1,
+              "second_only": 1,
+              "both": 0,
+              "primary_example": "REF_002 (REFRESH issued while one or more banks are still active): REFRESH command issued with banks [2] still active (not precharged)",
+              "second_example": "REF_002 (refresh_during_active_bank): REFRESH issued while bank(s) [2] are still active (not precharged) @ [sched_cmd.command aux=0x0 bank=0x0 col=0x0 row=0x0 type=0x5 we=0x0]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scope": "wb_port",
+      "kind": "predictor",
+      "traces": 42,
+      "agree": 42,
+      "disagree": 0,
+      "disagreements": []
+    }
+  ]
+}

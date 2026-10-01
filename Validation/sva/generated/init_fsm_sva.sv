@@ -4,7 +4,7 @@
 //
 // Spec revision : golden_ddr3_1600k_x8_2lane_1rank
 // Bound to      : init_fsm (via the bind statement in init_fsm_sva_bind.sv)
-// Covers        : INIT_002
+// Covers        : INIT_002, INIT_002, INIT_001, INIT_003
 //
 // Every bound below is recomputed from the spec's nanosecond timing values
 // and the controller clock period, not copied from a table. These assertions
@@ -16,7 +16,8 @@ module init_fsm_sva #(
     input logic clk,
     input logic rst_n,
     input logic [3:0] init_cmd,
-    input logic [2:0] init_bank
+    input logic [2:0] init_bank,
+    input logic init_done
 );
 
   // ---- INIT_002 -------------------------------------------------------
@@ -32,5 +33,54 @@ module init_fsm_sva #(
   a_INIT_002: assert property (p_INIT_002)
     else $error("[INIT_002] initialization_sequence.tZQinit_ns violation: Insufficient delay between init sequence steps: a command issued before tZQinit elapsed after ZQCL.");
   c_INIT_002: cover property (p_INIT_002);
+
+  // ---- INIT_002 (init_done after ZQCL) --------------------------------
+  // init_done must not be asserted until tZQinit has elapsed after ZQCL (JESD79-3: ZQ calibration must complete before normal operation).
+  // Bound: initialization_sequence.tZQinit_ns = 640.0ns = 128 cycle(s) at 5.0ns: init_done must
+  // not rise within that many cycles of the ZQCL that starts it.
+  property p_INIT_002_init_done;
+    @(posedge clk) disable iff (!rst_n)
+    (init_cmd == 4'b0110) |-> !init_done ##1 (!init_done)[*127];
+  endproperty
+  a_INIT_002_init_done: assert property (p_INIT_002_init_done)
+    else $error("[INIT_002] initialization_sequence.tZQinit_ns violation: init_done raised within 128 cycles of ZQCL");
+  c_INIT_002_init_done: cover property (@(posedge clk) disable iff (!rst_n) (init_cmd == 4'b0110) ##[128:$] $rose(init_done));
+
+  // ---- INIT_001 (MRS order from initialization_sequence.$derived.init_sequence_order) ----
+  // Mode registers are programmed in the order the spec's initialization_sequence states (each MRS carries the register number on the bank pins), ZQCL follows the last of them, and init_done is not raised before ZQCL.
+  // Parsed order of bank values: 2, 3, 1, 0; then ZQCL.
+  logic [7:0] init_001_step;
+  logic       init_001_then_seen;
+  localparam logic [BANK_W-1:0] init_001_order [4] = '{2, 3, 1, 0};
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+      init_001_step <= '0;
+      init_001_then_seen <= 1'b0;
+    end else begin
+      if ((init_cmd == 4'b0000)) init_001_step <= init_001_step + 1;
+      if ((init_cmd == 4'b0110)) init_001_then_seen <= 1'b1;
+    end
+  end
+  property p_INIT_001;
+    @(posedge clk) disable iff (!rst_n)
+    (init_cmd == 4'b0000) |-> (init_001_step < 4) && (init_bank == init_001_order[init_001_step]);
+  endproperty
+  a_INIT_001: assert property (p_INIT_001)
+    else $error("[INIT_001] MRS out of the spec's order");
+  property p_INIT_001_then;
+    @(posedge clk) disable iff (!rst_n)
+    (init_cmd == 4'b0110) |-> (init_001_step == 4);
+  endproperty
+  a_INIT_001_then: assert property (p_INIT_001_then)
+    else $error("[INIT_001] ZQCL issued before every MRS step");
+  c_INIT_001: cover property (@(posedge clk) disable iff (!rst_n) (init_cmd == 4'b0110) && init_001_step == 4);
+
+  // ---- INIT_003 (init_done before the sequence finished) --------------------------
+  property p_INIT_003_init_done;
+    @(posedge clk) disable iff (!rst_n)
+    $rose(init_done) |-> init_001_then_seen;
+  endproperty
+  a_INIT_003_init_done: assert property (p_INIT_003_init_done)
+    else $error("[INIT_003] init_done raised before ZQCL was issued");
 
 endmodule

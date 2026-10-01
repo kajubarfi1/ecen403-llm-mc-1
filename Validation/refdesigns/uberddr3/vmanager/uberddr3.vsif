@@ -1,0 +1,37 @@
+session uberddr3_known_good {
+    top_dir: $ENV(HOME)/vmanager_uberddr3/vm_results;
+    drm: serial local;
+};
+
+group known_good_reference {
+    test sva_timing_protocol {
+        run_script: "bash $ENV(HOME)/vmanager_uberddr3/run_known_good.sh";
+        scan_script: "env PATH=/opt/coe/cadence/XCELIUM240/tools.lnx86/bin:/opt/coe/cadence/XCELIUM240/tools/bin:$ENV(PATH) vm_scan.pl /opt/coe/cadence/XCELIUM240/tools.lnx86/bin/cdns_sim.flt $ENV(HOME)/vmanager_uberddr3/uberddr3.flt";
+        timeout: 3600;
+    };
+    test data_integrity_memory_model {
+        run_script: "bash $ENV(HOME)/vmanager_uberddr3/run_offline.sh integrity";
+        scan_script: "env PATH=/opt/coe/cadence/XCELIUM240/tools.lnx86/bin:/opt/coe/cadence/XCELIUM240/tools/bin:$ENV(PATH) vm_scan.pl $ENV(HOME)/vmanager_uberddr3/uberddr3.flt";
+        timeout: 3600;
+    };
+    test path_checker_19_row_conflict {
+        run_script: "bash $ENV(HOME)/vmanager_uberddr3/run_offline.sh path19";
+        scan_script: "env PATH=/opt/coe/cadence/XCELIUM240/tools.lnx86/bin:/opt/coe/cadence/XCELIUM240/tools/bin:$ENV(PATH) vm_scan.pl $ENV(HOME)/vmanager_uberddr3/uberddr3.flt";
+        timeout: 3600;
+    };
+    test path_checker_20_refresh_preempt {
+        run_script: "bash $ENV(HOME)/vmanager_uberddr3/run_offline.sh path20";
+        scan_script: "env PATH=/opt/coe/cadence/XCELIUM240/tools.lnx86/bin:/opt/coe/cadence/XCELIUM240/tools/bin:$ENV(PATH) vm_scan.pl $ENV(HOME)/vmanager_uberddr3/uberddr3.flt";
+        timeout: 3600;
+    };
+    test second_model_19_row_conflict {
+        run_script: "bash $ENV(HOME)/vmanager_uberddr3/run_offline.sh path19_2nd";
+        scan_script: "env PATH=/opt/coe/cadence/XCELIUM240/tools.lnx86/bin:/opt/coe/cadence/XCELIUM240/tools/bin:$ENV(PATH) vm_scan.pl $ENV(HOME)/vmanager_uberddr3/uberddr3.flt";
+        timeout: 3600;
+    };
+    test second_model_20_refresh_preempt {
+        run_script: "bash $ENV(HOME)/vmanager_uberddr3/run_offline.sh path20_2nd";
+        scan_script: "env PATH=/opt/coe/cadence/XCELIUM240/tools.lnx86/bin:/opt/coe/cadence/XCELIUM240/tools/bin:$ENV(PATH) vm_scan.pl $ENV(HOME)/vmanager_uberddr3/uberddr3.flt";
+        timeout: 3600;
+    };
+};

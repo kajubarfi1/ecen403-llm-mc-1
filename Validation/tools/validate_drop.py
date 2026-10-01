@@ -82,6 +82,9 @@ def main() -> int:
     ap.add_argument("--skip-regenerate", action="store_true")
     ap.add_argument("--strict-intake", action="store_true",
                     help="stop when the spec has intake gaps")
+    ap.add_argument("--partial", action="store_true",
+                    help="phase-partial drop: run every path whose blocks the drop "
+                         "provides, report the rest as blocked, never substitute")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -106,9 +109,48 @@ def main() -> int:
     banner(1, f"resolve blocks through the declared drop (git {head})")
     rc, out = sh("python3 Validation/structural/rtl_drop.py", log, check=False)
     print("    " + out.strip().splitlines()[-1])
-    if rc != 0:
-        print("    STOP: the drop does not provide every block.")
+    blocked, drop_status = {}, None
+    if rc != 0 and not args.partial:
+        print("    STOP: the drop does not provide every block "
+              "(--partial runs what it does provide).")
         return 1
+    if rc != 0:
+        all_blocks = sorted({b for p in pdefs for b in p["blocks"]})
+        absent = set(RD.missing(all_blocks))
+        present = [b for b in all_blocks if b not in absent]
+        sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
+        import chain_harness_gen as CHG
+        with open(os.path.join(ROOT, "Validation", "structural", "integration_map.json")) as f:
+            imap_now = json.load(f)
+        by_id = {p["id"]: p for p in pdefs}
+        runnable = []
+        # every path, derived ones included, so a finding whose paths are all
+        # blocked is carried as untested rather than resolved
+        for pdef in pdefs:
+            pid = pdef["id"]
+            need = set(CHG.block_closure(pdef["blocks"], imap_now, bool(pdef.get("standalone"))))
+            if need & absent:
+                blocked[pid] = sorted(need & absent)
+            elif pid in paths:
+                runnable.append(pid)
+        print(f"    PARTIAL drop: present {present}")
+        print(f"                  absent  {sorted(absent)}")
+        print(f"    {len(runnable)} path(s) runnable, {len(blocked)} blocked until "
+              f"their blocks arrive:")
+        for pid, need in blocked.items():
+            print(f"      blocked  {pid:34} needs {', '.join(need)}")
+        if drop_status is None and not runnable:
+            pass
+        paths = runnable
+        drop_status = {"$schema": "validation-drop-status/1", "drop": head,
+                       "partial": True, "blocks_present": present,
+                       "blocks_absent": sorted(absent),
+                       "paths_run": runnable, "paths_blocked": blocked,
+                       "note": "A blocked path is not a failure: it waits for the "
+                               "phase that brings its blocks. Nothing was substituted."}
+        if not runnable:
+            print("    STOP: no path can run on these blocks.")
+            return 1
 
     # 2. intake ----------------------------------------------------------------
     banner(2, "spec intake gate")
@@ -125,7 +167,8 @@ def main() -> int:
         banner(3, "regenerate integration map, schemas, monitors, SVA, coverage from the drop")
         for cmd in ("python3 Validation/structural/integration_map_gen.py --findings "
                     "Validation/findings/outbox/integration_map_findings.json",
-                    "python3 Validation/txn/schema_gen.py",
+                    "python3 Validation/txn/schema_gen.py"
+                    + (" --allow-missing" if drop_status else ""),
                     "python3 Validation/txn/monitor_gen.py",
                     "python3 Validation/sva/sva_gen.py",
                     "python3 Validation/sva/coverage_gen.py",
@@ -145,9 +188,17 @@ def main() -> int:
               f"{args.jobs} at a time")
     verdicts = {}
 
+    report_dir = REPORTS if not drop_status else os.path.join(
+        ROOT, "Validation", "reports", "partial", head)
+    if drop_status:
+        os.makedirs(report_dir, exist_ok=True)
+        print(f"    reports -> {os.path.relpath(report_dir, ROOT)} (kept apart from "
+              f"full-drop reports so nothing stale is judged)")
+
     def run_one(p):
         cmd = (f"python3 Validation/tools/run_path.py --path {p} "
-               f"--timeout {args.timeout}" + (" --judge-only" if args.skip_sim else ""))
+               f"--timeout {args.timeout}" + (" --judge-only" if args.skip_sim else "")
+               + (f" --report-dir {report_dir}" if drop_status else ""))
         rc, out = sh(cmd, None, check=False, timeout=args.timeout + 300)
         with open(os.path.join(LOGS, f"{head}_{p}.txt"), "w") as f:
             f.write(out)
@@ -182,21 +233,32 @@ def main() -> int:
 
     # 6. findings --------------------------------------------------------------
     banner(6, "findings v2 + retry instructions")
-    rc, out = sh("python3 Validation/findings/emit_findings.py", log, check=False,
-                 timeout=1200)
+    ds_file = None
+    if drop_status:
+        ds_file = os.path.join(report_dir, "DROP_STATUS.json")
+        with open(ds_file, "w") as f:
+            json.dump(drop_status, f, indent=2)
+    rc, out = sh("python3 Validation/findings/emit_findings.py"
+                 + (f" --reports {report_dir} --drop-status {ds_file}" if drop_status else ""),
+                 log, check=False, timeout=1200)
     print("    " + next((l.strip() for l in out.splitlines() if "finding(s)" in l), out[-120:]))
     rc, out = sh("python3 Validation/findings/retry_adapter.py", log, check=False)
     print("    " + next((l.strip() for l in out.splitlines() if l.strip().startswith(("FAIL", "PASS"))), ""))
 
     # 7. compare ---------------------------------------------------------------
     banner(7, "compare with the previous drop")
+    # a partial run's snapshot is never the reference: compare against the
+    # newest COMPLETE drop, whether this run is partial or not
     prev = [d for d in sorted(glob.glob(os.path.join(DROPS, "*")))
-            if os.path.basename(d) != head]
+            if os.path.basename(d) != head and not os.path.basename(d).endswith("-partial")]
+    if drop_status:
+        print(f"    partial drop: only the {len(paths)} path(s) that ran are compared")
     if prev:
         prev_dir = max(prev, key=lambda d: os.path.getmtime(os.path.join(d, "SNAPSHOT.json"))
                        if os.path.exists(os.path.join(d, "SNAPSHOT.json")) else 0)
         rc, out = sh(f"python3 Validation/tools/compare_drops.py --a {prev_dir} "
-                     f"--b {REPORTS} --json Validation/reports/drop_comparison.json",
+                     f"--b {report_dir} --json Validation/reports/drop_comparison.json"
+                     + (" --paths " + " ".join(paths) if drop_status else ""),
                      log, check=False)
         for l in out.splitlines():
             if l.strip().startswith(("REG", "FIX", "STIM", "CHG")) or "regression=" in l \
@@ -209,7 +271,9 @@ def main() -> int:
 
     # 8. snapshot --------------------------------------------------------------
     banner(8, "snapshot")
-    rc, out = sh("python3 Validation/tools/compare_drops.py --snapshot", log, check=False)
+    rc, out = sh("python3 Validation/tools/compare_drops.py --snapshot"
+                 + (f" --b {report_dir} --tag partial" if drop_status else ""),
+                 log, check=False)
     print("    " + out.strip())
 
     # 9. cockpit ---------------------------------------------------------------
@@ -217,8 +281,10 @@ def main() -> int:
     rc, out = sh("python3 Validation/tools/dashboard_gen.py", log, check=False)
     print("    " + out.strip())
 
-    print(f"\n  drop {head}: {n_pass} pass / {n_fail} fail / {n_err} error in "
-          f"{(time.time() - t0) / 60:.1f} min; log {os.path.relpath(log, ROOT)}")
+    print(f"\n  drop {head}{' (partial)' if drop_status else ''}: {n_pass} pass / "
+          f"{n_fail} fail / {n_err} error"
+          + (f" / {len(blocked)} blocked" if drop_status else "")
+          + f" in {(time.time() - t0) / 60:.1f} min; log {os.path.relpath(log, ROOT)}")
     return 0 if n_err == 0 else 1
 
 

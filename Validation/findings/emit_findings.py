@@ -372,8 +372,15 @@ def history_for(check_id, detector, snaps, current_head):
 
 # --------------------------------------------------------------------------
 
-def emit(reports_dir, out_dir=None):
+def emit(reports_dir, out_dir=None, drop_status=None):
+    """drop_status: validate_drop --partial's record of what the drop
+    provides and which paths were blocked. On a partial drop, findings
+    owned by absent blocks are not raised (nothing was tested), and a
+    previous finding whose every path was blocked is carried as
+    `untested`, never `resolved`."""
     rules = Rules()
+    absent = set((drop_status or {}).get("blocks_absent", []))
+    blocked_paths = set((drop_status or {}).get("paths_blocked", {}))
     schemas = load(SCHEMAS, {"interfaces": {}})["interfaces"]
     spec = load(SPEC, {})
     reps = [load(f) for f in sorted(glob.glob(os.path.join(reports_dir, "*_report.json")))]
@@ -436,17 +443,55 @@ def emit(reports_dir, out_dir=None):
             if f["confidence"] != "confirmed" and ev["confidence"] == "confirmed":
                 f["confidence"] = "confirmed"       # the evidence list says why
 
+    # Formal results are a detector like any other: counterexamples triaged as
+    # legal-host defects (findings/outbox/<rev>/formal_*_findings.json) join the
+    # same ledger, keyed formal/<owner>/<rule>, so the retry adapter hands them
+    # to the Frontend and the next drop's re-prove can resolve them.
+    for ff in formal_findings(spec.get("revision", "unknown"), head):
+        if ff["owner_module"] in absent:
+            continue
+        findings.setdefault(ff["id"], ff)
+
+    # Defects proven by the repair suite (repairs/repair_catalog.json): a
+    # minimal fix in a copy of the drop silenced named checks with nothing new
+    # firing. Where the drop still raises those checks, the repair's diff is
+    # the strongest anchor a finding can carry — the exact lines that make the
+    # checks go quiet — so it is attached to the matching finding, or the
+    # defect is filed on its own when no simulation check reaches it.
+    for rf in repair_findings(head, rep_stage_root=reports_dir):
+        if rf["owner_module"] in absent:
+            continue
+        cur = findings.get(rf["id"])
+        if cur is None:
+            findings[rf["id"]] = rf
+        else:
+            cur["repair"] = rf["repair"]
+            cur["confidence"] = "confirmed"
+            cur["detectors"] = sorted(set(cur["detectors"]) | set(rf["detectors"]))
+            if rf["anchor"]:
+                cur["anchor"] = rf["anchor"] + [a for a in cur["anchor"]
+                                                if a not in rf["anchor"]][:2]
+
     # resolved: a finding (owner/check id) that the previous drop's outbox
     # carried as open and this drop no longer raises. Keyed on the finding id,
     # not the taxonomy id — several findings share a taxonomy (every MISMATCH
     # is DATA_001), so a taxonomy key never goes absent while any survive.
-    resolved = []
+    resolved, untested = [], []
     prev = previous_outbox(spec.get("revision", "unknown"), head)
     if prev:
         prev_head, prev_doc = prev
         now_ids = {f["id"] for f in findings.values()}
         for pf in prev_doc.get("findings", []):
-            if pf.get("status", "open") == "open" and pf["id"] not in now_ids:
+            if pf.get("status", "open") != "open" or pf["id"] in now_ids:
+                continue
+            if drop_status and (pf["owner_module"] in absent
+                                or (pf.get("paths") and set(pf["paths"]) <= blocked_paths)):
+                untested.append({**pf, "status": "untested", "last_seen": prev_head,
+                                 "note": f"open in drop {prev_head}; drop {head} is partial "
+                                         f"and did not test it (block absent or every path "
+                                         f"blocked). Still open."})
+                continue
+            if True:
                 resolved.append({**{k: pf[k] for k in ("schema", "id", "kind", "check_id",
                                                         "taxonomy_id", "owner_module",
                                                         "severity", "title", "paths")
@@ -463,9 +508,14 @@ def emit(reports_dir, out_dir=None):
            "spec_revision": spec.get("revision"),
            "generated_utc": datetime.utcnow().isoformat() + "Z",
            "reports": os.path.relpath(reports_dir, ROOT),
-           "finding_count": len(out), "findings": out, "resolved": resolved}
+           "finding_count": len(out), "findings": out + untested, "resolved": resolved}
+    if drop_status:
+        doc["drop_status"] = drop_status
     out_dir = out_dir or os.path.join(OUTBOX, spec.get("revision", "unknown"), head)
     os.makedirs(out_dir, exist_ok=True)
+    if drop_status:
+        with open(os.path.join(out_dir, "DROP_STATUS.json"), "w") as f:
+            json.dump(drop_status, f, indent=2)
     with open(os.path.join(out_dir, "findings_v2.json"), "w") as f:
         json.dump(doc, f, indent=2)
     latest = os.path.join(os.path.dirname(out_dir), "latest")
@@ -473,6 +523,117 @@ def emit(reports_dir, out_dir=None):
         f.write(os.path.basename(out_dir) + "\n")
     return doc, out_dir
 
+
+
+def repair_findings(head, rep_stage_root=None):
+    """One v2 record per repair whose expected checks the CURRENT drop still
+    raises: owner = the repaired block, anchor = the edited lines, evidence =
+    the repair-matrix rows (silenced / new / remaining)."""
+    cat = load(os.path.join(ROOT, "Validation", "repairs", "repair_catalog.json"), {})
+    mat = load(os.path.join(ROOT, "Validation", "reports", "repairs", "repair_matrix.json"), {})
+    if not cat.get("repairs") or not mat.get("rows"):
+        return []
+    from seed_faults import signature
+    cur_keys = set()
+    for f in glob.glob(os.path.join(rep_stage_root or REPORTS, "*_report.json")):
+        cur_keys |= set(signature(rep_stage_root or REPORTS,
+                                  os.path.basename(f)[:-len("_report.json")]) or {})
+    out = []
+    for r in cat["repairs"]:
+        rows = [x for x in mat["rows"] if x.get("repair") == r["id"] and not x.get("error")]
+        silenced = sorted({k for x in rows for k in x.get("silenced_expected", {})})
+        still = [k for k in r["expect_gone"] if k in cur_keys]
+        # Filed when the delivered drop still raises the check, when the
+        # repair was seen to silence it, or when the defect was read at
+        # source (a check the current stimulus does not reach is still a bug).
+        if not rows or not (still or silenced or r.get("confirmed_at_source")):
+            continue
+        # the check ids this repair speaks for, as taxonomy ids
+        tids = sorted({k.split(":", 1)[1].replace("a_", "", 1)
+                       for k in (still or silenced or r["expect_gone"])})
+        anchor = []
+        for e in r["edits"]:
+            anchor.append({"file": os.path.join(cat["drop_root"], r["file"]), "line": 0,
+                           "signal": r["block"],
+                           "text": f"replace: {e['from'].strip()[:90]}",
+                           "with": e["to"].strip()[:160]})
+        out.append({
+            "schema": "validation-findings/2",
+            "id": f"repair/{r['block']}/{r['id']}",
+            "kind": "rtl_defect",
+            "check_id": "+".join(tids), "taxonomy_id": tids[0] if tids else None,
+            "detectors": [f"repair:{r['id']}"] + [f"silenced:{k}" for k in silenced],
+            "owner_module": r["block"], "owner_candidates": [r["block"]],
+            "severity": "critical", "confidence": "confirmed",
+            "title": f"{r['block']}: {r['defect'][:110]}",
+            "requirement": r["defect"], "spec_ref": None,
+            "expected": "with the fix below applied to a copy of the drop: " + ", ".join(silenced[:6]) + " silent",
+            "actual": ("on the drop as delivered: " + ", ".join(still[:6]) + " fire") if still
+                      else "not reached by the current stimulus; confirmed by reading the source",
+            "anchor": anchor, "mechanism": {"text": r["fix"], "source": "human",
+                                            "cited_lines": [], "fix_hypothesis": r["fix"]},
+            "paths": sorted({x["path"] for x in rows}), "occurrences": len(rows),
+            "repair": {"id": r["id"], "base": r.get("base", []),
+                       "matrix": "Validation/reports/repairs/repair_matrix.json",
+                       "verdicts": {x["path"]: x["verdict"] for x in rows}},
+            "repro": {"path": rows[0]["path"],
+                      "command": f"python3 Validation/repairs/repair_suite.py --only {r['id'].split('_')[0]}",
+                      "sequence": None, "work_dir": f"Validation/repairs/work/{r['id']}",
+                      "log": None, "trace": None, "first_failure": None},
+            "drop": {"git_head": head, "spec_revision": None, "rtl": os.path.join(cat["drop_root"], r["file"])},
+            "introduced_in": None, "first_seen": head, "last_seen": head, "resolved_in": None,
+            "status": "open", "related_manual_findings": [],
+        })
+    return out
+
+
+def formal_findings(spec_rev, head):
+    """v2 records for the formal-triage files of this spec revision whose
+    `drop` is this drop (or unstated)."""
+    out = []
+    # A formal finding is closed only by formal: a JasperGold report for THIS
+    # drop (reports/formal/jg_*_<head>.json) whose property is proven. Until
+    # such a report exists the finding is carried open with a note, because a
+    # simulation that does not reach the counterexample proves nothing.
+    proven_now = set()
+    for rp in glob.glob(os.path.join(ROOT, "Validation", "reports", "formal", f"jg_*_{head}.json")):
+        for r in load(rp, {}).get("results", []):
+            if r.get("status") == "proven":
+                proven_now.add(r.get("short", "").replace("a_", "", 1))
+    for f in glob.glob(os.path.join(OUTBOX, spec_rev, "formal_*_findings.json")):
+        d = load(f, {})
+        for x in d.get("findings", []):
+            if x.get("status", "open") != "open":
+                continue
+            tid = x.get("taxonomy_id") or x.get("id", "").split("/")[-1]
+            if tid in proven_now:
+                continue                         # formal cleared it on this drop
+            owner = x.get("scope", "unknown")
+            awaiting = bool(x.get("drop")) and x["drop"] != head
+            out.append({
+                "schema": "validation-findings/2",
+                "id": x.get("id") or f"formal/{owner}/{tid}",
+                "kind": x.get("kind", "rtl_defect"),
+                "check_id": tid, "taxonomy_id": tid,
+                "detectors": [x.get("detector", "formal:jaspergold")],
+                "owner_module": owner, "owner_candidates": [owner],
+                "severity": x.get("severity", "major"),
+                "confidence": "confirmed",          # a counterexample is a witness, not a sample
+                "title": x.get("title", ""), "requirement": x.get("expected", ""),
+                "spec_ref": x.get("spec_ref"),
+                "expected": x.get("expected", ""), "actual": x.get("actual", ""),
+                "detector": x.get("detector", "formal:jaspergold"),
+                "anchor": x.get("anchor", []),
+                "mechanism": x.get("detail", "") + (
+                    f" [found on drop {x['drop']}; awaiting formal re-prove on {head}]" if awaiting else ""),
+                "paths": ["formal:chain_formal"], "occurrences": 1,
+                "repro": x.get("repro", {}),
+                "drop": {"git_head": head, "spec_revision": spec_rev},
+                "introduced_in": None, "first_seen": x.get("drop") or head,
+                "last_seen": head, "resolved_in": None, "status": "open",
+                "related_manual_findings": [os.path.relpath(f, ROOT)],
+            })
+    return out
 
 def manual_related(owner, tid):
     out = []
@@ -489,10 +650,18 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--reports", default=REPORTS)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--drop-status", default=None,
+                    help="DROP_STATUS.json from validate_drop --partial")
     args = ap.parse_args()
-    doc, out_dir = emit(args.reports, args.out)
-    print(f"  drop {doc['drop']}: {doc['finding_count']} finding(s), "
-          f"{len(doc['resolved'])} resolved since the previous drop")
+    ds = None
+    if args.drop_status:
+        with open(args.drop_status) as f:
+            ds = json.load(f)
+    doc, out_dir = emit(args.reports, args.out, ds)
+    n_unt = sum(1 for f in doc["findings"] if f.get("status") == "untested")
+    print(f"  drop {doc['drop']}{' (partial)' if ds else ''}: {doc['finding_count']} finding(s), "
+          f"{len(doc['resolved'])} resolved since the previous drop"
+          + (f", {n_unt} carried untested" if ds else ""))
     for f in doc["findings"]:
         print(f"  {f['severity']:8} {f['confidence']:9} {f['owner_module']:13} "
               f"{f['check_id']:22} x{f['occurrences']:<5} paths={len(f['paths']):<2} "

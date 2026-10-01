@@ -1,0 +1,115 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_03_read_return",
+  "strategy": "composed",
+  "verdict": "fail",
+  "timestamp": "2026-09-24T13:27:18.936767",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/runs/crv2_s7/path_03_read_return/path_03_read_return_seed7.json",
+  "stimulus_generator": "random_v2",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "a41c77b",
+    "roots": [
+      "Frontend2/OutputFolders"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/addr_decoder.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/addr_decoder_manifest.json"
+      },
+      "bank_tracker": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker_manifest.json"
+      },
+      "cmd_gen": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json"
+      },
+      "cmd_queue": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json"
+      },
+      "config_regs": {
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json"
+      },
+      "data_path": {
+        "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json"
+      },
+      "refresh_ctrl": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json"
+      },
+      "scheduler": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json"
+      },
+      "wb_port": {
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json"
+      }
+    }
+  },
+  "stages": [
+    {
+      "stage": "data_path",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/data_path_predictor.py",
+      "scope": "data_path",
+      "verdict": "fail",
+      "summary": "scope=data_path  strategy=exact  status=fail  matched=210/831  missing=584 unexpected=609 value=37",
+      "detail": [
+        "  dp_rd_rsp[23] missing: predicted [dp_rd_rsp.response aux=0x3 data=0x0] but the design produced nothing",
+        "  dp_rd_rsp[26] missing: predicted [dp_rd_rsp.response aux=0xb data=0x0] but the design produced nothing",
+        "  dp_rd_rsp[29] missing: predicted [dp_rd_rsp.response aux=0xb data=0x0] but the design produced nothing",
+        "  dp_rd_rsp[31] missing: predicted [dp_rd_rsp.response aux=0xc data=0x0] but the design produced nothing",
+        "  dp_rd_rsp[32] missing: predicted [dp_rd_rsp.response aux=0xe data=0x0] but the design produced nothing",
+        "  dp_rd_rsp[33] missing: predicted [dp_rd_rsp.response aux=0x0 data=0x0] but the design produced nothing",
+        "  dp_rd_rsp[34] missing: predicted [dp_rd_rsp.response aux=0x0 data=0x0] but the design produced nothing",
+        "  dp_rd_rsp[35] missing: predicted [dp_rd_rsp.response aux=0xf data=0x0] but the design produced nothing",
+        "  dp_rd_rsp[36] missing: predicted [dp_rd_rsp.response aux=0x1 data=0x0] but the design produced nothing",
+        "  dp_rd_rsp[37] missing: predicted [dp_rd_rsp.response aux=0x1 data=0x0] but the design produced nothing",
+        "  dp_rd_rsp[38] missing: predicted [dp_rd_rsp.response aux=0xd data=0x0] but the design produced nothing",
+        "  ... and 1210 more"
+      ]
+    },
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "fail",
+      "summary": "scope=wb_port  strategy=exact  status=fail  matched=856/1712  missing=46 value=810",
+      "detail": [
+        "  req[9] value: predicted [req.request addr=0x18ce12e0 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x6060dd0 data=0x0 mask=0x0 we=0x0]",
+        "  req[10] value: predicted [req.request addr=0x18ce12f0 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x6060dd0 data=0x0 mask=0x0 we=0x0]",
+        "  req[11] value: predicted [req.request addr=0x18ce12f0 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x6060dd0 data=0x0 mask=0x0 we=0x0]",
+        "  req[12] value: predicted [req.request addr=0x9d216d0 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x6060dd0 data=0x0 mask=0x0 we=0x0]",
+        "  req[13] value: predicted [req.request addr=0x9d216d0 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x6060dd0 data=0x0 mask=0x0 we=0x0]",
+        "  req[14] value: predicted [req.request addr=0x11c552e0 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x6060dd0 data=0x0 mask=0x0 we=0x0]",
+        "  req[15] value: predicted [req.request addr=0x11c552e0 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x6060dd0 data=0x0 mask=0x0 we=0x0]",
+        "  req[16] value: predicted [req.request addr=0x293d7ee data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x6060de0 data=0x0 mask=0x0 we=0x0]",
+        "  req[17] value: predicted [req.request addr=0x293d7ee data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x6060de0 data=0x0 mask=0x0 we=0x0]",
+        "  req[18] value: predicted [req.request addr=0x293d7f0 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x7ea49f0 data=0x0 mask=0x0 we=0x0]",
+        "  req[19] value: predicted [req.request addr=0x293d7f0 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x7ea49f0 data=0x0 mask=0x0 we=0x0]",
+        "  ... and 836 more"
+      ]
+    }
+  ],
+  "log": "Validation/reports/crv2/s7/path_03_read_return_sim.log",
+  "observed_trace": "Validation/reports/crv2/s7/path_03_read_return_observed.jsonl"
+}

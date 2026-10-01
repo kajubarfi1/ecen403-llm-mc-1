@@ -59,7 +59,15 @@ def load_manifests(blocks):
     import rtl_drop as RD
     out = {}
     for b in blocks:
-        with open(RD.manifest_file(b)) as f:
+        try:
+            mf = RD.manifest_file(b)
+        except RD.DropError:
+            # a phase-partial drop: the block is reported absent, never
+            # substituted; edges that name it are left for the drop that
+            # brings it (validate_drop --partial decides what may run)
+            load_manifests.missing.append(b)
+            continue
+        with open(mf) as f:
             m = json.load(f)
         ports = {}
         for group, plist in m.get("ports", {}).items():
@@ -70,12 +78,16 @@ def load_manifests(blocks):
     return out
 
 
+load_manifests.missing = []
+
+
 def blocks_in_order():
     with open(PATH_DEFS) as f:
         return list(json.load(f)["blocks"].keys())
 
 
 def derive(manifests, blocks):
+    derive.deferred = []
     """Edges the manifests declare, in block order then manifest port order,
     plus the problems found on the way."""
     edges, errors = [], []
@@ -92,6 +104,12 @@ def derive(manifests, blocks):
                 continue
             pb, pp = src.split(".", 1)
             if pb not in manifests:
+                if pb in load_manifests.missing:
+                    # absent block: the edge waits for it, but stays visible
+                    # so a standalone harness knows this input is a cut edge
+                    derive.deferred.append({"from": src, "to": f"{b}.{name}",
+                                            "waits_for": pb})
+                    continue
                 errors.append(f"{b}.{name}: source block {pb!r} is not in the drop")
                 continue
             prod = manifests[pb].get(pp)
@@ -134,7 +152,7 @@ def build(manifests, blocks, ov):
 
     # Overrides: edges the manifests lack. Redundant ones are reported.
     have = {(c["from"], c["to"]) for c in kept}
-    redundant, overrides = [], []
+    redundant, overrides, deferred = [], [], []
     for c in ov.get("connections", []):
         key = (c["from"], c["to"])
         if key in have:
@@ -142,6 +160,10 @@ def build(manifests, blocks, ov):
             continue
         cb, cp = c["to"].split(".", 1)
         fb, fp = c["from"].split(".", 1)
+        if cb in load_manifests.missing or fb in load_manifests.missing:
+            deferred.append({"from": c["from"], "to": c["to"],
+                             "waits_for": cb if cb in load_manifests.missing else fb})
+            continue
         for blk, prt, want in ((cb, cp, "input"), (fb, fp, "output")):
             if blk not in manifests or prt not in manifests[blk]:
                 raise MapError(f"override {c['from']} -> {c['to']}: {blk}.{prt} is not in the drop")
@@ -183,12 +205,15 @@ def build(manifests, blocks, ov):
             "override_edges": len(overrides),
             "superseded_manifest_sources": superseded,
             "override_connections": overrides,
+            "deferred_until_block_arrives": deferred,
             "redundant_overrides": [{"from": c["from"], "to": c["to"]} for c in redundant],
             "consumer_ports_without_source": missing,
         },
         "connections": kept + overrides,
         "glue": ov.get("glue", []),
         "ties": ov.get("ties", {}),
+        "standalone_ties": ov.get("standalone_ties", {}),
+        "deferred_connections": getattr(derive, "deferred", []) + deferred,
         "requires": ov.get("requires", {}),
         "expr_glue": ov.get("expr_glue", []),
         "stubs": ov.get("stubs", []),
@@ -251,8 +276,13 @@ def main() -> int:
     with open(OVERRIDES_PATH) as f:
         ov = json.load(f)
     manifests = load_manifests(blocks)
+    if load_manifests.missing:
+        print(f"  partial drop: no manifest for {', '.join(load_manifests.missing)}; "
+              f"their edges are deferred")
+        blocks = [b for b in blocks if b in manifests]
     try:
         imap, report = build(manifests, blocks, ov)
+        imap["$derivation"]["blocks_missing_from_drop"] = list(load_manifests.missing)
     except MapError as e:
         print(f"  integration map NOT generated: {e}", file=sys.stderr)
         return 1

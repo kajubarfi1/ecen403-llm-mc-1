@@ -109,7 +109,7 @@ def prepare(path_id, tdir, pdefs, imap, seed=1, drives=19, test_name=None):
     with open(os.path.join(ROOT, "Validation", "txn", "generated",
                            "schemas.json")) as f:
         schemas = json.load(f)["interfaces"]
-    blocks = CHG.block_closure(pdef["blocks"], imap)
+    blocks = CHG.block_closure(pdef["blocks"], imap, bool(pdef.get("standalone")))
 
     # Entry, generator and window come from stimulus_select — the same
     # decisions run_path.py makes, so a vManager test IS the run_path run.
@@ -177,7 +177,8 @@ def prepare(path_id, tdir, pdefs, imap, seed=1, drives=19, test_name=None):
     gen = os.path.join(ROOT, "Validation", "sva", "generated")
     for b in blocks:
         for sfx in ("_fcov.sv", "_fcov_bind.sv", "_coverage.sv",
-                    "_coverage_bind.sv", "_sva.sv", "_sva_bind.sv"):
+                    "_coverage_bind.sv", "_sva.sv", "_sva_bind.sv",
+                       "_order_sva.sv", "_order_sva_bind.sv"):
             if os.path.exists(os.path.join(gen, b + sfx)):
                 files.append(os.path.join(gen, b + sfx))
 

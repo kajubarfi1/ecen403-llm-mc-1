@@ -86,7 +86,8 @@ def generated_checkers(blocks):
     out = []
     for b in blocks:
         for suffix in ("_fcov.sv", "_fcov_bind.sv", "_coverage.sv",
-                       "_coverage_bind.sv", "_sva.sv", "_sva_bind.sv"):
+                       "_coverage_bind.sv", "_sva.sv", "_sva_bind.sv",
+                       "_order_sva.sv", "_order_sva_bind.sv"):
             p = os.path.join(gen, b + suffix)
             if os.path.exists(p):
                 out.append(p)
@@ -192,7 +193,7 @@ def main() -> int:
                          "window for an autonomous path); default = the "
                          "path's settle_cycles / window_cycles")
     ap.add_argument("--stimulus", default=None,
-                    choices=["random", "register_walk", "status_poll",
+                    choices=["random", "random_v2", "register_walk", "status_poll",
                              "refresh_stress", "burst"],
                     help="override the path's stimulus_generator")
     ap.add_argument("--no-coverage", action="store_true")
@@ -227,7 +228,7 @@ def main() -> int:
                            "integration_map.json")) as f:
         imap = json.load(f)
     import chain_harness_gen as CHG
-    blocks = CHG.block_closure(pdef["blocks"], imap)
+    blocks = CHG.block_closure(pdef["blocks"], imap, bool(pdef.get("standalone")))
 
     sys.path.insert(0, os.path.join(ROOT, "Validation", "sequences"))
     import stimulus_select as SS
@@ -435,6 +436,16 @@ def main() -> int:
             print(f"    {name:24} {n}x")
     if "HARNESS_TIMEOUT" in stdout:
         print("\n  HARNESS TIMEOUT — the chain wedged; trace is partial.")
+    stalls = [l for l in lines if "DRIVER_STALL" in l]
+    if stalls:
+        # the driver gave up waiting for a completion the DUT owns. On a
+        # standalone path whose response source is a tie this is expected
+        # (reads are judged on the request stream and never complete);
+        # anywhere else it is a wedge worth reading the log for.
+        exp = pdef.get("standalone")
+        print(f"\n  DRIVER completion timeouts: {len(stalls)}"
+              + (" (expected: standalone path, responses tied off; requests "
+                 "are still judged)" if exp else " — see the log"))
 
     trace = os.path.join(rep_dir, f"{args.path}_observed.jsonl")
     rc, out = run_local(

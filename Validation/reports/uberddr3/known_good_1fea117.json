@@ -1,0 +1,55 @@
+{
+  "$schema": "validation-known-good/1",
+  "generated_utc": "2026-09-24T17:43:40.429969+00:00",
+  "reference": "AngeloJacobo/UberDDR3 (fetched 2026-09-24), testbench/ddr3_dimm_micron_sim.sv, TWO_LANES_x8, den8192Mb sg125, 12ns/3ns, SPEED_BIN 3, MICRON_SIM=1",
+  "spec": "builds/uberddr3_ddr3-667_x16_2lane_1rank/microarch_spec.json",
+  "assertions": "Validation/refdesigns/uberddr3/generated/cmd_gen_sva_pins.sv (14 assertions, DDR clock)",
+  "observation_point": "DRAM pins between ddr3_top and the Micron model, sampled on the DDR clock",
+  "simulator": "Xcelium on Olympus, with Validation/refdesigns/uberddr3/xcelium_compat.patch",
+  "uberddr3_self_check": {
+    "Writes": 4608,
+    "Reads": 4608,
+    "Success": 4604,
+    "Fails": 4,
+    "note": "the 4 fails are the testbench's own injected errors"
+  },
+  "micron_model_errors": 0,
+  "our_assertion_failures": 0,
+  "commands_observed": 15946,
+  "command_histogram": {
+    "MRS": 8,
+    "ZQ": 1,
+    "PRE": 2569,
+    "RD": 4878,
+    "REF": 30,
+    "ACT": 2635,
+    "WR": 5825
+  },
+  "sim_end": "Simulation stopped via $stop(1) at time 256652 NS (testbench end)",
+  "false_positives_before_fixes": {
+    "PROTO_001": 14,
+    "TIMING_012": 5,
+    "causes": [
+      "no MPR-mode awareness in cas_requires_open_row",
+      "tracking state X before the testbench drove RESET#"
+    ]
+  },
+  "verdict": "pass",
+  "sanity_mutation": {
+    "spec_change": "timing_model.tRCD 13.75 -> 60.0 ns (20 tCK)",
+    "expected": "TIMING_001 fires on ACT->CAS spacings shorter than 20 tCK",
+    "observed": {
+      "a_TIMING_001": 2347,
+      "other_assertions": 0,
+      "micron_model_errors": 0
+    },
+    "conclusion": "assertions are live and specific: only the mutated bound fired, on 2347 of 2635 activates"
+  },
+  "runs": [
+    "plain testbench (xrun_work): known-good baseline",
+    "with assertions, first: 19 false positives (PROTO_001 x14 MPR reads, TIMING_012 x5 X before RESET#)",
+    "with assertions, after generator fixes: 0 failures",
+    "sanity mutation: 2347 TIMING_001",
+    "with assertions, clean rerun for this record: 0 failures"
+  ]
+}

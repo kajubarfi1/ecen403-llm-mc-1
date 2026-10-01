@@ -41,7 +41,7 @@ module csr_sts_level_monitor #(
 
   // Transaction detected when: 1'b1 (emit only when the observed state changes)
   always @(posedge clk) begin
-    #SAMPLE_DELAY;                 // sample after non-blocking assignments commit
+    // sample: pre_nba -- what the DUT's flops saw at this edge (qualifier mixes a held input with combinational ready/stall)
     if (rst_n && (1'b1) && ({sts_bist_done, sts_bist_fail, sts_bist_fail_addr, sts_cal_done, sts_cal_fail, sts_ecc_ce_count, sts_init_done, sts_ref_pending_cnt, sts_self_refresh_active} !== csr_sts_level_prev)) begin
         $display("TXN csr_sts_level state t=%0t bist_done=%0h bist_fail=%0h bist_fail_addr=%0h cal_done=%0h cal_fail=%0h ecc_ce_count=%0h init_done=%0h ref_pending=%0h self_refresh=%0h", $time, sts_bist_done, sts_bist_fail, sts_bist_fail_addr, sts_cal_done, sts_cal_fail, sts_ecc_ce_count, sts_init_done, sts_ref_pending_cnt, sts_self_refresh_active);
     end

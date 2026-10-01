@@ -92,9 +92,37 @@ def generate(seq, schemas, catalog):
     waits = []
     for iface in ifaces:
         drv = catalog[iface].get("drive")
+        if drv and drv.get("accept"):
+            # pipelined handshake: hold the request while the slave stalls;
+            # the posedge after `accept` takes it, then release what the
+            # catalog says to release (stb) and keep the rest until complete
+            a = drv["accept"]
+            rel = "; ".join(f"{sig} = '0" for sig in drv.get("release_on_accept", []))
+            waits.append(f"""  task automatic accept_{iface}();
+    int w_;
+    w_ = 0;
+    while (!({a}) && w_ < 256) begin @(negedge clk); w_++; end
+    if (!({a}))
+      $display("DRIVER_STALL: {iface} — accept ({a}) never true within 256 cycles");
+    @(negedge clk);   // one beat accepted at the posedge just passed
+    {rel};
+  endtask
+""")
         if drv and drv.get("complete"):
             c = drv["complete"]
-            waits.append(f"""  task automatic wait_{iface}();
+            if drv.get("accept"):
+                # completion may already be high at the negedge after the
+                # beat (a write acks one cycle later): check before waiting
+                waits.append(f"""  task automatic wait_{iface}();
+    int w_;
+    w_ = 0;
+    while (!{c} && w_ < 256) begin @(negedge clk); w_++; end
+    if (!{c})
+      $display("DRIVER_STALL: {iface} — {c} never asserted within 256 cycles");
+  endtask
+""")
+            else:
+                waits.append(f"""  task automatic wait_{iface}();
     int w_;
     w_ = 0;
     do begin @(negedge clk); w_++; end while (!{c} && w_ < 256);
@@ -137,8 +165,10 @@ def generate(seq, schemas, catalog):
             for sig in req:
                 if not (ksig and sig == ksig[0]):
                     assigns.append(f"{sig} = 1'b1")
-            line = (f"      // {iface}.{kind} (handshake)\n"
+            line = (f"      // {iface}.{kind} ({'pipelined ' if drv.get('accept') else ''}handshake)\n"
                     f"      @(negedge clk); {'; '.join(assigns)};")
+            if drv.get("accept"):
+                line += f"\n      accept_{iface}();"
             if drv.get("complete"):
                 line += f"\n      wait_{iface}();"
             else:

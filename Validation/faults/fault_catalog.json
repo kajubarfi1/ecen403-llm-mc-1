@@ -179,15 +179,16 @@
       "paths": [
         "path_19_row_conflict"
       ],
-      "masked_by": "scheduler_regrant (open): the baseline already drops requests (19 enqueued, 16 dequeued) through the slot re-grant defect, so this fault's dropped requests add 3 to a count that is already non-zero. Re-testable once that defect is fixed."
+      "masked_by": null,
+      "masked_until": "5661e03: scheduler_regrant (open): the baseline already drops requests (19 enqueued, 16 dequeued) through the slot re-grant defect, so this fault's dropped requests add 3 to a count that is already non-zero. Re-testable once that defect is fixed."
     },
     {
       "id": "M13_data_path_dm_polarity",
       "block": "data_path",
       "file": "PHASE4RTL/data_path.sv",
       "description": "DDR data mask driven with host byte-enable polarity (not inverted).",
-      "from": "? ~wr_msk_r : '0;",
-      "to": "? wr_msk_r : '0;",
+      "from": "? ~dm_beat : '0;",
+      "to": "? dm_beat : '0;",
       "expect": [
         "stage:data_path",
         "matched:data_path"
@@ -195,7 +196,9 @@
       "paths": [
         "path_18_full_write"
       ],
-      "masked_by": "data_path_width (open): the design drives 32-bit beats where the spec's pack_32_to_16 predicts 16-bit halves, so every write beat already mismatches on data; a mask-only change cannot alter the verdict. Re-testable once that defect is fixed."
+      "masked_by": null,
+      "reseeded": "2026-09-24: data_path rewritten (DQ-width redesign, drop 5661e03); same fault, new site",
+      "masked_until": "5661e03: data_path_width (open): the design drives 32-bit beats where the spec's pack_32_to_16 predicts 16-bit halves, so every write beat already mismatches on data; a mask-only change cannot alter the verdict. Re-testable once that defect is fixed."
     },
     {
       "id": "M14_init_fsm_skip_mr2",
@@ -226,6 +229,184 @@
       "paths": [
         "path_08_init_to_cal"
       ]
+    },
+    {
+      "id": "M16_refresh_ctrl_before_init",
+      "block": "refresh_ctrl",
+      "file": "PHASE2RTL/refresh_ctrl.sv",
+      "description": "Refresh requests are raised before initialisation completes: the tREFI counter runs from reset and ref_required is not gated on init_done.",
+      "edits": [
+        {
+          "from": "        end else if (!init_done) begin\n            refi_ctr  <= '0;\n            refi_tick <= 1'b0;\n",
+          "to": "        end else if (1'b0) begin\n            refi_ctr  <= '0;\n            refi_tick <= 1'b0;\n"
+        },
+        {
+          "from": "    assign ref_required    = (|postpone_cnt) & init_done;",
+          "to": "    assign ref_required    = (|postpone_cnt);"
+        },
+        {
+          "from": "        end else if (!init_done) begin\n            postpone_cnt <= '0;",
+          "to": "        end else if (1'b0) begin\n            postpone_cnt <= '0;"
+        }
+      ],
+      "expect": [
+        "id:REF_003"
+      ],
+      "paths": [
+        "path_09_init_to_refresh"
+      ]
+    },
+    {
+      "id": "M17_scheduler_ignores_refresh",
+      "block": "scheduler",
+      "file": "PHASE3RTL/scheduler.sv",
+      "description": "The scheduler never selects REFRESH: refresh requests are raised and never serviced, so the postpone budget is exhausted.",
+      "edits": [
+        {
+          "from": "        if (ref_urgent) begin\n            if (all_banks_idle) begin",
+          "to": "        if (1'b0) begin\n            if (all_banks_idle) begin"
+        },
+        {
+          "from": "            if (!sel_valid && ref_required) begin",
+          "to": "            if (1'b0 && ref_required) begin"
+        }
+      ],
+      "expect": [
+        "id:SCHED_003",
+        "id:REF_001"
+      ],
+      "paths": [
+        "path_05_scheduler_refresh_loop"
+      ]
+    },
+    {
+      "id": "M18_calibration_zqcs_before_done",
+      "block": "calibration",
+      "file": "PHASE2RTL/calibration.sv",
+      "description": "The periodic ZQCS timer runs from reset instead of from cal_done, so a ZQCS request is raised before calibration completes.",
+      "from": "        end else if (!cal_done_r) begin\n            zqcs_ctr     <= '0;\n            zqcs_pending <= 1'b0;",
+      "to": "        end else if (1'b0) begin\n            zqcs_ctr     <= '0;\n            zqcs_pending <= 1'b0;",
+      "expect": [
+        "id:CAL_002"
+      ],
+      "paths": [
+        "path_08_init_to_cal"
+      ]
+    },
+    {
+      "id": "M19_init_fsm_tzqinit_short",
+      "block": "init_fsm",
+      "file": "PHASE1RTL/init_fsm.sv",
+      "description": "init_done is raised 4 cycles after ZQCL instead of tZQinit (128).",
+      "from": "    localparam WAIT_ZQCL  = 128;",
+      "to": "    localparam WAIT_ZQCL  = 4;",
+      "expect": [
+        "assert:a_INIT_002_init_done"
+      ],
+      "paths": [
+        "path_08_init_to_cal"
+      ]
+    },
+    {
+      "id": "M20_cas_without_activate",
+      "block": "scheduler",
+      "file": "PHASE3RTL/scheduler.sv",
+      "description": "Every pending request is treated as a row hit and bank_tracker permits CAS on an idle bank: READ/WRITE issue with no ACTIVATE.",
+      "edits": [
+        {
+          "file": "PHASE3RTL/scheduler.sv",
+          "from": "            is_row_hit[i]   = q_valid[i] && bank_is_active[b] &&\n                               (bank_open_row[b] == q_row[i]);",
+          "to": "            is_row_hit[i]   = q_valid[i];"
+        },
+        {
+          "file": "PHASE2RTL/bank_tracker.sv",
+          "from": "            bank_rd_allowed[b]  = (bk_state[b] == BANK_ACTIVE)\n",
+          "to": "            bank_rd_allowed[b]  = 1'b1\n"
+        },
+        {
+          "file": "PHASE2RTL/bank_tracker.sv",
+          "from": "            bank_wr_allowed[b]  = (bk_state[b] == BANK_ACTIVE)\n",
+          "to": "            bank_wr_allowed[b]  = 1'b1\n"
+        }
+      ],
+      "expect": [
+        "id:PROTO_001",
+        "assert:a_PROTO_001"
+      ],
+      "paths": [
+        "path_19_row_conflict",
+        "path_01_write_cmd"
+      ]
+    },
+    {
+      "id": "M21_calibration_zqcs_ungated",
+      "block": "calibration",
+      "file": "PHASE2RTL/calibration.sv",
+      "description": "The ZQCS request is no longer gated on cal_done and its timer runs from reset: zqcs_req rises before calibration completes. (M18 alone cannot reach a_CAL_002 because the drop's zqcs_req = zqcs_pending & cal_done_r gate is structural.)",
+      "edits": [
+        {
+          "file": "PHASE2RTL/calibration.sv",
+          "from": "    assign zqcs_req = zqcs_pending & cal_done_r;",
+          "to": "    assign zqcs_req = zqcs_pending;"
+        },
+        {
+          "file": "PHASE2RTL/calibration.sv",
+          "from": "        end else if (!cal_done_r) begin\n            zqcs_ctr     <= '0;\n            zqcs_pending <= 1'b0;",
+          "to": "        end else if (1'b0) begin\n            zqcs_ctr     <= '0;\n            zqcs_pending <= 1'b0;"
+        }
+      ],
+      "expect": [
+        "assert:a_CAL_002",
+        "id:CAL_002"
+      ],
+      "paths": [
+        "path_08_init_to_cal"
+      ]
+    },
+    {
+      "id": "M22_init_fsm_done_before_zqcl",
+      "block": "init_fsm",
+      "file": "PHASE1RTL/init_fsm.sv",
+      "description": "init_done is also asserted while the FSM sits in S_MR0, i.e. before ZQCL has been issued.",
+      "from": "    assign init_done    = (state == S_DONE);",
+      "to": "    assign init_done    = (state == S_MR0 || state == S_DONE);",
+      "expect": [
+        "assert:a_INIT_003_init_done",
+        "id:INIT_003"
+      ],
+      "paths": [
+        "path_08_init_to_cal"
+      ]
+    },
+    {
+      "id": "M23_init_fsm_mrs_after_zqcl",
+      "block": "init_fsm",
+      "file": "PHASE1RTL/init_fsm.sv",
+      "description": "MR0 is programmed the cycle after ZQCL instead of before it: a command lands inside the tZQinit window and ZQCL precedes the last MRS.",
+      "edits": [
+        {
+          "file": "PHASE1RTL/init_fsm.sv",
+          "from": "            S_MR1:        next_state = S_MR0;",
+          "to": "            S_MR1:        next_state = S_ZQCL;"
+        },
+        {
+          "file": "PHASE1RTL/init_fsm.sv",
+          "from": "            S_ZQCL:       next_state = S_ZQCL_WAIT;",
+          "to": "            S_ZQCL:       next_state = S_MR0;"
+        },
+        {
+          "file": "PHASE1RTL/init_fsm.sv",
+          "from": "            S_MR0:        next_state = S_ZQCL;",
+          "to": "            S_MR0:        next_state = S_ZQCL_WAIT;"
+        }
+      ],
+      "expect": [
+        "assert:a_INIT_002",
+        "assert:a_INIT_001_then"
+      ],
+      "paths": [
+        "path_08_init_to_cal"
+      ]
     }
   ],
   "$equivalent_note": "Three first-draft faults were 'equivalent mutants' \u2014 unobservable by construction, not missed by a check: tRCD/tRP timer bugs cannot violate a 3-cycle bound the command pipeline already exceeds, and the refresh-starvation latch never fires because the event is unreachable in this RTL. They were replaced; the reasoning is kept in each replacement's description.",
@@ -235,7 +416,9 @@
     "Scorer vocabulary: M12 was detected by the checker (request_not_serviced) but not recognised because the scorer only matched taxonomy-style ids. Violation lines now lead with the taxonomy id and the scorer accepts any rule token.",
     "Equivalent mutants: tRCD/tRP timer bugs cannot violate a 3-cycle bound the command pipeline already exceeds; tRC = tRAS + tRP so a tRC-only bug cannot show; the starvation latch never fires because the event is unreachable. Replaced with tRAS, tRRD and an RW1C-settable fault.",
     "M04 (tRRD zero) was caught by the tFAW window assertion rather than tRRD: with no tRRD hold-off the fifth ACTIVATE lands inside tFAW first. M06 (postpone runaway) was caught by tRFC rather than REF_001: the REF_001 checker compares against the SPEC's max_postpone_count while the refresh-stress stimulus reprograms the CSR to 2 \u2014 the checker should observe cfg_refresh. Filed as a checker to-do.",
-    "Masked faults (M12, M13) are re-tested automatically when the masking defect closes: the scorer reports them apart and never counts them as kills."
+    "Masked faults (M12, M13) are re-tested automatically when the masking defect closes: the scorer reports them apart and never counts them as kills.",
+    "2026-09-30: a fault must be able to reach the assertion it targets -- M18 exercised the ZQCS timer but the drop gates zqcs_req on cal_done structurally, so only the rule twin fired; M21 removes the gate too. Check the assign chain before expecting an assert: key.",
+    "2026-10-01: blame is judged by rule ownership, not only by the stage that fired -- a scheduler fault whose symptom is a spacing assertion on cmd_gen's pins is blamed on the scheduler (M20 on path_01), the same way the feedback loop routes the finding."
   ],
   "$todo": [
     "cmd_queue_scheduler / scheduler / path_05 / path_20 checkers should take cfg_refresh as an input stream so REF_001 uses the programmed postpone budget, not the spec constant."

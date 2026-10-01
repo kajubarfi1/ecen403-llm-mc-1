@@ -45,7 +45,7 @@
       "clock": "clk",
       "reset": "rst_n",
       "reset_active_low": true,
-      "qualifier": "wb_ack_o",
+      "qualifier": "wb_cyc_i && wb_stb_i && !wb_stall_o",
       "kind_select": {
         "expr": "wb_we_i",
         "map": {
@@ -65,12 +65,20 @@
       },
       "role": "request",
       "drive": {
+        "$note": "Pipelined: assert cyc+stb (we from kind_select); hold while the slave stalls; the cycle after acceptance drop stb only; keep cyc, address and data until ack, then drop everything.",
         "assert": [
           "wb_cyc_i",
           "wb_stb_i"
         ],
+        "accept": "!wb_stall_o",
+        "release_on_accept": [
+          "wb_stb_i"
+        ],
         "complete": "wb_ack_o"
-      }
+      },
+      "qualifier_note": "Wishbone B4 PIPELINED slave (spec host_interface.interface_type): a request is accepted on every cycle with cyc && stb && !stall -- that beat, not the later ack, is the request event. Observing at ack (as before 2026-10-01) mis-timed writes by a cycle and, with a driver that held stb until ack, turned one held read into one request per cycle: the 'duplicate read request' finding on drops 1fea117/5661e03 was this driver, not wb_port.",
+      "sample": "pre_nba",
+      "sample_note": "The beat is accepted when the slave's flops see cyc && stb && !stall; stall is combinational from cmd_queue.enq_ready, which updates at the same edge. Post-NBA sampling recorded a phantom beat at every edge the queue freed while the driver was holding a stalled request (drop 5661e03, path_01/07/20)."
     },
     "req": {
       "block": "wb_port",
@@ -109,13 +117,28 @@
           "read": [
             "data"
           ]
-        }
+        },
+        "model_guidance": "One req.request per accepted wb access, in order. mask carries wb.sel on writes. On reads the spec does not say what mask carries (intake gap CSR_READ_BYTE_ENABLES); the scoreboard treats req.mask as don't-care on reads, so predict 0."
       },
       "consumers": [
         "addr_decoder",
         "cmd_queue"
       ],
-      "$consumers_note": "wb_port emits request descriptors; addr_decoder decodes req_addr and cmd_queue takes the control fields. Declaring the consumers is what lets a downstream stage's predictor legally name 'req' as its input."
+      "$consumers_note": "wb_port emits request descriptors; addr_decoder decodes req_addr and cmd_queue takes the control fields. Declaring the consumers is what lets a downstream stage's predictor legally name 'req' as its input.",
+      "dont_care": [
+        {
+          "when": {
+            "we": 0
+          },
+          "keep_mask": 0,
+          "$why": "Byte enables on a READ request are undefined by the spec (intake gap CSR_READ_BYTE_ENABLES, proposed waiver W-003). Comparing them reported a defect that is not one; the field is compared on writes only until the spec decides.",
+          "fields": [
+            "mask",
+            "data"
+          ],
+          "why": "A read carries no write data or byte mask; wb_port forwards whatever was on wb_dat_i/wb_sel_i at the beat (the previous write's values on a pipelined bus). The spec fixes neither, so neither is compared on a read."
+        }
+      ]
     },
     "ddr_cmd": {
       "block": "cmd_gen",
@@ -164,7 +187,14 @@
             "by_command": {
               "ACT": "row",
               "RD": "col",
-              "WR": "col"
+              "WR": "col",
+              "PRE": {
+                "bits": {
+                  "10": 0
+                },
+                "why": "The scheduler's PRECHARGE names one bank; JESD79-3 A10 high would precharge every bank. The other address pins are don't-care on a PRECHARGE.",
+                "discovered_by": "2026-09-29: the accepted predictor carried the row on a PRECHARGE, so A10 followed row bit 10 and 74 correct commands were reported as mismatches"
+              }
             }
           }
         },
@@ -174,7 +204,17 @@
           ]
         },
         "$no_output_note": "A NOP scheduler decision issues no DDR command: the pins idle at the NOP encoding, which the monitor's qualifier deliberately excludes from being a transaction."
-      }
+      },
+      "dont_care": [
+        {
+          "when": {
+            "cmd": "PRE"
+          },
+          "field": "addr",
+          "keep_mask": 1024,
+          "$why": "JESD79-3: a PRECHARGE's address pins are don't-care except A10 (precharge-all). Comparing the rest reports a defect that is not one (plan gap #10)."
+        }
+      ]
     },
     "csr_rsp": {
       "block": "config_regs",
@@ -228,7 +268,19 @@
         "field_map": {
           "addr": "addr"
         },
-        "$note": "A read response echoes the requested address; its data comes from downstream and is not determined by the request, so it is deliberately not in field_map — gating it would assert a requirement the spec does not make of this block."
+        "$note": "A read response echoes the requested address; its data comes from downstream and is not determined by the request, so it is deliberately not in field_map — gating it would assert a requirement the spec does not make of this block.",
+        "model_guidance": "Emit exactly one wb_rsp.read_data per wb.read, in request order, with the request's addr. Its data is NOT known from the request: it is the data field of the dp_rd_rsp.response for that read (responses return in request order), which the model receives as an input transaction. Hold the response until that dp_rd_rsp arrives and emit it then; never derive read data from a memory image of earlier writes, and never emit nothing for a read.",
+        "completes_on": {
+          "interface": "dp_rd_rsp",
+          "kind": "response",
+          "for_kinds": [
+            "read"
+          ],
+          "field_map": {
+            "data": "data"
+          },
+          "$why": "The read response's data arrives later from the data path; the gate drives the request, expects nothing, then drives the completing dp_rd_rsp and expects the response with its data. Declared 2026-09-30 after two models were rejected for correctly refusing to answer a read from the request alone."
+        }
       }
     },
     "init_cmd": {
@@ -506,7 +558,8 @@
           "command_iface": "dp_cmd",
           "command_kind": "read"
         }
-      }
+      },
+      "model_guidance": "Consumed by wb_port: the data returned for the oldest outstanding host read, in order."
     },
     "csr_sts": {
       "block": "config_regs",
@@ -547,7 +600,9 @@
           "ecc_ce_count": "sts_ecc_ce_count",
           "bist_fail_addr": "sts_bist_fail_addr"
         }
-      }
+      },
+      "sample": "pre_nba",
+      "sample_note": "Levels are INPUTS config_regs samples at the edge: the value its flops saw is the one a read response produced at that edge reflects. Post-NBA sampling recorded a change at edge E ahead of the response of edge E (computed from the value before E): CTRL_STATUS read 0x20 (ref_pending=1) where the predictor, having already applied ref_pending=0, said 0 (drop 5661e03, path_10..13)."
     },
     "sched_in": {
       "block": "cmd_gen",

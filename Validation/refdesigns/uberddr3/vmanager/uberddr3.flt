@@ -1,0 +1,21 @@
+# Failure filters for the UberDDR3 known-good run.
+add_filter ('xrun_assert', 4,
+            '\*E,ASRTST[^\n]*Assertion\s+([\w.$]+)\s+has failed',
+            failure('1', 'assertion', '$1', 'error', 'spec-derived assertion failed at the DRAM pins')
+           );
+add_filter ('xrun_error', 5,
+            '^(xmsim|xmelab|xmvlog|xrun):\s*\*E,(\w+)([^\n]*)\n',
+            failure('1', '$1', '$2', 'error', '$3')
+           );
+add_filter ('xrun_fatal', 5,
+            '^(xmsim|xmelab|xmvlog|xrun):\s*\*F,(\w+)([^\n]*)\n',
+            failure('1', '$1', '$2', 'fatal', '$3')
+           );
+add_filter ('micron_model', 5,
+            '(ddr3[^\n]*ERROR[^\n]*)\n',
+            failure('1', 'micron_ddr3_model', 'JEDEC', 'error', '$1')
+           );
+add_filter ('validation_fail', 5,
+            '^(VALIDATION_FAIL:[^\n]*)\n',
+            failure('1', 'validation', 'CHECK', 'error', '$1')
+           );

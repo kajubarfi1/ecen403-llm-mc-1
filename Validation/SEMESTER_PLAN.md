@@ -50,6 +50,159 @@ DDR3 model (`testbench/ddr3.sv`), is a 4:1 controller at 83–100 MHz with
 SPEED_BIN presets for 1066/1333/1600, and ships SymbiYosys formal for its
 Wishbone slave — the spec for its configuration is the next local step.
 
+**Progress (2026-09-29/30, "is validation itself right?").** Four sources of
+evidence per check, gathered into one ledger (`agreement/check_ledger.py`,
+`reports/check_ledger.json`, cockpit section): 36 of 51 checks now have
+non-synthetic evidence on both sides (fired on something wrong, silent on
+something right); 13 are silent-only (never seen to fire outside the gate),
+1 fires-only, 1 gate-only, 0 false positives.
+- *Repairs* (`repairs/`): three minimal fixes applied to a Validation-owned
+  copy of drop 5661e03 — scheduler feedback-latency hold (R01), REFRESH gated
+  on tRFC (R02), tWTR applied to READ (R03). Stacked, they turn 6 of 10
+  command paths green and silence every scheduler check; nothing new fires.
+  R02 and R03 are defects the Frontend has not reported yet (REFRESH not
+  gated by tRFC; tWTR tracked per bank and applied to PRECHARGE instead of
+  READ). What still fails after R03 is data_path (read return), wb_port
+  (byte-enable spec gap) and config_regs (status-read spec gap).
+- *Second models* (`agreement/second_opinion.py`, `model_agreement.py`): 12
+  of 14 scopes have an independently generated model; disagreements on real
+  traces found two primary-model bugs — path_19's checker treated a
+  PRECHARGE to bank 7 as precharge-all (44 false PROTO_001/SCHED_001), and
+  cmd_gen's predictor carried the row on PRECHARGE so A10 followed row bit 10
+  (74 false mismatches sent to the Frontend). Both gates were extended
+  (single-bank-precharge trace; declared constant bits + complementary drive
+  patterns) and now reject those models; path_19 regenerated, cmd_gen
+  pending. The primary config_regs predictor does not model cfg_refresh at
+  all; the second one does (open).
+- *Known-good path checkers* (`refdesigns/uberddr3/path_checkers_on_uberddr3.py`):
+  the end-to-end checkers run on UberDDR3's host/pin streams. SCHED_004 as
+  first written fired 314x on its legal look-ahead ACTIVATE; restated as
+  "a CAS must land on the row its request asked for" (intake rule
+  SCHED_SPECULATIVE_ACTIVATE added). Now 0 violations for path_19/path_20
+  and their second models over 9216 requests. vManager session
+  `~/vmanager_uberddr3` (6 tests, all green).
+- *Oracle agreement* (`agreement/oracle_agreement.py`): PROTO_001/002 have
+  three oracles (rule, assertion, formal) and agree on all 40 runs compared.
+- Findings on 5661e03 after the fixes: 24 → 15 checks to the Frontend.
+- The wb_port second model was rejected four times on one point it would not
+  concede: it emits no `wb_rsp` for a READ until read data arrives, while the
+  catalog derives `wb_rsp` one-per-host-access from `wb` alone. A read
+  response does depend on `dp_rd_rsp`, which the wb_port predictor is not
+  given; the gate's read expectation (and the primary model that satisfies
+  it) needs a second look before the primary's wb_port read mismatches are
+  treated as design defects.
+- *2026-09-30 follow-up.* The wb_port rejection was the gate's: it demanded a
+  read response from the request alone. The catalog now declares `wb_rsp`
+  *completes on* `dp_rd_rsp` (gate drives request, expects nothing, drives
+  the completion, expects one response with its data); the predictor prompt
+  now carries the catalog's stream relationships and `model_guidance`;
+  `req.mask` is don't-care on reads (intake gap). wb_port and cmd_gen
+  predictors regenerated and accepted (cmd_gen's first attempt repeated the
+  A10 mistake and was rejected by the extended gate — the gate works); wb_port
+  second model accepted, agrees 41/41. Five seeded faults added for the
+  silent-only rules (refresh before init, scheduler ignoring refresh, ZQCS
+  before cal_done, short tZQinit, CAS without ACTIVATE): 20/20 killed. The
+  tZQinit fault exposed a rule gap — command-to-command spacing cannot see
+  init_done — closed with a new SVA rule kind (`event_rules`:
+  `a_INIT_002_init_done`), silent on the correct boot. Ledger: 45/51 closed;
+  left: REF_001 (needs a reachable starvation, blocked by the ref_pending_cnt
+  width gap), TIMING_002/TIMING_012 (tRP equivalent at this clock; tREFI
+  bound), data_path (second model disagrees on DM polarity, the open spec
+  gap), and the cmd_gen second model (still generating).
+- Gaps to close next: seeded faults for the 13 silent-only rules (PROTO_001,
+  REF_001/003, SCHED_003, CAL_002, TIMING_002/012, INIT_002); regenerate
+  cmd_gen and the wb_port second model (blocked today by a throttled API
+  link over the VPN, ~4 tokens/s).
+- *2026-09-30, later.* Repair-proven defects now ship as findings:
+  `emit_findings.py` files `repair/<block>/<Rid>` records (anchors = the
+  repair's edits, detectors `repair:<id>` + the checks it silenced) for R01
+  (scheduler feedback hold), R02 (refresh gated on tRFC/all-idle) and R03
+  (bank_tracker tWTR on read); 17 findings on 5661e03, retry_instructions
+  carries `repair`/`fix`. Boot path brought under SVA + formal: two rule
+  kinds added to the generator — `sequence_rules` (INIT_001 order parsed
+  from the spec's init-sequence sentence → `a_INIT_001`/`a_INIT_001_then`,
+  INIT_003 as an event → `a_INIT_003_init_done`) and `signal_groups`
+  (ordering assertions for blocks with no command stream:
+  `calibration_order_sva.sv`, CAL_001/CAL_002). Baseline path_08 stays
+  silent; M14/M15/M18/M19 fire the new assertions. JasperGold on the
+  init_fsm + calibration top (`run_formal.py --path path_08_init_to_cal`):
+  concrete run proves CAL_001/CAL_002 at infinite bound, the five init
+  properties are undetermined at bound 401 (the 40k/100k-cycle reset waits
+  are `localparam`s no bounded engine crosses); with `--stopat
+  u_init_fsm.wait_cnt` (a sound over-approximation, recorded in the report
+  as `abstractions`) 6/7 proven at infinite bound, covers 5/5; the one cex
+  (`a_INIT_002_init_done`) is the property that measures the cut wait and
+  is marked spurious — simulation grades it (silent on the baseline, fires
+  on M19). Ledger takes proofs under a cut as silent evidence and never a
+  cex under one as fired evidence. Three faults added so the boot
+  assertions are reachable (M21 ungated ZQCS: M18 alone could not trip
+  `a_CAL_002` because the drop gates `zqcs_req` on `cal_done_r`
+  structurally; M22 init_done in S_MR0; M23 MR0 after ZQCL): 23/23 killed.
+  `seed_faults.py --only` now merges into the matrix instead of replacing
+  it (a partial rerun had silently dropped 16 rows of ledger evidence).
+  Ledger 49/57 closed; left: `a_INIT_002_init_done` (fires only — no
+  known-good design binds the init group yet), TIMING_002/012, SCHED_002 on
+  two checkers, REF_001 ×2, data_path (DM polarity spec gap).
+- *2026-10-01 — Phase-1 integration readiness.* Asked whether a
+  `PHASE1RTL`-only drop can be validated today. It could not: the
+  orchestrator stopped on a drop missing any block, and only one of 20 paths
+  (`path_14`) used Phase-1 blocks alone. Built:
+  - **partial drops** — `validate_drop.py --partial` resolves what the drop
+    provides, runs every path whose closure is present, lists the rest as
+    `blocked (needs …)`, writes reports to `reports/partial/<head>/` (never
+    mixed with full-drop reports), and emits findings with a
+    `DROP_STATUS.json`: a previous finding whose block is absent or whose
+    every path was blocked is carried **untested**, never resolved (the
+    first attempt reported "22 resolved" for a drop that tested nothing of
+    them — fixed before it could mislead a retry). The generators defer what
+    an absent block owns (`integration_map_gen` keeps the edges as
+    `deferred_connections`, `schema_gen --allow-missing`, `sva_gen`,
+    `coverage_gen`, `block_coverage_gen`); `compare_drops --paths/--tag`
+    keeps a partial snapshot from ever becoming the reference.
+  - **standalone paths** — `path_21_wb_port_standalone` and
+    `path_22_csr_standalone` instantiate one block with no support closure;
+    every cut edge takes a `standalone_ties` entry from
+    `integration_overrides.json` (with a why) or generation refuses. The
+    first partial run proved the rule's worth: the partial map had deferred
+    `wb_port.req_ready`'s edge, the harness fell back to the silent zero tie,
+    and every write stalled.
+  - A Phase-1-only copy of 5661e03 now runs 3 paths (14, 21, 22), all PASS,
+    19 blocked, 0 findings, 24 carried untested, in under a minute.
+  **Two of our own defects found on the way, both on Phase-1 findings I had
+  called real the same morning:**
+  - The "duplicate read request" wb_port finding (critical, 50 occurrences,
+    on every drop since 1fea117) was the **driver**: it held `stb` until
+    `ack` (classic Wishbone) against a B4 *pipelined* slave
+    (`host_interface.interface_type: wishbone_pipelined`), so a read waiting
+    for data became one request per cycle until the 16-deep tag FIFO filled.
+    The catalog now declares the pipelined handshake (`drive.accept:
+    !wb_stall_o`, `release_on_accept: [wb_stb_i]`, `complete: wb_ack_o`) and
+    the request event is the accepted beat (`qualifier: cyc && stb &&
+    !stall`), not the ack. `driver_gen` emits accept/wait tasks from that
+    data. `req.data` joins `req.mask` as don't-care on reads.
+  - The remaining wb_port "missing request" and the config_regs
+    `CTRL_STATUS` findings were the **monitor's sampling point**: monitors
+    sample 1 ns after the edge (post-NBA) so a registered output shows at
+    its edge — right for outputs, wrong for an input the block samples when
+    that input is combinational from same-edge state (`!wb_stall_o` from
+    `cmd_queue.enq_ready`) or a level that changes at the edge a response was
+    computed from (`csr_sts_level.ref_pending`). Those recorded a beat the
+    slave had rejected, and a status change ahead of the read that predated
+    it. Catalog streams can now declare `sample: pre_nba` (wb,
+    csr_sts_level); the config_regs lesson (post-NBA default) stays pinned
+    for every other stream.
+  After both: wb_port 42/42 with its second model, config_regs stages pass
+  on all 6 paths (path_12/13 now PASS outright), **Phase-1 blocks carry 0
+  findings on 5661e03**; 12 findings remain, all scheduler / bank_tracker /
+  cmd_queue / data_path. 23/23 faults still killed (blame now consults
+  `rule_owners`, so a scheduler fault caught on cmd_gen's pins is blamed on
+  the scheduler, as the feedback loop routes it). Ledger 50/57.
+  Open after this: wb_port reads are judged standalone on the request
+  stream only (no read data returns without data_path; the driver's bounded
+  completion wait reports that as expected); config_regs second model still
+  disagrees 21/57 (the primary passes everywhere — the second model is next
+  to regenerate, with cmd_gen's).
+
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the
 schema generator's default root and `faults/fault_catalog.json` now point
@@ -94,6 +247,109 @@ against the previous outbox; (3) `measure_coverage.py` merged every run ever
 kept on the cluster, so a rewritten block counted old+new code (46% headline)
 — `--since <run start>` restricts the merge to the drop's own runs and
 `validate_drop.py` passes it.
+
+**Phase B: known-good reference done (2026-09-24).** UberDDR3 runs under
+Xcelium on Olympus (`refdesigns/uberddr3/`, one functionally neutral patch
+for its constant functions): its self-check passes (4608 W / 4608 R, the 4
+fails are its injected errors) with 0 Micron-model timing errors. Our 14
+spec-derived assertions, generated from a spec of ITS configuration
+(`builds/uberddr3_ddr3-667_x16_2lane_1rank/`, zero code edits) and bound at
+the DRAM pins on the DDR clock (`sva_gen.py --clock ddr`), report **0
+failures over 15946 observed commands** (2635 ACT, 2569 PRE, 5825 WR, 4878
+RD, 30 REF, 8 MRS, 1 ZQCL) — the exit criterion for timing/protocol. The
+first run had 19 false positives, all ours and all fixed in the generator:
+PROTO_001 did not know JEDEC MPR-mode reads (MR3 A2) need no open row;
+TIMING_012 fired on X before the testbench drove RESET#. A third apparent
+problem (a quarter of the pin trace missing) was an anchored grep meeting the
+Micron model's newline-less echo; `trace_extract.py` fixed too. Evidence:
+`reports/uberddr3/known_good_1fea117.json`, runbook `refdesigns/uberddr3/README.md`.
+Data integrity added the same day (`refdesigns/uberddr3/uberddr3_wb_monitor.sv`,
+`check_data_integrity.py`, `reports/uberddr3/data_integrity_1fea117.json`): 0
+read mismatches over 4608 reads against a byte-enable-aware host memory model,
+and 9216/9216 host requests matched in order to a CAS at the DRAM pins with
+the spec-mapped row/bank/column. **Phase B known-good item complete.** A
+sanity mutation (spec tRCD 60 ns) fires 2347 TIMING_001 and nothing else.
+Still open: a directed stress of UberDDR3's tRRD/tFAW gap (it enforces tRRD
+at 7.5 ns where JEDEC needs 4 nCK = 12 ns, and never enforces tFAW).
+JasperGold 24 and Cadence VIPCAT are installed on the compute nodes
+(`/opt/coe/cadence/JASPERGOLD240/bin/jg`, mounted there only), so the formal
+item can start.
+
+**Seeded faults on the Frontend2 drop (2026-09-24).** 15 faults, 4 of them
+re-seeded at new sites after the rewrites: 13/13 detectable killed, blame
+correct on every kill, 2 still masked by the same open defects
+(scheduler_regrant masks M12, data_path_width masks M13), none survived
+(`reports/faults/fault_matrix.json`, drop_root Frontend2/OutputFolders).
+
+**Formal (started).** `chain_harness_gen.py --formal` emits `formal/chain_formal.sv`:
+the command path's 9 blocks wired per the integration map with host inputs and
+DRAM data free and CSR/status tied, so the generated `cmd_gen_sva.sv` is
+proved over ALL host request streams on the composed scheduler + bank_tracker
++ cmd_gen, not on cmd_gen alone (whose inputs would be unconstrained).
+First JasperGold run (20 min budget, trace limit 200; `reports/formal/`):
+13 assertions — **4 proven for all inputs** (tRCD, tRP, tRAS, tFAW), **8
+counterexamples**, 1 undetermined (tREFI: bound 23400 cycles exceeds the trace
+limit; needs an abstraction). Shallow CEXs at 6 cycles from reset (tRC, tRFC,
+double-activate) are the defects simulation already reports; deep CEXs at
+136–139 cycles include two simulation never saw (PROTO_001 CAS to a closed
+bank, TIMING_008 tWR) — traces exported for triage: a legal host sequence
+makes them new findings, an illegal one means the top needs Wishbone-master
+assumptions. 24/25 covers reachable. **Triage done (all 8 traces):** both are real under a
+protocol-legal host — the scheduler READs a bank one cycle after PRECHARGing
+it (PROTO_001) and PRECHARGEs a bank one cycle after WRITEing it (tWR) —
+filed as `findings/outbox/.../formal_cmd_path_findings.json`: the first two
+defects found by formal that no simulation stimulus reached; the other six
+CEXs (tRC, tRFC, double-ACT, tRRD, tWTR, tRTP) are two-command witnesses of
+the findings simulation already has. Formal findings
+now flow through `emit_findings.py` (detector `formal:jaspergold`) into
+findings v2 and the Frontend's retry instructions. One command runs the flow:
+`tools/run_formal.py` (generate formal top, package, JasperGold on Olympus,
+parse the RESULTS table into `reports/formal/`). tREFI: JasperGold reports
+`undetermined` at bound 201 = no violation reachable within 200 cycles; the
+full 23400-cycle bound needs a counter abstraction, recorded as the one
+signoff blocker in this table.
+
+**Constrained-random v2 (2026-09-24).** `closure/random_v2.py`: address
+locality from `memory_geometry` (row hit / same-bank conflict / bank switch
+profiles), back-pressure bursts of 2 x queue depth, paced 0-3 idle runs,
+read/write pairs to one address, drains; still seeded, legal, reads no
+coverage; pluggable as `--stimulus random_v2` and the closure loop's
+`--arm constrained`. Batch 1 (path_19/04/07 x seeds 1-4, 400 requests each,
+12 runs, ~1 min each) merged with the drop baseline (`reports/crv2/`):
+**scheduler 71.4 → 92.0 %, cmd_queue 58.4 → 89.1 %, design 75.1 → 85.2 %**
+(scheduler, cmd_queue and design targets in `SIGNOFF.md` met); bank_tracker
+78.5 % unchanged. Batch 2 (path_18/20/03 x seeds 5-8, 12 more runs)
+merged with everything: **scheduler 93.7 %, cmd_queue 91.6 %, wb_port 59.5 →
+87.1 %, data_path 76.7 → 92.9 %, design 89.5 %** — every `SIGNOFF.md` block
+target met except bank_tracker (78.5 %, unmoved by 24 runs: its remaining
+code is the precharge-all path, which the harness ties off because the
+design never drives it (filed integration gap), and window/timer branches
+host traffic cannot reach — exclusion candidates E-SPEC/E-DEAD, to be settled
+by formal cover, not more seeds). `reports/crv2/summary.json`. Functional: the timing at-minimum bins stay at 50 %
+— the design never issues at the exact minimum spacing under host stimulus;
+whether those bins are reachable is a formal-cover question (E-DEAD
+candidates under `SIGNOFF.md` §4), not a seeds question.
+
+**First round trip with the Frontend closed (2026-09-24, drop 5661e03).**
+Lehana's reply (`Frontend2/VALIDATION_INTEGRATION_PLAN.md`) shipped manifest
+stamps (C1), phase-1 `source` (C4: 60/72 edges now manifest-derived), the
+scheduler re-grant fix, refresh-with-open-banks, the DQ-width redesign and
+reserved-bit masking. Regression: **24 → 15 open findings, 10 auto-resolved,
+8 paths improved, 0 regressions**; width gate 23/23; seeded faults **15/15 killed, 0 masked** (the re-grant
+and DQ fixes unmasked M12 and M13).
+Three apparent regressions were ours and are fixed: SCHED_001 was
+end-of-window starvation (settle 64 → 400 on host-driven paths), the DM
+mismatches were the predictor carrying byte enables through instead of JEDEC
+DM polarity, and PRE row-address bits are now a declared don't-care
+(catalog `dont_care`, plan gap #10 closed). Read responses under fr_fcfs are
+aligned by aux tag. Formal on 5661e03: same 4 proven / 8 CEX — the two
+formal-only defects are NOT closed by the re-grant guard; the emitter now
+carries formal findings until a formal run on the drop proves them. Reply
+to Lehana appended to `findings/HANDOFF_FRONTEND_2026-09-24.md`.
+
+**Signoff document v1 written:** `SIGNOFF.md` (drop acceptance, verdict
+levels, per-block coverage targets, exclusion codes, waiver policy, formal
+bar, known-good bar, regression rule, package contents).
 
 ---
 
@@ -170,13 +426,13 @@ triage → coverage closure → signoff):
 | Code coverage | **Partial** | measured, no per-block targets, no exclusion methodology |
 | Reference models / scoreboard | **Yes, unusual** | agent-generated models graded by spec-derived gates; the grading is the novel part and it is mutation-tested |
 | Assertions (independent of DUT) | **Yes** | timing/protocol SVA recomputed from spec, bound not embedded |
-| Constrained-random stimulus | **Weak** | random sequences are unconstrained draws of 19 transactions; directed walks carry most coverage |
+| Constrained-random stimulus | **Yes** | `random_v2.py`: address-aware profiles, back-pressure bursts, pacing; 12 runs took scheduler/cmd_queue from 71/58 % to 92/89 % |
 | Regression management | **Partial** | vManager session exists; no history across drops, no pass/fail trend, no nightly |
-| Triage → owner → fix → verify | **Designed, not built** | `findings/FEEDBACK_LOOP_DESIGN.md` |
-| Formal property checking | **No** | JasperGold + ABVIP DDR3 are installed and unused |
+| Triage → owner → fix → verify | **Yes (one round trip done)** | 10 findings auto-resolved by a Frontend drop from our package; formal findings carried until re-proved |
+| Formal property checking | **Started** | JasperGold on the composed command path: 4 of 13 generated SVA proven for all inputs, 8 CEX (6 match sim findings, 2 new, under triage), tREFI needs abstraction |
 | Gate-level simulation | **No** | backend has no cell models or SDF |
-| Known-good reference (false-positive rate) | **No** | every design seen so far is broken |
-| Signoff criteria written down | **No** | coverage goals, waiver policy and exit criteria are implicit |
+| Known-good reference (false-positive rate) | **Yes (timing/protocol)** | UberDDR3 + Micron model at the DRAM pins: 0 assertion failures, 0 model errors, 15946 commands |
+| Signoff criteria written down | **Yes (v1)** | `SIGNOFF.md`: acceptance, verdicts, targets, exclusions, waivers, formal bar, package |
 
 Verdict: the structure is industry-shaped and in places ahead of a typical
 student flow (spec-derived SVA, taxonomy-tagged findings, gate-graded models,
@@ -315,16 +571,15 @@ Exit criterion for each phase is stated so progress is measurable.
 ---
 
 ## 6. Gaps in validation, in one list
-1. False-positive rate unknown (no correct design seen) → UberDDR3.
-2. System-level detection rate unknown → seeded-fault suite.
-3. No formal → JasperGold on generated SVA.
+1. ~~False-positive rate unknown (no correct design seen) → UberDDR3.~~ Measured: 0 timing/protocol false positives after two generator fixes; 0 data-integrity mismatches; host↔pin addresses consistent 9216/9216.
+2. ~~System-level detection rate unknown → seeded-fault suite.~~ 23/23 killed on drop 5661e03, blame correct on all; every assertion and rule the ledger tracks has at least one fault that fires it except REF_001 (unreachable starvation) and TIMING_002/012.
+3. ~~No formal → JasperGold on generated SVA.~~ Command path (4 proven / 8 cex filed / 1 undetermined) and boot path (6/7 proven under a documented wait-counter cut, CAL_001/002 concretely); `run_formal.py --path <p> [--stopat sig]`.
 4. No gate-level → C7.
-5. Random stimulus is unconstrained and short → constrained-random v2.
-6. Coverage has no targets or exclusion policy → signoff document.
+5. ~~Random stimulus is unconstrained and short → constrained-random v2.~~ Done (`closure/random_v2.py`); scheduler/cmd_queue over 85 %.
+6. ~~Coverage has no targets or exclusion policy → signoff document.~~ `SIGNOFF.md` v1.
 7. No regression history → `compare_drops`, nightly vManager with trend.
 8. Findings are hand-assembled → feedback loop steps 1–3.
 9. ~~Integration map is hand-written → derive from `source`.~~ Done; 21 edges still carried as overrides until phase-1/2 manifests declare them.
-10. Don't-care fields (PRE address) counted as mismatches → declared masks +
-    intake rule.
+10. ~~Don't-care fields (PRE address) counted as mismatches → declared masks + intake rule.~~ Done: `interface_catalog.json` `dont_care`, applied by the scoreboard before alignment.
 11. Only one spec ever run → second preset spec.
 12. Waivers W-002/W-003 undecided → human decision.

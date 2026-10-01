@@ -19,10 +19,12 @@ module wb_monitor #(
 ) (
     input  logic clk,
     input  logic rst_n,
-    input  logic wb_ack_o,
     input  logic [28:0] wb_adr_i,
+    input  logic wb_cyc_i,
     input  logic [31:0] wb_dat_i,
     input  logic [3:0] wb_sel_i,
+    input  logic wb_stall_o,
+    input  logic wb_stb_i,
     input  logic wb_we_i
 );
 
@@ -33,10 +35,10 @@ module wb_monitor #(
     $display("TXN wb reset t=%0t", $time);
   end
 
-  // Transaction detected when: wb_ack_o
+  // Transaction detected when: wb_cyc_i && wb_stb_i && !wb_stall_o
   always @(posedge clk) begin
-    #SAMPLE_DELAY;                 // sample after non-blocking assignments commit
-    if (rst_n && (wb_ack_o)) begin
+    // sample: pre_nba -- what the DUT's flops saw at this edge (qualifier mixes a held input with combinational ready/stall)
+    if (rst_n && (wb_cyc_i && wb_stb_i && !wb_stall_o)) begin
         if ((wb_we_i) == 1)
           $display("TXN wb write t=%0t addr=%0h data=%0h sel=%0h", $time, wb_adr_i, wb_dat_i, wb_sel_i);
         else if ((wb_we_i) == 0)

@@ -35,6 +35,7 @@ Usage:
 """
 
 import argparse
+import re
 import json
 import math
 import os
@@ -73,12 +74,24 @@ def spec_value(spec, path):
     return cur
 
 
+# Which clock the assertions are sampled on. "controller": the command stream
+# is observed at the controller clock (this design's cmd_gen output).
+# "ddr": the stream is observed at the DRAM pins, one command per tCK (a PHY
+# that serialises several controller-cycle slots, or a known-good reference
+# design watched at its DDR3 pins).
+CLOCK_DOMAIN = "controller"
+MODULE_SUFFIX = ""
+CLOCK_KEY = {"controller": "controller_clock_period_ns", "ddr": "ddr_clock_period_ns"}
+
+
 def cycles_for(spec, param):
-    """Separation in controller cycles required by a spec timing value (ns)."""
+    """Separation in cycles of the selected clock required by a spec timing
+    value (ns)."""
     ns = spec_value(spec, param)
-    period = spec.get("clocking_model", {}).get("controller_clock_period_ns")
+    key = CLOCK_KEY[CLOCK_DOMAIN]
+    period = spec.get("clocking_model", {}).get(key)
     if not period:
-        raise SvaGenError("clocking_model.controller_clock_period_ns is required "
+        raise SvaGenError(f"clocking_model.{key} is required "
                           "to convert a timing parameter into cycles.")
     return math.ceil(float(ns) / float(period)), float(ns), float(period)
 
@@ -140,7 +153,7 @@ def gen_separation(rule, spec, enc, sig, bank):  # noqa: C901
 
     return f"""  // ---- {rid} -------------------------------------------------------
   // {rule['requirement']}
-  // Bound: {param} = {ns}ns; at a {period}ns controller clock that is
+  // Bound: {param} = {ns}ns; at a {period}ns {CLOCK_DOMAIN} clock that is
   // ceil({ns}/{period}) = {n} cycle(s) of separation, so {free} cycle(s)
   // between the two commands must be free of the second command {rel}.
   // Counted from the observed command stream — no DUT counter is consulted.
@@ -200,9 +213,12 @@ def gen_max_interval(rule, spec, enc, sig):
   // consecutive {cmd_name} commands may be at most {mult} x {n} = {bound}
   // cycles apart. Counted from the observed command stream; armed by the
   // first {cmd_name} seen after reset.
-  logic [31:0] {lo}_since;
-  logic        {lo}_armed;
-  always_ff @(posedge clk or negedge rst_n) begin
+  // Initialised at declaration as well as on reset: a testbench whose reset
+  // is X or still high for the first cycles must not see X here and fail
+  // (an X in the checked expression is a failure, not a don't-care).
+  logic [31:0] {lo}_since = '0;
+  logic        {lo}_armed = 1'b0;
+  always @(posedge clk or negedge rst_n) begin   // plain always: initialiser + always_ff would be two drivers
     if (!rst_n) begin
       {lo}_since <= '0;
       {lo}_armed <= 1'b0;
@@ -227,17 +243,104 @@ def gen_max_interval(rule, spec, enc, sig):
 """
 
 
+def gen_event(rule, spec, enc, sig):
+    """A level or pulse (not a command) that must not rise until a timing
+    parameter has elapsed after a command: init_done after ZQCL (tZQinit).
+    Command-to-command spacing cannot see this — the event is not on the
+    command pins — so without it a controller that declares initialisation
+    complete a few cycles after ZQCL passes every command rule."""
+    n, ns, period = cycles_for(spec, rule["param"])
+    rid, ev = rule["id"], rule["event"]
+    cmd = cmd_match(enc, [rule["after"]], sig)
+    return f"""  // ---- {rid} ({ev} after {rule['after']}) --------------------------------
+  // {rule['requirement']}
+  // Bound: {rule['param']} = {ns}ns = {n} cycle(s) at {period}ns: {ev} must
+  // not rise within that many cycles of the {rule['after']} that starts it.
+  property p_{rid}_{ev};
+    @(posedge clk) disable iff (!rst_n)
+    {cmd} |-> !{ev} ##1 (!{ev})[*{n - 1}];
+  endproperty
+  a_{rid}_{ev}: assert property (p_{rid}_{ev})
+    else $error("[{rid}] {rule['param']} violation: {ev} raised within {n} cycles of {rule['after']}");
+  c_{rid}_{ev}: cover property (@(posedge clk) disable iff (!rst_n) {cmd} ##[{n}:$] $rose({ev}));
+
+"""
+
+
+def gen_sequence(rule, spec, enc, sig, bank):
+    """An ordered sequence the spec states in prose (the init sequence:
+    MR2, MR3, MR1, MR0, then ZQCL, then the completion event). The order is
+    parsed from the spec's own sentence, so a spec with a different order
+    regenerates different assertions. Properties:
+      <id>        the k-th <ordered_command> carries the k-th value of
+                  <order_field>, and <then> is not issued before all of them
+      <event_id>  <event> does not rise before <then> was issued"""
+    text = spec_value(spec, rule["order_from_spec"])
+    order = [int(m) for m in re.findall(rule.get("token_regex", r"MR(\d)"), str(text))]
+    if not order:
+        raise SvaGenError(f"{rule['id']}: {rule['order_from_spec']} names no "
+                          f"{rule['ordered_command']} steps to order")
+    rid, ev, lo = rule["id"], rule.get("event"), rule["id"].lower()
+    ocmd = cmd_match(enc, [rule["ordered_command"]], sig)
+    then = cmd_match(enc, [rule["then"]], sig)
+    n = len(order)
+    table = ", ".join(str(b) for b in order)
+    body = f"""  // ---- {rid} ({rule['ordered_command']} order from {rule['order_from_spec']}) ----
+  // {rule['requirement']}
+  // Parsed order of {rule['order_field']} values: {table}; then {rule['then']}.
+  logic [7:0] {lo}_step;
+  logic       {lo}_then_seen;
+  localparam logic [BANK_W-1:0] {lo}_order [{n}] = '{{{table}}};
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+      {lo}_step <= '0;
+      {lo}_then_seen <= 1'b0;
+    end else begin
+      if ({ocmd}) {lo}_step <= {lo}_step + 1;
+      if ({then}) {lo}_then_seen <= 1'b1;
+    end
+  end
+  property p_{rid};
+    @(posedge clk) disable iff (!rst_n)
+    {ocmd} |-> ({lo}_step < {n}) && ({bank} == {lo}_order[{lo}_step]);
+  endproperty
+  a_{rid}: assert property (p_{rid})
+    else $error("[{rid}] {rule['ordered_command']} out of the spec's order");
+  property p_{rid}_then;
+    @(posedge clk) disable iff (!rst_n)
+    {then} |-> ({lo}_step == {n});
+  endproperty
+  a_{rid}_then: assert property (p_{rid}_then)
+    else $error("[{rid}] {rule['then']} issued before every {rule['ordered_command']} step");
+  c_{rid}: cover property (@(posedge clk) disable iff (!rst_n) {then} && {lo}_step == {n});
+
+"""
+    if ev:
+        did = rule.get("event_id", rid)
+        body += f"""  // ---- {did} ({ev} before the sequence finished) --------------------------
+  property p_{did}_{ev};
+    @(posedge clk) disable iff (!rst_n)
+    $rose({ev}) |-> {lo}_then_seen;
+  endproperty
+  a_{did}_{ev}: assert property (p_{did}_{ev})
+    else $error("[{did}] {ev} raised before {rule['then']} was issued");
+
+"""
+    return body
+
+
 def gen_state(rule, spec, enc, sig, bank, nbanks):
     rid = rule["id"]
     act = cmd_match(enc, ["ACT"], sig)
     cas = cmd_match(enc, ["RD", "WR"], sig)
 
     if rule["kind"] == "cas_requires_open_row":
+        rd = cmd_match(enc, ["RD"], sig)
         body = f"""  property p_{rid};
     @(posedge clk) disable iff (!rst_n)
-    {cas} |-> row_open[{bank}];
+    {cas} |-> (row_open[{bank}] || (mpr_en && {rd}));
   endproperty"""
-        msg = "READ/WRITE to a bank with no active row"
+        msg = "READ/WRITE to a bank with no active row (and not an MPR read)"
     elif rule["kind"] == "no_double_activate":
         body = f"""  property p_{rid};
     @(posedge clk) disable iff (!rst_n)
@@ -261,7 +364,7 @@ def gen_state(rule, spec, enc, sig, bank, nbanks):
 
 
 GROUP_KEYS = ("min_separation_rules", "window_rules", "state_rules",
-              "max_interval_rules")
+              "max_interval_rules", "event_rules", "sequence_rules")
 
 
 def command_groups(rules):
@@ -302,8 +405,13 @@ def generate(spec, rules, catalog, schemas):
 
     act = cmd_match(enc, ["ACT"], sig)
     pre = cmd_match(enc, ["PRE"], sig)
+    mrs = cmd_match(enc, ["MRS"], sig)
     addr_f = rules["command_signals"].get("addr_field")
     pa_bit = rules["command_signals"].get("precharge_all_bit")
+    # JESD79-3: MRS selects the mode register with the bank address pins;
+    # MR3 is BA=3 and its A2 enables Multi-Purpose Register reads.
+    mr3_sel = rules["command_signals"].get("mr3_bank_select", 3)
+    mpr_bit = rules["command_signals"].get("mpr_enable_bit", 2)
     if rules["state_rules"] and (addr_f is None or pa_bit is None):
         raise SvaGenError(
             "state rules need command_signals.addr_field and "
@@ -318,6 +426,10 @@ def generate(spec, rules, catalog, schemas):
         body += gen_window(r, spec, enc, sig)
     for r in rules["max_interval_rules"]:
         body += gen_max_interval(r, spec, enc, sig)
+    for r in rules["event_rules"]:
+        body += gen_event(r, spec, enc, sig)
+    for r in rules["sequence_rules"]:
+        body += gen_sequence(r, spec, enc, sig, bank)
     if rules["state_rules"]:
         body += f"""  // ---- observed bank state, for the protocol rules below ----------
   // Reconstructed from the command stream. The design's own bank_open_row is
@@ -327,13 +439,24 @@ def generate(spec, rules, catalog, schemas):
   // addressed one. Tracking only the addressed bank would leave banks marked
   // open after they were closed, and the protocol assertions below would then
   // fire on correct behaviour.
-  logic [{nbanks - 1}:0] row_open;
+  logic [{nbanks - 1}:0] row_open = '0;
   wire pre_all = {pre} && {addr}[{pa_bit}];
-  always_ff @(posedge clk or negedge rst_n) begin
+  always @(posedge clk or negedge rst_n) begin   // plain always: initialiser + always_ff would be two drivers
     if (!rst_n)        row_open <= '0;
     else if (pre_all)  row_open <= '0;
     else if ({act})    row_open[{bank}] <= 1'b1;
     else if ({pre})    row_open[{bank}] <= 1'b0;
+  end
+  // Multi-Purpose Register mode (JESD79-3 MR3 A2): while enabled, READs return
+  // the MPR pattern and need no open row — this is how a controller calibrates
+  // its read path during initialisation. Tracked from the observed MRS stream
+  // (MRS to MR3 = bank address 3), so a design that forgets to leave MPR mode
+  // is still caught by the data path, and one that reads a closed bank outside
+  // MPR mode is still caught here.
+  logic mpr_en = 1'b0;
+  always @(posedge clk or negedge rst_n) begin   // plain always: initialiser + always_ff would be two drivers
+    if (!rst_n)                                  mpr_en <= 1'b0;
+    else if ({mrs} && {bank} == {mr3_sel})   mpr_en <= {addr}[{mpr_bit}];
   end
 
 """
@@ -343,9 +466,18 @@ def generate(spec, rules, catalog, schemas):
     ids = ([r["id"] for r in rules["min_separation_rules"]]
            + [r["id"] for r in rules["window_rules"]]
            + [r["id"] for r in rules["max_interval_rules"]]
+           + [r["id"] for r in rules["event_rules"]]
+           + [x for r in rules["sequence_rules"]
+              for x in ([r["id"]] + ([r["event_id"]] if r.get("event_id") else []))]
            + [r["id"] for r in rules["state_rules"]])
-    addr_port = (f",\n    input logic [{fields[addr_f]['width'] - 1}:0] {addr}"
-                 if addr_f else "")
+    addr_port = (f",\n    input logic [ADDR_W-1:0] {addr}" if addr_f else "")
+    for ev in sorted({r["event"] for r in rules["event_rules"]}
+                     | {r["event"] for r in rules["sequence_rules"] if r.get("event")}):
+        addr_port += f",\n    input logic {ev}"
+    addr_param = (f",\n    parameter int ADDR_W = {fields[addr_f]['width']}"
+                  if addr_f else "")
+    clock_note = ("the controller clock period" if CLOCK_DOMAIN == "controller"
+                  else "the DDR clock period (tCK): one command per tCK at the pins")
 
     header = f"""`timescale 1ns/1ps
 // GENERATED by Validation/sva/sva_gen.py — DO NOT EDIT BY HAND.
@@ -356,11 +488,11 @@ def generate(spec, rules, catalog, schemas):
 // Covers        : {', '.join(ids)}
 //
 // Every bound below is recomputed from the spec's nanosecond timing values
-// and the controller clock period, not copied from a table. These assertions
+// and {clock_note}, not copied from a table. These assertions
 // consult NO signal of the design except the command stream itself.
 
-module {block}_sva #(
-    parameter int BANK_W = {bank_w}
+module {block}_sva{MODULE_SUFFIX} #(
+    parameter int BANK_W = {bank_w}{addr_param}
 ) (
     input logic clk,
     input logic rst_n,
@@ -369,25 +501,81 @@ module {block}_sva #(
 );
 
 """
-    return f"{block}_sva", header + body + "endmodule\n", block, ids
+    return f"{block}_sva{MODULE_SUFFIX}", header + body + "endmodule\n", block, ids
+
+
+def generate_signal_group(spec, grp):
+    """Assertions for a block that has no command stream: ordering between
+    its own signals (calibration: cal_done needs init_done first; a ZQCS
+    request needs cal_done first). Ports are the signals named."""
+    block = grp["block"]
+    body, ids, sigs = "", [], set()
+    for r in grp.get("event_order_rules", []):
+        ev, req = r["event"], r["requires"]
+        sigs |= {ev, req}
+        ids.append(r["id"])
+        body += f"""  // ---- {r['id']} -------------------------------------------------------
+  // {r['requirement']}
+  property p_{r['id']};
+    @(posedge clk) disable iff (!rst_n)
+    $rose({ev}) |-> {req};
+  endproperty
+  a_{r['id']}: assert property (p_{r['id']})
+    else $error("[{r['id']}] {ev} raised while {req} is low");
+  c_{r['id']}: cover property (@(posedge clk) disable iff (!rst_n) $rose({ev}) && {req});
+
+"""
+    ports = "".join(f",\n    input logic {x}" for x in sorted(sigs))
+    mod = f"{block}_order_sva{MODULE_SUFFIX}"
+    src = f"""`timescale 1ns/1ps
+// GENERATED by Validation/sva/sva_gen.py — DO NOT EDIT BY HAND.
+// Ordering assertions for {block}, from Validation/sva/sva_rules.json
+// signal_groups. Spec revision: {spec.get('revision')}. Covers: {', '.join(ids)}.
+
+module {mod} (
+    input logic clk,
+    input logic rst_n{ports}
+);
+
+{body}endmodule
+"""
+    return mod, src, block, ids
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--outdir", default=DEFAULT_OUT)
+    ap.add_argument("--spec", default=SPEC_PATH,
+                    help="spec to derive bounds from (default: the declared spec)")
+    ap.add_argument("--clock", choices=sorted(CLOCK_KEY), default="controller",
+                    help="clock the command stream is sampled on: controller "
+                         "(cmd_gen output, default) or ddr (DRAM pins, one command per tCK)")
+    ap.add_argument("--suffix", default="",
+                    help="module-name suffix, so a second variant (e.g. _pins) "
+                         "can coexist with the default modules")
     args = ap.parse_args()
+    global CLOCK_DOMAIN, MODULE_SUFFIX
+    CLOCK_DOMAIN, MODULE_SUFFIX = args.clock, args.suffix
 
-    with open(SPEC_PATH) as f:
+    with open(args.spec) as f:
         spec = json.load(f)
     with open(RULES_PATH) as f:
         rules = json.load(f)
     with open(CATALOG_PATH) as f:
         catalog = json.load(f)["interfaces"]
     with open(SCHEMA_PATH) as f:
-        schemas = json.load(f)["interfaces"]
+        sdoc = json.load(f)
+    schemas = sdoc["interfaces"]
+    # streams schema_gen left out because their block is absent from a
+    # phase-partial drop: their assertion group waits for that block
+    absent_streams = {x.split(" ")[0] for x in sdoc.get("streams_without_block", [])}
 
     os.makedirs(args.outdir, exist_ok=True)
     for grp in command_groups(rules):
+        iface = grp["command_signals"]["interface"]
+        if iface not in schemas and iface in absent_streams:
+            print(f"  deferred: {grp['name']} group on {iface} (its block is not in the drop)")
+            continue
         try:
             mod, src, block, ids = generate(spec, grp, catalog, schemas)
         except SvaGenError as e:
@@ -417,6 +605,17 @@ bind {block} {mod} u_{block}_sva (.*);
         if skipped:
             print(f"    not generated (no separation required at this clock): "
                   f"{', '.join(skipped)}")
+    for grp in rules.get("signal_groups", []):
+        mod, src, block, ids = generate_signal_group(spec, grp)
+        path = os.path.join(args.outdir, f"{mod}.sv")
+        with open(path, "w") as f:
+            f.write(src)
+        with open(os.path.join(args.outdir, f"{block}_order_sva_bind.sv"), "w") as f:
+            f.write(f"""// GENERATED by Validation/sva/sva_gen.py — DO NOT EDIT BY HAND.
+bind {block} {mod} u_{block}_order_sva (.*);
+""")
+        print(f"  wrote {os.path.relpath(path, ROOT)}  [signal group {grp['name']}]")
+        print(f"    {src.count('assert property')} assertion(s); taxonomy IDs: {', '.join(ids)}")
     return 0
 
 

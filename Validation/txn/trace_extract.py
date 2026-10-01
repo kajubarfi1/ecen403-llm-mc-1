@@ -44,7 +44,11 @@ from txn_contract import Txn, save_trace, RESET_KIND
 DEFAULT_SCHEMAS = os.path.join(HERE, "generated", "schemas.json")
 
 # TXN <iface> <kind> t=<time> [<field>=<hex> ...]
-TXN_RE = re.compile(r"^\s*TXN\s+(\w+)\s+(\w+)\s+t=(\d+)\s*(.*)$")
+# Not anchored to line start: a DUT or vendor model that prints without a
+# trailing newline (the Micron DDR3 model echoes "[ 6000 ps] MRS -> ")
+# leaves our TXN line appended to its text, and an anchored match would
+# silently drop a quarter of the trace.
+TXN_RE = re.compile(r"TXN\s+(\w+)\s+(\w+)\s+t=(\d+)\s*(.*)$")
 FIELD_RE = re.compile(r"(\w+)=([0-9a-fA-FxXzZ]+)")
 
 
@@ -54,7 +58,7 @@ class TraceError(Exception):
 
 def parse_line(line, lineno):
     """Parse one TXN line. Returns (iface, kind, time_ns, fields)."""
-    m = TXN_RE.match(line)
+    m = TXN_RE.search(line)
     if not m:
         raise TraceError(f"line {lineno}: looks like a TXN line but does not "
                          f"match the monitor format: {line.strip()!r}")

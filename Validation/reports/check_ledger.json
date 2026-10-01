@@ -1,0 +1,941 @@
+{
+  "$schema": "validation-check-ledger/1",
+  "generated_utc": "2026-10-01T16:22:57.213859Z",
+  "repair_stack": [
+    "R01_scheduler_feedback_hold",
+    "R02_scheduler_refresh_trfc_gate",
+    "R03_bank_tracker_twtr_on_read"
+  ],
+  "tally": {
+    "fires only": 1,
+    "silent only": 6,
+    "closed": 50
+  },
+  "rows": [
+    {
+      "kind": "assertion",
+      "model": "init_fsm_sva",
+      "check": "a_INIT_002_init_done",
+      "fired": [
+        "seeded: M19_init_fsm_tzqinit_short"
+      ],
+      "silent": [],
+      "false_positive": null,
+      "status": "fires only",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
+      "check": "a_TIMING_002",
+      "fired": [],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands",
+        "proven"
+      ],
+      "false_positive": null,
+      "status": "silent only",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
+      "check": "a_TIMING_012",
+      "fired": [],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands"
+      ],
+      "false_positive": null,
+      "status": "silent only",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "cmd_queue_scheduler_checker",
+      "check": "SCHED_002",
+      "fired": [
+        "gate"
+      ],
+      "silent": [
+        "gate",
+        "repaired: 5 path(s)",
+        "passing: 5 path(s)"
+      ],
+      "false_positive": null,
+      "status": "silent only",
+      "note": "second model DISAGREES on 15/53 traces"
+    },
+    {
+      "kind": "rule",
+      "model": "path_05_scheduler_refresh_loop_checker",
+      "check": "REF_001",
+      "fired": [
+        "gate"
+      ],
+      "silent": [
+        "gate",
+        "agreement: second model, 53/53 traces",
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "silent only",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "path_19_row_conflict_checker",
+      "check": "SCHED_002",
+      "fired": [
+        "gate"
+      ],
+      "silent": [
+        "gate",
+        "known-good: UberDDR3, 9216 requests",
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "silent only",
+      "note": "second model DISAGREES on 4/41 traces"
+    },
+    {
+      "kind": "rule",
+      "model": "scheduler_checker",
+      "check": "REF_001",
+      "fired": [
+        "gate"
+      ],
+      "silent": [
+        "gate",
+        "repaired: 2 path(s)",
+        "passing: 2 path(s)"
+      ],
+      "false_positive": null,
+      "status": "silent only",
+      "note": "second model DISAGREES on 6/53 traces"
+    },
+    {
+      "kind": "assertion",
+      "model": "calibration_order_sva",
+      "check": "a_CAL_001",
+      "fired": [
+        "seeded: M15_calibration_early_done, M22_init_fsm_done_before_zqcl"
+      ],
+      "silent": [
+        "proven"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "calibration_order_sva",
+      "check": "a_CAL_002",
+      "fired": [
+        "seeded: M21_calibration_zqcs_ungated"
+      ],
+      "silent": [
+        "proven"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
+      "check": "a_PROTO_001",
+      "fired": [
+        "seeded: M01_cmd_gen_bank_stuck, M02_cmd_gen_act_encoded_as_pre",
+        "formal-cex"
+      ],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
+      "check": "a_PROTO_002",
+      "fired": [
+        "seeded: M01_cmd_gen_bank_stuck, M03_bank_tracker_tras_short",
+        "repaired: R01_scheduler_feedback_hold",
+        "formal-cex"
+      ],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
+      "check": "a_TIMING_001",
+      "fired": [
+        "seeded: UberDDR3 spec mutation"
+      ],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands",
+        "proven"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
+      "check": "a_TIMING_003",
+      "fired": [
+        "seeded: M01_cmd_gen_bank_stuck, M03_bank_tracker_tras_short"
+      ],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands",
+        "proven"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
+      "check": "a_TIMING_004",
+      "fired": [
+        "seeded: M03_bank_tracker_tras_short, M04_bank_tracker_trrd_zero",
+        "repaired: R01_scheduler_feedback_hold",
+        "formal-cex"
+      ],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
+      "check": "a_TIMING_005",
+      "fired": [
+        "repaired: R01_scheduler_feedback_hold",
+        "formal-cex"
+      ],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
+      "check": "a_TIMING_006",
+      "fired": [
+        "seeded: M04_bank_tracker_trrd_zero"
+      ],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands",
+        "proven"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
+      "check": "a_TIMING_007",
+      "fired": [
+        "formal-cex"
+      ],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
+      "check": "a_TIMING_008",
+      "fired": [
+        "formal-cex"
+      ],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
+      "check": "a_TIMING_009",
+      "fired": [
+        "formal-cex"
+      ],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
+      "check": "a_TIMING_011",
+      "fired": [
+        "seeded: M06_refresh_pending_runaway",
+        "repaired: R01_scheduler_feedback_hold, R02_scheduler_refresh_trfc_gate",
+        "formal-cex"
+      ],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "init_fsm_sva",
+      "check": "a_INIT_001",
+      "fired": [
+        "seeded: M14_init_fsm_skip_mr2"
+      ],
+      "silent": [
+        "proven (u_init_fsm.wait_cnt cut)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "init_fsm_sva",
+      "check": "a_INIT_001_then",
+      "fired": [
+        "seeded: M14_init_fsm_skip_mr2, M23_init_fsm_mrs_after_zqcl"
+      ],
+      "silent": [
+        "proven (u_init_fsm.wait_cnt cut)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "init_fsm_sva",
+      "check": "a_INIT_002",
+      "fired": [
+        "seeded: M23_init_fsm_mrs_after_zqcl"
+      ],
+      "silent": [
+        "proven (u_init_fsm.wait_cnt cut)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "init_fsm_sva",
+      "check": "a_INIT_003_init_done",
+      "fired": [
+        "seeded: M22_init_fsm_done_before_zqcl"
+      ],
+      "silent": [
+        "proven (u_init_fsm.wait_cnt cut)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "predictor",
+      "model": "addr_decoder_predictor",
+      "check": "exact prediction",
+      "fired": [
+        "gate",
+        "seeded: M09_addr_decoder_bank_slice"
+      ],
+      "silent": [
+        "gate",
+        "agreement: second model, 42/42 traces",
+        "repaired: 5 path(s), e.g. matched=19/19",
+        "passing: 5 path(s), e.g. matched=19/19"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "predictor",
+      "model": "cmd_gen_predictor",
+      "check": "exact prediction",
+      "fired": [
+        "gate",
+        "seeded: M01_cmd_gen_bank_stuck, M02_cmd_gen_act_encoded_as_pre"
+      ],
+      "silent": [
+        "gate",
+        "passing: 4 path(s), e.g. matched=98/98"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "predictor",
+      "model": "config_regs_predictor",
+      "check": "exact prediction",
+      "fired": [
+        "gate",
+        "seeded: M07_config_regs_reset_value, M08_config_regs_rw1c_settable"
+      ],
+      "silent": [
+        "gate",
+        "passing: 7 path(s), e.g. matched=103/103"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": "second model DISAGREES on 21/57 traces"
+    },
+    {
+      "kind": "predictor",
+      "model": "data_path_predictor",
+      "check": "exact prediction",
+      "fired": [
+        "gate",
+        "seeded: M13_data_path_dm_polarity"
+      ],
+      "silent": [
+        "gate",
+        "passing: 1 path(s), e.g. matched=19/19"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": "second model DISAGREES on 35/41 traces"
+    },
+    {
+      "kind": "predictor",
+      "model": "wb_port_predictor",
+      "check": "exact prediction",
+      "fired": [
+        "gate",
+        "seeded: M10_wb_port_we_inverted, M13_data_path_dm_polarity"
+      ],
+      "silent": [
+        "gate",
+        "agreement: second model, 42/42 traces",
+        "repaired: 3 path(s), e.g. matched=19/19",
+        "passing: 7 path(s), e.g. matched=19/19"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "bank_tracker_scheduler_checker",
+      "check": "PROTO_001",
+      "fired": [
+        "gate",
+        "seeded: M20_cas_without_activate"
+      ],
+      "silent": [
+        "gate",
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": "second model DISAGREES on 4/57 traces"
+    },
+    {
+      "kind": "rule",
+      "model": "bank_tracker_scheduler_checker",
+      "check": "PROTO_002",
+      "fired": [
+        "gate",
+        "repaired: R01_scheduler_feedback_hold"
+      ],
+      "silent": [
+        "gate",
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": "second model DISAGREES on 4/57 traces"
+    },
+    {
+      "kind": "rule",
+      "model": "bank_tracker_scheduler_checker",
+      "check": "REF_002",
+      "fired": [
+        "gate",
+        "seeded: M06_refresh_pending_runaway",
+        "repaired: R01_scheduler_feedback_hold"
+      ],
+      "silent": [
+        "gate",
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": "second model DISAGREES on 4/57 traces"
+    },
+    {
+      "kind": "rule",
+      "model": "cmd_queue_scheduler_checker",
+      "check": "PROTO_001",
+      "fired": [
+        "gate",
+        "seeded: M20_cas_without_activate"
+      ],
+      "silent": [
+        "gate",
+        "repaired: 5 path(s)",
+        "passing: 5 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": "second model DISAGREES on 15/53 traces"
+    },
+    {
+      "kind": "rule",
+      "model": "cmd_queue_scheduler_checker",
+      "check": "PROTO_002",
+      "fired": [
+        "gate",
+        "repaired: R01_scheduler_feedback_hold"
+      ],
+      "silent": [
+        "gate",
+        "repaired: 5 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": "second model DISAGREES on 15/53 traces"
+    },
+    {
+      "kind": "rule",
+      "model": "cmd_queue_scheduler_checker",
+      "check": "REF_002",
+      "fired": [
+        "gate",
+        "seeded: M06_refresh_pending_runaway",
+        "repaired: R01_scheduler_feedback_hold"
+      ],
+      "silent": [
+        "gate",
+        "repaired: 5 path(s)",
+        "passing: 5 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": "second model DISAGREES on 15/53 traces"
+    },
+    {
+      "kind": "rule",
+      "model": "cmd_queue_scheduler_checker",
+      "check": "SCHED_001",
+      "fired": [
+        "gate",
+        "seeded: M12_scheduler_no_precharge"
+      ],
+      "silent": [
+        "gate",
+        "repaired: 5 path(s)",
+        "passing: 5 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": "second model DISAGREES on 15/53 traces"
+    },
+    {
+      "kind": "rule",
+      "model": "cmd_queue_scheduler_checker",
+      "check": "SCHED_004",
+      "fired": [
+        "gate",
+        "seeded: M11_cmd_queue_row_corrupted, M20_cas_without_activate"
+      ],
+      "silent": [
+        "gate",
+        "repaired: 5 path(s)",
+        "passing: 3 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": "second model DISAGREES on 15/53 traces"
+    },
+    {
+      "kind": "rule",
+      "model": "path_04_scheduler_bank_loop_checker",
+      "check": "PROTO_001",
+      "fired": [
+        "gate",
+        "seeded: M20_cas_without_activate"
+      ],
+      "silent": [
+        "gate",
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "path_04_scheduler_bank_loop_checker",
+      "check": "PROTO_002",
+      "fired": [
+        "gate",
+        "repaired: R01_scheduler_feedback_hold"
+      ],
+      "silent": [
+        "gate",
+        "repaired: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "path_04_scheduler_bank_loop_checker",
+      "check": "REF_002",
+      "fired": [
+        "gate",
+        "seeded: M06_refresh_pending_runaway",
+        "repaired: R01_scheduler_feedback_hold"
+      ],
+      "silent": [
+        "gate",
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "path_05_scheduler_refresh_loop_checker",
+      "check": "REF_002",
+      "fired": [
+        "gate",
+        "seeded: M06_refresh_pending_runaway",
+        "repaired: R01_scheduler_feedback_hold"
+      ],
+      "silent": [
+        "gate",
+        "agreement: second model, 53/53 traces",
+        "repaired: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "path_05_scheduler_refresh_loop_checker",
+      "check": "SCHED_003",
+      "fired": [
+        "gate",
+        "seeded: M17_scheduler_ignores_refresh"
+      ],
+      "silent": [
+        "gate",
+        "agreement: second model, 53/53 traces",
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "path_08_init_to_cal_checker",
+      "check": "CAL_001",
+      "fired": [
+        "gate",
+        "seeded: M15_calibration_early_done"
+      ],
+      "silent": [
+        "gate",
+        "agreement: second model, 5/5 traces",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "path_08_init_to_cal_checker",
+      "check": "CAL_002",
+      "fired": [
+        "gate",
+        "seeded: M18_calibration_zqcs_before_done, M21_calibration_zqcs_ungated"
+      ],
+      "silent": [
+        "gate",
+        "agreement: second model, 5/5 traces",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "path_08_init_to_cal_checker",
+      "check": "INIT_001",
+      "fired": [
+        "gate",
+        "seeded: M14_init_fsm_skip_mr2, M22_init_fsm_done_before_zqcl"
+      ],
+      "silent": [
+        "gate",
+        "agreement: second model, 5/5 traces",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "path_08_init_to_cal_checker",
+      "check": "INIT_003",
+      "fired": [
+        "gate",
+        "seeded: M14_init_fsm_skip_mr2, M22_init_fsm_done_before_zqcl"
+      ],
+      "silent": [
+        "gate",
+        "agreement: second model, 5/5 traces",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "path_09_init_to_refresh_checker",
+      "check": "REF_003",
+      "fired": [
+        "gate",
+        "seeded: M16_refresh_ctrl_before_init"
+      ],
+      "silent": [
+        "gate",
+        "agreement: second model, 5/5 traces",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "path_09_init_to_refresh_checker",
+      "check": "REF_004",
+      "fired": [
+        "gate",
+        "seeded: M05_refresh_never_requested, M16_refresh_ctrl_before_init"
+      ],
+      "silent": [
+        "gate",
+        "agreement: second model, 5/5 traces",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "path_19_row_conflict_checker",
+      "check": "PROTO_001",
+      "fired": [
+        "gate",
+        "seeded: M20_cas_without_activate"
+      ],
+      "silent": [
+        "gate",
+        "known-good: UberDDR3, 9216 requests",
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": "second model DISAGREES on 4/41 traces"
+    },
+    {
+      "kind": "rule",
+      "model": "path_19_row_conflict_checker",
+      "check": "PROTO_002",
+      "fired": [
+        "gate",
+        "repaired: R01_scheduler_feedback_hold"
+      ],
+      "silent": [
+        "gate",
+        "known-good: UberDDR3, 9216 requests",
+        "repaired: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": "second model DISAGREES on 4/41 traces"
+    },
+    {
+      "kind": "rule",
+      "model": "path_19_row_conflict_checker",
+      "check": "SCHED_001",
+      "fired": [
+        "gate",
+        "seeded: M12_scheduler_no_precharge"
+      ],
+      "silent": [
+        "gate",
+        "known-good: UberDDR3, 9216 requests",
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": "second model DISAGREES on 4/41 traces"
+    },
+    {
+      "kind": "rule",
+      "model": "path_19_row_conflict_checker",
+      "check": "SCHED_004",
+      "fired": [
+        "gate",
+        "seeded: M11_cmd_queue_row_corrupted, M20_cas_without_activate"
+      ],
+      "silent": [
+        "gate",
+        "known-good: UberDDR3, 9216 requests",
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": "second model DISAGREES on 4/41 traces"
+    },
+    {
+      "kind": "rule",
+      "model": "path_20_refresh_preempt_checker",
+      "check": "REF_002",
+      "fired": [
+        "gate",
+        "seeded: M06_refresh_pending_runaway",
+        "repaired: R01_scheduler_feedback_hold"
+      ],
+      "silent": [
+        "gate",
+        "agreement: second model, 53/53 traces",
+        "known-good: UberDDR3, 9216 requests",
+        "repaired: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "path_20_refresh_preempt_checker",
+      "check": "SCHED_001",
+      "fired": [
+        "gate",
+        "seeded: M12_scheduler_no_precharge"
+      ],
+      "silent": [
+        "gate",
+        "agreement: second model, 53/53 traces",
+        "known-good: UberDDR3, 9216 requests",
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "path_20_refresh_preempt_checker",
+      "check": "SCHED_003",
+      "fired": [
+        "gate",
+        "seeded: M17_scheduler_ignores_refresh"
+      ],
+      "silent": [
+        "gate",
+        "agreement: second model, 53/53 traces",
+        "known-good: UberDDR3, 9216 requests",
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "scheduler_checker",
+      "check": "REF_002",
+      "fired": [
+        "gate",
+        "seeded: M06_refresh_pending_runaway",
+        "repaired: R01_scheduler_feedback_hold"
+      ],
+      "silent": [
+        "gate",
+        "repaired: 2 path(s)",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": "second model DISAGREES on 6/53 traces"
+    },
+    {
+      "kind": "rule",
+      "model": "scheduler_checker",
+      "check": "SCHED_003",
+      "fired": [
+        "gate",
+        "seeded: M17_scheduler_ignores_refresh"
+      ],
+      "silent": [
+        "gate",
+        "repaired: 2 path(s)",
+        "passing: 2 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": "second model DISAGREES on 6/53 traces"
+    }
+  ]
+}

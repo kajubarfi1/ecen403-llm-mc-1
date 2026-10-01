@@ -2,9 +2,9 @@
   "schema": "validation-findings/2",
   "drop": "1fea117",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "generated_utc": "2026-09-24T17:14:28.741518Z",
+  "generated_utc": "2026-09-24T18:24:03.937879Z",
   "reports": "Validation/reports/paths",
-  "finding_count": 22,
+  "finding_count": 24,
   "findings": [
     {
       "schema": "validation-findings/2",
@@ -226,6 +226,60 @@
     },
     {
       "schema": "validation-findings/2",
+      "id": "formal/scheduler/PROTO_001",
+      "kind": "rtl_defect",
+      "check_id": "PROTO_001",
+      "taxonomy_id": "PROTO_001",
+      "detectors": [
+        "formal:jaspergold"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "READ issued to a bank one cycle after that bank was PRECHARGEd (no ACTIVATE between)",
+      "requirement": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+      "spec_ref": null,
+      "expected": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+      "actual": "PRE b=1 at cycle 183, RD b=1 at cycle 184.",
+      "detector": "formal:jaspergold",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "cmd_valid/cmd_type/cmd_bank"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "signal": "bank_rd_allowed"
+        }
+      ],
+      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 183 PRE bank 1 (A10=0), cycle 184 RD bank 1 col 0. The generated PROTO_001 tracker (row-open state from the observed ACT/PRE stream) shows bank 1 closed when the READ is issued. Never observed in simulation (no path stimulus reaches this interleaving); the scheduler or its bank_tracker gating lets a CAS follow its own precharge. Likely the same root as the open scheduler re-grant defect (commands are also held for 2-3 consecutive cycles in the trace, i.e. re-issued).",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+      },
+      "drop": {
+        "git_head": "1fea117",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "1fea117",
+      "last_seen": "1fea117",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
       "id": "scheduler/PROTO_002",
       "kind": "rtl_defect",
       "check_id": "PROTO_002",
@@ -312,6 +366,7 @@
       "resolved_in": null,
       "status": "open",
       "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
       ]
     },
@@ -400,6 +455,7 @@
       "resolved_in": null,
       "status": "open",
       "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
       ]
     },
@@ -486,6 +542,7 @@
       "resolved_in": null,
       "status": "open",
       "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
       ]
     },
@@ -565,7 +622,62 @@
       "resolved_in": null,
       "status": "open",
       "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "formal/scheduler/TIMING_008",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_008",
+      "taxonomy_id": "TIMING_008",
+      "detectors": [
+        "formal:jaspergold"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "PRECHARGE issued one cycle after a WRITE to the same bank (tWR violated; write data lost)",
+      "requirement": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+      "spec_ref": null,
+      "expected": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+      "actual": "WR b=4 at cycle 173, PRE b=4 at cycle 174.",
+      "detector": "formal:jaspergold",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "signal": "bank_pre_allowed / ctr_wr"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "precharge decision"
+        }
+      ],
+      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 173 WR bank 4, cycle 174 PRE bank 4. tWR = 15 ns = 3 controller cycles, so 2 cycles must separate the last write beat from the precharge. Not observed in simulation. bank_tracker's write-recovery timer (cfg_tWR_nCK) does not gate bank_pre_allowed for the cycle after a write, or the scheduler ignores it on the row-conflict path.",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+      },
+      "drop": {
+        "git_head": "1fea117",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "1fea117",
+      "last_seen": "1fea117",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
       ]
     },
     {
@@ -646,6 +758,7 @@
       "resolved_in": null,
       "status": "open",
       "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
       ]
     },
@@ -739,6 +852,7 @@
       "resolved_in": null,
       "status": "open",
       "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
       ]
     },
@@ -1216,6 +1330,7 @@
       "resolved_in": null,
       "status": "open",
       "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
       ]
     },
@@ -1302,6 +1417,7 @@
       "resolved_in": null,
       "status": "open",
       "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
       ]
     },

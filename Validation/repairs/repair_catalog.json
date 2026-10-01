@@ -1,0 +1,144 @@
+{
+  "$schema": "validation-repair-catalog/1",
+  "$comment": "The seeded-fault suite in reverse. Each repair is the minimal fix for a defect validation has reported, applied to a Validation-owned COPY of the drop (never to Frontend2/). If the checks that were firing go silent on the repaired copy and nothing new fires, those checks were firing for the right reason; whatever still fires is either a different defect or a false positive and gets read at source. A repair is evidence about the CHECKS, not a patch for the Frontend: the Frontend fixes its generators from the findings. Edits are literal substitutions; `count` is how many times `from` must occur (default 1) and a mismatch is an error.",
+  "drop_root": "Frontend2/OutputFolders",
+  "repairs": [
+    {
+      "id": "R01_scheduler_feedback_hold",
+      "block": "scheduler",
+      "file": "PHASE3RTL/scheduler.sv",
+      "defect": "The scheduler selects from bank_tracker's permissions, but a command it issues only reaches bank_tracker three cycles later (scheduler output register -> cmd_gen register -> feedback). In that window the permissions are stale: the same bank is ACTIVATEd again (PROTO_002, tRC), another bank is ACTIVATEd inside tRRD, traffic resumes inside tRFC after a REFRESH, a bank is read right after it was precharged. The re-grant mask added in drop 5661e03 covers only the CAS dequeue.",
+      "fix": "Hold a bank for FB_LAG cycles after any command to it (all banks after REFRESH), and hold ACTIVATE globally for FB_LAG cycles after an ACTIVATE, so no selection is made on permissions that do not yet reflect the scheduler's own last commands.",
+      "expect_gone": [
+        "id:PROTO_002",
+        "id:double_activate",
+        "assert:a_PROTO_002",
+        "assert:a_TIMING_004",
+        "assert:a_TIMING_005",
+        "assert:a_TIMING_011",
+        "assert:a_TIMING_008",
+        "assert:a_PROTO_001",
+        "id:PROTO_001",
+        "id:REF_002"
+      ],
+      "paths": [
+        "path_01_write_cmd",
+        "path_02_read_cmd",
+        "path_04_scheduler_bank_loop",
+        "path_05_scheduler_refresh_loop",
+        "path_07_backpressure",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt"
+      ],
+      "edits": [
+        {
+          "from": "    wire all_banks_idle = ~(|bank_is_active);\n",
+          "to": "    // [validation repair R01] feedback-latency hold\n    localparam int FB_LAG = 4;\n    logic [FB_LAG-1:0]    bank_hold [NUM_BANKS];\n    logic [FB_LAG-1:0]    act_hold;\n    logic [FB_LAG-1:0]    wr_hold;\n    wire wr_busy = |wr_hold;\n    logic [NUM_BANKS-1:0] bank_busy;\n    always_comb for (int k = 0; k < NUM_BANKS; k++) bank_busy[k] = |bank_hold[k];\n    wire act_busy = |act_hold;\n    wire all_banks_idle = ~(|bank_is_active) && ~(|bank_busy);\n"
+        },
+        {
+          "from": "            is_cas_ready[i] = is_row_hit[i] && !recently_granted &&\n",
+          "to": "            is_cas_ready[i] = is_row_hit[i] && !recently_granted && !bank_busy[b] &&\n"
+        },
+        {
+          "from": "                               (q_we[i] ? bank_wr_allowed[b] : bank_rd_allowed[b]);",
+          "to": "                               (q_we[i] ? bank_wr_allowed[b] : (bank_rd_allowed[b] && !wr_busy));"
+        },
+        {
+          "from": "            is_act_needed[i] = q_valid[i] && (!bank_is_active[b] ||\n",
+          "to": "            is_act_needed[i] = q_valid[i] && !bank_busy[b] && (!bank_is_active[b] ||\n"
+        },
+        {
+          "from": "if (bank_is_active[b] && bank_pre_allowed[b] && !sel_valid) begin",
+          "count": 2,
+          "to": "if (bank_is_active[b] && bank_pre_allowed[b] && !bank_busy[b] && !sel_valid) begin"
+        },
+        {
+          "from": "end else if (!bank_is_active[b] && bank_act_allowed[b]) begin",
+          "to": "end else if (!bank_is_active[b] && bank_act_allowed[b] && !act_busy) begin"
+        },
+        {
+          "from": "            ref_ack   <= 1'b0;\n        end else begin\n            cmd_valid <= sel_valid;\n",
+          "to": "            ref_ack   <= 1'b0;\n            act_hold  <= '0;\n            wr_hold   <= '0;\n            for (int k = 0; k < NUM_BANKS; k++) bank_hold[k] <= '0;\n        end else begin\n            act_hold <= act_hold >> 1;\n            wr_hold  <= wr_hold >> 1;\n            for (int k = 0; k < NUM_BANKS; k++) bank_hold[k] <= bank_hold[k] >> 1;\n            if (sel_valid) begin\n                if (sel_is_ref) begin\n                    for (int k = 0; k < NUM_BANKS; k++) bank_hold[k] <= '1;\n                end else if (!sel_from_queue) begin\n                    bank_hold[sel_bank] <= '1;\n                end else begin\n                    bank_hold[q_bank[sel_idx]] <= '1;\n                    if (sel_type == CMD_ACT) act_hold <= '1;\n                    if (sel_type == CMD_WR)  wr_hold  <= '1;\n                end\n            end\n            cmd_valid <= sel_valid;\n"
+        }
+      ],
+      "confirmed_at_source": true,
+      "source_note": "scheduler.sv classifies from bank_is_active/bank_*_allowed, which bank_tracker updates from cmd_gen's registered feedback: a command issued at cycle N is reflected at N+3."
+    },
+    {
+      "id": "R02_scheduler_refresh_trfc_gate",
+      "block": "scheduler",
+      "file": "PHASE3RTL/scheduler.sv",
+      "base": [
+        "R01_scheduler_feedback_hold"
+      ],
+      "defect": "REFRESH is selected whenever every bank is idle; nothing checks that tRFC has elapsed since the previous REFRESH, so two REFRESH commands can be 24 cycles apart where the spec requires 32 (seen on the CSR paths, where no host traffic separates them).",
+      "fix": "Gate REFRESH on bank_tracker's ACTIVATE permission for every bank, which already includes the tRFC counter.",
+      "expect_gone": [
+        "assert:a_TIMING_011"
+      ],
+      "paths": [
+        "path_01_write_cmd",
+        "path_02_read_cmd",
+        "path_04_scheduler_bank_loop",
+        "path_05_scheduler_refresh_loop",
+        "path_07_backpressure",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt"
+      ],
+      "edits": [
+        {
+          "from": "if (all_banks_idle) begin",
+          "count": 2,
+          "to": "if (all_banks_idle && (&bank_act_allowed)) begin"
+        }
+      ],
+      "confirmed_at_source": true,
+      "source_note": "scheduler.sv: both REF selection branches test all_banks_idle only; no tRFC term, and bank_tracker exposes none for REF."
+    },
+    {
+      "id": "R03_bank_tracker_twtr_on_read",
+      "block": "bank_tracker",
+      "file": "PHASE2RTL/bank_tracker.sv",
+      "base": [
+        "R01_scheduler_feedback_hold",
+        "R02_scheduler_refresh_trfc_gate"
+      ],
+      "defect": "bank_tracker counts tWTR per bank and applies it to PRECHARGE; READ permission never consults it. tWTR is a device-wide WRITE-to-READ delay, so a READ to any bank can follow a WRITE too early.",
+      "fix": "READ is allowed only when no bank's tWTR counter is running.",
+      "expect_gone": [
+        "assert:a_TIMING_007"
+      ],
+      "paths": [
+        "path_01_write_cmd",
+        "path_02_read_cmd",
+        "path_04_scheduler_bank_loop",
+        "path_05_scheduler_refresh_loop",
+        "path_07_backpressure",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt"
+      ],
+      "edits": [
+        {
+          "from": "    always_comb begin\n        for (int b = 0; b < NUM_BANKS; b++) begin\n            bank_is_active[b]   = (bk_state[b] == BANK_ACTIVE);",
+          "to": "    // [validation repair R03] tWTR is device-wide\n    logic wtr_any;\n    always_comb begin\n        wtr_any = 1'b0;\n        for (int k = 0; k < NUM_BANKS; k++) wtr_any |= (ctr_wtr[k] != 0);\n    end\n    always_comb begin\n        for (int b = 0; b < NUM_BANKS; b++) begin\n            bank_is_active[b]   = (bk_state[b] == BANK_ACTIVE);"
+        },
+        {
+          "from": "                                && (ctr_rcd[b] == 0)\n                                && (ctr_ccd    == 0)\n                                && (ctr_rfc    == 0);\n            bank_wr_allowed[b]",
+          "to": "                                && (ctr_rcd[b] == 0)\n                                && (ctr_ccd    == 0)\n                                && !wtr_any\n                                && (ctr_rfc    == 0);\n            bank_wr_allowed[b]"
+        }
+      ],
+      "confirmed_at_source": true,
+      "source_note": "bank_tracker.sv permission block: ctr_wtr[b] appears in bank_pre_allowed only; bank_rd_allowed has ctr_rcd, ctr_ccd, ctr_rfc and no tWTR term."
+    }
+  ],
+  "$stacking": "`base` lists repairs applied first, in order: later defects are only visible once earlier ones are out of the way, so repairs are cumulative and each is scored against the stack beneath it."
+}

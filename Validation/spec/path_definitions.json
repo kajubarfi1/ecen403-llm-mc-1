@@ -625,7 +625,9 @@
       "check_strategy_reason": "feed-forward host->DDR; each block's output is the next block's input",
       "stimulus_kinds": [
         "write"
-      ]
+      ],
+      "settle_cycles": 400,
+      "$settle_note": "2026-09-24: 400 (was the 64-cycle default) so accepted requests and their read responses can drain before the trace ends. SCHED_001 counts outstanding requests as dropped and the data_path model reports undelivered responses as missing; both are only fair when the window exceeds the worst-case service time (measured on drop 5661e03: 7 phantom drops at 64 cycles, 0 at 400)."
     },
     {
       "id": "path_02_read_cmd",
@@ -674,7 +676,9 @@
       "check_strategy_reason": "feed-forward host->DDR command issue",
       "stimulus_kinds": [
         "read"
-      ]
+      ],
+      "settle_cycles": 400,
+      "$settle_note": "2026-09-24: 400 (was the 64-cycle default) so accepted requests and their read responses can drain before the trace ends. SCHED_001 counts outstanding requests as dropped and the data_path model reports undelivered responses as missing; both are only fair when the window exceeds the worst-case service time (measured on drop 5661e03: 7 phantom drops at 64 cycles, 0 at 400)."
     },
     {
       "id": "path_03_read_return",
@@ -708,7 +712,9 @@
       "check_strategy_reason": "feed-forward DDR->host return path",
       "stimulus_kinds": [
         "read"
-      ]
+      ],
+      "settle_cycles": 400,
+      "$settle_note": "2026-09-24: 400 (was the 64-cycle default) so accepted requests and their read responses can drain before the trace ends. SCHED_001 counts outstanding requests as dropped and the data_path model reports undelivered responses as missing; both are only fair when the window exceeds the worst-case service time (measured on drop 5661e03: 7 phantom drops at 64 cycles, 0 at 400)."
     },
     {
       "id": "path_04_scheduler_bank_loop",
@@ -733,7 +739,9 @@
       "check_strategy_reason": "feedback loop: no entry/exit to predict across; check bank-state consistency and command legality",
       "stimulus_kinds": [
         "write"
-      ]
+      ],
+      "settle_cycles": 400,
+      "$settle_note": "2026-09-24: 400 (was the 64-cycle default) so accepted requests and their read responses can drain before the trace ends. SCHED_001 counts outstanding requests as dropped and the data_path model reports undelivered responses as missing; both are only fair when the window exceeds the worst-case service time (measured on drop 5661e03: 7 phantom drops at 64 cycles, 0 at 400)."
     },
     {
       "id": "path_05_scheduler_refresh_loop",
@@ -975,7 +983,9 @@
       "check_strategy_reason": "config broadcast through bank_tracker into scheduler",
       "stimulus_kinds": [
         "write"
-      ]
+      ],
+      "settle_cycles": 400,
+      "$settle_note": "2026-09-24: 400 (was the 64-cycle default) so accepted requests and their read responses can drain before the trace ends. SCHED_001 counts outstanding requests as dropped and the data_path model reports undelivered responses as missing; both are only fair when the window exceeds the worst-case service time (measured on drop 5661e03: 7 phantom drops at 64 cycles, 0 at 400)."
     },
     {
       "id": "path_13_csr_refresh_to_scheduling",
@@ -999,7 +1009,9 @@
       "check_strategy_reason": "config broadcast through refresh_ctrl into scheduler",
       "stimulus_kinds": [
         "write"
-      ]
+      ],
+      "settle_cycles": 400,
+      "$settle_note": "2026-09-24: 400 (was the 64-cycle default) so accepted requests and their read responses can drain before the trace ends. SCHED_001 counts outstanding requests as dropped and the data_path model reports undelivered responses as missing; both are only fair when the window exceeds the worst-case service time (measured on drop 5661e03: 7 phantom drops at 64 cycles, 0 at 400)."
     },
     {
       "id": "path_14_status_init",
@@ -1153,7 +1165,9 @@
       "stimulus_kinds": [
         "write",
         "read"
-      ]
+      ],
+      "settle_cycles": 400,
+      "$settle_note": "2026-09-24: 400 (was the 64-cycle default) so accepted requests and their read responses can drain before the trace ends. SCHED_001 counts outstanding requests as dropped and the data_path model reports undelivered responses as missing; both are only fair when the window exceeds the worst-case service time (measured on drop 5661e03: 7 phantom drops at 64 cycles, 0 at 400)."
     },
     {
       "id": "path_19_row_conflict",
@@ -1188,7 +1202,9 @@
       "check_strategy_reason": "6 blocks, FR-FCFS: several command orderings are legal. Check row-hit priority, data integrity, timing via SVA",
       "stimulus_kinds": [
         "write"
-      ]
+      ],
+      "settle_cycles": 400,
+      "$settle_note": "2026-09-24: 400 (was the 64-cycle default) so accepted requests and their read responses can drain before the trace ends. SCHED_001 counts outstanding requests as dropped and the data_path model reports undelivered responses as missing; both are only fair when the window exceeds the worst-case service time (measured on drop 5661e03: 7 phantom drops at 64 cycles, 0 at 400)."
     },
     {
       "id": "path_20_refresh_preempt",
@@ -1227,6 +1243,60 @@
       "stimulus_generator": "refresh_stress",
       "settle_cycles": 6000,
       "stimulus_reason": "CSR programs a short tREFI and a small postpone budget, then sustained writes keep the scheduler busy so refresh is postponed to the urgent threshold — the REF_001 / TIMING_012 antecedents."
+    },
+    {
+      "id": "path_21_wb_port_standalone",
+      "name": "Wishbone Port (standalone)",
+      "category": "data_flow",
+      "blocks": [
+        "wb_port"
+      ],
+      "connections_used": [],
+      "rtl_files": [
+        "wb_port.sv"
+      ],
+      "standalone": true,
+      "entry_boundary": {
+        "type": "external",
+        "entity": "HOST",
+        "block": "wb_port",
+        "signals": [
+          "wb_cyc_i",
+          "wb_stb_i",
+          "wb_we_i",
+          "wb_adr_i",
+          "wb_dat_i",
+          "wb_sel_i"
+        ]
+      },
+      "check_strategy": "exact",
+      "check_strategy_reason": "Phase-1 block judged on its own: the wb_port predictor predicts the req stream (one request per accepted host access with its address/data/mask/we) and the write acks; the request sink is tied always-ready and no read data returns (standalone_ties), so reads are accepted and judged on the req stream but never complete -- the driver's bounded completion wait reports that as expected. Runs on every drop, so its evidence is comparable once Phase 3/4 arrive and path_02/03 judge the responses.",
+      "stimulus_kinds": [
+        "write",
+        "read"
+      ],
+      "settle_cycles": 64
+    },
+    {
+      "id": "path_22_csr_standalone",
+      "name": "CSR Register Walk (standalone)",
+      "category": "config",
+      "blocks": [
+        "config_regs"
+      ],
+      "connections_used": [],
+      "rtl_files": [
+        "config_regs.sv"
+      ],
+      "standalone": true,
+      "check_strategy": "exact",
+      "check_strategy_reason": "Phase-1 block judged on its own: register_walk writes and reads back every register in the spec's csr_register_map (RW, RO, W1C, reserved bits, reset values) and the config_regs predictor judges each read; every status input is tied to its reset value (standalone_ties), so CTRL_STATUS must read as such. Live status bits are judged by path_14/15/16 once their sources are in the drop.",
+      "stimulus_generator": "register_walk",
+      "stimulus_kinds": [
+        "write",
+        "read"
+      ],
+      "settle_cycles": 64
     }
   ],
   "validation_summary": {
@@ -1237,5 +1307,6 @@
   },
   "$comment_check_strategy": "check_strategy selects how a scope is verified: exact (one predictor, exact comparison), composed (chained predictors down a feed-forward path), invariant (legality rules — used where many orderings are legal, so prediction would fail against correct RTL), observe (autonomous DUT; monitors and SVA carry the check). Read as data by the orchestrator; never inferred from a scope name.",
   "$comment_stimulus": "stimulus_generator names the directed generator for the path (register_walk, status_poll, refresh_stress); absent means constrained-random on the entry stream (register_walk for a CSR entry at seed 1). window_cycles is the observation window for a path with no driver; settle_cycles the drain after the driver finishes.",
-  "$comment_judged_in": "judged_in: a single-hop path whose check is exactly one stage of a longer path's run. run_path.py writes a derived report for it whenever the host path is judged, so every path has a report and every downstream tool (compare_drops, the fault matrix, the cockpit) sees all of them as first-class."
+  "$comment_judged_in": "judged_in: a single-hop path whose check is exactly one stage of a longer path's run. run_path.py writes a derived report for it whenever the host path is judged, so every path has a report and every downstream tool (compare_drops, the fault matrix, the cockpit) sees all of them as first-class.",
+  "$comment_standalone": "standalone: the harness instantiates ONLY the listed blocks (no support closure); every edge that cuts must be in integration_overrides.json standalone_ties or generation refuses. These are the paths a phase-partial drop can run; they also run on complete drops."
 }

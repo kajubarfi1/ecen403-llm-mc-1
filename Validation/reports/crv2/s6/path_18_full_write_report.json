@@ -1,0 +1,168 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_18_full_write",
+  "strategy": "composed",
+  "verdict": "fail",
+  "timestamp": "2026-09-24T13:26:22.452925",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/runs/crv2_s6/path_18_full_write/path_18_full_write_seed6.json",
+  "stimulus_generator": "random_v2",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "a41c77b",
+    "roots": [
+      "Frontend2/OutputFolders"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/addr_decoder.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/addr_decoder_manifest.json"
+      },
+      "bank_tracker": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker_manifest.json"
+      },
+      "cmd_gen": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json"
+      },
+      "cmd_queue": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json"
+      },
+      "config_regs": {
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json"
+      },
+      "data_path": {
+        "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json"
+      },
+      "refresh_ctrl": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json"
+      },
+      "scheduler": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json"
+      },
+      "wb_port": {
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json"
+      }
+    }
+  },
+  "stages": [
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "fail",
+      "summary": "scope=wb_port  strategy=exact  status=fail  matched=560/1177  missing=135 unexpected=35 value=482",
+      "detail": [
+        "  req[10] unexpected: the design produced [req.request addr=0x1e1895f0 data=0xdf5ca32e mask=0x9 we=0x0] with nothing predicted",
+        "  req[11] unexpected: the design produced [req.request addr=0x1e1895f0 data=0xdf5ca32e mask=0x9 we=0x0] with nothing predicted",
+        "  req[12] unexpected: the design produced [req.request addr=0x1e1895f0 data=0xdf5ca32e mask=0x9 we=0x0] with nothing predicted",
+        "  req[13] unexpected: the design produced [req.request addr=0x1e1895f0 data=0xdf5ca32e mask=0x9 we=0x0] with nothing predicted",
+        "  req[14] unexpected: the design produced [req.request addr=0x1e1895f0 data=0xdf5ca32e mask=0x9 we=0x0] with nothing predicted",
+        "  req[15] unexpected: the design produced [req.request addr=0x1e1895f0 data=0xdf5ca32e mask=0x9 we=0x0] with nothing predicted",
+        "  req[16] unexpected: the design produced [req.request addr=0x1e189600 data=0xdf5ca32e mask=0x9 we=0x0] with nothing predicted",
+        "  req[17] unexpected: the design produced [req.request addr=0x1e189600 data=0xdf5ca32e mask=0x9 we=0x0] with nothing predicted",
+        "  req[7] value: predicted [req.request addr=0x172d7400 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x172d7400 data=0x4a8b0188 mask=0xa we=0x0]",
+        "  req[8] value: predicted [req.request addr=0x172d7400 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x172d7400 data=0x4a8b0188 mask=0xa we=0x0]",
+        "  req[9] value: predicted [req.request addr=0x1f262b10 data=0x0 mask=0xf we=0x0] but observed [req.request addr=0x1f262b10 data=0x4a8b0188 mask=0xa we=0x0]",
+        "  ... and 632 more"
+      ]
+    },
+    {
+      "stage": "addr_decoder",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
+      "scope": "addr_decoder",
+      "verdict": "pass",
+      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=587/587  (587 output transaction(s) matched)",
+      "detail": []
+    },
+    {
+      "stage": "cmd_queue+scheduler",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
+      "scope": "cmd_queue_scheduler",
+      "verdict": "fail",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=576",
+      "detail": [
+        "  SCHED_002 (cas_no_matching_request): WR to bank 6 row 23733 col 512 matches no enqueued request @ [sched_cmd.command aux=0x4 bank=0x6 col=0x200 row=0x5cb5 type=0x3 we=0x1]",
+        "  SCHED_002 (cas_no_matching_request): WR to bank 5 row 31896 col 400 matches no enqueued request @ [sched_cmd.command aux=0xa bank=0x5 col=0x190 row=0x7c98 type=0x3 we=0x1]",
+        "  SCHED_002 (cas_no_matching_request): RD to bank 5 row 31896 col 400 matches no enqueued request @ [sched_cmd.command aux=0xc bank=0x5 col=0x190 row=0x7c98 type=0x2 we=0x0]",
+        "  SCHED_002 (cas_no_matching_request): RD to bank 5 row 31896 col 392 matches no enqueued request @ [sched_cmd.command aux=0x8 bank=0x5 col=0x188 row=0x7c98 type=0x2 we=0x0]",
+        "  SCHED_002 (cas_no_matching_request): WR to bank 5 row 31896 col 408 matches no enqueued request @ [sched_cmd.command aux=0xe bank=0x5 col=0x198 row=0x7c98 type=0x3 we=0x1]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 0 which already has row 12369 active @ [sched_cmd.command aux=0x2 bank=0x0 col=0x158 row=0x3051 type=0x1 we=0x0]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 0 which already has row 12369 active @ [sched_cmd.command aux=0x2 bank=0x0 col=0x158 row=0x3051 type=0x1 we=0x0]",
+        "  SCHED_002 (cas_no_matching_request): RD to bank 2 row 30818 col 760 matches no enqueued request @ [sched_cmd.command aux=0xb bank=0x2 col=0x2f8 row=0x7862 type=0x2 we=0x0]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has row 12592 active @ [sched_cmd.command aux=0xe bank=0x4 col=0x398 row=0x3130 type=0x1 we=0x1]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has row 12592 active @ [sched_cmd.command aux=0xe bank=0x4 col=0x398 row=0x3130 type=0x1 we=0x1]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 7 which already has row 27639 active @ [sched_cmd.command aux=0x4 bank=0x7 col=0x220 row=0x6bf7 type=0x1 we=0x1]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 7 which already has row 27639 active @ [sched_cmd.command aux=0x5 bank=0x7 col=0x228 row=0x6bf7 type=0x1 we=0x1]"
+      ]
+    },
+    {
+      "stage": "cmd_gen",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
+      "scope": "cmd_gen",
+      "verdict": "fail",
+      "summary": "scope=cmd_gen  strategy=exact  status=fail  matched=1289/1629  value=340",
+      "detail": [
+        "  ddr_cmd[117] value: predicted [ddr_cmd.command addr=0x7cd7 bank=0x4 cmd=0x2] but observed [ddr_cmd.command addr=0x0 bank=0x4 cmd=0x2]",
+        "  ddr_cmd[118] value: predicted [ddr_cmd.command addr=0x7cd7 bank=0x4 cmd=0x2] but observed [ddr_cmd.command addr=0x0 bank=0x4 cmd=0x2]",
+        "  ddr_cmd[119] value: predicted [ddr_cmd.command addr=0x7cd7 bank=0x4 cmd=0x2] but observed [ddr_cmd.command addr=0x0 bank=0x4 cmd=0x2]",
+        "  ddr_cmd[135] value: predicted [ddr_cmd.command addr=0x7484 bank=0x4 cmd=0x2] but observed [ddr_cmd.command addr=0x0 bank=0x4 cmd=0x2]",
+        "  ddr_cmd[136] value: predicted [ddr_cmd.command addr=0x7484 bank=0x4 cmd=0x2] but observed [ddr_cmd.command addr=0x0 bank=0x4 cmd=0x2]",
+        "  ddr_cmd[137] value: predicted [ddr_cmd.command addr=0x7484 bank=0x4 cmd=0x2] but observed [ddr_cmd.command addr=0x0 bank=0x4 cmd=0x2]",
+        "  ddr_cmd[143] value: predicted [ddr_cmd.command addr=0x5933 bank=0x6 cmd=0x2] but observed [ddr_cmd.command addr=0x0 bank=0x6 cmd=0x2]",
+        "  ddr_cmd[155] value: predicted [ddr_cmd.command addr=0x3d73 bank=0x4 cmd=0x2] but observed [ddr_cmd.command addr=0x0 bank=0x4 cmd=0x2]",
+        "  ddr_cmd[156] value: predicted [ddr_cmd.command addr=0x3d73 bank=0x4 cmd=0x2] but observed [ddr_cmd.command addr=0x0 bank=0x4 cmd=0x2]",
+        "  ddr_cmd[157] value: predicted [ddr_cmd.command addr=0x3d73 bank=0x4 cmd=0x2] but observed [ddr_cmd.command addr=0x0 bank=0x4 cmd=0x2]",
+        "  ddr_cmd[161] value: predicted [ddr_cmd.command addr=0x2571 bank=0x6 cmd=0x2] but observed [ddr_cmd.command addr=0x0 bank=0x6 cmd=0x2]",
+        "  ... and 320 more"
+      ]
+    },
+    {
+      "stage": "data_path",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/data_path_predictor.py",
+      "scope": "data_path",
+      "verdict": "fail",
+      "summary": "scope=data_path  strategy=exact  status=fail  matched=144/743  missing=279 unexpected=340 value=320",
+      "detail": [
+        "  ddr_wr_beat[9] value: predicted [ddr_wr_beat.beat data=0x1e9d mask=0x3] but observed [ddr_wr_beat.beat data=0x1e9d19e7 mask=0x0]",
+        "  ddr_wr_beat[10] value: predicted [ddr_wr_beat.beat data=0xaa42 mask=0x3] but observed [ddr_wr_beat.beat data=0x7bd6aa42 mask=0x0]",
+        "  ddr_wr_beat[11] value: predicted [ddr_wr_beat.beat data=0x7bd6 mask=0x3] but observed [ddr_wr_beat.beat data=0x7bd6aa42 mask=0x0]",
+        "  ddr_wr_beat[12] value: predicted [ddr_wr_beat.beat data=0xc598 mask=0x3] but observed [ddr_wr_beat.beat data=0x9e5dc598 mask=0x0]",
+        "  ddr_wr_beat[13] value: predicted [ddr_wr_beat.beat data=0x9e5d mask=0x3] but observed [ddr_wr_beat.beat data=0x9e5dc598 mask=0x0]",
+        "  ddr_wr_beat[14] value: predicted [ddr_wr_beat.beat data=0x3b5c mask=0x3] but observed [ddr_wr_beat.beat data=0x7d1f3b5c mask=0x0]",
+        "  ddr_wr_beat[15] value: predicted [ddr_wr_beat.beat data=0x7d1f mask=0x3] but observed [ddr_wr_beat.beat data=0x7d1f3b5c mask=0x0]",
+        "  ddr_wr_beat[16] value: predicted [ddr_wr_beat.beat data=0x966f mask=0x3] but observed [ddr_wr_beat.beat data=0x2c10966f mask=0x0]",
+        "  ddr_wr_beat[17] value: predicted [ddr_wr_beat.beat data=0x2c10 mask=0x3] but observed [ddr_wr_beat.beat data=0x2c10966f mask=0x0]",
+        "  ddr_wr_beat[18] value: predicted [ddr_wr_beat.beat data=0x7601 mask=0x3] but observed [ddr_wr_beat.beat data=0xa8027601 mask=0x0]",
+        "  ddr_wr_beat[19] value: predicted [ddr_wr_beat.beat data=0xa802 mask=0x3] but observed [ddr_wr_beat.beat data=0xa8027601 mask=0x0]",
+        "  ... and 919 more"
+      ]
+    }
+  ],
+  "log": "Validation/reports/crv2/s6/path_18_full_write_sim.log",
+  "observed_trace": "Validation/reports/crv2/s6/path_18_full_write_observed.jsonl"
+}

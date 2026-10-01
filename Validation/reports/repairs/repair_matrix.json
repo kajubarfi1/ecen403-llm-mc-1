@@ -1,0 +1,766 @@
+{
+  "$schema": "validation-repair-matrix/1",
+  "generated_utc": "2026-09-29T23:28:57.369326Z",
+  "drop_root": "Frontend2/OutputFolders",
+  "rows": [
+    {
+      "repair": "R01_scheduler_feedback_hold",
+      "path": "path_01_write_cmd",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {
+        "id:PROTO_002": 12,
+        "assert:a_TIMING_011": 1,
+        "assert:a_TIMING_004": 23,
+        "assert:a_PROTO_002": 23,
+        "assert:a_TIMING_005": 5
+      },
+      "silenced_other": {
+        "stage:cmd_queue+scheduler": 1
+      },
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "stage:cmd_gen": [
+          1,
+          1
+        ],
+        "assert:p_sel_nonzero_write": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {
+        "matched:cmd_gen": [
+          83,
+          47
+        ]
+      }
+    },
+    {
+      "repair": "R01_scheduler_feedback_hold",
+      "path": "path_02_read_cmd",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {
+        "id:PROTO_002": 12,
+        "assert:a_TIMING_011": 1,
+        "assert:a_TIMING_004": 35,
+        "assert:a_PROTO_002": 35,
+        "assert:a_TIMING_005": 1
+      },
+      "silenced_other": {
+        "stage:cmd_queue+scheduler": 1
+      },
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "stage:wb_port": [
+          1,
+          1
+        ],
+        "stage:cmd_gen": [
+          1,
+          1
+        ],
+        "assert:p_stall_hold": [
+          18,
+          15
+        ],
+        "assert:p_tag": [
+          21,
+          23
+        ]
+      },
+      "matched_changed": {
+        "matched:wb_port": [
+          22,
+          35
+        ],
+        "matched:addr_decoder": [
+          37,
+          44
+        ],
+        "matched:cmd_gen": [
+          99,
+          67
+        ]
+      }
+    },
+    {
+      "repair": "R01_scheduler_feedback_hold",
+      "path": "path_04_scheduler_bank_loop",
+      "verdict": [
+        "fail",
+        "pass"
+      ],
+      "silenced_expected": {
+        "id:PROTO_002": 12,
+        "assert:a_TIMING_011": 1,
+        "assert:a_TIMING_004": 23,
+        "assert:a_PROTO_002": 23,
+        "assert:a_TIMING_005": 5
+      },
+      "silenced_other": {
+        "stage:(path-level)": 1
+      },
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "assert:p_sel_nonzero_write": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R01_scheduler_feedback_hold",
+      "path": "path_05_scheduler_refresh_loop",
+      "verdict": [
+        "fail",
+        "pass"
+      ],
+      "silenced_expected": {
+        "id:REF_002": 2,
+        "assert:a_TIMING_011": 13,
+        "assert:a_TIMING_004": 946,
+        "assert:a_PROTO_002": 947,
+        "assert:a_TIMING_005": 85
+      },
+      "silenced_other": {
+        "stage:scheduler": 1,
+        "stage:(path-level)": 1,
+        "assert:p_wr_no_overflow": 82
+      },
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {},
+      "matched_changed": {}
+    },
+    {
+      "repair": "R01_scheduler_feedback_hold",
+      "path": "path_07_backpressure",
+      "verdict": [
+        "fail",
+        "pass"
+      ],
+      "silenced_expected": {
+        "id:PROTO_002": 12,
+        "assert:a_TIMING_011": 1,
+        "assert:a_TIMING_004": 55,
+        "assert:a_PROTO_002": 55,
+        "assert:a_TIMING_005": 3
+      },
+      "silenced_other": {
+        "stage:cmd_queue+scheduler": 1,
+        "assert:p_wr_no_overflow": 1
+      },
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {},
+      "matched_changed": {}
+    },
+    {
+      "repair": "R01_scheduler_feedback_hold",
+      "path": "path_12_csr_timing_to_scheduling",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {
+        "assert:a_TIMING_011": [
+          4,
+          1
+        ]
+      },
+      "new": {},
+      "remaining": {
+        "stage:config_regs": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R01_scheduler_feedback_hold",
+      "path": "path_13_csr_refresh_to_scheduling",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {
+        "assert:a_TIMING_011": [
+          4,
+          1
+        ]
+      },
+      "new": {},
+      "remaining": {
+        "stage:config_regs": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R01_scheduler_feedback_hold",
+      "path": "path_18_full_write",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {
+        "id:PROTO_002": 12,
+        "assert:a_TIMING_011": 1,
+        "assert:a_TIMING_004": 37,
+        "assert:a_PROTO_002": 37
+      },
+      "silenced_other": {
+        "stage:cmd_queue+scheduler": 1
+      },
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "stage:wb_port": [
+          1,
+          1
+        ],
+        "stage:cmd_gen": [
+          1,
+          1
+        ],
+        "stage:data_path": [
+          1,
+          1
+        ],
+        "assert:p_stall_hold": [
+          8,
+          6
+        ],
+        "assert:p_tag": [
+          13,
+          19
+        ]
+      },
+      "matched_changed": {
+        "matched:wb_port": [
+          20,
+          22
+        ],
+        "matched:addr_decoder": [
+          36,
+          37
+        ],
+        "matched:cmd_gen": [
+          106,
+          66
+        ],
+        "matched:data_path": [
+          32,
+          44
+        ]
+      }
+    },
+    {
+      "repair": "R01_scheduler_feedback_hold",
+      "path": "path_19_row_conflict",
+      "verdict": [
+        "fail",
+        "pass"
+      ],
+      "silenced_expected": {
+        "id:PROTO_002": 12,
+        "assert:a_TIMING_011": 1,
+        "assert:a_TIMING_004": 23,
+        "assert:a_PROTO_002": 23,
+        "assert:a_TIMING_005": 5
+      },
+      "silenced_other": {
+        "stage:(path-level)": 1
+      },
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "assert:p_sel_nonzero_write": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R01_scheduler_feedback_hold",
+      "path": "path_20_refresh_preempt",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {
+        "id:PROTO_002": 12,
+        "id:REF_002": 1,
+        "assert:a_TIMING_011": 13,
+        "assert:a_TIMING_004": 946,
+        "assert:a_PROTO_002": 947,
+        "assert:a_TIMING_005": 85
+      },
+      "silenced_other": {
+        "stage:cmd_queue+scheduler": 1,
+        "stage:(path-level)": 1,
+        "assert:p_wr_no_overflow": 82
+      },
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "stage:cmd_gen": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {
+        "matched:cmd_gen": [
+          3028,
+          1496
+        ]
+      }
+    },
+    {
+      "repair": "R02_scheduler_refresh_trfc_gate",
+      "path": "path_01_write_cmd",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "stage:cmd_gen": [
+          1,
+          1
+        ],
+        "assert:p_sel_nonzero_write": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R02_scheduler_refresh_trfc_gate",
+      "path": "path_02_read_cmd",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "stage:wb_port": [
+          1,
+          1
+        ],
+        "stage:cmd_gen": [
+          1,
+          1
+        ],
+        "assert:p_stall_hold": [
+          15,
+          15
+        ],
+        "assert:p_tag": [
+          23,
+          23
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R02_scheduler_refresh_trfc_gate",
+      "path": "path_04_scheduler_bank_loop",
+      "verdict": [
+        "pass",
+        "pass"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "assert:p_sel_nonzero_write": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R02_scheduler_refresh_trfc_gate",
+      "path": "path_05_scheduler_refresh_loop",
+      "verdict": [
+        "pass",
+        "pass"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {},
+      "matched_changed": {}
+    },
+    {
+      "repair": "R02_scheduler_refresh_trfc_gate",
+      "path": "path_07_backpressure",
+      "verdict": [
+        "pass",
+        "pass"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {},
+      "matched_changed": {}
+    },
+    {
+      "repair": "R02_scheduler_refresh_trfc_gate",
+      "path": "path_12_csr_timing_to_scheduling",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {
+        "assert:a_TIMING_011": 1
+      },
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "stage:config_regs": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R02_scheduler_refresh_trfc_gate",
+      "path": "path_13_csr_refresh_to_scheduling",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {
+        "assert:a_TIMING_011": 1
+      },
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "stage:config_regs": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R02_scheduler_refresh_trfc_gate",
+      "path": "path_18_full_write",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "stage:wb_port": [
+          1,
+          1
+        ],
+        "stage:cmd_gen": [
+          1,
+          1
+        ],
+        "stage:data_path": [
+          1,
+          1
+        ],
+        "assert:p_stall_hold": [
+          6,
+          6
+        ],
+        "assert:p_tag": [
+          19,
+          19
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R02_scheduler_refresh_trfc_gate",
+      "path": "path_19_row_conflict",
+      "verdict": [
+        "pass",
+        "pass"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "assert:p_sel_nonzero_write": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R02_scheduler_refresh_trfc_gate",
+      "path": "path_20_refresh_preempt",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "stage:cmd_gen": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R03_bank_tracker_twtr_on_read",
+      "path": "path_01_write_cmd",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "stage:cmd_gen": [
+          1,
+          1
+        ],
+        "assert:p_sel_nonzero_write": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R03_bank_tracker_twtr_on_read",
+      "path": "path_02_read_cmd",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "stage:wb_port": [
+          1,
+          1
+        ],
+        "stage:cmd_gen": [
+          1,
+          1
+        ],
+        "assert:p_stall_hold": [
+          15,
+          15
+        ],
+        "assert:p_tag": [
+          23,
+          23
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R03_bank_tracker_twtr_on_read",
+      "path": "path_04_scheduler_bank_loop",
+      "verdict": [
+        "pass",
+        "pass"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "assert:p_sel_nonzero_write": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R03_bank_tracker_twtr_on_read",
+      "path": "path_05_scheduler_refresh_loop",
+      "verdict": [
+        "pass",
+        "pass"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {},
+      "matched_changed": {}
+    },
+    {
+      "repair": "R03_bank_tracker_twtr_on_read",
+      "path": "path_07_backpressure",
+      "verdict": [
+        "pass",
+        "pass"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {},
+      "matched_changed": {}
+    },
+    {
+      "repair": "R03_bank_tracker_twtr_on_read",
+      "path": "path_12_csr_timing_to_scheduling",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "stage:config_regs": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R03_bank_tracker_twtr_on_read",
+      "path": "path_13_csr_refresh_to_scheduling",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "stage:config_regs": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R03_bank_tracker_twtr_on_read",
+      "path": "path_18_full_write",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "stage:wb_port": [
+          1,
+          1
+        ],
+        "stage:cmd_gen": [
+          1,
+          1
+        ],
+        "stage:data_path": [
+          1,
+          1
+        ],
+        "assert:p_stall_hold": [
+          6,
+          5
+        ],
+        "assert:p_tag": [
+          19,
+          19
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R03_bank_tracker_twtr_on_read",
+      "path": "path_19_row_conflict",
+      "verdict": [
+        "pass",
+        "pass"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "assert:p_sel_nonzero_write": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {}
+    },
+    {
+      "repair": "R03_bank_tracker_twtr_on_read",
+      "path": "path_20_refresh_preempt",
+      "verdict": [
+        "fail",
+        "fail"
+      ],
+      "silenced_expected": {},
+      "silenced_other": {},
+      "expected_still_firing": {},
+      "new": {},
+      "remaining": {
+        "stage:cmd_gen": [
+          1,
+          1
+        ]
+      },
+      "matched_changed": {}
+    }
+  ]
+}

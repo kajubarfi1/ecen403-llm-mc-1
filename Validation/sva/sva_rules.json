@@ -212,7 +212,30 @@
       ],
       "window_rules": [],
       "state_rules": [],
-      "max_interval_rules": []
+      "max_interval_rules": [],
+      "event_rules": [
+        {
+          "id": "INIT_002",
+          "after": "ZQCL",
+          "event": "init_done",
+          "param": "initialization_sequence.tZQinit_ns",
+          "requirement": "init_done must not be asserted until tZQinit has elapsed after ZQCL (JESD79-3: ZQ calibration must complete before normal operation).",
+          "discovered_by": "seeded fault M19 (tZQinit shortened to 4 cycles) survived: command-to-command spacing never sees init_done"
+        }
+      ],
+      "sequence_rules": [
+        {
+          "id": "INIT_001",
+          "ordered_command": "MRS",
+          "order_field": "bank",
+          "order_from_spec": "initialization_sequence.$derived.init_sequence_order",
+          "token_regex": "MR(\\d)",
+          "then": "ZQCL",
+          "event": "init_done",
+          "event_id": "INIT_003",
+          "requirement": "Mode registers are programmed in the order the spec's initialization_sequence states (each MRS carries the register number on the bank pins), ZQCL follows the last of them, and init_done is not raised before ZQCL."
+        }
+      ]
     }
   ],
   "rule_owners": {
@@ -237,5 +260,25 @@
     "INIT_002": [
       "init_fsm"
     ]
-  }
+  },
+  "signal_groups": [
+    {
+      "name": "calibration",
+      "block": "calibration",
+      "event_order_rules": [
+        {
+          "id": "CAL_001",
+          "event": "cal_done",
+          "requires": "init_done",
+          "requirement": "Calibration must not report complete before initialisation completed."
+        },
+        {
+          "id": "CAL_002",
+          "event": "zqcs_req",
+          "requires": "cal_done",
+          "requirement": "A periodic ZQCS request must not be raised before calibration completed."
+        }
+      ]
+    }
+  ]
 }

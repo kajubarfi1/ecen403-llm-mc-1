@@ -1,0 +1,40 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_21_wb_port_standalone",
+  "strategy": "exact",
+  "verdict": "pass",
+  "timestamp": "2026-10-01T11:21:15.697959",
+  "blocks": [
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_21_wb_port_standalone_seed1.json",
+  "stimulus_generator": "random",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "5661e03",
+    "roots": [
+      "Frontend2/OutputFolders"
+    ],
+    "blocks": {
+      "wb_port": {
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json"
+      }
+    }
+  },
+  "stages": [
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "pass",
+      "summary": "scope=wb_port  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/paths/path_21_wb_port_standalone_sim.log",
+  "observed_trace": "Validation/reports/paths/path_21_wb_port_standalone_observed.jsonl"
+}

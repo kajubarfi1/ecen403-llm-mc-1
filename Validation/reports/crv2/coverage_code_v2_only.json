@@ -1,0 +1,100 @@
+{
+  "$schema": "validation-code-coverage/1",
+  "generated_utc": "2026-09-24T18:24:40.114679Z",
+  "runs": [
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/crv2_*/*/cov_work/scope/*"
+  ],
+  "run_globs": [
+    "/home/ugrads/j/jacobz/cadence_agent_work/runs/crv2_*/*/cov_work/scope/*"
+  ],
+  "since": null,
+  "merge": "imc merge -initial_model union_all",
+  "design_total": {
+    "covered": 3447,
+    "total": 5234,
+    "percent": 65.86
+  },
+  "per_module": {
+    "addr_decoder": {
+      "covered": 53,
+      "total": 58,
+      "percent": 91.38
+    },
+    "bank_tracker": {
+      "covered": 752,
+      "total": 1109,
+      "percent": 67.81
+    },
+    "cmd_gen": {
+      "covered": 100,
+      "total": 115,
+      "percent": 86.96
+    },
+    "cmd_queue": {
+      "covered": 1060,
+      "total": 1193,
+      "percent": 88.85
+    },
+    "config_regs": {
+      "covered": 143,
+      "total": 894,
+      "percent": 16.0
+    },
+    "data_path": {
+      "covered": 227,
+      "total": 394,
+      "percent": 57.61
+    },
+    "refresh_ctrl": {
+      "covered": 61,
+      "total": 118,
+      "percent": 51.69
+    },
+    "scheduler": {
+      "covered": 813,
+      "total": 889,
+      "percent": 91.45
+    },
+    "wb_port": {
+      "covered": 238,
+      "total": 464,
+      "percent": 51.29
+    }
+  },
+  "testbench_excluded": [
+    "$unit",
+    "bank_tracker_fcov",
+    "cfg_refresh_monitor",
+    "cfg_timing_monitor",
+    "chain_harness",
+    "cmd_gen_coverage",
+    "cmd_gen_sva",
+    "cmd_queue_fcov",
+    "config_regs_fcov",
+    "cq_deq_monitor",
+    "cq_enq_monitor",
+    "csr_monitor",
+    "csr_rsp_monitor",
+    "csr_sts_level_monitor",
+    "csr_sts_monitor",
+    "data_path_fcov",
+    "ddr_cmd_monitor",
+    "ddr_rd_beat_monitor",
+    "ddr_wr_beat_monitor",
+    "dp_cmd_monitor",
+    "dp_rd_rsp_monitor",
+    "dp_wr_monitor",
+    "dram_stub",
+    "refresh_ack_monitor",
+    "refresh_ctrl_fcov",
+    "refresh_req_monitor",
+    "req_monitor",
+    "sched_cmd_monitor",
+    "sched_deq_monitor",
+    "sched_in_monitor",
+    "seq_driver",
+    "wb_monitor",
+    "wb_rsp_monitor"
+  ],
+  "imc_report_dir": "/var/folders/cf/9xfxgjjd46g31957zb0jn43w0000gn/T/cov_crv2_x/cov_report_crv2"
+}

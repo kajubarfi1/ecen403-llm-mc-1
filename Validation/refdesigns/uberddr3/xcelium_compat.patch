@@ -1,0 +1,104 @@
+# Xcelium compatibility patch for UberDDR3 rtl/ddr3_controller.v (upstream commit as fetched 2026-09-24).
+# Xcelium enforces IEEE 1800 10.3.5: no system-function calls inside constant functions, and no
+# reference to a localparam declared later. Icarus and Vivado accept both. The patch is functionally
+# neutral: $rtoi($ceil(a/b)) on positive integers == (a+b-1)/b; get_slot receives the three values
+# it read from module scope as arguments. Nothing about the controller's behaviour changes.
+# Also: the *_SLOT localparams are moved below CL_nCK/CWL_nCK because Xcelium requires declare-before-use.
+--- a/rtl/ddr3_controller.v	2026-09-24 12:30:40
++++ b/rtl/ddr3_controller.v	2026-09-24 12:31:16
+@@ -205,11 +205,7 @@
+                 CMD_ADDRESS_START = ROW_BITS - 1;
+     
+     /* verilator lint_on UNUSEDPARAM */          
+-    localparam READ_SLOT = get_slot(CMD_RD),
+-                WRITE_SLOT = get_slot(CMD_WR),
+-                ACTIVATE_SLOT = get_slot(CMD_ACT),
+-                PRECHARGE_SLOT = get_slot(CMD_PRE),
+-                REMAINING_SLOT = get_slot(0);
++    // XCELIUM: *_SLOT localparams moved below CL_nCK/CWL_nCK (declare-before-use)
+                 
+     // Data does not have to be delayed (DQS is the on that has to be
+     // delayed and center-aligned to the center eye of data)
+@@ -275,6 +271,12 @@
+     // FOr DLL_OFF< CL and CWL should both be 6. But effective CL is only 5 since read data is early by 1 nCK
+     localparam CL_nCK = DLL_OFF? 4'd5 : CL_generator(DDR3_CLK_PERIOD); //read latency (given in JEDEC DDR3 spec)
+     localparam CWL_nCK = DLL_OFF? 4'd6 : CWL_generator(DDR3_CLK_PERIOD); //write latency (given in JEDEC DDR3 spec)
++    // XCELIUM: moved here from above so CL_nCK, CWL_nCK and tRCD are declared before use
++    localparam READ_SLOT = get_slot(CMD_RD, CL_nCK, CWL_nCK, ps_to_nCK(tRCD)),
++                WRITE_SLOT = get_slot(CMD_WR, CL_nCK, CWL_nCK, ps_to_nCK(tRCD)),
++                ACTIVATE_SLOT = get_slot(CMD_ACT, CL_nCK, CWL_nCK, ps_to_nCK(tRCD)),
++                PRECHARGE_SLOT = get_slot(CMD_PRE, CL_nCK, CWL_nCK, ps_to_nCK(tRCD)),
++                REMAINING_SLOT = get_slot(0, CL_nCK, CWL_nCK, ps_to_nCK(tRCD));
+     localparam DELAY_MAX_VALUE = ps_to_cycles(INITIAL_CKE_LOW); //Largest possible delay needed by the reset and refresh sequence
+     localparam DELAY_COUNTER_WIDTH= $clog2(DELAY_MAX_VALUE); //Bitwidth needed by the maximum possible delay, this will be the delay counter width
+     localparam CALIBRATION_DELAY = 2; // must be >= 2
+@@ -3867,26 +3869,26 @@
+     //output is set at same length as a MRS command (19 bits) to maximize the time slot
+     function [DELAY_SLOT_WIDTH - 1:0] ps_to_cycles ( input integer ps );                
+             /* verilator lint_off WIDTHTRUNC */              
+-            ps_to_cycles = $rtoi( $ceil( ps*1.0/CONTROLLER_CLK_PERIOD ) ); 
++            ps_to_cycles = (ps + CONTROLLER_CLK_PERIOD - 1) / CONTROLLER_CLK_PERIOD; // XCELIUM: integer ceil 
+             /* verilator lint_on WIDTHTRUNC */
+     endfunction
+ 
+     //convert nCK input (number of DDR3 clock cycles) to number of controller clock cycles (referenced to serdes_ratio)
+     function [DELAY_SLOT_WIDTH - 1:0] nCK_to_cycles (input integer nCK); 
+             /* verilator lint_off WIDTHTRUNC */
+-            nCK_to_cycles =  $rtoi( $ceil( nCK*1.0/serdes_ratio ) ); 
++            nCK_to_cycles = (nCK + serdes_ratio - 1) / serdes_ratio; // XCELIUM: integer ceil 
+             /* verilator lint_on WIDTHTRUNC */
+     endfunction
+     
+     
+     //convert nanoseconds time input  to number of DDR clock cycles (referenced to DDR3_CLK_PERIOD)
+     function integer ps_to_nCK ( input integer ps );
+-        ps_to_nCK = $rtoi( $ceil( ps*1.0/ DDR3_CLK_PERIOD ) ); 
++        ps_to_nCK = (ps + DDR3_CLK_PERIOD - 1) / DDR3_CLK_PERIOD; // XCELIUM: integer ceil 
+     endfunction
+     
+     //convert DDR clock cycles to nanoseconds (referenced to DDR3_CLK_PERIOD)
+     function integer nCK_to_ps (input integer nCK); 
+-        nCK_to_ps = $rtoi( $ceil( nCK*1.0*DDR3_CLK_PERIOD ) ); 
++        nCK_to_ps = nCK * DDR3_CLK_PERIOD; // XCELIUM: exact 
+     endfunction
+     
+     // functions used to infer some localparam values
+@@ -3961,7 +3963,7 @@
+         end
+     endfunction
+ 
+-    function[1:0] get_slot (input[3:0] cmd); //cmd can either be CMD_PRE,CMD_ACT, CMD_WR, CMD_RD
++    function[1:0] get_slot (input[3:0] cmd, input integer cl_nck, input integer cwl_nck, input integer trcd_nck); // XCELIUM: later localparams passed in //cmd can either be CMD_PRE,CMD_ACT, CMD_WR, CMD_RD
+         integer delay;
+         reg[2:0] slot_number, read_slot, write_slot, anticipate_activate_slot, anticipate_precharge_slot;
+         reg[2:0] remaining_slot;
+@@ -3974,25 +3976,25 @@
+             remaining_slot = 0;
+             delay = 0;
+             // find read command slot number
+-            delay = {{(32-4){1'b0}},CL_nCK};
++            delay = cl_nck;
+             for(slot_number = 0 ;  delay != 0 ; delay = delay - 1) begin
+                     slot_number[1:0] = slot_number[1:0] - 1'b1;
+             end 
+             read_slot[1:0] = slot_number[1:0];
+             
+             // find write command slot number
+-            delay = {{(32-4){1'b0}},CWL_nCK};
++            delay = cwl_nck;
+             for(slot_number = 0 ;  delay != 0; delay = delay - 1) begin
+                     slot_number[1:0] = slot_number[1:0] - 1'b1;
+             end 
+             write_slot[1:0] = slot_number[1:0];
+             
+             // find anticipate activate command slot number
+-            if(CL_nCK > CWL_nCK) slot_number[1:0] = read_slot[1:0];
++            if(cl_nck > cwl_nck) slot_number[1:0] = read_slot[1:0];
+             else slot_number[1:0] = write_slot[1:0];
+ 
+             // delay = ps_to_nCK(tRCD); 
+-            delay = $rtoi( $ceil( tRCD*1.0/ DDR3_CLK_PERIOD ) );
++            delay = trcd_nck;
+             for(slot_number = slot_number;  delay != 0; delay = delay - 1) begin
+                     slot_number[1:0] = slot_number[1:0] - 1'b1;
+             end 

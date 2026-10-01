@@ -1,0 +1,89 @@
+{
+  "$schema": "validation-findings/1",
+  "generated_utc": "2026-09-24T18:11:01.905076+00:00",
+  "generated_by": "formal triage (Validation/formal/cex_triage.py on JasperGold VCDs)",
+  "findings": [
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "rtl_defect",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "drop": "1fea117",
+      "status": "open",
+      "detector": "formal:jaspergold",
+      "evidence_files": [
+        "Validation/reports/formal/jg_cmd_path_1fea117.json",
+        "Validation/reports/formal/jg_cmd_path_1fea117_report.txt"
+      ],
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+      },
+      "id": "formal/scheduler/PROTO_001",
+      "scope": "scheduler",
+      "severity": "critical",
+      "taxonomy_id": "PROTO_001",
+      "title": "READ issued to a bank one cycle after that bank was PRECHARGEd (no ACTIVATE between)",
+      "detail": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 183 PRE bank 1 (A10=0), cycle 184 RD bank 1 col 0. The generated PROTO_001 tracker (row-open state from the observed ACT/PRE stream) shows bank 1 closed when the READ is issued. Never observed in simulation (no path stimulus reaches this interleaving); the scheduler or its bank_tracker gating lets a CAS follow its own precharge. Likely the same root as the open scheduler re-grant defect (commands are also held for 2-3 consecutive cycles in the trace, i.e. re-issued).",
+      "expected": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+      "actual": "PRE b=1 at cycle 183, RD b=1 at cycle 184.",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "cmd_valid/cmd_type/cmd_bank"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "signal": "bank_rd_allowed"
+        }
+      ]
+    },
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "rtl_defect",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "drop": "1fea117",
+      "status": "open",
+      "detector": "formal:jaspergold",
+      "evidence_files": [
+        "Validation/reports/formal/jg_cmd_path_1fea117.json",
+        "Validation/reports/formal/jg_cmd_path_1fea117_report.txt"
+      ],
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+      },
+      "id": "formal/scheduler/TIMING_008",
+      "scope": "scheduler",
+      "severity": "critical",
+      "taxonomy_id": "TIMING_008",
+      "title": "PRECHARGE issued one cycle after a WRITE to the same bank (tWR violated; write data lost)",
+      "detail": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 173 WR bank 4, cycle 174 PRE bank 4. tWR = 15 ns = 3 controller cycles, so 2 cycles must separate the last write beat from the precharge. Not observed in simulation. bank_tracker's write-recovery timer (cfg_tWR_nCK) does not gate bank_pre_allowed for the cycle after a write, or the scheduler ignores it on the row-conflict path.",
+      "expected": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+      "actual": "WR b=4 at cycle 173, PRE b=4 at cycle 174.",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "signal": "bank_pre_allowed / ctr_wr"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "precharge decision"
+        }
+      ]
+    }
+  ],
+  "also_confirmed": [
+    "tRC (TIMING_004), tRFC (TIMING_011) and double-ACTIVATE (PROTO_002) counterexamples at 6 cycles from reset match the simulation findings already open on this drop",
+    "tRRD (TIMING_005), tWTR (TIMING_007) and tRTP (TIMING_009) counterexamples at 136-139 cycles, each a two-command witness under a legal host, match the simulation findings already open"
+  ],
+  "proven_for_all_inputs": [
+    "TIMING_001 tRCD",
+    "TIMING_002 tRP",
+    "TIMING_003 tRAS",
+    "TIMING_006 tFAW"
+  ]
+}

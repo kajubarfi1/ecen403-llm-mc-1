@@ -402,7 +402,15 @@ def main() -> int:
 
     os.makedirs(args.outdir, exist_ok=True)
     total_gen, total_skip = [], []
+    sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
+    import rtl_drop as RD
+    absent = set(RD.missing(sorted(by_block)))
+    if absent:
+        print(f"  deferred: {', '.join(sorted(absent))} (not in the drop; their "
+              f"covergroups wait for the phase that brings them)")
     for block, cps in sorted(by_block.items()):
+        if block in absent:
+            continue
         try:
             bm = gen_block(block, cps, spec, catalog, schemas, rules, vplan_ids)
             src, bind = render(bm, spec)

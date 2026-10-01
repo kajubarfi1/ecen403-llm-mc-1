@@ -49,27 +49,6 @@
       "source": "validation",
       "target": "frontend",
       "kind": "manifest_gap",
-      "scope": "config_regs",
-      "severity": "minor",
-      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-      "title": "config_regs manifest declares no `source` on 5 consumer port(s) the design wires",
-      "detail": "Ports sts_init_done, sts_cal_done, sts_cal_fail, sts_ref_pending_cnt, sts_init_fail_event are inputs that the integrated design drives from another block, but the manifest does not say from where. Validation carries these edges by hand in integration_overrides.json; the backend's set gate lists them as unresolved slots. Add `\"source\": \"<block>.<port>\"` to each.",
-      "evidence": {
-        "block": "config_regs",
-        "ports": [
-          "sts_init_done",
-          "sts_cal_done",
-          "sts_cal_fail",
-          "sts_ref_pending_cnt",
-          "sts_init_fail_event"
-        ]
-      },
-      "status": "open"
-    },
-    {
-      "source": "validation",
-      "target": "frontend",
-      "kind": "manifest_gap",
       "scope": "refresh_ctrl",
       "severity": "minor",
       "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
@@ -79,26 +58,6 @@
         "block": "refresh_ctrl",
         "ports": [
           "ref_ack"
-        ]
-      },
-      "status": "open"
-    },
-    {
-      "source": "validation",
-      "target": "frontend",
-      "kind": "manifest_gap",
-      "scope": "wb_port",
-      "severity": "minor",
-      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-      "title": "wb_port manifest declares no `source` on 4 consumer port(s) the design wires",
-      "detail": "Ports req_ready, rsp_valid, rsp_rdata, rsp_aux are inputs that the integrated design drives from another block, but the manifest does not say from where. Validation carries these edges by hand in integration_overrides.json; the backend's set gate lists them as unresolved slots. Add `\"source\": \"<block>.<port>\"` to each.",
-      "evidence": {
-        "block": "wb_port",
-        "ports": [
-          "req_ready",
-          "rsp_valid",
-          "rsp_rdata",
-          "rsp_aux"
         ]
       },
       "status": "open"

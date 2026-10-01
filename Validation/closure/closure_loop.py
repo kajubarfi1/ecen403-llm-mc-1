@@ -202,9 +202,10 @@ def run_arm(arm, scope, iterations, patience, agent_ssh, rep=1):
         else:
             seed = rep * 1000 + it        # distinct seeds across replicates
             seq_path = os.path.join(SEQ_DIR, f"{scope}_random_r{rep}_it{it}.json")
+            gen = ("Validation/closure/random_v2.py" if arm == "constrained"
+                   else "Validation/closure/random_sequence.py")
             rc, out = run_local(
-                f"python3 Validation/closure/random_sequence.py --scope {scope} "
-                f"--seed {seed} --out {seq_path}")
+                f"python3 {gen} --scope {scope} --seed {seed} --out {seq_path}")
             if rc != 0:
                 print(f"  {tag} control generation failed:\n{out[-400:]}")
                 break
@@ -260,7 +261,8 @@ def run_arm(arm, scope, iterations, patience, agent_ssh, rep=1):
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--scope", default="cmd_gen")
-    ap.add_argument("--arm", choices=("agent", "control", "both"), default="both")
+    ap.add_argument("--arm", choices=("agent", "control", "constrained", "both"), default="both",
+                    help="constrained = random_v2.py (address-aware, reads no coverage)")
     ap.add_argument("-n", "--iterations", type=int, default=3)
     ap.add_argument("--patience", type=int, default=2)
     ap.add_argument("-r", "--replicates", type=int, default=1,

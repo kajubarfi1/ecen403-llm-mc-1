@@ -1,114 +1,145 @@
 from txn_contract import TransactionPredictor, Txn
-from typing import List
 
 
-class CmdGenPredictor(TransactionPredictor):
-    """
-    Transaction predictor for cmd_gen block.
-    Translates scheduler commands (sched_in) to DDR3 pin-level commands (ddr_cmd).
-    """
-
+class Predictor(TransactionPredictor):
     INPUT_IFACES = ('sched_in',)
     OUTPUT_IFACES = ('ddr_cmd',)
 
-    # Scheduler input command type encodings (sched_in.type)
+    # Scheduler type encoding (input side)
     SCHED_NOP = 0
     SCHED_ACT = 1
-    SCHED_RD = 2
-    SCHED_WR = 3
+    SCHED_READ = 2
+    SCHED_WRITE = 3
     SCHED_PRE = 4
     SCHED_REF = 5
+    SCHED_MRS = 6
+    SCHED_ZQCL = 7
 
-    # DDR command output encodings (ddr_cmd.cmd)
-    DDR_REF = 1
-    DDR_PRE = 2
-    DDR_ACT = 3
-    DDR_WR = 4
-    DDR_RD = 5
+    # DDR command encoding (output side, active-low CS#/RAS#/CAS#/WE#)
+    # Standard DDR3 command truth table (active-low signals):
+    # MRS:        0b0000  (CS=0, RAS=0, CAS=0, WE=0)
+    # REF:        0b0001  (CS=0, RAS=0, CAS=0, WE=1)
+    # PRE:        0b0010  (CS=0, RAS=0, CAS=1, WE=0)
+    # ACT:        0b0011  (CS=0, RAS=0, CAS=1, WE=1)
+    # WRITE:      0b0100  (CS=0, RAS=1, CAS=0, WE=0)
+    # READ:       0b0101  (CS=0, RAS=1, CAS=0, WE=1)
+    # NOP:        0b0111  (CS=0, RAS=1, CAS=1, WE=1)
+    # DESEL:      0b1xxx
+    #
+    # But actual encoding used by the design may differ. We use a mapping
+    # that the spec implies: cmd_gen re-encodes between two different encodings.
+    # The scheduler encoding maps to DDR pin-level encoding.
 
     def __init__(self, spec: dict):
         self.spec = spec
-        self._build_command_map()
+        self._build_encoding_map()
         self.reset()
 
-    def _build_command_map(self):
-        """Build the mapping from scheduler command types to DDR command encodings."""
-        # Mapping from sched_in.type to ddr_cmd.cmd
-        self.cmd_translate = {
-            self.SCHED_ACT: self.DDR_ACT,
-            self.SCHED_RD: self.DDR_RD,
-            self.SCHED_WR: self.DDR_WR,
-            self.SCHED_PRE: self.DDR_PRE,
-            self.SCHED_REF: self.DDR_REF,
+    def _build_encoding_map(self):
+        """Build the mapping from scheduler command type to DDR command encoding.
+
+        The spec says: 'the command VALUE is re-encoded between two different encodings'
+        and 'the address field is selected by command type (a row for ACTIVATE, a column for a CAS)'.
+
+        Scheduler encoding (from sched_type values):
+          0 = NOP
+          1 = ACTIVATE
+          2 = READ
+          3 = WRITE
+          4 = PRECHARGE
+          5 = REFRESH
+          6 = MRS
+          7 = ZQCL
+
+        DDR3 pin-level command encoding {CS#, RAS#, CAS#, WE#}:
+          MRS:       0b0000 = 0
+          REFRESH:   0b0001 = 1
+          PRECHARGE: 0b0010 = 2
+          ACTIVATE:  0b0011 = 3
+          WRITE:     0b0100 = 4
+          READ:      0b0101 = 5
+          NOP:       0b0111 = 7
+          DESELECT:  0b1000 = 8
+        """
+        self.sched_to_ddr = {
+            1: 3,   # ACT -> 0b0011
+            2: 5,   # READ -> 0b0101
+            3: 4,   # WRITE -> 0b0100
+            4: 2,   # PRE -> 0b0010
+            5: 1,   # REF -> 0b0001
+            6: 0,   # MRS -> 0b0000
+            7: 8,   # ZQCL -> could be mapped; using deselect-like or special
         }
-
-        # Commands that use column address instead of row address
-        self.col_addr_cmds = {self.SCHED_RD, self.SCHED_WR}
-
-        # Commands that should not produce output (NOP idles the bus)
-        self.no_output_cmds = {self.SCHED_NOP}
+        # Commands that use row address
+        self.row_cmds = {1}  # ACTIVATE
+        # Commands that use column address
+        self.col_cmds = {2, 3}  # READ, WRITE
+        # Commands where addr is don't-care (PRE, REF, ZQCL)
+        self.dont_care_addr_cmds = {4, 5, 7}
+        # MRS uses row for mode register data
+        self.mrs_cmds = {6}
 
     def reset(self) -> None:
-        """Return all modeled state to its power-on values."""
-        # This block is combinational/stateless translation
-        # No persistent state to reset
         pass
 
-    def process(self, txn: Txn) -> List[Txn]:
-        """
-        Process one input transaction and return resulting output transactions.
-        Translates sched_in commands to ddr_cmd commands.
-        """
-        # Ignore transactions on interfaces we don't model
+    def process(self, txn: Txn) -> list:
         if txn.iface != 'sched_in':
             return []
 
-        # Only handle 'command' kind
         if txn.kind != 'command':
             return []
 
-        # Extract input fields
-        sched_type = txn.fields.get('type', 0)
-        sched_row = txn.fields.get('row', 0)
-        sched_col = txn.fields.get('col', 0)
-        sched_bank = txn.fields.get('bank', 0)
+        sched_type = int(txn.fields.get('type', 0))
+        row = int(txn.fields.get('row', 0))
+        col = int(txn.fields.get('col', 0))
+        bank = int(txn.fields.get('bank', 0))
 
-        # NOP commands do not produce output transactions
-        # The pins idle at NOP state - that's not a transaction
-        if sched_type in self.no_output_cmds:
+        # NOP produces no transaction - pins idle at NOP
+        if sched_type == self.SCHED_NOP:
             return []
 
-        # Check if this is a command we know how to translate
-        if sched_type not in self.cmd_translate:
+        if sched_type not in self.sched_to_ddr:
             return []
 
-        # Translate command type
-        ddr_cmd = self.cmd_translate[sched_type]
+        ddr_cmd = self.sched_to_ddr[sched_type]
 
         # Determine address based on command type
-        # RD and WR commands carry column address
-        # ACT, PRE, REF commands carry row address
-        if sched_type in self.col_addr_cmds:
-            ddr_addr = sched_col
+        if sched_type in self.row_cmds:
+            addr = row
+        elif sched_type in self.col_cmds:
+            addr = col
+        elif sched_type in self.mrs_cmds:
+            # MRS: address carries mode register settings
+            addr = row
+        elif sched_type in self.dont_care_addr_cmds:
+            # For PRECHARGE: A10=0 means single-bank precharge (spec says
+            # "the scheduler's PRECHARGE names one bank; A10 high would
+            # precharge every bank"). So we set addr to 0 (A10=0).
+            # For REF and ZQCL: address is don't care, use 0.
+            addr = 0
         else:
-            ddr_addr = sched_row
+            addr = 0
 
-        # Create output transaction
+        # Mask to field widths from schema
+        addr_width = 15  # ddr_addr width from schema
+        bank_width = 3   # ddr_bank width from schema
+        cmd_width = 4    # ddr_cmd width from schema
+
+        addr = addr & ((1 << addr_width) - 1)
+        bank = bank & ((1 << bank_width) - 1)
+        ddr_cmd = ddr_cmd & ((1 << cmd_width) - 1)
+
         out_txn = Txn(
             iface='ddr_cmd',
             kind='command',
             fields={
                 'cmd': ddr_cmd,
-                'addr': ddr_addr,
-                'bank': sched_bank,
+                'addr': addr,
+                'bank': bank,
             }
         )
 
         return [out_txn]
 
-    def drain(self) -> List[Txn]:
-        """
-        Return any pending output transactions at end of trace.
-        This block has no buffering, so nothing to drain.
-        """
+    def drain(self) -> list:
         return []

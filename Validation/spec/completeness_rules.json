@@ -153,6 +153,20 @@
       "question": "What is the minimum delay from a mode-register-set command to the next non-MRS command (tMOD)?",
       "consequence": "ZQCL after the last MRS cannot be checked for tMOD without it.",
       "discovered_by": "sva_rules.json command_groups[init]"
+    },
+    {
+      "id": "SCHED_SPECULATIVE_ACTIVATE",
+      "kind": "required_field",
+      "when_present": "controller_architecture.scheduler_policy",
+      "require": "controller_architecture.speculative_activate",
+      "options": [
+        "allowed",
+        "forbidden"
+      ],
+      "disposition": "decision",
+      "question": "May the scheduler open a row that no pending request has asked for yet (look-ahead / speculative ACTIVATE)?",
+      "consequence": "A checker that forbids it fires on a correct look-ahead controller; one that allows it cannot flag a wasted ACTIVATE. Validation assumes 'allowed' until the spec says otherwise.",
+      "discovered_by": "SCHED_004 fired 314x on the known-good UberDDR3 reference (2026-09-29)"
     }
   ]
 }

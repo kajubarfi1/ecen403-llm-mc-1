@@ -1,0 +1,143 @@
+{
+  "$schema": "validation-crv2/1",
+  "generated_utc": "2026-09-24T18:28:45.643743+00:00",
+  "drop": "1fea117",
+  "generator": "Validation/closure/random_v2.py (address-aware constrained random: locality profiles from memory_geometry, back-pressure bursts of 2 x queue depth, paced 0-3 idle, read/write pairs, drains)",
+  "batch_1": {
+    "paths": [
+      "path_19_row_conflict",
+      "path_04_scheduler_bank_loop",
+      "path_07_backpressure"
+    ],
+    "seeds": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "drives_per_run": 400,
+    "runs": 12,
+    "verdicts": "all FAIL (open defects on this drop; runs completed, no errors)"
+  },
+  "code_coverage": {
+    "baseline_runs": 17,
+    "v2_runs": 12,
+    "union_runs": 29,
+    "design_total": {
+      "baseline": 75.1,
+      "v2_only": 65.86,
+      "union": 85.15,
+      "union_all": 89.49
+    },
+    "per_block": [
+      {
+        "block": "scheduler",
+        "baseline_pct": 71.43,
+        "v2_only_pct": 91.45,
+        "union_pct": 92.01,
+        "union_all_pct": 93.7
+      },
+      {
+        "block": "cmd_queue",
+        "baseline_pct": 58.42,
+        "v2_only_pct": 88.85,
+        "union_pct": 89.1,
+        "union_all_pct": 91.62
+      },
+      {
+        "block": "bank_tracker",
+        "baseline_pct": 78.54,
+        "v2_only_pct": 67.81,
+        "union_pct": 78.54,
+        "union_all_pct": 78.54
+      },
+      {
+        "block": "cmd_gen",
+        "baseline_pct": 92.17,
+        "v2_only_pct": 86.96,
+        "union_pct": 92.17,
+        "union_all_pct": 92.17
+      },
+      {
+        "block": "addr_decoder",
+        "baseline_pct": 93.1,
+        "v2_only_pct": 91.38,
+        "union_pct": 93.1,
+        "union_all_pct": 93.1
+      },
+      {
+        "block": "refresh_ctrl",
+        "baseline_pct": 96.61,
+        "v2_only_pct": 51.69,
+        "union_pct": 96.61,
+        "union_all_pct": 96.61
+      },
+      {
+        "block": "config_regs",
+        "baseline_pct": 94.3,
+        "v2_only_pct": 16.0,
+        "union_pct": 94.3,
+        "union_all_pct": 94.3
+      },
+      {
+        "block": "wb_port",
+        "baseline_pct": 59.48,
+        "v2_only_pct": 51.29,
+        "union_pct": 59.48,
+        "union_all_pct": 87.07
+      },
+      {
+        "block": "data_path",
+        "baseline_pct": 76.65,
+        "v2_only_pct": 57.61,
+        "union_pct": 76.65,
+        "union_all_pct": 92.89
+      },
+      {
+        "block": "calibration",
+        "baseline_pct": 89.83,
+        "v2_only_pct": null,
+        "union_pct": 89.83,
+        "union_all_pct": 89.83
+      },
+      {
+        "block": "init_fsm",
+        "baseline_pct": 89.35,
+        "v2_only_pct": null,
+        "union_pct": 89.35,
+        "union_all_pct": 89.35
+      }
+    ],
+    "union_all_runs": 41
+  },
+  "functional_union": {
+    "vplan_fully_covered": "27/39",
+    "timing_at_minimum_bins": "still 50% on tCCD/tFAW/tRAS/tRCD/tRC/tRFC/tRP: the design never issues at the exact minimum spacing under host stimulus; reachability to be settled by formal cover (E-DEAD candidate) rather than more seeds",
+    "refresh_starvation": "0% (VP_FAIL_012; refresh_stress generator owns it)"
+  },
+  "targets_met": {
+    "scheduler>=85": true,
+    "cmd_queue>=85": true,
+    "bank_tracker>=85": false,
+    "wb_port>=85": true,
+    "data_path>=85": true,
+    "design>=85": true
+  },
+  "note": "per-block numbers come from IMC union merges restricted by --since to this drop's runs; the union report also became reports/coverage_rollup.json (campaign result).",
+  "batch_2": {
+    "paths": [
+      "path_18_full_write",
+      "path_20_refresh_preempt",
+      "path_03_read_return"
+    ],
+    "seeds": [
+      5,
+      6,
+      7,
+      8
+    ],
+    "drives_per_run": 400,
+    "runs": 12,
+    "verdicts": "all FAIL (open defects; no run errors)"
+  }
+}

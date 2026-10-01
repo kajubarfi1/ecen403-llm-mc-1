@@ -152,7 +152,10 @@ def scope_interfaces(scope, catalog, schemas):
     # single canonical name per side or the composite would double-count it.
     def dedupe(names):
         keep = []
-        for n in sorted(names):
+        # Of two names for one stream, keep the one the scope's own block
+        # owns (cmd_gen sees the scheduler's command as `sched_in`): that is
+        # the name the catalog's derivation and the gates are written in.
+        for n in sorted(names, key=lambda x: (catalog.get(x, {}).get("block") != scope, x)):
             alias = catalog.get(n, {}).get("same_stream_as")
             if alias and alias in keep:
                 continue
@@ -295,6 +298,38 @@ def _catalog():
         return json.load(f)["interfaces"]
 
 
+def _stream_relationships(ins, outs, catalog):
+    """What the catalog says about each stream the model touches: what an
+    output derives from and how many per source, plus any modelling guidance.
+    Design-agnostic: it is the catalog's own declarations, printed."""
+    lines = []
+    for name in list(ins) + list(outs):
+        d = catalog.get(name, {})
+        side = "INPUT" if name in ins else "OUTPUT"
+        lines.append(f"{name} ({side}): {d.get('description', '')}")
+        df = d.get("derives_from")
+        if df and name in outs:
+            if df.get("interface"):
+                lines.append(f"  derives from: {df['interface']}"
+                             f" ({df.get('cardinality', '')}"
+                             + (f", only for kinds {df['only_for_kinds']}" if df.get("only_for_kinds") else "")
+                             + ")")
+            if df.get("field_map"):
+                lines.append(f"  field map (output <- source): {df['field_map']}")
+            if df.get("fields_absent_on"):
+                lines.append(f"  fields absent on: {df['fields_absent_on']}")
+            if df.get("$note"):
+                lines.append(f"  note: {df['$note']}")
+            if df.get("model_guidance"):
+                lines.append(f"  MODEL THIS AS: {df['model_guidance']}")
+        elif d.get("model_guidance"):
+            lines.append(f"  note: {d['model_guidance']}")
+        for r in d.get("dont_care", []):
+            flds = ", ".join(r.get("fields", [r.get("field", "?")]))
+            lines.append(f"  don't-care: {flds} when {r['when']} (keep mask {r['keep_mask']})")
+    return "\n".join(lines)
+
+
 def assemble_prompt(scope, spec, schemas, catalog, strategy, prior_failures=None):
     ins, outs = scope_interfaces(scope, catalog, schemas)
     sub = {i: schemas[i] for i in ins + outs}
@@ -323,6 +358,10 @@ Field names below are the exact keys that appear in Txn.fields. Use these
 names; the scoreboard compares on them.
 
 {json.dumps(sub, indent=2)}
+
+=== HOW THE STREAMS RELATE (from the interface catalog) ===
+
+{_stream_relationships(ins, outs, catalog)}
 
 === THE SPECIFICATION ===
 
@@ -427,6 +466,11 @@ def generate(scope, retries=3, dry_run=False, verbose=True):
         schemas = json.load(f)["interfaces"]
     with open(CATALOG_PATH) as f:
         catalog = json.load(f)["interfaces"]
+    # The schema's `manifest` entry is provenance (a path into the RTL drop);
+    # the model has no use for it and the no-RTL guard rightly refuses a
+    # prompt that names the drop's directories.
+    schemas = {k: {kk: vv for kk, vv in v.items() if kk != "manifest"}
+               for k, v in schemas.items()}
 
     stage = stage_entry(scope)
     if stage is not None:

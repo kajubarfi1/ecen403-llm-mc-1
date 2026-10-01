@@ -204,6 +204,49 @@ class CompositePredictor(TransactionPredictor):
 # Alignment
 # =============================================================================
 
+
+_DONT_CARE = None
+
+
+def _dont_care_rules():
+    """{iface: [(when_field, when_value_int, field, keep_mask)]} from the catalog."""
+    global _DONT_CARE
+    if _DONT_CARE is None:
+        _DONT_CARE = {}
+        try:
+            with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   "interface_catalog.json")) as f:
+                cat = json.load(f)["interfaces"]
+        except (OSError, ValueError, KeyError):
+            return _DONT_CARE
+        for iface, d in cat.items():
+            enc = {k: v for k, v in d.get("command_encoding", {}).items() if not k.startswith("$")}
+            for rule in d.get("dont_care", []):
+                (wf, wv), = rule["when"].items()
+                if isinstance(wv, str) and wv in enc:
+                    wv = int(enc[wv].split("'b")[-1], 2)
+                for fld in rule.get("fields", [rule.get("field")]):
+                    if fld:
+                        _DONT_CARE.setdefault(iface, []).append((wf, int(wv), fld, int(rule["keep_mask"])))
+    return _DONT_CARE
+
+
+def _apply_dont_care(t):
+    rules = _dont_care_rules().get(t.iface)
+    if not rules:
+        return t
+    fields = dict(t.fields)
+    changed = False
+    for wf, wv, fld, keep in rules:
+        if fields.get(wf) == wv and fld in fields:
+            fields[fld] = fields[fld] & keep
+            changed = True
+    if not changed:
+        return t
+    n = Txn(iface=t.iface, kind=t.kind, fields=fields)
+    n.seq, n.time = getattr(t, "seq", None), getattr(t, "time", None)
+    return n
+
 def align(predicted: List[Txn], observed: List[Txn], iface: str) -> tuple:
     """Align two ordered transaction streams. Returns (matched, mismatches).
 
@@ -465,6 +508,13 @@ class Scoreboard:
                         f"on {sorted(outs)} — nothing was compared")
             return r
 
+        # Declared don't-care fields (interface_catalog.json -> dont_care):
+        # normalised on BOTH sides before alignment, so a field the standard
+        # says is meaningless for a command (PRE address bits other than A10)
+        # can neither cause nor hide a mismatch.
+        predicted = [_apply_dont_care(t) for t in predicted]
+        observed_out = [_apply_dont_care(t) for t in observed_out]
+
         if self.waivers is not None:
             predicted, observed_out, n_waived = _apply_waivers(
                 self.waivers, predicted, observed_out)
@@ -563,8 +613,15 @@ def main() -> int:
         waivers = WaiverSet.load(waiver_path, scope=args.scope,
                                  spec_revision=spec.get("revision"))
 
+    # Under a reordering scheduler (fr_fcfs) read responses legitimately return
+    # out of issue order; the aux tag is what identifies them. Align those by
+    # tag, so ordering that the spec permits is not reported as missing +
+    # unexpected pairs. In-order policies keep strict sequence alignment.
+    reorder = ({"dp_rd_rsp": "aux"}
+               if spec.get("controller_architecture", {}).get("scheduler_policy") == "fr_fcfs"
+               else {})
     sb = Scoreboard(strategy=strategy, model=model, scope=args.scope,
-                    waivers=waivers)
+                    waivers=waivers, reorder_keys=reorder)
     result = sb.run(load_trace(args.trace))
 
     print(result.summary())

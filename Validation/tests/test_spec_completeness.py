@@ -60,6 +60,7 @@ class TestIntakeGate(unittest.TestCase):
             "read_byte_enable_semantics": "ignored",
             "status_read_sampling": "previous_edge"})
         spec["data_path_mapping"]["ddr_dm_polarity"] = "active_high_mask"
+        spec["controller_architecture"]["speculative_activate"] = "allowed"
         spec["failure_taxonomy"]["categories"].append(
             {"id": "SCHED_001", "name": "dropped request"})
         spec["failure_taxonomy"]["categories"].append(

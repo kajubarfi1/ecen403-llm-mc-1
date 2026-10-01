@@ -19,8 +19,8 @@ module ddr_wr_beat_monitor #(
 ) (
     input  logic clk,
     input  logic rst_n,
-    input  logic [3:0] ddr_dm_o,
-    input  logic [31:0] ddr_dq_o,
+    input  logic [1:0] ddr_dm_o,
+    input  logic [15:0] ddr_dq_o,
     input  logic ddr_dq_oe
 );
 

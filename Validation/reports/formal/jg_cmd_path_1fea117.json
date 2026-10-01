@@ -1,0 +1,145 @@
+{
+  "$schema": "validation-formal/1",
+  "generated_utc": "2026-09-24T18:02:03.296787+00:00",
+  "tool": "JasperGold 2024.09 (Olympus n01-zeus)",
+  "drop": "1fea117 (Frontend2/OutputFolders)",
+  "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --formal, path_01_write_cmd closure: 9 blocks)",
+  "assertions": "Validation/sva/generated/cmd_gen_sva.sv bound to cmd_gen",
+  "assumptions": "none beyond the top's tie-offs (CSR traffic off, status inputs 0); host Wishbone inputs and DRAM data unconstrained",
+  "prove_time_limit": "20m",
+  "max_trace_length": 200,
+  "summary": {
+    "assertions": 13,
+    "proven": 4,
+    "cex": 8,
+    "undetermined": 1,
+    "covers": 25,
+    "covered": 24,
+    "cover_undetermined": 1
+  },
+  "results": [
+    {
+      "assertion": "a_TIMING_001",
+      "rule": "TIMING_001",
+      "parameter": "tRCD",
+      "status": "proven",
+      "bound": "Infinite",
+      "seen_in_simulation": false
+    },
+    {
+      "assertion": "a_TIMING_002",
+      "rule": "TIMING_002",
+      "parameter": "tRP",
+      "status": "proven",
+      "bound": "Infinite",
+      "seen_in_simulation": false
+    },
+    {
+      "assertion": "a_TIMING_003",
+      "rule": "TIMING_003",
+      "parameter": "tRAS",
+      "status": "proven",
+      "bound": "Infinite",
+      "seen_in_simulation": false
+    },
+    {
+      "assertion": "a_TIMING_004",
+      "rule": "TIMING_004",
+      "parameter": "tRC",
+      "status": "cex",
+      "bound": "6",
+      "seen_in_simulation": true
+    },
+    {
+      "assertion": "a_TIMING_005",
+      "rule": "TIMING_005",
+      "parameter": "tRRD",
+      "status": "cex",
+      "bound": "139",
+      "seen_in_simulation": true
+    },
+    {
+      "assertion": "a_TIMING_007",
+      "rule": "TIMING_007",
+      "parameter": "tWTR",
+      "status": "cex",
+      "bound": "136",
+      "seen_in_simulation": true
+    },
+    {
+      "assertion": "a_TIMING_008",
+      "rule": "TIMING_008",
+      "parameter": "tWR",
+      "status": "cex",
+      "bound": "138",
+      "seen_in_simulation": false
+    },
+    {
+      "assertion": "a_TIMING_009",
+      "rule": "TIMING_009",
+      "parameter": "tRTP",
+      "status": "cex",
+      "bound": "138",
+      "seen_in_simulation": true
+    },
+    {
+      "assertion": "a_TIMING_011",
+      "rule": "TIMING_011",
+      "parameter": "tRFC",
+      "status": "cex",
+      "bound": "6",
+      "seen_in_simulation": true
+    },
+    {
+      "assertion": "a_TIMING_006",
+      "rule": "TIMING_006",
+      "parameter": "tFAW (window)",
+      "status": "proven",
+      "bound": "Infinite",
+      "seen_in_simulation": false
+    },
+    {
+      "assertion": "a_TIMING_012",
+      "rule": "TIMING_012",
+      "parameter": "tREFI",
+      "status": "undetermined",
+      "bound": "201",
+      "seen_in_simulation": false
+    },
+    {
+      "assertion": "a_PROTO_001",
+      "rule": "PROTO_001",
+      "parameter": "cas_requires_open_row",
+      "status": "cex",
+      "bound": "136",
+      "seen_in_simulation": false
+    },
+    {
+      "assertion": "a_PROTO_002",
+      "rule": "PROTO_002",
+      "parameter": "no_double_activate",
+      "status": "cex",
+      "bound": "6",
+      "seen_in_simulation": true
+    }
+  ],
+  "reading": [
+    "4 proven for all inputs: tRCD (001), tRP (002), tRAS (003), and 006 \u2014 the bank_tracker + scheduler enforce these regardless of host behaviour.",
+    "Shallow counterexamples (bound 6): tRC (004), tRFC (011), PROTO_002 double-activate \u2014 these are the defects simulation already reports on this drop (scheduler re-grant / refresh with open banks), reproduced from reset in 6 cycles.",
+    "Deep counterexamples (bound 136-139): tRRD (005), 007, tWR (008), tRTP (009), PROTO_001 \u2014 two of these (PROTO_001 CAS-to-closed-bank, TIMING_008 tWR) were NOT seen in simulation; they need triage against the exported traces: a legal-host sequence makes them new findings, an illegal one (Wishbone protocol violated by the free inputs) means the top needs a Wishbone-master assumption.",
+    "tREFI (012) undetermined: its bound is 23400 cycles, far beyond the 200-cycle trace limit; needs an abstraction (free-running counter with an assumption) or a bounded statement."
+  ],
+  "next": [
+    "abstract tREFI (free-running counter assumption or bounded statement)",
+    "re-prove after the Frontend fixes scheduler re-grant / bank_tracker gating"
+  ],
+  "triage": {
+    "PROTO_001": "REAL: legal host; PRE b1 @183 then RD b1 @184 with no ACT. New finding (formal_cmd_path_findings.json).",
+    "TIMING_008": "REAL: legal host; WR b4 @173 then PRE b4 @174 (tWR needs 2 free cycles). New finding.",
+    "TIMING_004/TIMING_011/PROTO_002": "shallow (6 cycles), match open simulation findings.",
+    "TIMING_012": "undetermined: tREFI bound 23400 cycles > trace limit; needs abstraction.",
+    "TIMING_005": "REAL: legal host; ACT b0 @137 then ACT b4 @138 (tRRD needs 1 free cycle). Matches open sim finding.",
+    "TIMING_007": "REAL: legal host; WR @152 then RD @153 (tWTR). Matches open sim finding.",
+    "TIMING_009": "REAL: legal host; RD b0 @135-136 then PRE b0 @137 (tRTP). Matches open sim finding."
+  }
+}

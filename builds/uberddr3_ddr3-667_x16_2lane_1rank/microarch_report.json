@@ -1,0 +1,35 @@
+{
+  "choices": {
+    "speed_grade": "DDR3-800",
+    "density": "8Gb",
+    "device_width": "x16",
+    "ranks": 1,
+    "byte_lanes": 2,
+    "ecc_mode": 0,
+    "scheduler_policy": "in_order",
+    "row_policy": "open_page",
+    "command_queue_depth": 4,
+    "lookahead_depth": 0
+  },
+  "overrides": {
+    "tCK_ns": 3.0,
+    "controller_clock_period_ns": 12.0,
+    "CL": 5,
+    "CWL": 5,
+    "timing_ns": {
+      "tRCD": 13.75,
+      "tRP": 13.75,
+      "tRAS": 35.0,
+      "tRC": 48.75,
+      "tRFC": 350.0,
+      "tREFI": 7800.0,
+      "tWR": 15.0,
+      "tWTR": 12.0,
+      "tRTP": 12.0,
+      "tCCD": 12.0,
+      "tRRD": 12.0,
+      "tFAW": 40.0
+    }
+  },
+  "source": "UberDDR3 rtl/ddr3_controller.v localparams + testbench/sim_defines.vh"
+}

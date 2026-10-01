@@ -1,0 +1,65 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_08_init_to_cal",
+  "strategy": "invariant",
+  "verdict": "fail",
+  "timestamp": "2026-09-30T15:25:08.458342",
+  "blocks": [
+    "calibration",
+    "init_fsm"
+  ],
+  "sequence": null,
+  "stimulus_generator": null,
+  "autonomous": true,
+  "window_cycles": 180000,
+  "coverage_collected": false,
+  "rtl_drop": {
+    "git_head": "5661e03",
+    "roots": [
+      "Validation/faults/work/M23_init_fsm_mrs_after_zqcl/Frontend2/OutputFolders"
+    ],
+    "blocks": {
+      "calibration": {
+        "rtl": "Validation/faults/work/M23_init_fsm_mrs_after_zqcl/Frontend2/OutputFolders/PHASE2RTL/calibration.sv",
+        "manifest": "Validation/faults/work/M23_init_fsm_mrs_after_zqcl/Frontend2/OutputFolders/PHASE2RTL/calibration_manifest.json"
+      },
+      "init_fsm": {
+        "rtl": "Validation/faults/work/M23_init_fsm_mrs_after_zqcl/Frontend2/OutputFolders/PHASE1RTL/init_fsm.sv",
+        "manifest": "Validation/faults/work/M23_init_fsm_mrs_after_zqcl/Frontend2/OutputFolders/PHASE1RTL/init_fsm_manifest.json"
+      }
+    }
+  },
+  "stages": [
+    {
+      "stage": "init_fsm",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "init_fsm",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA"
+    },
+    {
+      "stage": "calibration",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "calibration",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA"
+    },
+    {
+      "stage": "(path-level)",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_08_init_to_cal_checker.py",
+      "scope": "path_08_init_to_cal",
+      "verdict": "fail",
+      "summary": "scope=path_08_init_to_cal  strategy=invariant  status=fail  violations=2",
+      "detail": [
+        "scope=path_08_init_to_cal  strategy=invariant  status=fail  violations=2",
+        "  INIT_001: ZQCL issued before all MRS commands; missing MR[0] @ [init_cmd.command addr=0x400 bank=0x0 cmd=0x6]",
+        "  INIT_003: init_done raised before ZQCL issued @ [init_status.done fail=0x0 state=0xe]"
+      ]
+    }
+  ],
+  "log": "Validation/reports/faults/M23_init_fsm_mrs_after_zqcl/path_08_init_to_cal_sim.log",
+  "observed_trace": "Validation/reports/faults/M23_init_fsm_mrs_after_zqcl/path_08_init_to_cal_observed.jsonl"
+}

@@ -81,7 +81,15 @@ def net_decl(name, width):
     return f"  logic {dim}{name};"
 
 
-def block_closure(blocks, imap):
+def block_closure(blocks, imap, standalone=False):
+    """The blocks a harness instantiates: the path's own plus the support
+    closure the map declares. A `standalone` path (a single block judged on
+    its own stream, for a drop that has no downstream yet) takes no closure;
+    the edges that cut must each have a `standalone_ties` entry in the map
+    or generation refuses — a silent zero tie is how a block gets judged
+    against a wrong environment."""
+    if standalone:
+        return sorted(set(blocks))
     req = imap.get("requires", {})
     out = set(blocks)
     frontier = list(blocks)
@@ -137,7 +145,13 @@ def check_wiring(imap, blocks):
     return errs
 
 
-def generate(path_id, seq, imap, settle=DEFAULT_SETTLE):
+def generate(path_id, seq, imap, settle=DEFAULT_SETTLE, formal=False):
+    """formal=True emits a synthesizable top for JasperGold: same blocks and
+    wiring, but clk/rst_n are ports, the host-facing inputs and the DRAM
+    stub's outputs become free inputs (the tool explores every value), and
+    there is no clock generator, reset sequence, driver, stub or watchdog.
+    CSR and status inputs stay tied as in simulation, so the timing registers
+    hold the spec's reset values that the assertions were generated from."""
     with open(SPEC_PATH) as f:
         spec = json.load(f)
     with open(SCHEMA_PATH) as f:
@@ -149,7 +163,10 @@ def generate(path_id, seq, imap, settle=DEFAULT_SETTLE):
     if path_id not in pdefs:
         raise WiringError(f"unknown path {path_id!r}; known: {sorted(pdefs)}")
 
-    blocks = block_closure(pdefs[path_id]["blocks"], imap)
+    standalone = bool(pdefs[path_id].get("standalone"))
+    blocks = block_closure(pdefs[path_id]["blocks"], imap, standalone)
+    sa_ties = {k: v["value"] if isinstance(v, dict) else v
+               for k, v in imap.get("standalone_ties", {}).items() if not k.startswith("$")}
     errs = check_wiring(imap, blocks)
     if errs:
         raise WiringError("wiring conformance failed:\n  " + "\n  ".join(errs))
@@ -179,6 +196,10 @@ def generate(path_id, seq, imap, settle=DEFAULT_SETTLE):
     sink_of = {}
     for c in imap["connections"]:
         sink_of[c["to"]] = c["from"]
+    # edges the map deferred because their source block is absent from the
+    # drop: still cut edges, so a standalone path takes its declared tie
+    for c in imap.get("deferred_connections", []):
+        sink_of.setdefault(c["to"], c["from"])
     for g in imap.get("glue", []):
         for to in g["to"]:
             sink_of[to] = ("__delayed__" + g["from"], g["from"],
@@ -195,6 +216,12 @@ def generate(path_id, seq, imap, settle=DEFAULT_SETTLE):
 
     decls, insts, tieoffs, glue_ff = [], [], [], []
     declared = set()
+    free = []               # formal mode: (net, width) exposed as input ports
+    # In formal mode the entry block's host inputs are free: every block that
+    # a path enters from the outside (wb_port for the command paths).
+    entry_blocks = {pdefs[path_id].get("entry_boundary", {}).get("block")} - {None}
+    if formal and not entry_blocks:
+        entry_blocks = {b for b in blocks if b == "wb_port"}
 
     def net_for_source(blk, port):
         n = f"{blk}__{port}"
@@ -238,7 +265,10 @@ def generate(path_id, seq, imap, settle=DEFAULT_SETTLE):
                     n = f"stub__{inst}__{sport}"
                     if n not in declared:
                         declared.add(n)
-                        decls.append(net_decl(n, width))
+                        if formal:
+                            free.append((n, width))      # DRAM data: free
+                        else:
+                            decls.append(net_decl(n, width))
                     conns.append(f".{pname}({n})")
                 elif isinstance(src, tuple):
                     _, src_ref, delay = src
@@ -255,6 +285,20 @@ def generate(path_id, seq, imap, settle=DEFAULT_SETTLE):
                 else:
                     sb, _, sp = src.partition(".")
                     conns.append(f".{pname}({net_for_source(sb, sp)})")
+            elif standalone and ref in sink_of and ref not in ties:
+                # a cut edge: its source block is deliberately absent
+                if ref not in sa_ties:
+                    src = sink_of[ref]
+                    src = src[1] if isinstance(src, tuple) else src
+                    raise WiringError(
+                        f"standalone path {path_id} cuts {ref} <- {src} and the map "
+                        f"declares no standalone_ties entry for it (integration_overrides.json)")
+                n = f"tie__{b}__{pname}"
+                if n not in declared:
+                    declared.add(n)
+                    decls.append(net_decl(n, width))
+                    tieoffs.append(f"  assign {n} = {sa_ties[ref]};   // standalone tie")
+                conns.append(f".{pname}({n})")
             elif ref in ties:
                 n = f"tie__{b}__{pname}"
                 if n not in declared:
@@ -280,6 +324,12 @@ def generate(path_id, seq, imap, settle=DEFAULT_SETTLE):
                     declared.add(n)
                     decls.append(net_decl(n, width))
                 conns.append(f".{pname}({n})")
+            elif formal and b in entry_blocks:
+                n = f"free__{b}__{pname}"
+                if n not in declared:
+                    declared.add(n)
+                    free.append((n, width))
+                conns.append(f".{pname}({n})")
             else:
                 n = f"tie__{b}__{pname}"
                 if n not in declared:
@@ -292,7 +342,7 @@ def generate(path_id, seq, imap, settle=DEFAULT_SETTLE):
                 conns.append(f".{pname}({n})")
         insts.append(f"  {b} u_{b} (\n    " + ",\n    ".join(conns) + "\n  );")
 
-    for s in active_stubs:
+    for s in ([] if formal else active_stubs):
         sconns = []
         for sport, src in s["inputs"].items():
             if src == "@clk":
@@ -347,6 +397,35 @@ def generate(path_id, seq, imap, settle=DEFAULT_SETTLE):
     $display("HARNESS_DONE");
     $finish;
   end"""
+    if formal:
+        port_lines = ["    input logic clk", "    input logic rst_n"] + [
+            f"    input logic {'' if width == 1 else f'[{width - 1}:0] '}{n}"
+            if not isinstance(width, str) else f"    input logic {n}"
+            for n, width in free]
+        return f"""// GENERATED by Validation/structural/chain_harness_gen.py --formal — DO NOT EDIT.
+//
+// Path     : {path_id}
+// Blocks   : {', '.join(blocks)}
+//
+// Formal top for JasperGold: the path's blocks wired per integration_map.json,
+// host inputs and DRAM data left free, CSR/status inputs tied as in simulation.
+// The generated SVA attach through their bind files; nothing here checks anything.
+
+module chain_formal (
+{(',' + chr(10)).join(port_lines)}
+);
+
+{chr(10).join(decls)}
+
+{chr(10).join(tieoffs)}
+
+{chr(10).join(glue_ff)}
+
+{chr(10).join(insts)}
+
+endmodule
+""", blocks
+
     return f"""`timescale 1ns/1ps
 // GENERATED by Validation/structural/chain_harness_gen.py — DO NOT EDIT.
 //
@@ -395,6 +474,9 @@ def main() -> int:
     ap.add_argument("--check", action="store_true",
                     help="run only the wiring conformance check, all blocks")
     ap.add_argument("--outdir", default=DEFAULT_OUT)
+    ap.add_argument("--formal", action="store_true",
+                    help="emit chain_formal.sv (synthesizable top for JasperGold) "
+                         "instead of the simulation harness")
     ap.add_argument("--settle", type=int, default=DEFAULT_SETTLE,
                     help="cycles to keep simulating after the driver is done "
                          "(refresh paths need to outlive tREFI)")
@@ -427,12 +509,13 @@ def main() -> int:
         with open(args.sequence) as f:
             seq = json.load(f)
     try:
-        sv, blocks = generate(args.path, seq, imap, settle=args.settle)
+        sv, blocks = generate(args.path, seq, imap, settle=args.settle,
+                              formal=args.formal)
     except WiringError as e:
         print(f"  {e}", file=sys.stderr)
         return 1
     os.makedirs(args.outdir, exist_ok=True)
-    dest = os.path.join(args.outdir, "chain_harness.sv")
+    dest = os.path.join(args.outdir, "chain_formal.sv" if args.formal else "chain_harness.sv")
     with open(dest, "w") as f:
         f.write(sv)
     print(f"  wrote {os.path.relpath(dest, ROOT)}  "

@@ -242,11 +242,31 @@ def _call_anthropic(messages: List[Dict[str, str]], max_tokens: int = 16000,
     if system_parts:
         payload["system"] = "\n\n".join(system_parts)
 
-    r = requests.post(url, headers=headers, json=payload, timeout=300)
-    r.raise_for_status()
-    data = r.json()
-    return "".join(b.get("text", "") for b in data.get("content", [])
-                   if b.get("type") == "text")
+    # Streamed: a 16k-token generation on a large model can run for many
+    # minutes, and a non-streaming request that long either hangs or is
+    # refused. With streaming, the read timeout applies between chunks, so a
+    # stalled connection is detected instead of waited on forever.
+    payload["stream"] = True
+    text = []
+    with requests.post(url, headers=headers, json=payload, stream=True,
+                       timeout=(30, 120)) as r:
+        r.raise_for_status()
+        for raw in r.iter_lines():
+            if not raw or not raw.startswith(b"data:"):
+                continue
+            try:
+                ev = json.loads(raw[5:].decode("utf-8", "replace").strip())
+            except ValueError:
+                continue
+            t = ev.get("type")
+            if t == "content_block_delta" and ev.get("delta", {}).get("type") == "text_delta":
+                text.append(ev["delta"]["text"])
+            elif t == "error":
+                raise requests.exceptions.RequestException(
+                    f"stream error: {ev.get('error')}")
+            elif t == "message_stop":
+                break
+    return "".join(text)
 
 
 def call_llm(messages: List[Dict[str, str]], max_tokens: int = 16000,

@@ -33,6 +33,7 @@ an at_minimum bin except by accident.
 """
 
 import json
+import re
 import os
 import sys
 
@@ -105,6 +106,10 @@ def stimulus_ports(iface, catalog, schemas):
                 outs[sig] = _manifest_width(cat["block"], sig)
         if drv.get("complete"):
             ins[drv["complete"]] = 1
+        if drv.get("accept"):
+            for sig in re.findall(r"[A-Za-z_]\w*", drv["accept"]):
+                if sig not in outs:
+                    ins[sig] = 1
     else:
         q = cat["qualifier"]
         if not IDENT.match(q):

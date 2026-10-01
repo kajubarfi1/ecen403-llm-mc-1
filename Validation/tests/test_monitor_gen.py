@@ -118,8 +118,16 @@ class TestGeneratedMonitorIsWellFormed(unittest.TestCase):
 
     def test_samples_after_nba_not_at_the_edge(self):
         """The config_regs lesson, pinned. Reading at the clock edge returns
-        pre-NBA values and fabricates failures against correct RTL."""
+        pre-NBA values and fabricates failures against correct RTL.
+
+        The one declared exception (`sample: pre_nba`, the wb_port lesson of
+        2026-10-01): a host-driven handshake whose qualifier mixes a held
+        input with a combinational stall/ready must record what the DUT's
+        flops saw at the edge, or it records a beat the slave rejected the
+        moment its queue frees. Pinned in its own test below."""
         for iface in SCHEMAS:
+            if CATALOG[iface].get("sample") == "pre_nba":
+                continue
             _, src = gen(iface)
             # A monitor has two always blocks: the reset event (negedge) and
             # the transaction sampler (posedge). Check the sampler.
@@ -131,6 +139,17 @@ class TestGeneratedMonitorIsWellFormed(unittest.TestCase):
             disp = body.index("$display")
             self.assertLess(edge, delay)
             self.assertLess(delay, disp, f"{iface}: display precedes the delay")
+
+    def test_pre_nba_streams_sample_at_the_edge(self):
+        """A `sample: pre_nba` stream (wb) reads the qualifier in the active
+        region at the edge -- no delay -- and says so in the source."""
+        pre = [i for i in SCHEMAS if CATALOG[i].get("sample") == "pre_nba"]
+        self.assertIn("wb", pre)
+        for iface in pre:
+            _, src = gen(iface)
+            body = src[src.index("always @(posedge"):]
+            self.assertNotIn("#SAMPLE_DELAY", body, f"{iface}: declared pre_nba but delays")
+            self.assertIn("pre_nba", body)
 
     def test_reset_is_respected(self):
         for iface in SCHEMAS:

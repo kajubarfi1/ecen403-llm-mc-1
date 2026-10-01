@@ -607,52 +607,75 @@ class BusBridgeGate:
                     seed += 1
                     drive[fname] = (0xC3C3C3C3 ^ (seed * 0x77)) & ((1 << w) - 1)
                 drive[sfield] = cls._numeric(sval)
+                # Two drive patterns, the second the bitwise complement of the
+                # first: a single pattern leaves half of every field's bits
+                # untested at one polarity (a PRECHARGE that leaked row bit 10
+                # onto A10 passed for months because the pattern's bit 10 was 0).
+                inv = dict(drive)
+                for fname, info in sfields.items():
+                    if fname != sfield and isinstance(info['width'], int):
+                        inv[fname] = drive[fname] ^ ((1 << info['width']) - 1)
+                for drive in (drive, inv):
 
-                predictor.reset()
-                mine = [t for t in (predictor.process(Txn(src, skind, drive)) or [])
-                        if t.iface == oi]
-                if len(mine) != 1:
-                    fails.append(
-                        f"a {src} command {name} produced {len(mine)} "
-                        f"transaction(s) on {oi!r}; exactly one is required.")
-                    continue
-                t = mine[0]
-
-                want = cls._numeric(tenc[name])
-                got = t.fields.get(ofield)
-                if got != want:
-                    fails.append(
-                        f"{oi}.{ofield} is {got} for a {name} command; the "
-                        f"{spec_['target_encoding_iface']} encoding of {name} "
-                        f"is {want}. The two buses use different encodings and "
-                        f"the bridge must translate between them, not copy "
-                        f"the value through.")
-
-                # Plain field correspondences still apply on an encoded
-                # bridge. An earlier version checked only the value and
-                # conditional maps here, so a bridge that dropped the bank
-                # passed every command — the gate was grading the
-                # interesting half and ignoring the rest.
-                for ofld, sfld in d.get("field_map", {}).items():
-                    if sfld not in drive:
-                        continue
-                    if t.fields.get(ofld) != drive[sfld]:
+                    predictor.reset()
+                    mine = [t for t in (predictor.process(Txn(src, skind, drive)) or [])
+                            if t.iface == oi]
+                    if len(mine) != 1:
                         fails.append(
-                            f"{oi}.{ofld} is {t.fields.get(ofld)!r} for a "
-                            f"{name}, but {src}.{sfld} was driven as "
-                            f"{drive[sfld]:#x}. This field carries across "
-                            f"unchanged on every command.")
-
-                for cf, csp in cmap.items():
-                    src_for = csp["by_command"].get(name)
-                    if src_for is None or src_for not in drive:
+                            f"a {src} command {name} produced {len(mine)} "
+                            f"transaction(s) on {oi!r}; exactly one is required.")
                         continue
-                    if t.fields.get(cf) != drive[src_for]:
+                    t = mine[0]
+
+                    want = cls._numeric(tenc[name])
+                    got = t.fields.get(ofield)
+                    if got != want:
                         fails.append(
-                            f"{oi}.{cf} is {t.fields.get(cf):#x} for a {name}; "
-                            f"a {name} carries {src}.{src_for} "
-                            f"({drive[src_for]:#x}) there. That field is "
-                            f"multiplexed by command type.")
+                            f"{oi}.{ofield} is {got} for a {name} command; the "
+                            f"{spec_['target_encoding_iface']} encoding of {name} "
+                            f"is {want}. The two buses use different encodings and "
+                            f"the bridge must translate between them, not copy "
+                            f"the value through.")
+
+                    # Plain field correspondences still apply on an encoded
+                    # bridge. An earlier version checked only the value and
+                    # conditional maps here, so a bridge that dropped the bank
+                    # passed every command — the gate was grading the
+                    # interesting half and ignoring the rest.
+                    for ofld, sfld in d.get("field_map", {}).items():
+                        if sfld not in drive:
+                            continue
+                        if t.fields.get(ofld) != drive[sfld]:
+                            fails.append(
+                                f"{oi}.{ofld} is {t.fields.get(ofld)!r} for a "
+                                f"{name}, but {src}.{sfld} was driven as "
+                                f"{drive[sfld]:#x}. This field carries across "
+                                f"unchanged on every command.")
+
+                    for cf, csp in cmap.items():
+                        src_for = csp["by_command"].get(name)
+                        if isinstance(src_for, dict) and "bits" in src_for:
+                            # Declared constant bits for this command (e.g. a
+                            # single-bank PRECHARGE drives A10 low). Only the
+                            # declared bits are graded; the rest stay don't-care.
+                            got = t.fields.get(cf) or 0
+                            for bit, val in src_for["bits"].items():
+                                if (got >> int(bit)) & 1 != int(val):
+                                    fails.append(
+                                        f"{oi}.{cf} bit {bit} is "
+                                        f"{(got >> int(bit)) & 1} for a {name}; it "
+                                        f"must be {val}. {src_for.get('why', '')} "
+                                        f"(driven with {src} fields "
+                                        f"{ {k: hex(v) for k, v in drive.items()} })")
+                            continue
+                        if src_for is None or src_for not in drive:
+                            continue
+                        if t.fields.get(cf) != drive[src_for]:
+                            fails.append(
+                                f"{oi}.{cf} is {t.fields.get(cf):#x} for a {name}; "
+                                f"a {name} carries {src}.{src_for} "
+                                f"({drive[src_for]:#x}) there. That field is "
+                                f"multiplexed by command type.")
 
             # a command declared to produce nothing must produce nothing
             for name in no_out.get(sfield, []):
@@ -745,15 +768,55 @@ class BusBridgeGate:
                         continue
                     mine = [t for t in emitted if t.iface == oi]
 
+                    # An output that COMPLETES on a second stream (a read
+                    # response carrying data that arrives later on another
+                    # interface) is due only once that transaction has been
+                    # seen: nothing may be emitted for the request alone, and
+                    # exactly one for the completion, carrying its fields.
+                    comp = d.get("completes_on")
+                    comp_drive = None
+                    if comp and skind in comp.get("for_kinds", list(src_kinds)):
+                        if mine:
+                            fails.append(
+                                f"a {src}.{skind} produced {len(mine)} "
+                                f"transaction(s) on {oi!r} before its "
+                                f"{comp['interface']}.{comp['kind']} arrived; the "
+                                f"response completes on that stream and must "
+                                f"wait for it.")
+                            continue
+                        cfields = schemas[comp["interface"]]["kinds"][comp["kind"]]
+                        comp_drive = {}
+                        for fname, info in cfields.items():
+                            w = info["width"]
+                            if isinstance(w, int):
+                                seed += 1
+                                comp_drive[fname] = ((0x3C3C3C3C ^ (seed * 0x51))
+                                                     & ((1 << w) - 1))
+                        emitted = predictor.process(
+                            Txn(comp["interface"], comp["kind"], comp_drive))
+                        mine = [t for t in (emitted or []) if t.iface == oi]
+
                     card = d.get("cardinality", "one_per_source_transaction")
                     if card.startswith("one_per") and len(mine) != 1:
                         fails.append(
                             f"a {src}.{skind} produced {len(mine)} "
                             f"transaction(s) on {oi!r}; exactly one is "
                             f"required. Every accepted host access translates "
-                            f"into exactly one descriptor.")
+                            f"into exactly one descriptor."
+                            + (f" (emitted when its {comp['interface']}."
+                               f"{comp['kind']} arrives)" if comp_drive else ""))
                         continue
                     t = mine[0]
+
+                    if comp_drive:
+                        for ofield, cfield in comp.get("field_map", {}).items():
+                            if t.fields.get(ofield) != comp_drive[cfield]:
+                                fails.append(
+                                    f"{oi}.{ofield} is {t.fields.get(ofield)!r} "
+                                    f"but the completing {comp['interface']}."
+                                    f"{cfield} carried {comp_drive[cfield]:#x}. "
+                                    f"The response returns that value, not one "
+                                    f"the model computed itself.")
 
                     if dirf:
                         want = dirf["by_source_kind"].get(skind)

@@ -11,13 +11,14 @@
 // consult NO signal of the design except the command stream itself.
 
 module cmd_gen_sva #(
-    parameter int BANK_W = 3
+    parameter int BANK_W = 3,
+    parameter int ADDR_W = 15
 ) (
     input logic clk,
     input logic rst_n,
     input logic [3:0] ddr_cmd,
     input logic [2:0] ddr_bank,
-    input logic [14:0] ddr_addr
+    input logic [ADDR_W-1:0] ddr_addr
 );
 
   // ---- TIMING_001 -------------------------------------------------------
@@ -183,9 +184,12 @@ module cmd_gen_sva #(
   // consecutive REF commands may be at most 9 x 1560 = 14040
   // cycles apart. Counted from the observed command stream; armed by the
   // first REF seen after reset.
-  logic [31:0] timing_012_since;
-  logic        timing_012_armed;
-  always_ff @(posedge clk or negedge rst_n) begin
+  // Initialised at declaration as well as on reset: a testbench whose reset
+  // is X or still high for the first cycles must not see X here and fail
+  // (an X in the checked expression is a failure, not a don't-care).
+  logic [31:0] timing_012_since = '0;
+  logic        timing_012_armed = 1'b0;
+  always @(posedge clk or negedge rst_n) begin   // plain always: initialiser + always_ff would be two drivers
     if (!rst_n) begin
       timing_012_since <= '0;
       timing_012_armed <= 1'b0;
@@ -215,13 +219,24 @@ module cmd_gen_sva #(
   // addressed one. Tracking only the addressed bank would leave banks marked
   // open after they were closed, and the protocol assertions below would then
   // fire on correct behaviour.
-  logic [7:0] row_open;
+  logic [7:0] row_open = '0;
   wire pre_all = (ddr_cmd == 4'b0010) && ddr_addr[10];
-  always_ff @(posedge clk or negedge rst_n) begin
+  always @(posedge clk or negedge rst_n) begin   // plain always: initialiser + always_ff would be two drivers
     if (!rst_n)        row_open <= '0;
     else if (pre_all)  row_open <= '0;
     else if ((ddr_cmd == 4'b0011))    row_open[ddr_bank] <= 1'b1;
     else if ((ddr_cmd == 4'b0010))    row_open[ddr_bank] <= 1'b0;
+  end
+  // Multi-Purpose Register mode (JESD79-3 MR3 A2): while enabled, READs return
+  // the MPR pattern and need no open row — this is how a controller calibrates
+  // its read path during initialisation. Tracked from the observed MRS stream
+  // (MRS to MR3 = bank address 3), so a design that forgets to leave MPR mode
+  // is still caught by the data path, and one that reads a closed bank outside
+  // MPR mode is still caught here.
+  logic mpr_en = 1'b0;
+  always @(posedge clk or negedge rst_n) begin   // plain always: initialiser + always_ff would be two drivers
+    if (!rst_n)                                  mpr_en <= 1'b0;
+    else if ((ddr_cmd == 4'b0000) && ddr_bank == 3)   mpr_en <= ddr_addr[2];
   end
 
   // ---- PROTO_001 -------------------------------------------------------
@@ -231,10 +246,10 @@ module cmd_gen_sva #(
   // be able to excuse itself.
   property p_PROTO_001;
     @(posedge clk) disable iff (!rst_n)
-    (ddr_cmd == 4'b0101 || ddr_cmd == 4'b0100) |-> row_open[ddr_bank];
+    (ddr_cmd == 4'b0101 || ddr_cmd == 4'b0100) |-> (row_open[ddr_bank] || (mpr_en && (ddr_cmd == 4'b0101)));
   endproperty
   a_PROTO_001: assert property (p_PROTO_001)
-    else $error("[PROTO_001] READ/WRITE to a bank with no active row");
+    else $error("[PROTO_001] READ/WRITE to a bank with no active row (and not an MPR read)");
   c_PROTO_001: cover property (p_PROTO_001);
 
   // ---- PROTO_002 -------------------------------------------------------

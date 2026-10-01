@@ -1,0 +1,40 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_22_csr_standalone",
+  "strategy": "exact",
+  "verdict": "pass",
+  "timestamp": "2026-10-01T11:22:44.927588",
+  "blocks": [
+    "config_regs"
+  ],
+  "sequence": "Validation/sequences/generated/path_22_csr_standalone_seed1.json",
+  "stimulus_generator": "register_walk",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "5661e03",
+    "roots": [
+      "Frontend2/OutputFolders"
+    ],
+    "blocks": {
+      "config_regs": {
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json"
+      }
+    }
+  },
+  "stages": [
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "pass",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=103/103  WAIVED=2 field comparison(s)  (103 output transaction(s) matched)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/paths/path_22_csr_standalone_sim.log",
+  "observed_trace": "Validation/reports/paths/path_22_csr_standalone_observed.jsonl"
+}
