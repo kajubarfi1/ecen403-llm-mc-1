@@ -593,8 +593,25 @@
         },
         "pack_mode": {
           "type": "string",
-          "enum": ["pack_32_to_16", "pack_64_to_16", "pack_32_to_32", "direct"],
-          "description": "How host words are serialized onto the DDR bus."
+          "enum": [
+          "direct",
+          "pack_32_to_8",
+          "pack_32_to_16",
+          "pack_32_to_32",
+          "pack_32_to_64",
+          "pack_32_to_128",
+          "pack_64_to_8",
+          "pack_64_to_16",
+          "pack_64_to_32",
+          "pack_64_to_64",
+          "pack_64_to_128",
+          "pack_128_to_8",
+          "pack_128_to_16",
+          "pack_128_to_32",
+          "pack_128_to_64",
+          "pack_128_to_128"
+        ],
+          "description": "How host words are serialized onto the DDR bus: pack_<host_width>_to_<channel_width> (host 32/64/128, channel 8..128), or direct."
         },
         "alignment_bytes_required": { "type": "integer", "minimum": 1 },
         "endianness": {
@@ -697,27 +714,27 @@
       "description": "End-to-end latency formulas for validation reference model. All in DDR clock cycles (nCK).",
       "properties": {
         "read_hit_latency_nCK": {
-          "type": "string",
+          "type": ["integer", "string"],
           "description": "Formula: pipeline_latency * clock_ratio + CL + burst_length/2 + data_alignment. Row already open, correct bank."
         },
         "read_miss_latency_nCK": {
-          "type": "string",
+          "type": ["integer", "string"],
           "description": "Formula: pipeline_latency * clock_ratio + tRP + tRCD + CL + burst_length/2 + data_alignment. Wrong row open."
         },
         "read_empty_latency_nCK": {
-          "type": "string",
+          "type": ["integer", "string"],
           "description": "Formula: pipeline_latency * clock_ratio + tRCD + CL + burst_length/2 + data_alignment. Bank idle."
         },
         "write_hit_latency_nCK": {
-          "type": "string",
+          "type": ["integer", "string"],
           "description": "Formula: pipeline_latency * clock_ratio + CWL + burst_length/2 + tWR."
         },
         "write_to_read_turnaround_nCK": {
-          "type": "string",
+          "type": ["integer", "string"],
           "description": "Formula: CWL + burst_length/2 + tWTR."
         },
         "read_to_write_turnaround_nCK": {
-          "type": "string",
+          "type": ["integer", "string"],
           "description": "Formula: CL + tCCD + 2 - CWL (typical, controller-specific)."
         }
       }
