@@ -18,7 +18,8 @@ What is checked, and what each outcome does:
 
   BLOCKING (status FAIL — the pipeline stops before Phase 1):
     * schema: every section Spec/llmmc_microarchitecture.schema.json requires
-      is present, with the declared type; enum fields hold an allowed value
+      is present, with the declared type; enum / pattern / minimum / maximum
+      hold (the subset of JSON Schema this checker evaluates; nothing else is)
     * JEDEC: Validation/jedec/spec_conformance.py — JESD79-3 rules recomputed
       from the spec's numbers; the spec's own "[check]" claims re-derived
     * registers: the CSR map is self-consistent (unique offsets, fields inside
@@ -44,6 +45,7 @@ Usage:
 import argparse
 import json
 import os
+import re
 import sys
 from datetime import datetime, timezone
 
@@ -68,7 +70,7 @@ _TYPES = {"object": dict, "array": list, "string": str, "boolean": bool,
 
 def _schema_walk(node, value, path, out, depth=0):
     """A deliberately small subset of JSON Schema: required / properties /
-    type / enum, recursively. Enough to refuse a spec with a missing section
+    type / enum / pattern / minimum / maximum, recursively. Enough to refuse a spec with a missing section
     or a value outside its enum; anything the subset cannot express is not
     checked (and that is said, not hidden)."""
     if not isinstance(node, dict):
@@ -86,6 +88,13 @@ def _schema_walk(node, value, path, out, depth=0):
             return
     if "enum" in node and value not in node["enum"]:
         out.append(f"{path}: {value!r} is not one of {node['enum']}")
+    if "pattern" in node and isinstance(value, str) and not re.search(node["pattern"], value):
+        out.append(f"{path}: {value!r} does not match pattern {node['pattern']!r}")
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        if "minimum" in node and value < node["minimum"]:
+            out.append(f"{path}: {value} is below minimum {node['minimum']}")
+        if "maximum" in node and value > node["maximum"]:
+            out.append(f"{path}: {value} is above maximum {node['maximum']}")
     if isinstance(value, dict):
         for req in node.get("required", []):
             if req not in value:

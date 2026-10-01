@@ -196,6 +196,22 @@ def _git_head():
         return None
 
 
+PATH_DEFS = os.path.join(ROOT, "Validation", "spec", "path_definitions.json")
+
+
+def all_blocks():
+    """Every block of the design (path_definitions.json `blocks`, 11 today).
+    The interface catalog names only the blocks that own an interface (9:
+    addr_decoder and bank_tracker consume and produce shared streams), so it
+    is not the list a drop is identified by -- a drop id that ignored two
+    blocks let an addr_decoder change keep its id (Lehana, 2026-10-01)."""
+    try:
+        with open(PATH_DEFS) as f:
+            return sorted(json.load(f)["blocks"])
+    except (OSError, ValueError, KeyError):
+        return _catalog_blocks()
+
+
 def _catalog_blocks():
     with open(CATALOG) as f:
         return sorted({d["block"] for d in json.load(f)["interfaces"].values()})
@@ -205,7 +221,7 @@ def frontend_commits(blocks=None):
     """{block: git_commit the Frontend's manifest records}, blocks without
     one omitted."""
     out = {}
-    for b in blocks or _catalog_blocks():
+    for b in blocks or all_blocks():
         try:
             with open(manifest_file(b)) as f:
                 c = json.load(f).get("git_commit")
@@ -219,8 +235,9 @@ def frontend_commits(blocks=None):
 def drop_id(blocks=None):
     """The drop's identity, which names its reports and its outbox folder.
 
-    It is a hash of the drop's OWN files -- every block's RTL and manifest,
-    in block order -- so it depends on nothing outside the drop: not on
+    It is a hash of the drop's OWN files -- EVERY block's RTL and manifest
+    (all_blocks(): the 11 of path_definitions.json, not only the 9 the
+    interface catalog names), in block order -- so it depends on nothing outside the drop: not on
     this repo's HEAD, not on the Frontend's, not on when the files were
     written. The same files always get the same id; one changed byte is a
     new drop. The Frontend can compute it from the files it just wrote
@@ -231,7 +248,7 @@ def drop_id(blocks=None):
     """
     h = hashlib.sha256()
     n = 0
-    for b in sorted(blocks or _catalog_blocks()):
+    for b in sorted(blocks or all_blocks()):
         for fn in (rtl_file, manifest_file):
             try:
                 p = fn(b)
@@ -268,8 +285,7 @@ def stamp(blocks):
 
 
 def main() -> int:
-    with open(CATALOG) as f:
-        blocks = sorted({d["block"] for d in json.load(f)["interfaces"].values()})
+    blocks = all_blocks()
     st = stamp(blocks)
     print(f"  drop roots : {', '.join(st['roots']) or 'NONE PRESENT'}")
     n_gen = len(set(st["frontend_commits"].values()))

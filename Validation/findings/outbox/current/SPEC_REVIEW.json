@@ -2,10 +2,10 @@
   "$schema": "validation-spec-review/1",
   "status": "PASS",
   "validator": "Validation/spec/validate_spec_stage.py (schema + JESD79-3 + register map + intake gate)",
-  "spec": "../../../../private/tmp/claude-501/-Users-jacob-Capstone-ecen403-llm-mc-1/3f4c2279-68de-43b3-be57-c25da6ceaf5f/scratchpad/run_golden/spec/generated_spec.json",
-  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "design_id": "ddr3_mc_core_v2",
-  "generated_utc": "2026-10-01T17:59:22.867329+00:00",
+  "spec": "Frontend2/OutputFolders/generated_spec.json",
+  "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+  "design_id": "ddr3_mc_800_x8_1lane_1rank",
+  "generated_utc": "2026-10-01T18:44:22.851146+00:00",
   "blocking": [],
   "advisory": [
     "[gap:decision] CSR_UNMAPPED_READ_DATA: csr_register_map.unmapped_read_data is not stated",
@@ -27,42 +27,42 @@
       "title": "tRC equals tRAS + tRP",
       "status": "pass",
       "severity": "critical",
-      "detail": "tRC=48.75, tRAS+tRP=48.75"
+      "detail": "tRC=52.5, tRAS+tRP=52.5"
     },
     {
       "id": "J-TIM-002",
       "title": "tFAW at least 4x tRRD",
       "status": "pass",
       "severity": "critical",
-      "detail": "tFAW=40.0, 4*tRRD=30.0"
+      "detail": "tFAW=40.0, 4*tRRD=40.0"
     },
     {
       "id": "J-TIM-003",
       "title": "tRRD floor",
       "status": "pass",
       "severity": "critical",
-      "detail": "tRRD=7.5, floor=max(4*tCK=5.0, 7.5)=7.5"
+      "detail": "tRRD=10.0, floor=max(4*tCK=10.0, 7.5)=10.0"
     },
     {
       "id": "J-TIM-004",
       "title": "tWTR floor",
       "status": "pass",
       "severity": "critical",
-      "detail": "tWTR=7.5, floor=max(4*tCK=5.0, 7.5)=7.5"
+      "detail": "tWTR=10.0, floor=max(4*tCK=10.0, 7.5)=10.0"
     },
     {
       "id": "J-TIM-005",
       "title": "tRTP floor",
       "status": "pass",
       "severity": "critical",
-      "detail": "tRTP=7.5, floor=max(4*tCK=5.0, 7.5)=7.5"
+      "detail": "tRTP=10.0, floor=max(4*tCK=10.0, 7.5)=10.0"
     },
     {
       "id": "J-TIM-006",
       "title": "tCCD is 4 clocks",
       "status": "pass",
       "severity": "critical",
-      "detail": "tCCD=5.0, 4*tCK=5.0"
+      "detail": "tCCD=10.0, 4*tCK=10.0"
     },
     {
       "id": "J-TIM-007",
@@ -76,14 +76,14 @@
       "title": "CWL legal for tCK",
       "status": "pass",
       "severity": "critical",
-      "detail": "CWL=8 at tCK=1.25; standard allows [8]"
+      "detail": "CWL=5 at tCK=2.5; standard allows [5]"
     },
     {
       "id": "J-TIM-009",
       "title": "tRFC matches device density",
       "status": "pass",
       "severity": "critical",
-      "detail": "tRFC=160.0 for 2Gb; standard=160.0"
+      "detail": "tRFC=110.0 for 1Gb; standard=110.0"
     },
     {
       "id": "J-TIM-010",
@@ -97,7 +97,7 @@
       "title": "CL/tRCD/tRP consistent with a real speed bin",
       "status": "pass",
       "severity": "major",
-      "detail": "CL=11 (13.75ns), tRCD=13.75, tRP=13.75 \u2014 a published bin has all three equal"
+      "detail": "CL=6 (15.0ns), tRCD=15.0, tRP=15.0 \u2014 a published bin has all three equal"
     },
     {
       "id": "J-INI-001",
@@ -118,14 +118,14 @@
       "title": "tXPR floor",
       "status": "pass",
       "severity": "critical",
-      "detail": "tXPR=170.0, floor=max(5*tCK=6.25, tRFC+10=170.0)=170.0"
+      "detail": "tXPR=120.0, floor=max(5*tCK=12.5, tRFC+10=120.0)=120.0"
     },
     {
       "id": "J-INI-004",
       "title": "tZQinit at least 512 clocks",
       "status": "pass",
       "severity": "critical",
-      "detail": "tZQinit=640.0, floor=512*tCK=640.0"
+      "detail": "tZQinit=1280.0, floor=512*tCK=1280.0"
     },
     {
       "id": "J-INI-005",
@@ -160,7 +160,7 @@
       "title": "Density matches addressing",
       "status": "pass",
       "severity": "major",
-      "detail": "2^(15+10+3)*8 = 2147483648 bits; spec says 2147483648"
+      "detail": "2^(14+10+3)*8 = 1073741824 bits; spec says 1073741824"
     },
     {
       "id": "J-GEO-004",
@@ -174,7 +174,7 @@
       "title": "tCK agrees across sections",
       "status": "pass",
       "severity": "critical",
-      "detail": "timing_model.tCK_ns=1.25, clocking_model.ddr_clock_period_ns=1.25"
+      "detail": "timing_model.tCK_ns=2.5, clocking_model.ddr_clock_period_ns=2.5"
     },
     {
       "id": "J-CON-002",
@@ -188,14 +188,14 @@
       "title": "MR0 CAS latency matches the timing model",
       "status": "pass",
       "severity": "critical",
-      "detail": "MR0.cas_latency_cycles=11, timing_model.CL_cycles=11"
+      "detail": "MR0.cas_latency_cycles=6, timing_model.CL_cycles=6"
     },
     {
       "id": "J-CON-004",
       "title": "MR2 CAS write latency matches the timing model",
       "status": "pass",
       "severity": "critical",
-      "detail": "MR2.cas_write_latency_cycles=8, timing_model.CWL_cycles=8"
+      "detail": "MR2.cas_write_latency_cycles=5, timing_model.CWL_cycles=5"
     }
   ],
   "intake_gaps": [

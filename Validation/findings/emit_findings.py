@@ -535,6 +535,12 @@ def emit(reports_dir, out_dir=None, drop_status=None):
     if drop_status:
         with open(os.path.join(out_dir, "DROP_STATUS.json"), "w") as f:
             json.dump(drop_status, f, indent=2)
+    # the spec review this drop was judged under travels with the drop's
+    # archive (current/ is overwritten by every run, from either side)
+    rv = os.path.join(OUTBOX, "current", "SPEC_REVIEW.json")
+    if os.path.exists(rv):
+        import shutil
+        shutil.copy(rv, os.path.join(out_dir, "SPEC_REVIEW.json"))
     with open(os.path.join(out_dir, "findings_v2.json"), "w") as f:
         json.dump(doc, f, indent=2)
     latest = os.path.join(os.path.dirname(out_dir), "latest")

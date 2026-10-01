@@ -92,9 +92,10 @@ class FlowCase(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp(prefix="flow_")
         self.run_dir = os.path.join(self.tmp, "run")
-        self.saved = (flow.sh, flow.OUTBOX_CURRENT, flow.phase_agent, flow.agent_takes_retry)
+        self.saved = (flow.sh, flow.OUTBOX_CURRENT, flow.phase_agent, flow.agent_findings_flag, flow.agent_takes_yes)
         self.direct = False
-        flow.agent_takes_retry = lambda agent: self.direct
+        flow.agent_findings_flag = lambda agent: "--findings" if self.direct else None
+        flow.agent_takes_yes = lambda agent: False
         flow.OUTBOX_CURRENT = os.path.join(self.tmp, "outbox_current")
         self.agents = {}                       # phase -> fake agent path
         flow.phase_agent = lambda n: self.agents.get(n, os.path.join(self.tmp, f"no_agent_{n}.py"))
@@ -104,7 +105,7 @@ class FlowCase(unittest.TestCase):
         flow.QUIET = True
 
     def tearDown(self):
-        flow.sh, flow.OUTBOX_CURRENT, flow.phase_agent, flow.agent_takes_retry = self.saved
+        flow.sh, flow.OUTBOX_CURRENT, flow.phase_agent, flow.agent_findings_flag, flow.agent_takes_yes = self.saved
         flow.QUIET = False
         shutil.rmtree(self.tmp, ignore_errors=True)
         os.environ.pop("OLYMPUS_KEY", None)
@@ -231,9 +232,9 @@ class TestHalts(FlowCase):
         rc, run = self.go(fake, skip_backend=True)
         self.assertEqual(rc, 0, run.state["halt"])
         agent = [c for c in fake.calls if c[0] == "phase1_validation_agent.py"][0]
-        self.assertIn("--retry", agent[1])
-        self.assertTrue(agent[1][agent[1].index("--retry") + 1].endswith("retry_instructions.json"))
-        self.assertIn("--yes", agent[1])
+        self.assertIn("--findings", agent[1])
+        self.assertTrue(agent[1][agent[1].index("--findings") + 1].endswith("retry_instructions.json"))
+        self.assertNotIn("--yes", agent[1], "only passed when the agent advertises it")
 
     def test_rtl_round_cap(self):
         self._agent(1)

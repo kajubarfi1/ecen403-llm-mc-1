@@ -40,10 +40,10 @@ nothing here re-implements any of them:
 Two edges are defined but wait for a counterpart that does not exist yet, and
 say so instead of pretending:
   * validation -> frontend regeneration goes through the Frontend's phase
-    validation agents (Phase{N}/phase{N}_validation_agent.py), which repair a
-    generator from that phase's error report; Validation writes our findings
-    in that report's shape. Phases that have no agent yet (3, 4) halt with the
-    package.
+    validation agents (Phase{N}/phase{N}_validation_agent.py). They take our
+    retry_instructions.json directly (--findings); an agent without that
+    option gets our findings rendered as its phase error report. Phases that
+    have no agent yet (3, 4) halt with the package.
   * backend -> frontend change requests have no agreed artifact yet; a backend
     failure that names the RTL halts with the backend report.
   * the final netlist validation on our paths is not built yet; the stage
@@ -88,12 +88,25 @@ def phase_agent(n):
 TO_ERROR_REPORT = os.path.join(ROOT, "Validation", "findings", "to_frontend_error_report.py")
 
 
-def agent_takes_retry(agent):
-    """True when the agent's --help advertises --retry (it consumes
-    retry_instructions.json itself)."""
+def agent_findings_flag(agent):
+    """The option under which the agent takes retry_instructions.json itself
+    (`--findings`, Frontend 2026-10-01; `--retry` was our name for it), or
+    None when it only reads the phase error report."""
     try:
         r = subprocess.run([PY, agent, "--help"], capture_output=True, text=True, timeout=60)
-        return "--retry" in (r.stdout + r.stderr)
+        text = r.stdout + r.stderr
+    except Exception:
+        return None
+    for flag in ("--findings", "--retry"):
+        if flag in text:
+            return flag
+    return None
+
+
+def agent_takes_yes(agent):
+    try:
+        r = subprocess.run([PY, agent, "--help"], capture_output=True, text=True, timeout=60)
+        return "--yes" in (r.stdout + r.stderr)
     except Exception:
         return False
 PHASES = [(1, "Phase1", "phase1_pipeline.py", "PHASE1RTL", ["init_fsm", "config_regs", "wb_port"]),
@@ -362,9 +375,16 @@ def stage_rtl_generation(run, args, phases=None):
                             "resume.", phase=n,
                             report=os.path.relpath(os.path.join(run.drop, "VALIDATIONREPORT",
                                                                 f"phase{n}_error_report.json"), ROOT))
-        skipped = [k for k in ("lint_status", "sim_status") if rep and rep.get(k) == "SKIPPED"]
-        run.record("rtl_generation", "PASS", f"phase {n}" + (f" ({', '.join(skipped)} SKIPPED -- "
-                   f"the Frontend's own gate did not run)" if skipped else ""), phase=n)
+        # Frontend 2026-10-01: a gate that could not run fails the phase
+        # unless ALLOW_SKIPPED_GATES=1, in which case the report says
+        # PASS_UNVERIFIED with `skipped_gates`. Validation is the gate that
+        # does run, so the flow continues and records it.
+        skipped = list((rep or {}).get("skipped_gates") or []) or \
+            [k for k in ("lint_status", "sim_status") if rep and rep.get(k) == "SKIPPED"]
+        status = (rep or {}).get("status", "PASS")
+        run.record("rtl_generation", "PASS", f"phase {n}" + (
+            f" ({status}: {', '.join(skipped)} did not run on the Frontend side)" if skipped else ""),
+            phase=n, frontend_status=status)
         if args.validate_per_phase and n < 4:
             rc = stage_rtl_validation(run, args, partial=True, tag=f"phase{n}")
             if rc:
@@ -464,15 +484,18 @@ def stage_frontend_regeneration(run, args, package):
         # An agent that takes our package directly (--retry, the ask in
         # HANDOFF_FRONTEND_2026-10-01.md) gets it; otherwise it reads the
         # phase error report the adapter just wrote in its own shape.
-        direct = agent_takes_retry(agent)
+        flag = agent_findings_flag(agent)
         run.log(f"-- phase {n} validation agent on "
-                f"{os.path.relpath(ri if direct else written[n], ROOT)}"
-                + ("" if direct else "  (rendered as the phase error report)"))
+                f"{os.path.relpath(ri if flag else written[n], ROOT)}"
+                + ("" if flag else "  (rendered as the phase error report)"))
         cmd = [PY, agent, "--output-dir", run.drop, "--spec", run.state["spec"]]
-        if direct:
-            cmd += ["--retry", ri, "--yes"]
-        # every proposal is applied; a module the agent cannot fix stays
-        # failing and the next validation round says so
+        if flag:
+            cmd += [flag, ri]
+            if agent_takes_yes(agent):
+                cmd.append("--yes")
+        # Unattended: every proposal is applied (the agent's prompts are
+        # answered 'a'). The review of what it changed is the next validation
+        # round, the rtl-round cap, and the agent's own re-verify/revert.
         rc, txt = sh(cmd, cwd=os.path.dirname(agent), stdin="a\n" * 40, log=run.log, timeout=3600)
         run.record("frontend_regeneration", "PASS" if rc == 0 else "PARTIAL",
                    f"phase {n} agent exited {rc}" + ("" if rc == 0 else " (not every module fixed)"),

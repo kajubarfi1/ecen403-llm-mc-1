@@ -23,13 +23,18 @@ gets one finding (`SPEC_MISMATCH`) and nothing else.
 
 `drop_id` = first 12 hex digits of SHA-256 over, for each block in sorted
 name order: the block name, the bytes of `<block>.sv`, the block name, the
-bytes of `<block>_manifest.json`. Nothing from git, nothing from timestamps.
+bytes of `<block>_manifest.json`. "Each block" is **every block of the
+design** — the 11 listed in `Validation/spec/path_definitions.json`
+`blocks` (`addr_decoder, bank_tracker, calibration, cmd_gen, cmd_queue,
+config_regs, data_path, init_fsm, refresh_ctrl, scheduler, wb_port`), not
+only the 9 the interface catalog names (fixed 2026-10-01; ids before that
+date covered 9). Nothing from git, nothing from timestamps.
 Same files → same id; one changed byte → a new drop. Reference
 implementation: `Validation/structural/rtl_drop.py: drop_id()`.
 
 ```python
 import hashlib, os
-def drop_id(root, blocks):               # blocks: the names, any order
+def drop_id(root, blocks):               # blocks: all 11 names, any order
     h = hashlib.sha256()
     for b in sorted(blocks):
         for fn in (f"{b}.sv", f"{b}_manifest.json"):

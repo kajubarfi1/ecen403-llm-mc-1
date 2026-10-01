@@ -127,7 +127,7 @@ def publish_current(drop_dir, ri):
     for f in os.listdir(CURRENT):
         os.remove(os.path.join(CURRENT, f))
     copied = []
-    for name in ("retry_instructions.json", "findings_v2.json", "DROP_STATUS.json"):
+    for name in ("retry_instructions.json", "findings_v2.json", "DROP_STATUS.json", "SPEC_REVIEW.json"):
         src = os.path.join(drop_dir, name)
         if os.path.exists(src):
             shutil.copy(src, os.path.join(CURRENT, name))
