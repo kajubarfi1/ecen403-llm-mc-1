@@ -95,22 +95,22 @@ module config_regs #(
     // Register storage
     logic [31:0] reg_timing_0;
     always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n) reg_timing_0 <= 32'h21180909;
+        if (!rst_n) reg_timing_0 <= 32'h150F0606;
         else if (csr_wr && addr_valid && csr_adr_i == ADDR_TIMING_0) reg_timing_0 <= csr_dat_i;
 
     logic [31:0] reg_timing_1;
     always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n) reg_timing_1 <= 32'h6B1E0507;
+        if (!rst_n) reg_timing_1 <= 32'h2C100404;
         else if (csr_wr && addr_valid && csr_adr_i == ADDR_TIMING_1) reg_timing_1 <= csr_dat_i;
 
     logic [31:0] reg_timing_2;
     always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n) reg_timing_2 <= 32'h0709050A;
+        if (!rst_n) reg_timing_2 <= 32'h05060406;
         else if (csr_wr && addr_valid && csr_adr_i == ADDR_TIMING_2) reg_timing_2 <= csr_dat_i;
 
     logic [31:0] reg_timing_3;
     always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n) reg_timing_3 <= 32'h00145004;
+        if (!rst_n) reg_timing_3 <= 32'h000C3004;
         else if (csr_wr && addr_valid && csr_adr_i == ADDR_TIMING_3) reg_timing_3 <= csr_dat_i;
 
     logic [31:0] reg_refresh_config;
@@ -129,13 +129,13 @@ module config_regs #(
     always_ff @(posedge clk or negedge rst_n)
         if (!rst_n) reg_bist_addr_start <= 32'h00000000;
         else if (csr_wr && addr_valid && csr_adr_i == ADDR_BIST_ADDR_START)
-            reg_bist_addr_start <= (csr_dat_i & 32'h0FFFFFFF) | (reg_bist_addr_start & 32'hF0000000);  // reserved bits pinned
+            reg_bist_addr_start <= (csr_dat_i & 32'h07FFFFFF) | (reg_bist_addr_start & 32'hF8000000);  // reserved bits pinned
 
     logic [31:0] reg_bist_addr_end;
     always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n) reg_bist_addr_end <= 32'h0FFFFFFF;
+        if (!rst_n) reg_bist_addr_end <= 32'h07FFFFFF;
         else if (csr_wr && addr_valid && csr_adr_i == ADDR_BIST_ADDR_END)
-            reg_bist_addr_end <= (csr_dat_i & 32'h0FFFFFFF) | (reg_bist_addr_end & 32'hF0000000);  // reserved bits pinned
+            reg_bist_addr_end <= (csr_dat_i & 32'h07FFFFFF) | (reg_bist_addr_end & 32'hF8000000);  // reserved bits pinned
 
     logic [31:0] reg_ctrl_config;
     always_ff @(posedge clk or negedge rst_n) begin

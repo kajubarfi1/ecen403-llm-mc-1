@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 module wb_port_tb;
-    localparam real CLK_PERIOD = 6.0;
-    localparam ADDR_WIDTH=28, DATA_WIDTH=32, SEL_WIDTH=4, AUX_WIDTH=4;
+    localparam real CLK_PERIOD = 10.0;
+    localparam ADDR_WIDTH=27, DATA_WIDTH=32, SEL_WIDTH=4, AUX_WIDTH=4;
     logic clk=0;
     always #(CLK_PERIOD/2) clk=~clk;
 
@@ -41,7 +41,7 @@ module wb_port_tb;
 
         // Single write
         @(posedge clk); wb_cyc_i=1; wb_stb_i=1; wb_we_i=1;
-        wb_adr_i=28'h100; wb_dat_i=32'hDEADBEEF; wb_sel_i={SEL_WIDTH{1'b1}};
+        wb_adr_i=27'h100; wb_dat_i=32'hDEADBEEF; wb_sel_i={SEL_WIDTH{1'b1}};
         do @(posedge clk); while(wb_stall_o);
         wb_stb_i=0; if(!wb_ack_o) begin repeat(20) begin @(posedge clk); if(wb_ack_o) break; end end
         @(posedge clk); wb_idle();
@@ -58,7 +58,7 @@ module wb_port_tb;
 
         // Stall
         req_ready=0; @(posedge clk);
-        wb_cyc_i=1; wb_stb_i=1; wb_we_i=1; wb_adr_i=28'h300;
+        wb_cyc_i=1; wb_stb_i=1; wb_we_i=1; wb_adr_i=27'h300;
         wb_dat_i=32'hCAFEBABE; wb_sel_i={SEL_WIDTH{1'b1}};
         repeat(3) @(posedge clk);
         check("Stall when backend busy", wb_stall_o===1'b1);

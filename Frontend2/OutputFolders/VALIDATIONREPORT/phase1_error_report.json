@@ -1,52 +1,18 @@
 {
   "status": "FAIL",
   "pipeline": "phase1",
-  "failure_stage": "TESTBENCH_AUDIT",
-  "tb_audit_result": {
-    "status": "FAIL",
-    "modules": {
-      "init_fsm": {
-        "status": "NO_CHECKS",
-        "findings": []
-      },
-      "config_regs": {
-        "status": "FAIL",
-        "findings": [
-          {
-            "check": "reset_value",
-            "register": "TIMING_0",
-            "offset": "0x08",
-            "testbench_expects": "0x271C0B0B",
-            "spec_derived_value": "0x21180909",
-            "detail": "testbench checks TIMING_0 (offset 0x08) resets to 0x271C0B0B, but the spec's csr_register_map declares reset_value 0x21180909. Likely a stale hardcoded expected value in the testbench, not an RTL bug -- confirm what the RTL actually resets to before assuming otherwise."
-          },
-          {
-            "check": "write_readback_mask",
-            "register": "BIST_ADDR_START",
-            "offset": "0x24",
-            "written_value": "0x1ABC0000",
-            "reserved_mask": "0xF0000000",
-            "detail": "testbench writes 0x1ABC0000 to BIST_ADDR_START (offset 0x24) and expects an EXACT readback match, but bits 0x10000000 of that value fall in this register's reserved range (mask 0xF0000000, derived from its spec-declared fields). Correct RTL that pins reserved bits can never pass this exact-match check -- the test is unsound regardless of what the RTL does."
-          },
-          {
-            "check": "write_readback_mask",
-            "register": "BIST_ADDR_END",
-            "offset": "0x28",
-            "written_value": "0x1FFFFFFF",
-            "reserved_mask": "0xF0000000",
-            "detail": "testbench writes 0x1FFFFFFF to BIST_ADDR_END (offset 0x28) and expects an EXACT readback match, but bits 0x10000000 of that value fall in this register's reserved range (mask 0xF0000000, derived from its spec-declared fields). Correct RTL that pins reserved bits can never pass this exact-match check -- the test is unsound regardless of what the RTL does."
-          }
-        ]
-      },
-      "wb_port": {
-        "status": "NO_CHECKS",
-        "findings": []
-      }
+  "failure_stage": "GENERATION",
+  "failed_modules": [
+    "wb_port"
+  ],
+  "details": {
+    "wb_port": {
+      "status": "error",
+      "errors": [
+        "Expected wishbone_pipelined, got wishbone_classic"
+      ]
     }
   },
-  "failed_modules": [
-    "config_regs"
-  ],
   "requires_human_review": true,
-  "timestamp": "2026-09-29T15:49:01.115617"
+  "timestamp": "2026-10-01T13:03:49.222117"
 }

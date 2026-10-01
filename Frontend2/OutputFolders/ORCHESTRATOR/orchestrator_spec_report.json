@@ -1,0 +1,90 @@
+{
+  "generated_utc": "2026-10-01T18:23:09.547046+00:00",
+  "stage": "spec",
+  "drop": {
+    "frontend_drop_id": "3863c28a5cd6",
+    "validation_drop_id": "a58933561396",
+    "validated_this_drop": false,
+    "validation_status": "FAIL",
+    "failed_modules": [
+      "bank_tracker",
+      "config_regs",
+      "data_path",
+      "init_fsm",
+      "scheduler",
+      "wb_port"
+    ],
+    "spec_consistency": {
+      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "foreign": {
+        "addr_decoder": "golden_ddr3_1600k_x8_2lane_1rank",
+        "bank_tracker": "golden_ddr3_1600k_x8_2lane_1rank",
+        "calibration": "golden_ddr3_1600k_x8_2lane_1rank",
+        "refresh_ctrl": "golden_ddr3_1600k_x8_2lane_1rank",
+        "cmd_gen": "golden_ddr3_1600k_x8_2lane_1rank",
+        "cmd_queue": "golden_ddr3_1600k_x8_2lane_1rank",
+        "scheduler": "golden_ddr3_1600k_x8_2lane_1rank",
+        "data_path": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "ok": false
+    },
+    "blocks_absent": [],
+    "paths_blocked": 22,
+    "untested_in_this_drop": 7,
+    "requires_human_review": false
+  },
+  "model": "claude-sonnet-5-5",
+  "dispatches": 1,
+  "summary": "I forwarded all 17 spec-gap findings verbatim to the Microarch agent in one call. It returned no_patch (exit code 1) with no revised spec and no owner decisions, and gave no reason. I then escalated all 17 to a human. The escalation covers four things: the unexplained no_patch result, the owner decisions the findings need, the spec-revision mismatch between the findings and the current spec, and the unvalidated drop. I used 1 of 3 dispatches and kept 2 in reserve. I made no RTL fixes and no spec revisions.",
+  "actions": [
+    {
+      "action": "forward_spec_findings",
+      "finding_ids": [
+        "csr_register_map/[intake] What data accompanies a read of an address the regi",
+        "csr_register_map/[intake] What happens on a write to an undeclared address \u2014 ",
+        "csr_register_map/[intake] Does a write to a read-only register (or a read of ",
+        "csr_register_map/[intake] Do byte enables mean anything on a READ, and what v",
+        "csr_register_map/[intake] When a status register is read in the same cycle it",
+        "data_path_mapping/[intake] On the DDR channel, does the data-mask pin mask or ",
+        "TAXONOMY_SCHEDULER_FAMILY/[intake] Does the failure taxonomy have ids for what a queue",
+        "block_interfaces/[intake] For every pair of blocks a path connects, what are ",
+        "TAXONOMY_NAMES_TIMING_PARAMS/[intake] Does the failure taxonomy have an id for violating ",
+        "timing_model/[intake] What is the minimum spacing between consecutive mod",
+        "timing_model/[intake] What is the minimum delay from a mode-register-set ",
+        "controller_architecture/[intake] May the scheduler open a row that no pending reques",
+        "data_path_mapping/Byte-enable semantics underspecified: DDR-side DM polarity a",
+        "failure_taxonomy/failure_taxonomy has no ids for scheduler conservation or re",
+        "failure_taxonomy/failure_taxonomy has no ids for init/calibration ordering, r",
+        "csr_register_map/ref_pending_cnt is 3 bits wide but max_postpone is programma",
+        "csr_register_map/CSR reads of live status fields: the spec does not say which"
+      ],
+      "exit_code": 1,
+      "status": "no_patch",
+      "revised_spec": null,
+      "owner_decisions": []
+    },
+    {
+      "action": "escalate",
+      "finding_ids": [
+        "csr_register_map/[intake] What data accompanies a read of an address the regi",
+        "csr_register_map/[intake] What happens on a write to an undeclared address \u2014 ",
+        "csr_register_map/[intake] Does a write to a read-only register (or a read of ",
+        "csr_register_map/[intake] Do byte enables mean anything on a READ, and what v",
+        "csr_register_map/[intake] When a status register is read in the same cycle it",
+        "data_path_mapping/[intake] On the DDR channel, does the data-mask pin mask or ",
+        "TAXONOMY_SCHEDULER_FAMILY/[intake] Does the failure taxonomy have ids for what a queue",
+        "block_interfaces/[intake] For every pair of blocks a path connects, what are ",
+        "TAXONOMY_NAMES_TIMING_PARAMS/[intake] Does the failure taxonomy have an id for violating ",
+        "timing_model/[intake] What is the minimum spacing between consecutive mod",
+        "timing_model/[intake] What is the minimum delay from a mode-register-set ",
+        "controller_architecture/[intake] May the scheduler open a row that no pending reques",
+        "data_path_mapping/Byte-enable semantics underspecified: DDR-side DM polarity a",
+        "failure_taxonomy/failure_taxonomy has no ids for scheduler conservation or re",
+        "failure_taxonomy/failure_taxonomy has no ids for init/calibration ordering, r",
+        "csr_register_map/ref_pending_cnt is 3 bits wide but max_postpone is programma",
+        "csr_register_map/CSR reads of live status fields: the spec does not say which"
+      ],
+      "reason": "All 17 spec-gap findings were forwarded verbatim to the Microarch agent in one call. It returned status=no_patch, exit_code=1, revised_spec=null, and no owner_decisions, so no compiler patch was proposed and nothing was recompiled. It gave no reason, so I can't tell whether this was a tool failure or a refusal. Several gaps are owner decisions: unmapped_read_data, unmapped_write_behavior, access_violation_error, read_byte_enable_semantics, status_read_sampling, speculative_activate, and the ref_pending_cnt width versus max_postpone cap. Validation's handoff proposes values for some, but I won't choose them myself. The block_interfaces gap is marked deferred in the handoff. The findings are tagged with spec revision golden_ddr3_1600k_x8_2lane_1rank, but the current spec is compiled_ddr3800_x8_1lane_1rank. Validation also did not run on this drop (validated_this_drop=False), so the findings may be stale. A human should check why the Microarch agent produced no patch, make the owner decisions, and decide whether to re-run validation. I have 2 dispatches left and held them back rather than retry blindly."
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 {
-  "$comment": "Compiled by microarch_compiler from choices: DDR3-1333 / 2Gb / x16 / 1lane / 1rank",
+  "$comment": "Compiled by microarch_compiler from choices: DDR3-800 / 1Gb / x8 / 1lane / 1rank",
   "$schema": "https://example.com/ddr3_microarchitecture.schema.json",
   "schema_version": "2.0.0",
-  "design_id": "ddr3_mc_1333_x16_1lane_1rank",
-  "revision": "compiled_ddr31333_x16_1lane_1rank",
+  "design_id": "ddr3_mc_800_x8_1lane_1rank",
+  "revision": "compiled_ddr3800_x8_1lane_1rank",
   "conversion_rules": {
     "timing_ns_to_nCK": "ceil(param_ns / tCK_ns)",
     "conversion_owner": "microarchitecture_agent",
@@ -97,70 +97,70 @@
     "bank_bits": 3,
     "ranks": 1,
     "burst_length": 8,
-    "device_width_bits": 16,
+    "device_width_bits": 8,
     "byte_lanes": 1,
     "address_mapping": "row-bank-column",
     "$derived": {
-      "device_density_bits": 2147483648,
-      "device_density_label": "2Gb",
-      "channel_data_width_bits": 16,
+      "device_density_bits": 1073741824,
+      "device_density_label": "1Gb",
+      "channel_data_width_bits": 8,
       "data_byte_lanes": 1,
       "ecc_byte_lanes": 0,
-      "page_size_bytes_per_device": 2048,
-      "page_size_bytes_channel": 2048,
-      "channel_capacity_bytes": 268435456,
-      "channel_capacity_MB": 256,
-      "burst_transfer_bytes_on_dq": 16,
-      "peak_channel_bandwidth_MBps": 2666
+      "page_size_bytes_per_device": 1024,
+      "page_size_bytes_channel": 1024,
+      "channel_capacity_bytes": 134217728,
+      "channel_capacity_MB": 128,
+      "burst_transfer_bytes_on_dq": 8,
+      "peak_channel_bandwidth_MBps": 800
     }
   },
   "clocking_model": {
-    "controller_clock_period_ns": 6.0,
-    "ddr_clock_period_ns": 1.5,
+    "controller_clock_period_ns": 10.0,
+    "ddr_clock_period_ns": 2.5,
     "clock_ratio_ddr_to_controller": 4,
     "pipeline_latency_cycles": 2,
     "$derived": {
-      "controller_frequency_MHz": 166.6667,
-      "ddr_clock_frequency_MHz": 666.6667,
-      "data_rate_MTps": 1333.0,
-      "tCK_ns": 1.5,
-      "period_ratio_check": "6.0 / 1.5 = 4"
+      "controller_frequency_MHz": 100.0,
+      "ddr_clock_frequency_MHz": 400.0,
+      "data_rate_MTps": 800.0,
+      "tCK_ns": 2.5,
+      "period_ratio_check": "10.0 / 2.5 = 4"
     }
   },
   "timing_model": {
     "units": "ns",
-    "tCK_ns": 1.5,
-    "speed_bin": "DDR3-1333H (9-9-9)",
-    "tRCD": 13.5,
-    "tRP": 13.5,
-    "tRAS": 36.0,
-    "tRC": 49.5,
-    "tRFC": 160.0,
-    "tFAW": 45.0,
+    "tCK_ns": 2.5,
+    "speed_bin": "DDR3-800E (6-6-6)",
+    "tRCD": 15.0,
+    "tRP": 15.0,
+    "tRAS": 37.5,
+    "tRC": 52.5,
+    "tRFC": 110.0,
+    "tFAW": 40.0,
     "tRRD": 10.0,
     "tWR": 15.0,
-    "tWTR": 7.5,
-    "tRTP": 7.5,
-    "tCCD": 6.0,
+    "tWTR": 10.0,
+    "tRTP": 10.0,
+    "tCCD": 10.0,
     "tREFI": 7800.0,
-    "CL_cycles": 9,
-    "CWL_cycles": 7,
+    "CL_cycles": 6,
+    "CWL_cycles": 5,
     "$derived_cycles": {
-      "tRCD_nCK": 9,
-      "tRP_nCK": 9,
-      "tRAS_nCK": 24,
-      "tRC_nCK": 33,
-      "tRFC_nCK": 107,
-      "tFAW_nCK": 30,
-      "tRRD_nCK": 7,
-      "tWR_nCK": 10,
-      "tWTR_nCK": 5,
-      "tRTP_nCK": 5,
+      "tRCD_nCK": 6,
+      "tRP_nCK": 6,
+      "tRAS_nCK": 15,
+      "tRC_nCK": 21,
+      "tRFC_nCK": 44,
+      "tFAW_nCK": 16,
+      "tRRD_nCK": 4,
+      "tWR_nCK": 6,
+      "tWTR_nCK": 4,
+      "tRTP_nCK": 4,
       "tCCD_nCK": 4,
-      "tREFI_nCK": 5200,
-      "CL_ns": 13.5,
-      "CWL_ns": 10.5,
-      "$comment": "All computed via ceil(param_ns / 1.5)."
+      "tREFI_nCK": 3120,
+      "CL_ns": 15.0,
+      "CWL_ns": 12.5,
+      "$comment": "All computed via ceil(param_ns / 2.5)."
     }
   },
   "controller_architecture": {
@@ -183,7 +183,7 @@
       "address_mode": "sequential",
       "address_range": {
         "start": 0,
-        "end": 268435455
+        "end": 134217727
       }
     },
     "error_handling": {
@@ -203,13 +203,13 @@
   "initialization_sequence": {
     "reset_hold_us": 200,
     "cke_delay_us": 500,
-    "tXPR_ns": 170.0,
+    "tXPR_ns": 120.0,
     "zq_calibration_on_init": true,
-    "tZQinit_ns": 768.0,
+    "tZQinit_ns": 1280.0,
     "mode_registers": {
       "MR0": {
         "burst_length": "fixed_8",
-        "cas_latency_cycles": 9,
+        "cas_latency_cycles": 6,
         "dll_reset": true,
         "write_recovery_ns": 15.0,
         "precharge_pd_mode": "fast_exit"
@@ -222,7 +222,7 @@
         "write_leveling_enable": false
       },
       "MR2": {
-        "cas_write_latency_cycles": 7,
+        "cas_write_latency_cycles": 5,
         "rtt_wr": "RZQ_4",
         "self_refresh_temperature": "normal",
         "auto_self_refresh": false
@@ -233,9 +233,9 @@
       }
     },
     "$derived": {
-      "tXPR_reason": "max(5*tCK, tRFC+10ns) = max(7.5, 170.0) = 170.0ns",
-      "tZQinit_reason": "512*tCK = 512*1.5 = 768.0ns",
-      "tXPR_nCK": 114,
+      "tXPR_reason": "max(5*tCK, tRFC+10ns) = max(12.5, 120.0) = 120.0ns",
+      "tZQinit_reason": "512*tCK = 512*2.5 = 1280.0ns",
+      "tXPR_nCK": 48,
       "tZQinit_nCK": 512,
       "init_sequence_order": "RESET# low -> wait 200us -> RESET# high -> wait 500us -> CKE high -> wait tXPR -> MR2 -> MR3 -> MR1 -> MR0(DLL reset) -> ZQCL -> init_done"
     }
@@ -246,7 +246,7 @@
     "enable_bitslip_training": false,
     "calibration_retry_count": 0,
     "periodic_recalibration_enable": true,
-    "periodic_zqcs_interval_ns": 768000.0,
+    "periodic_zqcs_interval_ns": 1280000.0,
     "$comment": "PHY not modeled; periodic ZQCS is a scheduling requirement only.",
     "$derived": {
       "periodic_zqcs_interval_nCK": 512000
@@ -256,7 +256,7 @@
     "interface_type": "wishbone_pipelined",
     "addressing": "byte",
     "data_width_bits": 32,
-    "address_width_bits": 28,
+    "address_width_bits": 27,
     "granularity_bits": 8,
     "burst_type": "linear",
     "max_burst_length": 8,
@@ -264,23 +264,23 @@
     "write_buffer_depth": 16,
     "enable_data_mask": true,
     "$derived": {
-      "addressable_space_bytes": 268435456,
-      "addressable_space_MB": 256,
+      "addressable_space_bytes": 134217728,
+      "addressable_space_MB": 128,
       "host_burst_transfer_bytes": 32,
       "sel_width_bits": 4
     }
   },
   "data_path_mapping": {
-    "ddr_channel_width_bits": 16,
+    "ddr_channel_width_bits": 8,
     "host_width_bits": 32,
-    "pack_mode": "pack_32_to_16",
-    "alignment_bytes_required": 2,
+    "pack_mode": "pack_32_to_8",
+    "alignment_bytes_required": 1,
     "endianness": "little",
     "byte_enable_semantics": "wishbone_sel_per_byte"
   },
   "phy_interface": {
     "mode": "abstract",
-    "dq_width_bits": 16,
+    "dq_width_bits": 8,
     "dqs_count": 1,
     "dm_enabled": true,
     "ck_pair_present": true,
@@ -423,34 +423,34 @@
         "name": "TIMING_0",
         "offset": "0x08",
         "access": "RW",
-        "reset_value": "0x21180909",
+        "reset_value": "0x150F0606",
         "fields": [
           {
             "name": "tRCD_nCK",
             "bits": "7:0",
             "access": "RW",
-            "reset_value": 9,
+            "reset_value": 6,
             "description": "RAS-to-CAS delay"
           },
           {
             "name": "tRP_nCK",
             "bits": "15:8",
             "access": "RW",
-            "reset_value": 9,
+            "reset_value": 6,
             "description": "Row precharge"
           },
           {
             "name": "tRAS_nCK",
             "bits": "23:16",
             "access": "RW",
-            "reset_value": 24,
+            "reset_value": 15,
             "description": "Row active time"
           },
           {
             "name": "tRC_nCK",
             "bits": "31:24",
             "access": "RW",
-            "reset_value": 33,
+            "reset_value": 21,
             "description": "Row cycle time"
           }
         ]
@@ -459,34 +459,34 @@
         "name": "TIMING_1",
         "offset": "0x0C",
         "access": "RW",
-        "reset_value": "0x6B1E0507",
+        "reset_value": "0x2C100404",
         "fields": [
           {
             "name": "tRRD_nCK",
             "bits": "7:0",
             "access": "RW",
-            "reset_value": 7,
+            "reset_value": 4,
             "description": "Row-to-row delay"
           },
           {
             "name": "tWTR_nCK",
             "bits": "15:8",
             "access": "RW",
-            "reset_value": 5,
+            "reset_value": 4,
             "description": "Write-to-read"
           },
           {
             "name": "tFAW_nCK",
             "bits": "23:16",
             "access": "RW",
-            "reset_value": 30,
+            "reset_value": 16,
             "description": "Four-activate window"
           },
           {
             "name": "tRFC_nCK",
             "bits": "31:24",
             "access": "RW",
-            "reset_value": 107,
+            "reset_value": 44,
             "description": "Refresh cycle time"
           }
         ]
@@ -495,34 +495,34 @@
         "name": "TIMING_2",
         "offset": "0x10",
         "access": "RW",
-        "reset_value": "0x0709050A",
+        "reset_value": "0x05060406",
         "fields": [
           {
             "name": "tWR_nCK",
             "bits": "7:0",
             "access": "RW",
-            "reset_value": 10,
+            "reset_value": 6,
             "description": "Write recovery"
           },
           {
             "name": "tRTP_nCK",
             "bits": "15:8",
             "access": "RW",
-            "reset_value": 5,
+            "reset_value": 4,
             "description": "Read-to-precharge"
           },
           {
             "name": "CL_nCK",
             "bits": "23:16",
             "access": "RW",
-            "reset_value": 9,
+            "reset_value": 6,
             "description": "CAS latency"
           },
           {
             "name": "CWL_nCK",
             "bits": "31:24",
             "access": "RW",
-            "reset_value": 7,
+            "reset_value": 5,
             "description": "CAS write latency"
           }
         ]
@@ -531,7 +531,7 @@
         "name": "TIMING_3",
         "offset": "0x14",
         "access": "RW",
-        "reset_value": "0x00145004",
+        "reset_value": "0x000C3004",
         "fields": [
           {
             "name": "tCCD_nCK",
@@ -544,7 +544,7 @@
             "name": "tREFI_nCK",
             "bits": "31:8",
             "access": "RW",
-            "reset_value": 5200,
+            "reset_value": 3120,
             "description": "Refresh interval"
           }
         ]
@@ -665,14 +665,14 @@
         "fields": [
           {
             "name": "start_addr",
-            "bits": "27:0",
+            "bits": "26:0",
             "access": "RW",
             "reset_value": 0,
-            "description": "BIST start byte address (28 bits)"
+            "description": "BIST start byte address (27 bits)"
           },
           {
             "name": "reserved",
-            "bits": "31:28",
+            "bits": "31:27",
             "access": "RO",
             "reset_value": 0,
             "description": "Reserved"
@@ -683,18 +683,18 @@
         "name": "BIST_ADDR_END",
         "offset": "0x28",
         "access": "RW",
-        "reset_value": "0x0FFFFFFF",
+        "reset_value": "0x07FFFFFF",
         "fields": [
           {
             "name": "end_addr",
-            "bits": "27:0",
+            "bits": "26:0",
             "access": "RW",
-            "reset_value": 268435455,
-            "description": "BIST end byte address (28 bits)"
+            "reset_value": 134217727,
+            "description": "BIST end byte address (27 bits)"
           },
           {
             "name": "reserved",
-            "bits": "31:28",
+            "bits": "31:27",
             "access": "RO",
             "reset_value": 0,
             "description": "Reserved"
@@ -705,12 +705,12 @@
   },
   "latency_model": {
     "$comment": "Formulas in DDR clock cycles (nCK). pipeline_latency is in controller cycles; multiply by clock_ratio for nCK.",
-    "read_hit_latency_nCK": 23,
-    "read_empty_latency_nCK": 32,
-    "read_miss_latency_nCK": 41,
-    "write_hit_latency_nCK": 29,
-    "write_to_read_turnaround_nCK": 16,
-    "read_to_write_turnaround_nCK": 8
+    "read_hit_latency_nCK": 20,
+    "read_empty_latency_nCK": 26,
+    "read_miss_latency_nCK": 32,
+    "write_hit_latency_nCK": 23,
+    "write_to_read_turnaround_nCK": 13,
+    "read_to_write_turnaround_nCK": 7
   },
   "failure_taxonomy": {
     "categories": [
@@ -857,7 +857,7 @@
     ]
   },
   "implementation_targets": {
-    "target_frequency_mhz": 167,
+    "target_frequency_mhz": 100,
     "area_optimization_goal": "balanced",
     "power_optimization_goal": "balanced",
     "clock_name": "clk_ctrl",

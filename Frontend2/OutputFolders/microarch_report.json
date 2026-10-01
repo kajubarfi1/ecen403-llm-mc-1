@@ -9,13 +9,13 @@
     "write_buffer_depth": 16,
     "interface_type": "wishbone_pipelined",
     "self_refresh_mode": "auto",
-    "target_frequency_mhz": 167,
+    "target_frequency_mhz": 100,
     "area_optimization_goal": "balanced",
     "power_optimization_goal": "balanced",
     "pipeline_latency_cycles": 2,
-    "speed_grade": "DDR3-1333",
-    "density": "2Gb",
-    "device_width": "x16",
+    "speed_grade": "DDR3-800",
+    "density": "1Gb",
+    "device_width": "x8",
     "ranks": 1,
     "byte_lanes": 1,
     "ecc_mode": 0,
@@ -23,6 +23,11 @@
     "row_policy": "close_page"
   },
   "assumptions": [
+    {
+      "parameter": "speed_grade",
+      "value": "DDR3-800",
+      "reason": "from stated goal: Best power savings"
+    },
     {
       "parameter": "row_policy",
       "value": "close_page",
@@ -36,41 +41,51 @@
     {
       "parameter": "command_queue_depth",
       "value": 4,
-      "reason": "from stated goal: Best power savings (minimal queue depth)"
+      "reason": "from stated goal: Best power savings"
     },
     {
       "parameter": "byte_lanes",
       "value": 1,
-      "reason": "from stated goal: Best power savings (minimal data width)"
-    },
-    {
-      "parameter": "ranks",
-      "value": 1,
-      "reason": "power-savings goal implies minimal configuration; single rank is most efficient"
-    },
-    {
-      "parameter": "ecc_mode",
-      "value": 0,
-      "reason": "power-savings goal and no reliability requirement mentioned; ECC adds power overhead"
+      "reason": "from stated goal: Best power savings"
     },
     {
       "parameter": "scheduler_policy",
       "value": "in_order",
-      "reason": "power-savings goal implies simpler logic with lower power"
+      "reason": "in_order scheduler is simpler and lower power than fr_fcfs, aligning with power savings goal"
+    },
+    {
+      "parameter": "density",
+      "value": "1Gb",
+      "reason": "smallest density (1Gb) chosen for minimal power consumption in absence of capacity requirement"
+    },
+    {
+      "parameter": "device_width",
+      "value": "x8",
+      "reason": "x8 devices typically consume less power than x16 for low-power applications"
+    },
+    {
+      "parameter": "ranks",
+      "value": 1,
+      "reason": "single rank minimizes power consumption and is the only supported option"
+    },
+    {
+      "parameter": "ecc_mode",
+      "value": 0,
+      "reason": "ECC disabled to minimize power overhead (no extra byte lane needed)"
     },
     {
       "parameter": "lookahead_depth",
       "value": 0,
-      "reason": "set to 0 to satisfy constraint with command_queue_depth=4 and align with power-savings goal of minimal complexity"
+      "reason": "set to 0 to satisfy constraint that lookahead_depth cannot exceed command_queue_depth=4; zero lookahead also minimizes scheduling complexity and power"
     }
   ],
-  "rationale": "The user explicitly requested DDR3-1333 speed grade (overriding the power-savings default of DDR3-800) and specified 2Gb density with x16 device width. The compiler is still rejecting due to lookahead_depth=8 exceeding command_queue_depth=4. Since lookahead is being set by the compiler despite not being in my output, I need to explicitly set lookahead_depth=0 to disable it, which aligns with the power-savings goal of minimal complexity.",
+  "rationale": "The compiler rejected the configuration because lookahead_depth=8 exceeds command_queue_depth=4. Since the user requested the recommended defaults for power savings (which specifies command_queue_depth=4), and I did not explicitly set lookahead_depth, the compiler must have a default lookahead_depth=8. To fix this while preserving the power-savings goal, I'm explicitly setting lookahead_depth=0 (no lookahead) which is most consistent with minimal power consumption and works with the small queue depth.",
   "warnings": [],
   "consistency_checks": [
     {
       "name": "tRC == tRAS + tRP",
       "pass": true,
-      "detail": "49.5 == 36.0 + 13.5"
+      "detail": "52.5 == 37.5 + 15.0"
     },
     {
       "name": "tRRD >= max(4*tCK, page floor)",
@@ -90,7 +105,7 @@
     {
       "name": "tFAW >= 4*tRRD",
       "pass": true,
-      "detail": "45.0 >= 40.0"
+      "detail": "40.0 >= 40.0"
     },
     {
       "name": "tCCD == 4*tCK",
@@ -110,52 +125,52 @@
     {
       "name": "tRCD_nCK == ceil(tRCD/tCK)",
       "pass": true,
-      "detail": "9 == 9"
+      "detail": "6 == 6"
     },
     {
       "name": "tRP_nCK == ceil(tRP/tCK)",
       "pass": true,
-      "detail": "9 == 9"
+      "detail": "6 == 6"
     },
     {
       "name": "tRAS_nCK == ceil(tRAS/tCK)",
       "pass": true,
-      "detail": "24 == 24"
+      "detail": "15 == 15"
     },
     {
       "name": "tRC_nCK == ceil(tRC/tCK)",
       "pass": true,
-      "detail": "33 == 33"
+      "detail": "21 == 21"
     },
     {
       "name": "tRFC_nCK == ceil(tRFC/tCK)",
       "pass": true,
-      "detail": "107 == 107"
+      "detail": "44 == 44"
     },
     {
       "name": "tFAW_nCK == ceil(tFAW/tCK)",
       "pass": true,
-      "detail": "30 == 30"
+      "detail": "16 == 16"
     },
     {
       "name": "tRRD_nCK == ceil(tRRD/tCK)",
       "pass": true,
-      "detail": "7 == 7"
+      "detail": "4 == 4"
     },
     {
       "name": "tWR_nCK == ceil(tWR/tCK)",
       "pass": true,
-      "detail": "10 == 10"
+      "detail": "6 == 6"
     },
     {
       "name": "tWTR_nCK == ceil(tWTR/tCK)",
       "pass": true,
-      "detail": "5 == 5"
+      "detail": "4 == 4"
     },
     {
       "name": "tRTP_nCK == ceil(tRTP/tCK)",
       "pass": true,
-      "detail": "5 == 5"
+      "detail": "4 == 4"
     },
     {
       "name": "tCCD_nCK == ceil(tCCD/tCK)",
@@ -165,7 +180,7 @@
     {
       "name": "tREFI_nCK == ceil(tREFI/tCK)",
       "pass": true,
-      "detail": "5200 == 5200"
+      "detail": "3120 == 3120"
     },
     {
       "name": "MR0.cas_latency_cycles == timing.CL_cycles",
@@ -185,7 +200,7 @@
     {
       "name": "host.address_width_bits == geometry sum",
       "pass": true,
-      "detail": "28 == 28"
+      "detail": "27 == 27"
     },
     {
       "name": "address_width_bits == log2(channel_capacity_bytes)",
@@ -200,7 +215,7 @@
     {
       "name": "tXPR_ns == max(5*tCK, tRFC+10ns)",
       "pass": true,
-      "detail": "170.0 == 170.0"
+      "detail": "120.0 == 120.0"
     }
   ],
   "modifiability": {

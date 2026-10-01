@@ -1,0 +1,420 @@
+[
+  {
+    "source": "validation",
+    "target": "spec",
+    "kind": "spec_gap",
+    "scope": "csr_register_map",
+    "severity": "major",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "title": "[intake] What data accompanies a read of an address the register map does not declare?",
+    "detail": "csr_register_map.unmapped_read_data is not stated. A spec-derived model and a design can both be 'correct' with different answers; the comparison is unfalsifiable until this is stated. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: VP_CSR_006 \u2014 design returned 0xDEADBEEF, model returned 0; waived as W-001.",
+    "evidence": {
+      "rule": "CSR_UNMAPPED_READ_DATA",
+      "status": "gap",
+      "proposed_patch": {
+        "csr_register_map": {
+          "unmapped_read_data": "<one of ['zero', 'all_ones', 'undefined', 'last_written']>"
+        }
+      },
+      "options": [
+        "zero",
+        "all_ones",
+        "undefined",
+        "last_written"
+      ]
+    },
+    "status": "open"
+  },
+  {
+    "source": "validation",
+    "target": "spec",
+    "kind": "spec_gap",
+    "scope": "csr_register_map",
+    "severity": "major",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "title": "[intake] What happens on a write to an undeclared address \u2014 error flag, silent drop, or both?",
+    "detail": "csr_register_map.unmapped_write_behavior is not stated. Error-flag comparison on unmapped writes rests on an assumption. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: sibling of VP_CSR_006 (the error flag happened to agree; the spec never said it must).",
+    "evidence": {
+      "rule": "CSR_UNMAPPED_WRITE",
+      "status": "gap",
+      "proposed_patch": {
+        "csr_register_map": {
+          "unmapped_write_behavior": "<one of ['ignored_with_error', 'ignored_silently', 'error_only']>"
+        }
+      },
+      "options": [
+        "ignored_with_error",
+        "ignored_silently",
+        "error_only"
+      ]
+    },
+    "status": "open"
+  },
+  {
+    "source": "validation",
+    "target": "spec",
+    "kind": "spec_gap",
+    "scope": "csr_register_map",
+    "severity": "major",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "title": "[intake] Does a write to a read-only register (or a read of a write-only one) set the response error flag, or is it acknowledged silently and ignored?",
+    "detail": "csr_register_map.access_violation_error is not stated. failure_taxonomy names CSR_001 'CSR access violation' but the register map never says the response flags it. A regenerated predictor assumed err=1 on RO writes; the drop acks with err=0. Neither is wrong until this is decided. Until then the catalog pins 'silent' so models agree with each other. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: config_regs primary regeneration 2026-10-01 (4 write_ack err mismatches on path_22).",
+    "evidence": {
+      "rule": "CSR_ACCESS_VIOLATION_ERR",
+      "status": "gap",
+      "proposed_patch": {
+        "csr_register_map": {
+          "access_violation_error": "<one of ['flagged', 'silent']>"
+        }
+      },
+      "options": [
+        "flagged",
+        "silent"
+      ]
+    },
+    "status": "open"
+  },
+  {
+    "source": "validation",
+    "target": "spec",
+    "kind": "spec_gap",
+    "scope": "csr_register_map",
+    "severity": "major",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "title": "[intake] Do byte enables mean anything on a READ, and what value is expected on the request?",
+    "detail": "csr_register_map.read_byte_enable_semantics is not stated. A model predicted full enables on reads; the bus drove none. Neither is wrong. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: byte_enable_semantics finding (path_18).",
+    "evidence": {
+      "rule": "CSR_READ_BYTE_ENABLES",
+      "status": "gap",
+      "proposed_patch": {
+        "csr_register_map": {
+          "read_byte_enable_semantics": "<one of ['ignored', 'must_be_full', 'masks_data']>"
+        }
+      },
+      "options": [
+        "ignored",
+        "must_be_full",
+        "masks_data"
+      ]
+    },
+    "status": "open"
+  },
+  {
+    "source": "validation",
+    "target": "spec",
+    "kind": "spec_gap",
+    "scope": "csr_register_map",
+    "severity": "major",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "title": "[intake] When a status register is read in the same cycle its source changes, does the read return the old or the new value?",
+    "detail": "csr_register_map.status_read_sampling is not stated. A one-cycle coincidence produced a mismatch that no waiver can express. Registered designs return the old value; the spec must say so. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: csr_status_read_coherency finding (path_12/13, CTRL_STATUS.ref_pending_cnt).",
+    "evidence": {
+      "rule": "CSR_STATUS_READ_SAMPLING",
+      "status": "gap",
+      "proposed_patch": {
+        "csr_register_map": {
+          "status_read_sampling": "<one of ['previous_edge', 'same_cycle']>"
+        }
+      },
+      "options": [
+        "previous_edge",
+        "same_cycle"
+      ]
+    },
+    "status": "open"
+  },
+  {
+    "source": "validation",
+    "target": "spec",
+    "kind": "spec_gap",
+    "scope": "data_path_mapping",
+    "severity": "major",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "title": "[intake] On the DDR channel, does the data-mask pin mask or enable a byte?",
+    "detail": "data_path_mapping.ddr_dm_polarity is not stated. The design drives ~sel (JEDEC-correct); a spec-derived model carried sel through unchanged. The standard decides this one. The applicable standard (JESD79-3 (DDR3)) answers this: active_high_mask \u2014 DM=1 masks the byte. The host-side wishbone sel (1 = write this byte) is the inverse convention. Validation adopts that value and keeps checking; please state it in the spec. First encountered as: byte_enable_semantics finding (data_path pack/unpack gate).",
+    "evidence": {
+      "rule": "DDR_DM_POLARITY",
+      "status": "gap",
+      "proposed_patch": {
+        "data_path_mapping": {
+          "ddr_dm_polarity": "active_high_mask"
+        }
+      },
+      "options": [
+        "active_high_mask",
+        "active_high_enable"
+      ]
+    },
+    "status": "open"
+  },
+  {
+    "source": "validation",
+    "target": "spec",
+    "kind": "spec_gap",
+    "scope": "TAXONOMY_SCHEDULER_FAMILY",
+    "severity": "minor",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "title": "[intake] Does the failure taxonomy have ids for what a queue + arbiter can do wrong \u2014 drop a request, invent a command, starve a refresh?",
+    "detail": "no failure_taxonomy id starts with 'SCHED_'; needed for: dropped request, invented command, refresh never serviced. Checkers reported real defects under locally proposed ids (SCHED_001..003) that the spec cannot name. Disposition: vocabulary \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: taxonomy_gap finding (stage invariant checkers).",
+    "evidence": {
+      "rule": "TAXONOMY_SCHEDULER_FAMILY",
+      "status": "gap",
+      "proposed_patch": {
+        "failure_taxonomy": {
+          "scheduling": [
+            {
+              "id": "SCHED_001",
+              "description": "dropped request"
+            },
+            {
+              "id": "SCHED_002",
+              "description": "invented command"
+            },
+            {
+              "id": "SCHED_003",
+              "description": "refresh never serviced"
+            }
+          ]
+        }
+      },
+      "options": null
+    },
+    "status": "open"
+  },
+  {
+    "source": "validation",
+    "target": "spec",
+    "kind": "spec_gap",
+    "scope": "block_interfaces",
+    "severity": "major",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "title": "[intake] For every pair of blocks a path connects, what are the port-level signals, widths and handshake between them?",
+    "detail": "spec has no 'block_interfaces' section; 19 block-to-block hops are declared by path_definitions and none has an interface contract. The drop shipped 11 blocks and no top level; two block pairs did not compose (no bank on cmd_gen's feedback, nothing consuming calibration's ZQCS request). Validation had to author a 75-connection map by hand. Interfaces that are not specified cannot be generated consistently on both sides. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: integration_map.json glue entries; fb-bank and ZQCS findings.",
+    "evidence": {
+      "rule": "INTERFACE_CONTRACTS",
+      "status": "gap",
+      "proposed_patch": {
+        "block_interfaces": [
+          {
+            "from": "<block>",
+            "to": "<block>",
+            "signals": [
+              {
+                "name": "<port>",
+                "width": 0,
+                "direction": "from->to"
+              }
+            ],
+            "handshake": "<valid/ready | pulse | level>"
+          }
+        ]
+      },
+      "options": null
+    },
+    "status": "open"
+  },
+  {
+    "source": "validation",
+    "target": "spec",
+    "kind": "spec_gap",
+    "scope": "TAXONOMY_NAMES_TIMING_PARAMS",
+    "severity": "minor",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "title": "[intake] Does the failure taxonomy have an id for violating EVERY timing parameter the timing model states?",
+    "detail": "failure_taxonomy names no failure for ['tREFI']; every stated timing parameter needs a violation id. A parameter with no failure id has no assertion name to report under; tREFI had none, so the refresh-interval assertion reports under a proposed TIMING_012. Disposition: vocabulary \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: sva_rules.json max_interval_rules (tREFI) \u2014 no taxonomy id names tREFI.",
+    "evidence": {
+      "rule": "TAXONOMY_NAMES_TIMING_PARAMS",
+      "status": "gap",
+      "proposed_patch": {
+        "failure_taxonomy": {
+          "categories": [
+            {
+              "id": "<FAMILY>_<nnn>",
+              "name": "<param> violation",
+              "description": "<what issuing outside <param> looks like>"
+            }
+          ]
+        }
+      },
+      "options": null
+    },
+    "status": "open"
+  },
+  {
+    "source": "validation",
+    "target": "spec",
+    "kind": "spec_gap",
+    "scope": "timing_model",
+    "severity": "major",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "title": "[intake] What is the minimum spacing between consecutive mode-register-set commands (tMRD)?",
+    "detail": "timing_model.tMRD is not stated. The init sequence issues four MRS commands; without tMRD their spacing cannot be asserted, so INIT_002 is only partially checkable. The applicable standard (JESD79-3 (DDR3)) answers this: 4 nCK \u2014 MRS-to-MRS command spacing. Stated in nanoseconds in timing_model (4 x tCK). Validation adopts that value and keeps checking; please state it in the spec. First encountered as: sva_rules.json command_groups[init] \u2014 only tZQinit could be generated.",
+    "evidence": {
+      "rule": "INIT_TMRD",
+      "status": "gap",
+      "proposed_patch": {
+        "timing_model": {
+          "tMRD": "4 nCK"
+        }
+      },
+      "options": null
+    },
+    "status": "open"
+  },
+  {
+    "source": "validation",
+    "target": "spec",
+    "kind": "spec_gap",
+    "scope": "timing_model",
+    "severity": "major",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "title": "[intake] What is the minimum delay from a mode-register-set command to the next non-MRS command (tMOD)?",
+    "detail": "timing_model.tMOD is not stated. ZQCL after the last MRS cannot be checked for tMOD without it. The applicable standard (JESD79-3 (DDR3)) answers this: max(12 nCK, 15 ns) \u2014 MRS to any non-MRS command. Validation adopts that value and keeps checking; please state it in the spec. First encountered as: sva_rules.json command_groups[init].",
+    "evidence": {
+      "rule": "INIT_TMOD",
+      "status": "gap",
+      "proposed_patch": {
+        "timing_model": {
+          "tMOD": "max(12 nCK, 15 ns)"
+        }
+      },
+      "options": null
+    },
+    "status": "open"
+  },
+  {
+    "source": "validation",
+    "target": "spec",
+    "kind": "spec_gap",
+    "scope": "controller_architecture",
+    "severity": "major",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "title": "[intake] May the scheduler open a row that no pending request has asked for yet (look-ahead / speculative ACTIVATE)?",
+    "detail": "controller_architecture.speculative_activate is not stated. A checker that forbids it fires on a correct look-ahead controller; one that allows it cannot flag a wasted ACTIVATE. Validation assumes 'allowed' until the spec says otherwise. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: SCHED_004 fired 314x on the known-good UberDDR3 reference (2026-09-29).",
+    "evidence": {
+      "rule": "SCHED_SPECULATIVE_ACTIVATE",
+      "status": "gap",
+      "proposed_patch": {
+        "controller_architecture": {
+          "speculative_activate": "<one of ['allowed', 'forbidden']>"
+        }
+      },
+      "options": [
+        "allowed",
+        "forbidden"
+      ]
+    },
+    "status": "open"
+  },
+  {
+    "source": "validation",
+    "target": "spec",
+    "kind": "spec_gap",
+    "scope": "data_path_mapping",
+    "severity": "minor",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "title": "Byte-enable semantics underspecified: DDR-side DM polarity and read-request mask",
+    "detail": "data_path_mapping.byte_enable_semantics says 'wishbone_sel_per_byte' for the host side and nothing else. Two questions the spec must answer: (1) DDR-side DM polarity \u2014 the design drives ddr_dm_o = ~sel (JEDEC DDR3 DM=1 masks a byte), while a spec-derived model carries sel through unchanged; both are defensible readings of a silent spec. (2) What byte-enable accompanies a READ request internally \u2014 observed req.mask is 0 on reads (wb_sel_i not driven), a spec-derived model predicts full enables. Until the spec states both, mask comparisons on ddr_wr_beat and on read req transactions assert requirements the spec never makes; a waiver is PROPOSED for those two field comparisons and awaits owner approval (waivers require a named approver \u2014 none added unilaterally).",
+    "evidence": {
+      "rtl": "data_path.sv 'ddr_dm_o = ~wr_msk_r  // DM active-high masks'",
+      "observed": "req.mask=0x0 on reads; predicted 0xf",
+      "proposed_waivers": [
+        "ddr_wr_beat.mask when write",
+        "req.mask when we=0"
+      ]
+    },
+    "status": "open"
+  },
+  {
+    "source": "validation",
+    "target": "spec",
+    "kind": "spec_gap",
+    "scope": "failure_taxonomy",
+    "severity": "minor",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "title": "failure_taxonomy has no ids for scheduler conservation or refresh-service liveness",
+    "detail": "The taxonomy covers timing (TIMING_*), protocol state (PROTO_*), refresh state (REF_*), init, data and CSR failures, but a queue+arbiter can also drop an enqueued request, issue a command that matches no request, or never service a refresh request \u2014 and none of those has an id. Validation checks these today under proposed local ids and requests their adoption into the spec: SCHED_001 (enqueued request never issued as a command), SCHED_002 (command issued matching no enqueued request), SCHED_003 (refresh request raised but never serviced with a REFRESH command). Declared in Validation/gates/stage_invariant_rules.json under proposed_taxonomy_extensions.",
+    "evidence": {
+      "proposed_ids": [
+        "SCHED_001",
+        "SCHED_002",
+        "SCHED_003"
+      ],
+      "used_by": [
+        "cmd_queue_scheduler_checker",
+        "scheduler_checker"
+      ],
+      "declared_in": "Validation/gates/stage_invariant_rules.json"
+    },
+    "status": "open"
+  },
+  {
+    "source": "validation",
+    "target": "spec",
+    "kind": "spec_gap",
+    "scope": "failure_taxonomy",
+    "severity": "minor",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "title": "failure_taxonomy has no ids for init/calibration ordering, refresh-versus-init ordering, or a tREFI interval violation",
+    "detail": "Bringing the six autonomous paths (init -> calibration, init -> refresh, and the four status-reporting paths) under real checks needed failure classes the taxonomy cannot name. INIT_001/INIT_002 cover mode-register order and inter-step timing, but not: init_done raised before the sequence completed (INIT_003); calibration finishing before init_done (CAL_001); periodic ZQCS requested before cal_done (CAL_002); a refresh requested before init_done (REF_003); no refresh ever requested after init_done (REF_004). Separately, every timing parameter in timing_model has a TIMING_* id except tREFI \u2014 a MAXIMUM interval rather than a minimum separation \u2014 so the refresh-interval assertion reports under a proposed TIMING_012. Checkers and assertions use these ids locally; adoption into the spec is requested. The intake gate (Validation/spec/spec_completeness.py, rule TAXONOMY_NAMES_TIMING_PARAMS) now flags an unnamed timing parameter on arrival.",
+    "evidence": {
+      "proposed_ids": [
+        "INIT_003",
+        "CAL_001",
+        "CAL_002",
+        "REF_003",
+        "REF_004",
+        "TIMING_012"
+      ],
+      "used_by": [
+        "path_08_init_to_cal_checker",
+        "path_09_init_to_refresh_checker",
+        "cmd_gen_sva (a_TIMING_012)",
+        "cmd_gen_coverage (cp_trefi_spacing)"
+      ],
+      "declared_in": [
+        "Validation/gates/stage_invariant_rules.json",
+        "Validation/sva/sva_rules.json"
+      ]
+    },
+    "status": "open"
+  },
+  {
+    "source": "validation",
+    "target": "spec",
+    "kind": "spec_gap",
+    "scope": "csr_register_map",
+    "severity": "minor",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "title": "ref_pending_cnt is 3 bits wide but max_postpone is programmable to 8: the refresh-starvation antecedent cannot be represented",
+    "detail": "CTRL_STATUS.ref_pending_cnt occupies bits 7:5 (values 0-7) while REFRESH_CONFIG.max_postpone is documented as 0-8 with reset value 8. The starvation condition REF_001 (pending count exceeding max_postpone) is therefore unreachable at the reset configuration by construction, and the coverpoint cg_refresh.cp_ref_001_exercised (VP_FAIL_012) reads 0% even under refresh stress. Under stress with max_postpone = 2 the antecedent is representable but still never occurs, because the scheduler acknowledges every refresh request immediately (39 acks for 22 requests) instead of postponing \u2014 the same behaviour that produces the REF_002 defect above. Either the status field must be 4 bits wide or the postpone budget must be capped at 7; the spec should state which.",
+    "evidence": {
+      "spec_paths": [
+        "csr_register_map.registers[CTRL_STATUS].fields[ref_pending_cnt]",
+        "csr_register_map.registers[REFRESH_CONFIG].fields[max_postpone]",
+        "controller_architecture.refresh_policy.max_postpone_count"
+      ],
+      "coverpoint": "cg_refresh.cp_ref_001_exercised = 0% after path_05, path_16, path_20",
+      "rollup": "Validation/reports/coverage_rollup.json"
+    },
+    "status": "open"
+  },
+  {
+    "source": "validation",
+    "target": "spec",
+    "kind": "spec_gap",
+    "scope": "csr_register_map",
+    "severity": "minor",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "title": "CSR reads of live status fields: the spec does not say which cycle's value a read returns",
+    "detail": "In the integrated chain (path_12/13), a read of CTRL_STATUS completed in the same controller cycle that refresh_ctrl's ref_pending_cnt changed from 1 to 0. The design returned the pre-change value (ref_pending_cnt=1, data 0x20); the spec-derived model, which sees the status-level change in that same cycle, predicted the post-change value (0x0). Both are defensible: the spec defines the CTRL_STATUS field layout but never states the read-data sampling relationship to status inputs (registered one cycle behind, or combinational). This is 1 of 103 comparisons in an otherwise fully matching register walk and appears only when live status sources are wired, never in block-level runs. Requested: a sentence in csr_register_map stating that read data for status registers reflects the status inputs as of the previous clock edge (or the alternative). Until then the comparison is reported, not waived, because it fails only under a specific same-cycle coincidence the waiver schema cannot express.",
+    "evidence": {
+      "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+      "time_ns": 39000,
+      "observed": "csr_rsp.read_data addr=0x0 data=0x20",
+      "predicted": "data=0x0 after csr_sts_level ref_pending 1->0 in the same cycle",
+      "field": "CTRL_STATUS.ref_pending_cnt[7:5]"
+    },
+    "status": "open"
+  }
+]
