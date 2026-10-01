@@ -197,6 +197,32 @@ logic/ports unrelated to the diagnosed root cause.
 """
 
 
+def _load_external_findings(path: str) -> dict:
+    """Validation-subsystem findings handed over by the Frontend
+    Orchestrator (--findings). Accepts {module: [failed_check, ...]} or a
+    retry_instructions.json-shaped file. Returns {module: entry} where entry
+    carries 'external_findings' (formatted lines) and no sim stats -- this
+    path is for defects Validation found that the local Xcelium gate did not.
+    """
+    raw = json.loads(Path(path).read_text())
+    per_mod = raw.get("retry_instructions", raw)
+    out = {}
+    for module, v in per_mod.items():
+        checks = v.get("failed_checks", v) if isinstance(v, dict) else v
+        lines = []
+        for c in checks:
+            if not isinstance(c, dict):
+                lines.append(str(c))
+                continue
+            anchors = "; ".join(f"{a.get('file')}:{a.get('line')}" for a in c.get("anchor", [])[:3])
+            lines.append(f"[{c.get('severity', '?')}/{c.get('confidence', '?')}] {c.get('id')}: {c.get('name', '')} | "
+                         f"expected={c.get('expected')} actual={c.get('actual')}"
+                         + (f" | anchors: {anchors}" if anchors else "")
+                         + (f" | Validation's proven repair hint: {c['fix']}" if c.get("fix") else ""))
+        out[module] = {"external_findings": lines}
+    return out
+
+
 def _anthropic_client():
     try:
         import anthropic
@@ -208,15 +234,24 @@ def _anthropic_client():
     return anthropic.Anthropic()
 
 
+def _failure_block(context: dict) -> str:
+    if context.get("external_findings"):
+        return ("VALIDATION-SUBSYSTEM FINDINGS (system-level checks from the Validation\n"
+                "team's drop; the local Xcelium unit sim for this module PASSED, so the\n"
+                "defect is a behavior the unit testbench does not cover):\n"
+                + "\n".join("    " + l for l in context["external_findings"]))
+    return (f"SIMULATION FAILURE (from phase1_error_report.json):\n"
+            f"  {context['pass_count']}/{context['test_count']} tests passed.\n"
+            "  Failing test lines:\n"
+            + "\n".join("    " + l for l in context["fail_lines"]) + "\n"
+            "  Assertion errors:\n"
+            + ("\n".join("    " + l for l in context["assertion_errors"]) or "    (none)"))
+
+
 def _propose_fix(client, context: dict) -> dict:
     user_msg = f"""FAILING MODULE: {context['module']}
 
-SIMULATION FAILURE (from phase1_error_report.json):
-  {context['pass_count']}/{context['test_count']} tests passed.
-  Failing test lines:
-{chr(10).join('    ' + l for l in context['fail_lines'])}
-  Assertion errors:
-{chr(10).join('    ' + l for l in context['assertion_errors']) or '    (none)'}
+{_failure_block(context)}
 
 CURRENT GENERATOR SOURCE ({context['generator_path']}):
 ```python
@@ -403,6 +438,7 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
             "pass_count": entry.get("pass_count", 0),
             "fail_lines": entry.get("fail_lines", []),
             "assertion_errors": entry.get("assertion_errors", []),
+            "external_findings": entry.get("external_findings", []),
             "generator_path": str(gen_path),
             "generator_source": gen_path.read_text(),
             "rtl_source": (rtl_dir / f"{module}.sv").read_text(),
@@ -506,6 +542,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--output-dir", help="pipeline output dir (skips the prompt)")
     ap.add_argument("--spec", help="spec JSON path (skips the prompt)")
+    ap.add_argument("--findings", help="Validation findings JSON from the Frontend Orchestrator; "
+                                       "replaces the Xcelium error-report precondition")
     args = ap.parse_args()
 
     # full_pipeline.py drives this with both flags set, since it already
@@ -517,33 +555,40 @@ def main() -> int:
         print(f"Not found: {spec_path}")
         return 1
 
-    err_path = Path(output_dir) / VALIDATION_SUBDIR / "phase1_error_report.json"
-    if not err_path.is_file():
-        print(f"Not found: {err_path}")
-        print("(this reads the failure report a real Phase 1 sim-gate FAIL leaves behind)")
-        return 1
+    if args.findings:
+        modules = _load_external_findings(args.findings)
+        failing = [m for m in P1_MODULES if m in modules]
+        if not failing:
+            print("No findings for a Phase 1 module in --findings -- nothing to fix.")
+            return 0
+    else:
+        err_path = Path(output_dir) / VALIDATION_SUBDIR / "phase1_error_report.json"
+        if not err_path.is_file():
+            print(f"Not found: {err_path}")
+            print("(this reads the failure report a real Phase 1 sim-gate FAIL leaves behind)")
+            return 1
 
-    error_report = json.loads(err_path.read_text())
-    failure_stage = error_report.get("failure_stage")
-    if failure_stage != "BEHAVIORAL_SIMULATION":
-        print(f"This phase failed at {failure_stage or 'an earlier stage'}, not "
-              f"BEHAVIORAL_SIMULATION -- this agent only patches RTL generators in "
-              f"response to a real sim failure, and only understands sim_result's "
-              f"shape.")
-        if failure_stage == "TESTBENCH_AUDIT":
-            print("(That's testbench_auditor.py's report, not Xcelium's -- it's "
-                  "telling you the testbench disagrees with the spec on its own, "
-                  "independent of the RTL. This agent doesn't yet act on those "
-                  "findings -- see tb_audit_report.json and fix tb_generator.py by "
-                  "hand for now.)")
-        return 1
+        error_report = json.loads(err_path.read_text())
+        failure_stage = error_report.get("failure_stage")
+        if failure_stage != "BEHAVIORAL_SIMULATION":
+            print(f"This phase failed at {failure_stage or 'an earlier stage'}, not "
+                  f"BEHAVIORAL_SIMULATION -- this agent only patches RTL generators in "
+                  f"response to a real sim failure, and only understands sim_result's "
+                  f"shape.")
+            if failure_stage == "TESTBENCH_AUDIT":
+                print("(That's testbench_auditor.py's report, not Xcelium's -- it's "
+                      "telling you the testbench disagrees with the spec on its own, "
+                      "independent of the RTL. This agent doesn't yet act on those "
+                      "findings -- see tb_audit_report.json and fix tb_generator.py by "
+                      "hand for now.)")
+            return 1
 
-    modules = error_report.get("sim_result", {}).get("modules", {})
-    failing = [m for m in P1_MODULES if modules.get(m, {}).get("status") == "FAIL"]
+        modules = error_report.get("sim_result", {}).get("modules", {})
+        failing = [m for m in P1_MODULES if modules.get(m, {}).get("status") == "FAIL"]
 
-    if not failing:
-        print("No FAILED modules in phase1_error_report.json -- nothing to fix.")
-        return 0
+        if not failing:
+            print("No FAILED modules in phase1_error_report.json -- nothing to fix.")
+            return 0
 
     print(f"Failing module(s): {', '.join(failing)}")
 

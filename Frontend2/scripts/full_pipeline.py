@@ -22,6 +22,12 @@
 |  get an authoritative pass/fail, rather than trusting the agent's    |
 |  own per-module re-verification as the final word.                  |
 |                                                                      |
+|  Two optional Frontend Orchestrator checkpoints (Orchestrator/       |
+|  orchestrator_agent.py), both prompt-gated and off by default: after |
+|  the spec is resolved (spec-stage findings -> Microarch agent, may   |
+|  swap in a revised spec) and after the top-level bundle (RTL-stage   |
+|  findings -> Phase 1/2 fix agents). They read Validation's outbox.   |
+|                                                                      |
 |  Each phase runs as its own subprocess (phaseN_pipeline.py), output  |
 |  streamed live -- identical to running it by hand. Subprocess         |
 |  isolation is deliberate, not incidental: Phase1/tb_generator.py and |
@@ -71,19 +77,21 @@ VALIDATION_DIR = "VALIDATIONREPORT"
 FIX_AGENTS = {
     (1, "BEHAVIORAL_SIMULATION"): "Phase1/phase1_validation_agent.py",
     (1, "TESTBENCH_AUDIT"): "Phase1/testbench_fix_agent.py",
-    # Phase 2 has no TESTBENCH_AUDIT entry on purpose: investigated
-    # 2026-09-29, Phase2/tb_generator.py doesn't have the bug class that
-    # motivated Phase 1's auditor (no gate exists to hook one to either).
+    # Phase 2's auditor (Phase2/testbench_auditor.py) is narrower than
+    # Phase 1's: it checks the spec-derived localparams, address-slice
+    # vectors and ZQCS values, not the TB-owned directed timing constants.
     (2, "BEHAVIORAL_SIMULATION"): "Phase2/phase2_validation_agent.py",
+    (2, "TESTBENCH_AUDIT"): "Phase2/testbench_fix_agent.py",
 }
 
 
 def _check_ssh_env():
     if not os.environ.get("OLYMPUS_USER") or not os.environ.get("OLYMPUS_KEY"):
         print("\n  WARNING: OLYMPUS_USER / OLYMPUS_KEY are not both set in this")
-        print("  shell. Each phase's lint/sim gates will SKIP (or a phase may")
-        print("  crash waiting on a password prompt this script can't answer)")
-        print("  unless both are exported first. See IMPLEMENTATION_PLAN.md.\n")
+        print("  shell. Each phase's lint/sim gates will SKIP -- and a skipped gate now")
+        print("  FAILS the phase (set ALLOW_SKIPPED_GATES=1 to proceed unverified on")
+        print("  purpose) -- or a phase may crash waiting on a password prompt this")
+        print("  script can't answer. Export both first. See IMPLEMENTATION_PLAN.md.\n")
 
 
 def _check_scripts_exist():
@@ -119,7 +127,48 @@ def resolve_spec_path(output_dir: str) -> str:
     if not os.path.isfile(spec_path):
         print(f"Not found: {spec_path}")
         sys.exit(1)
-    return os.path.abspath(spec_path)
+    spec_path = os.path.abspath(spec_path)
+    if not run_spec_review(spec_path):
+        print("\n  Spec failed review. Stopping before Phase 1.")
+        sys.exit(1)
+    return spec_path
+
+
+def run_spec_review(spec_path: str) -> bool:
+    """The spec-review stage before Phase 1, on every spec however it arrived.
+    Validation's validate_spec_stage (schema, JESD79-3, register map, intake
+    gate) when it is importable; otherwise the stub dummy_validation_agent,
+    said out loud. FAIL blocks. Intake gaps are advisory: listed, never
+    silently dropped. Returns True on PASS."""
+    print(f"\n{'#' * 62}")
+    print("#  SPEC REVIEW")
+    print(f"{'#' * 62}\n")
+    spec = json.loads(Path(spec_path).read_text())
+    try:
+        sys.path.insert(0, str(Path(HERE).parents[1] / "Validation" / "spec"))
+        from validate_spec_stage import validate_spec
+        result = validate_spec(spec, None, spec_path=spec_path)
+    except Exception as e:
+        print(f"  WARNING: Validation's spec review unavailable ({e}); using the stub.")
+        sys.path.insert(0, str(Path(HERE) / "Microarch"))
+        import dummy_validation_agent as dva
+        result = dva.validate_spec(spec)
+    print(f"  validator: {result['validator']}")
+    print(f"  status:    {result['status']}")
+    review = result.get("review") or {}
+    blocking = review.get("blocking", result["findings"] if result["status"] == "FAIL" else [])
+    advisory = review.get("advisory", [])
+    for f in blocking:
+        print(f"    BLOCKING  {f}")
+    if advisory:
+        print(f"    {len(advisory)} open intake question(s) (advisory; Validation judges under "
+              f"pinned conventions until the spec answers them):")
+        for f in advisory:
+            print(f"      {f}")
+    if result["status"] != "PASS":
+        print("\n  Revise with:  microarch_cli.py --feedback "
+              "Validation/findings/outbox/current/SPEC_REVIEW.json  <request>")
+    return result["status"] == "PASS"
 
 
 def run_microarch_synthesis(output_dir: str) -> str | None:
@@ -157,24 +206,65 @@ def run_microarch_synthesis(output_dir: str) -> str | None:
     spec_path = spec_path.resolve()
     spec = json.loads(spec_path.read_text())
 
-    print(f"\n{'#' * 62}")
-    print("#  SPEC VALIDATION (stub -- hands off to Jacob's Validation subsystem later)")
-    print(f"{'#' * 62}\n")
-    sys.path.insert(0, str(Path(HERE) / "Microarch"))
-    import dummy_validation_agent as dva
-    result = dva.validate_spec(spec)
-    print(f"  validator: {result['validator']}")
-    print(f"  status:    {result['status']}")
-    for f in result["findings"]:
-        print(f"    - {f}")
-
-    if result["status"] != "PASS":
-        print("\n  Spec failed validation. Stopping before Phase 1.")
+    if not run_spec_review(str(spec_path)):
+        print("\n  Spec failed review. Stopping before Phase 1.")
         return None
 
     print(f"\n  Spec validated: {spec_path}")
     return str(spec_path)
 
+
+def run_orchestrator(stage: str, spec_path: str, output_dir: str) -> str | None:
+    """Optional Frontend Orchestrator checkpoint (Orchestrator/
+    orchestrator_agent.py). Reads Validation's outbox and routes findings:
+    stage "spec" -> Microarch agent, stage "rtl" -> Phase 1/2 fix agents
+    (patches still human-confirmed there). Inherits stdio. Returns the path
+    of the newest revised spec it wrote (stage "spec" only), else None.
+    Skipped by default -- the outbox may be stale relative to this run."""
+    print(f"\n  Frontend Orchestrator ({stage} stage): route Validation's findings?")
+    print("  Reads Validation/findings/outbox (check its drop is current first).")
+    if input("  > run it? (y/N): ").strip().lower() != "y":
+        return None
+    print(f"\n{'#' * 62}")
+    print(f"#  FRONTEND ORCHESTRATOR ({stage.upper()} STAGE)")
+    print(f"{'#' * 62}\n")
+    subprocess.run(
+        [PYTHON, str(Path(HERE) / "Orchestrator" / "orchestrator_agent.py"),
+         "--stage", stage, "--spec", spec_path, "--output-dir", output_dir],
+        env=os.environ.copy(),
+    )
+    if stage != "spec":
+        return None
+    revs = sorted((Path(output_dir) / "ORCHESTRATOR").glob("spec_rev*.json"),
+                  key=lambda p: p.stat().st_mtime)
+    if not revs:
+        return None
+    print(f"\n  Orchestrator wrote a revised spec: {revs[-1]}")
+    if input("  > use it for Phases 1-4 instead? (y/N): ").strip().lower() == "y":
+        return str(revs[-1].resolve())
+    return None
+
+
+def ship_drop(spec_path: str, output_dir: str) -> None:
+    """Frontend side of Validation/findings/HANDOFF_CONTRACT.md: ship the
+    spec beside the RTL, name the drop by content hash, and warn if any block
+    was generated from a different spec revision (Validation would block
+    every path through it)."""
+    import drop
+    drop.ship_spec(spec_path, output_dir)
+    chk = drop.spec_consistency(output_dir)
+    print(f"\n    Drop id (content hash, matches Validation's): {drop.compute_drop_id(output_dir)}")
+    print(f"    Shipped spec: {Path(output_dir) / 'generated_spec.json'}"
+          f"  (revision {chk['spec_revision']})")
+    stale = drop.top_copy_mismatches(output_dir)
+    if stale:
+        print(f"    WARNING: TOPRTL copies differ from their phase outputs: {', '.join(sorted(stale))}")
+    if chk["foreign"]:
+        print("    WARNING: blocks from a different spec revision (Validation will block")
+        print("    paths through them -- re-run the phases that produced them):")
+        for b, r in sorted(chk["foreign"].items()):
+            print(f"      {b}: {r}")
+    print()
 
 def run_phase(phase_num: int, subdir: str, script: str, spec_path: str, output_dir: str) -> bool:
     script_path = str(Path(HERE) / subdir / script)
@@ -312,10 +402,25 @@ def main():
     os.makedirs(output_dir, exist_ok=True)
 
     spec_path = resolve_spec_path(output_dir)
+    spec_path = run_orchestrator("spec", spec_path, output_dir) or spec_path
 
     i = 0
     while i < len(PHASES):
         phase_num, subdir, script, rtl_subdir = PHASES[i]
+        if i > 0:
+            import drop
+            mixed = drop.revision_mismatches(
+                output_dir, spec_path, [p[3] for p in PHASES[:i]])
+            if mixed:
+                print(f"\n  STOP: earlier phase(s) in {output_dir} were generated from a different")
+                print(f"  spec than the one in use ({Path(spec_path).name}). One generation = one")
+                print("  spec; a drop built from two has no single contract.")
+                for b, r in sorted(mixed.items()):
+                    print(f"    {b}: {r}")
+                if input("  [r]e-run from Phase 1 with this spec / [q]uit: ").strip().lower() == "r":
+                    i = 0
+                    continue
+                sys.exit(1)
         is_last = (i == len(PHASES) - 1)
         passed = run_phase(phase_num, subdir, script, spec_path, output_dir)
         rtl_dir = Path(output_dir) / rtl_subdir
@@ -352,6 +457,11 @@ def main():
                 print("\n    Top-level bundle generation FAILED -- see output above.")
                 print("    (The 4 phase RTL outputs above are still valid; only the")
                 print("    combined top-level bundle failed.)\n")
+            ship_drop(spec_path, output_dir)
+            if top_rc == 0:
+                run_orchestrator("rtl", spec_path, output_dir)
+                print("\n    If the orchestrator dispatched fixes, re-run this pipeline")
+                print("    to regenerate every phase from the patched generators.\n")
             sys.exit(top_rc)
         # action == "continue" -> advance to the next phase
         i += 1

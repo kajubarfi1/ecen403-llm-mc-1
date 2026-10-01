@@ -50,6 +50,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from manifest_stamp import stamp  # noqa: E402
+from gate_policy import gate_passes  # noqa: E402
 
 TOP = "ddr3_controller"
 CLK, RST = "clk", "rst_n"
@@ -435,6 +436,16 @@ def main() -> int:
         return 1
     spec = json.loads(args.spec.read_text())
 
+    from drop import revision_mismatches  # noqa: E402
+    mixed = revision_mismatches(args.output_dir, args.spec)
+    if mixed:
+        print(f"ERROR: blocks were generated from a different spec than {args.spec.name} "
+              f"(revision {spec.get('revision')}): one drop must come from one spec.", file=sys.stderr)
+        for b, r in sorted(mixed.items()):
+            print(f"  {b}: {r}", file=sys.stderr)
+        print("Regenerate those phases from this spec, then re-run.", file=sys.stderr)
+        return 1
+
     try:
         manifests = load_manifests(args.output_dir)
         edges, redundant = build_edges(manifests)
@@ -495,6 +506,10 @@ def main() -> int:
         (out_dir / "top_lint_report.json").write_text(json.dumps(lint, indent=2) + "\n")
         if lint["status"] == "SKIPPED":
             print(f"  SKIPPED: {lint.get('reason')}")
+            if not gate_passes("SKIPPED"):
+                print("  A skipped lint is not a pass. Export OLYMPUS_USER / OLYMPUS_KEY, or set")
+                print("  ALLOW_SKIPPED_GATES=1 to accept the bundle unverified.")
+                return 1
         elif lint["status"] == "PASS":
             print(f"  PASS -- 0 errors, {len(lint.get('warnings', []))} warning(s)")
         else:
