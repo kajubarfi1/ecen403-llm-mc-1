@@ -37,6 +37,7 @@ for p in (HERE, AGENTS_DIR):
         sys.path.insert(0, p)
 
 from langgraph.graph import StateGraph, END
+from gate_policy import gate_passes
 from config_regs_gen import ConfigRegsGenerator
 from init_fsm_gen import InitFsmGenerator
 from wb_port_gen import WishbonePortGenerator
@@ -166,7 +167,7 @@ def tb_audit_gate(state: GraphState) -> dict:
     all_ok = True
     for mod, r in result.items():
         status = r["status"]
-        if status == "FAIL":
+        if status == "FAIL" or (status == "SKIPPED" and not gate_passes("SKIPPED")):
             all_ok = False
         sym = {"PASS": "OK", "NO_CHECKS": "--", "SKIPPED": "--", "FAIL": "FAIL"}[status]
         print(f"  {sym:4s} {mod:15s} {status}")
@@ -230,7 +231,7 @@ def lint_gate(state: GraphState) -> dict:
 
 def route_after_lint(state: GraphState) -> Literal["sim_gate", "lint_failure"]:
     status = state.get("lint_result", {}).get("status", "SKIPPED")
-    return "lint_failure" if status == "FAIL" else "sim_gate"
+    return "sim_gate" if gate_passes(status) else "lint_failure"
 
 
 # ===================================================
@@ -360,7 +361,7 @@ def sim_gate(state: GraphState) -> dict:
 
 def route_after_sim(state: GraphState) -> Literal["success", "sim_failure"]:
     status = state.get("sim_result", {}).get("status", "SKIPPED")
-    return "success" if status in ("PASS", "SKIPPED") else "sim_failure"
+    return "success" if gate_passes(status) else "sim_failure"
 
 
 # ===================================================
@@ -372,6 +373,9 @@ def success(state: GraphState) -> dict:
     sim = state.get("sim_result", {})
     print(f"  Lint: {lint.get('status', 'N/A')}")
     print(f"  Sim:  {sim.get('status', 'N/A')}")
+    skipped = [g for g, r in (("lint", lint), ("sim", sim)) if r.get("status") == "SKIPPED"]
+    if skipped:
+        print(f"\n  WARNING: {' and '.join(skipped)} SKIPPED (ALLOW_SKIPPED_GATES) -- this phase is UNVERIFIED.")
 
     rd = Path(state["phase1_rtl_dir"])
     vd = Path(state["validation_dir"])
@@ -381,7 +385,8 @@ def success(state: GraphState) -> dict:
         print(f"    {sv_ok} {mod}.sv  {tb_ok} {mod}_tb.sv")
 
     report = {
-        "status": "PASS", "pipeline": "phase1",
+        "status": "PASS_UNVERIFIED" if skipped else "PASS", "pipeline": "phase1",
+        "skipped_gates": skipped,
         "lint_status": lint.get("status"),
         "sim_status": sim.get("status"),
         "modules": list(P1_MODULES),
@@ -451,6 +456,10 @@ def lint_failure(state: GraphState) -> dict:
     print("  fluke. Fix the generator directly; see lint_report.json.")
 
     lint = state.get("lint_result", {})
+    if lint.get("status") == "SKIPPED":
+        print(f"\n  NOTE: this gate was SKIPPED ({lint.get('reason')}), not run. A skipped gate")
+        print("  is not a pass: export OLYMPUS_USER / OLYMPUS_KEY, or set")
+        print("  ALLOW_SKIPPED_GATES=1 to proceed explicitly unverified.")
     failed_mods = [m for m, r in lint.get("modules", {}).items()
                    if isinstance(r, dict) and r.get("status") == "FAIL"]
     for mod in failed_mods:
@@ -477,6 +486,10 @@ def sim_failure(state: GraphState) -> dict:
     print("  bug in a generator's logic. No retry will fix this.")
 
     sim = state.get("sim_result", {})
+    if sim.get("status") == "SKIPPED":
+        print(f"\n  NOTE: this gate was SKIPPED ({sim.get('reason')}), not run. A skipped gate")
+        print("  is not a pass: export OLYMPUS_USER / OLYMPUS_KEY, or set")
+        print("  ALLOW_SKIPPED_GATES=1 to proceed explicitly unverified.")
     failed_mods = [m for m, r in sim.get("modules", {}).items()
                    if isinstance(r, dict) and r.get("status") == "FAIL"]
     for mod in failed_mods:

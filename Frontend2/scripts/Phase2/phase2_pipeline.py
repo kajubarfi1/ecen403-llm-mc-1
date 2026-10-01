@@ -6,6 +6,7 @@
 |  Flow:                                                               |
 |    4 RTL generation scripts + 1 testbench generator (all parallel,   |
 |    all deterministic, zero LLM calls) -> generation check            |
+|        -> Testbench Audit Gate (local, spec-only, no LLM/SSH)        |
 |        -> Lint Gate (real Verilator via SSH/Slurm)                   |
 |        -> Sim Gate (real Xcelium via SSH/Slurm) -> Success           |
 |                                                                      |
@@ -15,7 +16,7 @@
 |                                                                      |
 |  Output:                                                             |
 |    PHASE2RTL/          .sv + _tb.sv + _manifest.json per module      |
-|    VALIDATIONREPORT/   lint + sim reports                            |
+|    VALIDATIONREPORT/   audit + lint + sim reports                      |
 |                                                                      |
 |  Modules: addr_decoder, calibration, refresh_ctrl, bank_tracker --   |
 |  all deterministic now. (In Frontend/, refresh_ctrl and bank_tracker |
@@ -39,11 +40,13 @@ for p in (HERE, AGENTS_DIR):
         sys.path.insert(0, p)
 
 from langgraph.graph import StateGraph, END
+from gate_policy import gate_passes
 from addr_decoder_gen import AddrDecoderGenerator
 from calibration_gen import CalibrationGenerator
 from refresh_ctrl_gen import RefreshCtrlGenerator
 from bank_tracker_gen import BankTrackerGenerator
 from tb_generator import TestbenchGenerator
+from testbench_auditor import audit as audit_testbenches
 
 try:
     from verilator_lint import VerilatorLint
@@ -83,6 +86,7 @@ class GraphState(TypedDict):
     phase2_rtl_dir: str
     validation_dir: str
     modules: Annotated[dict, operator.or_]
+    tb_audit_result: dict
     lint_result: dict
     sim_result: dict
     pipeline_status: str
@@ -153,8 +157,45 @@ def check_generation(state: GraphState) -> dict:
     return {"pipeline_status": "generation_failed" if failed else "generation_ok"}
 
 
-def route_after_generation(state: GraphState) -> Literal["lint_gate", "generation_failure"]:
-    return "generation_failure" if state.get("pipeline_status") == "generation_failed" else "lint_gate"
+def route_after_generation(state: GraphState) -> Literal["tb_audit_gate", "generation_failure"]:
+    return "generation_failure" if state.get("pipeline_status") == "generation_failed" else "tb_audit_gate"
+
+
+# ===================================================
+# TESTBENCH AUDIT GATE (deterministic, local, no LLM, no SSH --
+# see testbench_auditor.py. Cross-checks the testbench tb_generator.py
+# just wrote against the spec independently of what the RTL generators
+# decided, catching bugs like a stale hardcoded golden value before an
+# expensive remote Xcelium job would otherwise be spent finding it.)
+# ===================================================
+def tb_audit_gate(state: GraphState) -> dict:
+    print(f"\n{'=' * 62}")
+    print("  TESTBENCH AUDIT GATE -- deterministic, local, spec-derived")
+    print(f"{'=' * 62}")
+
+    result = audit_testbenches(state["spec_path"], state["phase2_rtl_dir"], P2_MODULES)
+    all_ok = True
+    for mod, r in result.items():
+        status = r["status"]
+        if status == "FAIL" or (status == "SKIPPED" and not gate_passes("SKIPPED")):
+            all_ok = False
+        sym = {"PASS": "OK", "NO_CHECKS": "--", "SKIPPED": "--", "FAIL": "FAIL"}[status]
+        print(f"  {sym:4s} {mod:15s} {status}")
+        for f in r.get("findings", []):
+            print(f"    [{f['check']}] {f['register']} ({f['offset']})")
+            print(f"      {f['detail']}")
+
+    vd = Path(state["validation_dir"])
+    report_path = vd / "phase2_tb_audit_report.json"
+    report_path.write_text(json.dumps(result, indent=2))
+    print(f"\n  Report: {report_path}")
+
+    return {"tb_audit_result": {"status": "PASS" if all_ok else "FAIL", "modules": result}}
+
+
+def route_after_tb_audit(state: GraphState) -> Literal["lint_gate", "tb_audit_failure"]:
+    status = state.get("tb_audit_result", {}).get("status", "PASS")
+    return "lint_gate" if status == "PASS" else "tb_audit_failure"
 
 
 # ===================================================
@@ -200,7 +241,7 @@ def lint_gate(state: GraphState) -> dict:
 
 def route_after_lint(state: GraphState) -> Literal["sim_gate", "lint_failure"]:
     status = state.get("lint_result", {}).get("status", "SKIPPED")
-    return "lint_failure" if status == "FAIL" else "sim_gate"
+    return "sim_gate" if gate_passes(status) else "lint_failure"
 
 
 # ===================================================
@@ -330,7 +371,7 @@ def sim_gate(state: GraphState) -> dict:
 
 def route_after_sim(state: GraphState) -> Literal["success", "sim_failure"]:
     status = state.get("sim_result", {}).get("status", "SKIPPED")
-    return "success" if status in ("PASS", "SKIPPED") else "sim_failure"
+    return "success" if gate_passes(status) else "sim_failure"
 
 
 # ===================================================
@@ -342,6 +383,9 @@ def success(state: GraphState) -> dict:
     sim = state.get("sim_result", {})
     print(f"  Lint: {lint.get('status', 'N/A')}")
     print(f"  Sim:  {sim.get('status', 'N/A')}")
+    skipped = [g for g, r in (("lint", lint), ("sim", sim)) if r.get("status") == "SKIPPED"]
+    if skipped:
+        print(f"\n  WARNING: {' and '.join(skipped)} SKIPPED (ALLOW_SKIPPED_GATES) -- this phase is UNVERIFIED.")
 
     rd = Path(state["phase2_rtl_dir"])
     vd = Path(state["validation_dir"])
@@ -351,7 +395,8 @@ def success(state: GraphState) -> dict:
         print(f"    {sv_ok} {mod}.sv  {tb_ok} {mod}_tb.sv")
 
     report = {
-        "status": "PASS", "pipeline": "phase2",
+        "status": "PASS_UNVERIFIED" if skipped else "PASS", "pipeline": "phase2",
+        "skipped_gates": skipped,
         "lint_status": lint.get("status"),
         "sim_status": sim.get("status"),
         "modules": list(P2_MODULES),
@@ -388,6 +433,32 @@ def generation_failure(state: GraphState) -> dict:
     return {"pipeline_status": "fail"}
 
 
+def tb_audit_failure(state: GraphState) -> dict:
+    print(f"\n{'=' * 62}\n  PHASE 2 PIPELINE FAILED AT TESTBENCH AUDIT GATE\n{'=' * 62}")
+    print("\n  The testbench disagrees with the spec, independent of anything")
+    print("  the RTL generators decided -- see phase2_tb_audit_report.json. This is")
+    print("  NOT necessarily an RTL bug: it means tb_generator.py's expected")
+    print("  value for a check doesn't match what the spec derives, which is")
+    print("  usually a testbench bug (stale hardcoded literal, or a generic")
+    print("  round-trip test that doesn't know a register has reserved bits).")
+    print("  Lint/sim were skipped -- no point spending a remote Xcelium job")
+    print("  simulating against a testbench already known to disagree with spec.")
+
+    tb = state.get("tb_audit_result", {})
+    failed_mods = [m for m, r in tb.get("modules", {}).items() if r.get("status") == "FAIL"]
+
+    report = {
+        "status": "FAIL", "pipeline": "phase2", "failure_stage": "TESTBENCH_AUDIT",
+        "tb_audit_result": tb, "failed_modules": failed_mods,
+        "requires_human_review": True,
+        "timestamp": datetime.now().isoformat(),
+    }
+    vd = Path(state["validation_dir"])
+    (vd / "phase2_error_report.json").write_text(json.dumps(report, indent=2))
+    print(f"\n  Error report: {vd / 'phase2_error_report.json'}")
+    return {"pipeline_status": "fail"}
+
+
 def lint_failure(state: GraphState) -> dict:
     print(f"\n{'=' * 62}\n  PHASE 2 PIPELINE FAILED AT LINT GATE\n{'=' * 62}")
     print("\n  Generation succeeded, but Verilator found a real static")
@@ -395,6 +466,10 @@ def lint_failure(state: GraphState) -> dict:
     print("  fluke. Fix the generator directly; see phase2_lint_report.json.")
 
     lint = state.get("lint_result", {})
+    if lint.get("status") == "SKIPPED":
+        print(f"\n  NOTE: this gate was SKIPPED ({lint.get('reason')}), not run. A skipped gate")
+        print("  is not a pass: export OLYMPUS_USER / OLYMPUS_KEY, or set")
+        print("  ALLOW_SKIPPED_GATES=1 to proceed explicitly unverified.")
     failed_mods = [m for m, r in lint.get("modules", {}).items()
                    if isinstance(r, dict) and r.get("status") == "FAIL"]
     for mod in failed_mods:
@@ -421,6 +496,10 @@ def sim_failure(state: GraphState) -> dict:
     print("  bug in a generator's logic (or the testbench). No retry will fix this.")
 
     sim = state.get("sim_result", {})
+    if sim.get("status") == "SKIPPED":
+        print(f"\n  NOTE: this gate was SKIPPED ({sim.get('reason')}), not run. A skipped gate")
+        print("  is not a pass: export OLYMPUS_USER / OLYMPUS_KEY, or set")
+        print("  ALLOW_SKIPPED_GATES=1 to proceed explicitly unverified.")
     failed_mods = [m for m, r in sim.get("modules", {}).items()
                    if isinstance(r, dict) and r.get("status") == "FAIL"]
     for mod in failed_mods:
@@ -451,10 +530,12 @@ def build_graph():
     g.add_node("gen_bank_tracker", gen_bank_tracker)
     g.add_node("gen_testbenches", gen_testbenches)
     g.add_node("check_generation", check_generation)
+    g.add_node("tb_audit_gate", tb_audit_gate)
     g.add_node("lint_gate", lint_gate)
     g.add_node("sim_gate", sim_gate)
     g.add_node("success", success)
     g.add_node("generation_failure", generation_failure)
+    g.add_node("tb_audit_failure", tb_audit_failure)
     g.add_node("lint_failure", lint_failure)
     g.add_node("sim_failure", sim_failure)
 
@@ -472,7 +553,10 @@ def build_graph():
     g.add_edge("gen_testbenches", "check_generation")
 
     g.add_conditional_edges("check_generation", route_after_generation,
-        {"lint_gate": "lint_gate", "generation_failure": "generation_failure"})
+        {"tb_audit_gate": "tb_audit_gate", "generation_failure": "generation_failure"})
+
+    g.add_conditional_edges("tb_audit_gate", route_after_tb_audit,
+        {"lint_gate": "lint_gate", "tb_audit_failure": "tb_audit_failure"})
 
     g.add_conditional_edges("lint_gate", route_after_lint,
         {"sim_gate": "sim_gate", "lint_failure": "lint_failure"})
@@ -482,6 +566,7 @@ def build_graph():
 
     g.add_edge("success", END)
     g.add_edge("generation_failure", END)
+    g.add_edge("tb_audit_failure", END)
     g.add_edge("lint_failure", END)
     g.add_edge("sim_failure", END)
 
@@ -521,7 +606,7 @@ if __name__ == "__main__":
     result = app.invoke({
         "spec_path": spec, "output_dir": out,
         "phase2_rtl_dir": dirs["phase2_rtl"], "validation_dir": dirs["validation"],
-        "modules": {}, "lint_result": {}, "sim_result": {}, "pipeline_status": "running",
+        "modules": {}, "tb_audit_result": {}, "lint_result": {}, "sim_result": {}, "pipeline_status": "running",
         "ssh_password": ssh_password,
     })
 
