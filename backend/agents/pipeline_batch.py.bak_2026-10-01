@@ -129,7 +129,6 @@ def run_block(
     env_file: Path,
     enable_autotuner: bool,
     optimize_fmax: bool,
-    mode: str,
     optimize_power: bool,
     block_colour: str,
     print_lock: threading.Lock,
@@ -148,8 +147,6 @@ def run_block(
         "--out_root",    str(out_root),
         "--env_file",    str(env_file),
     ]
-    if mode:
-        cmd += ["--mode", mode]
     if enable_autotuner:
         cmd.append("--enable_autotuner")
     if optimize_fmax:
@@ -351,11 +348,6 @@ def main() -> int:
                     help="Enable Fmax optimization for all blocks")
     ap.add_argument("--optimize_power",   action="store_true", default=False,
                     help="Enable power optimization for all blocks")
-    ap.add_argument("--mode", default="build",
-                    choices=["contract", "synth", "build", "full"],
-                    help="How far to take each block. contract (seconds, no Docker), "
-                         "synth (minutes), build (~1 hour for 11 blocks, default), "
-                         "full (hours, adds PPA optimization).")
     ap.add_argument("--max_workers",      type=int, default=None,
                     help=f"Max parallel workers (default: {SAFE_MAX_WORKERS}). Higher values "
                          f"have corrupted runs on this flow — see SAFE_MAX_WORKERS in this file.")
@@ -397,7 +389,6 @@ def main() -> int:
     print(f"  Workers     : {max_workers}")
     print(f"  out_root    : {args.out_root}")
     print(f"  autotuner   : {args.enable_autotuner}")
-    print(f"  mode        : {args.mode}")
     print(f"  opt_fmax    : {args.optimize_fmax}")
     print(f"  opt_power   : {args.optimize_power}")
     print("=" * 70 + "\n")
@@ -414,7 +405,6 @@ def main() -> int:
                 out_root=args.out_root,
                 env_file=args.env_file,
                 enable_autotuner=args.enable_autotuner,
-                mode=args.mode,
                 optimize_fmax=args.optimize_fmax,
                 optimize_power=args.optimize_power,
                 block_colour=BLOCK_COLOURS[i % len(BLOCK_COLOURS)],

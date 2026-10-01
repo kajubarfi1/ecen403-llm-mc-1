@@ -1,0 +1,76 @@
+{
+  "schema": "validation-findings/2",
+  "drop": {
+    "git_head": "3b542a6",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+  },
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "generated_utc": "2026-10-01T18:13:27+00:00",
+  "producer": "backend",
+  "finding_count": 1,
+  "findings": [
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/TIMING/cmd_row[5]",
+      "kind": "timing_defect",
+      "check_id": "TIMING/cmd_row[5]",
+      "taxonomy_id": "TIMING_001",
+      "detectors": [
+        "sta:opensta:setup"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "observed",
+      "title": "scheduler: does not close timing at 5.0 ns",
+      "requirement": "scheduler must close timing at the clock period of 5.0 ns (200 MHz)",
+      "spec_ref": "clocking_model.controller_clock_period_ns",
+      "expected": "slack >= 0 ns at a 5.0 ns period",
+      "actual": "WNS -0.910 ns, TNS -29.320 ns, Fmax 169.20 MHz",
+      "detector": "sta:opensta:setup",
+      "anchor": [
+        {
+          "file": "bundles_frontend2/scheduler/scheduler.sv"
+        }
+      ],
+      "mechanism": null,
+      "paths": [],
+      "occurrences": 2,
+      "suggested_fix": null,
+      "evidence": {
+        "worst_path": {
+          "startpoint": "q_bank[47]",
+          "startpoint_kind": "input port clocked by core_clk",
+          "endpoint": "cmd_row[5]$_DFFE_PN0P_",
+          "slack_ns": -0.91,
+          "logic_levels": 34,
+          "buffers": 18,
+          "arrival_ns": 6.15,
+          "required_ns": 5.23,
+          "path_group": "core_clk"
+        },
+        "wns_ns": -0.91,
+        "tns_ns": -29.32,
+        "failing_paths_reported": 2,
+        "spread": "many endpoints failing, not a single outlier"
+      },
+      "repro": {
+        "command": "pipeline_batch.py --bundle_dirs ..\\bundles_frontend2\\scheduler"
+      },
+      "drop": {
+        "git_head": "3b542a6",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "3b542a6",
+      "last_seen": "3b542a6",
+      "resolved_in": null,
+      "status": "open",
+      "generated_utc": "2026-10-01T18:13:27+00:00",
+      "related_manual_findings": []
+    }
+  ],
+  "resolved": []
+}

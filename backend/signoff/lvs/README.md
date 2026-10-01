@@ -365,3 +365,89 @@ without establishing that the artifact belongs to the run being reported.
 Verified by replay: the four contaminated cases return None with the old values
 preserved under `withheld_values`, a passing run is untouched, and a failed run with
 no reports on disk does not crash. Backup `agents/pipeline.py.bak_2026-09-29`.
+
+## Run modes for orchestration (2026-10-01)
+
+The backend now declares four tiers so an orchestrator can choose depth by name and
+know roughly what it costs. A full optimization run takes hours, far too slow to sit
+inside an automated loop; a contract check takes seconds. Naming the tiers is what
+lets a loop use a cheap one and keep optimization as a terminal stage.
+
+    contract  23 s    manifest and RTL satisfy the interface. No Docker, no layout.
+    synth     42 s    the RTL synthesizes. ORFS target `synth`. No sign-off.
+    build     ~1 hr   reaches a clean signed-off layout (11 blocks).
+    full      hours   build plus PPA optimization. Terminal stage, runs once.
+
+`--mode` on both pipeline.py and pipeline_batch.py; `full` implies the three tuner
+flags so a caller names one thing rather than three. Every run records `mode` and
+`checks_applicable` in the final report: a PASS from `contract` and a PASS from
+`build` mean very different things and a consumer must be able to tell them apart
+without inferring it.
+
+A tier that produces no layout returns PASS without running DRC/LVS/STA. That is not
+a skipped check - the tier never claimed them - and `checks_applicable` says so.
+
+**Fourth instance of the stale-artifact fault, found while testing this.** A synth run
+reported `gds`, `def`, `spef`, `timing_rpt` and four more as artifacts, all written two
+days earlier, because the files existed in the ORFS tree and nothing established when.
+An orchestrator reading `artifacts.gds` from a synth run would have been handed a
+two-day-old layout. `_collect_artifacts` now filters on the run's start time and names
+what it excluded. Verified: synth reports 4 artifacts and names 8 exclusions, while a
+build run still collects all 29 with none wrongly dropped.
+
+Gate tiers also skip the Claude narrative report, which is latency on output an
+orchestrator does not read; that took contract from 38 s to 23 s. The remaining 23 s is
+intake's own LLM summary and could come out too.
+
+Verified end to end on real bundles: contract on the frontend's top-level module
+(bundles_top), synth and build on addr_decoder. Backups agents/*.bak_2026-10-01.
+
+## Timing findings emitted upstream (2026-10-01)
+
+The backend used to terminate: it produced a verdict ("STA FAIL, WNS -0.915 ns") and
+stopped. That tells the backend owner the block is slow and tells the frontend nothing
+they can change. For the three-subsystem pipeline the backend has to participate, so a
+timing failure now emits a routable record naming the owning module, the failing path
+and the deficit.
+
+`findings/emit_findings.py` parses an ORFS 6_finish.rpt for failing paths, endpoints,
+slack, logic depth and the arrival-vs-required split, and writes a record in
+Validation's `validation-findings/2` envelope to a drop-stamped outbox mirroring their
+layout. validator_node calls it when STA fails, best effort: a failure to emit never
+changes the pipeline verdict, which is established by the checks themselves.
+
+The record carries TNS alongside WNS and says what the ratio means. On scheduler, WNS
+-0.91 ns against TNS -29.32 ns is "many endpoints failing, not a single outlier" -
+the difference between nudging one path and restructuring the block, which the reader
+should not have to work out.
+
+Three things the testing caught:
+
+- `report_checks` prints the worst path twice (once for -path_delay max, again under
+  its path group), so the same path arrived twice and would have overstated how many
+  endpoints fail. Deduped on startpoint, endpoint and slack.
+- The finding id was built from the endpoint `cmd_row[5]$_DFFE_PN0P_`. That suffix is
+  a synthesis-generated instance name that changes when the block is re-synthesised,
+  so the finding would not have matched itself across drops and lifecycle tracking
+  would have broken silently. The id keys on the RTL signal; the full instance stays
+  in the evidence.
+- The drop stamp came back null because ddr3_backend sits beside the team repo rather
+  than inside it. BACKEND_GIT_REPO covers that, and the emitter warns when no head is
+  resolved, because a finding that cannot be tied to a code state has lost most of its
+  value.
+
+Lifecycle is verified: re-emitting a finding preserves `first_seen`, and a run where
+timing closes marks the previous finding resolved with `resolved_in`. The outbox is a
+ledger, not a snapshot, so a consumer can tell a fixed defect from one never re-tested.
+
+**Five fields are backend decisions pending agreement with Validation**, each marked
+PENDING in the source and all additive, so a consumer that ignores them still works:
+the `kind` value (`timing_defect`, extending their hardcoded `rtl_defect`), the
+severity mapping (ERROR/WARNING/INFO against their rules-driven `major` default), an
+anchor without a line number (synthesis does not preserve one), a `suggested_fix`
+field the schema has no home for, and the outbox location.
+
+A sixth is worth raising: the anchor names the bundle path the backend read, not the
+upstream source. `Frontend2/OutputFolders/PHASE3RTL/scheduler.sv` would be far more
+useful to the team that has to fix it, but the backend is never told it - that needs a
+manifest field the frontend fills in.
