@@ -1,0 +1,22 @@
+Integration test IT-2: frontend RTL through the backend to signed-off GDSII.
+Drop: Frontend2/OutputFolders at main c8ac792. Run 2026-09-29/30, clock period 5.0 ns (200 MHz).
+Bundles built from the repo by copying each block .sv and its manifest; no backend edits to the RTL.
+
+Result: 11/11 blocks DRC clean and LVS match; 10/11 meet the 200 MHz spec target.
+scheduler is the exception at -0.915 ns (169 MHz). The April RTL measured 168 MHz, so the
+limit is architectural rather than an artifact of regeneration. See the README section on
+the timing finding for the critical path and the suggested RTL fix.
+
+Machine-readable per-block results: signoff/results_frontend2/<block>.json
+
+addr_decoder  DRC PASS 0  LVS PASS 31/31 bb=0  AUDIT PASS 60/60  STA n/a (no timing paths)  200MHz=n/a
+bank_tracker  DRC PASS 0  LVS PASS 4216/287 bb=0  AUDIT PASS 287/287  STA +0.334 ns  200MHz=YES
+calibration   DRC PASS 0  LVS PASS 107/8 bb=0  AUDIT PASS 9/9  STA +2.601 ns  200MHz=YES
+cmd_gen       DRC PASS 0  LVS PASS 282/102 bb=0  AUDIT PASS 106/106  STA +2.360 ns  200MHz=YES
+cmd_queue     DRC PASS 0  LVS PASS 1999/595 bb=2  AUDIT PASS 595/595  STA +1.399 ns  200MHz=YES
+config_regs   DRC PASS 0  LVS PASS 1293/333 bb=0  AUDIT PASS 333/333  STA +1.317 ns  200MHz=YES
+data_path     DRC PASS 0  LVS PASS 2449/139 bb=0  AUDIT PASS 139/139  STA +0.537 ns  200MHz=YES
+init_fsm      DRC PASS 0  LVS PASS 191/27 bb=1  AUDIT PASS 36/36  STA +1.846 ns  200MHz=YES
+refresh_ctrl  DRC PASS 0  LVS PASS 222/46 bb=0  AUDIT PASS 46/46  STA +1.247 ns  200MHz=YES
+scheduler     DRC PASS 0  LVS PASS 6081/753 bb=11  AUDIT PASS 754/754  STA -0.915 ns  200MHz=NO
+wb_port       DRC PASS 0  LVS PASS 534/189 bb=0  AUDIT PASS 221/221  STA +0.983 ns  200MHz=YES

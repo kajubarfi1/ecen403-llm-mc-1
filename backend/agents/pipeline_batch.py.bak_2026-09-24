@@ -50,20 +50,6 @@ from typing import Any, Dict, List, Optional
 SKIP_BLOCKS = {}
 
 
-# ─── Parallelism ──────────────────────────────────────────────────────────────
-# Each worker runs its own ORFS container against the same bind-mounted flow
-# directory. Under heavy concurrent I/O that mount loses writes: on 2026-09-17 a
-# run with one worker per block (11) failed at 3_1_place with
-#   mv: cannot stat .../3_1_place_gp_skip_io.tmp.log: No such file or directory
-# on 10 of 11 blocks. The flow limped on, the GDS merge never ran, and sign-off
-# certified week-old layouts. The same 11 blocks at 2 workers completed cleanly.
-#
-# The runner and sign-off provenance checks now catch that corruption rather than
-# reporting it as success, but the default should not steer into it in the first
-# place. Raise this only if you have evidence your machine tolerates more.
-SAFE_MAX_WORKERS = 2
-
-
 # ─── ANSI colours (gracefully disabled on terminals that don't support them) ──
 
 COLOURS = {
@@ -211,13 +197,6 @@ def run_block(
                 "sta":  report.get("sta_wns_ns"),
                 "sta_status": report.get("sta_status"),
             }
-            # Optimization outcomes, when the tuners ran. Kept separate from the
-            # delivered run's metrics below, which describe a different thing.
-            for k in ("fmax_best_closed_mhz", "fmax_best_period_ns", "fmax_best_wns_ns",
-                      "power_baseline_mw", "power_best_mw", "power_delivered_mw",
-                      "power_delivered_is_best"):
-                if report.get(k) is not None:
-                    metrics[k] = report[k]
         except Exception:
             pass
 
@@ -280,22 +259,10 @@ def print_summary(results: List[Dict[str, Any]], total_elapsed: float) -> None:
             print(f"    Area         : {m['area_um2']} um2")
         if m.get("cell_count") is not None:
             print(f"    Cell count   : {m['cell_count']}")
-        # Two different quantities. "delivered" is 1/period_min implied by the layout
-        # that was actually built; "closed" is the fastest constraint the design met
-        # during Fmax optimization. A power-optimized layout reports a lower delivered
-        # figure because it was never asked to go fast — that is not a regression.
-        has_closed = m.get("fmax_best_closed_mhz") is not None
         if m.get("fmax_mhz") is not None:
-            print(f"    {'Fmax (built)' if has_closed else 'Fmax':<13}: {m['fmax_mhz']} MHz")
-        if has_closed:
-            print(f"    {'Fmax (closed)':<13}: {m['fmax_best_closed_mhz']} MHz  "
-                  f"(period={m.get('fmax_best_period_ns')} ns, "
-                  f"WNS={m.get('fmax_best_wns_ns')} ns)")
+            print(f"    Fmax         : {m['fmax_mhz']} MHz")
         if m.get("power_mw") is not None:
             print(f"    Power        : {m['power_mw']} mW")
-        if m.get("power_best_mw") is not None and not m.get("power_delivered_is_best", True):
-            print(c(f"    Power (best) : {m['power_best_mw']} mW at a config that was NOT built "
-                    f"(baseline {m.get('power_baseline_mw')} mW)", "yellow"))
         if v.get("drc") is not None:
             drc_str = c(f"PASS  violations={v['drc']}", "green") if v["drc"] == 0 else c(f"FAIL  violations={v['drc']}", "red")
             print(f"    DRC          : {drc_str}")
@@ -349,8 +316,7 @@ def main() -> int:
     ap.add_argument("--optimize_power",   action="store_true", default=False,
                     help="Enable power optimization for all blocks")
     ap.add_argument("--max_workers",      type=int, default=None,
-                    help=f"Max parallel workers (default: {SAFE_MAX_WORKERS}). Higher values "
-                         f"have corrupted runs on this flow — see SAFE_MAX_WORKERS in this file.")
+                    help="Max parallel workers (default: number of discovered bundles)")
     args = ap.parse_args()
 
     # ── Resolve bundle list ───────────────────────────────────────────────────
@@ -369,18 +335,7 @@ def main() -> int:
         print(c("  ERROR: No bundles found. Use --bundle_dirs or --bundles_root to point at your bundles.", "red"))
         return 1
 
-    # Default to the parallelism the flow is known to survive, not to one worker
-    # per block. Asking for more is allowed, but it is a deliberate choice and
-    # says so out loud.
-    max_workers = args.max_workers or min(SAFE_MAX_WORKERS, len(bundle_dirs))
-    if args.max_workers and args.max_workers > SAFE_MAX_WORKERS:
-        print(c(f"  WARNING: --max_workers={args.max_workers} exceeds the tested safe limit of "
-                f"{SAFE_MAX_WORKERS}.", "yellow"))
-        print(c(f"           Concurrent ORFS containers have corrupted the bind-mounted flow "
-                f"directory at this level,", "yellow"))
-        print(c(f"           producing layouts that look complete but are not. Sign-off will "
-                f"catch it and halt; expect", "yellow"))
-        print(c(f"           failed blocks rather than wrong results.", "yellow"))
+    max_workers = args.max_workers or len(bundle_dirs)
 
     print("=" * 70)
     print(c("  DDR3 Backend Batch Pipeline", "bold"))

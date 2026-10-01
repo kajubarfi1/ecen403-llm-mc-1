@@ -563,23 +563,6 @@ def reporter_node(state: PipelineState) -> PipelineState:
 
     # Parse metrics from available reports
     metrics = _parse_metrics(artifacts, log_path)
-
-    # A failed run leaves the PREVIOUS run's reports in the ORFS tree, and
-    # _parse_metrics cannot tell the two apart — the numbers it returns look
-    # entirely plausible. On 2026-09-29 a Docker outage failed four blocks and the
-    # reporter handed back their timing from runs a week earlier, at a different
-    # clock period. A run that did not pass has no metrics; say so rather than
-    # reporting someone else's. The values are kept under `withheld_values` so the
-    # failure is still debuggable, but nothing downstream can mistake them for this
-    # run's results.
-    if exit_code != 0:
-        stale = {k: v for k, v in metrics.items() if v is not None}
-        metrics = {k: None for k in metrics}
-        if stale:
-            metrics["withheld_values"] = stale
-        metrics["metrics_withheld"] = (
-            "run failed; the ORFS reports on disk may describe an earlier run")
-
     metrics["exit_code"]    = exit_code
     metrics["failed_stage"] = failed_stage
     metrics["run_passed"]   = exit_code == 0

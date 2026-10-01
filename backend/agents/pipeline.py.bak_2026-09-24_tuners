@@ -563,23 +563,6 @@ def reporter_node(state: PipelineState) -> PipelineState:
 
     # Parse metrics from available reports
     metrics = _parse_metrics(artifacts, log_path)
-
-    # A failed run leaves the PREVIOUS run's reports in the ORFS tree, and
-    # _parse_metrics cannot tell the two apart — the numbers it returns look
-    # entirely plausible. On 2026-09-29 a Docker outage failed four blocks and the
-    # reporter handed back their timing from runs a week earlier, at a different
-    # clock period. A run that did not pass has no metrics; say so rather than
-    # reporting someone else's. The values are kept under `withheld_values` so the
-    # failure is still debuggable, but nothing downstream can mistake them for this
-    # run's results.
-    if exit_code != 0:
-        stale = {k: v for k, v in metrics.items() if v is not None}
-        metrics = {k: None for k in metrics}
-        if stale:
-            metrics["withheld_values"] = stale
-        metrics["metrics_withheld"] = (
-            "run failed; the ORFS reports on disk may describe an earlier run")
-
     metrics["exit_code"]    = exit_code
     metrics["failed_stage"] = failed_stage
     metrics["run_passed"]   = exit_code == 0
@@ -913,14 +896,8 @@ def validator_node(state: PipelineState) -> PipelineState:
         final_status = "OPTIMIZE_FMAX"
         msg = f"[validator] DRC PASS | LVS PASS | {sta_label} — routing to Fmax optimizer."
     elif fmax_ran and both_flags and not in_tradeoff:
-        # Fmax converged early — transition to power phase before it runs.
-        # Capture the final period's result here: the transition resets the clock,
-        # after which this observation can no longer be reconstructed.
+        # Fmax converged early — transition to power phase before it runs
         final_status = "TRADEOFF_TRANSITION"
-        state = {**state, "fmax_history": _with_final_fmax_observation(
-            list(state.get("fmax_history", [])),
-            state.get("current_clock_period_ns"),
-            metrics_for_fmax.get("wns_ns"))}
         msg = f"[validator] DRC PASS | LVS PASS | {sta_label} — Fmax converged, transitioning to power phase."
     elif _should_optimize_power(metrics_for_fmax, state) or \
          (in_tradeoff and state.get("power_iteration", 0) < MAX_POWER_ITERATIONS):
@@ -934,55 +911,28 @@ def validator_node(state: PipelineState) -> PipelineState:
         packaged_manifest = packager_report.get("packaged_manifest") or {}
         design_name = packaged_manifest.get("packager", {}).get("resolved", {}).get("design_name", "design")
         # Tradeoff mode — write combined report if both phases completed
-        reporter_summary = state.get("reporter_summary") or {}
-        metrics = reporter_summary.get("metrics", {})
-
-        # The last configuration the tuner tried also has a result. It used to be
-        # dropped, so the best run could be the one nobody recorded: on 2026-09-24
-        # the Fmax tuner closed at 2.561 ns and reported 2.972 ns.
-        power_history = _with_final_observation(
-            list(state.get("power_history", [])), metrics,
-            dict(state.get("power_config_applied") or {}))
-        state = {**state, "power_history": power_history}
-
-        # Fmax-only run: the clock still holds the final tightened period, so the
-        # last result can be captured here. In tradeoff mode it was captured at the
-        # transition, before the clock was reset, and this is a no-op.
-        if not in_tradeoff and state.get("fmax_iteration", 0) > 0:
-            state = {**state, "fmax_history": _with_final_fmax_observation(
-                list(state.get("fmax_history", [])),
-                state.get("current_clock_period_ns"),
-                metrics.get("wns_ns"))}
-
         if in_tradeoff and state.get("power_iteration", 0) > 0:
-            # Every field below comes from one observation, not several. Mixing them
-            # produced a report claiming 0.600 mW beside the area of a 0.753 mW run.
-            best_power = _best_power_observation(power_history) or {}
-            delivered  = power_history[-1] if power_history else {}
+            reporter_summary = state.get("reporter_summary") or {}
+            metrics = reporter_summary.get("metrics", {})
+            power_history = state.get("power_history", [])
+            best_power = min(power_history, key=lambda h: h.get("power_mw", float("inf"))) \
+                         if power_history else {}
             tradeoff_power = {
                 "power_mw":        best_power.get("power_mw"),
                 "wns_ns":          best_power.get("wns_ns"),
                 "clock_period_ns": state.get("original_clock_period_ns") or 10.0,
                 "fmax_mhz":        round(1000.0 / (state.get("original_clock_period_ns") or 10.0), 2),
-                "utilization_pct": best_power.get("utilization_pct"),
-                "area_um2":        best_power.get("area_um2"),
+                "utilization_pct": metrics.get("utilization_pct"),
+                "area_um2":        metrics.get("area_um2"),
                 "iterations":      state.get("power_iteration", 0),
-                "from_iteration":  best_power.get("iteration"),
-                # Whether the layout on disk is the one described above.
-                "delivered_is_best": best_power.get("iteration") == delivered.get("iteration"),
-                "delivered_power_mw": delivered.get("power_mw"),
-                "baseline_power_mw":  power_history[0].get("power_mw") if power_history else None,
             }
             updated_state = {**state, "tradeoff_power_result": tradeoff_power}
             _write_tradeoff_report(updated_state, out_root, design_name)
-
-        # Always write these. They used to be skipped in tradeoff mode, which left
-        # fmax_summary.json and power_summary.json on disk from an earlier run —
-        # months stale and indistinguishable from current results.
-        if state.get("fmax_iteration", 0) > 0:
-            _write_fmax_summary(state, out_root, design_name)
-        if state.get("power_iteration", 0) > 0:
-            _write_power_summary(state, out_root, design_name)
+        else:
+            if state.get("fmax_iteration", 0) > 0 and not in_tradeoff:
+                _write_fmax_summary(state, out_root, design_name)
+            if state.get("power_iteration", 0) > 0 and not in_tradeoff:
+                _write_power_summary(state, out_root, design_name)
     print(msg)
     return {
         **state,
@@ -1495,36 +1445,6 @@ def _patch_clock_period(design_dir: Path, new_period: float, clock_port: str, pl
             print(f"[fmax_tuner] Patched constraint.sdc: period={new_period}")
 
 
-def _with_final_fmax_observation(history: List[Dict[str, Any]], period: Optional[float],
-                                 wns: Optional[float]) -> List[Dict[str, Any]]:
-    """Append the result of the last period the Fmax tuner set.
-
-    The tuner records the period it was given, then tightens. The run at the final
-    tightened period therefore has no row. On 2026-09-24 cmd_gen closed at 2.561 ns
-    with +0.661 ns of slack and the summary reported 2.972 ns — the previous
-    iteration — discarding the best result the flow had actually achieved.
-
-    Must be called while that period is still in effect. In tradeoff mode the clock
-    is reset to the original period for the power phase, so this runs at the
-    transition, not at the end of the pipeline.
-    """
-    if not history or not isinstance(period, (int, float)) or period <= 0:
-        return history
-    if any(h.get("final_observation") for h in history):
-        return history
-    if not isinstance(wns, (int, float)):
-        return history
-    if any(abs((h.get("clock_period_ns") or 0) - period) < 1e-9 for h in history):
-        return history                      # this period already has a row
-    return history + [{
-        "iteration":         history[-1]["iteration"] + 1,
-        "final_observation": True,
-        "clock_period_ns":   period,
-        "wns_ns":            wns,
-        "fmax_mhz":          round(1000.0 / period, 2),
-    }]
-
-
 def _write_fmax_summary(state: PipelineState, out_root: Path, design_name: str) -> None:
     """Write fmax_summary.json with achieved Fmax and full iteration history."""
     history = state.get("fmax_history", [])
@@ -1906,56 +1826,12 @@ def power_tuner_node(state: PipelineState) -> PipelineState:
     design_name = packager_resolved.get("design_name", "design")
     platform    = packager_resolved.get("platform", "sky130hd")
 
-    # Record what this configuration actually produced, before proposing the next.
-    # Every metric for an iteration comes from the same run: reporting power from
-    # one iteration next to the area from another produced the mixed rows in the
-    # 2026-09-24 tradeoff report.
-    cfg_applied = dict(state.get("power_config_applied") or {})
+    # Record this iteration before proposing changes
     power_history.append({
-        "iteration":       power_iteration - 1,
-        "power_mw":        power_mw,
-        "wns_ns":          wns_ns,
-        "area_um2":        metrics.get("area_um2"),
-        "utilization_pct": metrics.get("utilization_pct"),
-        "cell_count":      metrics.get("cell_count"),
-        "config":          cfg_applied,      # the cumulative config that produced this row
-        "is_baseline":     power_iteration == 1,
+        "iteration": power_iteration - 1,
+        "power_mw":  power_mw,
+        "wns_ns":    wns_ns,
     })
-
-    # Has optimization actually helped? The tuner used to keep whichever iteration
-    # ran last, so on 2026-09-24 cmd_gen shipped 0.753 mW against a 0.639 mW
-    # baseline — 18% worse than doing nothing — and still reported PASS.
-    best = _best_power_observation(power_history)
-    baseline = power_history[0]
-    regressed = (best is not None and power_mw > best["power_mw"] + 1e-9)
-
-    if regressed:
-        # Do not ask for another proposal. On 2026-09-24 the model was told power had
-        # gone up, concluded its settings "weren't fully applied", and applied more of
-        # them — spreading the design further, adding wire capacitance, and driving
-        # power up again. Revert to the best configuration and stop.
-        msg = (f"[power_tuner] Iteration {power_iteration}/{MAX_POWER_ITERATIONS}  "
-               f"power={power_mw:.4f}mW is worse than the best seen "
-               f"({best['power_mw']:.4f}mW at iteration {best['iteration']}) — "
-               f"reverting to that configuration and stopping.")
-        print(msg)
-        if design_dir:
-            config_mk = Path(design_dir) / "config.mk"
-            if config_mk.exists() and best.get("config"):
-                _apply_repair_to_config_mk(config_mk, best["config"])
-                print(f"[power_tuner] Restored: {best['config']}")
-        print(f"[power_tuner] NOTE: the layout on disk is from iteration "
-              f"{power_history[-1]['iteration']}, not the best one. Re-run to rebuild it "
-              f"from the restored config.")
-        return {
-            **state,
-            "power_iteration":  MAX_POWER_ITERATIONS,     # stop optimizing
-            "power_history":    power_history,
-            "power_regressed":  True,
-            "current_node":     "power_tuner",
-            "pipeline_status":  "RUNNING",
-            "messages":         [msg],
-        }
 
     api_key = (os.environ.get("ANTHROPIC_API_KEY") or "").strip()
     model   = (os.environ.get("MODEL") or "claude-opus-4-6").strip()
@@ -2035,61 +1911,14 @@ If the slack budget is small, be conservative. If it is large, be aggressive.
     power_history[-1]["changes"] = changes
     power_history[-1]["rationale"] = rationale
 
-    # Carry the cumulative config forward so the next observation knows what produced it.
-    cfg_next = dict(cfg_applied)
-    cfg_next.update(changes or {})
-
     return {
         **state,
         "power_iteration": power_iteration,
         "power_history":   power_history,
-        "power_config_applied": cfg_next,
         "current_node":    "power_tuner",
         "pipeline_status": "RUNNING",
         "messages":        [msg],
     }
-
-
-def _with_final_observation(history: List[Dict[str, Any]], metrics: Dict[str, Any],
-                            cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Append the result of the last configuration tried.
-
-    Each tuner records the metrics it was given, then proposes the next change. The
-    run that follows the final proposal therefore has no row, so the best result can
-    be one that was never recorded. This closes that off-by-one.
-    """
-    if not history:
-        return history
-    if any(h.get("final_observation") for h in history):
-        return history                      # already closed out; do not append twice
-    power = metrics.get("power_mw")
-    if not isinstance(power, (int, float)):
-        return history
-    return history + [{
-        "iteration":       history[-1]["iteration"] + 1,
-        "final_observation": True,
-        "power_mw":        power,
-        "wns_ns":          metrics.get("wns_ns"),
-        "area_um2":        metrics.get("area_um2"),
-        "utilization_pct": metrics.get("utilization_pct"),
-        "cell_count":      metrics.get("cell_count"),
-        "config":          cfg,
-        "changes":         {},
-        "rationale":       "Final configuration — result recorded after the last proposal.",
-    }]
-
-
-def _best_power_observation(history: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
-    """Lowest-power observation that still closes timing.
-
-    Only rows with a real power number and positive slack can win: a configuration
-    that saves power by breaking timing has not optimized anything. The baseline
-    row is a legitimate winner — if nothing beats doing nothing, doing nothing wins.
-    """
-    usable = [h for h in history
-              if isinstance(h.get("power_mw"), (int, float)) and h["power_mw"] > 0
-              and isinstance(h.get("wns_ns"), (int, float)) and h["wns_ns"] > 0]
-    return min(usable, key=lambda h: h["power_mw"]) if usable else None
 
 
 def _heuristic_power_reduction(
@@ -2419,27 +2248,6 @@ def main() -> int:
         "artifacts":         (final_state.get("runner_result")     or {}).get("artifacts", {}),
         "messages":          final_state.get("messages", []),
     }
-
-    # Optimization outcomes. Without these the batch summary had only the delivered
-    # run's metrics, so a design that closed at 390 MHz during the Fmax phase was
-    # summarised as 293 MHz — the speed implied by the power-optimised layout, which
-    # was never asked to go fast. Two different quantities, one label.
-    _fh = final_state.get("fmax_history") or []
-    _closed = [h for h in _fh if isinstance(h.get("wns_ns"), (int, float)) and h["wns_ns"] >= 0]
-    if _closed:
-        _best = min(_closed, key=lambda h: h["clock_period_ns"])
-        final_report["fmax_best_closed_mhz"] = round(1000.0 / _best["clock_period_ns"], 2)
-        final_report["fmax_best_period_ns"]  = _best["clock_period_ns"]
-        final_report["fmax_best_wns_ns"]     = _best["wns_ns"]
-
-    _ph = final_state.get("power_history") or []
-    if _ph:
-        _bp = _best_power_observation(_ph)
-        final_report["power_baseline_mw"]  = _ph[0].get("power_mw")
-        final_report["power_best_mw"]      = _bp.get("power_mw") if _bp else None
-        final_report["power_delivered_mw"] = _ph[-1].get("power_mw")
-        final_report["power_delivered_is_best"] = bool(
-            _bp and _bp.get("iteration") == _ph[-1].get("iteration"))
 
     design_name_final = (final_state.get("runner_result") or {}).get("design_name", Path(args.bundle_dir).name)
     final_report_path = out_root / f"pipeline_final_report_{design_name_final}.json"

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 640" width="1400" height="640" font-family="Segoe UI, Calibri, Arial, sans-serif">
+  <rect width="1400" height="640" fill="#ffffff"/>
+  <text x="30" y="46" font-size="34" font-weight="700" fill="#16243a">Integration Test Plan</text>
+  <text x="30" y="76" font-size="20" fill="#5b6b7f">Frontend RTL through backend to signed-off GDSII. Equipment: OpenROAD-flow-scripts 26Q1, KLayout 0.30.3, SkyWater sky130hd.</text>
+
+  <rect x="30" y="96" width="1340" height="54" fill="#500000"/>
+  <text x="52"   y="131" font-size="21" font-weight="600" fill="#ffffff">ID</text>
+  <text x="120"  y="131" font-size="21" font-weight="600" fill="#ffffff">Integration test</text>
+  <text x="620"  y="131" font-size="21" font-weight="600" fill="#ffffff">Boundary</text>
+  <text x="940"  y="131" font-size="21" font-weight="600" fill="#ffffff">Status / result</text>
+
+  <g font-size="20">
+    <rect x="30" y="150" width="1340" height="88" fill="#f5f7fa"/>
+    <text x="52"  y="184" fill="#16243a" font-weight="600">IT-1</text>
+    <text x="120" y="184" fill="#16243a">Bundle contract validation</text>
+    <text x="120" y="212" fill="#5b6b7f" font-size="18">Manifests, port widths, connectivity</text>
+    <text x="620" y="184" fill="#16243a">Frontend to Backend</text>
+    <text x="940" y="184" fill="#1a7f46" font-weight="600">CONDUCTED 9/29</text>
+    <text x="940" y="212" fill="#16243a" font-size="18">11/11 valid, 62/102 wired (61%)</text>
+
+    <rect x="30" y="238" width="1340" height="88" fill="#ffffff"/>
+    <text x="52"  y="272" fill="#16243a" font-weight="600">IT-2</text>
+    <text x="120" y="272" fill="#16243a">Frontend RTL to signed-off GDSII</text>
+    <text x="120" y="300" fill="#5b6b7f" font-size="18">DRC, LVS, pin audit, STA at 200 MHz</text>
+    <text x="620" y="272" fill="#16243a">Frontend to Backend</text>
+    <text x="940" y="272" fill="#1a7f46" font-weight="600">CONDUCTED 9/29</text>
+    <text x="940" y="300" fill="#16243a" font-size="18">11/11 DRC+LVS clean, 10/11 at 200 MHz</text>
+
+    <rect x="30" y="326" width="1340" height="88" fill="#f5f7fa"/>
+    <text x="52"  y="360" fill="#16243a" font-weight="600">IT-3</text>
+    <text x="120" y="360" fill="#16243a">Full controller at 200 MHz</text>
+    <text x="120" y="388" fill="#5b6b7f" font-size="18">Assembled chip, cross-block timing</text>
+    <text x="620" y="360" fill="#16243a">Frontend top level</text>
+    <text x="940" y="360" fill="#b3261e" font-weight="600">BLOCKED</text>
+    <text x="940" y="388" fill="#16243a" font-size="18">Needs top-level module</text>
+
+    <rect x="30" y="414" width="1340" height="88" fill="#ffffff"/>
+    <text x="52"  y="448" fill="#16243a" font-weight="600">IT-4</text>
+    <text x="120" y="448" fill="#16243a">Defect routing to frontend</text>
+    <text x="120" y="476" fill="#5b6b7f" font-size="18">Backend findings in validation-findings/2</text>
+    <text x="620" y="448" fill="#16243a">Backend to Validation</text>
+    <text x="940" y="448" fill="#5b6b7f" font-weight="600">PLANNED wk 7</text>
+
+    <rect x="30" y="502" width="1340" height="88" fill="#f5f7fa"/>
+    <text x="52"  y="536" fill="#16243a" font-weight="600">IT-5</text>
+    <text x="120" y="536" fill="#16243a">Full chain: prompt to GDSII</text>
+    <text x="120" y="564" fill="#5b6b7f" font-size="18">Automated, no manual handoff</text>
+    <text x="620" y="536" fill="#16243a">All three subsystems</text>
+    <text x="940" y="536" fill="#5b6b7f" font-weight="600">PLANNED wk 7-8</text>
+  </g>
+
+  <g stroke="#d0d7de" stroke-width="1">
+    <line x1="30" y1="238" x2="1370" y2="238"/><line x1="30" y1="326" x2="1370" y2="326"/>
+    <line x1="30" y1="414" x2="1370" y2="414"/><line x1="30" y1="502" x2="1370" y2="502"/>
+    <line x1="600" y1="96" x2="600" y2="590"/><line x1="920" y1="96" x2="920" y2="590"/>
+  </g>
+  <rect x="30" y="96" width="1340" height="494" fill="none" stroke="#500000" stroke-width="2"/>
+  <text x="30" y="622" font-size="19" fill="#5b6b7f">Unit testing complete: 11 blocks and full chip pass DRC, LVS, pin audit and STA, with mutation testing proving each check can fail.</text>
+</svg>
