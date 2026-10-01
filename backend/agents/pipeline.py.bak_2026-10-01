@@ -105,7 +105,6 @@ def call_claude(api_key: str, model: str, system: str, user: str, max_tokens: in
 class PipelineState(TypedDict):
     # ── Inputs ──────────────────────────────────────────────────────────────
     bundle_dir:         str
-    mode:               str                    # contract | synth | build | full; see MODES
     out_root:           str
     env_file:           str
     enable_autotuner:   bool
@@ -146,36 +145,6 @@ class PipelineState(TypedDict):
     error_message:      Optional[str]
     tuner_iteration:    int
     messages:           Annotated[List[str], operator.add]  # human-readable log
-
-
-# ── Run modes ────────────────────────────────────────────────────────────────
-# Declared tiers so an orchestrator can choose depth by name and know roughly what
-# it costs. A full optimization run takes hours, which is far too slow to sit inside
-# an automated loop; a contract check takes seconds. Naming the tiers lets the loop
-# use a cheap one and keep optimization as a terminal stage.
-#
-#   contract  seconds   manifest and RTL satisfy the interface. No Docker, no layout.
-#   synth     minutes   the RTL synthesizes. Stops after ORFS 'synth'. No sign-off.
-#   build     ~1 hour   reaches a clean signed-off layout. DRC, LVS, pin audit, STA.
-#   full      hours     build plus PPA optimization. Terminal stage, runs once.
-#
-# make_target None means the ORFS default (the whole flow through GDSII).
-MODES: Dict[str, Dict[str, Any]] = {
-    "contract": {"runs_orfs": False, "make_target": None,    "signoff": False,
-                 "optimize": False, "cost": "seconds"},
-    "synth":    {"runs_orfs": True,  "make_target": "synth", "signoff": False,
-                 "optimize": False, "cost": "minutes"},
-    "build":    {"runs_orfs": True,  "make_target": None,    "signoff": True,
-                 "optimize": False, "cost": "~1 hour for 11 blocks"},
-    "full":     {"runs_orfs": True,  "make_target": None,    "signoff": True,
-                 "optimize": True,  "cost": "hours"},
-}
-DEFAULT_MODE = "build"
-
-
-def mode_of(state: "PipelineState") -> Dict[str, Any]:
-    """Mode settings for this run, defaulting to build if unset or unknown."""
-    return MODES.get(state.get("mode") or DEFAULT_MODE, MODES[DEFAULT_MODE])
 
 
 MAX_TUNER_ITERATIONS  = 3     # Max failure-tuner iterations
@@ -385,12 +354,6 @@ def runner_node(state: PipelineState) -> PipelineState:
     docker_image = os.environ.get("ORFS_DOCKER_IMAGE", "openroad/orfs:latest")
     use_docker   = os.environ.get("USE_DOCKER", "1").strip() == "1"
 
-    # An explicit ORFS target stops the flow early; no target means the default,
-    # which is the whole flow through GDSII. This is what makes the synth tier
-    # minutes rather than an hour.
-    make_target = mode_of(state)["make_target"]
-    target_arg = f" {make_target}" if make_target else ""
-
     if use_docker:
         design_mount_src = str(design_dir_path).replace("\\", "/")
         orfs_results = str(orfs_dir_path / "flow" / "results").replace("\\", "/")
@@ -399,7 +362,7 @@ def runner_node(state: PipelineState) -> PipelineState:
         bash_cmd = (
             f"sed -i 's/\\r//' /OpenROAD-flow-scripts/flow/designs/{platform}/{design_name}/config.mk && "
             f"sed -i 's/\\r//' /OpenROAD-flow-scripts/flow/designs/{platform}/{design_name}/constraint.sdc && "
-            f"make {jobs_arg} DESIGN_CONFIG=designs/{platform}/{design_name}/config.mk{target_arg} 2>&1"
+            f"make {jobs_arg} DESIGN_CONFIG=designs/{platform}/{design_name}/config.mk 2>&1"
         )
         cmd = [
             "docker", "run", "--rm",
@@ -412,31 +375,10 @@ def runner_node(state: PipelineState) -> PipelineState:
             "bash", "-c", bash_cmd
         ]
     else:
-        cmd = ["bash", "-c", f"cd {flow_dir} && make {jobs_arg} DESIGN_CONFIG={rel_cfg}{target_arg} 2>&1"]
-    if mode_of(state)["runs_orfs"]:
-        print(f"[runner] Executing: {' '.join(cmd[:6])}")
+        cmd = ["bash", "-c", f"cd {flow_dir} && make {jobs_arg} DESIGN_CONFIG={rel_cfg} 2>&1"]
+    print(f"[runner] Executing: {' '.join(cmd[:6])}")
 
     log_path = runner_out / "run.log"
-
-    # contract mode stops here: the interface has been checked by intake and the
-    # packager, and nothing below produces evidence about it. Skipping ORFS is the
-    # entire point of the tier — it is what makes it cheap enough for a loop.
-    if not mode_of(state)["runs_orfs"]:
-        msg = (f"[runner] mode={state.get('mode', DEFAULT_MODE)} — skipping ORFS; "
-               f"intake and packaging validated the interface.")
-        print(msg)
-        write_text(log_path, msg + "\n")
-        return {
-            **state,
-            "runner_result": {"exit_code": 0, "failed_stage": None, "log_path": str(log_path),
-                              "artifacts": {}, "tuner_iter": state.get("tuner_iteration", 0),
-                              "orfs_dir": str(orfs_dir_path), "platform": platform,
-                              "design_name": design_name, "gds_exit_override": None,
-                              "skipped": "mode"},
-            "current_node": "runner", "pipeline_status": "RUNNING",
-            "error_message": None, "messages": [msg],
-        }
-
     run_started = time.time()
     try:
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=7200)
@@ -462,10 +404,7 @@ def runner_node(state: PipelineState) -> PipelineState:
     results_base = orfs_dir_path / "flow" / "results" / platform / design_name / "base"
     gds_path = results_base / "6_final.gds"
     gds_override: Optional[Dict[str, Any]] = None
-    # Only a mode that runs the whole flow can be rescued by a finished GDS. In
-    # synth mode no GDS is expected, so one on disk is necessarily from an earlier
-    # run and must never excuse a failure.
-    if make_target is None and exit_code != 0 and gds_path.exists():
+    if exit_code != 0 and gds_path.exists():
         fresh, why = _gds_is_from_this_run(gds_path, results_base / "6_final.def", run_started)
         if fresh:
             gds_override = {"original_exit_code": exit_code, "gds": str(gds_path)}
@@ -480,7 +419,7 @@ def runner_node(state: PipelineState) -> PipelineState:
     failed_stage = _detect_failed_stage(combined_log) if exit_code != 0 else None
 
     # Copy artifacts
-    artifacts = _collect_artifacts(orfs_dir_path, platform, design_name, runner_out, run_started)
+    artifacts = _collect_artifacts(orfs_dir_path, platform, design_name, runner_out)
 
     runner_result = {
         "exit_code":    exit_code,
@@ -557,18 +496,9 @@ def _detect_failed_stage(log: str) -> Optional[str]:
     return "unknown"
 
 
-def _collect_artifacts(orfs_dir: Path, platform: str, design_name: str, out_dir: Path,
-                       newer_than: Optional[float] = None) -> Dict[str, str]:
-    """Copy key ORFS output artifacts to runner_out directory.
-
-    `newer_than` restricts the list to files this run actually wrote. Without it
-    the ORFS tree hands back whatever is lying there: a synth-tier run on
-    2026-10-01 reported a gds, def and spef from 09-29, because those files
-    exist and nothing checked when. An orchestrator reading artifacts.gds would
-    have been handed a two-day-old layout.
-    """
+def _collect_artifacts(orfs_dir: Path, platform: str, design_name: str, out_dir: Path) -> Dict[str, str]:
+    """Copy key ORFS output artifacts to runner_out directory."""
     artifacts: Dict[str, str] = {}
-    cutoff = None if newer_than is None else newer_than - GDS_CLOCK_SKEW_S
     results_base = orfs_dir / "flow" / "results" / platform / design_name / "base"
     reports_base = orfs_dir / "flow" / "reports" / platform / design_name / "base"
     logs_base    = orfs_dir / "flow" / "logs"    / platform / design_name / "base"
@@ -587,9 +517,6 @@ def _collect_artifacts(orfs_dir: Path, platform: str, design_name: str, out_dir:
 
     for key, src in artifact_map.items():
         if src.exists():
-            if cutoff is not None and src.stat().st_mtime < cutoff:
-                print(f"[runner] stale, not an artifact of this run: {key} ({src.name})")
-                continue
             dst = out_dir / src.name
             try:
                 shutil.copy2(src, dst)
@@ -601,8 +528,6 @@ def _collect_artifacts(orfs_dir: Path, platform: str, design_name: str, out_dir:
 
     if logs_base.exists():
         for log_file in list(logs_base.glob("*.log")) + list(logs_base.glob("*.json")):
-            if cutoff is not None and log_file.stat().st_mtime < cutoff:
-                continue
             dst = out_dir / "logs" / log_file.name
             dst.parent.mkdir(parents=True, exist_ok=True)
             try:
@@ -672,15 +597,7 @@ def reporter_node(state: PipelineState) -> PipelineState:
 
     write_json(reporter_out / "reporter_summary.json", summary)
 
-    # Claude-generated narrative report. Gate tiers exist to be fast and are read by
-    # an orchestrator, not a person, so the round trip is skipped there.
-    if not mode_of(state)["signoff"]:
-        write_text(reporter_out / "report.md", _build_fallback_report(summary))
-        return {**state, "reporter_summary": summary, "current_node": "reporter",
-                "pipeline_status": "RUNNING",
-                "messages": [f"[reporter] run_passed={summary['run_passed']} "
-                             f"(mode={state.get('mode', DEFAULT_MODE)}, narrative skipped)"]}
-
+    # Claude-generated narrative report
     api_key = (os.environ.get("ANTHROPIC_API_KEY") or "").strip()
     model   = (os.environ.get("MODEL") or "claude-opus-4-6").strip()
 
@@ -838,88 +755,6 @@ def _build_fallback_report(summary: Dict[str, Any]) -> str:
 
 # ── 2e. Validator Node ───────────────────────────────────────────────────────
 
-def _anchor_path(state: PipelineState, resolved: Dict[str, Any]) -> Optional[str]:
-    """Where the RTL came from, as something the owner can actually open.
-
-    The packager keeps only the basename, which is not locatable. The bundle it was
-    read from is, so anchor on that. PENDING: an upstream repo-relative path would be
-    better still (Frontend2/OutputFolders/PHASE3RTL/scheduler.sv), but the backend is
-    not told it - that needs a manifest field the frontend fills in.
-    """
-    name = resolved.get("rtl_filename")
-    if not name:
-        return None
-    bundle = state.get("bundle_dir")
-    if not bundle:
-        return name
-    full = (Path(bundle) / name).resolve()
-    # An absolute path from the machine that ran the flow means nothing to the team
-    # that has to fix the RTL. Express it relative to the backend root, with forward
-    # slashes so it reads the same on any platform.
-    root = Path(__file__).resolve().parent.parent
-    try:
-        return full.relative_to(root).as_posix()
-    except ValueError:
-        return full.name
-
-
-def _emit_timing_finding(state: PipelineState, design_name: str,
-                         artifacts: Dict[str, str],
-                         resolved: Dict[str, Any]) -> None:
-    """Write a routable finding for a block that misses its clock target.
-
-    Best effort: a failure to emit must never change the pipeline's verdict, which is
-    established by the checks themselves. If this cannot run, say why and carry on.
-    """
-    try:
-        sys.path.insert(0, str(FINDINGS_ROOT))
-        import emit_findings as ef                                  # noqa: PLC0415
-
-        rpt = artifacts.get("timing_rpt")
-        if not rpt or not Path(rpt).exists():
-            print("[findings] no timing report among this run's artifacts — nothing to parse.")
-            return
-        parsed = ef.parse_timing_report(Path(rpt))
-        # The period the design was actually constrained to. current_clock_period_ns
-        # is set only once a tuner has moved it, so the packager's resolved value is
-        # the authority for an untuned run.
-        period = (state.get("current_clock_period_ns")
-                  or resolved.get("clock_period_ns"))
-        if not period:
-            print("[findings] no clock period resolved — cannot state what was missed.")
-            return
-        # The backend may sit inside the team repo or beside it as a working copy.
-        # BACKEND_GIT_REPO covers the second case; without a head the finding cannot
-        # be tied to a code state, which is most of its value, so say so.
-        env_repo = (os.environ.get("BACKEND_GIT_REPO") or "").strip()
-        repo = Path(env_repo) if env_repo else ef.find_repo(FINDINGS_ROOT)
-        head = ef.git_head(repo) if repo and Path(repo).exists() else None
-        if not head:
-            print("[findings] WARNING: no git head resolved — set BACKEND_GIT_REPO to the "
-                  "team checkout so findings carry a drop stamp.")
-        drop = {"git_head": head,
-                "spec_revision": os.environ.get("SPEC_REVISION",
-                                                "golden_ddr3_1600k_x8_2lane_1rank")}
-        f = ef.timing_finding(
-            design_name, float(period), parsed,
-            rtl_path=_anchor_path(state, resolved),
-            repro=f"pipeline_batch.py --bundle_dirs {state.get('bundle_dir', '<bundle>')}",
-            drop=drop)
-        if not f:
-            return
-        out = ef.write_outbox([f], FINDINGS_ROOT / "outbox", drop)
-        w = f["evidence"]["worst_path"] or {}
-        print(f"[findings] emitted {f['id']}  owner={f['owner_module']}  "
-              f"severity={f['severity']}")
-        if w:
-            print(f"[findings] worst path {w.get('startpoint')} -> {w.get('endpoint')}  "
-                  f"slack={w.get('slack_ns')}ns  levels={w.get('logic_levels')}")
-        print(f"[findings] wrote {out}")
-    except Exception as e:
-        print(f"[findings] could not emit a timing finding ({type(e).__name__}: {e}) — "
-              f"the pipeline verdict is unaffected.")
-
-
 def validator_node(state: PipelineState) -> PipelineState:
     """
     Post-route sign-off validation. Runs three checks in order:
@@ -971,29 +806,6 @@ def validator_node(state: PipelineState) -> PipelineState:
             "current_node":     "validator",
             "pipeline_status":  "FAIL",
             "error_message":    state.get("error_message") or "Runner failed before validation.",
-            "messages":         [msg],
-        }
-
-    # ── Modes below `build` produce no layout, so there is nothing to sign off ──
-    # This is a clean PASS for what the tier claims, not a skipped check: the tier
-    # never promised DRC/LVS/STA. The report records which mode ran so a reader
-    # cannot mistake a contract pass for a signed-off layout.
-    m = mode_of(state)
-    if not m["signoff"]:
-        mode_name = state.get("mode", DEFAULT_MODE)
-        msg = (f"[validator] mode={mode_name} ({m['cost']}) — no layout produced, "
-               f"so DRC/LVS/STA do not apply. Checks that did run: "
-               f"intake, packaging{', synthesis' if m['runs_orfs'] else ''}.")
-        print(msg)
-        validator_result = {"skipped": False, "mode": mode_name, "checks": {},
-                            "reason": "tier does not produce a layout"}
-        write_json(validator_out / "validator_report.json", validator_result)
-        return {
-            **state,
-            "validator_result": validator_result,
-            "current_node":     "validator",
-            "pipeline_status":  "PASS",
-            "error_message":    None,
             "messages":         [msg],
         }
 
@@ -1079,11 +891,6 @@ def validator_node(state: PipelineState) -> PipelineState:
         else:
             msg = f"[validator] STA soft fail (WNS={wns}ns) — autotuner disabled or exhausted. Marking FAIL."
             print(msg)
-            # The verdict alone tells the backend owner the block is slow; it tells
-            # the frontend nothing they can change. Emit a routable finding naming
-            # the owning module, the failing path and the deficit, so the failure can
-            # travel upstream without a human writing it up.
-            _emit_timing_finding(state, design_name, artifacts, packager_resolved)
             return {
                 **state,
                 "validator_result": {"checks": checks, "failed_at": "sta"},
@@ -1193,7 +1000,6 @@ def validator_node(state: PipelineState) -> PipelineState:
 # the negative controls proving these checks fail on broken layouts.
 
 SIGNOFF_ROOT      = Path(__file__).resolve().parent.parent / "signoff"
-FINDINGS_ROOT     = Path(__file__).resolve().parent.parent / "findings"
 SIGNOFF_TIMEOUT_S = 3 * 3600
 
 
@@ -2547,25 +2353,17 @@ def main() -> int:
                     help="After a clean PASS, tighten clock period to maximize Fmax (up to 3 iterations)")
     ap.add_argument("--optimize_power",   action="store_true", default=False,
                     help="After a clean PASS, use Claude to minimize power while preserving timing (up to 3 iterations)")
-    ap.add_argument("--mode", choices=sorted(MODES), default=DEFAULT_MODE,
-                    help="How far to take the run. "
-                         + "; ".join(f"{k} ({v['cost']})" for k, v in MODES.items()))
     args = ap.parse_args()
 
     load_env_file(args.env_file)
-
-    # `full` is `build` plus optimization, so it implies the tuner flags rather than
-    # making a caller pass both. An explicit flag still wins.
-    optimize = MODES[args.mode]["optimize"]
 
     initial_state: PipelineState = {
         "bundle_dir":       str(args.bundle_dir),
         "out_root":         str(args.out_root),
         "env_file":         str(args.env_file),
-        "mode":             args.mode,
-        "enable_autotuner":       args.enable_autotuner or optimize,
-        "optimize_fmax":          args.optimize_fmax or optimize,
-        "optimize_power":         args.optimize_power or optimize,
+        "enable_autotuner":       args.enable_autotuner,
+        "optimize_fmax":          args.optimize_fmax,
+        "optimize_power":         args.optimize_power,
         "intake_report":          None,
         "packager_report":  None,
         "runner_result":    None,
@@ -2620,16 +2418,6 @@ def main() -> int:
         "sta_status":        (validator.get("checks", {}).get("sta") or {}).get("status"),
         "artifacts":         (final_state.get("runner_result")     or {}).get("artifacts", {}),
         "messages":          final_state.get("messages", []),
-        # Which tier ran. A PASS from `contract` and a PASS from `build` mean very
-        # different things; a consumer must be able to tell them apart.
-        "mode":              final_state.get("mode", DEFAULT_MODE),
-        "checks_applicable": sorted(k for k, v in {
-            "intake": True, "packaging": True,
-            "synthesis": mode_of(final_state)["runs_orfs"],
-            "drc": mode_of(final_state)["signoff"],
-            "lvs": mode_of(final_state)["signoff"],
-            "sta": mode_of(final_state)["signoff"],
-        }.items() if v),
     }
 
     # Optimization outcomes. Without these the batch summary had only the delivered
