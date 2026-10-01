@@ -41,7 +41,7 @@ module cfg_refresh_monitor #(
     if (rst_n && (1'b1) && ({cfg_force_refresh, cfg_max_postpone, cfg_ref_priority, cfg_tREFI_nCK, cfg_urgent_threshold} !== cfg_refresh_prev)) begin
         $display("TXN cfg_refresh update t=%0t force_refresh=%0h max_postpone=%0h priority=%0h trefi=%0h urgent_threshold=%0h", $time, cfg_force_refresh, cfg_max_postpone, cfg_ref_priority, cfg_tREFI_nCK, cfg_urgent_threshold);
     end
-    cfg_refresh_prev <= rst_n ? {cfg_force_refresh, cfg_max_postpone, cfg_ref_priority, cfg_tREFI_nCK, cfg_urgent_threshold} : 34'b0;
+    cfg_refresh_prev <= {cfg_force_refresh, cfg_max_postpone, cfg_ref_priority, cfg_tREFI_nCK, cfg_urgent_threshold};
   end
 
 endmodule

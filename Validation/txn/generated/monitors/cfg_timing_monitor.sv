@@ -47,7 +47,7 @@ module cfg_timing_monitor #(
     if (rst_n && (1'b1) && ({cfg_tCCD_nCK, cfg_tFAW_nCK, cfg_tRAS_nCK, cfg_tRC_nCK, cfg_tRCD_nCK, cfg_tRFC_nCK, cfg_tRP_nCK, cfg_tRRD_nCK, cfg_tRTP_nCK, cfg_tWR_nCK, cfg_tWTR_nCK} !== cfg_timing_prev)) begin
         $display("TXN cfg_timing update t=%0t tccd=%0h tfaw=%0h tras=%0h trc=%0h trcd=%0h trfc=%0h trp=%0h trrd=%0h trtp=%0h twr=%0h twtr=%0h", $time, cfg_tCCD_nCK, cfg_tFAW_nCK, cfg_tRAS_nCK, cfg_tRC_nCK, cfg_tRCD_nCK, cfg_tRFC_nCK, cfg_tRP_nCK, cfg_tRRD_nCK, cfg_tRTP_nCK, cfg_tWR_nCK, cfg_tWTR_nCK);
     end
-    cfg_timing_prev <= rst_n ? {cfg_tCCD_nCK, cfg_tFAW_nCK, cfg_tRAS_nCK, cfg_tRC_nCK, cfg_tRCD_nCK, cfg_tRFC_nCK, cfg_tRP_nCK, cfg_tRRD_nCK, cfg_tRTP_nCK, cfg_tWR_nCK, cfg_tWTR_nCK} : 88'b0;
+    cfg_timing_prev <= {cfg_tCCD_nCK, cfg_tFAW_nCK, cfg_tRAS_nCK, cfg_tRC_nCK, cfg_tRCD_nCK, cfg_tRFC_nCK, cfg_tRP_nCK, cfg_tRRD_nCK, cfg_tRTP_nCK, cfg_tWR_nCK, cfg_tWTR_nCK};
   end
 
 endmodule

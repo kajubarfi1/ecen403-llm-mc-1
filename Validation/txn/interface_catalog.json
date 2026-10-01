@@ -242,7 +242,8 @@
           "err": "csr_err_o"
         }
       },
-      "role": "response"
+      "role": "response",
+      "model_guidance": "err asserts only for an UNMAPPED address (no register at the offset). An access violation -- a write to a read-only register or a read of a write-only field -- is acknowledged with err=0: the write is ignored (RO fields keep their value) and the WO field reads as zero. This is the pinned convention while intake rule CSR_ACCESS_VIOLATION_ERR is undecided; the spec's CSR_001 names the violation, not the flag."
     },
     "wb_rsp": {
       "block": "wb_port",
@@ -663,7 +664,8 @@
           "tccd": "cfg_tCCD_nCK",
           "trfc": "cfg_tRFC_nCK"
         }
-      }
+      },
+      "model_guidance": "Timing configuration broadcast from the CSR block to bank_tracker. A LEVEL stream: values persist and downstream reloads counters from them, so the transaction is the change, not the cycle. Level stream, change-qualified: emit exactly one update whenever any field changes, carrying EVERY field's current value. Nothing is emitted for reset itself: the fields hold their reset values through reset and the first change after it is the first update. "
     },
     "cfg_refresh": {
       "block": "config_regs",
@@ -685,7 +687,8 @@
           "force_refresh": "cfg_force_refresh",
           "priority": "cfg_ref_priority"
         }
-      }
+      },
+      "model_guidance": "Refresh configuration broadcast from the CSR block to refresh_ctrl. Level stream, change-qualified. Level stream, change-qualified: emit exactly one update whenever any field changes, carrying EVERY field's current value. Nothing is emitted for reset itself: the fields hold their reset values through reset and the first change after it is the first update. A write-only pulse field (force_refresh, from CTRL_CONFIG.force_refresh, 'write 1 to force immediate refresh') is seen for one cycle: a write of 1 produces an update with the field at 1 followed by an update with it back at 0."
     },
     "dp_cmd": {
       "block": "data_path",

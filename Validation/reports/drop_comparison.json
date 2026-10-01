@@ -1,55 +1,25 @@
 {
   "$schema": "validation-drop-comparison/1",
   "a": {
-    "dir": "Validation/reports/drops/1fea117",
-    "drop_head": "1fea117"
+    "dir": "Validation/reports/drops/5661e03",
+    "drop_head": "5661e03"
   },
   "b": {
     "dir": "Validation/reports/paths",
-    "drop_head": "5661e03"
+    "drop_head": "14f15f9"
   },
   "strict": false,
-  "generated_utc": "2026-10-01T16:21:18.901975Z",
+  "generated_utc": "2026-10-01T16:53:55.665683Z",
   "rows": [
     {
       "path": "path_01_write_cmd",
-      "kind": "changed",
+      "kind": "same",
       "new": {},
-      "gone": {
-        "id:SCHED_002": 5,
-        "illegal:cp_tccd_spacing": 7,
-        "stage:cmd_gen": 1
-      },
-      "grew": {
-        "assert:a_PROTO_002": [
-          13,
-          23
-        ],
-        "assert:a_TIMING_004": [
-          13,
-          23
-        ],
-        "illegal:cp_tfaw_spacing": [
-          13,
-          23
-        ],
-        "illegal:cp_trc_spacing": [
-          13,
-          23
-        ],
-        "illegal:cp_trrd_spacing": [
-          13,
-          23
-        ]
-      },
+      "gone": {},
+      "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {
-        "matched:cmd_gen": [
-          42,
-          98
-        ]
-      },
+      "matched_up": {},
       "verdict": [
         "fail",
         "fail"
@@ -57,34 +27,12 @@
     },
     {
       "path": "path_02_read_cmd",
-      "kind": "changed",
+      "kind": "same",
       "new": {},
-      "gone": {
-        "assert:a_TIMING_009": 1,
-        "assert:p_stall_hold": 13,
-        "assert:p_tag": 45,
-        "id:SCHED_002": 5,
-        "illegal:cp_tccd_spacing": 44,
-        "illegal:cp_trtp_spacing": 2,
-        "stage:cmd_gen": 1,
-        "stage:wb_port": 1
-      },
+      "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {
-        "matched:addr_decoder": [
-          52,
-          19
-        ],
-        "matched:cmd_gen": [
-          126,
-          111
-        ],
-        "matched:wb_port": [
-          52,
-          38
-        ]
-      },
+      "matched_down": {},
       "matched_up": {},
       "verdict": [
         "fail",
@@ -93,68 +41,24 @@
     },
     {
       "path": "path_03_read_return",
-      "kind": "changed",
+      "kind": "same",
       "new": {},
-      "gone": {
-        "assert:a_TIMING_009": 1,
-        "assert:p_stall_hold": 13,
-        "assert:p_tag": 45,
-        "illegal:cp_tccd_spacing": 44,
-        "illegal:cp_trtp_spacing": 2,
-        "stage:data_path": 1,
-        "stage:wb_port": 1
-      },
+      "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {
-        "matched:data_path": [
-          26,
-          19
-        ],
-        "matched:wb_port": [
-          52,
-          38
-        ]
-      },
+      "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "fail",
+        "pass",
         "pass"
       ]
     },
     {
       "path": "path_04_scheduler_bank_loop",
-      "kind": "changed",
+      "kind": "same",
       "new": {},
-      "gone": {
-        "illegal:cp_tccd_spacing": 7
-      },
-      "grew": {
-        "assert:a_PROTO_002": [
-          13,
-          23
-        ],
-        "assert:a_TIMING_004": [
-          13,
-          23
-        ],
-        "illegal:cp_tfaw_spacing": [
-          13,
-          23
-        ],
-        "illegal:cp_trc_spacing": [
-          13,
-          23
-        ],
-        "illegal:cp_trrd_spacing": [
-          13,
-          23
-        ],
-        "violations:(path-level)": [
-          13,
-          23
-        ]
-      },
+      "gone": {},
+      "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
@@ -165,34 +69,11 @@
     },
     {
       "path": "path_05_scheduler_refresh_loop",
-      "kind": "fixed",
+      "kind": "same",
       "new": {},
-      "gone": {
-        "illegal:cp_tccd_spacing": 516
-      },
+      "gone": {},
       "grew": {},
-      "shrank": {
-        "assert:a_TIMING_011": [
-          24,
-          13
-        ],
-        "id:REF_002": [
-          23,
-          2
-        ],
-        "illegal:cp_trfc_spacing": [
-          22,
-          13
-        ],
-        "violations:(path-level)": [
-          37,
-          1
-        ],
-        "violations:scheduler": [
-          11,
-          1
-        ]
-      },
+      "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
@@ -202,11 +83,9 @@
     },
     {
       "path": "path_06_scheduler_dequeue",
-      "kind": "fixed",
+      "kind": "same",
       "new": {},
-      "gone": {
-        "id:SCHED_002": 5
-      },
+      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
@@ -218,14 +97,9 @@
     },
     {
       "path": "path_07_backpressure",
-      "kind": "changed",
-      "new": {
-        "id:SCHED_004": 1
-      },
-      "gone": {
-        "id:SCHED_002": 4,
-        "illegal:cp_tccd_spacing": 29
-      },
+      "kind": "same",
+      "new": {},
+      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
@@ -273,13 +147,13 @@
       "matched_down": {},
       "matched_up": {
         "matched:config_regs": [
-          87,
-          102
+          103,
+          131
         ]
       },
       "verdict": [
-        "fail",
-        "fail"
+        "pass",
+        "pass"
       ]
     },
     {
@@ -292,13 +166,13 @@
       "matched_down": {},
       "matched_up": {
         "matched:config_regs": [
-          87,
-          102
+          103,
+          131
         ]
       },
       "verdict": [
-        "fail",
-        "fail"
+        "pass",
+        "pass"
       ]
     },
     {
@@ -311,13 +185,13 @@
       "matched_down": {},
       "matched_up": {
         "matched:config_regs": [
-          87,
-          102
+          103,
+          131
         ]
       },
       "verdict": [
-        "fail",
-        "fail"
+        "pass",
+        "pass"
       ]
     },
     {
@@ -330,13 +204,13 @@
       "matched_down": {},
       "matched_up": {
         "matched:config_regs": [
-          87,
-          102
+          103,
+          131
         ]
       },
       "verdict": [
-        "fail",
-        "fail"
+        "pass",
+        "pass"
       ]
     },
     {
@@ -397,46 +271,13 @@
     },
     {
       "path": "path_18_full_write",
-      "kind": "changed",
+      "kind": "same",
       "new": {},
-      "gone": {
-        "assert:a_TIMING_007": 1,
-        "assert:a_TIMING_009": 1,
-        "assert:p_stall_hold": 7,
-        "assert:p_tag": 23,
-        "id:SCHED_002": 6,
-        "illegal:cp_tccd_spacing": 36,
-        "illegal:cp_trtp_spacing": 2,
-        "stage:cmd_gen": 1,
-        "stage:wb_port": 1
-      },
-      "grew": {
-        "id:PROTO_002": [
-          6,
-          12
-        ]
-      },
+      "gone": {},
+      "grew": {},
       "shrank": {},
-      "matched_down": {
-        "matched:addr_decoder": [
-          47,
-          19
-        ],
-        "matched:wb_port": [
-          31,
-          28
-        ]
-      },
-      "matched_up": {
-        "matched:cmd_gen": [
-          105,
-          107
-        ],
-        "matched:data_path": [
-          20,
-          27
-        ]
-      },
+      "matched_down": {},
+      "matched_up": {},
       "verdict": [
         "fail",
         "fail"
@@ -444,34 +285,10 @@
     },
     {
       "path": "path_19_row_conflict",
-      "kind": "changed",
+      "kind": "same",
       "new": {},
-      "gone": {
-        "id:SCHED_002": 5,
-        "illegal:cp_tccd_spacing": 7
-      },
-      "grew": {
-        "assert:a_PROTO_002": [
-          13,
-          23
-        ],
-        "assert:a_TIMING_004": [
-          13,
-          23
-        ],
-        "illegal:cp_tfaw_spacing": [
-          13,
-          23
-        ],
-        "illegal:cp_trc_spacing": [
-          13,
-          23
-        ],
-        "illegal:cp_trrd_spacing": [
-          13,
-          23
-        ]
-      },
+      "gone": {},
+      "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
@@ -482,45 +299,13 @@
     },
     {
       "path": "path_20_refresh_preempt",
-      "kind": "changed",
-      "new": {
-        "id:SCHED_004": 1
-      },
-      "gone": {
-        "id:SCHED_002": 4,
-        "illegal:cp_tccd_spacing": 516,
-        "stage:cmd_gen": 1
-      },
+      "kind": "same",
+      "new": {},
+      "gone": {},
       "grew": {},
-      "shrank": {
-        "assert:a_TIMING_011": [
-          24,
-          13
-        ],
-        "id:REF_002": [
-          11,
-          1
-        ],
-        "illegal:cp_trfc_spacing": [
-          22,
-          13
-        ],
-        "violations:(path-level)": [
-          11,
-          1
-        ],
-        "violations:cmd_queue+scheduler": [
-          1498,
-          961
-        ]
-      },
+      "shrank": {},
       "matched_down": {},
-      "matched_up": {
-        "matched:cmd_gen": [
-          2730,
-          3929
-        ]
-      },
+      "matched_up": {},
       "verdict": [
         "fail",
         "fail"
@@ -528,13 +313,36 @@
     },
     {
       "path": "path_21_wb_port_standalone",
-      "kind": "missing",
-      "side": "a"
+      "kind": "same",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "pass",
+        "pass"
+      ]
     },
     {
       "path": "path_22_csr_standalone",
-      "kind": "missing",
-      "side": "a"
+      "kind": "fixed",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {
+        "matched:config_regs": [
+          103,
+          131
+        ]
+      },
+      "verdict": [
+        "pass",
+        "pass"
+      ]
     }
   ]
 }

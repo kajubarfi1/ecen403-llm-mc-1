@@ -202,6 +202,32 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   completion wait reports that as expected); config_regs second model still
   disagrees 21/57 (the primary passes everywhere — the second model is next
   to regenerate, with cmd_gen's).
+- *2026-10-01, afternoon — second models.* The config_regs disagreement was
+  the primary's: it predicts `csr_rsp` only, having been accepted on
+  2026-09-03 before the `cfg_timing`/`cfg_refresh` broadcast streams existed,
+  so a wrong timing broadcast would have passed its own stage and surfaced
+  under bank_tracker's name. Two fixes in the harness, not the model: the
+  agent now rejects a model whose INPUT/OUTPUT_IFACES differ from the scope's
+  streams (the prompt stated the tuples; now it is a contract), and the
+  register gate grades broadcasts (step 9: after a write that changes a
+  mapped field, one update carrying every mapped field's current value;
+  mutation-tested — wrong value, silent, swapped mapping all rejected;
+  `tests/test_broadcast_gate.py`). config_regs second model regenerated on
+  Opus, accepted first attempt; primary regenerated under the new contract.
+  Regenerating the primary surfaced two more harness defects: (1) a
+  write-to-read-only register was assumed to set `csr_err_o` by the new
+  model and not by the drop — the spec names the violation (CSR_001) but
+  never says the response flags it: intake gap `CSR_ACCESS_VIOLATION_ERR`
+  filed, convention pinned in the catalog (`err` only on unmapped
+  addresses) until decided; (2) change-qualified monitors zeroed their
+  baseline during reset, so every run opened with a phantom `update`
+  carrying reset values that no model could derive from the spec — the
+  baseline now follows the wires through reset. `evaluate()` also mistook
+  a model's own TypeError for a gate-signature mismatch; it now inspects
+  the signature. After that: primary accepted first attempt, 131/131 on
+  every config_regs path with the cfg_timing/cfg_refresh broadcasts judged
+  for the first time; second model 131/131 on the same trace; cmd_gen
+  second model accepted (attempt 2), agrees 51/51.
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

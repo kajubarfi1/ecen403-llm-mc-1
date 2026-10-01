@@ -1,153 +1,120 @@
 from txn_contract import TransactionPredictor, Txn
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List
+import math
 
 
-class ConfigRegsPredictor(TransactionPredictor):
-    """
-    Transaction predictor for the config_regs block.
-    
-    Models CSR read/write behavior, hardware status inputs, and
-    configuration output broadcasts per the specification.
-    """
-    
-    INPUT_IFACES: tuple = ('csr', 'csr_sts', 'csr_sts_level')
-    OUTPUT_IFACES: tuple = ('cfg_refresh', 'cfg_timing', 'csr_rsp')
-    
+class Predictor(TransactionPredictor):
+    INPUT_IFACES = ('csr', 'csr_sts', 'csr_sts_level')
+    OUTPUT_IFACES = ('cfg_refresh', 'cfg_timing', 'csr_rsp')
+
     def __init__(self, spec: dict):
         self.spec = spec
-        self._build_register_tables()
+        self._build_register_tables(spec)
         self.reset()
-    
-    def _build_register_tables(self) -> None:
-        """Build lookup tables from spec for register decoding."""
-        csr_map = self.spec['csr_register_map']
-        self.addr_width_bits = csr_map['address_width_bits']
-        self.data_width_bits = csr_map['data_width_bits']
-        
-        # Table: offset -> register definition
-        self.reg_by_offset: Dict[int, dict] = {}
-        # Table: register name -> offset
-        self.offset_by_name: Dict[str, int] = {}
-        
-        for reg in csr_map['registers']:
-            offset = int(reg['offset'], 16)
-            self.reg_by_offset[offset] = reg
-            self.offset_by_name[reg['name']] = offset
-        
-        # Build field tables for each register
-        # Table: (offset, field_name) -> (lsb, width, access)
-        self.field_info: Dict[Tuple[int, str], Tuple[int, int, str]] = {}
-        
-        for reg in csr_map['registers']:
-            offset = int(reg['offset'], 16)
-            for field in reg['fields']:
-                lsb, width = self._parse_bits(field['bits'])
-                self.field_info[(offset, field['name'])] = (lsb, width, field['access'])
-        
-        # Table: offset -> list of (field_name, lsb, width, access, reset_value)
-        self.fields_by_offset: Dict[int, List[Tuple[str, int, int, str, int]]] = {}
-        for reg in csr_map['registers']:
-            offset = int(reg['offset'], 16)
-            fields = []
-            for field in reg['fields']:
-                lsb, width = self._parse_bits(field['bits'])
-                fields.append((field['name'], lsb, width, field['access'], field['reset_value']))
-            self.fields_by_offset[offset] = fields
-        
-        # Table: which registers contribute to cfg_timing
-        # Maps register offset to list of (field_name, output_field_name)
-        self.timing_fields: Dict[int, List[Tuple[str, str]]] = {
-            self.offset_by_name['TIMING_0']: [
-                ('tRCD_nCK', 'trcd'),
-                ('tRP_nCK', 'trp'),
-                ('tRAS_nCK', 'tras'),
-                ('tRC_nCK', 'trc'),
-            ],
-            self.offset_by_name['TIMING_1']: [
-                ('tRRD_nCK', 'trrd'),
-                ('tFAW_nCK', 'tfaw'),
-                ('tWTR_nCK', 'twtr'),
-                ('tRFC_nCK', 'trfc'),
-            ],
-            self.offset_by_name['TIMING_2']: [
-                ('tWR_nCK', 'twr'),
-                ('tRTP_nCK', 'trtp'),
-            ],
-            self.offset_by_name['TIMING_3']: [
-                ('tCCD_nCK', 'tccd'),
-            ],
-        }
-        
-        # Table: which registers contribute to cfg_refresh
-        # Maps register offset to list of (field_name, output_field_name)
-        self.refresh_fields: Dict[int, List[Tuple[str, str]]] = {
-            self.offset_by_name['TIMING_3']: [
-                ('tREFI_nCK', 'trefi'),
-            ],
-            self.offset_by_name['REFRESH_CONFIG']: [
-                ('max_postpone', 'max_postpone'),
-                ('urgent_threshold', 'urgent_threshold'),
-                ('ref_priority', 'priority'),
-            ],
-            self.offset_by_name['CTRL_CONFIG']: [
-                ('force_refresh', 'force_refresh'),
-            ],
-        }
-        
-        # Table: csr_sts event field -> (register offset, field_name)
-        self.sts_event_map: Dict[str, Tuple[int, str]] = {
-            'ecc_ue': (self.offset_by_name['ERROR_STATUS'], 'ecc_ue_flag'),
-            'ref_starve': (self.offset_by_name['ERROR_STATUS'], 'ref_starve_flag'),
-            'init_fail': (self.offset_by_name['ERROR_STATUS'], 'init_fail_flag'),
-        }
-        
-        # Table: csr_sts_level field -> (register offset, field_name)
-        self.sts_level_map: Dict[str, Tuple[int, str]] = {
-            'init_done': (self.offset_by_name['CTRL_STATUS'], 'init_done'),
-            'cal_done': (self.offset_by_name['CTRL_STATUS'], 'cal_done'),
-            'cal_fail': (self.offset_by_name['CTRL_STATUS'], 'cal_fail'),
-            'bist_done': (self.offset_by_name['CTRL_STATUS'], 'bist_done'),
-            'bist_fail': (self.offset_by_name['CTRL_STATUS'], 'bist_fail'),
-            'ref_pending': (self.offset_by_name['CTRL_STATUS'], 'ref_pending_cnt'),
-            'self_refresh': (self.offset_by_name['CTRL_STATUS'], 'self_refresh_active'),
-            'ecc_ce_count': (self.offset_by_name['ERROR_STATUS'], 'ecc_ce_count'),
-            'bist_fail_addr': (self.offset_by_name['ERROR_STATUS'], 'bist_fail_addr'),
-        }
-        
-        # Valid address set for error detection
-        self.valid_offsets = set(self.reg_by_offset.keys())
-        
-        # Max valid address per Wishbone B4: addresses outside valid range are bus errors
-        # Spec: address_width_bits = 8, so addresses 0x00-0xFF are addressable
-        # but only defined offsets are valid
-        self.addr_mask = (1 << self.addr_width_bits) - 1
-    
-    def _parse_bits(self, bits_str: str) -> Tuple[int, int]:
-        """Parse bit field specification like '7:0' or '0' into (lsb, width)."""
+
+    def _parse_bit_range(self, bits_str):
         if ':' in bits_str:
-            msb, lsb = map(int, bits_str.split(':'))
-            return lsb, msb - lsb + 1
+            parts = bits_str.split(':')
+            hi = int(parts[0])
+            lo = int(parts[1])
+            return lo, hi
         else:
-            bit = int(bits_str)
-            return bit, 1
-    
+            b = int(bits_str)
+            return b, b
+
+    def _build_register_tables(self, spec):
+        csr_map = spec['csr_register_map']
+        self.addr_width = csr_map['address_width_bits']
+        self.data_width = csr_map['data_width_bits']
+
+        self.registers = {}
+        self.reg_by_offset = {}
+
+        for reg_def in csr_map['registers']:
+            name = reg_def['name']
+            offset_str = reg_def['offset']
+            offset = int(offset_str, 16) if isinstance(offset_str, str) else int(offset_str)
+            reset_val_raw = reg_def['reset_value']
+            if isinstance(reset_val_raw, str):
+                reset_value = int(reset_val_raw, 16)
+            else:
+                reset_value = int(reset_val_raw)
+            reg_access = reg_def['access']
+
+            fields = []
+            for f in reg_def['fields']:
+                lo, hi = self._parse_bit_range(f['bits'])
+                width = hi - lo + 1
+                mask = ((1 << width) - 1) << lo
+                f_reset = int(f.get('reset_value', 0))
+                fields.append({
+                    'name': f['name'],
+                    'lo': lo,
+                    'hi': hi,
+                    'width': width,
+                    'mask': mask,
+                    'access': f['access'],
+                    'reset_value': f_reset,
+                })
+
+            reg_info = {
+                'name': name,
+                'offset': offset,
+                'reset_value': reset_value,
+                'access': reg_access,
+                'fields': fields,
+            }
+            self.registers[name] = reg_info
+            self.reg_by_offset[offset] = reg_info
+
+        # Build set of valid offsets
+        self.valid_offsets = set(self.reg_by_offset.keys())
+
+        # Precompute which registers feed cfg_timing and cfg_refresh
+        # cfg_timing fields come from TIMING_0, TIMING_1, TIMING_2, TIMING_3
+        # cfg_refresh fields come from TIMING_3 (tREFI), REFRESH_CONFIG, CTRL_CONFIG (force_refresh)
+
+        # Map from cfg_timing field name to (register_name, field_name)
+        self.timing_field_map = {
+            'trcd': ('TIMING_0', 'tRCD_nCK'),
+            'trp': ('TIMING_0', 'tRP_nCK'),
+            'tras': ('TIMING_0', 'tRAS_nCK'),
+            'trc': ('TIMING_0', 'tRC_nCK'),
+            'trrd': ('TIMING_1', 'tRRD_nCK'),
+            'twtr': ('TIMING_1', 'tWTR_nCK'),
+            'tfaw': ('TIMING_1', 'tFAW_nCK'),
+            'trfc': ('TIMING_1', 'tRFC_nCK'),
+            'twr': ('TIMING_2', 'tWR_nCK'),
+            'trtp': ('TIMING_2', 'tRTP_nCK'),
+            'tccd': ('TIMING_3', 'tCCD_nCK'),
+        }
+
+        self.refresh_field_map = {
+            'trefi': ('TIMING_3', 'tREFI_nCK'),
+            'max_postpone': ('REFRESH_CONFIG', 'max_postpone'),
+            'urgent_threshold': ('REFRESH_CONFIG', 'urgent_threshold'),
+            'priority': ('REFRESH_CONFIG', 'ref_priority'),
+            'force_refresh': ('CTRL_CONFIG', 'force_refresh'),
+        }
+
+        # Registers whose writes can affect cfg_timing
+        self.timing_trigger_regs = set()
+        for reg_name, _ in self.timing_field_map.values():
+            self.timing_trigger_regs.add(reg_name)
+
+        # Registers whose writes can affect cfg_refresh
+        self.refresh_trigger_regs = set()
+        for reg_name, _ in self.refresh_field_map.values():
+            self.refresh_trigger_regs.add(reg_name)
+
     def reset(self) -> None:
-        """Return all modeled state to its power-on values."""
-        # Register storage: offset -> 32-bit value
-        self.registers: Dict[int, int] = {}
-        
-        for reg in self.spec['csr_register_map']['registers']:
-            offset = int(reg['offset'], 16)
-            reset_val = int(reg['reset_value'], 16)
-            self.registers[offset] = reset_val
-        
-        # Track last emitted cfg values for change detection
-        # Per schema: "Level stream, change-qualified" - emit only on change
-        self._last_cfg_timing = self._build_cfg_timing()
-        self._last_cfg_refresh = self._build_cfg_refresh()
-        
-        # Track current hardware status levels
-        self._hw_levels: Dict[str, int] = {
+        # Initialize register storage with reset values
+        self.reg_values = {}
+        for name, info in self.registers.items():
+            self.reg_values[name] = info['reset_value'] & ((1 << self.data_width) - 1)
+
+        # Hardware status levels - initialize to reset defaults
+        self.hw_levels = {
             'init_done': 0,
             'cal_done': 0,
             'cal_fail': 0,
@@ -158,290 +125,278 @@ class ConfigRegsPredictor(TransactionPredictor):
             'ecc_ce_count': 0,
             'bist_fail_addr': 0,
         }
-    
-    def _get_field(self, offset: int, field_name: str) -> int:
-        """Extract a field value from a register."""
-        lsb, width, _ = self.field_info[(offset, field_name)]
-        mask = (1 << width) - 1
-        return (self.registers[offset] >> lsb) & mask
-    
-    def _set_field(self, offset: int, field_name: str, value: int) -> None:
-        """Set a field value in a register."""
-        lsb, width, _ = self.field_info[(offset, field_name)]
-        mask = (1 << width) - 1
-        value = value & mask
-        clear_mask = ~(mask << lsb) & 0xFFFFFFFF
-        self.registers[offset] = (self.registers[offset] & clear_mask) | (value << lsb)
-    
-    def _build_cfg_timing(self) -> Dict[str, int]:
-        """Build cfg_timing output fields from current register state."""
-        result = {}
-        for offset, field_list in self.timing_fields.items():
-            for reg_field, out_field in field_list:
-                result[out_field] = self._get_field(offset, reg_field)
-        return result
-    
-    def _build_cfg_refresh(self) -> Dict[str, int]:
-        """Build cfg_refresh output fields from current register state."""
-        result = {}
-        for offset, field_list in self.refresh_fields.items():
-            for reg_field, out_field in field_list:
-                result[out_field] = self._get_field(offset, reg_field)
-        return result
-    
-    def _read_register(self, offset: int) -> int:
-        """
-        Read a register, applying access rules.
+
+        # Track last emitted values for change-qualification
+        self.last_timing = None
+        self.last_refresh = None
+
+    def _get_field_value(self, reg_name, field_name):
+        reg_info = self.registers[reg_name]
+        reg_val = self.reg_values[reg_name]
+        for f in reg_info['fields']:
+            if f['name'] == field_name:
+                return (reg_val >> f['lo']) & ((1 << f['width']) - 1)
+        raise KeyError(f"Field {field_name} not found in {reg_name}")
+
+    def _set_field_value(self, reg_name, field_name, value):
+        reg_info = self.registers[reg_name]
+        reg_val = self.reg_values[reg_name]
+        for f in reg_info['fields']:
+            if f['name'] == field_name:
+                mask = f['mask']
+                reg_val = (reg_val & ~mask) | ((value << f['lo']) & mask)
+                self.reg_values[reg_name] = reg_val
+                return
+        raise KeyError(f"Field {field_name} not found in {reg_name}")
+
+    def _build_read_value(self, reg_name):
+        """Build the value returned for a read of the given register.
         
-        Per spec: WO fields read as 0 (CSR_001 in failure_taxonomy implies
-        read from WO is defined behavior returning 0, not an error).
-        RO fields read their current value.
-        RW fields read their current value.
-        RW1C fields read their current value.
+        Per the spec notes: WO fields read as zero (CSR_001 / access violation
+        convention: err=0, WO field reads as zero).
+        RO fields in CTRL_STATUS mirror hardware levels.
+        RO fields in ERROR_STATUS mirror hardware levels for ecc_ce_count and bist_fail_addr.
+        RW1C fields reflect their current stored state.
         """
-        value = 0
-        for field_name, lsb, width, access, _ in self.fields_by_offset[offset]:
-            mask = (1 << width) - 1
-            if access == 'WO':
-                # WO fields read as 0 per common CSR convention
-                # Spec failure_taxonomy CSR_001 mentions "read from write-only register"
-                # as a violation, but the register access is RW/RO/WO per field.
-                # Per Wishbone B4, the data returned is implementation-defined for
-                # inaccessible regions; reading 0 is the conservative choice.
-                field_val = 0
+        reg_info = self.registers[reg_name]
+        result = 0
+
+        for f in reg_info['fields']:
+            if f['access'] == 'WO':
+                # Per spec note: WO field reads as zero
+                val = 0
+            elif reg_name == 'CTRL_STATUS':
+                # All CTRL_STATUS fields are RO and mirror hardware levels
+                val = self._get_ctrl_status_field(f['name'])
+            elif reg_name == 'ERROR_STATUS':
+                val = self._get_error_status_field(f['name'])
             else:
-                field_val = (self.registers[offset] >> lsb) & mask
-            value |= (field_val << lsb)
-        return value
-    
-    def _write_register(self, offset: int, data: int) -> bool:
-        """
-        Write to a register, applying access rules.
+                val = (self.reg_values[reg_name] >> f['lo']) & ((1 << f['width']) - 1)
+            result |= (val & ((1 << f['width']) - 1)) << f['lo']
+
+        return result
+
+    def _get_ctrl_status_field(self, field_name):
+        """CTRL_STATUS fields are all RO and mirror hardware level signals."""
+        level_map = {
+            'init_done': 'init_done',
+            'cal_done': 'cal_done',
+            'cal_fail': 'cal_fail',
+            'bist_done': 'bist_done',
+            'bist_fail': 'bist_fail',
+            'ref_pending_cnt': 'ref_pending',
+            'self_refresh_active': 'self_refresh',
+            'reserved': None,
+        }
+        hw_key = level_map.get(field_name)
+        if hw_key is None:
+            return 0
+        return self.hw_levels[hw_key]
+
+    def _get_error_status_field(self, field_name):
+        """ERROR_STATUS has mixed field types: RO level-mirrors and RW1C flags."""
+        if field_name == 'ecc_ce_count':
+            # RO, mirrors hardware level
+            return self.hw_levels['ecc_ce_count']
+        elif field_name == 'bist_fail_addr':
+            # RO, mirrors hardware level
+            return self.hw_levels['bist_fail_addr']
+        elif field_name in ('ecc_ue_flag', 'ref_starve_flag', 'init_fail_flag'):
+            # RW1C stored in reg_values
+            reg_info = self.registers['ERROR_STATUS']
+            for f in reg_info['fields']:
+                if f['name'] == field_name:
+                    return (self.reg_values['ERROR_STATUS'] >> f['lo']) & ((1 << f['width']) - 1)
+        elif field_name == 'reserved':
+            return 0
+        return 0
+
+    def _write_register(self, reg_name, write_data):
+        """Apply a write to a register, respecting field access types.
         
-        Returns True if this was a valid write (register exists).
-        
-        Per spec:
-        - RO fields: writes are ignored
-        - RW fields: writes update the field
-        - WO fields: writes update the field (value may be transient/self-clearing)
+        Per spec notes:
+        - RO fields: write is silently ignored (err=0), field keeps value
+        - WO fields: write value is accepted (pulse semantics for some)
+        - RW fields: write value is accepted
         - RW1C fields: writing 1 clears the bit
-        
-        Per spec, WO fields like bist_start, force_refresh, force_self_ref are
-        write-only action triggers. The spec says reset_value=0 and they are WO.
-        The spec does not say they auto-clear, but since they are WO and read as 0,
-        a reasonable interpretation is they are strobes. However, for cfg_refresh
-        output, force_refresh is emitted, so we need to track its written value.
-        Since the spec says WO fields "reset_value": 0, and the output is
-        change-qualified, writing 1 should emit a change, then presumably it
-        auto-clears. But the spec doesn't explicitly state auto-clear behavior.
-        
-        Literal reading: WO fields accept writes, and since they read as 0,
-        their stored value is not directly observable. For force_refresh in
-        cfg_refresh output, we emit what was written. The spec is silent on
-        whether WO bits persist or auto-clear. Given force_refresh is described
-        as "Write 1 to force immediate refresh", it is a command strobe. We will
-        treat WO command bits as edge-sensitive: they are set to the written value
-        for the purpose of output emission, then implicitly cleared afterward.
+        - Reserved/RO bits within an RW register are not modified
         """
-        reg = self.reg_by_offset[offset]
-        
-        for field_name, lsb, width, access, _ in self.fields_by_offset[offset]:
-            mask = (1 << width) - 1
-            written_val = (data >> lsb) & mask
-            
-            if access == 'RO':
-                # Per spec: writes to RO fields are ignored
+        reg_info = self.registers[reg_name]
+        current = self.reg_values[reg_name]
+        new_val = current
+
+        for f in reg_info['fields']:
+            field_write_val = (write_data >> f['lo']) & ((1 << f['width']) - 1)
+
+            if f['access'] == 'RO':
+                # Write ignored; field keeps its value
                 pass
-            elif access == 'RW':
-                # Normal read-write: update field
-                self._set_field(offset, field_name, written_val)
-            elif access == 'WO':
-                # Write-only: accept write
-                # These are action triggers; we set them for output emission
-                self._set_field(offset, field_name, written_val)
-            elif access == 'RW1C':
-                # Read-write-1-to-clear: writing 1 clears the bit
-                current = self._get_field(offset, field_name)
-                new_val = current & ~written_val
-                self._set_field(offset, field_name, new_val)
+            elif f['access'] == 'RW':
+                new_val = (new_val & ~f['mask']) | ((field_write_val << f['lo']) & f['mask'])
+            elif f['access'] == 'WO':
+                # Accept the write value into storage
+                new_val = (new_val & ~f['mask']) | ((field_write_val << f['lo']) & f['mask'])
+            elif f['access'] == 'RW1C':
+                # Writing 1 clears the corresponding bit(s)
+                clear_mask = field_write_val << f['lo']
+                new_val = new_val & ~clear_mask
+
+        self.reg_values[reg_name] = new_val
+
+    def _build_timing_snapshot(self):
+        """Build a dict of all cfg_timing fields from current register state."""
+        result = {}
+        for output_field, (reg_name, field_name) in self.timing_field_map.items():
+            result[output_field] = self._get_field_value(reg_name, field_name)
+        return result
+
+    def _build_refresh_snapshot(self):
+        """Build a dict of all cfg_refresh fields from current register state."""
+        result = {}
+        for output_field, (reg_name, field_name) in self.refresh_field_map.items():
+            result[output_field] = self._get_field_value(reg_name, field_name)
+        return result
+
+    def _emit_timing_if_changed(self, outputs):
+        """Emit a cfg_timing update if any field has changed."""
+        snap = self._build_timing_snapshot()
+        if snap != self.last_timing:
+            self.last_timing = dict(snap)
+            outputs.append(Txn(iface='cfg_timing', kind='update', fields=dict(snap)))
+
+    def _emit_refresh_if_changed(self, outputs, force_refresh_pulse=False):
+        """Emit cfg_refresh update(s) if any field has changed.
         
-        return True
-    
-    def _emit_cfg_timing_if_changed(self) -> List[Txn]:
-        """Emit cfg_timing update if any timing field changed."""
-        current = self._build_cfg_timing()
-        if current != self._last_cfg_timing:
-            self._last_cfg_timing = current
-            return [Txn(iface='cfg_timing', kind='update', fields=current)]
-        return []
-    
-    def _emit_cfg_refresh_if_changed(self) -> List[Txn]:
-        """Emit cfg_refresh update if any refresh field changed."""
-        current = self._build_cfg_refresh()
-        if current != self._last_cfg_refresh:
-            self._last_cfg_refresh = current
-            return [Txn(iface='cfg_refresh', kind='update', fields=current)]
-        return []
-    
-    def _clear_wo_fields_after_write(self, offset: int) -> None:
+        For force_refresh (WO pulse): if written as 1, emit update with
+        force_refresh=1, then auto-clear and emit update with force_refresh=0.
         """
-        Clear WO fields after they have been processed.
-        
-        Per spec, WO fields like force_refresh are command strobes.
-        After the command is acted upon (output emitted), the field
-        returns to 0. This is the behavior required for level-based
-        outputs to correctly represent transient commands.
-        """
-        for field_name, lsb, width, access, reset_val in self.fields_by_offset[offset]:
-            if access == 'WO':
-                self._set_field(offset, field_name, reset_val)
-    
-    def _process_csr_write(self, addr: int, data: int) -> List[Txn]:
-        """Process a CSR write transaction."""
-        outputs = []
-        
-        # Check for valid address
-        # Per Wishbone B4 section 3.1.3: ERR_O indicates bus errors
-        if addr not in self.valid_offsets:
-            # Invalid address - return error response
-            outputs.append(Txn(
-                iface='csr_rsp',
-                kind='write_ack',
-                fields={'addr': addr, 'err': 1}
-            ))
-            return outputs
-        
-        # Perform the write
-        self._write_register(addr, data)
-        
-        # Check for configuration output changes
-        # Per schema: cfg_refresh and cfg_timing are change-qualified level streams
-        
-        # Determine which output categories this register affects
-        timing_changed = addr in self.timing_fields
-        refresh_changed = addr in self.refresh_fields
-        
-        if timing_changed:
-            outputs.extend(self._emit_cfg_timing_if_changed())
-        
-        if refresh_changed:
-            outputs.extend(self._emit_cfg_refresh_if_changed())
-        
-        # Clear WO fields after outputs are emitted
-        # This ensures force_refresh=1 is captured in cfg_refresh, then cleared
-        self._clear_wo_fields_after_write(addr)
-        
-        # After clearing WO fields, check for refresh change again
-        # (force_refresh going 0->1->0 means we might need another update)
-        if refresh_changed and addr == self.offset_by_name['CTRL_CONFIG']:
-            # If force_refresh was written as 1, it's now 0, emit the clear
-            outputs.extend(self._emit_cfg_refresh_if_changed())
-        
-        # Emit write acknowledgment
-        # Per Wishbone B4: successful write gets ACK, no error
-        outputs.append(Txn(
-            iface='csr_rsp',
-            kind='write_ack',
-            fields={'addr': addr, 'err': 0}
-        ))
-        
-        return outputs
-    
-    def _process_csr_read(self, addr: int) -> List[Txn]:
-        """Process a CSR read transaction."""
-        # Check for valid address
-        if addr not in self.valid_offsets:
-            # Invalid address - return error response
-            # Per Wishbone B4: ERR_O with undefined data
-            # Return 0 for data as a safe default
-            return [Txn(
-                iface='csr_rsp',
-                kind='read_data',
-                fields={'addr': addr, 'data': 0, 'err': 1}
-            )]
-        
-        # Before reading, update RO fields from hardware levels
-        # Per schema: csr_sts_level carries "continuously-valid state"
-        # that "read-only status fields mirror"
-        # This means reads should return the current hardware level
-        for level_name, (offset, field_name) in self.sts_level_map.items():
-            self._set_field(offset, field_name, self._hw_levels[level_name])
-        
-        # Perform the read
-        data = self._read_register(addr)
-        
-        # Per Wishbone B4: successful read gets ACK, no error
-        return [Txn(
-            iface='csr_rsp',
-            kind='read_data',
-            fields={'addr': addr, 'data': data, 'err': 0}
-        )]
-    
-    def _process_sts_event(self, txn: Txn) -> List[Txn]:
-        """
-        Process hardware status event (pulse) that sets RW1C flags.
-        
-        Per schema: "These are a genuine INPUT stream: they set RW1C flag
-        fields that the bus can only clear"
-        """
-        # Per spec: events set the corresponding flag bits
-        for event_name, (offset, field_name) in self.sts_event_map.items():
-            if event_name in txn.fields:
-                event_val = txn.fields[event_name]
-                if event_val:
-                    # Event occurred - set the flag (it can only be cleared by bus write)
-                    self._set_field(offset, field_name, 1)
-        
-        # Events don't directly produce output transactions
-        return []
-    
-    def _process_sts_level(self, txn: Txn) -> List[Txn]:
-        """
-        Process hardware status level update.
-        
-        Per schema: "continuously-valid state that read-only status fields mirror"
-        """
-        # Update internal tracking of hardware levels
-        for level_name in self.sts_level_map:
-            if level_name in txn.fields:
-                self._hw_levels[level_name] = txn.fields[level_name]
-        
-        # Level updates don't directly produce output transactions
-        # They are reflected on subsequent CSR reads
-        return []
-    
-    def process(self, txn: Txn) -> List[Txn]:
-        """Process one observed input transaction."""
-        if txn.iface == 'csr':
-            if txn.kind == 'write':
-                return self._process_csr_write(txn.fields['addr'], txn.fields['data'])
-            elif txn.kind == 'read':
-                return self._process_csr_read(txn.fields['addr'])
-            else:
-                # Unknown kind - ignore per contract
-                return []
-        
-        elif txn.iface == 'csr_sts':
-            if txn.kind == 'event':
-                return self._process_sts_event(txn)
-            else:
-                return []
-        
-        elif txn.iface == 'csr_sts_level':
-            if txn.kind == 'state':
-                return self._process_sts_level(txn)
-            else:
-                return []
-        
+        snap = self._build_refresh_snapshot()
+
+        if force_refresh_pulse and snap.get('force_refresh', 0) == 1:
+            # First emit with force_refresh=1
+            if snap != self.last_refresh:
+                self.last_refresh = dict(snap)
+                outputs.append(Txn(iface='cfg_refresh', kind='update', fields=dict(snap)))
+
+            # Auto-clear force_refresh back to 0
+            self._set_field_value('CTRL_CONFIG', 'force_refresh', 0)
+            snap2 = self._build_refresh_snapshot()
+            if snap2 != self.last_refresh:
+                self.last_refresh = dict(snap2)
+                outputs.append(Txn(iface='cfg_refresh', kind='update', fields=dict(snap2)))
         else:
-            # Unknown interface - ignore per contract
-            return []
-    
+            if snap != self.last_refresh:
+                self.last_refresh = dict(snap)
+                outputs.append(Txn(iface='cfg_refresh', kind='update', fields=dict(snap)))
+
+    def process(self, txn: Txn) -> List[Txn]:
+        outputs = []
+
+        if txn.iface == 'csr_sts_level':
+            if txn.kind == 'state':
+                # Update hardware level mirrors
+                for key in ('init_done', 'cal_done', 'cal_fail', 'bist_done',
+                            'bist_fail', 'ref_pending', 'self_refresh',
+                            'ecc_ce_count', 'bist_fail_addr'):
+                    if key in txn.fields:
+                        self.hw_levels[key] = txn.fields[key]
+            return outputs
+
+        if txn.iface == 'csr_sts':
+            if txn.kind == 'event':
+                # RW1C flag fields: hardware events SET the flags
+                # (only bus writes of 1 can clear them)
+                if txn.fields.get('ecc_ue', 0):
+                    self._set_field_value('ERROR_STATUS', 'ecc_ue_flag',
+                                          self._get_field_value('ERROR_STATUS', 'ecc_ue_flag') | 1)
+                if txn.fields.get('ref_starve', 0):
+                    self._set_field_value('ERROR_STATUS', 'ref_starve_flag',
+                                          self._get_field_value('ERROR_STATUS', 'ref_starve_flag') | 1)
+                if txn.fields.get('init_fail', 0):
+                    self._set_field_value('ERROR_STATUS', 'init_fail_flag',
+                                          self._get_field_value('ERROR_STATUS', 'init_fail_flag') | 1)
+            return outputs
+
+        if txn.iface == 'csr':
+            addr = txn.fields.get('addr', 0)
+
+            if addr not in self.valid_offsets:
+                # Unmapped address: err=1
+                if txn.kind == 'write':
+                    outputs.append(Txn(iface='csr_rsp', kind='write_ack', fields={
+                        'addr': addr,
+                        'err': 1,
+                    }))
+                elif txn.kind == 'read':
+                    outputs.append(Txn(iface='csr_rsp', kind='read_data', fields={
+                        'addr': addr,
+                        'data': 0,
+                        'err': 1,
+                    }))
+                return outputs
+
+            reg_info = self.reg_by_offset[addr]
+            reg_name = reg_info['name']
+
+            if txn.kind == 'write':
+                write_data = txn.fields.get('data', 0)
+
+                # Check if this is a write to a fully RO register
+                # Per spec note: write to RO register => err=0, write is ignored
+                # (access violation convention)
+                # But we still need to process field-by-field for mixed-access registers
+
+                # Detect if force_refresh is being written as 1
+                force_refresh_pulse = False
+                if reg_name == 'CTRL_CONFIG':
+                    fr_field = None
+                    for f in reg_info['fields']:
+                        if f['name'] == 'force_refresh':
+                            fr_field = f
+                            break
+                    if fr_field:
+                        fr_write_val = (write_data >> fr_field['lo']) & ((1 << fr_field['width']) - 1)
+                        if fr_write_val == 1:
+                            force_refresh_pulse = True
+
+                # Perform the write
+                self._write_register(reg_name, write_data)
+
+                # Also auto-clear bist_start and force_self_ref (WO pulse fields)
+                # after they've been captured — but they don't produce output stream events
+                # except force_refresh which has special handling
+                if reg_name == 'CTRL_CONFIG':
+                    # Clear WO pulse fields back to 0 after write (except force_refresh
+                    # which is handled in _emit_refresh_if_changed)
+                    self._set_field_value('CTRL_CONFIG', 'bist_start', 0)
+                    self._set_field_value('CTRL_CONFIG', 'force_self_ref', 0)
+                    if not force_refresh_pulse:
+                        self._set_field_value('CTRL_CONFIG', 'force_refresh', 0)
+
+                # Emit write_ack with err=0
+                outputs.append(Txn(iface='csr_rsp', kind='write_ack', fields={
+                    'addr': addr,
+                    'err': 0,
+                }))
+
+                # Check if this write triggers cfg_timing or cfg_refresh updates
+                if reg_name in self.timing_trigger_regs:
+                    self._emit_timing_if_changed(outputs)
+                if reg_name in self.refresh_trigger_regs:
+                    self._emit_refresh_if_changed(outputs, force_refresh_pulse=force_refresh_pulse)
+
+            elif txn.kind == 'read':
+                read_val = self._build_read_value(reg_name)
+                outputs.append(Txn(iface='csr_rsp', kind='read_data', fields={
+                    'addr': addr,
+                    'data': read_val,
+                    'err': 0,
+                }))
+
+            return outputs
+
+        # Unknown interface: ignore
+        return outputs
+
     def drain(self) -> List[Txn]:
-        """
-        Return any pending outputs at end of trace.
-        
-        Per spec, the config_regs block doesn't buffer responses;
-        all outputs are emitted synchronously with inputs.
-        """
         return []

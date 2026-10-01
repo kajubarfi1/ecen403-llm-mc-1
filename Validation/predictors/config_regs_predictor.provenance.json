@@ -1,7 +1,7 @@
 {
   "scope": "config_regs",
   "strategy": "exact",
-  "generated_utc": "2026-09-03T16:58:13.685273+00:00",
+  "generated_utc": "2026-10-01T16:52:13.057574+00:00",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "model": "claude-opus-4-6",
   "accepted_by_gate": "register_map",
@@ -18,6 +18,8 @@
     "csr_sts_level"
   ],
   "output_ifaces": [
+    "cfg_refresh",
+    "cfg_timing",
     "csr_rsp"
   ],
   "note": "Generated from the spec and transaction schemas only; no RTL was supplied to the model. Accepted by a gate whose expectations are composed from the same spec by code the model never saw."

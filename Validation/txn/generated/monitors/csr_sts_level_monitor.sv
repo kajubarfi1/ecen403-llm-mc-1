@@ -45,7 +45,7 @@ module csr_sts_level_monitor #(
     if (rst_n && (1'b1) && ({sts_bist_done, sts_bist_fail, sts_bist_fail_addr, sts_cal_done, sts_cal_fail, sts_ecc_ce_count, sts_init_done, sts_ref_pending_cnt, sts_self_refresh_active} !== csr_sts_level_prev)) begin
         $display("TXN csr_sts_level state t=%0t bist_done=%0h bist_fail=%0h bist_fail_addr=%0h cal_done=%0h cal_fail=%0h ecc_ce_count=%0h init_done=%0h ref_pending=%0h self_refresh=%0h", $time, sts_bist_done, sts_bist_fail, sts_bist_fail_addr, sts_cal_done, sts_cal_fail, sts_ecc_ce_count, sts_init_done, sts_ref_pending_cnt, sts_self_refresh_active);
     end
-    csr_sts_level_prev <= rst_n ? {sts_bist_done, sts_bist_fail, sts_bist_fail_addr, sts_cal_done, sts_cal_fail, sts_ecc_ce_count, sts_init_done, sts_ref_pending_cnt, sts_self_refresh_active} : 38'b0;
+    csr_sts_level_prev <= {sts_bist_done, sts_bist_fail, sts_bist_fail_addr, sts_cal_done, sts_cal_fail, sts_ecc_ce_count, sts_init_done, sts_ref_pending_cnt, sts_self_refresh_active};
   end
 
 endmodule

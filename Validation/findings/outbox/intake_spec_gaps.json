@@ -1,7 +1,7 @@
 {
   "$schema": "validation-findings/1",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "finding_count": 11,
+  "finding_count": 12,
   "findings": [
     {
       "source": "validation",
@@ -50,6 +50,30 @@
           "ignored_with_error",
           "ignored_silently",
           "error_only"
+        ]
+      },
+      "status": "open"
+    },
+    {
+      "source": "validation",
+      "target": "spec",
+      "kind": "spec_gap",
+      "scope": "csr_register_map",
+      "severity": "major",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "[intake] Does a write to a read-only register (or a read of a write-only one) set the response error flag, or is it acknowledged silently and ignored?",
+      "detail": "csr_register_map.access_violation_error is not stated. failure_taxonomy names CSR_001 'CSR access violation' but the register map never says the response flags it. A regenerated predictor assumed err=1 on RO writes; the drop acks with err=0. Neither is wrong until this is decided. Until then the catalog pins 'silent' so models agree with each other. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: config_regs primary regeneration 2026-10-01 (4 write_ack err mismatches on path_22).",
+      "evidence": {
+        "rule": "CSR_ACCESS_VIOLATION_ERR",
+        "status": "gap",
+        "proposed_patch": {
+          "csr_register_map": {
+            "access_violation_error": "<one of ['flagged', 'silent']>"
+          }
+        },
+        "options": [
+          "flagged",
+          "silent"
         ]
       },
       "status": "open"

@@ -427,7 +427,7 @@ def assert_no_rtl(prompt):
 # Grading
 # =============================================================================
 
-def evaluate(path, spec, schemas, strategy):
+def evaluate(path, spec, schemas, strategy, ins=None, outs=None):
     """Structural gate, then behavioural gate. Returns (failures, gate_name)."""
     structural = contract_check(path, spec, strategy)
     if structural:
@@ -438,16 +438,37 @@ def evaluate(path, spec, schemas, strategy):
             if STRATEGY_NEEDS_MODEL[strategy] == "predictor" else LegalityChecker)
     cls = find_model_classes(mod, base)[0]
 
+    # The model must cover the scope's streams exactly: a predictor that
+    # leaves an output stream undeclared is never judged on it, and a wrong
+    # broadcast (config_regs -> cfg_timing) would pass its own stage and
+    # surface downstream under another block's name. The prompt states the
+    # tuples; this makes them a contract (config_regs primary, 2026-10-01:
+    # accepted on csr_rsp alone, from before the cfg_* streams existed).
+    cover = []
+    if ins is not None and sorted(cls.INPUT_IFACES) != sorted(ins):
+        cover.append(f"INPUT_IFACES must be exactly {tuple(ins)}, got "
+                     f"{tuple(cls.INPUT_IFACES)}")
+    if outs is not None and sorted(cls.OUTPUT_IFACES) != sorted(outs):
+        cover.append(f"OUTPUT_IFACES must be exactly {tuple(outs)}, got "
+                     f"{tuple(cls.OUTPUT_IFACES)} -- every stream the scope "
+                     f"produces must be predicted, or it is never judged")
+    if cover:
+        return cover, None
+
     gate = predictor_gates.select_gate(cls, spec, schemas)
     if gate is None:
         return [], None                     # caller must treat this as UNGATED
     try:
-        try:
-            return gate.grade(cls(spec), spec, schemas), gate.name
-        except TypeError:
+        # a gate takes the catalog only when its signature says so; deciding
+        # by catching TypeError mistook a model's own TypeError for the
+        # signature mismatch and reported it as "grade() takes 4 arguments"
+        import inspect
+        n_params = len(inspect.signature(gate.grade).parameters)
+        if n_params >= 4:
             with open(CATALOG_PATH) as f:
                 cat = json.load(f)["interfaces"]
             return gate.grade(cls(spec), spec, schemas, cat), gate.name
+        return gate.grade(cls(spec), spec, schemas), gate.name
     except predictor_gates.GateNotApplicable as e:
         return [], None
     except Exception as e:
@@ -511,7 +532,7 @@ def generate(scope, retries=3, dry_run=False, verbose=True):
         tmp.write(code)
         tmp.close()
 
-        failures, gate_name = evaluate(tmp.name, spec, schemas, strategy)
+        failures, gate_name = evaluate(tmp.name, spec, schemas, strategy, ins, outs)
         attempts.append({"attempt": attempt, "failures": len(failures),
                          "gate": gate_name})
 

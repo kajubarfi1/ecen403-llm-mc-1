@@ -1,6 +1,6 @@
 {
   "$schema": "validation-model-agreement/1",
-  "generated_utc": "2026-10-01T16:22:54.540984Z",
+  "generated_utc": "2026-10-01T16:53:59.439767Z",
   "traces": 59,
   "rows": [
     {
@@ -14,8 +14,8 @@
     {
       "scope": "bank_tracker_scheduler",
       "kind": "checker",
-      "traces": 57,
-      "agree": 53,
+      "traces": 54,
+      "agree": 50,
       "disagree": 4,
       "disagreements": [
         {
@@ -71,6 +71,14 @@
           ]
         }
       ]
+    },
+    {
+      "scope": "cmd_gen",
+      "kind": "predictor",
+      "traces": 51,
+      "agree": 51,
+      "disagree": 0,
+      "disagreements": []
     },
     {
       "scope": "cmd_queue_scheduler",
@@ -163,112 +171,9 @@
       "scope": "config_regs",
       "kind": "predictor",
       "traces": 57,
-      "agree": 36,
-      "disagree": 21,
-      "disagreements": [
-        {
-          "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
-          "diffs": [
-            {
-              "iface": "cfg_refresh",
-              "differing": 2,
-              "of": 2,
-              "first_index": 0,
-              "primary": "(nothing)",
-              "second": "update force_refresh=0x0 max_postpone=0x8 priority=0x1 trefi=0x200 urgent_threshold=0x6"
-            }
-          ]
-        },
-        {
-          "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
-          "diffs": [
-            {
-              "iface": "cfg_refresh",
-              "differing": 12,
-              "of": 12,
-              "first_index": 0,
-              "primary": "(nothing)",
-              "second": "update force_refresh=0x1 max_postpone=0x8 priority=0x1 trefi=0x1860 urgent_threshold=0x6"
-            },
-            {
-              "iface": "cfg_timing",
-              "differing": 16,
-              "of": 16,
-              "first_index": 0,
-              "primary": "(nothing)",
-              "second": "update tccd=0x4 tfaw=0x20 tras=0xff trc=0xff trcd=0xff trfc=0x80 trp=0xff trrd=0x6 trtp=0x6 twr=0xc twtr=0x6"
-            }
-          ]
-        },
-        {
-          "trace": "Validation/reports/paths/path_13_csr_refresh_to_scheduling_observed.jsonl",
-          "diffs": [
-            {
-              "iface": "cfg_refresh",
-              "differing": 12,
-              "of": 12,
-              "first_index": 0,
-              "primary": "(nothing)",
-              "second": "update force_refresh=0x1 max_postpone=0x8 priority=0x1 trefi=0x1860 urgent_threshold=0x6"
-            },
-            {
-              "iface": "cfg_timing",
-              "differing": 16,
-              "of": 16,
-              "first_index": 0,
-              "primary": "(nothing)",
-              "second": "update tccd=0x4 tfaw=0x20 tras=0xff trc=0xff trcd=0xff trfc=0x80 trp=0xff trrd=0x6 trtp=0x6 twr=0xc twtr=0x6"
-            }
-          ]
-        },
-        {
-          "trace": "Validation/reports/paths/path_20_refresh_preempt_observed.jsonl",
-          "diffs": [
-            {
-              "iface": "cfg_refresh",
-              "differing": 2,
-              "of": 2,
-              "first_index": 0,
-              "primary": "(nothing)",
-              "second": "update force_refresh=0x0 max_postpone=0x8 priority=0x1 trefi=0x200 urgent_threshold=0x6"
-            }
-          ]
-        },
-        {
-          "trace": "Validation/reports/paths/path_22_csr_standalone_observed.jsonl",
-          "diffs": [
-            {
-              "iface": "cfg_refresh",
-              "differing": 12,
-              "of": 12,
-              "first_index": 0,
-              "primary": "(nothing)",
-              "second": "update force_refresh=0x1 max_postpone=0x8 priority=0x1 trefi=0x1860 urgent_threshold=0x6"
-            },
-            {
-              "iface": "cfg_timing",
-              "differing": 16,
-              "of": 16,
-              "first_index": 0,
-              "primary": "(nothing)",
-              "second": "update tccd=0x4 tfaw=0x20 tras=0xff trc=0xff trcd=0xff trfc=0x80 trp=0xff trrd=0x6 trtp=0x6 twr=0xc twtr=0x6"
-            }
-          ]
-        },
-        {
-          "trace": "Validation/reports/repairs/R01_scheduler_feedback_hold/path_05_scheduler_refresh_loop_observed.jsonl",
-          "diffs": [
-            {
-              "iface": "cfg_refresh",
-              "differing": 2,
-              "of": 2,
-              "first_index": 0,
-              "primary": "(nothing)",
-              "second": "update force_refresh=0x0 max_postpone=0x8 priority=0x1 trefi=0x200 urgent_threshold=0x6"
-            }
-          ]
-        }
-      ]
+      "agree": 57,
+      "disagree": 0,
+      "disagreements": []
     },
     {
       "scope": "data_path",

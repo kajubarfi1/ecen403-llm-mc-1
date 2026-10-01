@@ -244,8 +244,13 @@ def generate_monitor(iface, cat_entry, schema_entry):
         concat = "{" + ", ".join(fports) + "}"
         edge_decl = f"  logic [{total - 1}:0] {iface}_prev;\n\n"
         fire_cond = f"({qual}) && ({concat} !== {iface}_prev)"
-        edge_track = (f"\n    {iface}_prev <= {rst_cond} ? {concat} : "
-                      f"{total}'b0;")
+        # The baseline follows the wires through reset too: a level stream
+        # holds its reset values while reset is asserted, so the first sample
+        # after release is NOT a change. Zeroing the baseline in reset made
+        # every run open with a phantom 'update' carrying the reset values
+        # (cfg_timing/cfg_refresh, drop 5661e03) that no model could predict
+        # from the spec -- it described the monitor, not the design.
+        edge_track = f"\n    {iface}_prev <= {concat};"
     elif edge == "rising":
         edge_decl = f"  logic {iface}_qual_prev;\n\n"
         fire_cond = f"({qual}) && !{iface}_qual_prev"

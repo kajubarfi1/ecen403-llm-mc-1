@@ -361,6 +361,85 @@ class RegisterMapGate:
                     f"The model is not distinguishing registers — decode the "
                     f"address against the register map's offsets.")
 
+        # --- 9. configuration broadcasts follow the registers ---------------
+        # A register block also drives level streams downstream (cfg_timing,
+        # cfg_refresh): each stream field's port is named after a register
+        # field (cfg_<field>), so the expectation composes from the register
+        # map alone. After a write that changes a mapped field, the stream
+        # must carry an update in which every mapped field equals the
+        # register's current field value. Fields with no register behind
+        # them (self-clearing pulses) are not graded here.
+        fails += cls._grade_broadcasts(predictor, regs, schemas, type(predictor),
+                                       ri, wk, oi, write)
+        return fails
+
+    @classmethod
+    def _grade_broadcasts(cls, predictor, regs, schemas, pcls, ri, wk, rsp_iface, write):
+        fails = []
+        by_field = {}
+        for reg in regs:
+            for name, hi, lo, acc, rst in cls._fields(reg):
+                by_field[name] = (reg, hi, lo, acc, rst)
+        for oi in pcls.OUTPUT_IFACES:
+            if oi == rsp_iface or oi not in schemas:
+                continue
+            for kind, fields in schemas[oi]["kinds"].items():
+                mapped = {}
+                for fname, info in fields.items():
+                    port = info["port"]
+                    for pre in ("cfg_",):
+                        if port.startswith(pre) and port[len(pre):] in by_field:
+                            mapped[fname] = by_field[port[len(pre):]]
+                if not mapped:
+                    continue
+                # one write per register that carries a mapped RW field
+                regs_hit = {}
+                for fname, (reg, hi, lo, acc, rst) in mapped.items():
+                    if acc == "RW":
+                        regs_hit.setdefault(reg["name"], (reg, []))[1].append((fname, hi, lo, rst))
+                for rname, (reg, flds) in regs_hit.items():
+                    predictor.reset()
+                    off = _parse_offset(reg["offset"])
+                    # compose a value that changes every mapped field of this
+                    # register and keeps the others at reset
+                    val = cls._reset_readback(reg, (1 << 64) - 1)
+                    want = {}
+                    # distinct new values per field (fields of one register
+                    # often share a reset value; a swapped mapping would pass
+                    # a uniform change)
+                    for i, (fname, hi, lo, rst) in enumerate(flds):
+                        fm = (1 << (hi - lo + 1)) - 1
+                        new = (rst + 1 + i) & fm
+                        if new == rst or new in want.values():
+                            new = (new + 1) & fm
+                        val = (val & ~(fm << lo)) | (new << lo)
+                        want[fname] = new
+                    out = predictor.process(Txn(ri, wk, {"addr": off, "data": val}))
+                    ups = [t for t in (out or []) if t.iface == oi and t.kind == kind]
+                    if not ups:
+                        fails.append(
+                            f"{oi}: a write of {val:#010x} to {rname} ({off:#04x}) changed "
+                            f"{', '.join(want)} but no {oi}.{kind} followed. {oi} is a "
+                            f"level stream: emit one update whenever any of its fields "
+                            f"changes, carrying every field's current value.")
+                        continue
+                    last = ups[-1].fields
+                    for fname, new in want.items():
+                        if last.get(fname) != new:
+                            fails.append(
+                                f"{oi}.{kind}.{fname}: after writing {rname}.{fname} = "
+                                f"{new:#x} the update carried {last.get(fname)!r}. The "
+                                f"field mirrors register field {rname}.{fname}.")
+                    for fname, (r2, hi, lo, acc, rst) in mapped.items():
+                        if fname in want or fname not in last:
+                            continue
+                        fm = (1 << (hi - lo + 1)) - 1
+                        if last[fname] != (rst & fm):
+                            fails.append(
+                                f"{oi}.{kind}.{fname}: an update caused by a write to {rname} "
+                                f"carried {last[fname]!r} for {r2['name']}.{fname}, which was "
+                                f"not written and must still read its reset value "
+                                f"{rst & fm:#x}. Every update carries every field's current value.")
         return fails
 
 

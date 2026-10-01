@@ -1,0 +1,1104 @@
+{
+  "schema": "validation-findings/2",
+  "drop": "14f15f9",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "generated_utc": "2026-10-01T16:53:55.565198Z",
+  "reports": "Validation/reports/paths",
+  "finding_count": 12,
+  "findings": [
+    {
+      "schema": "validation-findings/2",
+      "id": "repair/bank_tracker/R03_bank_tracker_twtr_on_read",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_007",
+      "taxonomy_id": "TIMING_007",
+      "detectors": [
+        "repair:R03_bank_tracker_twtr_on_read"
+      ],
+      "owner_module": "bank_tracker",
+      "owner_candidates": [
+        "bank_tracker"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "bank_tracker: bank_tracker counts tWTR per bank and applies it to PRECHARGE; READ permission never consults it. tWTR is a de",
+      "requirement": "bank_tracker counts tWTR per bank and applies it to PRECHARGE; READ permission never consults it. tWTR is a device-wide WRITE-to-READ delay, so a READ to any bank can follow a WRITE too early.",
+      "spec_ref": null,
+      "expected": "with the fix below applied to a copy of the drop:  silent",
+      "actual": "not reached by the current stimulus; confirmed by reading the source",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "line": 0,
+          "signal": "bank_tracker",
+          "text": "replace: always_comb begin\n        for (int b = 0; b < NUM_BANKS; b++) begin\n            bank_is_ac",
+          "with": "// [validation repair R03] tWTR is device-wide\n    logic wtr_any;\n    always_comb begin\n        wtr_any = 1'b0;\n        for (int k = 0; k < NUM_BANKS; k++) wtr_"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "line": 0,
+          "signal": "bank_tracker",
+          "text": "replace: && (ctr_rcd[b] == 0)\n                                && (ctr_ccd    == 0)\n                ",
+          "with": "&& (ctr_rcd[b] == 0)\n                                && (ctr_ccd    == 0)\n                                && !wtr_any\n                                && (ctr_rf"
+        }
+      ],
+      "mechanism": {
+        "text": "READ is allowed only when no bank's tWTR counter is running.",
+        "source": "human",
+        "cited_lines": [],
+        "fix_hypothesis": "READ is allowed only when no bank's tWTR counter is running."
+      },
+      "paths": [
+        "path_01_write_cmd",
+        "path_02_read_cmd",
+        "path_04_scheduler_bank_loop",
+        "path_05_scheduler_refresh_loop",
+        "path_07_backpressure",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 10,
+      "repair": {
+        "id": "R03_bank_tracker_twtr_on_read",
+        "base": [
+          "R01_scheduler_feedback_hold",
+          "R02_scheduler_refresh_trfc_gate"
+        ],
+        "matrix": "Validation/reports/repairs/repair_matrix.json",
+        "verdicts": {
+          "path_01_write_cmd": [
+            "fail",
+            "fail"
+          ],
+          "path_02_read_cmd": [
+            "fail",
+            "fail"
+          ],
+          "path_04_scheduler_bank_loop": [
+            "pass",
+            "pass"
+          ],
+          "path_05_scheduler_refresh_loop": [
+            "pass",
+            "pass"
+          ],
+          "path_07_backpressure": [
+            "pass",
+            "pass"
+          ],
+          "path_12_csr_timing_to_scheduling": [
+            "fail",
+            "fail"
+          ],
+          "path_13_csr_refresh_to_scheduling": [
+            "fail",
+            "fail"
+          ],
+          "path_18_full_write": [
+            "fail",
+            "fail"
+          ],
+          "path_19_row_conflict": [
+            "pass",
+            "pass"
+          ],
+          "path_20_refresh_preempt": [
+            "fail",
+            "fail"
+          ]
+        }
+      },
+      "repro": {
+        "path": "path_01_write_cmd",
+        "command": "python3 Validation/repairs/repair_suite.py --only R03",
+        "sequence": null,
+        "work_dir": "Validation/repairs/work/R03_bank_tracker_twtr_on_read",
+        "log": null,
+        "trace": null,
+        "first_failure": null
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": null,
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "14f15f9",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": []
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/MISMATCH/ddr_wr_beat[data,mask]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/ddr_wr_beat[data,mask]",
+      "taxonomy_id": "DATA_001",
+      "detectors": [
+        "exact:data_path:missing"
+      ],
+      "owner_module": "data_path",
+      "owner_candidates": [
+        "data_path"
+      ],
+      "severity": "critical",
+      "confidence": "observed",
+      "title": "data_path: MISMATCH/ddr_wr_beat[data,mask]",
+      "requirement": "data_path must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "transaction predicted on ddr_wr_beat",
+      "actual": "predicted [ddr_wr_beat.beat data=0x2741 mask=0x3] but the design produced nothing",
+      "detector": "exact:data_path:missing",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 170,
+          "signal": "ddr_dq_o",
+          "text": "ddr_dq_o = wr_dat_r[DQ_WIDTH-1:0];"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 173,
+          "signal": "ddr_dq_o",
+          "text": "ddr_dq_o = wr_dat_r[(wb+1)*DQ_WIDTH-1 -: DQ_WIDTH];"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 300,
+          "signal": "rd_rsp_data",
+          "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 301,
+          "signal": "rd_rsp_aux",
+          "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_18_full_write"
+      ],
+      "occurrences": 2,
+      "repro": {
+        "path": "path_18_full_write",
+        "command": "python3 Validation/tools/run_path.py --path path_18_full_write",
+        "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_18_full_write",
+        "log": "Validation/reports/paths/path_18_full_write_sim.log",
+        "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "ddr_wr_beat[18] missing: predicted [ddr_wr_beat.beat data=0x2741 mask=0x3] but the design produced nothing"
+        }
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "14f15f9",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_read_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_width_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "formal/scheduler/PROTO_001",
+      "kind": "rtl_defect",
+      "check_id": "PROTO_001",
+      "taxonomy_id": "PROTO_001",
+      "detectors": [
+        "formal:jaspergold"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "READ issued to a bank one cycle after that bank was PRECHARGEd (no ACTIVATE between)",
+      "requirement": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+      "spec_ref": null,
+      "expected": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+      "actual": "PRE b=1 at cycle 183, RD b=1 at cycle 184.",
+      "detector": "formal:jaspergold",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "cmd_valid/cmd_type/cmd_bank"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "signal": "bank_rd_allowed"
+        }
+      ],
+      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 183 PRE bank 1 (A10=0), cycle 184 RD bank 1 col 0. The generated PROTO_001 tracker (row-open state from the observed ACT/PRE stream) shows bank 1 closed when the READ is issued. Never observed in simulation (no path stimulus reaches this interleaving); the scheduler or its bank_tracker gating lets a CAS follow its own precharge. Likely the same root as the open scheduler re-grant defect (commands are also held for 2-3 consecutive cycles in the trace, i.e. re-issued). [found on drop 1fea117; awaiting formal re-prove on 14f15f9]",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "1fea117",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/PROTO_002",
+      "kind": "rtl_defect",
+      "check_id": "PROTO_002",
+      "taxonomy_id": "PROTO_002",
+      "detectors": [
+        "invariant:cmd_queue+scheduler:double_activate",
+        "assertion:a_PROTO_002",
+        "invariant:(path-level):PROTO_002",
+        "invariant:(path-level):double_activate"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler",
+        "bank_tracker"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "scheduler: PROTO_002",
+      "requirement": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE.",
+      "spec_ref": "failure_taxonomy.categories[PROTO_002]",
+      "expected": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE.",
+      "actual": "ACTIVATE to bank 6 which already has active row",
+      "detector": "invariant:cmd_queue+scheduler:double_activate",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 202,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= CMD_NOP;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 213,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= sel_type;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 228,
+          "signal": "cmd_bank",
+          "text": "cmd_bank <= sel_bank;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 234,
+          "signal": "cmd_row",
+          "text": "cmd_row  <= q_row[sel_idx];"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_01_write_cmd",
+        "path_02_read_cmd",
+        "path_03_read_return",
+        "path_04_scheduler_bank_loop",
+        "path_05_scheduler_refresh_loop",
+        "path_06_scheduler_dequeue",
+        "path_07_backpressure",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 2310,
+      "repro": {
+        "path": "path_01_write_cmd",
+        "command": "python3 Validation/tools/run_path.py --path path_01_write_cmd",
+        "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_01_write_cmd",
+        "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+        "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "PROTO_002 (double_activate): ACTIVATE to bank 6 which already has active row @ [sched_cmd.command aux=0x0 bank=0x6 col=0x98 row=0x1027 type=0x1 we=0x1]"
+        }
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "repair/scheduler/R01_scheduler_feedback_hold",
+      "kind": "rtl_defect",
+      "check_id": "PROTO_002+REF_002+TIMING_004+TIMING_005+TIMING_011",
+      "taxonomy_id": "PROTO_002",
+      "detectors": [
+        "repair:R01_scheduler_feedback_hold",
+        "silenced:assert:a_PROTO_002",
+        "silenced:assert:a_TIMING_004",
+        "silenced:assert:a_TIMING_005",
+        "silenced:assert:a_TIMING_011",
+        "silenced:id:PROTO_002",
+        "silenced:id:REF_002"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "scheduler: The scheduler selects from bank_tracker's permissions, but a command it issues only reaches bank_tracker three",
+      "requirement": "The scheduler selects from bank_tracker's permissions, but a command it issues only reaches bank_tracker three cycles later (scheduler output register -> cmd_gen register -> feedback). In that window the permissions are stale: the same bank is ACTIVATEd again (PROTO_002, tRC), another bank is ACTIVATEd inside tRRD, traffic resumes inside tRFC after a REFRESH, a bank is read right after it was precharged. The re-grant mask added in drop 5661e03 covers only the CAS dequeue.",
+      "spec_ref": null,
+      "expected": "with the fix below applied to a copy of the drop: assert:a_PROTO_002, assert:a_TIMING_004, assert:a_TIMING_005, assert:a_TIMING_011, id:PROTO_002, id:REF_002 silent",
+      "actual": "on the drop as delivered: id:PROTO_002, assert:a_PROTO_002, assert:a_TIMING_004, assert:a_TIMING_005, assert:a_TIMING_011, id:REF_002 fire",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 0,
+          "signal": "scheduler",
+          "text": "replace: wire all_banks_idle = ~(|bank_is_active);",
+          "with": "// [validation repair R01] feedback-latency hold\n    localparam int FB_LAG = 4;\n    logic [FB_LAG-1:0]    bank_hold [NUM_BANKS];\n    logic [FB_LAG-1:0]    act_h"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 0,
+          "signal": "scheduler",
+          "text": "replace: is_cas_ready[i] = is_row_hit[i] && !recently_granted &&",
+          "with": "is_cas_ready[i] = is_row_hit[i] && !recently_granted && !bank_busy[b] &&"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 0,
+          "signal": "scheduler",
+          "text": "replace: (q_we[i] ? bank_wr_allowed[b] : bank_rd_allowed[b]);",
+          "with": "(q_we[i] ? bank_wr_allowed[b] : (bank_rd_allowed[b] && !wr_busy));"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 0,
+          "signal": "scheduler",
+          "text": "replace: is_act_needed[i] = q_valid[i] && (!bank_is_active[b] ||",
+          "with": "is_act_needed[i] = q_valid[i] && !bank_busy[b] && (!bank_is_active[b] ||"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 0,
+          "signal": "scheduler",
+          "text": "replace: if (bank_is_active[b] && bank_pre_allowed[b] && !sel_valid) begin",
+          "with": "if (bank_is_active[b] && bank_pre_allowed[b] && !bank_busy[b] && !sel_valid) begin"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 0,
+          "signal": "scheduler",
+          "text": "replace: end else if (!bank_is_active[b] && bank_act_allowed[b]) begin",
+          "with": "end else if (!bank_is_active[b] && bank_act_allowed[b] && !act_busy) begin"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 0,
+          "signal": "scheduler",
+          "text": "replace: ref_ack   <= 1'b0;\n        end else begin\n            cmd_valid <= sel_valid;",
+          "with": "ref_ack   <= 1'b0;\n            act_hold  <= '0;\n            wr_hold   <= '0;\n            for (int k = 0; k < NUM_BANKS; k++) bank_hold[k] <= '0;\n        end els"
+        }
+      ],
+      "mechanism": {
+        "text": "Hold a bank for FB_LAG cycles after any command to it (all banks after REFRESH), and hold ACTIVATE globally for FB_LAG cycles after an ACTIVATE, so no selection is made on permissions that do not yet reflect the scheduler's own last commands.",
+        "source": "human",
+        "cited_lines": [],
+        "fix_hypothesis": "Hold a bank for FB_LAG cycles after any command to it (all banks after REFRESH), and hold ACTIVATE globally for FB_LAG cycles after an ACTIVATE, so no selection is made on permissions that do not yet reflect the scheduler's own last commands."
+      },
+      "paths": [
+        "path_01_write_cmd",
+        "path_02_read_cmd",
+        "path_04_scheduler_bank_loop",
+        "path_05_scheduler_refresh_loop",
+        "path_07_backpressure",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 10,
+      "repair": {
+        "id": "R01_scheduler_feedback_hold",
+        "base": [],
+        "matrix": "Validation/reports/repairs/repair_matrix.json",
+        "verdicts": {
+          "path_01_write_cmd": [
+            "fail",
+            "fail"
+          ],
+          "path_02_read_cmd": [
+            "fail",
+            "fail"
+          ],
+          "path_04_scheduler_bank_loop": [
+            "fail",
+            "pass"
+          ],
+          "path_05_scheduler_refresh_loop": [
+            "fail",
+            "pass"
+          ],
+          "path_07_backpressure": [
+            "fail",
+            "pass"
+          ],
+          "path_12_csr_timing_to_scheduling": [
+            "fail",
+            "fail"
+          ],
+          "path_13_csr_refresh_to_scheduling": [
+            "fail",
+            "fail"
+          ],
+          "path_18_full_write": [
+            "fail",
+            "fail"
+          ],
+          "path_19_row_conflict": [
+            "fail",
+            "pass"
+          ],
+          "path_20_refresh_preempt": [
+            "fail",
+            "fail"
+          ]
+        }
+      },
+      "repro": {
+        "path": "path_01_write_cmd",
+        "command": "python3 Validation/repairs/repair_suite.py --only R01",
+        "sequence": null,
+        "work_dir": "Validation/repairs/work/R01_scheduler_feedback_hold",
+        "log": null,
+        "trace": null,
+        "first_failure": null
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": null,
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "14f15f9",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": []
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/TIMING_004",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_004",
+      "taxonomy_id": "TIMING_004",
+      "detectors": [
+        "assertion:a_TIMING_004"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler",
+        "bank_tracker"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "scheduler: TIMING_004",
+      "requirement": "ACTIVATE issued before tRC elapsed after previous ACTIVATE to same bank.",
+      "spec_ref": "timing_model.tRC",
+      "expected": "ACTIVATE issued before tRC elapsed after previous ACTIVATE to same bank.",
+      "actual": "fired 23x; first: xmsim: *E,ASRTST (./cmd_gen_sva.sv,81): (time 707500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004 has failed",
+      "detector": "assertion:a_TIMING_004",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 202,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= CMD_NOP;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 213,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= sel_type;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 228,
+          "signal": "cmd_bank",
+          "text": "cmd_bank <= sel_bank;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 234,
+          "signal": "cmd_row",
+          "text": "cmd_row  <= q_row[sel_idx];"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_01_write_cmd",
+        "path_02_read_cmd",
+        "path_03_read_return",
+        "path_04_scheduler_bank_loop",
+        "path_05_scheduler_refresh_loop",
+        "path_06_scheduler_dequeue",
+        "path_07_backpressure",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 2150,
+      "repro": {
+        "path": "path_01_write_cmd",
+        "command": "python3 Validation/tools/run_path.py --path path_01_write_cmd",
+        "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_01_write_cmd",
+        "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+        "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "xmsim: *E,ASRTST (./cmd_gen_sva.sv,81): (time 707500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004 has failed"
+        }
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/TIMING_005",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_005",
+      "taxonomy_id": "TIMING_005",
+      "detectors": [
+        "assertion:a_TIMING_005"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler",
+        "bank_tracker"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "scheduler: TIMING_005",
+      "requirement": "ACTIVATE to different bank before tRRD elapsed.",
+      "spec_ref": "timing_model.tRRD",
+      "expected": "ACTIVATE to different bank before tRRD elapsed.",
+      "actual": "fired 5x; first: xmsim: *E,ASRTST (./cmd_gen_sva.sv,96): (time 947500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005 has failed",
+      "detector": "assertion:a_TIMING_005",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 202,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= CMD_NOP;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 213,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= sel_type;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 228,
+          "signal": "cmd_bank",
+          "text": "cmd_bank <= sel_bank;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 234,
+          "signal": "cmd_row",
+          "text": "cmd_row  <= q_row[sel_idx];"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_01_write_cmd",
+        "path_04_scheduler_bank_loop",
+        "path_05_scheduler_refresh_loop",
+        "path_06_scheduler_dequeue",
+        "path_07_backpressure",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 194,
+      "repro": {
+        "path": "path_01_write_cmd",
+        "command": "python3 Validation/tools/run_path.py --path path_01_write_cmd",
+        "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_01_write_cmd",
+        "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+        "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "xmsim: *E,ASRTST (./cmd_gen_sva.sv,96): (time 947500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005 has failed"
+        }
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "formal/scheduler/TIMING_008",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_008",
+      "taxonomy_id": "TIMING_008",
+      "detectors": [
+        "formal:jaspergold"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "PRECHARGE issued one cycle after a WRITE to the same bank (tWR violated; write data lost)",
+      "requirement": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+      "spec_ref": null,
+      "expected": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+      "actual": "WR b=4 at cycle 173, PRE b=4 at cycle 174.",
+      "detector": "formal:jaspergold",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "signal": "bank_pre_allowed / ctr_wr"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "precharge decision"
+        }
+      ],
+      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 173 WR bank 4, cycle 174 PRE bank 4. tWR = 15 ns = 3 controller cycles, so 2 cycles must separate the last write beat from the precharge. Not observed in simulation. bank_tracker's write-recovery timer (cfg_tWR_nCK) does not gate bank_pre_allowed for the cycle after a write, or the scheduler ignores it on the row-conflict path. [found on drop 1fea117; awaiting formal re-prove on 14f15f9]",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "1fea117",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/TIMING_011",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_011",
+      "taxonomy_id": "TIMING_011",
+      "detectors": [
+        "assertion:a_TIMING_011"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler",
+        "bank_tracker",
+        "refresh_ctrl"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "scheduler: TIMING_011",
+      "requirement": "Command issued before tRFC elapsed after REFRESH.",
+      "spec_ref": "timing_model.tRFC",
+      "expected": "Command issued before tRFC elapsed after REFRESH.",
+      "actual": "fired 1x; first: xmsim: *E,ASRTST (./cmd_gen_sva.sv,157): (time 47500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011 has failed",
+      "detector": "assertion:a_TIMING_011",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 202,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= CMD_NOP;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 213,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= sel_type;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 228,
+          "signal": "cmd_bank",
+          "text": "cmd_bank <= sel_bank;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 234,
+          "signal": "cmd_row",
+          "text": "cmd_row  <= q_row[sel_idx];"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_01_write_cmd",
+        "path_02_read_cmd",
+        "path_03_read_return",
+        "path_04_scheduler_bank_loop",
+        "path_05_scheduler_refresh_loop",
+        "path_06_scheduler_dequeue",
+        "path_07_backpressure",
+        "path_10_csr_to_timing",
+        "path_11_csr_to_refresh",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 50,
+      "repro": {
+        "path": "path_01_write_cmd",
+        "command": "python3 Validation/tools/run_path.py --path path_01_write_cmd",
+        "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_01_write_cmd",
+        "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+        "trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "xmsim: *E,ASRTST (./cmd_gen_sva.sv,157): (time 47500 PS) Assertion chain_harness.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011 has failed"
+        }
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "repair/scheduler/R02_scheduler_refresh_trfc_gate",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_011",
+      "taxonomy_id": "TIMING_011",
+      "detectors": [
+        "repair:R02_scheduler_refresh_trfc_gate",
+        "silenced:assert:a_TIMING_011"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "scheduler: REFRESH is selected whenever every bank is idle; nothing checks that tRFC has elapsed since the previous REFRE",
+      "requirement": "REFRESH is selected whenever every bank is idle; nothing checks that tRFC has elapsed since the previous REFRESH, so two REFRESH commands can be 24 cycles apart where the spec requires 32 (seen on the CSR paths, where no host traffic separates them).",
+      "spec_ref": null,
+      "expected": "with the fix below applied to a copy of the drop: assert:a_TIMING_011 silent",
+      "actual": "on the drop as delivered: assert:a_TIMING_011 fire",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 0,
+          "signal": "scheduler",
+          "text": "replace: if (all_banks_idle) begin",
+          "with": "if (all_banks_idle && (&bank_act_allowed)) begin"
+        }
+      ],
+      "mechanism": {
+        "text": "Gate REFRESH on bank_tracker's ACTIVATE permission for every bank, which already includes the tRFC counter.",
+        "source": "human",
+        "cited_lines": [],
+        "fix_hypothesis": "Gate REFRESH on bank_tracker's ACTIVATE permission for every bank, which already includes the tRFC counter."
+      },
+      "paths": [
+        "path_01_write_cmd",
+        "path_02_read_cmd",
+        "path_04_scheduler_bank_loop",
+        "path_05_scheduler_refresh_loop",
+        "path_07_backpressure",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 10,
+      "repair": {
+        "id": "R02_scheduler_refresh_trfc_gate",
+        "base": [
+          "R01_scheduler_feedback_hold"
+        ],
+        "matrix": "Validation/reports/repairs/repair_matrix.json",
+        "verdicts": {
+          "path_01_write_cmd": [
+            "fail",
+            "fail"
+          ],
+          "path_02_read_cmd": [
+            "fail",
+            "fail"
+          ],
+          "path_04_scheduler_bank_loop": [
+            "pass",
+            "pass"
+          ],
+          "path_05_scheduler_refresh_loop": [
+            "pass",
+            "pass"
+          ],
+          "path_07_backpressure": [
+            "pass",
+            "pass"
+          ],
+          "path_12_csr_timing_to_scheduling": [
+            "fail",
+            "fail"
+          ],
+          "path_13_csr_refresh_to_scheduling": [
+            "fail",
+            "fail"
+          ],
+          "path_18_full_write": [
+            "fail",
+            "fail"
+          ],
+          "path_19_row_conflict": [
+            "pass",
+            "pass"
+          ],
+          "path_20_refresh_preempt": [
+            "fail",
+            "fail"
+          ]
+        }
+      },
+      "repro": {
+        "path": "path_01_write_cmd",
+        "command": "python3 Validation/repairs/repair_suite.py --only R02",
+        "sequence": null,
+        "work_dir": "Validation/repairs/work/R02_scheduler_refresh_trfc_gate",
+        "log": null,
+        "trace": null,
+        "first_failure": null
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": null,
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "14f15f9",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": []
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "cmd_queue/SCHED_004",
+      "kind": "rtl_defect",
+      "check_id": "SCHED_004",
+      "taxonomy_id": "SCHED_004",
+      "detectors": [
+        "invariant:cmd_queue+scheduler:cas_wrong_row"
+      ],
+      "owner_module": "cmd_queue",
+      "owner_candidates": [
+        "cmd_queue",
+        "scheduler"
+      ],
+      "severity": "major",
+      "confidence": "observed",
+      "title": "cmd_queue: SCHED_004",
+      "requirement": "A READ/WRITE must execute against the row its request asked for: when the CAS for a request issues, the row open in that bank (set by the most recent ACTIVATE to it) must be the request's row. An ACTIVATE that no pending request asked for is NOT a violation by itself \u2014 a controller may open a row speculatively \u2014 only a CAS landing on the wrong row is.",
+      "spec_ref": null,
+      "expected": "A READ/WRITE must execute against the row its request asked for: when the CAS for a request issues, the row open in that bank (set by the most recent ACTIVATE to it) must be the request's row. An ACTIVATE that no pending request asked for is NOT a violation by itself \u2014 a controller may open a row speculatively \u2014 only a CAS landing on the wrong row is.",
+      "actual": "WR issued with open row 25778 but request asked for row 22655",
+      "detector": "invariant:cmd_queue+scheduler:cas_wrong_row",
+      "anchor": [],
+      "mechanism": null,
+      "paths": [
+        "path_07_backpressure",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 2,
+      "repro": {
+        "path": "path_07_backpressure",
+        "command": "python3 Validation/tools/run_path.py --path path_07_backpressure",
+        "sequence": "Validation/sequences/generated/path_07_backpressure_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_07_backpressure",
+        "log": "Validation/reports/paths/path_07_backpressure_sim.log",
+        "trace": "Validation/reports/paths/path_07_backpressure_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "SCHED_004 (cas_wrong_row): WR issued with open row 25778 but request asked for row 22655 @ [sched_cmd.command aux=0x0 bank=0x6 col=0x250 row=0x64b2 type=0x3 we=0x1] [cq_enq.enqueue bank=0x6 col=0x250 row=0x587f we=0x1]"
+        }
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue.sv"
+      },
+      "introduced_in": "5661e03",
+      "first_seen": "5661e03",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": []
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/REF_002",
+      "kind": "rtl_defect",
+      "check_id": "REF_002",
+      "taxonomy_id": "REF_002",
+      "detectors": [
+        "invariant:(path-level):REF_002"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler",
+        "bank_tracker"
+      ],
+      "severity": "major",
+      "confidence": "observed",
+      "title": "scheduler: REF_002",
+      "requirement": "REFRESH issued while one or more banks are still active (not precharged).",
+      "spec_ref": "failure_taxonomy.categories[REF_002]",
+      "expected": "REFRESH issued while one or more banks are still active (not precharged).",
+      "actual": "REFRESH issued while banks [2] are still active (not precharged)",
+      "detector": "invariant:(path-level):REF_002",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 202,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= CMD_NOP;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 213,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= sel_type;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 228,
+          "signal": "cmd_bank",
+          "text": "cmd_bank <= sel_bank;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 234,
+          "signal": "cmd_row",
+          "text": "cmd_row  <= q_row[sel_idx];"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_05_scheduler_refresh_loop",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 2,
+      "repro": {
+        "path": "path_05_scheduler_refresh_loop",
+        "command": "python3 Validation/tools/run_path.py --path path_05_scheduler_refresh_loop",
+        "sequence": "Validation/sequences/generated/path_05_scheduler_refresh_loop_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_05_scheduler_refresh_loop",
+        "log": "Validation/reports/paths/path_05_scheduler_refresh_loop_sim.log",
+        "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]"
+        }
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "b4d6f45",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
+      ]
+    }
+  ],
+  "resolved": []
+}

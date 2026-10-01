@@ -57,6 +57,7 @@ class TestIntakeGate(unittest.TestCase):
         spec["csr_register_map"].update({
             "unmapped_read_data": "zero",
             "unmapped_write_behavior": "ignored_with_error",
+            "access_violation_error": "silent",
             "read_byte_enable_semantics": "ignored",
             "status_read_sampling": "previous_edge"})
         spec["data_path_mapping"]["ddr_dm_polarity"] = "active_high_mask"
