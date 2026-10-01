@@ -162,8 +162,8 @@ CUSTOMIZABLE: dict[str, list[tuple[str, str, str]]] = {
          "4-64"),
         ("Interface type",
          "Pipelined Wishbone gives ~2x throughput over classic but is "
-         "more complex",
-         "wishbone_classic / wishbone_pipelined"),
+         "more complex. Only pipelined is implemented today.",
+         "wishbone_pipelined (classic not yet supported)"),
         ("Self-refresh mode",
          "Auto self-refresh saves power when idle but adds wake-up "
          "latency",

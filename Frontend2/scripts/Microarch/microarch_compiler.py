@@ -203,7 +203,8 @@ BLAST_RADIUS = {
         "host-facing port."),
     "interface_type": ("structural",
         "wishbone_classic vs _pipelined changes the wb_port protocol FSM "
-        "and stall semantics."),
+        "and stall semantics. Only _pipelined is implemented today; "
+        "validate_choices rejects _classic."),
     "ecc_mode": ("structural",
         "ECC on consumes a byte lane and widens the data_path with "
         "SEC-DED logic; changes channel data width and ERROR_STATUS use."),
@@ -320,6 +321,13 @@ def validate_choices(choices: dict) -> tuple[list[str], list[str], dict]:
         errors.append(
             f"interface_type={r['interface_type']!r} must be "
             "'wishbone_classic' or 'wishbone_pipelined'")
+    elif r["interface_type"] == "wishbone_classic":
+        # Unsupported axis value: Phase1/wb_port_gen.py only emits the
+        # pipelined protocol FSM and rejects anything else at generation.
+        errors.append(
+            "interface_type='wishbone_classic' is not supported: wb_port_gen.py "
+            "only implements 'wishbone_pipelined' (use that, or add classic "
+            "support to the generator first)")
     if r["self_refresh_mode"] not in ("disabled", "manual", "auto"):
         errors.append(
             f"self_refresh_mode={r['self_refresh_mode']!r} must be "

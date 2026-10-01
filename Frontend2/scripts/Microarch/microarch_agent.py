@@ -108,7 +108,9 @@ PROPOSE_TOOL = {
             "read_buffer_depth": {"type": "integer"},
             "write_buffer_depth": {"type": "integer"},
             "interface_type": {"type": "string",
-                               "enum": ["wishbone_classic", "wishbone_pipelined"]},
+                               "enum": ["wishbone_pipelined"],
+                               "description": "Only wishbone_pipelined is implemented; "
+                                              "the compiler rejects wishbone_classic."},
             "self_refresh_mode": {"type": "string",
                                   "enum": ["disabled", "manual", "auto"]},
             # Tier-3 (optional)
@@ -195,7 +197,8 @@ TIER-1 (you must resolve all of these, or ask):
 TIER-2 (leave unset unless the user implies a preference):
   command_queue_depth (power of 2, 4..32), lookahead_depth (0..16),
   address_mapping, burst_length (4/8), host_data_width (32/64/128),
-  read_buffer_depth, write_buffer_depth, interface_type, self_refresh_mode
+  read_buffer_depth, write_buffer_depth, interface_type (only
+  wishbone_pipelined is supported today), self_refresh_mode
 
 TIER-3 (rarely set): target_frequency_mhz, area_optimization_goal,
   power_optimization_goal, pipeline_latency_cycles
@@ -271,9 +274,26 @@ def _extract_choices(proposal: dict) -> dict:
 # ======================================================================
 # Orchestration
 # ======================================================================
+def _feedback_block(feedback: dict | None) -> str:
+    """Render a structured spec review (Validation's SPEC_REVIEW.json) for the
+    prompt: which field/rule failed, not prose. Only blocking findings and the
+    open intake questions are shown."""
+    if not feedback:
+        return ""
+    lines = ["SPEC REVIEW FEEDBACK (structured, from Validation's review of the previous spec):"]
+    for b in feedback.get("blocking", []):
+        lines.append(f"  BLOCKING: {b}")
+    for g in feedback.get("intake_gaps", []):
+        lines.append(f"  OPEN QUESTION [{g.get('id')}]: {g.get('detail')}")
+    lines.append("Choices can only fix findings about configuration values; findings about "
+                 "fields the compiler does not emit are not yours to fix here.\n\n")
+    return "\n".join(lines)
+
+
 def run_english(request: str, interactive: bool = False,
                 max_rounds: int = MAX_ROUNDS, goal: str | None = None,
-                max_confirm_rounds: int = MAX_CONFIRM_ROUNDS) -> dict:
+                max_confirm_rounds: int = MAX_CONFIRM_ROUNDS,
+                feedback: dict | None = None) -> dict:
     """
     goal: optional key into microarch_goals.GOALS (e.g. "performance",
           "power", "cost", "balanced"). When given, its recommended-defaults
@@ -296,6 +316,7 @@ def run_english(request: str, interactive: bool = False,
     """
     client = _anthropic_client()
     goal_block = f"{mg.goal_prompt_context(goal)}\n\n" if goal else ""
+    goal_block += _feedback_block(feedback)
     messages = [{"role": "user", "content":
                  f"{goal_block}User request:\n{request}\n\n"
                  "Resolve it to a configuration."}]
@@ -506,6 +527,8 @@ def main() -> int:
                     help="skip the LLM; compile a JSON choices file")
     ap.add_argument("--out", metavar="DIR",
                     help="output directory for microarch_spec.json + report")
+    ap.add_argument("--feedback", metavar="SPEC_REVIEW.json",
+                    help="structured spec review (Validation's SPEC_REVIEW.json) to revise against")
     ap.add_argument("--interactive", action="store_true",
                     help="ask follow-up questions on ambiguity")
     ap.add_argument("--no-llm", action="store_true",
@@ -544,7 +567,8 @@ def main() -> int:
         ap.error("--no-llm set but an English request was given")
 
     try:
-        outcome = run_english(args.request, interactive=args.interactive)
+        outcome = run_english(args.request, interactive=args.interactive,
+                              feedback=json.loads(Path(args.feedback).read_text()) if args.feedback else None)
     except RuntimeError as e:
         print(mcol.err(f"ERROR: {e}"))
         return 1

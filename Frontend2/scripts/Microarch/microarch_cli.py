@@ -145,7 +145,7 @@ def _write(spec: dict, report_payload: dict, path: Path):
 # ======================================================================
 def _one_shot(request: str | None, preset: str | None, choices_file: str | None,
               out: str | None, as_json: bool, no_write: bool,
-              goal: str | None = None) -> int:
+              goal: str | None = None, feedback: dict | None = None) -> int:
     if preset:
         res = mc.compile_spec(dict(mc.PRESETS[preset]))
         proposal = None
@@ -157,7 +157,7 @@ def _one_shot(request: str | None, preset: str | None, choices_file: str | None,
             print(_rule(f"goal: {mg.GOALS[goal]['label']}"))
             print(" ", mg.describe_goal(goal).replace("\n", "\n  "))
         try:
-            outcome = ma.run_english(request, interactive=False, goal=goal)
+            outcome = ma.run_english(request, interactive=False, goal=goal, feedback=feedback)
         except RuntimeError as e:
             print(f"ERROR: {e}", file=sys.stderr)
             if "ANTHROPIC_API_KEY" in str(e):
@@ -419,6 +419,9 @@ def main() -> int:
                     help="don't write files, just show the summary")
     ap.add_argument("--modifiable", action="store_true",
                     help="print the blast-radius classification and exit")
+    ap.add_argument("--feedback", metavar="SPEC_REVIEW.json",
+                    help="structured spec review (Validation's SPEC_REVIEW.json) "
+                         "to revise the request against (one-shot English only)")
     ap.add_argument("--goal", choices=sorted(mg.GOALS),
                     help="prime the English request with a use-case goal "
                          "(performance/power/cost/balanced) -- one-shot "
@@ -432,7 +435,8 @@ def main() -> int:
     if args.request or args.preset or args.from_choices:
         return _one_shot(args.request, args.preset, args.from_choices,
                          args.out, args.json, args.no_write or args.json,
-                         args.goal)
+                         args.goal,
+                         json.loads(Path(args.feedback).read_text()) if args.feedback else None)
     return _repl()
 
 
