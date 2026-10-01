@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Frontend Flow (literal)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  body { margin: 0; }
+  .sans { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .card { box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+</style>
+</helmet>
+
+<div style="position: relative; width: 1450px; height: 1090px; background: #FFFFFF;">
+
+  <!-- ========== ARROWS ========== -->
+
+  <svg width="8" height="38" viewBox="0 0 8 38" preserveAspectRatio="none" style="position:absolute; left:536px; top:190px; width:8px; height:38px; overflow:visible; fill:none; stroke:#222222; stroke-width:2; stroke-linecap:round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#222222" stroke="none" style="fill:context-stroke"/></marker></defs><path d="M 4 0 L 4 38" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <!-- Microarch <-> FE Orchestrator, bidirectional -->
+  <svg width="98" height="8" viewBox="0 0 98 8" preserveAspectRatio="none" style="position:absolute; left:700px; top:256px; width:98px; height:8px; overflow:visible; fill:none; stroke:#222222; stroke-width:2; stroke-linecap:round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#222222" stroke="none" style="fill:context-stroke"/></marker></defs><path d="M 0 4 L 98 4" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+  <svg width="98" height="8" viewBox="0 0 98 8" preserveAspectRatio="none" style="position:absolute; left:702px; top:296px; width:98px; height:8px; overflow:visible; fill:none; stroke:#222222; stroke-width:2; stroke-linecap:round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#222222" stroke="none" style="fill:context-stroke"/></marker></defs><path d="M 98 4 L 0 4" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <!-- FE Orch -> VALIDATION (pink, top) -->
+  <svg width="68" height="8" viewBox="0 0 68 8" preserveAspectRatio="none" style="position:absolute; left:1080px; top:266px; width:68px; height:8px; overflow:visible; fill:none; stroke:#D6389B; stroke-width:2; stroke-linecap:round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#D6389B" stroke="none" style="fill:context-stroke"/></marker></defs><path d="M 0 4 L 68 4" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <!-- VALIDATION -> FE Orch, .md files, bent (down, left, up) -->
+  <svg width="8" height="90" viewBox="0 0 8 90" preserveAspectRatio="none" style="position:absolute; left:1246px; top:310px; width:8px; height:90px; overflow:visible; fill:none; stroke:#D6389B; stroke-width:2; stroke-linecap:round"><path d="M 4 0 L 4 90"></path></svg>
+  <svg width="310" height="8" viewBox="0 0 310 8" preserveAspectRatio="none" style="position:absolute; left:940px; top:396px; width:310px; height:8px; overflow:visible; fill:none; stroke:#D6389B; stroke-width:2; stroke-linecap:round"><path d="M 310 4 L 0 4"></path></svg>
+  <svg width="8" height="68" viewBox="0 0 8 68" preserveAspectRatio="none" style="position:absolute; left:936px; top:332px; width:8px; height:68px; overflow:visible; fill:none; stroke:#D6389B; stroke-width:2; stroke-linecap:round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#D6389B" stroke="none" style="fill:context-stroke"/></marker></defs><path d="M 4 68 L 4 0" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <!-- "upon passing validation" arrow -->
+  <svg width="8" height="98" viewBox="0 0 8 98" preserveAspectRatio="none" style="position:absolute; left:536px; top:330px; width:8px; height:98px; overflow:visible; fill:none; stroke:#222222; stroke-width:2; stroke-linecap:round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#222222" stroke="none" style="fill:context-stroke"/></marker></defs><path d="M 4 0 L 4 98" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <!-- RTL Gen Scripts -> RTL output -->
+  <svg width="8" height="38" viewBox="0 0 8 38" preserveAspectRatio="none" style="position:absolute; left:706px; top:515px; width:8px; height:38px; overflow:visible; fill:none; stroke:#222222; stroke-width:2; stroke-linecap:round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#222222" stroke="none" style="fill:context-stroke"/></marker></defs><path d="M 4 0 L 4 38" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+  <!-- RTL output -> Lint -->
+  <svg width="8" height="38" viewBox="0 0 8 38" preserveAspectRatio="none" style="position:absolute; left:706px; top:605px; width:8px; height:38px; overflow:visible; fill:none; stroke:#222222; stroke-width:2; stroke-linecap:round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#222222" stroke="none" style="fill:context-stroke"/></marker></defs><path d="M 4 0 L 4 38" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+  <!-- Testbench Gen -> Testbench Valid. -->
+  <svg width="8" height="38" viewBox="0 0 8 38" preserveAspectRatio="none" style="position:absolute; left:306px; top:515px; width:8px; height:38px; overflow:visible; fill:none; stroke:#222222; stroke-width:2; stroke-linecap:round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#222222" stroke="none" style="fill:context-stroke"/></marker></defs><path d="M 4 0 L 4 38" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <!-- Testbench Valid. -> Simulation -->
+  <svg width="8" height="123" viewBox="0 0 8 123" preserveAspectRatio="none" style="position:absolute; left:306px; top:615px; width:8px; height:123px; overflow:visible; fill:none; stroke:#222222; stroke-width:2; stroke-linecap:round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#222222" stroke="none" style="fill:context-stroke"/></marker></defs><path d="M 4 0 L 4 123" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+  <!-- Lint -> Simulation -->
+  <svg width="8" height="33" viewBox="0 0 8 33" preserveAspectRatio="none" style="position:absolute; left:706px; top:705px; width:8px; height:33px; overflow:visible; fill:none; stroke:#222222; stroke-width:2; stroke-linecap:round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#222222" stroke="none" style="fill:context-stroke"/></marker></defs><path d="M 4 0 L 4 33" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <!-- Simulation -> Validation Agent -->
+  <svg width="8" height="43" viewBox="0 0 8 43" preserveAspectRatio="none" style="position:absolute; left:501px; top:810px; width:8px; height:43px; overflow:visible; fill:none; stroke:#222222; stroke-width:2; stroke-linecap:round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#222222" stroke="none" style="fill:context-stroke"/></marker></defs><path d="M 4 0 L 4 43" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <!-- Validation Agent -> loop back to RTL Gen Scripts (bent: right, up, left) -->
+  <svg width="170" height="8" viewBox="0 0 170 8" preserveAspectRatio="none" style="position:absolute; left:730px; top:886px; width:170px; height:8px; overflow:visible; fill:none; stroke:#222222; stroke-width:2; stroke-linecap:round"><path d="M 0 4 L 170 4"></path></svg>
+  <svg width="8" height="410" viewBox="0 0 8 410" preserveAspectRatio="none" style="position:absolute; left:896px; top:480px; width:8px; height:410px; overflow:visible; fill:none; stroke:#222222; stroke-width:2; stroke-linecap:round"><path d="M 4 410 L 4 0"></path></svg>
+  <svg width="78" height="8" viewBox="0 0 78 8" preserveAspectRatio="none" style="position:absolute; left:822px; top:476px; width:78px; height:8px; overflow:visible; fill:none; stroke:#222222; stroke-width:2; stroke-linecap:round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#222222" stroke="none" style="fill:context-stroke"/></marker></defs><path d="M 78 4 L 0 4" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <!-- Validation Agent -> Final RTL output -->
+  <svg width="8" height="43" viewBox="0 0 8 43" preserveAspectRatio="none" style="position:absolute; left:501px; top:925px; width:8px; height:43px; overflow:visible; fill:none; stroke:#222222; stroke-width:2; stroke-linecap:round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#222222" stroke="none" style="fill:context-stroke"/></marker></defs><path d="M 4 0 L 4 43" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <!-- Final RTL output -> F.E orchestrator Agent -->
+  <svg width="243" height="8" viewBox="0 0 243 8" preserveAspectRatio="none" style="position:absolute; left:655px; top:1001px; width:243px; height:8px; overflow:visible; fill:none; stroke:#222222; stroke-width:2; stroke-linecap:round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#222222" stroke="none" style="fill:context-stroke"/></marker></defs><path d="M 0 4 L 243 4" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <!-- F.E Orch <-> VALIDATION (bottom, pink, bidirectional) -->
+  <svg width="8" height="73" viewBox="0 0 8 73" preserveAspectRatio="none" style="position:absolute; left:1056px; top:880px; width:8px; height:73px; overflow:visible; fill:none; stroke:#D6389B; stroke-width:2; stroke-linecap:round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#D6389B" stroke="none" style="fill:context-stroke"/></marker></defs><path d="M 4 0 L 4 73" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+  <svg width="8" height="73" viewBox="0 0 8 73" preserveAspectRatio="none" style="position:absolute; left:1136px; top:882px; width:8px; height:73px; overflow:visible; fill:none; stroke:#D6389B; stroke-width:2; stroke-linecap:round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#D6389B" stroke="none" style="fill:context-stroke"/></marker></defs><path d="M 4 73 L 4 0" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <!-- ========== LABELS (only the ones actually written on the sketch) ========== -->
+  <div class="sans" style="position:absolute; left:200px; top:335px; width:340px; font-size:14px; color:#222222;">upon passing validation</div>
+  <div class="sans" style="position:absolute; left:1000px; top:378px; width:160px; text-align:center; font-size:13px; color:#D6389B;">.md files</div>
+  <div class="sans" style="position:absolute; left:1150px; top:900px; width:100px; text-align:center; font-size:13px; color:#D6389B;">.md files</div>
+
+  <!-- ========== CARDS (plain black outline, matching sketch; pink only for VALIDATION) ========== -->
+
+  <div class="card sans" style="position:absolute; left:460px; top:130px; width:160px; height:60px; background:#FFFFFF; border:2px solid #222222; font-size:16px; font-weight:600; color:#222222;">English</div>
+
+  <div class="card sans" style="position:absolute; left:380px; top:230px; width:320px; height:100px; background:#FFFFFF; border:2px solid #222222; font-size:15px; font-weight:600; color:#222222;">Microarchitecture Gen<br>Agent</div>
+
+  <div class="card sans" style="position:absolute; left:800px; top:230px; width:280px; height:100px; background:#FFFFFF; border:2px solid #222222; font-size:15px; font-weight:600; color:#222222;">FE Orchestrator<br>Agent</div>
+
+  <div class="card sans" style="position:absolute; left:1150px; top:250px; width:200px; height:60px; background:#FFFFFF; border:2px solid #D6389B; font-size:16px; font-weight:700; color:#D6389B;">VALIDATION</div>
+
+  <div class="card sans" style="position:absolute; left:200px; top:445px; width:220px; height:70px; background:#FFFFFF; border:2px solid #222222; font-size:15px; font-weight:600; color:#222222;">Testbench Gen</div>
+
+  <div class="card sans" style="position:absolute; left:600px; top:445px; width:220px; height:70px; background:#FFFFFF; border:2px solid #222222; font-size:15px; font-weight:600; color:#222222;">RTL Gen Scripts</div>
+
+  <div class="card sans" style="position:absolute; left:200px; top:555px; width:220px; height:60px; background:#FFFFFF; border:2px solid #222222; font-size:15px; font-weight:600; color:#222222;">Testbench Valid.</div>
+
+  <div class="card sans" style="position:absolute; left:630px; top:555px; width:160px; height:50px; background:#FFFFFF; border:2px solid #222222; border-radius:25px; font-size:14px; font-weight:600; color:#222222;">RTL output</div>
+
+  <div class="card sans" style="position:absolute; left:610px; top:645px; width:200px; height:60px; background:#FFFFFF; border:2px solid #222222; font-size:15px; font-weight:600; color:#222222;">Lint</div>
+
+  <div class="card sans" style="position:absolute; left:200px; top:740px; width:610px; height:70px; background:#FFFFFF; border:2px solid #222222; font-size:15px; font-weight:600; color:#222222;">Simulation</div>
+
+  <div class="card sans" style="position:absolute; left:280px; top:855px; width:450px; height:70px; background:#FFFFFF; border:2px solid #222222; font-size:15px; font-weight:600; color:#222222;">Validation Agent</div>
+
+  <div class="card sans" style="position:absolute; left:355px; top:970px; width:300px; height:70px; background:#FFFFFF; border:2px solid #222222; font-size:15px; font-weight:600; color:#222222;">Final RTL output</div>
+
+  <div class="card sans" style="position:absolute; left:900px; top:955px; width:300px; height:100px; background:#FFFFFF; border:2px solid #222222; font-size:15px; font-weight:600; color:#222222;">F.E orchestrator<br>Agent</div>
+
+  <div class="card sans" style="position:absolute; left:1000px; top:820px; width:200px; height:60px; background:#FFFFFF; border:2px solid #D6389B; font-size:16px; font-weight:700; color:#D6389B;">VALIDATION</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1450,"height":1090}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

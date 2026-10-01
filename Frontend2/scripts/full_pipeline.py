@@ -1,12 +1,26 @@
 #!/usr/bin/env python3
 """
 +======================================================================+
-|              FULL PIPELINE RUNNER (Frontend2) -- Phases 1-4          |
+|         FULL PIPELINE RUNNER (Frontend2) -- Spec -> Phases 1-4       |
 |                                                                      |
-|  Prompts ONCE for spec path + output dir, then runs Phase 1 -> 2 ->  |
-|  3 -> 4 in order. After each phase, pauses and shows where its RTL   |
-|  and validation report landed, then lets you continue to the next    |
-|  phase or review the report first.                                   |
+|  Prompts for output dir, then a spec: either an existing spec JSON,  |
+|  or synthesize a new one now via Microarch/microarch_cli.py (English |
+|  / preset / Tier-1-3 choices), gated by Microarch/                   |
+|  dummy_validation_agent.py -- a stub standing in for Jacob's         |
+|  Validation subsystem until that hookup exists. Then runs Phase 1 -> |
+|  2 -> 3 -> 4 in order same as before. After each phase, pauses and   |
+|  shows where its RTL and validation report landed, then lets you     |
+|  continue to the next phase or review the report first. On the last  |
+|  phase passing, also generates the combined top-level bundle         |
+|  (generate_top.py).                                                  |
+|                                                                      |
+|  A FAILED phase offers [x] run the fix agent, for any phase_num in   |
+|  FIX_AGENTS (today: just Phase 1, phase1_validation_agent.py) -- an  |
+|  LLM reads that phase's failure report and proposes a human-         |
+|  confirmed patch to the generator script (never the emitted RTL      |
+|  directly). After it runs, this pipeline re-runs the SAME phase to   |
+|  get an authoritative pass/fail, rather than trusting the agent's    |
+|  own per-module re-verification as the final word.                  |
 |                                                                      |
 |  Each phase runs as its own subprocess (phaseN_pipeline.py), output  |
 |  streamed live -- identical to running it by hand. Subprocess         |
@@ -25,6 +39,7 @@
 |  individual phase pipeline.                                          |
 +======================================================================+
 """
+from __future__ import annotations
 
 import json
 import os
@@ -43,6 +58,24 @@ PHASES = [
     (4, "Phase4", "phase4_pipeline.py", "PHASE4RTL"),
 ]
 VALIDATION_DIR = "VALIDATIONREPORT"
+
+# (phase_num, failure_stage) -> fix agent script. Keyed by failure_stage,
+# not just phase_num, because the SAME phase can fail for two genuinely
+# different reasons that need two DIFFERENT agents -- a real Xcelium sim
+# failure (phase1_validation_agent.py, patches the RTL generator) vs. a
+# testbench_auditor.py finding (testbench_fix_agent.py, patches the
+# testbench generator). Deliberately never one agent for both -- see
+# testbench_fix_agent.py's docstring on why that circular-dependency risk
+# is worth avoiding by construction. A (phase_num, failure_stage) pair not
+# in this map just doesn't offer the [x] option.
+FIX_AGENTS = {
+    (1, "BEHAVIORAL_SIMULATION"): "Phase1/phase1_validation_agent.py",
+    (1, "TESTBENCH_AUDIT"): "Phase1/testbench_fix_agent.py",
+    # Phase 2 has no TESTBENCH_AUDIT entry on purpose: investigated
+    # 2026-09-29, Phase2/tb_generator.py doesn't have the bug class that
+    # motivated Phase 1's auditor (no gate exists to hook one to either).
+    (2, "BEHAVIORAL_SIMULATION"): "Phase2/phase2_validation_agent.py",
+}
 
 
 def _check_ssh_env():
@@ -64,6 +97,83 @@ def _check_scripts_exist():
         for m in missing:
             print(f"    {m}")
         sys.exit(1)
+
+
+def resolve_spec_path(output_dir: str) -> str:
+    """Either an existing spec JSON, or a freshly synthesized one that has
+    passed the (stub) validation stage. Returns an absolute path, or exits
+    the process if neither path produces one."""
+    print("\n  Spec source:")
+    print("    [e] existing spec JSON path")
+    print("    [s] synthesize a new spec now (microarchitecture generator)")
+    choice = input("  > (e/s) [e]: ").strip().lower() or "e"
+
+    if choice == "s":
+        spec_path = run_microarch_synthesis(output_dir)
+        if not spec_path:
+            print("\n  No validated spec produced. Stopping.")
+            sys.exit(1)
+        return spec_path
+
+    spec_path = input("Spec JSON path: ").strip()
+    if not os.path.isfile(spec_path):
+        print(f"Not found: {spec_path}")
+        sys.exit(1)
+    return os.path.abspath(spec_path)
+
+
+def run_microarch_synthesis(output_dir: str) -> str | None:
+    """Runs microarch_cli.py (English / preset / choices, interactive),
+    then the (stub) dummy_validation_agent.py against whatever it wrote.
+    Returns the validated spec's absolute path, or None on abort/failure.
+
+    microarch_cli.py is a REPL, so this inherits stdio rather than piping
+    canned answers the way run_phase() does for the (mostly-scripted)
+    phase pipelines -- there's no fixed question sequence to script here.
+    """
+    print(f"\n{'#' * 62}")
+    print("#  MICROARCHITECTURE SPEC SYNTHESIS")
+    print(f"{'#' * 62}\n")
+    default_path = Path(output_dir) / "generated_spec.json"
+    print(f"  When asked where to write the spec, press Enter to accept the")
+    print(f"  default ({default_path}), or type your own path.\n")
+
+    cli_path = str(Path(HERE) / "Microarch" / "microarch_cli.py")
+    env = os.environ.copy()
+    env["MICROARCH_DEFAULT_OUT_DIR"] = output_dir
+    subprocess.run([PYTHON, cli_path], env=env)
+
+    while True:
+        candidate = input(
+            f"\n  Path to the spec that was written [{default_path}]: ").strip()
+        spec_path = Path(candidate) if candidate else default_path
+        if spec_path.is_file():
+            break
+        print(f"  Not found: {spec_path}")
+        again = input("  [r]etry path / [a]bort synthesis: ").strip().lower()
+        if again == "a":
+            return None
+
+    spec_path = spec_path.resolve()
+    spec = json.loads(spec_path.read_text())
+
+    print(f"\n{'#' * 62}")
+    print("#  SPEC VALIDATION (stub -- hands off to Jacob's Validation subsystem later)")
+    print(f"{'#' * 62}\n")
+    sys.path.insert(0, str(Path(HERE) / "Microarch"))
+    import dummy_validation_agent as dva
+    result = dva.validate_spec(spec)
+    print(f"  validator: {result['validator']}")
+    print(f"  status:    {result['status']}")
+    for f in result["findings"]:
+        print(f"    - {f}")
+
+    if result["status"] != "PASS":
+        print("\n  Spec failed validation. Stopping before Phase 1.")
+        return None
+
+    print(f"\n  Spec validated: {spec_path}")
+    return str(spec_path)
 
 
 def run_phase(phase_num: int, subdir: str, script: str, spec_path: str, output_dir: str) -> bool:
@@ -98,8 +208,18 @@ def show_report(output_dir: str, phase_num: int, passed: bool):
     print()
 
 
+def _read_failure_stage(output_dir: str, phase_num: int) -> str | None:
+    report_path = Path(output_dir) / VALIDATION_DIR / f"phase{phase_num}_error_report.json"
+    if not report_path.is_file():
+        return None
+    try:
+        return json.loads(report_path.read_text()).get("failure_stage")
+    except Exception:
+        return None
+
+
 def prompt_next(phase_num: int, output_dir: str, rtl_dir: Path, passed: bool, is_last: bool) -> str:
-    """Returns 'continue', 'finish', or 'quit'."""
+    """Returns 'continue', 'finish', 'quit', or 'fix'."""
     while True:
         print(f"\n{'=' * 62}")
         print(f"  PHASE {phase_num} {'PASSED' if passed else 'FAILED'}")
@@ -108,14 +228,26 @@ def prompt_next(phase_num: int, output_dir: str, rtl_dir: Path, passed: bool, is
         print(f"  Validation: {Path(output_dir) / VALIDATION_DIR}")
 
         if not passed:
-            print("\n  This phase failed. Nothing in this pipeline is LLM-driven,")
-            print("  so this is a real bug (generator, spec, or testbench) that")
-            print("  needs human review -- not something a retry would fix.")
-            print("\n  [r] review report   [q] quit")
+            failure_stage = _read_failure_stage(output_dir, phase_num)
+            has_agent = (phase_num, failure_stage) in FIX_AGENTS
+            print("\n  This phase failed. Nothing in this pipeline retries a")
+            print("  deterministic generator blindly -- a bare retry reproduces")
+            print("  the same bug. What CAN help is a human-confirmed LLM patch")
+            print("  agent that reads the failure report and proposes a fix.")
+            if failure_stage:
+                print(f"  Failure stage: {failure_stage}"
+                      f"{'' if has_agent else ' (no fix agent registered for this stage yet)'}")
+            opts = "  [r] review report"
+            if has_agent:
+                opts += "   [x] run the fix agent"
+            opts += "   [q] quit"
+            print(f"\n{opts}")
             choice = input("  > ").strip().lower()
             if choice == "r":
                 show_report(output_dir, phase_num, passed)
                 continue
+            if choice == "x" and has_agent:
+                return "fix"
             if choice == "q":
                 return "quit"
             print("  (unrecognized option)")
@@ -144,6 +276,26 @@ def prompt_next(phase_num: int, output_dir: str, rtl_dir: Path, passed: bool, is
         print("  (unrecognized option)")
 
 
+def run_fix_agent(phase_num: int, failure_stage: str, output_dir: str, spec_path: str) -> None:
+    """Runs the fix agent registered for this exact (phase_num,
+    failure_stage) pair -- see FIX_AGENTS for why that's two-dimensional,
+    not just phase_num. Inherits stdio: the agent's own apply/retry/skip
+    prompts are answered live by whoever is running this pipeline, same as
+    the microarch synthesis REPL. Does not itself judge pass/fail -- the
+    caller re-runs the phase afterward, which is the only authoritative
+    verdict (an agent's own re-verification is per-module/local, not the
+    full phase-level lint+sim gate this pipeline actually gates on)."""
+    agent_path = str(Path(HERE) / FIX_AGENTS[(phase_num, failure_stage)])
+    print(f"\n{'#' * 62}")
+    print(f"#  PHASE {phase_num} FIX AGENT ({failure_stage})")
+    print(f"{'#' * 62}\n")
+    subprocess.run(
+        [PYTHON, agent_path, "--output-dir", output_dir, "--spec", spec_path],
+        env=os.environ.copy(),
+    )
+    print(f"\n  Re-running Phase {phase_num} to get an authoritative verdict...")
+
+
 def main():
     print("+========================================================+")
     print("|   DDR3 Controller -- FULL PIPELINE (Frontend2)          |")
@@ -155,22 +307,25 @@ def main():
     _check_scripts_exist()
     _check_ssh_env()
 
-    spec_path = input("Spec JSON path: ").strip()
-    if not os.path.isfile(spec_path):
-        print(f"Not found: {spec_path}")
-        sys.exit(1)
-    spec_path = os.path.abspath(spec_path)
-
     output_dir = input("Output dir (Enter for ./output): ").strip() or "./output"
     output_dir = os.path.abspath(output_dir)
     os.makedirs(output_dir, exist_ok=True)
 
-    for i, (phase_num, subdir, script, rtl_subdir) in enumerate(PHASES):
+    spec_path = resolve_spec_path(output_dir)
+
+    i = 0
+    while i < len(PHASES):
+        phase_num, subdir, script, rtl_subdir = PHASES[i]
         is_last = (i == len(PHASES) - 1)
         passed = run_phase(phase_num, subdir, script, spec_path, output_dir)
         rtl_dir = Path(output_dir) / rtl_subdir
 
         action = prompt_next(phase_num, output_dir, rtl_dir, passed, is_last)
+
+        if action == "fix":
+            failure_stage = _read_failure_stage(output_dir, phase_num)
+            run_fix_agent(phase_num, failure_stage, output_dir, spec_path)
+            continue  # re-run this same phase_num, not the next one
 
         if action == "quit":
             print("\n  Stopped by user.")
@@ -198,7 +353,8 @@ def main():
                 print("    (The 4 phase RTL outputs above are still valid; only the")
                 print("    combined top-level bundle failed.)\n")
             sys.exit(top_rc)
-        # action == "continue" -> loop to next phase
+        # action == "continue" -> advance to the next phase
+        i += 1
 
 
 if __name__ == "__main__":

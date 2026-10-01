@@ -4,7 +4,7 @@
 //==============================================================
 module config_regs_tb;
 
-    localparam real CLK_PERIOD = 6.0;
+    localparam real CLK_PERIOD = 10.0;
     logic clk = 0;
     always #(CLK_PERIOD/2) clk = ~clk;
 
@@ -87,8 +87,8 @@ module config_regs_tb;
     endtask
 
     localparam [31:0] CTRL_CONFIG_WO_MASK = 32'hFFFFFF1F;
-    localparam [31:0] BIST_ADDR_START_MASK = 32'h0FFFFFFF;
-    localparam [31:0] BIST_ADDR_END_MASK = 32'h0FFFFFFF;
+    localparam [31:0] BIST_ADDR_START_MASK = 32'h07FFFFFF;
+    localparam [31:0] BIST_ADDR_END_MASK = 32'h07FFFFFF;
 
     initial begin
         $dumpfile("config_regs_tb.vcd");
@@ -102,15 +102,15 @@ module config_regs_tb;
         $display(""); $display("  -- Section A: Reset Values --");
         csr_read(8'h00, rdata); check($sformatf("A1: CTRL_STATUS reset = 0x%08X", rdata), rdata == 32'h00000000);
         csr_read(8'h04, rdata); check($sformatf("A2: CTRL_CONFIG reset = 0x%08X", rdata), rdata == 32'h0000000A);
-        csr_read(8'h08, rdata); check($sformatf("A3: TIMING_0 reset = 0x%08X", rdata), rdata == 32'h21180909);
-        csr_read(8'h0C, rdata); check($sformatf("A4: TIMING_1 reset = 0x%08X", rdata), rdata == 32'h6B1E0507);
-        csr_read(8'h10, rdata); check($sformatf("A5: TIMING_2 reset = 0x%08X", rdata), rdata == 32'h0709050A);
-        csr_read(8'h14, rdata); check($sformatf("A6: TIMING_3 reset = 0x%08X", rdata), rdata == 32'h00145004);
+        csr_read(8'h08, rdata); check($sformatf("A3: TIMING_0 reset = 0x%08X", rdata), rdata == 32'h150F0606);
+        csr_read(8'h0C, rdata); check($sformatf("A4: TIMING_1 reset = 0x%08X", rdata), rdata == 32'h2C100404);
+        csr_read(8'h10, rdata); check($sformatf("A5: TIMING_2 reset = 0x%08X", rdata), rdata == 32'h05060406);
+        csr_read(8'h14, rdata); check($sformatf("A6: TIMING_3 reset = 0x%08X", rdata), rdata == 32'h000C3004);
         csr_read(8'h18, rdata); check($sformatf("A7: REFRESH_CONFIG reset = 0x%08X", rdata), rdata == 32'h00000168);
         csr_read(8'h1C, rdata); check($sformatf("A8: ERROR_STATUS reset = 0x%08X", rdata), rdata == 32'h00000000);
         csr_read(8'h20, rdata); check($sformatf("A9: BIST_CONFIG reset = 0x%08X", rdata), rdata == 32'h00000000);
         csr_read(8'h24, rdata); check($sformatf("A10: BIST_ADDR_START reset = 0x%08X", rdata), rdata == 32'h00000000);
-        csr_read(8'h28, rdata); check($sformatf("A11: BIST_ADDR_END reset = 0x%08X", rdata), rdata == 32'h0FFFFFFF);
+        csr_read(8'h28, rdata); check($sformatf("A11: BIST_ADDR_END reset = 0x%08X", rdata), rdata == 32'h07FFFFFF);
 
         $display(""); $display("  -- Section B: Write / Readback --");
         csr_write(8'h04, 32'h0000001F); csr_read(8'h04, rdata);
@@ -183,7 +183,7 @@ module config_regs_tb;
         $display(""); $display("  -- Section H: Reset --");
         csr_write(8'h08, 32'hFFFFFFFF); csr_write(8'h0C, 32'hFFFFFFFF);
         rst_n=0; repeat(5) @(posedge clk); rst_n=1; csr_idle(); repeat(2) @(posedge clk);
-        csr_read(8'h08, rdata); check($sformatf("H1: TIMING_0 reset (0x%08X)", rdata), rdata==32'h21180909);
+        csr_read(8'h08, rdata); check($sformatf("H1: TIMING_0 reset (0x%08X)", rdata), rdata==32'h150F0606);
         csr_write(8'h08, 32'h11223344); csr_read(8'h08, rdata); check("H2: Normal after reset", rdata==32'h11223344);
 
         $display(""); $display("  -- Section I: Edge Cases --");

@@ -68,33 +68,46 @@ Known inconsistencies across the 4 LLM agents (candidates for a shared base clas
 working terminal-style UI referenced in the ECEN 403 deck (spec path + output folder
 fields only — no per-parameter inputs yet).
 
-## Current 404 goal in progress: microarchitecture spec synthesis agent
-Today, "customizing" the design means hand-editing the one filled spec JSON — there is
-no code anywhere that takes individual parameters (speed grade, density, ECC mode,
-etc.) as input. The 404 goal is to replace golden-spec substitution with genuine
-synthesis: an agent that takes user requirements (eventually English) and derives a
-new, valid, JEDEC-correct spec — not just edits values in the existing one.
+## Microarchitecture spec synthesis agent — status
+**This section used to say "no code anywhere does this" — that's now stale.** Items
+1, 3, and 4 of the roadmap below are built, working, and wired into the Frontend2
+pipeline (moved from `Frontend/Agents/` to `Frontend2/scripts/Microarch/` on
+2026-09-29):
 
-Roadmap (see conversation history for full detail; agreed direction as of this doc):
-1. **Codify JEDEC/device timing tables** as a deterministic Python lookup module
-   (formalizing the tables already written in prose in `customizable_parameters_guide.md`).
+- `Microarch/microarch_jedec.py` — deterministic JEDEC/device timing lookup tables
+  (roadmap item 1).
+- `Microarch/microarch_compiler.py` — deterministic `compile_spec(choices) -> spec`
+  (roadmap item 3): full Tier-1/2/3 validity matrix, preset library, blast-radius
+  classification, 27 executable consistency checks. `--selftest` reproduces the golden
+  spec exactly. No LLM.
+- `Microarch/microarch_agent.py` + `microarch_goals.py` — the English-intake agent
+  (roadmap item 4): direct `anthropic` API calls (not the Claude Agent SDK / `query()`
+  pattern the roadmap originally described — no `examplercadder/agent.py` exists in
+  this repo to model on, so this used a simpler single-tool-call-per-round loop
+  instead), reject/revise against the compiler, clarify-question and goal-priming
+  flows.
+- `Microarch/microarch_cli.py` — standalone interactive REPL/one-shot CLI over the
+  above three.
+- `Microarch/dummy_validation_agent.py` — **stub**, not roadmap item 5. Sits between
+  spec synthesis and Phase 1; today only confirms the spec has every top-level section
+  the schema requires. Placeholder for Jacob's Validation subsystem to take over.
+- `Frontend2/scripts/full_pipeline.py` now prompts at startup: use an existing spec
+  JSON, or synthesize one now (`resolve_spec_path()` → `run_microarch_synthesis()` →
+  `dummy_validation_agent.validate_spec()`) before proceeding into Phase 1–4 same as
+  before.
+
+Still open (roadmap items 2, 6, 7 — and 5 for real):
 2. **Audit schema coverage** against real DDR3 controller configurators (Xilinx MIG,
    Synopsys uMCTL2, the open-source `UberDDR3` project this repo's
    `sim_diagnostic.py` is named after, LiteDRAM) to confirm/extend what's parametrized.
-3. **Build a deterministic spec compiler**: `compile_spec(tier1_choices, overrides)` →
-   complete schema-valid spec, generalized beyond the one golden config, with a
-   validity matrix rejecting invalid Tier-1 combinations (like MIG's picker does).
-4. **Build the intake/requirements agent** (the one LLM-appropriate piece): interprets
-   English/structured user input into a resolved Tier-1/2/3 choice dict, asks
-   clarifying questions on ambiguity, then hands off to the compiler — modeled on the
-   working `examplercadder/agent.py` multi-agent pattern (Claude Agent SDK `query()` +
-   `ClaudeAgentOptions`), generalized with real schema/consistency validation.
-5. **Validate synthesized specs** before they reach Phase 1–4, extending
-   `lint_agent.py`'s cross-check style to the spec level.
-6. **Wire into a real CLI** (replacing the `main.py` stub): English in → RTL out,
-   one command.
+5. **Replace `dummy_validation_agent.py` with Jacob's real Validation subsystem hookup**
+   — the stub's `validate_spec(spec, compile_result=None) -> {status, findings, validator}`
+   contract is the thing to preserve when this happens.
+6. `Frontend2` has no top-level "one command, English in → GDSII out" entry point yet —
+   `full_pipeline.py` is closer than `Frontend/main.py` (still a stub) ever got, but it's
+   still a sequence of interactive prompts, not a single non-interactive CLI invocation.
 7. **Test against the guide's preset matrix** (low-cost embedded → server-grade) plus
-   adversarial/ambiguous inputs.
+   adversarial/ambiguous English inputs.
 
 ## Working conventions
 - User's email: lehanar57@tamu.edu.

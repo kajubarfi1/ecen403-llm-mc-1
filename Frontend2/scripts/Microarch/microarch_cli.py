@@ -5,16 +5,17 @@
 |                                                                      |
 |  English in  ->  microarch_spec.json out.                           |
 |                                                                      |
-|  This is a STANDALONE explorer. It does NOT run Phase 1-4, lint,     |
-|  sim, or backend -- it only produces (and optionally writes) the     |
-|  microarchitecture spec so you can see what the agent resolves an    |
-|  English request into.                                               |
+|  Run standalone, this only produces (and optionally writes) the      |
+|  microarchitecture spec -- it does not itself run Phase 1-4, lint,   |
+|  sim, or backend. full_pipeline.py drives it as its first stage      |
+|  (spec synthesis -> dummy_validation_agent.py -> Phase 1-4 -> top    |
+|  level) when you choose "synthesize a new spec" at its prompt.       |
 |                                                                      |
 |  Run it:                                                             |
-|    python Frontend/microarch_cli.py                 # interactive    |
-|    python Frontend/microarch_cli.py "low power ddr3 for a sensor"    |
-|    python Frontend/microarch_cli.py --preset balanced               |
-|    python Frontend/microarch_cli.py "..." --json    # spec to stdout |
+|    python Frontend2/scripts/Microarch/microarch_cli.py   # interactive|
+|    python .../microarch_cli.py "low power ddr3 for a sensor"        |
+|    python .../microarch_cli.py --preset balanced                    |
+|    python .../microarch_cli.py "..." --json         # spec to stdout |
 |                                                                      |
 |  Needs ANTHROPIC_API_KEY for the English path. Preset / choices-file |
 |  paths work with no key.                                            |
@@ -30,11 +31,10 @@ import sys
 import textwrap
 from pathlib import Path
 
-# --- make Frontend/Agents importable -------------------------------------
+# --- make sibling microarch_* modules importable --------------------------
 _HERE = Path(__file__).resolve().parent
-_AGENTS = _HERE / "Agents"
-if str(_AGENTS) not in sys.path:
-    sys.path.insert(0, str(_AGENTS))
+if str(_HERE) not in sys.path:
+    sys.path.insert(0, str(_HERE))
 
 import microarch_agent as ma      # noqa: E402
 import microarch_compiler as mc   # noqa: E402
@@ -122,7 +122,13 @@ def _print_result(res: dict, proposal: dict | None):
 
 
 def _default_out(spec: dict) -> Path:
-    return _HERE.parent / "builds" / spec["design_id"] / "microarch_spec.json"
+    # full_pipeline.py sets this so a synthesized spec lands exactly where
+    # it's about to go looking for it, without having to parse this REPL's
+    # interactive output to find out where the user actually wrote it.
+    override = os.environ.get("MICROARCH_DEFAULT_OUT_DIR")
+    if override:
+        return Path(override) / "generated_spec.json"
+    return _HERE.parents[1] / "OutputFolders" / "builds" / spec["design_id"] / "microarch_spec.json"
 
 
 def _write(spec: dict, report_payload: dict, path: Path):
@@ -208,7 +214,8 @@ def _report_payload(res: dict, proposal: dict | None) -> dict:
 def _print_banner() -> None:
     print()
     print(mcol.header("  DDR3 Microarchitecture Generator") + mcol.dim("  --  English -> spec"))
-    print(mcol.dim("  Nothing downstream is wired up; this only produces the spec JSON."))
+    print(mcol.dim("  Produces the spec JSON. full_pipeline.py takes it from here if you"))
+    print(mcol.dim("  got here via its 'synthesize a new spec' option."))
     print()
     print("  Type a description of the controller you want. Commands:")
     for cmd, desc in [

@@ -1,7 +1,7 @@
 module init_fsm #(
     parameter int DDR_ADDR_W = 14,
     parameter int DDR_BANK_W = 3,
-    parameter int CTR_WIDTH  = 17
+    parameter int CTR_WIDTH  = 16
 ) (
     input  logic                    clk,
     input  logic                    rst_n,            // active-low async reset
@@ -17,14 +17,14 @@ module init_fsm #(
     output logic [3:0]              init_state        // for debug
 );
 
-    localparam WAIT_RESET = 33334;
-    localparam WAIT_CKE   = 83334;
-    localparam WAIT_TXPR  = 29;
+    localparam WAIT_RESET = 20000;
+    localparam WAIT_CKE   = 50000;
+    localparam WAIT_TXPR  = 12;
     localparam WAIT_ZQCL  = 128;
 
-    localparam [DDR_ADDR_W-1:0] MR0_VAL   = 14'h1B24;
+    localparam [DDR_ADDR_W-1:0] MR0_VAL   = 14'h1510;
     localparam [DDR_ADDR_W-1:0] MR1_VAL   = 14'h0004;
-    localparam [DDR_ADDR_W-1:0] MR2_VAL   = 14'h0210;
+    localparam [DDR_ADDR_W-1:0] MR2_VAL   = 14'h0200;
     localparam [DDR_ADDR_W-1:0] MR3_VAL   = 14'h0000;
     localparam [DDR_ADDR_W-1:0] ZQCL_ADDR = 14'h0400;  // A10=1, long calibration
 

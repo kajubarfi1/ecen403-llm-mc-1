@@ -1,0 +1,105 @@
+{
+  "git_commit": "9864df2a61f41c5bec35955b94302505f27e1829",
+  "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+  "generated_utc": "2026-09-30T01:59:43.553923+00:00",
+  "clock_period_ns": 10.0,
+  "module_name": "refresh_ctrl",
+  "file": "refresh_ctrl.sv",
+  "phase": 2,
+  "generator": "refresh_ctrl_gen",
+  "dependencies": [
+    "config_regs"
+  ],
+  "parameters": {
+    "REFI_CTR_W": 12,
+    "POST_CTR_W": 4,
+    "tREFI_nCK": 3120,
+    "tRFC_nCK": 44,
+    "MAX_POSTPONE": 8,
+    "URGENT_THRESH": 6
+  },
+  "ports": {
+    "clock_reset": [
+      {
+        "name": "clk",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "rst_n",
+        "width": 1,
+        "dir": "input"
+      }
+    ],
+    "control": [
+      {
+        "name": "init_done",
+        "width": 1,
+        "dir": "input",
+        "source": "init_fsm.init_done"
+      },
+      {
+        "name": "cfg_force_refresh",
+        "width": 1,
+        "dir": "input",
+        "source": "config_regs.cfg_force_refresh"
+      }
+    ],
+    "config_in": [
+      {
+        "name": "cfg_tREFI_nCK",
+        "width": 24,
+        "dir": "input",
+        "source": "config_regs.cfg_tREFI_nCK"
+      },
+      {
+        "name": "cfg_max_postpone",
+        "width": 4,
+        "dir": "input",
+        "source": "config_regs.cfg_max_postpone"
+      },
+      {
+        "name": "cfg_urgent_threshold",
+        "width": 4,
+        "dir": "input",
+        "source": "config_regs.cfg_urgent_threshold"
+      },
+      {
+        "name": "cfg_ref_priority",
+        "width": 1,
+        "dir": "input",
+        "source": "config_regs.cfg_ref_priority"
+      }
+    ],
+    "scheduler_if": [
+      {
+        "name": "ref_required",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "ref_urgent",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "ref_ack",
+        "width": 1,
+        "dir": "input",
+        "source": "scheduler.ref_ack"
+      }
+    ],
+    "status_out": [
+      {
+        "name": "ref_pending_cnt",
+        "width": 3,
+        "dir": "output"
+      },
+      {
+        "name": "ref_starve_flag",
+        "width": 1,
+        "dir": "output"
+      }
+    ]
+  }
+}
