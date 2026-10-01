@@ -1,0 +1,338 @@
+{
+  "$schema": "validation-spec-review/1",
+  "status": "PASS",
+  "validator": "Validation/spec/validate_spec_stage.py (schema + JESD79-3 + register map + intake gate)",
+  "spec": "../../../../private/tmp/claude-501/-Users-jacob-Capstone-ecen403-llm-mc-1/3f4c2279-68de-43b3-be57-c25da6ceaf5f/scratchpad/run_golden/spec/generated_spec.json",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "design_id": "ddr3_mc_core_v2",
+  "generated_utc": "2026-10-01T17:59:22.867329+00:00",
+  "blocking": [],
+  "advisory": [
+    "[gap:decision] CSR_UNMAPPED_READ_DATA: csr_register_map.unmapped_read_data is not stated",
+    "[gap:decision] CSR_UNMAPPED_WRITE: csr_register_map.unmapped_write_behavior is not stated",
+    "[gap:decision] CSR_ACCESS_VIOLATION_ERR: csr_register_map.access_violation_error is not stated",
+    "[gap:decision] CSR_READ_BYTE_ENABLES: csr_register_map.read_byte_enable_semantics is not stated",
+    "[gap:decision] CSR_STATUS_READ_SAMPLING: csr_register_map.status_read_sampling is not stated",
+    "[gap:standard] DDR_DM_POLARITY: data_path_mapping.ddr_dm_polarity is not stated",
+    "[gap:vocabulary] TAXONOMY_SCHEDULER_FAMILY: no failure_taxonomy id starts with 'SCHED_'; needed for: dropped request, invented command, refresh never serviced",
+    "[gap:decision] INTERFACE_CONTRACTS: spec has no 'block_interfaces' section; 19 block-to-block hops are declared by path_definitions and none has an interface contract",
+    "[gap:vocabulary] TAXONOMY_NAMES_TIMING_PARAMS: failure_taxonomy names no failure for ['tREFI']; every stated timing parameter needs a violation id",
+    "[gap:standard] INIT_TMRD: timing_model.tMRD is not stated",
+    "[gap:standard] INIT_TMOD: timing_model.tMOD is not stated",
+    "[gap:decision] SCHED_SPECULATIVE_ACTIVATE: controller_architecture.speculative_activate is not stated"
+  ],
+  "jedec": [
+    {
+      "id": "J-TIM-001",
+      "title": "tRC equals tRAS + tRP",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "tRC=48.75, tRAS+tRP=48.75"
+    },
+    {
+      "id": "J-TIM-002",
+      "title": "tFAW at least 4x tRRD",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "tFAW=40.0, 4*tRRD=30.0"
+    },
+    {
+      "id": "J-TIM-003",
+      "title": "tRRD floor",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "tRRD=7.5, floor=max(4*tCK=5.0, 7.5)=7.5"
+    },
+    {
+      "id": "J-TIM-004",
+      "title": "tWTR floor",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "tWTR=7.5, floor=max(4*tCK=5.0, 7.5)=7.5"
+    },
+    {
+      "id": "J-TIM-005",
+      "title": "tRTP floor",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "tRTP=7.5, floor=max(4*tCK=5.0, 7.5)=7.5"
+    },
+    {
+      "id": "J-TIM-006",
+      "title": "tCCD is 4 clocks",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "tCCD=5.0, 4*tCK=5.0"
+    },
+    {
+      "id": "J-TIM-007",
+      "title": "tWR is 15ns",
+      "status": "pass",
+      "severity": "major",
+      "detail": "tWR=15.0"
+    },
+    {
+      "id": "J-TIM-008",
+      "title": "CWL legal for tCK",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "CWL=8 at tCK=1.25; standard allows [8]"
+    },
+    {
+      "id": "J-TIM-009",
+      "title": "tRFC matches device density",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "tRFC=160.0 for 2Gb; standard=160.0"
+    },
+    {
+      "id": "J-TIM-010",
+      "title": "tREFI is 7.8us (or 3.9us extended)",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "tREFI=7800.0; standard 7800 (normal) or 3900 (extended)"
+    },
+    {
+      "id": "J-TIM-011",
+      "title": "CL/tRCD/tRP consistent with a real speed bin",
+      "status": "pass",
+      "severity": "major",
+      "detail": "CL=11 (13.75ns), tRCD=13.75, tRP=13.75 \u2014 a published bin has all three equal"
+    },
+    {
+      "id": "J-INI-001",
+      "title": "RESET# hold at least 200us",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "reset_hold_us=200"
+    },
+    {
+      "id": "J-INI-002",
+      "title": "CKE low at least 500us after RESET# de-assert",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "cke_delay_us=500"
+    },
+    {
+      "id": "J-INI-003",
+      "title": "tXPR floor",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "tXPR=170.0, floor=max(5*tCK=6.25, tRFC+10=170.0)=170.0"
+    },
+    {
+      "id": "J-INI-004",
+      "title": "tZQinit at least 512 clocks",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "tZQinit=640.0, floor=512*tCK=640.0"
+    },
+    {
+      "id": "J-INI-005",
+      "title": "Mode register load order MR2, MR3, MR1, MR0",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "MRS order found: MR2->MR3->MR1->MR0"
+    },
+    {
+      "id": "J-INI-006",
+      "title": "MR0 asserts DLL reset during init",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "MR0.dll_reset=True"
+    },
+    {
+      "id": "J-GEO-001",
+      "title": "DDR3 has 8 banks",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "bank_bits=3"
+    },
+    {
+      "id": "J-GEO-002",
+      "title": "Burst length is 8 or chopped 4",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "burst_length=8"
+    },
+    {
+      "id": "J-GEO-003",
+      "title": "Density matches addressing",
+      "status": "pass",
+      "severity": "major",
+      "detail": "2^(15+10+3)*8 = 2147483648 bits; spec says 2147483648"
+    },
+    {
+      "id": "J-GEO-004",
+      "title": "Page size is 1KB or 2KB",
+      "status": "pass",
+      "severity": "major",
+      "detail": "page = 2^10 * 8/8 = 1024 bytes"
+    },
+    {
+      "id": "J-CON-001",
+      "title": "tCK agrees across sections",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "timing_model.tCK_ns=1.25, clocking_model.ddr_clock_period_ns=1.25"
+    },
+    {
+      "id": "J-CON-002",
+      "title": "Derived cycle counts match their nanosecond values",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "all 12 derived counts agree"
+    },
+    {
+      "id": "J-CON-003",
+      "title": "MR0 CAS latency matches the timing model",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "MR0.cas_latency_cycles=11, timing_model.CL_cycles=11"
+    },
+    {
+      "id": "J-CON-004",
+      "title": "MR2 CAS write latency matches the timing model",
+      "status": "pass",
+      "severity": "critical",
+      "detail": "MR2.cas_write_latency_cycles=8, timing_model.CWL_cycles=8"
+    }
+  ],
+  "intake_gaps": [
+    {
+      "id": "CSR_UNMAPPED_READ_DATA",
+      "status": "gap",
+      "disposition": "decision",
+      "question": "What data accompanies a read of an address the register map does not declare?",
+      "detail": "csr_register_map.unmapped_read_data is not stated",
+      "require": "csr_register_map.unmapped_read_data",
+      "options": [
+        "zero",
+        "all_ones",
+        "undefined",
+        "last_written"
+      ]
+    },
+    {
+      "id": "CSR_UNMAPPED_WRITE",
+      "status": "gap",
+      "disposition": "decision",
+      "question": "What happens on a write to an undeclared address \u2014 error flag, silent drop, or both?",
+      "detail": "csr_register_map.unmapped_write_behavior is not stated",
+      "require": "csr_register_map.unmapped_write_behavior",
+      "options": [
+        "ignored_with_error",
+        "ignored_silently",
+        "error_only"
+      ]
+    },
+    {
+      "id": "CSR_ACCESS_VIOLATION_ERR",
+      "status": "gap",
+      "disposition": "decision",
+      "question": "Does a write to a read-only register (or a read of a write-only one) set the response error flag, or is it acknowledged silently and ignored?",
+      "detail": "csr_register_map.access_violation_error is not stated",
+      "require": "csr_register_map.access_violation_error",
+      "options": [
+        "flagged",
+        "silent"
+      ]
+    },
+    {
+      "id": "CSR_READ_BYTE_ENABLES",
+      "status": "gap",
+      "disposition": "decision",
+      "question": "Do byte enables mean anything on a READ, and what value is expected on the request?",
+      "detail": "csr_register_map.read_byte_enable_semantics is not stated",
+      "require": "csr_register_map.read_byte_enable_semantics",
+      "options": [
+        "ignored",
+        "must_be_full",
+        "masks_data"
+      ]
+    },
+    {
+      "id": "CSR_STATUS_READ_SAMPLING",
+      "status": "gap",
+      "disposition": "decision",
+      "question": "When a status register is read in the same cycle its source changes, does the read return the old or the new value?",
+      "detail": "csr_register_map.status_read_sampling is not stated",
+      "require": "csr_register_map.status_read_sampling",
+      "options": [
+        "previous_edge",
+        "same_cycle"
+      ]
+    },
+    {
+      "id": "DDR_DM_POLARITY",
+      "status": "gap",
+      "disposition": "standard",
+      "question": "On the DDR channel, does the data-mask pin mask or enable a byte?",
+      "detail": "data_path_mapping.ddr_dm_polarity is not stated",
+      "require": "data_path_mapping.ddr_dm_polarity",
+      "options": [
+        "active_high_mask",
+        "active_high_enable"
+      ]
+    },
+    {
+      "id": "TAXONOMY_SCHEDULER_FAMILY",
+      "status": "gap",
+      "disposition": "vocabulary",
+      "question": "Does the failure taxonomy have ids for what a queue + arbiter can do wrong \u2014 drop a request, invent a command, starve a refresh?",
+      "detail": "no failure_taxonomy id starts with 'SCHED_'; needed for: dropped request, invented command, refresh never serviced",
+      "require": null,
+      "options": null
+    },
+    {
+      "id": "INTERFACE_CONTRACTS",
+      "status": "gap",
+      "disposition": "decision",
+      "question": "For every pair of blocks a path connects, what are the port-level signals, widths and handshake between them?",
+      "detail": "spec has no 'block_interfaces' section; 19 block-to-block hops are declared by path_definitions and none has an interface contract",
+      "require": "block_interfaces",
+      "options": null
+    },
+    {
+      "id": "TAXONOMY_NAMES_TIMING_PARAMS",
+      "status": "gap",
+      "disposition": "vocabulary",
+      "question": "Does the failure taxonomy have an id for violating EVERY timing parameter the timing model states?",
+      "detail": "failure_taxonomy names no failure for ['tREFI']; every stated timing parameter needs a violation id",
+      "require": null,
+      "options": null
+    },
+    {
+      "id": "INIT_TMRD",
+      "status": "gap",
+      "disposition": "standard",
+      "question": "What is the minimum spacing between consecutive mode-register-set commands (tMRD)?",
+      "detail": "timing_model.tMRD is not stated",
+      "require": "timing_model.tMRD",
+      "options": null
+    },
+    {
+      "id": "INIT_TMOD",
+      "status": "gap",
+      "disposition": "standard",
+      "question": "What is the minimum delay from a mode-register-set command to the next non-MRS command (tMOD)?",
+      "detail": "timing_model.tMOD is not stated",
+      "require": "timing_model.tMOD",
+      "options": null
+    },
+    {
+      "id": "SCHED_SPECULATIVE_ACTIVATE",
+      "status": "gap",
+      "disposition": "decision",
+      "question": "May the scheduler open a row that no pending request has asked for yet (look-ahead / speculative ACTIVATE)?",
+      "detail": "controller_architecture.speculative_activate is not stated",
+      "require": "controller_architecture.speculative_activate",
+      "options": [
+        "allowed",
+        "forbidden"
+      ]
+    }
+  ],
+  "requires_human_review": true,
+  "note": "FAIL stops the pipeline before Phase 1. A gap does not: validation judges the RTL under a pinned convention and the question is carried here until the spec answers it (the synthesis agent can answer most of them)."
+}

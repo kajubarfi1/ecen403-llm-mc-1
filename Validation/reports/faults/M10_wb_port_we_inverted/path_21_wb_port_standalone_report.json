@@ -1,0 +1,63 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_21_wb_port_standalone",
+  "strategy": "exact",
+  "verdict": "fail",
+  "timestamp": "2026-10-01T12:34:49.076314",
+  "blocks": [
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/runs/faults/M10_wb_port_we_inverted/path_21_wb_port_standalone/path_21_wb_port_standalone_seed1.json",
+  "stimulus_generator": "random",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": false,
+  "rtl_drop": {
+    "git_head": "640113d4d14f",
+    "drop_id": "640113d4d14f",
+    "validated_at": "3b542a6",
+    "frontend_commits": {
+      "wb_port": "9864df2a61f41c5bec35955b94302505f27e1829"
+    },
+    "roots": [
+      "Validation/faults/work/M10_wb_port_we_inverted/Frontend2/OutputFolders"
+    ],
+    "blocks": {
+      "wb_port": {
+        "rtl": "Validation/faults/work/M10_wb_port_we_inverted/Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+        "manifest": "Validation/faults/work/M10_wb_port_we_inverted/Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "compiled_ddr31333_x16_1lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "Validation/faults/work/M10_wb_port_we_inverted/Frontend2/OutputFolders/generated_spec.json",
+      "revision": "compiled_ddr31333_x16_1lane_1rank"
+    }
+  },
+  "stages": [
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "fail",
+      "summary": "scope=wb_port  strategy=exact  status=fail  matched=0/19  value=19",
+      "detail": [
+        "  req[7] value: predicted [req.request addr=0xc32d339 data=0x0 mask=0x0 we=0x0] but observed [req.request addr=0xc32d339 data=0xc9e9c616 mask=0x3 we=0x1]",
+        "  req[8] value: predicted [req.request addr=0xd81fa9e data=0x0 mask=0x0 we=0x0] but observed [req.request addr=0xd81fa9e data=0xc9e9c616 mask=0x3 we=0x1]",
+        "  req[9] value: predicted [req.request addr=0x718191f data=0x0 mask=0x0 we=0x0] but observed [req.request addr=0x718191f data=0xc9e9c616 mask=0x3 we=0x1]",
+        "  req[10] value: predicted [req.request addr=0x7756d87 data=0x587fd280 mask=0x7 we=0x1] but observed [req.request addr=0x7756d87 data=0x0 mask=0x0 we=0x0]",
+        "  req[11] value: predicted [req.request addr=0xb00b2e data=0x19999e3f mask=0x9 we=0x1] but observed [req.request addr=0xb00b2e data=0x0 mask=0x0 we=0x0]",
+        "  req[12] value: predicted [req.request addr=0xd81e68b data=0x3099fdf5 mask=0x9 we=0x1] but observed [req.request addr=0xd81e68b data=0x0 mask=0x0 we=0x0]",
+        "  req[13] value: predicted [req.request addr=0xc965a57 data=0x8d6af57 mask=0x7 we=0x1] but observed [req.request addr=0xc965a57 data=0x0 mask=0x0 we=0x0]",
+        "  req[14] value: predicted [req.request addr=0xd420f6e data=0xaa2ca1af mask=0xb we=0x1] but observed [req.request addr=0xd420f6e data=0x0 mask=0x0 we=0x0]",
+        "  req[15] value: predicted [req.request addr=0x2c457af data=0x82283d15 mask=0x5 we=0x1] but observed [req.request addr=0x2c457af data=0x0 mask=0x0 we=0x0]",
+        "  req[16] value: predicted [req.request addr=0xbdb525b data=0x7923986 mask=0x1 we=0x1] but observed [req.request addr=0xbdb525b data=0x0 mask=0x0 we=0x0]",
+        "  req[17] value: predicted [req.request addr=0x5738029 data=0x8c5fe8f8 mask=0xc we=0x1] but observed [req.request addr=0x5738029 data=0x0 mask=0x0 we=0x0]",
+        "  req[18] value: predicted [req.request addr=0xb4e059f data=0x1762741 mask=0x4 we=0x1] but observed [req.request addr=0xb4e059f data=0x0 mask=0x0 we=0x0]"
+      ]
+    }
+  ],
+  "log": "Validation/reports/faults/M10_wb_port_we_inverted/path_21_wb_port_standalone_sim.log",
+  "observed_trace": "Validation/reports/faults/M10_wb_port_we_inverted/path_21_wb_port_standalone_observed.jsonl"
+}

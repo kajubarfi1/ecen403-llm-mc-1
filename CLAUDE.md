@@ -109,6 +109,23 @@ Still open (roadmap items 2, 6, 7 — and 5 for real):
 7. **Test against the guide's preset matrix** (low-cost embedded → server-grade) plus
    adversarial/ambiguous English inputs.
 
+## Top-level flow (repo root)
+`flow.py` is the one-command entry point that chains the subsystems through
+their own CLIs: Frontend spec synthesis → Validation spec review → Frontend RTL
+generation (phases 1–4 + top) → Validation of the drop → (Frontend
+regeneration on findings) → backend RTL→GDSII → (backend→frontend change
+requests) → final netlist validation. Runs live in `runs/<run_id>/` with
+`RUN_STATE.json`; a halted run resumes with `--resume`. Loops are capped
+(`--max-rtl-rounds`, `--max-backend-rounds`). Validation findings go back to the
+Frontend through its own phase validation agents
+(`Frontend2/scripts/Phase{N}/phase{N}_validation_agent.py`, fed our package
+rendered as that phase's error report by
+`Validation/findings/to_frontend_error_report.py`); spec-review findings go
+back to the microarch agent through the request text. Edges whose
+counterpart does not exist yet halt and say so: phases without a validation
+agent (3, 4), the backend→frontend artifact, and the netlist validation stage. `--dry-run` prints the plan. Tests: `tests/test_flow.py`.
+The Validation⇄Frontend contract is `Validation/findings/HANDOFF_CONTRACT.md`.
+
 ## Working conventions
 - User's email: lehanar57@tamu.edu.
 - When asked about Claude Code features/behavior itself (not this project), use the

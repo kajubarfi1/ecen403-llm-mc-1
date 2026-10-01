@@ -1,0 +1,65 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_14_status_init",
+  "strategy": "composed",
+  "verdict": "pass",
+  "timestamp": "2026-10-01T12:34:59.816512",
+  "blocks": [
+    "config_regs",
+    "init_fsm"
+  ],
+  "sequence": "Validation/sequences/generated/runs/faults/M23_init_fsm_mrs_after_zqcl/path_14_status_init/path_14_status_init_seed1.json",
+  "stimulus_generator": "status_poll",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": false,
+  "rtl_drop": {
+    "git_head": "29006d3fe462",
+    "drop_id": "29006d3fe462",
+    "validated_at": "3b542a6",
+    "frontend_commits": {
+      "config_regs": "9864df2a61f41c5bec35955b94302505f27e1829",
+      "init_fsm": "9864df2a61f41c5bec35955b94302505f27e1829"
+    },
+    "roots": [
+      "Validation/faults/work/M23_init_fsm_mrs_after_zqcl/Frontend2/OutputFolders"
+    ],
+    "blocks": {
+      "config_regs": {
+        "rtl": "Validation/faults/work/M23_init_fsm_mrs_after_zqcl/Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Validation/faults/work/M23_init_fsm_mrs_after_zqcl/Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "compiled_ddr31333_x16_1lane_1rank"
+      },
+      "init_fsm": {
+        "rtl": "Validation/faults/work/M23_init_fsm_mrs_after_zqcl/Frontend2/OutputFolders/PHASE1RTL/init_fsm.sv",
+        "manifest": "Validation/faults/work/M23_init_fsm_mrs_after_zqcl/Frontend2/OutputFolders/PHASE1RTL/init_fsm_manifest.json",
+        "spec_revision": "compiled_ddr31333_x16_1lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "Validation/faults/work/M23_init_fsm_mrs_after_zqcl/Frontend2/OutputFolders/generated_spec.json",
+      "revision": "compiled_ddr31333_x16_1lane_1rank"
+    }
+  },
+  "stages": [
+    {
+      "stage": "init_fsm",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "init_fsm",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA"
+    },
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "pass",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=160/160  (160 output transaction(s) matched)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/faults/M23_init_fsm_mrs_after_zqcl/path_14_status_init_sim.log",
+  "observed_trace": "Validation/reports/faults/M23_init_fsm_mrs_after_zqcl/path_14_status_init_observed.jsonl"
+}

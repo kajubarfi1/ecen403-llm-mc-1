@@ -38,6 +38,35 @@ def drop_id(root, blocks):               # blocks: the names, any order
     return h.hexdigest()[:12]
 ```
 
+## 2b. The spec-review stage (before Phase 1)
+
+`full_pipeline.py` runs a validation stage right after microarch synthesis,
+today through `Microarch/dummy_validation_agent.validate_spec`. Validation's
+implementation keeps the same contract:
+
+```python
+sys.path.insert(0, "<repo>/Validation/spec")
+from validate_spec_stage import validate_spec
+result = validate_spec(spec, compile_result)   # {"status", "findings", "validator", "review"}
+```
+
+`status: FAIL` (stop before Phase 1): a schema violation against
+`Spec/llmmc_microarchitecture.schema.json`, a JESD79-3 violation or a false
+`$consistency_checks` claim, a register map that disagrees with itself or
+with `timing_model.$derived_cycles`, a failed compiler consistency check, or
+no `revision`.
+
+`status: PASS` may still carry `[gap:decision] ...` findings: questions the
+spec leaves open (unmapped CSR reads, DM polarity, tMRD/tMOD, ...). Validation
+judges the RTL under a pinned convention meanwhile; the synthesis agent can
+close most of them by stating the field named in the finding. They are also
+written to `Validation/findings/outbox/current/SPEC_REVIEW.json`
+(`requires_human_review`, the JEDEC table, the gap list with the field each
+one asks for).
+
+The same review is step 2 of `validate_drop.py` on the spec the drop is
+judged against.
+
 ## 3. How validation is invoked
 
 ```
@@ -62,7 +91,15 @@ The third form judges the drop against the spec it ships instead of
 
 The loop: read `HANDOFF.json`, confirm `drop_id` equals the id of the drop
 just written (else validation has not run on it yet), then act on
-`retry_instructions.json`. `status: PASS` with no `failed_modules` means
+`retry_instructions.json`.
+
+`flow.py` (repo root) does this for the Frontend today: it renders the
+package as each failing phase's `VALIDATIONREPORT/phase{N}_error_report.json`
+(`Validation/findings/to_frontend_error_report.py`; `failure_stage:
+BEHAVIORAL_SIMULATION`, one "test" per failed check with expected/actual,
+anchor and repro) and runs `Phase{N}/phase{N}_validation_agent.py
+--output-dir <drop> --spec <spec>` with every proposal applied, then
+regenerates those phases and validates again. `status: PASS` with no `failed_modules` means
 every path that could run passed; look at `DROP_STATUS.json` for what could
 not run yet.
 

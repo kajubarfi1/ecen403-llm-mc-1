@@ -171,14 +171,23 @@ def main() -> int:
                    "shipped_spec_revision": ship_rev, "block_revisions": stamps,
                    "finding_count": len(spec_findings), "findings": spec_findings}, f, indent=2)
 
-    # 2. intake ----------------------------------------------------------------
-    banner(2, "spec intake gate")
-    rc, out = sh("python3 Validation/spec/spec_completeness.py --findings "
-                 "Validation/findings/outbox/intake_spec_gaps.json", log, check=False)
-    tail = [l for l in out.splitlines() if "gap(s)" in l or "complete:" in l]
-    print("    " + (tail[0].strip() if tail else out.strip()[-120:]))
-    if rc != 0 and args.strict_intake:
-        print("    STOP: --strict-intake and the spec has gaps.")
+    # 2. spec review -------------------------------------------------------------
+    # The same stage the Frontend pipeline runs before Phase 1
+    # (validate_spec_stage: schema, JESD79-3, register map, intake gaps).
+    # A spec that fails it is not a contract: RTL judged against it proves
+    # nothing, so the run stops. Gaps are advisory unless --strict-intake.
+    banner(2, f"spec review (rev {val_rev})")
+    rc, out = sh(f"python3 Validation/spec/validate_spec_stage.py --spec {spec_path}",
+                 log, check=False)
+    for l in out.splitlines():
+        if l.strip().startswith(("status", "JEDEC", "BLOCK", "human")):
+            print("    " + l.strip()[:140])
+    if rc != 0:
+        print("    STOP: the spec fails its own review; nothing generated from it can be judged.")
+        return 1
+    n_gaps = sum(1 for l in out.splitlines() if "[gap:" in l)
+    if n_gaps and args.strict_intake:
+        print(f"    STOP: --strict-intake and the spec has {n_gaps} gap(s).")
         return 1
 
     # 3. regenerate ------------------------------------------------------------

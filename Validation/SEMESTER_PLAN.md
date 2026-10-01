@@ -284,6 +284,54 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   written for the Frontend: `findings/HANDOFF_CONTRACT.md`. `untested`
   findings are now carried across drops until a run decides them (they
   had been dropped after one carry).
+- *Spec-review stage (2026-10-01, late).* `Frontend2/scripts/full_pipeline.py`
+  calls a stub (`dummy_validation_agent.validate_spec`) between spec
+  synthesis and Phase 1, reserved for this subsystem. Implemented as
+  `spec/validate_spec_stage.py` with that contract: schema (required /
+  types / enums, no jsonschema dependency), JESD79-3 conformance with the
+  spec's own `[check]` claims recomputed, register-map self-consistency
+  including TIMING_* reset fields == `$derived_cycles`, the compiler's own
+  consistency checks, and the intake gate as advisory with
+  `requires_human_review`. Golden: PASS, 12 advisory. Lehana's compiled
+  1333 spec: JEDEC 25/25, registers consistent, but **6 schema violations**
+  — `latency_model.*_nCK` are numbers where the shared schema says string
+  (a formula with its derivation). Routed as blocking because `Spec/` is the
+  contract every agent generates against; whether to relax the schema or
+  fix the compiler is theirs to decide. Now step 2 of `validate_drop.py`.
+  Contract section 2b documents the two-line hookup.
+- *Second spec as a regression target (2026-10-01).* The compiled 1333 spec
+  is the first spec nobody hand-wrote that validation has run end to end.
+  Under it the 7 Phase-1 seeded faults (M07/M08 config_regs — M07 re-seeded
+  to the compiled TIMING_0 reset 0x21180909 — M10 wb_port, M14/M19/M22/M23
+  init_fsm) are all killed on the Phase-1 paths (14/21/22), by checkers
+  that were derived from that spec at run time, not from golden. Every
+  Phase-1 fault now also lists a Phase-1-only path, `seed_faults --paths`
+  restricts a run to what the drop can run, and matrix rows carry
+  `spec_revision`. That is the evidence behind "spec as data": nothing in
+  the fault suite, the gates or the generators was touched to move specs.
+- *Top-level orchestrator (2026-10-01).* `flow.py` at the repo root drives
+  the whole loop through each subsystem's own entry points,
+  non-interactively: `microarch_cli.py` (English / preset / choices) →
+  `validate_spec_stage.py` → `phase{1..4}_pipeline.py` (stdin: spec, drop
+  dir) + `generate_top.py` → `validate_drop.py` on the run's drop against
+  the spec it ships → feedback agent → `backend/agents/pipeline.py` on
+  `drop/TOPRTL` → final netlist validation. One directory per run
+  (`runs/<id>/`: spec/, drop/, validation/round_N/, backend/,
+  RUN_STATE.json, flow.log), fixed caps, `--resume` after a halt. Findings go
+  back through the Frontend's own repair agents: the phase validation
+  agents (`Phase{1,2}/phase{N}_validation_agent.py`) read that phase's
+  error report, so `findings/to_frontend_error_report.py` renders our
+  package in that shape and the flow answers their apply/re-verify prompts;
+  spec-review findings go back to the microarch agent through the request
+  text (its only revision input). Edges with no counterpart yet halt with
+  the artifact in place: phases 3–4 (no agent), the backend→frontend change
+  format (Jacob: wait for Dawson's), and our own netlist-on-paths stage
+  (NOT_IMPLEMENTED; needs sky130hd cell models on Olympus). Exercised for real through stages 1–2: a `--preset balanced`
+  run synthesizes a spec and halts at the review on the compiled spec's
+  six `latency_model` schema violations; `--spec` golden passes the review
+  and halts before RTL generation for want of `OLYMPUS_KEY` (the phase
+  pipelines prompt for a password otherwise). 12 state-machine tests with
+  every subsystem faked at the subprocess boundary (`tests/test_flow.py`).
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the
@@ -663,5 +711,5 @@ Exit criterion for each phase is stated so progress is measurable.
 8. Findings are hand-assembled → feedback loop steps 1–3.
 9. ~~Integration map is hand-written → derive from `source`.~~ Done; 21 edges still carried as overrides until phase-1/2 manifests declare them.
 10. ~~Don't-care fields (PRE address) counted as mismatches → declared masks + intake rule.~~ Done: `interface_catalog.json` `dont_care`, applied by the scoreboard before alignment.
-11. Only one spec ever run → second preset spec.
+11. ~~Only one spec ever run → second preset spec.~~ Lehana's compiled DDR3-1333/x16/1-lane spec (`VALIDATION_SPEC=Frontend2/OutputFolders/generated_spec.json`): Phase-1 paths 3/3 pass, the 7 Phase-1 seeded faults 7/7 killed by checkers derived from that spec (register map with its reset values, init SVA at its clock), JEDEC 25/25. Phases 2–4 wait for RTL from the same spec; the fault matrix now records the spec revision per row.
 12. Waivers W-002/W-003 undecided → human decision.

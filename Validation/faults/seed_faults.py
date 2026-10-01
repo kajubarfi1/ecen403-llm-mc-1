@@ -235,6 +235,9 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", nargs="*", default=None,
                     help="fault ids (or id prefixes) to run")
+    ap.add_argument("--paths", nargs="*", default=None,
+                    help="run only these paths of each fault (what the drop can run: "
+                         "a partial drop, or one judged under its own spec)")
     ap.add_argument("--prep-only", action="store_true")
     ap.add_argument("--score-only", action="store_true",
                     help="skip building/running; score existing reports")
@@ -251,6 +254,8 @@ def main() -> int:
     if args.only:
         faults = [x for x in faults
                   if any(x["id"].startswith(p) for p in args.only)]
+    if args.paths is not None:
+        faults = [fl for fl in faults if any(p in set(args.paths) for p in fl["paths"])]
     if not faults:
         print("no faults selected")
         return 2
@@ -264,7 +269,8 @@ def main() -> int:
             print(f"  built {fl['id']:36} {fl['block']:13} {fl['description'][:60]}")
 
     # 2. run (fault, path) jobs in parallel
-    jobs = [(fl, p) for fl in faults for p in fl["paths"]]
+    jobs = [(fl, p) for fl in faults for p in fl["paths"]
+            if args.paths is None or p in set(args.paths)]
     if not args.score_only:
         print(f"\n  running {len(jobs)} job(s), {args.jobs} at a time"
               + (" [prep only]" if args.prep_only else "") + "\n")
@@ -285,6 +291,15 @@ def main() -> int:
 
     # 3. score
     rows = []
+    # the spec the mutants were judged against: a row is evidence for one
+    # spec revision only (the same fault is re-run per spec)
+    spec_path = os.environ.get("VALIDATION_SPEC", os.path.join(
+        ROOT, "Validation", "spec", "llmmc_microarchitecturespec_filled.json"))
+    try:
+        with open(spec_path) as f:
+            spec_rev = json.load(f).get("revision")
+    except (OSError, ValueError):
+        spec_rev = None
     for fl, p in jobs:
         base = signature(BASELINE, p)
         mut = signature(os.path.join(REPORTS, fl["id"]), p)
@@ -296,6 +311,7 @@ def main() -> int:
             continue
         res = compare(base, mut, fl["expect"], fl["block"])
         rows.append({"fault": fl["id"], "block": fl["block"], "path": p,
+                     "spec_revision": spec_rev,
                      "description": fl["description"], "expect": fl["expect"],
                      "masked_by": fl.get("masked_by"), **res})
 
@@ -343,12 +359,13 @@ def main() -> int:
     os.makedirs(REPORTS, exist_ok=True)
     # a partial run (--only) replaces only the rows it re-scored; the rest
     # of the matrix keeps its previous evidence for the ledger
-    if args.only and os.path.exists(MATRIX):
+    if (args.only or args.paths) and os.path.exists(MATRIX):
         with open(MATRIX) as f:
             prev = json.load(f)
-        ran = {r["fault"] for r in rows}
-        rows = [r for r in prev.get("rows", []) if r["fault"] not in ran] + rows
-        rows.sort(key=lambda r: (r["fault"], r["path"]))
+        ran = {(r["fault"], r["path"], r.get("spec_revision")) for r in rows}
+        rows = [r for r in prev.get("rows", [])
+                if (r["fault"], r["path"], r.get("spec_revision")) not in ran] + rows
+        rows.sort(key=lambda r: (r["fault"], r["path"], str(r.get("spec_revision"))))
         by_fault = {}
         for r in rows:
             by_fault.setdefault(r["fault"], []).append(r)

@@ -98,14 +98,16 @@
       "block": "config_regs",
       "file": "PHASE1RTL/config_regs.sv",
       "description": "TIMING_0 resets to a value one off the spec's reset value.",
-      "from": "reg_timing_0 <= 32'h271C0B0B;",
-      "to": "reg_timing_0 <= 32'h271C0B0C;",
+      "from": "reg_timing_0 <= 32'h21180909;",
+      "to": "reg_timing_0 <= 32'h21180908;",
       "expect": [
         "matched:config_regs"
       ],
       "paths": [
-        "path_12_csr_timing_to_scheduling"
-      ]
+        "path_12_csr_timing_to_scheduling",
+        "path_22_csr_standalone"
+      ],
+      "reseeded": "2026-10-01: Phase-1 regenerated from compiled_ddr31333 (TIMING_0 reset 0x21180909); same fault, new value"
     },
     {
       "id": "M08_config_regs_rw1c_settable",
@@ -118,7 +120,8 @@
         "matched:config_regs"
       ],
       "paths": [
-        "path_12_csr_timing_to_scheduling"
+        "path_12_csr_timing_to_scheduling",
+        "path_22_csr_standalone"
       ],
       "reseeded": "2026-09-24: block rewritten in the Frontend2 drop (c8ac792); same fault, new site"
     },
@@ -147,7 +150,8 @@
         "stage:wb_port"
       ],
       "paths": [
-        "path_01_write_cmd"
+        "path_01_write_cmd",
+        "path_21_wb_port_standalone"
       ]
     },
     {
@@ -212,7 +216,8 @@
         "id:INIT_003"
       ],
       "paths": [
-        "path_08_init_to_cal"
+        "path_08_init_to_cal",
+        "path_14_status_init"
       ],
       "reseeded": "2026-09-24: block rewritten in the Frontend2 drop (c8ac792); same fault, new site"
     },
@@ -304,7 +309,8 @@
         "assert:a_INIT_002_init_done"
       ],
       "paths": [
-        "path_08_init_to_cal"
+        "path_08_init_to_cal",
+        "path_14_status_init"
       ]
     },
     {
@@ -375,7 +381,8 @@
         "id:INIT_003"
       ],
       "paths": [
-        "path_08_init_to_cal"
+        "path_08_init_to_cal",
+        "path_14_status_init"
       ]
     },
     {
@@ -405,7 +412,8 @@
         "assert:a_INIT_001_then"
       ],
       "paths": [
-        "path_08_init_to_cal"
+        "path_08_init_to_cal",
+        "path_14_status_init"
       ]
     }
   ],
@@ -418,7 +426,8 @@
     "M04 (tRRD zero) was caught by the tFAW window assertion rather than tRRD: with no tRRD hold-off the fifth ACTIVATE lands inside tFAW first. M06 (postpone runaway) was caught by tRFC rather than REF_001: the REF_001 checker compares against the SPEC's max_postpone_count while the refresh-stress stimulus reprograms the CSR to 2 \u2014 the checker should observe cfg_refresh. Filed as a checker to-do.",
     "Masked faults (M12, M13) are re-tested automatically when the masking defect closes: the scorer reports them apart and never counts them as kills.",
     "2026-09-30: a fault must be able to reach the assertion it targets -- M18 exercised the ZQCS timer but the drop gates zqcs_req on cal_done structurally, so only the rule twin fired; M21 removes the gate too. Check the assign chain before expecting an assert: key.",
-    "2026-10-01: blame is judged by rule ownership, not only by the stage that fired -- a scheduler fault whose symptom is a spacing assertion on cmd_gen's pins is blamed on the scheduler (M20 on path_01), the same way the feedback loop routes the finding."
+    "2026-10-01: blame is judged by rule ownership, not only by the stage that fired -- a scheduler fault whose symptom is a spacing assertion on cmd_gen's pins is blamed on the scheduler (M20 on path_01), the same way the feedback loop routes the finding.",
+    "2026-10-01: every Phase-1 fault also lists a Phase-1-only path (path_14/21/22), so the fault suite can run on a partial drop or under the drop's own spec; seed_faults --paths restricts a run to the paths the drop can run."
   ],
   "$todo": [
     "cmd_queue_scheduler / scheduler / path_05 / path_20 checkers should take cfg_refresh as an input stream so REF_001 uses the programmed postpone budget, not the spec constant."
