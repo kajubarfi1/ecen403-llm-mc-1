@@ -1,7 +1,8 @@
 {
-  "git_commit": "fd2a561795ec86a2aa5628363c28d361ce0d2279",
+  "git_commit": "5661e0394d265d95562aec1c2a160854863573e4",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "generated_utc": "2026-09-24T18:01:11.198808+00:00",
+  "generated_utc": "2026-09-24T18:43:38.062765+00:00",
+  "clock_period_ns": 5.0,
   "module_name": "bank_tracker",
   "file": "bank_tracker.sv",
   "phase": 2,
@@ -32,57 +33,68 @@
       {
         "name": "cmd_act_valid",
         "width": 1,
-        "dir": "input"
+        "dir": "input",
+        "source": "cmd_gen.fb_act_valid"
       },
       {
         "name": "cmd_act_bank",
         "width": 3,
-        "dir": "input"
+        "dir": "input",
+        "source": "cmd_gen.fb_act_bank"
       },
       {
         "name": "cmd_act_row",
         "width": 15,
-        "dir": "input"
+        "dir": "input",
+        "source": "cmd_gen.fb_act_row"
       },
       {
         "name": "cmd_pre_valid",
         "width": 1,
-        "dir": "input"
+        "dir": "input",
+        "source": "cmd_gen.fb_pre_valid"
       },
       {
         "name": "cmd_pre_bank",
         "width": 3,
-        "dir": "input"
+        "dir": "input",
+        "source": "cmd_gen.fb_pre_bank"
       },
       {
         "name": "cmd_pre_all",
         "width": 1,
-        "dir": "input"
+        "dir": "input",
+        "source": "cmd_gen.fb_pre_all"
       },
       {
         "name": "cmd_rd_valid",
         "width": 1,
-        "dir": "input"
+        "dir": "input",
+        "source": "cmd_gen.fb_rd_valid"
       },
       {
         "name": "cmd_rd_bank",
         "width": 3,
-        "dir": "input"
+        "dir": "input",
+        "source": "cmd_gen.fb_rd_bank"
       },
       {
         "name": "cmd_wr_valid",
         "width": 1,
-        "dir": "input"
+        "dir": "input",
+        "source": "cmd_gen.fb_wr_valid"
       },
       {
         "name": "cmd_wr_bank",
         "width": 3,
-        "dir": "input"
+        "dir": "input",
+        "source": "cmd_gen.fb_wr_bank"
       },
       {
         "name": "cmd_ref_valid",
         "width": 1,
-        "dir": "input"
+        "dir": "input",
+        "source": "cmd_gen.fb_ref_valid"
       }
     ],
     "config_in": [

@@ -194,6 +194,30 @@ endmodule
     # exactly the drift problem a single spec-only generator is
     # supposed to eliminate.
     # ════════════════════════════════════════════════════════════
+    def _reg_lookup(self, regs, name):
+        for r in regs:
+            if r["name"] == name:
+                return r
+        return None
+
+    def _writable_mask(self, reg) -> int:
+        """Compute the mask of bits that are actually writable/pinned-
+        comparable for a register, based on its spec-declared fields.
+        Reserved (RO, always-0-on-write) bits are excluded so masked
+        comparisons only check bits the spec says the field occupies."""
+        mask = 0
+        for f in reg.get("fields", []):
+            if f["name"] == "reserved":
+                continue
+            bits = f["bits"]
+            if ":" in bits:
+                hi, lo = (int(x) for x in bits.split(":"))
+            else:
+                hi = lo = int(bits)
+            for b in range(lo, hi + 1):
+                mask |= (1 << b)
+        return mask
+
     def _config_regs_tb_test_registry(self, regs) -> list:
         tests = []
         for i, r in enumerate(regs):
@@ -222,6 +246,23 @@ endmodule
         csr_map = self.csrs if isinstance(self.csrs, dict) else {"registers": self.csrs}
         regs = csr_map.get("registers", self.csrs if isinstance(self.csrs, list) else [])
         tests = self._config_regs_tb_test_registry(regs)
+
+        # Reset value for TIMING_0, pulled straight from the spec (matches
+        # the pattern already used for the A-series reset checks) rather
+        # than a hardcoded literal, so Section H's post-reset check agrees
+        # with csr_register_map.
+        timing_0_reg = self._reg_lookup(regs, "TIMING_0")
+        timing_0_reset = int(timing_0_reg["reset_value"], 16) if isinstance(timing_0_reg["reset_value"], str) else timing_0_reg["reset_value"]
+
+        # Writable masks for BIST_ADDR_START/END, derived from their
+        # spec-declared fields, the same way CTRL_CONFIG's WO mask is
+        # already handled below -- masked comparison instead of exact
+        # match, since these registers have spec-declared reserved bits
+        # (31:28) that real RTL pins and can never round-trip exactly.
+        bist_addr_start_reg = self._reg_lookup(regs, "BIST_ADDR_START")
+        bist_addr_end_reg = self._reg_lookup(regs, "BIST_ADDR_END")
+        bist_addr_start_mask = self._writable_mask(bist_addr_start_reg)
+        bist_addr_end_mask = self._writable_mask(bist_addr_end_reg)
 
         lines = []
         L = lines.append
@@ -314,6 +355,8 @@ endmodule
         L(f"    endtask")
         L(f"")
         L(f"    localparam [31:0] CTRL_CONFIG_WO_MASK = 32'hFFFFFF1F;")
+        L(f"    localparam [31:0] BIST_ADDR_START_MASK = 32'h{bist_addr_start_mask:08X};")
+        L(f"    localparam [31:0] BIST_ADDR_END_MASK = 32'h{bist_addr_end_mask:08X};")
         L(f"")
         L(f"    initial begin")
         L(f'        $dumpfile("config_regs_tb.vcd");')
@@ -333,8 +376,17 @@ endmodule
         L(f'        $display(""); $display("  -- Section B: Write / Readback --");')
         bi = 1
         vi = 0
+        # NOTE: 0x1ABC0000 and 0x1FFFFFFF (originally used for
+        # BIST_ADDR_START/END) each set bit 28, which falls in those
+        # registers' spec-declared reserved range (31:28, mask
+        # 0xF0000000). Since BIST_ADDR_START/END use a masked comparison
+        # below anyway (like CTRL_CONFIG), the reserved bits in the
+        # written value don't matter for correctness there -- but to keep
+        # the written test values themselves clean of reserved bits (and
+        # available for any register that might need an exact-match test
+        # later), swap in a value that has no bits above bit 27.
         test_vals = [0x0000001F, 0x12345678, 0xDEADBEEF, 0xCAFEBABE,
-                     0xFACEFEED, 0x000001FF, 0x0000000F, 0x1ABC0000, 0x1FFFFFFF]
+                     0xFACEFEED, 0x000001FF, 0x0000000F, 0x0ABC0000, 0x0FFFFFFF]
         for r in regs:
             if r["access"] == "RO" or r["name"] == "ERROR_STATUS":
                 continue
@@ -345,6 +397,12 @@ endmodule
             if r["name"] == "CTRL_CONFIG":
                 L(f'        check($sformatf("B{bi}: {r["name"]} write/readback (0x%08X, WO masked)", rdata),')
                 L(f"              (rdata & CTRL_CONFIG_WO_MASK) == (32'h{val:08X} & CTRL_CONFIG_WO_MASK));")
+            elif r["name"] == "BIST_ADDR_START":
+                L(f'        check($sformatf("B{bi}: {r["name"]} write/readback (0x%08X, reserved masked)", rdata),')
+                L(f"              (rdata & BIST_ADDR_START_MASK) == (32'h{val:08X} & BIST_ADDR_START_MASK));")
+            elif r["name"] == "BIST_ADDR_END":
+                L(f'        check($sformatf("B{bi}: {r["name"]} write/readback (0x%08X, reserved masked)", rdata),')
+                L(f"              (rdata & BIST_ADDR_END_MASK) == (32'h{val:08X} & BIST_ADDR_END_MASK));")
             else:
                 L(f'        check("B{bi}: {r["name"]} write/readback", rdata == 32\'h{val:08X});')
             bi += 1
@@ -397,7 +455,7 @@ endmodule
         L(f'        $display(""); $display("  -- Section H: Reset --");')
         L(f"        csr_write(8'h08, 32'hFFFFFFFF); csr_write(8'h0C, 32'hFFFFFFFF);")
         L(f"        rst_n=0; repeat(5) @(posedge clk); rst_n=1; csr_idle(); repeat(2) @(posedge clk);")
-        L(f'        csr_read(8\'h08, rdata); check($sformatf("H1: TIMING_0 reset (0x%08X)", rdata), rdata==32\'h271C0B0B);')
+        L(f'        csr_read(8\'h08, rdata); check($sformatf("H1: TIMING_0 reset (0x%08X)", rdata), rdata==32\'h{timing_0_reset:08X});')
         L(f'        csr_write(8\'h08, 32\'h11223344); csr_read(8\'h08, rdata); check("H2: Normal after reset", rdata==32\'h11223344);')
         L(f"")
         L(f'        $display(""); $display("  -- Section I: Edge Cases --");')

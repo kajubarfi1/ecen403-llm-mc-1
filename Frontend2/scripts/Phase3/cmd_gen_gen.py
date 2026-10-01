@@ -379,9 +379,18 @@ endmodule
                     {"name": "fb_act_bank", "width": p["BANK_BITS"], "dir": "output"},
                     {"name": "fb_act_row", "width": p["ROW_BITS"], "dir": "output"},
                     {"name": "fb_pre_valid", "width": 1, "dir": "output"},
+                    {"name": "fb_pre_bank", "width": p["BANK_BITS"], "dir": "output"},
+                    {"name": "fb_pre_all", "width": 1, "dir": "output"},
                     {"name": "fb_rd_valid", "width": 1, "dir": "output"},
+                    {"name": "fb_rd_bank", "width": p["BANK_BITS"], "dir": "output"},
                     {"name": "fb_wr_valid", "width": 1, "dir": "output"},
+                    {"name": "fb_wr_bank", "width": p["BANK_BITS"], "dir": "output"},
                     {"name": "fb_ref_valid", "width": 1, "dir": "output"},
+                ],
+                "aux_passthrough": [
+                    {"name": "cmd_out_valid", "width": 1, "dir": "output"},
+                    {"name": "cmd_out_we", "width": 1, "dir": "output"},
+                    {"name": "cmd_out_aux", "width": p["AUX_WIDTH"], "dir": "output"},
                 ],
             },
         }

@@ -41,6 +41,7 @@ from config_regs_gen import ConfigRegsGenerator
 from init_fsm_gen import InitFsmGenerator
 from wb_port_gen import WishbonePortGenerator
 from tb_generator import TestbenchGenerator
+from testbench_auditor import audit as audit_testbenches
 
 try:
     from verilator_lint import VerilatorLint
@@ -80,6 +81,7 @@ class GraphState(TypedDict):
     phase1_rtl_dir: str
     validation_dir: str
     modules: Annotated[dict, operator.or_]
+    tb_audit_result: dict
     lint_result: dict
     sim_result: dict
     pipeline_status: str
@@ -144,8 +146,45 @@ def check_generation(state: GraphState) -> dict:
     return {"pipeline_status": "generation_failed" if failed else "generation_ok"}
 
 
-def route_after_generation(state: GraphState) -> Literal["lint_gate", "generation_failure"]:
-    return "generation_failure" if state.get("pipeline_status") == "generation_failed" else "lint_gate"
+def route_after_generation(state: GraphState) -> Literal["tb_audit_gate", "generation_failure"]:
+    return "generation_failure" if state.get("pipeline_status") == "generation_failed" else "tb_audit_gate"
+
+
+# ===================================================
+# TESTBENCH AUDIT GATE (deterministic, local, no LLM, no SSH --
+# see testbench_auditor.py. Cross-checks the testbench tb_generator.py
+# just wrote against the spec independently of what the RTL generators
+# decided, catching bugs like a stale hardcoded golden value before an
+# expensive remote Xcelium job would otherwise be spent finding it.)
+# ===================================================
+def tb_audit_gate(state: GraphState) -> dict:
+    print(f"\n{'=' * 62}")
+    print("  TESTBENCH AUDIT GATE -- deterministic, local, spec-derived")
+    print(f"{'=' * 62}")
+
+    result = audit_testbenches(state["spec_path"], state["phase1_rtl_dir"], P1_MODULES)
+    all_ok = True
+    for mod, r in result.items():
+        status = r["status"]
+        if status == "FAIL":
+            all_ok = False
+        sym = {"PASS": "OK", "NO_CHECKS": "--", "SKIPPED": "--", "FAIL": "FAIL"}[status]
+        print(f"  {sym:4s} {mod:15s} {status}")
+        for f in r.get("findings", []):
+            print(f"    [{f['check']}] {f['register']} ({f['offset']})")
+            print(f"      {f['detail']}")
+
+    vd = Path(state["validation_dir"])
+    report_path = vd / "tb_audit_report.json"
+    report_path.write_text(json.dumps(result, indent=2))
+    print(f"\n  Report: {report_path}")
+
+    return {"tb_audit_result": {"status": "PASS" if all_ok else "FAIL", "modules": result}}
+
+
+def route_after_tb_audit(state: GraphState) -> Literal["lint_gate", "tb_audit_failure"]:
+    status = state.get("tb_audit_result", {}).get("status", "PASS")
+    return "lint_gate" if status == "PASS" else "tb_audit_failure"
 
 
 # ===================================================
@@ -379,6 +418,32 @@ def generation_failure(state: GraphState) -> dict:
     return {"pipeline_status": "fail"}
 
 
+def tb_audit_failure(state: GraphState) -> dict:
+    print(f"\n{'=' * 62}\n  PHASE 1 PIPELINE FAILED AT TESTBENCH AUDIT GATE\n{'=' * 62}")
+    print("\n  The testbench disagrees with the spec, independent of anything")
+    print("  the RTL generators decided -- see tb_audit_report.json. This is")
+    print("  NOT necessarily an RTL bug: it means tb_generator.py's expected")
+    print("  value for a check doesn't match what the spec derives, which is")
+    print("  usually a testbench bug (stale hardcoded literal, or a generic")
+    print("  round-trip test that doesn't know a register has reserved bits).")
+    print("  Lint/sim were skipped -- no point spending a remote Xcelium job")
+    print("  simulating against a testbench already known to disagree with spec.")
+
+    tb = state.get("tb_audit_result", {})
+    failed_mods = [m for m, r in tb.get("modules", {}).items() if r.get("status") == "FAIL"]
+
+    report = {
+        "status": "FAIL", "pipeline": "phase1", "failure_stage": "TESTBENCH_AUDIT",
+        "tb_audit_result": tb, "failed_modules": failed_mods,
+        "requires_human_review": True,
+        "timestamp": datetime.now().isoformat(),
+    }
+    vd = Path(state["validation_dir"])
+    (vd / "phase1_error_report.json").write_text(json.dumps(report, indent=2))
+    print(f"\n  Error report: {vd / 'phase1_error_report.json'}")
+    return {"pipeline_status": "fail"}
+
+
 def lint_failure(state: GraphState) -> dict:
     print(f"\n{'=' * 62}\n  PHASE 1 PIPELINE FAILED AT LINT GATE\n{'=' * 62}")
     print("\n  Generation succeeded, but Verilator found a real static")
@@ -441,10 +506,12 @@ def build_graph():
     g.add_node("gen_wb_port", gen_wb_port)
     g.add_node("gen_testbenches", gen_testbenches)
     g.add_node("check_generation", check_generation)
+    g.add_node("tb_audit_gate", tb_audit_gate)
     g.add_node("lint_gate", lint_gate)
     g.add_node("sim_gate", sim_gate)
     g.add_node("success", success)
     g.add_node("generation_failure", generation_failure)
+    g.add_node("tb_audit_failure", tb_audit_failure)
     g.add_node("lint_failure", lint_failure)
     g.add_node("sim_failure", sim_failure)
 
@@ -460,7 +527,10 @@ def build_graph():
     g.add_edge("gen_testbenches", "check_generation")
 
     g.add_conditional_edges("check_generation", route_after_generation,
-        {"lint_gate": "lint_gate", "generation_failure": "generation_failure"})
+        {"tb_audit_gate": "tb_audit_gate", "generation_failure": "generation_failure"})
+
+    g.add_conditional_edges("tb_audit_gate", route_after_tb_audit,
+        {"lint_gate": "lint_gate", "tb_audit_failure": "tb_audit_failure"})
 
     g.add_conditional_edges("lint_gate", route_after_lint,
         {"sim_gate": "sim_gate", "lint_failure": "lint_failure"})
@@ -470,6 +540,7 @@ def build_graph():
 
     g.add_edge("success", END)
     g.add_edge("generation_failure", END)
+    g.add_edge("tb_audit_failure", END)
     g.add_edge("lint_failure", END)
     g.add_edge("sim_failure", END)
 
@@ -509,8 +580,8 @@ if __name__ == "__main__":
     result = app.invoke({
         "spec_path": spec, "output_dir": out,
         "phase1_rtl_dir": dirs["phase1_rtl"], "validation_dir": dirs["validation"],
-        "modules": {}, "lint_result": {}, "sim_result": {}, "pipeline_status": "running",
-        "ssh_password": ssh_password,
+        "modules": {}, "tb_audit_result": {}, "lint_result": {}, "sim_result": {},
+        "pipeline_status": "running", "ssh_password": ssh_password,
     })
 
     sys.exit(0 if result.get("pipeline_status") == "pass" else 1)

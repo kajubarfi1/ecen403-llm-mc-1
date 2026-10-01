@@ -713,21 +713,30 @@ class ConfigRegsGenerator:
             return {"status": "error", "errors": errs}
 
         rtl = self.generate_rtl()
-        tb = self.generate_testbench()
         manifest = self.generate_manifest()
 
         rtl_path = self.output_dir / "config_regs.sv"
-        tb_path = self.output_dir / "config_regs_tb.sv"
         mfst_path = self.output_dir / "config_regs_manifest.json"
         rtl_path.write_text(rtl)
-        tb_path.write_text(tb)
+        # Testbench generation is intentionally NOT done here. It's
+        # Phase1/tb_generator.py's exclusive job (spec-only, independent of
+        # this generator) -- see wb_port_gen.py's run() for the same fix,
+        # applied earlier for the identical reason. This generator used to
+        # also write its own config_regs_tb.sv, which raced against
+        # tb_generator.py's gen_testbenches node writing the same path in
+        # parallel in the real pipeline -- whichever finished last silently
+        # won. That's exactly how a fix applied to tb_generator.py's H1/B8/
+        # B9 checks (2026-09-29) kept silently reverting: this generator's
+        # OWN stale copy of those same three checks was overwriting it every
+        # run. generate_testbench() is kept below as reference content, not
+        # called from here anymore.
         mfst_path.write_text(json.dumps(manifest, indent=2))
 
         return {
             "status": "success", "module": "config_regs", "phase": 1,
-            "rtl_path": str(rtl_path), "tb_path": str(tb_path),
+            "rtl_path": str(rtl_path),
             "manifest_path": str(mfst_path), "manifest": manifest,
-            "rtl_lines": len(rtl.splitlines()), "tb_lines": len(tb.splitlines()),
+            "rtl_lines": len(rtl.splitlines()),
         }
 
 
@@ -746,7 +755,6 @@ if __name__ == "__main__":
     result = ConfigRegsGenerator(spec_path, output_dir).run()
     if result["status"] == "success":
         print(f"  wrote {result['rtl_path']} ({result['rtl_lines']} lines)")
-        print(f"  wrote {result['tb_path']} ({result['tb_lines']} lines)")
         print(f"  wrote {result['manifest_path']}")
     else:
         print(f"  ERROR: {result['errors']}")

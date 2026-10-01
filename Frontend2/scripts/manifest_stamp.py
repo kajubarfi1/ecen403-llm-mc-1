@@ -27,10 +27,21 @@ def _git_commit() -> str:
 
 
 def stamp(spec: dict) -> dict:
-    """Returns {"git_commit", "spec_revision", "generated_utc"} to merge
-    into a generate_manifest() return value."""
-    return {
+    """Returns {"git_commit", "spec_revision", "generated_utc",
+    "clock_period_ns"?} to merge into a generate_manifest() return value.
+
+    clock_period_ns comes straight from the spec's own clocking_model --
+    per TOP_LEVEL_SPEC_2026-09-24.md section 4, this was missing on all 11
+    block manifests, which meant every backend timing result reported so
+    far was against a target the backend invented (10.0 ns / 100 MHz
+    default), not one the spec actually requires.
+    """
+    out = {
         "git_commit": _git_commit(),
         "spec_revision": spec.get("revision", "unknown"),
         "generated_utc": datetime.now(timezone.utc).isoformat(),
     }
+    period = spec.get("clocking_model", {}).get("controller_clock_period_ns")
+    if period is not None:
+        out["clock_period_ns"] = period
+    return out

@@ -1,23 +1,24 @@
 {
-  "git_commit": "fd2a561795ec86a2aa5628363c28d361ce0d2279",
-  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "generated_utc": "2026-09-24T18:00:47.924285+00:00",
+  "git_commit": "9864df2a61f41c5bec35955b94302505f27e1829",
+  "spec_revision": "compiled_ddr31333_x16_1lane_1rank",
+  "generated_utc": "2026-09-29T20:56:18.713990+00:00",
+  "clock_period_ns": 6.0,
   "module_name": "wb_port",
   "file": "wb_port.sv",
   "phase": 1,
   "generator": "wb_port_gen",
   "spec_version": "2.0.0",
-  "design_id": "ddr3_mc_core_v2",
+  "design_id": "ddr3_mc_1333_x16_1lane_1rank",
   "parameters": {
     "DATA_WIDTH": 32,
-    "ADDR_WIDTH": 29,
+    "ADDR_WIDTH": 28,
     "SEL_WIDTH": 4,
     "AUX_WIDTH": 4,
     "MAX_BURST_LEN": 8,
-    "QUEUE_DEPTH": 16,
+    "QUEUE_DEPTH": 4,
     "BURST_CTR_W": 4,
     "TAG_FIFO_DEPTH": 16,
-    "ROW_BITS": 15
+    "ROW_BITS": 14
   },
   "ports": {
     "clock_reset": [
@@ -50,7 +51,7 @@
       },
       {
         "name": "wb_adr_i",
-        "width": 29,
+        "width": 28,
         "dir": "input"
       },
       {
@@ -109,7 +110,7 @@
       },
       {
         "name": "req_addr",
-        "width": 29,
+        "width": 28,
         "dir": "output"
       },
       {

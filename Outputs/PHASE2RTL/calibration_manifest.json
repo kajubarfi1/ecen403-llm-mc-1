@@ -1,0 +1,65 @@
+{
+  "git_commit": "9864df2a61f41c5bec35955b94302505f27e1829",
+  "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+  "generated_utc": "2026-09-30T01:59:43.554419+00:00",
+  "clock_period_ns": 10.0,
+  "module_name": "calibration",
+  "file": "calibration.sv",
+  "phase": 2,
+  "generator": "calibration_gen",
+  "dependencies": [
+    "init_fsm"
+  ],
+  "parameters": {
+    "ZQCS_CTR_W": 17,
+    "ZQCS_CTRL_CYC": 128000,
+    "tZQCS_CYC": 16,
+    "PERIODIC_ZQCS": true
+  },
+  "ports": {
+    "clock_reset": [
+      {
+        "name": "clk",
+        "width": 1,
+        "dir": "input"
+      },
+      {
+        "name": "rst_n",
+        "width": 1,
+        "dir": "input"
+      }
+    ],
+    "control": [
+      {
+        "name": "init_done",
+        "width": 1,
+        "dir": "input",
+        "source": "init_fsm.init_done"
+      }
+    ],
+    "status_out": [
+      {
+        "name": "cal_done",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "cal_fail",
+        "width": 1,
+        "dir": "output"
+      }
+    ],
+    "zqcs_if": [
+      {
+        "name": "zqcs_req",
+        "width": 1,
+        "dir": "output"
+      },
+      {
+        "name": "zqcs_ack",
+        "width": 1,
+        "dir": "input"
+      }
+    ]
+  }
+}

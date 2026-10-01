@@ -7,16 +7,16 @@
       "pass_count": 11,
       "fail_count": 0,
       "pass_lines": [
-        "[PASS] Reset hold >= 40000 cyc (got 40011)",
-        "[PASS] CKE delay >= 100000 cyc",
+        "[PASS] Reset hold >= 33334 cyc (got 33345)",
+        "[PASS] CKE delay >= 83334 cyc",
         "[PASS] init_done asserted",
         "[PASS] init_fail not asserted",
         "[PASS] 4 MRS commands (got 4)",
         "[PASS] MR order 2->3->1->0",
         "[PASS] Sequence completed",
-        "[PASS] MR0 encoding matches spec (exp 15'h1D34)",
+        "[PASS] MR0 encoding matches spec (exp 15'h1B24)",
         "[PASS] MR1 encoding matches spec (exp 15'h0004)",
-        "[PASS] MR2 encoding matches spec (exp 15'h0218)",
+        "[PASS] MR2 encoding matches spec (exp 15'h0210)",
         "[PASS] MR3 encoding matches spec (exp 15'h0000)"
       ],
       "fail_lines": [],
@@ -25,21 +25,21 @@
     },
     "config_regs": {
       "status": "PASS",
-      "test_count": 41,
-      "pass_count": 41,
+      "test_count": 36,
+      "pass_count": 36,
       "fail_count": 0,
       "pass_lines": [
         "[PASS] 1: A1: CTRL_STATUS reset = 0x00000000",
-        "[PASS] 2: A2: CTRL_CONFIG reset = 0x00000009",
-        "[PASS] 3: A3: TIMING_0 reset = 0x271c0b0b",
-        "[PASS] 4: A4: TIMING_1 reset = 0x80200606",
-        "[PASS] 5: A5: TIMING_2 reset = 0x080b060c",
-        "[PASS] 6: A6: TIMING_3 reset = 0x00186004",
+        "[PASS] 2: A2: CTRL_CONFIG reset = 0x0000000a",
+        "[PASS] 3: A3: TIMING_0 reset = 0x21180909",
+        "[PASS] 4: A4: TIMING_1 reset = 0x6b1e0507",
+        "[PASS] 5: A5: TIMING_2 reset = 0x0709050a",
+        "[PASS] 6: A6: TIMING_3 reset = 0x00145004",
         "[PASS] 7: A7: REFRESH_CONFIG reset = 0x00000168",
         "[PASS] 8: A8: ERROR_STATUS reset = 0x00000000",
         "[PASS] 9: A9: BIST_CONFIG reset = 0x00000000",
         "[PASS] 10: A10: BIST_ADDR_START reset = 0x00000000",
-        "[PASS] 11: A11: BIST_ADDR_END reset = 0x1fffffff",
+        "[PASS] 11: A11: BIST_ADDR_END reset = 0x0fffffff",
         "[PASS] 12: B1: CTRL_CONFIG write/readback (0x0000001f, WO masked)",
         "[PASS] 13: B2: TIMING_0 write/readback",
         "[PASS] 14: B3: TIMING_1 write/readback",
@@ -47,8 +47,8 @@
         "[PASS] 16: B5: TIMING_3 write/readback",
         "[PASS] 17: B6: REFRESH_CONFIG write/readback",
         "[PASS] 18: B7: BIST_CONFIG write/readback",
-        "[PASS] 19: B8: BIST_ADDR_START write/readback",
-        "[PASS] 20: B9: BIST_ADDR_END write/readback",
+        "[PASS] 19: B8: BIST_ADDR_START write/readback (0x0abc0000, reserved masked)",
+        "[PASS] 20: B9: BIST_ADDR_END write/readback (0x0fffffff, reserved masked)",
         "[PASS] 21: C1: CTRL_STATUS reflects inputs (0x000000a3)",
         "[PASS] 22: C2: CTRL_STATUS ignores writes",
         "[PASS] 23: D1: bist_start self-clears (bit5=0)",
@@ -61,20 +61,15 @@
         "[PASS] 30: G1: cfg_tRCD_nCK=0x11",
         "[PASS] 31: G2: cfg_sched_policy=1",
         "[PASS] 32: G3: cfg_max_postpone=10",
-        "[PASS] 33: H1: TIMING_0 reset (0x271c0b0b)",
+        "[PASS] 33: H1: TIMING_0 reset (0x21180909)",
         "[PASS] 34: H2: Normal after reset",
         "[PASS] 35: I1: Back-to-back TIMING_0",
-        "[PASS] 36: I2: Back-to-back TIMING_1",
-        "[PASS] 37: J1: CTRL_CONFIG reserved bits pinned (0x0000001f)",
-        "[PASS] 38: J2: REFRESH_CONFIG reserved bits pinned (0x000001ff)",
-        "[PASS] 39: J3: BIST_CONFIG reserved bits pinned (0x0000000f)",
-        "[PASS] 40: J4: BIST_ADDR_START reserved bits pinned (0x1fffffff)",
-        "[PASS] 41: J5: BIST_ADDR_END reserved bits pinned (0x1fffffff)"
+        "[PASS] 36: I2: Back-to-back TIMING_1"
       ],
       "fail_lines": [],
       "assertion_errors": [
-        "xmsim: *E,ASRTST (./config_regs.sv,230): (time 822500 PS) Assertion config_regs_tb.dut.p_bad_addr has failed (2 cycles, starting 817500 PS)",
-        "xmsim: *E,ASRTST (./config_regs.sv,230): (time 832500 PS) Assertion config_regs_tb.dut.p_bad_addr has failed (2 cycles, starting 827500 PS)"
+        "xmsim: *E,ASRTST (./config_regs.sv,230): (time 987 NS) Assertion config_regs_tb.dut.p_bad_addr has failed (2 cycles, starting 981 NS)",
+        "xmsim: *E,ASRTST (./config_regs.sv,230): (time 999 NS) Assertion config_regs_tb.dut.p_bad_addr has failed (2 cycles, starting 993 NS)"
       ],
       "log_file": "config_regs_xrun.log"
     },
@@ -94,6 +89,6 @@
       "log_file": "wb_port_xrun.log"
     }
   },
-  "timestamp": "2026-09-24T13:01:10.320197",
+  "timestamp": "2026-09-29T15:56:44.346161",
   "server": "olympus.ece.tamu.edu"
 }

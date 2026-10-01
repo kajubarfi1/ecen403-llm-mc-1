@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Per-Phase Validation Flow</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  body { margin: 0; }
+  .maroon-serif { font-family: Georgia, "Times New Roman", serif; }
+  .sans { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .card { box-sizing: border-box; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 10px; }
+</style>
+</helmet>
+
+<div style="position: relative; width: 1650px; height: 980px; background: #FBF8F6;">
+
+  <!-- title -->
+  <div class="maroon-serif" style="position: absolute; left: 64px; top: 36px; font-size: 28px; font-weight: 700; color: #500000;">DDR3 Controller — Per-Phase Validation Flow</div>
+  <div class="sans" style="position: absolute; left: 64px; top: 78px; font-size: 14px; font-style: italic; color: #6B6862;">repeats for each phase (1 &rarr; 4)</div>
+
+  <!-- ================= ARROWS (painted before cards, per diagram rules) ================= -->
+
+  <!-- main pass-path arrows, neutral -->
+  <svg width="62" height="8" viewBox="0 0 62 8" preserveAspectRatio="none" style="position: absolute; left: 264px; top: 276px; width: 62px; height: 8px; overflow: visible; fill: none; stroke: #8a8378; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#8a8378" stroke="none" style="fill: context-stroke"/></marker></defs><path d="M 0 4 L 62 4" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <svg width="62" height="8" viewBox="0 0 62 8" preserveAspectRatio="none" style="position: absolute; left: 528px; top: 276px; width: 62px; height: 8px; overflow: visible; fill: none; stroke: #8a8378; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#8a8378" stroke="none" style="fill: context-stroke"/></marker></defs><path d="M 0 4 L 62 4" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <svg width="62" height="8" viewBox="0 0 62 8" preserveAspectRatio="none" style="position: absolute; left: 782px; top: 276px; width: 62px; height: 8px; overflow: visible; fill: none; stroke: #8a8378; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#8a8378" stroke="none" style="fill: context-stroke"/></marker></defs><path d="M 0 4 L 62 4" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <svg width="62" height="8" viewBox="0 0 62 8" preserveAspectRatio="none" style="position: absolute; left: 1026px; top: 276px; width: 62px; height: 8px; overflow: visible; fill: none; stroke: #8a8378; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#8a8378" stroke="none" style="fill: context-stroke"/></marker></defs><path d="M 0 4 L 62 4" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <svg width="62" height="8" viewBox="0 0 62 8" preserveAspectRatio="none" style="position: absolute; left: 1280px; top: 276px; width: 62px; height: 8px; overflow: visible; fill: none; stroke: #8a8378; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#8a8378" stroke="none" style="fill: context-stroke"/></marker></defs><path d="M 0 4 L 62 4" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <!-- fail branches, warm red -->
+  <svg width="8" height="153" viewBox="0 0 8 153" preserveAspectRatio="none" style="position: absolute; left: 643px; top: 365px; width: 8px; height: 153px; overflow: visible; fill: none; stroke: #B33A3A; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#B33A3A" stroke="none" style="fill: context-stroke"/></marker></defs><path d="M 4 0 L 4 153" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+  <svg width="8" height="153" viewBox="0 0 8 153" preserveAspectRatio="none" style="position: absolute; left: 723px; top: 367px; width: 8px; height: 153px; overflow: visible; fill: none; stroke: #B33A3A; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#B33A3A" stroke="none" style="fill: context-stroke"/></marker></defs><path d="M 4 153 L 4 0" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <svg width="8" height="153" viewBox="0 0 8 153" preserveAspectRatio="none" style="position: absolute; left: 1141px; top: 365px; width: 8px; height: 153px; overflow: visible; fill: none; stroke: #B33A3A; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#B33A3A" stroke="none" style="fill: context-stroke"/></marker></defs><path d="M 4 0 L 4 153" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+  <svg width="8" height="153" viewBox="0 0 8 153" preserveAspectRatio="none" style="position: absolute; left: 1221px; top: 367px; width: 8px; height: 153px; overflow: visible; fill: none; stroke: #B33A3A; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#B33A3A" stroke="none" style="fill: context-stroke"/></marker></defs><path d="M 4 153 L 4 0" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <!-- bent arrow: Next Phase -> Full-System Lint (after Phase 4) -->
+  <svg width="8" height="325" viewBox="0 0 8 325" preserveAspectRatio="none" style="position: absolute; left: 1440px; top: 325px; width: 8px; height: 325px; overflow: visible; fill: none; stroke: #8a8378; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M 4 0 L 4 325"></path></svg>
+  <svg width="744" height="8" viewBox="0 0 744 8" preserveAspectRatio="none" style="position: absolute; left: 700px; top: 646px; width: 744px; height: 8px; overflow: visible; fill: none; stroke: #8a8378; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M 744 4 L 0 4"></path></svg>
+  <svg width="8" height="63" viewBox="0 0 8 63" preserveAspectRatio="none" style="position: absolute; left: 696px; top: 650px; width: 8px; height: 63px; overflow: visible; fill: none; stroke: #8a8378; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#8a8378" stroke="none" style="fill: context-stroke"/></marker></defs><path d="M 4 0 L 4 63" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <!-- full-system row arrow -->
+  <svg width="62" height="8" viewBox="0 0 62 8" preserveAspectRatio="none" style="position: absolute; left: 840px; top: 756px; width: 62px; height: 8px; overflow: visible; fill: none; stroke: #8a8378; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#8a8378" stroke="none" style="fill: context-stroke"/></marker></defs><path d="M 0 4 L 62 4" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <!-- ================= CARDS / DIAMONDS ================= -->
+
+  <div class="card sans" style="position: absolute; left: 64px; top: 235px; width: 200px; height: 90px; background: #FFFFFF; border: 1.5px solid #E3DCD6; padding: 8px; font-size: 14px; font-weight: 600; color: #2A2A28;">Spec Synthesis<br><span style="font-weight: 400; font-size: 12px; color: #6B6862;">Microarch Agent</span></div>
+
+  <div class="card sans" style="position: absolute; left: 328px; top: 235px; width: 200px; height: 90px; background: #FFFFFF; border: 1.5px solid #E3DCD6; padding: 8px; font-size: 14px; font-weight: 600; color: #2A2A28;">Generate RTL + TB<br><span style="font-weight: 400; font-size: 12px; color: #6B6862;">deterministic, no LLM</span></div>
+
+  <div class="sans" style="position: absolute; left: 592px; top: 195px; width: 190px; height: 170px; box-sizing: border-box; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); background: #F3E3E3; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; font-size: 13px; font-weight: 600; color: #500000;"><span>Testbench<br>Audit<br><span style="font-weight:400; font-size:11px;">(Phase 1)</span></span></div>
+
+  <div class="card sans" style="position: absolute; left: 846px; top: 235px; width: 180px; height: 90px; background: #FFFFFF; border: 1.5px solid #E3DCD6; padding: 8px; font-size: 14px; font-weight: 600; color: #2A2A28;">Lint<br><span style="font-weight: 400; font-size: 12px; color: #6B6862;">Verilator</span></div>
+
+  <div class="sans" style="position: absolute; left: 1090px; top: 195px; width: 190px; height: 170px; box-sizing: border-box; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); background: #F3E3E3; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; font-size: 13px; font-weight: 600; color: #500000;"><span>Sim<br>(Xcelium)</span></div>
+
+  <div class="card sans" style="position: absolute; left: 1344px; top: 235px; width: 200px; height: 90px; background: #DCF3E3; border: 1.5px solid #3F9E5E; padding: 8px; font-size: 14px; font-weight: 700; color: #1E4A2E;">Next Phase &rarr;</div>
+
+  <!-- fail-branch agent cards -->
+  <div class="card sans" style="position: absolute; left: 567px; top: 520px; width: 240px; height: 100px; background: #FFF3D6; border: 1.5px solid #E0B84D; padding: 10px; font-size: 13px; font-weight: 600; color: #6B4E00;">TB Validation Agent<br><span style="font-weight: 400; font-size: 11.5px;">LLM, human-confirmed &middot; re-audits after patch</span></div>
+
+  <div class="card sans" style="position: absolute; left: 1065px; top: 520px; width: 240px; height: 100px; background: #FFF3D6; border: 1.5px solid #E0B84D; padding: 10px; font-size: 13px; font-weight: 600; color: #6B4E00;">RTL Validation Agent<br><span style="font-weight: 400; font-size: 11.5px;">LLM, human-confirmed &middot; re-lints + re-sims after patch</span></div>
+
+  <!-- full-system row -->
+  <div class="card sans" style="position: absolute; left: 560px; top: 715px; width: 280px; height: 90px; background: #DCF3E3; border: 1.5px solid #3F9E5E; padding: 8px; font-size: 14px; font-weight: 700; color: #1E4A2E;">Full-System Lint<br><span style="font-weight: 400; font-size: 12px; color: #3A6B47;">11 modules, assembled</span></div>
+
+  <div class="card sans" style="position: absolute; left: 904px; top: 715px; width: 340px; height: 90px; background: #F1EFEC; border: 1.5px dashed #A8A29C; padding: 8px; font-size: 14px; font-weight: 700; color: #5A564F;">Full-System Sim<br><span style="font-weight: 400; font-size: 12px; color: #7A766E;">vs. Micron spec &middot; Validation Subsystem</span></div>
+
+  <!-- ================= LABELS ================= -->
+
+  <div class="sans" style="position: absolute; left: 659px; top: 433px; width: 44px; text-align: center; font-size: 12.5px; font-weight: 600; color: #B33A3A;">fail</div>
+  <div class="sans" style="position: absolute; left: 1157px; top: 433px; width: 44px; text-align: center; font-size: 12.5px; font-weight: 600; color: #B33A3A;">fail</div>
+  <div class="sans" style="position: absolute; left: 1000px; top: 620px; width: 200px; text-align: center; font-size: 12.5px; color: #6B6862;">after Phase 4 passes</div>
+
+  <div class="sans" style="position: absolute; left: 64px; top: 862px; width: 1520px; font-size: 12.5px; color: #6B6862;">Current status: TB Validation Agent &mdash; Phase 1 only. RTL Validation Agent &mdash; Phase 1&ndash;2 built, Phase 3&ndash;4 planned. Full-System Sim &mdash; planned, owned by Validation Subsystem.</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1650,"height":980}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

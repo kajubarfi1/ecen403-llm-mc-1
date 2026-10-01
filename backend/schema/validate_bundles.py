@@ -270,8 +270,46 @@ def validate_set(manifests: Dict[str, Dict[str, Any]], findings: List[Finding]) 
             "outputs_consumed":   len(outputs.get(mod, {})) - len(dangling),
         }
 
+    # ── Is this a system, or just a pile of blocks? ─────────────────────────
+    # Every check above is per-port: it asks whether a declared connection
+    # resolves, never whether any were declared. A set whose manifests carry no
+    # `source` at all therefore passed clean, while describing blocks that drive
+    # nothing and are driven by nothing — each port silently promoted to a chip
+    # pin. Verified 2026-09-17: three disconnected Phase 1 bundles reported PASS
+    # with 0 internal nets and 81 top-level pins.
+    leaf_modules = sorted(m.get("module_name") for m in manifests.values()
+                          if isinstance(m.get("module_name"), str) and m.get("kind") != "top")
+    wired = {e["from"]["module"] for e in edges} | {e["to"]["module"] for e in edges}
+    isolated = [mod for mod in leaf_modules if mod not in wired]
+
+    if len(leaf_modules) > 1 and not edges:
+        add(findings, "ERROR", "SET-030", "frontend",
+            f"{len(leaf_modules)} blocks, but not one declared connection between them. "
+            f"Every input becomes a chip pin, so this set describes {len(leaf_modules)} "
+            f"independent chips, not one design.",
+            'Add "source": "<module>.<port>" to each input driven by another block. Ports '
+            "that really are chip pins need no source; the point is that a multi-block set "
+            "cannot be all pins.")
+    elif isolated:
+        add(findings, "WARNING", "SET-031", "frontend",
+            f"{len(isolated)} of {len(leaf_modules)} blocks have no declared connection in "
+            f"either direction: {', '.join(isolated)}. They are wired as if they were "
+            f"separate chips.",
+            "Fill in `source` on those blocks' inputs, or confirm they are genuinely "
+            "standalone. Regenerating a block commonly drops the sources it carried before.")
+
+    sourced_inputs = sum(1 for m in manifests.values() if m.get("kind") != "top"
+                         for g, p in iter_ports(m)
+                         if p.get("dir") == "input" and p.get("source"))
+    total_inputs = sum(1 for m in manifests.values() if m.get("kind") != "top"
+                       for g, p in iter_ports(m)
+                       if p.get("dir") == "input" and g != "clock_reset")
+
     return {
         "declared_edges":         len(edges),
+        "isolated_modules":       isolated,
+        "sourced_inputs":         sourced_inputs,
+        "total_inputs":           total_inputs,
         "distinct_producer_ports": len({(e["from"]["module"], e["from"]["port"]) for e in edges}),
         "modules":                sorted(module_owner),
         "top_bundle":             tops[0] if len(tops) == 1 else None,
@@ -335,6 +373,12 @@ def main() -> int:
     print(f"  bundles            : {len(manifests)}")
     print(f"  top-level bundle   : {facts['top_bundle'] or '(none — see §4.1)'}")
     print(f"  internal nets      : {len(facts['internal_edges'])}")
+    cov = facts["sourced_inputs"], facts["total_inputs"]
+    pct = f" ({100.0 * cov[0] / cov[1]:.0f}%)" if cov[1] else ""
+    print(f"  connectivity       : {cov[0]} of {cov[1]} inputs have a source{pct}")
+    if facts["isolated_modules"]:
+        print(f"  isolated blocks    : {len(facts['isolated_modules'])} "
+              f"({', '.join(facts['isolated_modules'])})")
     print(f"  probable gaps      : {len(facts['gaps'])}")
     print(f"  top-level pins     : {len(facts['top_level_inputs'])} in / "
           f"{len(facts['top_level_outputs'])} out")

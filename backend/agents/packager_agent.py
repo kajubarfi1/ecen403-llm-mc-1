@@ -148,6 +148,14 @@ def safe_design_name(s: str) -> str:
 # register-to-register paths are timed and paths through ports go unchecked.
 SDC_IO_DELAY_PCT = 0.2
 
+# Controller clock target when a manifest does not state one. This is the value from
+# the microarchitecture spec (implementation_targets.target_frequency_mhz = 200,
+# clocking_model.controller_clock_period_ns = 5.0 for DDR3-1600K), not a backend
+# preference. It was 10.0 ns until 2026-09-24, which meant every timing result the
+# backend reported was against half the frequency the design is required to reach.
+# A manifest that states clock_period_ns always wins; this is only the fallback.
+DEFAULT_CLOCK_PERIOD_NS = 5.0
+
 
 def build_sdc(module_name: str, clock_port: str, clock_period_ns: float,
               io_pct: float = SDC_IO_DELAY_PCT) -> str:
@@ -414,12 +422,15 @@ def package_bundle(
     elif manifest.get("clock_period_ns") is not None:
         resolved_clock_period = float(manifest["clock_period_ns"])
     else:
-        resolved_clock_period = 10.0  # default policy
+        resolved_clock_period = DEFAULT_CLOCK_PERIOD_NS
         defaulted_clock_period = True
         add_finding(
             warnings, "WARNING", "OR-003",
-            "clock_period_ns not provided; defaulting to 10.0 ns.",
-            "Add manifest.clock_period_ns (or pass --clock_period_ns) to control timing constraints."
+            f"clock_period_ns not provided; defaulting to {DEFAULT_CLOCK_PERIOD_NS} ns "
+            f"({round(1000.0 / DEFAULT_CLOCK_PERIOD_NS)} MHz), the controller target from the "
+            f"microarchitecture spec.",
+            "Add manifest.clock_period_ns (or pass --clock_period_ns) so the target comes from "
+            "the design rather than a backend default."
         )
 
     if not resolved_clock_port:

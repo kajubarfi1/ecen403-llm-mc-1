@@ -744,7 +744,7 @@ _STATIC_SECTIONS = {
 def _load_failure_taxonomy() -> dict:
     """The failure taxonomy is config-independent; reuse the golden file's
     copy verbatim if it is available, else fall back to a minimal set."""
-    golden = Path(__file__).resolve().parents[2] / "Spec" \
+    golden = Path(__file__).resolve().parents[3] / "Spec" \
         / "llmmc_microarchitecturespec_filled.json"
     try:
         g = json.loads(golden.read_text())
@@ -1029,7 +1029,7 @@ def modifiability_report() -> dict:
 def _selftest() -> int:
     """Compile the 'default' preset and diff its derived blocks against the
     committed golden spec."""
-    golden_path = Path(__file__).resolve().parents[2] / "Spec" \
+    golden_path = Path(__file__).resolve().parents[3] / "Spec" \
         / "llmmc_microarchitecturespec_filled.json"
     golden = json.loads(golden_path.read_text())
     res = compile_spec(PRESETS["default"])

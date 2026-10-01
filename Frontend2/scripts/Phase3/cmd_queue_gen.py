@@ -361,17 +361,17 @@ endmodule
                     {"name": "rst_n", "width": 1, "dir": "input"},
                 ],
                 "enqueue": [
-                    {"name": "enq_valid", "width": 1, "dir": "input"},
+                    {"name": "enq_valid", "width": 1, "dir": "input", "source": "wb_port.req_valid"},
                     {"name": "enq_ready", "width": 1, "dir": "output"},
                     {"name": "enq_row", "width": p["ROW_BITS"], "dir": "input", "source": "addr_decoder.dec_row"},
                     {"name": "enq_col", "width": p["COL_BITS"], "dir": "input", "source": "addr_decoder.dec_col"},
                     {"name": "enq_bank", "width": p["BANK_BITS"], "dir": "input", "source": "addr_decoder.dec_bank"},
                     {"name": "enq_we", "width": 1, "dir": "input", "source": "wb_port.req_we"},
-                    {"name": "enq_aux", "width": p["AUX_WIDTH"], "dir": "input"},
+                    {"name": "enq_aux", "width": p["AUX_WIDTH"], "dir": "input", "source": "wb_port.req_aux"},
                 ],
                 "dequeue": [
-                    {"name": "deq_grant", "width": 1, "dir": "input"},
-                    {"name": "deq_idx", "width": p["IDX_BITS"], "dir": "input"},
+                    {"name": "deq_grant", "width": 1, "dir": "input", "source": "scheduler.deq_grant"},
+                    {"name": "deq_idx", "width": p["IDX_BITS"], "dir": "input", "source": "scheduler.deq_idx"},
                 ],
                 "lookahead": [
                     {"name": "entry_valid", "width": p["DEPTH"], "dir": "output"},

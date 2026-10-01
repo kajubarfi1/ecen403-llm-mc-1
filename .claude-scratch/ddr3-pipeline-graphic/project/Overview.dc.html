@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Subsystem Flow — Overview</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  body { margin: 0; }
+  .maroon-serif { font-family: Georgia, "Times New Roman", serif; }
+  .sans { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .card { box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border-radius: 12px; }
+</style>
+</helmet>
+
+<div style="position: relative; width: 1650px; height: 700px; background: #FBF8F6;">
+
+  <div class="maroon-serif" style="position: absolute; left: 64px; top: 40px; font-size: 28px; font-weight: 700; color: #500000;">Subsystem Flow — Overview</div>
+  <div class="sans" style="position: absolute; left: 64px; top: 82px; font-size: 14px; font-style: italic; color: #6B6862;">three subsystems, one shared RTL drop</div>
+
+  <!-- arrows (painted first) -->
+  <svg width="198" height="8" viewBox="0 0 198 8" preserveAspectRatio="none" style="position: absolute; left: 452px; top: 296px; width: 198px; height: 8px; overflow: visible; fill: none; stroke: #8a8378; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#8a8378" stroke="none" style="fill: context-stroke"/></marker></defs><path d="M 0 4 L 198 4" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <svg width="198" height="8" viewBox="0 0 198 8" preserveAspectRatio="none" style="position: absolute; left: 452px; top: 346px; width: 198px; height: 8px; overflow: visible; fill: none; stroke: #7A1F1F; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#7A1F1F" stroke="none" style="fill: context-stroke"/></marker></defs><path d="M 198 4 L 0 4" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <svg width="198" height="8" viewBox="0 0 198 8" preserveAspectRatio="none" style="position: absolute; left: 1002px; top: 296px; width: 198px; height: 8px; overflow: visible; fill: none; stroke: #8a8378; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled" orient="auto" markerWidth="5" markerHeight="5" refX="3.2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#8a8378" stroke="none" style="fill: context-stroke"/></marker></defs><path d="M 0 4 L 198 4" marker-end="url(#dc-arrow-head-filled)"></path></svg>
+
+  <!-- arrow labels -->
+  <div class="sans" style="position: absolute; left: 452px; top: 262px; width: 198px; text-align: center; font-size: 12.5px; font-weight: 600; color: #4A4A46;">RTL bundle (shared drop)</div>
+  <div class="sans" style="position: absolute; left: 452px; top: 356px; width: 198px; text-align: center; font-size: 12.5px; font-weight: 600; color: #7A1F1F;">findings (.md / .json)</div>
+  <div class="sans" style="position: absolute; left: 1002px; top: 262px; width: 198px; text-align: center; font-size: 12.5px; color: #6B6862;">independently reads same drop</div>
+
+  <!-- Frontend -->
+  <div class="card sans" style="position: absolute; left: 100px; top: 250px; width: 350px; height: 130px; background: #FFFFFF; border: 2px solid #500000;">
+    <div style="font-size: 18px; font-weight: 700; color: #500000;">Frontend</div>
+    <div style="font-size: 12.5px; color: #4A4A46; margin-top: 6px;">Lehana &middot; spec + RTL generation</div>
+  </div>
+
+  <!-- Validation -->
+  <div class="card sans" style="position: absolute; left: 650px; top: 250px; width: 350px; height: 130px; background: #FFFFFF; border: 2px solid #7A1F1F;">
+    <div style="font-size: 18px; font-weight: 700; color: #7A1F1F;">Validation</div>
+    <div style="font-size: 12.5px; color: #4A4A46; margin-top: 6px;">Jacob &middot; independent reference model</div>
+  </div>
+
+  <!-- Backend -->
+  <div class="card sans" style="position: absolute; left: 1200px; top: 250px; width: 350px; height: 130px; background: #FFFFFF; border: 2px solid #2D4A6B;">
+    <div style="font-size: 18px; font-weight: 700; color: #2D4A6B;">Backend</div>
+    <div style="font-size: 12.5px; color: #4A4A46; margin-top: 6px;">Dawson &middot; synthesis &rarr; GDSII</div>
+  </div>
+
+  <div class="sans" style="position: absolute; left: 1200px; top: 410px; width: 350px; text-align: center; font-size: 12px; color: #6B6862; font-style: italic;">reads the same RTL bundle Validation does &mdash; independently, not sequentially after it</div>
+
+  <div class="sans" style="position: absolute; left: 64px; top: 640px; width: 1520px; font-size: 12.5px; color: #6B6862;">Validation and Backend are parallel, independent consumers of the same Frontend output &mdash; not a sequential handoff. Findings flow back to Frontend; nothing blocks Backend on Validation's verdict today.</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1650,"height":700}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

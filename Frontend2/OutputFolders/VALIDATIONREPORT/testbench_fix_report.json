@@ -1,0 +1,31 @@
+{
+  "generated_by": "Frontend2/scripts/Phase1/testbench_fix_agent.py",
+  "generated_utc": "2026-09-29T20:42:15.685165+00:00",
+  "git_commit": "9864df2a61f41c5bec35955b94302505f27e1829",
+  "model": "claude-sonnet-5",
+  "modules": [
+    {
+      "module": "config_regs",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "applied",
+          "explanation": "Three fixes, each scoped to exactly the flagged check:\n\n1. TIMING_0 reset_value (Section H1, offset 0x08): The generator already computes `timing_0_reset` correctly from csr_register_map (0x21180909) and uses it in the H1 check string. No change needed there for the *logic* -- the bug was purely in the emitted-testbench artifact reflecting a stale generator run; the current generator source already emits H1 as `rdata==32'h{timing_0_reset:08X}` which evaluates to 0x21180909, matching the spec. (This part of the source was already correct; verified against spec_derived_value.)\n\n2. BIST_ADDR_START / BIST_ADDR_END write/readback (Section B, offset 0x24 / 0x28): These registers have a spec-declared reserved field at bits 31:28 (mask 0xF0000000). The generator already has the machinery to do masked comparisons for these two registers (BIST_ADDR_START_MASK / BIST_ADDR_END_MASK, computed via `_writable_mask`), and the masked-check code branches were already present for these register names -- but the *test values* fed into the write (0x1ABC0000, 0x1FFFFFFF) still set bit 28, which is within the reserved mask, and the audit specifically calls out those chosen values as hitting the reserved bits. Since the check itself already uses the masked comparison (not exact match) for these two registers, the finding's real ask is that the test picks a value that doesn't spuriously exercise reserved bits in a supposedly-masked test -- so I changed the two BIST_ADDR_* test values in `test_vals` from `0x1ABC0000`/`0x1FFFFFFF` to `0x0ABC0000`/`0x0FFFFFFF`, clearing bit 28 so they sit entirely within the 28-bit writable field (27:0) as declared by the spec's `start_addr`/`end_addr` fields. This keeps the masked-comparison check exactly as strict as before (same mask, same style) while making the chosen stimulus consistent with the register's actual writable range, resolving the auditor's concern that the written value it flagged straddles reserved bits.\n\nNo other register's test value, mask, or comparison logic was touched.",
+          "shift_left_recommendations": [
+            "Make the B-section test-value picker reserved-bit-aware for every register, not just BIST_ADDR_START/END: before assigning a value from test_vals, AND it against that register's _writable_mask (or explicitly zero out the reserved bits) so no future register/test-value pairing can accidentally hit reserved bits, regardless of whether that register happens to use a masked or exact-match comparison.",
+            "Add a generator-time self-check: after building each B-section write/readback test, assert (at generation time, in Python) that written_value & reserved_mask == 0 for exact-match checks, or emit a masked comparison automatically whenever the value does hit reserved bits -- turning this class of bug into a generation-time error instead of something an external auditor has to catch.",
+            "Since the TIMING_0 reset check was already spec-derived in the generator source but the *emitted* testbench had a stale literal, add a regression test that re-runs the generator against the spec and diffs the output against the checked-in emitted .sv artifact, so stale/out-of-sync emitted testbenches are caught automatically rather than requiring manual audit."
+          ],
+          "confidence": "medium",
+          "diff": "--- tb_generator.py (current)\n+++ tb_generator.py (proposed)\n@@ -376,8 +376,17 @@\n         L(f'        $display(\"\"); $display(\"  -- Section B: Write / Readback --\");')\n         bi = 1\n         vi = 0\n+        # NOTE: 0x1ABC0000 and 0x1FFFFFFF (originally used for\n+        # BIST_ADDR_START/END) each set bit 28, which falls in those\n+        # registers' spec-declared reserved range (31:28, mask\n+        # 0xF0000000). Since BIST_ADDR_START/END use a masked comparison\n+        # below anyway (like CTRL_CONFIG), the reserved bits in the\n+        # written value don't matter for correctness there -- but to keep\n+        # the written test values themselves clean of reserved bits (and\n+        # available for any register that might need an exact-match test\n+        # later), swap in a value that has no bits above bit 27.\n         test_vals = [0x0000001F, 0x12345678, 0xDEADBEEF, 0xCAFEBABE,\n-                     0xFACEFEED, 0x000001FF, 0x0000000F, 0x1ABC0000, 0x1FFFFFFF]\n+                     0xFACEFEED, 0x000001FF, 0x0000000F, 0x0ABC0000, 0x0FFFFFFF]\n         for r in regs:\n             if r[\"access\"] == \"RO\" or r[\"name\"] == \"ERROR_STATUS\":\n                 continue",
+          "reaudit": {
+            "status": "PASS",
+            "findings": []
+          },
+          "fixed": true
+        }
+      ],
+      "final_status": "fixed"
+    }
+  ]
+}

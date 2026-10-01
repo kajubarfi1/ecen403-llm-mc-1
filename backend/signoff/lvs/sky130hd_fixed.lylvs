@@ -236,9 +236,26 @@ align
 #netlist.purge_nets
 netlist.make_top_level_pins
 netlist.combine_devices
-# vendor cells whose GDS splits series branches that the CDL draws as single devices:
-# compared by pin connectivity only (black box)
-%w[a2111oi_2 a211oi_4 o211ai_4 a21oi_2].each { |c| blank_circuit("sky130_fd_sc_hd__#{c}"); blank_circuit("SKY130_FD_SC_HD__#{c.upcase}") }
+# Vendor cells whose GDS splits series branches that the CDL draws as single devices:
+# compared by pin connectivity only (black box).
+#
+# Read from blackbox_cells.txt rather than hardcoded. The list used to live here, so
+# it only ever held cells that had already broken a run: on 2026-09-24 a scheduler
+# build at 5 ns picked a21boi_2 and o211a_4, two gates no earlier run had used, and
+# LVS failed in a way indistinguishable from a real design defect. detect_blackbox.py
+# now finds the condition by comparing device counts and maintains the list.
+bb_list = $blackbox_list &amp;&amp; File.exist?($blackbox_list) ? $blackbox_list :
+          File.join(File.dirname(File.expand_path(__FILE__)), "blackbox_cells.txt")
+if File.exist?(bb_list)
+  bb_cells = File.readlines(bb_list, encoding: "UTF-8").map { |l| l.sub(/#.*/, "").strip }.reject(&amp;:empty?)
+  puts "BLACKBOX source=#{bb_list} cells=#{bb_cells.size}"
+else
+  # Fallback so the deck still runs if the list is missing; the four cells known
+  # before detection existed.
+  bb_cells = %w[a2111oi_2 a211oi_4 o211ai_4 a21oi_2]
+  puts "BLACKBOX source=builtin-fallback cells=#{bb_cells.size} (#{bb_list} not found)"
+end
+bb_cells.each { |c| blank_circuit("sky130_fd_sc_hd__#{c}"); blank_circuit("SKY130_FD_SC_HD__#{c.upcase}") }
 #schematic.simplify
 
 # Tolerances for the devices extracted parameters

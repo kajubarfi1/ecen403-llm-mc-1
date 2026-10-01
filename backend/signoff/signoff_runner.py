@@ -86,11 +86,30 @@ def parse_kv(s: str) -> dict:
     return {k: (int(v) if v.isdigit() else v) for k, v in re.findall(r"(\w+)=(\[[^\]]*\]|\S+)", s)}
 
 
+def blackbox_cells(deck: Path) -> list:
+    """Cell names the deck black-boxes.
+
+    Read from blackbox_cells.txt beside the deck, which detect_blackbox.py maintains.
+    Falls back to parsing the deck's literal list, which is how it worked before the
+    list moved out of the deck.
+    """
+    lst = deck.parent / "blackbox_cells.txt"
+    if lst.exists():
+        out = []
+        for line in lst.read_text(errors="ignore").splitlines():
+            line = line.split("#", 1)[0].strip()
+            if line:
+                out.append(line)
+        return out
+    m = re.search(r"%w\[([^\]]+)\]", deck.read_text(errors="ignore"))
+    return m.group(1).split() if m else []
+
+
 def count_blackboxed(deck: Path, ref: Path) -> int:
-    m = re.search(r"%w\[([^\]]+)\]\.each\s*\{\s*\|\w+\|\s*blank_circuit", deck.read_text(errors="ignore"))
-    if not m:
+    cells = blackbox_cells(deck)
+    if not cells:
         return 0
-    names = tuple("__" + n for n in m.group(1).split())
+    names = tuple("__" + n for n in cells)
     return sum(1 for l in ref.read_text(errors="ignore").splitlines()
                if l.startswith("X") and l.split()[-1].lower().endswith(names))
 
@@ -155,12 +174,52 @@ def signoff(a, res: dict) -> None:
         ref = mut
 
     # 4. LVS
+    #
+    # A synthesis choice can pull in a library cell whose vendor GDS and CDL disagree
+    # on device count, which fails LVS and skips the top-level comparison — identical
+    # in appearance to a real design defect. When that happens, check whether the
+    # named cells are that known vendor condition, and if so cover them and compare
+    # again. One retry only: a second failure is not a library problem.
     lvsdb = out / "lvs.lvsdb"
-    rc, log, secs = run([kl, "-b", "-rd", f"in_gds={gds}", "-rd", f"cdl_file={ref}", "-rd", f"report_file={lvsdb}",
-                         "-rd", f"target_netlist={out / 'extracted.cir'}", "-r", deck], out / "lvs.log", 3600, flow)
-    verdict = "match" if "Congratulations" in log else ("mismatch" if "don't match" in log else None)
+    extracted = out / "extracted.cir"
+
+    def run_lvs(bb_list: Path = None):
+        cmd = [kl, "-b", "-rd", f"in_gds={gds}", "-rd", f"cdl_file={ref}",
+               "-rd", f"report_file={lvsdb}", "-rd", f"target_netlist={extracted}"]
+        if bb_list:
+            cmd += ["-rd", f"blackbox_list={bb_list}"]
+        rc_, log_, secs_ = run(cmd + ["-r", deck], out / "lvs.log", 3600, flow)
+        v_ = "match" if "Congratulations" in log_ else ("mismatch" if "don't match" in log_ else None)
+        return rc_, v_, secs_
+
+    rc, verdict, secs = run_lvs()
+    retried = None
+    if verdict == "mismatch" and extracted.exists():
+        # /signoff is mounted read-only, so the merged list goes to the writable
+        # output mount and the deck is pointed at it with -rd blackbox_list.
+        merged = out / "blackbox_cells.txt"
+        rcd, det, _ = run(["python3", str(so / "lvs" / "detect_blackbox.py"),
+                           "--extracted", str(extracted), "--reference", str(ref),
+                           "--apply", "--list-out", str(merged)],
+                          out / "blackbox_detect.log", 300, flow)
+        added = re.findall(r"BLACKBOX-DETECT (\S+) layout=(\d+) cdl=(\d+)", det)
+        if added and merged.exists():
+            retried = [{"cell": c, "layout_devices": int(l), "cdl_devices": int(r)} for c, l, r in added]
+            print(f"[signoff] LVS mismatch involves {len(added)} cell(s) whose vendor GDS and CDL "
+                  f"disagree on device count: {', '.join(c for c, _, _ in added)}. "
+                  f"Covering them and re-running LVS.")
+            print(f"[signoff] To keep this across runs, add to signoff/lvs/blackbox_cells.txt: "
+                  f"{' '.join(c for c, _, _ in added)}")
+            rc, verdict, secs2 = run_lvs(merged)
+            secs += secs2
+        elif added:
+            print(f"[signoff] detected {len(added)} vendor-mismatched cell(s) but could not write "
+                  f"{merged}; see blackbox_detect.log. LVS not retried.")
+
     lvs = {"verdict": verdict, "report": str(lvsdb), "deck": str(deck), "seconds": secs, "prep": prep,
            "blackboxed_instances": count_blackboxed(deck, ref)}
+    if retried:
+        lvs["blackbox_auto_added"] = retried
     if verdict is None or not lvsdb.exists():
         lvs.update(status="ERROR", detail=f"LVS produced no verdict or database (klayout rc={rc}); see lvs.log")
         res["lvs"] = lvs

@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 //==============================================================
 // data_path_tb.sv -- Enhanced testbench (26 tests)
-// Generated: 2026-09-24 13:02:05
+// Generated: 2026-09-24 13:43:38
 // Generator:     Data Path / Alignment Generator (Phase 3)
 //
 // Sections:

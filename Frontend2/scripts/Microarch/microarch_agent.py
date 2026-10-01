@@ -45,11 +45,11 @@ import microarch_colors as mcol
 
 
 def _load_dotenv() -> None:
-    """Minimal, dependency-free .env loader. Looks for Frontend/.env and the
+    """Minimal, dependency-free .env loader. Looks for Frontend2/.env and the
     repo-root .env; only sets keys not already in the environment (a real
     shell export always wins). KEY=VALUE lines, '#' comments, optional quotes."""
     here = Path(__file__).resolve()
-    for env_path in (here.parents[1] / ".env", here.parents[2] / ".env"):
+    for env_path in (here.parents[2] / ".env", here.parents[3] / ".env"):
         if not env_path.is_file():
             continue
         for line in env_path.read_text().splitlines():
@@ -473,8 +473,8 @@ def _print_report(res: dict, proposal: dict | None, out_dir: Path | None,
     if out_dir:
         print(mcol.ok(f"\n  WROTE  {out_dir / 'microarch_spec.json'}"))
         print(mcol.ok(f"         {out_dir / 'microarch_report.json'}"))
-        print(mcol.header("\n  NEXT:") + "  run Phase 1 against it, e.g.")
-        print(f"         python Frontend/Agents/phase1_pipeline.py")
+        print(mcol.header("\n  NEXT:") + "  run the full pipeline against it, e.g.")
+        print(f"         python Frontend2/scripts/full_pipeline.py")
         print(f"         (spec path: {out_dir / 'microarch_spec.json'})")
 
 
