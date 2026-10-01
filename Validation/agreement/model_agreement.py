@@ -30,6 +30,7 @@ import scoreboard as SB  # noqa: E402
 PRIMARY = os.path.join(ROOT, "Validation", "predictors")
 SECOND = os.path.join(PRIMARY, "second_opinion")
 SPEC = os.path.join(ROOT, "Validation", "spec", "llmmc_microarchitecturespec_filled.json")
+SPEC = os.environ.get("VALIDATION_SPEC", SPEC)   # the spec the drop was generated from, when it is not the default
 OUT = os.path.join(ROOT, "Validation", "reports", "model_agreement.json")
 TRACE_GLOBS = ["Validation/reports/paths/*_observed.jsonl",
                "Validation/reports/repairs/*/*_observed.jsonl"]

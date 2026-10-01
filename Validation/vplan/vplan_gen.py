@@ -291,8 +291,8 @@ def main():
     here = os.path.dirname(os.path.abspath(__file__))
     root = os.path.dirname(here)
     ap = argparse.ArgumentParser()
-    ap.add_argument("--spec", default=os.path.join(root, "spec",
-                                                   "llmmc_microarchitecturespec_filled.json"))
+    ap.add_argument("--spec", default=os.environ.get("VALIDATION_SPEC", os.path.join(
+        root, "spec", "llmmc_microarchitecturespec_filled.json")))
     ap.add_argument("--out", default=os.path.join(here, "vplan.json"))
     args = ap.parse_args()
 

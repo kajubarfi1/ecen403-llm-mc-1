@@ -43,6 +43,7 @@ ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 RULES_PATH = os.path.join(HERE, "jedec_ddr3_rules.json")
 DEFAULT_SPEC = os.path.join(ROOT, "Validation", "spec",
                             "llmmc_microarchitecturespec_filled.json")
+DEFAULT_SPEC = os.environ.get("VALIDATION_SPEC", DEFAULT_SPEC)   # the spec the drop was generated from, when it is not the default
 
 TOL = 1e-6          # float comparison tolerance, nanoseconds
 

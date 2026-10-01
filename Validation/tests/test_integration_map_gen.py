@@ -62,11 +62,20 @@ class Derivation(unittest.TestCase):
         with self.assertRaises(G.MapError):
             G.build(m, BLOCKS, OV)
 
-    def test_width_mismatch_refuses(self):
+    def test_width_mismatch_is_filed_not_wired(self):
+        """A width-inconsistent edge is a finding about the drop: it is kept
+        out of the wiring (never truncated or extended) and reported, so the
+        orchestrator can block the paths that cross it and route the defect."""
         m = copy.deepcopy(MANIFESTS)
         m["cons"]["in_a"]["width"] = 16
-        with self.assertRaises(G.MapError):
-            G.build(m, BLOCKS, OV)
+        imap, rep = G.build(m, BLOCKS, OV)
+        bad = imap["inconsistent_connections"]
+        self.assertEqual([(e["from"], e["to"]) for e in bad], [("prod.out_a", "cons.in_a")])
+        self.assertNotIn("cons.in_a", {c["to"] for c in imap["connections"]})
+        fs = [f for f in G.to_findings(rep, "rev") if f["kind"] == "width_mismatch"]
+        self.assertEqual(len(fs), 1)
+        self.assertEqual(fs[0]["severity"], "critical")
+        self.assertIn("prod.out_a", fs[0]["title"])
 
     def test_source_that_is_an_input_refuses(self):
         m = copy.deepcopy(MANIFESTS)

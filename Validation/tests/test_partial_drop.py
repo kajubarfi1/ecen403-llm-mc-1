@@ -214,5 +214,42 @@ class TestPipelinedWishboneDriver(unittest.TestCase):
         self.assertIn("wb_stb_i = '0;\n  endtask", sv)
 
 
+class TestForeignSpecBlocks(unittest.TestCase):
+    def test_foreign_block_gets_only_its_spec_mismatch(self):
+        import emit_findings as EF
+        tmp = tempfile.mkdtemp()
+        saved = (EF.previous_outbox, EF.structural_findings, EF.formal_findings, EF.repair_findings)
+        try:
+            EF.previous_outbox = lambda spec_rev, head: None
+            EF.formal_findings = lambda spec_rev, head: []
+            EF.repair_findings = lambda head, rep_stage_root=None: []
+            base = {"schema": "validation-findings/2", "kind": "rtl_defect", "severity": "critical",
+                    "confidence": "confirmed", "title": "t", "detectors": ["structural:x"],
+                    "owner_candidates": [], "requirement": "", "spec_ref": None, "expected": "",
+                    "actual": "", "detector": "structural:x", "anchor": [], "mechanism": "",
+                    "paths": ["structural"], "occurrences": 1, "repro": {}, "drop": {},
+                    "introduced_in": None, "first_seen": "h", "last_seen": "h",
+                    "resolved_in": None, "status": "open", "related_manual_findings": []}
+            EF.structural_findings = lambda spec_rev, head: [
+                {**base, "id": "structural/wb_port/SPEC_MISMATCH/other", "check_id": "SPEC_MISMATCH/other",
+                 "taxonomy_id": "SPEC_MISMATCH", "owner_module": "wb_port"},
+                {**base, "id": "structural/wb_port/RTL_BUG/req_addr", "check_id": "RTL_BUG/req_addr",
+                 "taxonomy_id": "RTL_BUG", "owner_module": "wb_port"},
+                {**base, "id": "structural/scheduler/RTL_BUG/x", "check_id": "RTL_BUG/x",
+                 "taxonomy_id": "RTL_BUG", "owner_module": "scheduler"}]
+            reports = os.path.join(tmp, "reports")
+            os.makedirs(reports)
+            ds = {"partial": False, "blocks_absent": [], "paths_blocked": {},
+                  "foreign_spec_blocks": {"wb_port": "other"}, "paths_run": []}
+            doc, _ = EF.emit(reports, os.path.join(tmp, "out"), ds)
+            ids = {f["id"] for f in doc["findings"]}
+            self.assertIn("structural/wb_port/SPEC_MISMATCH/other", ids)
+            self.assertNotIn("structural/wb_port/RTL_BUG/req_addr", ids)
+            self.assertIn("structural/scheduler/RTL_BUG/x", ids)
+        finally:
+            EF.previous_outbox, EF.structural_findings, EF.formal_findings, EF.repair_findings = saved
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -19,7 +19,7 @@ module init_cmd_monitor #(
 ) (
     input  logic clk,
     input  logic rst_n,
-    input  logic [14:0] init_addr,
+    input  logic [13:0] init_addr,
     input  logic [2:0] init_bank,
     input  logic [3:0] init_cmd,
     input  logic init_cmd_valid

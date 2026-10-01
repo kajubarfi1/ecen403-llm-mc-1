@@ -94,7 +94,7 @@ def main() -> int:
     os.makedirs(LOGS, exist_ok=True)
     t0 = time.time()
     import rtl_drop as RD
-    head = RD._git_head() or "unknown"
+    head = RD.drop_id()
     log = os.path.join(LOGS, f"{head}.log")
     if os.path.exists(log):
         os.remove(log)
@@ -114,43 +114,62 @@ def main() -> int:
         print("    STOP: the drop does not provide every block "
               "(--partial runs what it does provide).")
         return 1
-    if rc != 0:
-        all_blocks = sorted({b for p in pdefs for b in p["blocks"]})
-        absent = set(RD.missing(all_blocks))
-        present = [b for b in all_blocks if b not in absent]
-        sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
-        import chain_harness_gen as CHG
-        with open(os.path.join(ROOT, "Validation", "structural", "integration_map.json")) as f:
-            imap_now = json.load(f)
-        by_id = {p["id"]: p for p in pdefs}
-        runnable = []
-        # every path, derived ones included, so a finding whose paths are all
-        # blocked is carried as untested rather than resolved
-        for pdef in pdefs:
-            pid = pdef["id"]
-            need = set(CHG.block_closure(pdef["blocks"], imap_now, bool(pdef.get("standalone"))))
-            if need & absent:
-                blocked[pid] = sorted(need & absent)
-            elif pid in paths:
-                runnable.append(pid)
-        print(f"    PARTIAL drop: present {present}")
-        print(f"                  absent  {sorted(absent)}")
-        print(f"    {len(runnable)} path(s) runnable, {len(blocked)} blocked until "
-              f"their blocks arrive:")
-        for pid, need in blocked.items():
-            print(f"      blocked  {pid:34} needs {', '.join(need)}")
-        if drop_status is None and not runnable:
-            pass
-        paths = runnable
-        drop_status = {"$schema": "validation-drop-status/1", "drop": head,
-                       "partial": True, "blocks_present": present,
-                       "blocks_absent": sorted(absent),
-                       "paths_run": runnable, "paths_blocked": blocked,
-                       "note": "A blocked path is not a failure: it waits for the "
-                               "phase that brings its blocks. Nothing was substituted."}
-        if not runnable:
-            print("    STOP: no path can run on these blocks.")
-            return 1
+    all_blocks = sorted({b for p in pdefs for b in p["blocks"]})
+    absent = set(RD.missing(all_blocks)) if rc != 0 else set()
+    present = [b for b in all_blocks if b not in absent]
+
+    # 1b. spec consistency --------------------------------------------------
+    # Every block says which spec revision generated it. Validation judges
+    # against ONE spec (VALIDATION_SPEC, default Validation/spec/...). A block
+    # from another revision is foreign: nothing the spec-derived checkers say
+    # about it is evidence, so every path that includes it is blocked and the
+    # mismatch is filed. The drop's own shipped spec is named so the run can
+    # be repeated against it.
+    spec_path = os.environ.get("VALIDATION_SPEC", os.path.join(
+        ROOT, "Validation", "spec", "llmmc_microarchitecturespec_filled.json"))
+    with open(spec_path) as f:
+        val_rev = json.load(f).get("revision")
+    stamps = {b: RD.spec_stamp(b)[1] for b in present}
+    foreign = {b: r for b, r in stamps.items() if r and r != val_rev}
+    unstamped = [b for b, r in stamps.items() if not r]
+    ship_path, ship_rev = RD.shipped_spec()
+    print(f"    validation spec : rev {val_rev} ({os.path.relpath(spec_path, ROOT)})")
+    if ship_path:
+        print(f"    drop ships spec : rev {ship_rev} ({os.path.relpath(ship_path, ROOT)})"
+              + ("" if ship_rev == val_rev else "   <-- NOT the spec being judged against"))
+    if foreign:
+        by_rev = {}
+        for b, r in foreign.items():
+            by_rev.setdefault(r, []).append(b)
+        for r, bs in by_rev.items():
+            print(f"    FOREIGN spec rev {r}: {', '.join(sorted(bs))}")
+        if ship_path and ship_rev != val_rev:
+            print(f"    to judge those blocks against their own spec: "
+                  f"VALIDATION_SPEC={os.path.relpath(ship_path, ROOT)} python3 Validation/tools/validate_drop.py --partial")
+    if unstamped:
+        print(f"    unstamped (no spec_revision in manifest or RTL header): {', '.join(unstamped)}")
+    spec_findings = []
+    for b, r in sorted(foreign.items()):
+        spec_findings.append({
+            "source": "validation", "target": "frontend", "kind": "spec_mismatch",
+            "scope": b, "severity": "critical", "spec_revision": val_rev,
+            "title": f"{b} was generated from spec rev {r}; the drop is judged against rev {val_rev}",
+            "detail": (f"The block's manifest says spec_revision = {r}. The other blocks of this drop"
+                       f"{' and the spec validation loads' if val_rev else ''} are rev {val_rev}. A design "
+                       f"assembled from two specs has no single contract: every path through {b} is blocked "
+                       f"until the drop is regenerated from one spec"
+                       + (f" (the drop ships {os.path.relpath(ship_path, ROOT)}, rev {ship_rev})." if ship_path else ".")),
+            "evidence": {"block": b, "block_spec_revision": r, "validation_spec_revision": val_rev,
+                         "shipped_spec": os.path.relpath(ship_path, ROOT) if ship_path else None,
+                         "shipped_spec_revision": ship_rev},
+            "spec_ref": "revision", "status": "open"})
+    os.makedirs(os.path.join(ROOT, "Validation", "findings", "outbox"), exist_ok=True)
+    with open(os.path.join(ROOT, "Validation", "findings", "outbox", "spec_revision_findings.json"), "w") as f:
+        json.dump({"$schema": "validation-findings/1", "spec_revision": val_rev,
+                   "validation_spec": os.path.relpath(spec_path, ROOT),
+                   "shipped_spec": os.path.relpath(ship_path, ROOT) if ship_path else None,
+                   "shipped_spec_revision": ship_rev, "block_revisions": stamps,
+                   "finding_count": len(spec_findings), "findings": spec_findings}, f, indent=2)
 
     # 2. intake ----------------------------------------------------------------
     banner(2, "spec intake gate")
@@ -167,14 +186,23 @@ def main() -> int:
         banner(3, "regenerate integration map, schemas, monitors, SVA, coverage from the drop")
         for cmd in ("python3 Validation/structural/integration_map_gen.py --findings "
                     "Validation/findings/outbox/integration_map_findings.json",
+                    "python3 Validation/structural/width_conformance.py --json "
+                    "Validation/findings/outbox/width_findings.json",
                     "python3 Validation/txn/schema_gen.py"
-                    + (" --allow-missing" if drop_status else ""),
+                    + (" --allow-missing" if absent else ""),
                     "python3 Validation/txn/monitor_gen.py",
                     "python3 Validation/sva/sva_gen.py",
                     "python3 Validation/sva/coverage_gen.py",
                     "python3 Validation/sva/block_coverage_gen.py"):
             rc, out = sh(cmd, log, check=False)
             last = out.strip().splitlines()[-1] if out.strip() else ""
+            if "width_conformance" in cmd:
+                # its non-zero exit means "mismatches filed", a finding about
+                # the drop (routed in step 6), never a refusal to validate it
+                n = re.search(r"(\d+) mismatch", out)
+                print(f"    {'ok  ' if rc == 0 else 'FIND'} {cmd.split('/')[-1]:24} "
+                      f"{n.group(1) + ' width mismatch(es) filed' if n else last[:80]}")
+                continue
             print(f"    {'ok  ' if rc == 0 else 'FAIL'} {cmd.split('/')[-1]:24} {last[:80]}")
             if rc != 0:
                 print("    STOP: a generator refused the drop; its output is in the log.")
@@ -183,29 +211,87 @@ def main() -> int:
     else:
         banner(3, "regenerate: skipped")
 
+    # 3b. what can run ----------------------------------------------------------
+    # A path is blocked when its closure needs an absent block, or crosses an
+    # edge whose two manifests disagree on width (filed as width_mismatch).
+    # Every path is classified, derived ones included, so a finding whose
+    # paths are all blocked is carried as untested rather than resolved.
+    sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
+    import chain_harness_gen as CHG
+    with open(os.path.join(ROOT, "Validation", "structural", "integration_map.json")) as f:
+        imap_now = json.load(f)
+    bad_edges = imap_now.get("inconsistent_connections", [])
+    runnable = []
+    for pdef in pdefs:
+        pid = pdef["id"]
+        need = set(CHG.block_closure(pdef["blocks"], imap_now, bool(pdef.get("standalone"))))
+        if need & absent:
+            blocked[pid] = sorted(need & absent)
+        elif need & set(foreign):
+            blocked[pid] = [f"spec mismatch {b} (rev {foreign[b]})" for b in sorted(need & set(foreign))]
+        else:
+            cross = [f"{e['from']}({e['from_width']})->{e['to']}({e['to_width']})" for e in bad_edges
+                     if e["from"].partition(".")[0] in need and e["to"].partition(".")[0] in need]
+            if cross:
+                blocked[pid] = ["width mismatch " + c for c in cross]
+            elif pid in paths:
+                runnable.append(pid)
+    if absent:
+        print(f"    PARTIAL drop: present {present}")
+        print(f"                  absent  {sorted(absent)}")
+    if blocked:
+        print(f"    {len(runnable)} path(s) runnable, {len(blocked)} blocked:")
+        for pid, need in blocked.items():
+            print(f"      blocked  {pid:34} needs {', '.join(need)}")
+    paths = runnable
+    if absent or blocked:
+        drop_status = {"$schema": "validation-drop-status/1", "drop": head,
+                       "partial": bool(absent), "blocks_present": present,
+                       "blocks_absent": sorted(absent),
+                       "inconsistent_edges": bad_edges,
+                       "validation_spec_revision": val_rev,
+                       "foreign_spec_blocks": foreign,
+                       "paths_run": runnable, "paths_blocked": blocked,
+                       "note": "A blocked path is not a failure and not a pass: it waits "
+                               "for the drop that brings its blocks or fixes the edge it "
+                               "crosses. Nothing was substituted."}
+    nothing_runs = not runnable
+    if nothing_runs:
+        print("    nothing can run on this drop; the structural findings are still "
+              "emitted and routed (steps 4, 5, 7, 8 skipped).")
+
     # 4. run -------------------------------------------------------------------
     banner(4, f"{'re-judge' if args.skip_sim else 'simulate'} {len(paths)} path(s), "
               f"{args.jobs} at a time")
     verdicts = {}
+    if nothing_runs:
+        print("    (no runnable path)")
 
-    report_dir = REPORTS if not drop_status else os.path.join(
+    # anything blocked => the run is isolated like a partial one: its reports
+    # live apart, so a blocked path's report from an earlier drop is never
+    # judged, compared or snapshotted as if it were this drop's
+    partial = bool(absent) or bool(blocked)
+    report_dir = REPORTS if not partial else os.path.join(
         ROOT, "Validation", "reports", "partial", head)
-    if drop_status:
+    if partial:
         os.makedirs(report_dir, exist_ok=True)
+        os.makedirs(report_dir, exist_ok=True)
+        for f in glob.glob(os.path.join(report_dir, "*")):
+            os.remove(f)
         print(f"    reports -> {os.path.relpath(report_dir, ROOT)} (kept apart from "
               f"full-drop reports so nothing stale is judged)")
 
     def run_one(p):
         cmd = (f"python3 Validation/tools/run_path.py --path {p} "
                f"--timeout {args.timeout}" + (" --judge-only" if args.skip_sim else "")
-               + (f" --report-dir {report_dir}" if drop_status else ""))
+               + (f" --report-dir {report_dir}" if partial else ""))
         rc, out = sh(cmd, None, check=False, timeout=args.timeout + 300)
         with open(os.path.join(LOGS, f"{head}_{p}.txt"), "w") as f:
             f.write(out)
         m = re.search(r"path verdict : (\w+)", out)
         return p, (m.group(1) if m else f"rc={rc}"), rc
 
-    with concurrent.futures.ThreadPoolExecutor(1 if args.skip_sim else args.jobs) as ex:
+    with concurrent.futures.ThreadPoolExecutor(1 if args.skip_sim else max(1, args.jobs)) as ex:
         for p, v, rc in ex.map(run_one, paths):
             verdicts[p] = v
             print(f"    {p:34} {v}")
@@ -215,7 +301,7 @@ def main() -> int:
     print(f"    pass={n_pass} fail={n_fail} error={n_err}")
 
     # 5. rollup ----------------------------------------------------------------
-    if not args.skip_rollup and not args.skip_sim:
+    if not args.skip_rollup and not args.skip_sim and not nothing_runs:
         banner(5, "coverage rollup")
         since = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(t0 - 60))
         rc, out = sh(f"python3 Validation/coverage/measure_coverage.py --rollup "
@@ -247,18 +333,21 @@ def main() -> int:
 
     # 7. compare ---------------------------------------------------------------
     banner(7, "compare with the previous drop")
+    if nothing_runs:
+        print("    nothing ran; no comparison, no snapshot")
+        prev = []
     # a partial run's snapshot is never the reference: compare against the
     # newest COMPLETE drop, whether this run is partial or not
     prev = [d for d in sorted(glob.glob(os.path.join(DROPS, "*")))
             if os.path.basename(d) != head and not os.path.basename(d).endswith("-partial")]
-    if drop_status:
-        print(f"    partial drop: only the {len(paths)} path(s) that ran are compared")
-    if prev:
+    if blocked:
+        print(f"    only the {len(paths)} path(s) that ran are compared")
+    if prev and not nothing_runs:
         prev_dir = max(prev, key=lambda d: os.path.getmtime(os.path.join(d, "SNAPSHOT.json"))
                        if os.path.exists(os.path.join(d, "SNAPSHOT.json")) else 0)
         rc, out = sh(f"python3 Validation/tools/compare_drops.py --a {prev_dir} "
                      f"--b {report_dir} --json Validation/reports/drop_comparison.json"
-                     + (" --paths " + " ".join(paths) if drop_status else ""),
+                     + (" --paths " + " ".join(paths) if blocked else ""),
                      log, check=False)
         for l in out.splitlines():
             if l.strip().startswith(("REG", "FIX", "STIM", "CHG")) or "regression=" in l \
@@ -266,26 +355,30 @@ def main() -> int:
                 print("    " + l.strip())
         print(f"    vs {os.path.basename(prev_dir)}: "
               + (out.strip().splitlines()[-2].strip() if out.strip() else ""))
-    else:
+    elif not nothing_runs:
         print("    no previous snapshot; this drop becomes the reference")
 
     # 8. snapshot --------------------------------------------------------------
     banner(8, "snapshot")
-    rc, out = sh("python3 Validation/tools/compare_drops.py --snapshot"
-                 + (f" --b {report_dir} --tag partial" if drop_status else ""),
+    if nothing_runs:
+        print("    skipped")
+        rc, out = 0, ""
+    else:
+        rc, out = sh("python3 Validation/tools/compare_drops.py --snapshot"
+                 + (f" --b {report_dir} --tag partial" if partial else ""),
                  log, check=False)
-    print("    " + out.strip())
+        print("    " + out.strip())
 
     # 9. cockpit ---------------------------------------------------------------
     banner(9, "cockpit")
     rc, out = sh("python3 Validation/tools/dashboard_gen.py", log, check=False)
     print("    " + out.strip())
 
-    print(f"\n  drop {head}{' (partial)' if drop_status else ''}: {n_pass} pass / "
+    print(f"\n  drop {head}{' (partial)' if partial else ''}: {n_pass} pass / "
           f"{n_fail} fail / {n_err} error"
-          + (f" / {len(blocked)} blocked" if drop_status else "")
+          + (f" / {len(blocked)} blocked" if blocked else "")
           + f" in {(time.time() - t0) / 60:.1f} min; log {os.path.relpath(log, ROOT)}")
-    return 0 if n_err == 0 else 1
+    return 0 if n_err == 0 and not nothing_runs else 1
 
 
 if __name__ == "__main__":

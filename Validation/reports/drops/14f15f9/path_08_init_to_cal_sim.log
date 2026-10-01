@@ -1,4 +1,4 @@
-TOOL:	xrun	24.03-s013: Started on Oct 01, 2026 at 11:53:33 CDT
+TOOL:	xrun	24.03-s013: Started on Oct 01, 2026 at 12:03:32 CDT
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xrun: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
@@ -13,7 +13,6 @@ Check if clsbd is running on the host. If the host is not valid remove
 the ".cdslck" lock file. The connect timeout length can be set using
 the CLS_CLSBD_CONNECT_TIMEOUT environment variable.
 
-*WARNING* file /home/ugrads/j/jacobz/CDS.log.2 File is already locked by some other process.
 *WARNING* X Window Display Initialization failure
 *WARNING* (DISPLAY "")
 xrun: *N,CLEAN: Removing existing directory ./xcelium.d.
@@ -499,6 +498,12 @@ xmelab: *N,CGNSWA: (File: ./cov_conf.ccf, Line: 6): A covergroup is not (de)sele
 		worklib.init_fsm
 			FSM extracted for state register state
 	Total FSMs extracted = 1
+    .init_addr(init_fsm__init_addr),
+                                 |
+xmelab: *W,CUVMPW (./chain_harness.sv,64|33): port sizes differ in port connection(14/15) for the instance(chain_harness) .
+bind init_fsm init_cmd_monitor u_init_cmd_mon (.*);
+                                                |
+xmelab: *W,CUVMPW (./chain_monitors_bind.sv,5|48): port sizes differ in port connection(15/14) for the instance(chain_harness.u_init_fsm)  for child port:  init_addr.
 xmelab: *W,ICFNFR: Module "*_txn_harness", specified on line 17 of file "./cov_conf.ccf", not found in the design.
 xmelab: *W,ICFNFR: Module "seq_driver", specified on line 18 of file "./cov_conf.ccf", not found in the design.
 xmelab: *W,ICFNFR: Module "dram_stub", specified on line 19 of file "./cov_conf.ccf", not found in the design.
@@ -569,10 +574,10 @@ xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environm
 		worklib.cal_status_monitor:sv <0x1e2b5bfd>
 			streams:   3, words:  1791
 		worklib.chain_harness:sv <0x5fefd774>
-			streams:  24, words:  9089
+			streams:  24, words:  9093
 		worklib.calibration:sv <0x290a8b3d>
 			streams:  31, words: 18329
-		worklib.init_fsm:sv <0x7dab8857>
+		worklib.init_fsm:sv <0x60e96420>
 			streams:  20, words: 25536
 		worklib.\$unit_0x5e7539fc :compilation_unit <0x44b21d80>
 			streams:   0, words:     0
@@ -676,4 +681,4 @@ coverage setup:
 coverage files:
   model(design data) :  ./cov_work/scope/icc_44ed889c_1278e93c.ucm (reused)
   data               :  ./cov_work/scope/path_08_init_to_cal/icc_44ed889c_1278e93c.ucd
-TOOL:	xrun	24.03-s013: Exiting on Oct 01, 2026 at 11:53:35 CDT  (total: 00:00:02)
+TOOL:	xrun	24.03-s013: Exiting on Oct 01, 2026 at 12:03:34 CDT  (total: 00:00:02)

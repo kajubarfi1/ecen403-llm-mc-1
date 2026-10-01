@@ -1,4 +1,4 @@
-TOOL:	xrun	24.03-s013: Started on Oct 01, 2026 at 11:53:49 CDT
+TOOL:	xrun	24.03-s013: Started on Oct 01, 2026 at 12:03:36 CDT
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xrun: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
@@ -479,6 +479,21 @@ xmelab: *N,CGNSWA: (File: ./cov_conf.ccf, Line: 6): A covergroup is not (de)sele
 	Extracting FSMs for coverage:
 		worklib.wb_port
 	Total FSMs extracted = 0
+    .wb_adr_i(drv__wb_adr_i),
+                          |
+xmelab: *W,CUVMPW (./chain_harness.sv,73|26): port sizes differ in port connection(28/29) for the instance(chain_harness) .
+    .req_addr(wb_port__req_addr),
+                              |
+xmelab: *W,CUVMPW (./chain_harness.sv,84|30): port sizes differ in port connection(28/29) for the instance(chain_harness) .
+bind wb_port req_monitor u_req_mon (.*);
+                                     |
+xmelab: *W,CUVMPW (./chain_monitors_bind.sv,3|37): port sizes differ in port connection(29/28) for the instance(chain_harness.u_wb_port)  for child port:  req_addr.
+bind wb_port wb_monitor u_wb_mon (.*);
+                                   |
+xmelab: *W,CUVMPW (./chain_monitors_bind.sv,4|35): port sizes differ in port connection(29/28) for the instance(chain_harness.u_wb_port)  for child port:  wb_adr_i.
+bind wb_port wb_rsp_monitor u_wb_rsp_mon (.*);
+                                           |
+xmelab: *W,CUVMPW (./chain_monitors_bind.sv,5|43): port sizes differ in port connection(29/28) for the instance(chain_harness.u_wb_port)  for child port:  wb_adr_i.
 xmelab: *W,ICFNFR: Module "*_txn_harness", specified on line 17 of file "./cov_conf.ccf", not found in the design.
 xmelab: *W,ICFNFR: Module "dram_stub", specified on line 19 of file "./cov_conf.ccf", not found in the design.
 xmelab: *W,ICFNFR: Module "*_tb", specified on line 21 of file "./cov_conf.ccf", not found in the design.
@@ -535,18 +550,18 @@ xmvlog_cg: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,1
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
-		worklib.wb_rsp_monitor:sv <0x7125350d>
-			streams:   2, words:  1788
-		worklib.wb_monitor:sv <0x0ec18113>
-			streams:   2, words:  2913
+		worklib.wb_rsp_monitor:sv <0x44831f05>
+			streams:   2, words:  1834
+		worklib.wb_monitor:sv <0x247d319b>
+			streams:   2, words:  3005
 		worklib.req_monitor:sv <0x133385d5>
 			streams:   2, words:  2235
 		worklib.seq_driver:sv <0x73f17281>
-			streams:   5, words: 32108
-		worklib.chain_harness:sv <0x4828cd2e>
-			streams:  44, words: 12037
-		worklib.wb_port:sv <0x31e4f2fb>
-			streams:  58, words: 45842
+			streams:   5, words: 32103
+		worklib.chain_harness:sv <0x0fbf0a8e>
+			streams:  44, words: 12146
+		worklib.wb_port:sv <0x054a281b>
+			streams:  58, words: 46001
 		worklib.\$unit_0x14b85b43 :compilation_unit <0x15929ac4>
 			streams:   0, words:     0
 	Building instance specific data structures.
@@ -557,7 +572,8 @@ xmelab: *W,CGPIDF: Covergroup "per_instance" option , by default, is set as 0.
 		Modules:                 6       6
 		Registers:              76      76
 		Scalar wires:           42       -
-		Vectored wires:         33       -
+		Expanded wires:         29       1
+		Vectored wires:         32       -
 		Named events:            5       5
 		Always blocks:          35      35
 		Initial blocks:         10      10
@@ -623,53 +639,53 @@ xcelium> run
 TXN wb_rsp reset t=0
 TXN wb reset t=0
 TXN req reset t=0
-TXN wb read t=38000 addr=409f134
-TXN req request t=39000 addr=409f134 data=0 mask=0 we=0
+TXN wb read t=38000 addr=204f89a
+TXN req request t=39000 addr=204f89a data=0 mask=0 we=0
 DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb read t=1353000 addr=1fb5355e
-TXN req request t=1354000 addr=1fb5355e data=0 mask=0 we=0
+TXN wb read t=1353000 addr=fda9aaf
+TXN req request t=1354000 addr=fda9aaf data=0 mask=0 we=0
 DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb write t=2683000 addr=184b9da5 data=c9e9c616 sel=3
-TXN req request t=2684000 addr=184b9da5 data=c9e9c616 mask=3 we=1
-TXN wb read t=2733000 addr=18f2a0a3
-TXN req request t=2734000 addr=18f2a0a3 data=c9e9c616 mask=3 we=0
+TXN wb write t=2683000 addr=c25ced2 data=c9e9c616 sel=3
+TXN req request t=2684000 addr=c25ced2 data=c9e9c616 mask=3 we=1
+TXN wb read t=2733000 addr=c795051
+TXN req request t=2734000 addr=c795051 data=c9e9c616 mask=3 we=0
 DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb read t=4058000 addr=1c81394b
-TXN req request t=4059000 addr=1c81394b data=c9e9c616 mask=3 we=0
+TXN wb read t=4058000 addr=e409ca5
+TXN req request t=4059000 addr=e409ca5 data=c9e9c616 mask=3 we=0
 DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb read t=5373000 addr=68ae3c7
-TXN req request t=5374000 addr=68ae3c7 data=c9e9c616 mask=3 we=0
+TXN wb read t=5373000 addr=34571e3
+TXN req request t=5374000 addr=34571e3 data=c9e9c616 mask=3 we=0
 DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb read t=6693000 addr=16db9b8
-TXN req request t=6694000 addr=16db9b8 data=c9e9c616 mask=3 we=0
+TXN wb read t=6693000 addr=b6dcdc
+TXN req request t=6694000 addr=b6dcdc data=c9e9c616 mask=3 we=0
 DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb read t=7988000 addr=1865a673
-TXN req request t=7989000 addr=1865a673 data=c9e9c616 mask=3 we=0
+TXN wb read t=7988000 addr=c32d339
+TXN req request t=7989000 addr=c32d339 data=c9e9c616 mask=3 we=0
 DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb read t=9333000 addr=1b03f53d
-TXN req request t=9334000 addr=1b03f53d data=c9e9c616 mask=3 we=0
+TXN wb read t=9333000 addr=d81fa9e
+TXN req request t=9334000 addr=d81fa9e data=c9e9c616 mask=3 we=0
 DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb read t=10683000 addr=e30323f
-TXN req request t=10684000 addr=e30323f data=c9e9c616 mask=3 we=0
+TXN wb read t=10683000 addr=718191f
+TXN req request t=10684000 addr=718191f data=c9e9c616 mask=3 we=0
 DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb write t=12013000 addr=eeadb0e data=587fd280 sel=7
-TXN req request t=12014000 addr=eeadb0e data=587fd280 mask=7 we=1
-TXN wb write t=12063000 addr=160165d data=19999e3f sel=9
-TXN req request t=12064000 addr=160165d data=19999e3f mask=9 we=1
-TXN wb write t=12083000 addr=1b03cd16 data=3099fdf5 sel=9
-TXN req request t=12084000 addr=1b03cd16 data=3099fdf5 mask=9 we=1
-TXN wb write t=12143000 addr=192cb4af data=8d6af57 sel=7
-TXN req request t=12144000 addr=192cb4af data=8d6af57 mask=7 we=1
-TXN wb write t=12213000 addr=1a841edd data=aa2ca1af sel=b
-TXN req request t=12214000 addr=1a841edd data=aa2ca1af mask=b we=1
-TXN wb write t=12268000 addr=588af5e data=82283d15 sel=5
-TXN req request t=12269000 addr=588af5e data=82283d15 mask=5 we=1
-TXN wb write t=12323000 addr=17b6a4b6 data=7923986 sel=1
-TXN req request t=12324000 addr=17b6a4b6 data=7923986 mask=1 we=1
-TXN wb write t=12358000 addr=ae70053 data=8c5fe8f8 sel=c
-TXN req request t=12359000 addr=ae70053 data=8c5fe8f8 mask=c we=1
-TXN wb write t=12413000 addr=169c0b3e data=1762741 sel=4
-TXN req request t=12414000 addr=169c0b3e data=1762741 mask=4 we=1
+TXN wb write t=12013000 addr=7756d87 data=587fd280 sel=7
+TXN req request t=12014000 addr=7756d87 data=587fd280 mask=7 we=1
+TXN wb write t=12063000 addr=b00b2e data=19999e3f sel=9
+TXN req request t=12064000 addr=b00b2e data=19999e3f mask=9 we=1
+TXN wb write t=12083000 addr=d81e68b data=3099fdf5 sel=9
+TXN req request t=12084000 addr=d81e68b data=3099fdf5 mask=9 we=1
+TXN wb write t=12143000 addr=c965a57 data=8d6af57 sel=7
+TXN req request t=12144000 addr=c965a57 data=8d6af57 mask=7 we=1
+TXN wb write t=12213000 addr=d420f6e data=aa2ca1af sel=b
+TXN req request t=12214000 addr=d420f6e data=aa2ca1af mask=b we=1
+TXN wb write t=12268000 addr=2c457af data=82283d15 sel=5
+TXN req request t=12269000 addr=2c457af data=82283d15 mask=5 we=1
+TXN wb write t=12323000 addr=bdb525b data=7923986 sel=1
+TXN req request t=12324000 addr=bdb525b data=7923986 mask=1 we=1
+TXN wb write t=12358000 addr=5738029 data=8c5fe8f8 sel=c
+TXN req request t=12359000 addr=5738029 data=8c5fe8f8 mask=c we=1
+TXN wb write t=12413000 addr=b4e059f data=1762741 sel=4
+TXN req request t=12414000 addr=b4e059f data=1762741 mask=4 we=1
 HARNESS_DONE
 Simulation complete via $finish(1) at time 12857500 PS + 0
 ./chain_harness.sv:98     $finish;
@@ -686,4 +702,4 @@ coverage setup:
 coverage files:
   model(design data) :  ./cov_work/scope/icc_154b5263_58da17e8.ucm (reused)
   data               :  ./cov_work/scope/path_21_wb_port_standalone/icc_154b5263_58da17e8.ucd
-TOOL:	xrun	24.03-s013: Exiting on Oct 01, 2026 at 11:53:52 CDT  (total: 00:00:03)
+TOOL:	xrun	24.03-s013: Exiting on Oct 01, 2026 at 12:03:39 CDT  (total: 00:00:03)

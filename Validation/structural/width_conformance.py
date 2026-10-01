@@ -39,6 +39,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 SPEC_PATH = os.path.join(ROOT, "Validation", "spec",
                          "llmmc_microarchitecturespec_filled.json")
+SPEC_PATH = os.environ.get("VALIDATION_SPEC", SPEC_PATH)   # the spec the drop was generated from, when it is not the default
 RULES_PATH = os.path.join(HERE, "width_rules.json")
 
 

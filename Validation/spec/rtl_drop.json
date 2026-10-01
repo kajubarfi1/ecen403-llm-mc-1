@@ -1,6 +1,6 @@
 {
   "$schema": "validation-rtl-drop/1",
-  "$comment": "Where the RTL under validation comes from. Every tool that needs a block's RTL or manifest resolves it through Validation/structural/rtl_drop.py using ONLY these roots, in order \u2014 never by 'newest file anywhere under Frontend/ or Frontend2/'. The Frontend tree also carries demo copies, failed attempts and trial directories of the same blocks; a lookup that could land on one of those would validate the wrong design without saying so. A block absent from every root is a missing block, reported as such, never substituted.",
+  "$comment": "Where the RTL under validation comes from. Every tool that needs a block's RTL or manifest resolves it through Validation/structural/rtl_drop.py using ONLY these roots, in order — never by 'newest file anywhere under Frontend/ or Frontend2/'. The Frontend tree also carries demo copies, failed attempts and trial directories of the same blocks; a lookup that could land on one of those would validate the wrong design without saying so. A block absent from every root is a missing block, reported as such, never substituted.",
   "roots": [
     "Frontend2/OutputFolders"
   ],
@@ -27,5 +27,12 @@
       ],
       "note": "Frontend2 pipeline output is the canonical drop from here on (Jacob, 2026-09-24). Frontend/OutputFolders is a historical snapshot only."
     }
-  ]
+  ],
+  "rtl_dirs_preferred": [
+    "PHASE1RTL",
+    "PHASE2RTL",
+    "PHASE3RTL",
+    "PHASE4RTL"
+  ],
+  "$rtl_dirs_note": "The Frontend's phase directories ARE the drop: each block's RTL is read from the phase that generated it. TOPRTL/ is the backend's assembly (copies of the blocks beside ddr3_controller.sv); when a copy there differs from the phase output the drop disagrees with itself and that is filed, never resolved by file age. Two differing copies with no preferred directory refuse to resolve (2026-10-01: TOPRTL/wb_port from the golden spec vs PHASE1RTL/wb_port from compiled_ddr31333)."
 }

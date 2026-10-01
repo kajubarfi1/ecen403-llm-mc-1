@@ -83,7 +83,7 @@ def main() -> int:
                          "is marked so in the report")
     args = ap.parse_args()
     import rtl_drop as RD
-    head = RD._git_head() or "unknown"
+    head = RD.drop_id()
 
     # 1. formal top
     os.makedirs(FORMAL_DIR, exist_ok=True)

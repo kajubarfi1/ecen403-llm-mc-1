@@ -5,60 +5,74 @@
     {
       "source": "validation",
       "target": "frontend",
-      "kind": "manifest_gap",
+      "kind": "width_mismatch",
+      "scope": "wb_port",
+      "owner_candidates": [
+        "wb_port"
+      ],
+      "severity": "critical",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "wb_port.req_addr is 28 bits but drives addr_decoder.req_addr, which is 29",
+      "detail": "The manifests declare addr_decoder.req_addr is driven by wb_port.req_addr, and their widths differ (28 -> 29). The wire cannot be made; every path that crosses it is blocked until the drop agrees with itself. The spec fixes this width: host_interface.address_width_bits = 29, so the block(s) that depart from it own the fix: wb_port.",
+      "evidence": {
+        "from": "wb_port.req_addr",
+        "to": "addr_decoder.req_addr",
+        "from_width": 28,
+        "to_width": 29,
+        "spec_path": "host_interface.address_width_bits",
+        "spec_value": 29
+      },
+      "spec_ref": "host_interface.address_width_bits",
+      "status": "open"
+    },
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "manifest_wrong_source",
       "scope": "bank_tracker",
-      "severity": "minor",
+      "severity": "major",
       "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-      "title": "bank_tracker manifest declares no `source` on 7 consumer port(s) the design wires",
-      "detail": "Ports cmd_act_valid, cmd_act_bank, cmd_act_row, cmd_pre_valid, cmd_rd_valid, cmd_wr_valid, cmd_ref_valid are inputs that the integrated design drives from another block, but the manifest does not say from where. Validation carries these edges by hand in integration_overrides.json; the backend's set gate lists them as unresolved slots. Add `\"source\": \"<block>.<port>\"` to each.",
+      "title": "bank_tracker.cmd_pre_bank declares source cmd_gen.fb_pre_bank, but the design needs glue",
+      "detail": "The manifest says bank_tracker.cmd_pre_bank is driven directly by cmd_gen.fb_pre_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. The harness registers the scheduler's cmd_bank one cycle so it aligns with the REGISTERED fb pulses. This is testbench glue standing in for a missing design signal \u2014 see the filed finding; the Frontend should add fb_pre_bank/fb_rd_bank/fb_wr_bank. Driver used: scheduler.cmd_bank. Either the RTL should consume cmd_gen.fb_pre_bank as declared, or the manifest should stop claiming a direct connection.",
       "evidence": {
-        "block": "bank_tracker",
-        "ports": [
-          "cmd_act_valid",
-          "cmd_act_bank",
-          "cmd_act_row",
-          "cmd_pre_valid",
-          "cmd_rd_valid",
-          "cmd_wr_valid",
-          "cmd_ref_valid"
-        ]
+        "consumer": "bank_tracker.cmd_pre_bank",
+        "declared_source": "cmd_gen.fb_pre_bank",
+        "driver": "scheduler.cmd_bank",
+        "kind": "glue"
       },
       "status": "open"
     },
     {
       "source": "validation",
       "target": "frontend",
-      "kind": "manifest_gap",
-      "scope": "cmd_queue",
-      "severity": "minor",
+      "kind": "manifest_wrong_source",
+      "scope": "bank_tracker",
+      "severity": "major",
       "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-      "title": "cmd_queue manifest declares no `source` on 4 consumer port(s) the design wires",
-      "detail": "Ports enq_valid, enq_aux, deq_grant, deq_idx are inputs that the integrated design drives from another block, but the manifest does not say from where. Validation carries these edges by hand in integration_overrides.json; the backend's set gate lists them as unresolved slots. Add `\"source\": \"<block>.<port>\"` to each.",
+      "title": "bank_tracker.cmd_rd_bank declares source cmd_gen.fb_rd_bank, but the design needs glue",
+      "detail": "The manifest says bank_tracker.cmd_rd_bank is driven directly by cmd_gen.fb_rd_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. The harness registers the scheduler's cmd_bank one cycle so it aligns with the REGISTERED fb pulses. This is testbench glue standing in for a missing design signal \u2014 see the filed finding; the Frontend should add fb_pre_bank/fb_rd_bank/fb_wr_bank. Driver used: scheduler.cmd_bank. Either the RTL should consume cmd_gen.fb_rd_bank as declared, or the manifest should stop claiming a direct connection.",
       "evidence": {
-        "block": "cmd_queue",
-        "ports": [
-          "enq_valid",
-          "enq_aux",
-          "deq_grant",
-          "deq_idx"
-        ]
+        "consumer": "bank_tracker.cmd_rd_bank",
+        "declared_source": "cmd_gen.fb_rd_bank",
+        "driver": "scheduler.cmd_bank",
+        "kind": "glue"
       },
       "status": "open"
     },
     {
       "source": "validation",
       "target": "frontend",
-      "kind": "manifest_gap",
-      "scope": "refresh_ctrl",
-      "severity": "minor",
+      "kind": "manifest_wrong_source",
+      "scope": "bank_tracker",
+      "severity": "major",
       "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-      "title": "refresh_ctrl manifest declares no `source` on 1 consumer port(s) the design wires",
-      "detail": "Ports ref_ack are inputs that the integrated design drives from another block, but the manifest does not say from where. Validation carries these edges by hand in integration_overrides.json; the backend's set gate lists them as unresolved slots. Add `\"source\": \"<block>.<port>\"` to each.",
+      "title": "bank_tracker.cmd_wr_bank declares source cmd_gen.fb_wr_bank, but the design needs glue",
+      "detail": "The manifest says bank_tracker.cmd_wr_bank is driven directly by cmd_gen.fb_wr_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. The harness registers the scheduler's cmd_bank one cycle so it aligns with the REGISTERED fb pulses. This is testbench glue standing in for a missing design signal \u2014 see the filed finding; the Frontend should add fb_pre_bank/fb_rd_bank/fb_wr_bank. Driver used: scheduler.cmd_bank. Either the RTL should consume cmd_gen.fb_wr_bank as declared, or the manifest should stop claiming a direct connection.",
       "evidence": {
-        "block": "refresh_ctrl",
-        "ports": [
-          "ref_ack"
-        ]
+        "consumer": "bank_tracker.cmd_wr_bank",
+        "declared_source": "cmd_gen.fb_wr_bank",
+        "driver": "scheduler.cmd_bank",
+        "kind": "glue"
       },
       "status": "open"
     },
@@ -69,11 +83,11 @@
       "scope": "data_path",
       "severity": "major",
       "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-      "title": "data_path.cmd_aux declares source scheduler.cmd_aux, but the design needs glue",
-      "detail": "The manifest says data_path.cmd_aux is driven directly by scheduler.cmd_aux. It is not: cmd_gen's feedback carries no aux tag, but data_path needs the issued command's aux to tag read responses (rd_rsp_aux). Registered one cycle to align with the registered fb_rd_valid/fb_wr_valid pulses. Same missing-feedback-signal gap as the bank workaround \u2014 covered by the filed fb-bank finding; the design wants fb_aux. Driver used: scheduler.cmd_aux. Either the RTL should consume scheduler.cmd_aux as declared, or the manifest should stop claiming a direct connection.",
+      "title": "data_path.cmd_aux declares source cmd_gen.cmd_out_aux, but the design needs glue",
+      "detail": "The manifest says data_path.cmd_aux is driven directly by cmd_gen.cmd_out_aux. It is not: cmd_gen's feedback carries no aux tag, but data_path needs the issued command's aux to tag read responses (rd_rsp_aux). Registered one cycle to align with the registered fb_rd_valid/fb_wr_valid pulses. Same missing-feedback-signal gap as the bank workaround \u2014 covered by the filed fb-bank finding; the design wants fb_aux. Driver used: scheduler.cmd_aux. Either the RTL should consume cmd_gen.cmd_out_aux as declared, or the manifest should stop claiming a direct connection.",
       "evidence": {
         "consumer": "data_path.cmd_aux",
-        "declared_source": "scheduler.cmd_aux",
+        "declared_source": "cmd_gen.cmd_out_aux",
         "driver": "scheduler.cmd_aux",
         "kind": "glue"
       },

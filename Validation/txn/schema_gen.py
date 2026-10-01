@@ -41,6 +41,7 @@ def _first_drop_root():
 FRONTEND_ROOT = _first_drop_root()
 SPEC_PATH = os.path.join(ROOT, "Validation", "spec",
                          "llmmc_microarchitecturespec_filled.json")
+SPEC_PATH = os.environ.get("VALIDATION_SPEC", SPEC_PATH)   # the spec the drop was generated from, when it is not the default
 
 
 class SchemaError(Exception):

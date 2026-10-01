@@ -38,6 +38,7 @@ from typing import Dict, Optional, Tuple
 
 _DEFAULT_SPEC = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                              "..", "spec", "llmmc_microarchitecturespec_filled.json")
+_DEFAULT_SPEC = os.environ.get("VALIDATION_SPEC", _DEFAULT_SPEC)   # the spec the drop was generated from, when it is not the default
 
 
 def _parse_bits(bits) -> Tuple[int, int]:

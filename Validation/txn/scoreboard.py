@@ -568,8 +568,8 @@ def main() -> int:
     ap.add_argument("--trace", required=True, help="observed .jsonl trace")
     ap.add_argument("--model", help="predictor/checker .py (not needed for observe)")
     ap.add_argument("--strategy", help="override path_definitions.json")
-    ap.add_argument("--spec", default=os.path.join(
-        root, "Validation", "spec", "llmmc_microarchitecturespec_filled.json"))
+    ap.add_argument("--spec", default=os.environ.get("VALIDATION_SPEC", os.path.join(
+        root, "Validation", "spec", "llmmc_microarchitecturespec_filled.json")))
     ap.add_argument("--findings", help="write findings JSON here")
     args = ap.parse_args()
 

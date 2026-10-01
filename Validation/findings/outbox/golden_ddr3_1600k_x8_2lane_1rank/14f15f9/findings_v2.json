@@ -2,9 +2,9 @@
   "schema": "validation-findings/2",
   "drop": "14f15f9",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "generated_utc": "2026-10-01T16:53:55.565198Z",
+  "generated_utc": "2026-10-01T17:04:03.125986Z",
   "reports": "Validation/reports/paths",
-  "finding_count": 12,
+  "finding_count": 20,
   "findings": [
     {
       "schema": "validation-findings/2",
@@ -155,25 +155,25 @@
       "detector": "exact:data_path:missing",
       "anchor": [
         {
-          "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/data_path.sv",
           "line": 170,
           "signal": "ddr_dq_o",
           "text": "ddr_dq_o = wr_dat_r[DQ_WIDTH-1:0];"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/data_path.sv",
           "line": 173,
           "signal": "ddr_dq_o",
           "text": "ddr_dq_o = wr_dat_r[(wb+1)*DQ_WIDTH-1 -: DQ_WIDTH];"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/data_path.sv",
           "line": 300,
           "signal": "rd_rsp_data",
           "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/data_path.sv",
           "line": 301,
           "signal": "rd_rsp_aux",
           "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
@@ -293,25 +293,25 @@
       "detector": "invariant:cmd_queue+scheduler:double_activate",
       "anchor": [
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 202,
           "signal": "cmd_type",
           "text": "cmd_type  <= CMD_NOP;"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 213,
           "signal": "cmd_type",
           "text": "cmd_type  <= sel_type;"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 228,
           "signal": "cmd_bank",
           "text": "cmd_bank <= sel_bank;"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 234,
           "signal": "cmd_row",
           "text": "cmd_row  <= q_row[sel_idx];"
@@ -546,25 +546,25 @@
       "detector": "assertion:a_TIMING_004",
       "anchor": [
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 202,
           "signal": "cmd_type",
           "text": "cmd_type  <= CMD_NOP;"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 213,
           "signal": "cmd_type",
           "text": "cmd_type  <= sel_type;"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 228,
           "signal": "cmd_bank",
           "text": "cmd_bank <= sel_bank;"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 234,
           "signal": "cmd_row",
           "text": "cmd_row  <= q_row[sel_idx];"
@@ -635,25 +635,25 @@
       "detector": "assertion:a_TIMING_005",
       "anchor": [
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 202,
           "signal": "cmd_type",
           "text": "cmd_type  <= CMD_NOP;"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 213,
           "signal": "cmd_type",
           "text": "cmd_type  <= sel_type;"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 228,
           "signal": "cmd_bank",
           "text": "cmd_bank <= sel_bank;"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 234,
           "signal": "cmd_row",
           "text": "cmd_row  <= q_row[sel_idx];"
@@ -777,25 +777,25 @@
       "detector": "assertion:a_TIMING_011",
       "anchor": [
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 202,
           "signal": "cmd_type",
           "text": "cmd_type  <= CMD_NOP;"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 213,
           "signal": "cmd_type",
           "text": "cmd_type  <= sel_type;"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 228,
           "signal": "cmd_bank",
           "text": "cmd_bank <= sel_bank;"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 234,
           "signal": "cmd_row",
           "text": "cmd_row  <= q_row[sel_idx];"
@@ -967,6 +967,300 @@
     },
     {
       "schema": "validation-findings/2",
+      "id": "structural/wb_port/RTL_BUG/req_addr",
+      "kind": "rtl_defect",
+      "check_id": "RTL_BUG/req_addr",
+      "taxonomy_id": "RTL_BUG",
+      "detectors": [
+        "structural:width_findings"
+      ],
+      "owner_module": "wb_port",
+      "owner_candidates": [
+        "wb_port"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "wb_port.req_addr is 28 bits; the spec declares 29",
+      "requirement": "host_interface.address_width_bits = 29, so wb_port.req_addr must be 29 bits wide; the design makes it 28. The host byte address spans the spec's host address space on the bus and on the request the port forwards.",
+      "spec_ref": "host_interface.address_width_bits",
+      "expected": "host_interface.address_width_bits = 29",
+      "actual": "wb_port.req_addr is 28 bits",
+      "detector": "structural:width_findings",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json",
+          "signal": "req_addr",
+          "text": "manifest port req_addr"
+        }
+      ],
+      "mechanism": "host_interface.address_width_bits = 29, so wb_port.req_addr must be 29 bits wide; the design makes it 28. The host byte address spans the spec's host address space on the bus and on the request the port forwards.",
+      "paths": [
+        "structural"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "cmd": "python3 Validation/structural/width_conformance.py"
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "14f15f9",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/width_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "structural/wb_port/RTL_BUG/wb_adr_i",
+      "kind": "rtl_defect",
+      "check_id": "RTL_BUG/wb_adr_i",
+      "taxonomy_id": "RTL_BUG",
+      "detectors": [
+        "structural:width_findings"
+      ],
+      "owner_module": "wb_port",
+      "owner_candidates": [
+        "wb_port"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "wb_port.wb_adr_i is 28 bits; the spec declares 29",
+      "requirement": "host_interface.address_width_bits = 29, so wb_port.wb_adr_i must be 29 bits wide; the design makes it 28. The host byte address spans the spec's host address space on the bus and on the request the port forwards.",
+      "spec_ref": "host_interface.address_width_bits",
+      "expected": "host_interface.address_width_bits = 29",
+      "actual": "wb_port.wb_adr_i is 28 bits",
+      "detector": "structural:width_findings",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json",
+          "signal": "wb_adr_i",
+          "text": "manifest port wb_adr_i"
+        }
+      ],
+      "mechanism": "host_interface.address_width_bits = 29, so wb_port.wb_adr_i must be 29 bits wide; the design makes it 28. The host byte address spans the spec's host address space on the bus and on the request the port forwards.",
+      "paths": [
+        "structural"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "cmd": "python3 Validation/structural/width_conformance.py"
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "14f15f9",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/width_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "structural/wb_port/WIDTH_MISMATCH/req_addr",
+      "kind": "rtl_defect",
+      "check_id": "WIDTH_MISMATCH/req_addr",
+      "taxonomy_id": "WIDTH_MISMATCH",
+      "detectors": [
+        "structural:integration_map_findings"
+      ],
+      "owner_module": "wb_port",
+      "owner_candidates": [
+        "wb_port"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "wb_port.req_addr is 28 bits but drives addr_decoder.req_addr, which is 29",
+      "requirement": "The manifests declare addr_decoder.req_addr is driven by wb_port.req_addr, and their widths differ (28 -> 29). The wire cannot be made; every path that crosses it is blocked until the drop agrees with itself. The spec fixes this width: host_interface.address_width_bits = 29, so the block(s) that dep",
+      "spec_ref": "host_interface.address_width_bits",
+      "expected": "host_interface.address_width_bits = 29",
+      "actual": "wb_port.req_addr 28 -> addr_decoder.req_addr 29",
+      "detector": "structural:integration_map_findings",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json",
+          "signal": "req_addr",
+          "text": "manifest port req_addr"
+        }
+      ],
+      "mechanism": "The manifests declare addr_decoder.req_addr is driven by wb_port.req_addr, and their widths differ (28 -> 29). The wire cannot be made; every path that crosses it is blocked until the drop agrees with itself. The spec fixes this width: host_interface.address_width_bits = 29, so the block(s) that depart from it own the fix: wb_port.",
+      "paths": [
+        "structural"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "cmd": "python3 Validation/structural/integration_map_gen.py --findings /dev/stdout"
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "14f15f9",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/integration_map_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "structural/bank_tracker/MANIFEST_WRONG_SOURCE/cmd_pre_bank",
+      "kind": "manifest_defect",
+      "check_id": "MANIFEST_WRONG_SOURCE/cmd_pre_bank",
+      "taxonomy_id": "MANIFEST_WRONG_SOURCE",
+      "detectors": [
+        "structural:integration_map_findings"
+      ],
+      "owner_module": "bank_tracker",
+      "owner_candidates": [
+        "bank_tracker"
+      ],
+      "severity": "major",
+      "confidence": "confirmed",
+      "title": "bank_tracker.cmd_pre_bank declares source cmd_gen.fb_pre_bank, but the design needs glue",
+      "requirement": "The manifest says bank_tracker.cmd_pre_bank is driven directly by cmd_gen.fb_pre_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state",
+      "spec_ref": null,
+      "expected": "bank_tracker.cmd_pre_bank declares source cmd_gen.fb_pre_bank, but the design needs glue",
+      "actual": "The manifest says bank_tracker.cmd_pre_bank is driven directly by cmd_gen.fb_pre_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR puls",
+      "detector": "structural:integration_map_findings",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker_manifest.json",
+          "signal": "cmd_pre_bank",
+          "text": "manifest port cmd_pre_bank"
+        }
+      ],
+      "mechanism": "The manifest says bank_tracker.cmd_pre_bank is driven directly by cmd_gen.fb_pre_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. The harness registers the scheduler's cmd_bank one cycle so it aligns with the REGISTERED fb pulses. This is testbench glue standing in for a missing design signal \u2014 see the filed finding; the Frontend should add fb_pre_bank/fb_rd_bank/fb_wr_bank. Driver used: scheduler.cmd_bank. Either the RTL should consume cmd_gen.fb_pre_bank as declared, or the manifest should stop claiming a direct connection.",
+      "paths": [
+        "structural"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "cmd": "python3 Validation/structural/integration_map_gen.py --findings /dev/stdout"
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "14f15f9",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/integration_map_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "structural/bank_tracker/MANIFEST_WRONG_SOURCE/cmd_rd_bank",
+      "kind": "manifest_defect",
+      "check_id": "MANIFEST_WRONG_SOURCE/cmd_rd_bank",
+      "taxonomy_id": "MANIFEST_WRONG_SOURCE",
+      "detectors": [
+        "structural:integration_map_findings"
+      ],
+      "owner_module": "bank_tracker",
+      "owner_candidates": [
+        "bank_tracker"
+      ],
+      "severity": "major",
+      "confidence": "confirmed",
+      "title": "bank_tracker.cmd_rd_bank declares source cmd_gen.fb_rd_bank, but the design needs glue",
+      "requirement": "The manifest says bank_tracker.cmd_rd_bank is driven directly by cmd_gen.fb_rd_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. ",
+      "spec_ref": null,
+      "expected": "bank_tracker.cmd_rd_bank declares source cmd_gen.fb_rd_bank, but the design needs glue",
+      "actual": "The manifest says bank_tracker.cmd_rd_bank is driven directly by cmd_gen.fb_rd_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses",
+      "detector": "structural:integration_map_findings",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker_manifest.json",
+          "signal": "cmd_rd_bank",
+          "text": "manifest port cmd_rd_bank"
+        }
+      ],
+      "mechanism": "The manifest says bank_tracker.cmd_rd_bank is driven directly by cmd_gen.fb_rd_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. The harness registers the scheduler's cmd_bank one cycle so it aligns with the REGISTERED fb pulses. This is testbench glue standing in for a missing design signal \u2014 see the filed finding; the Frontend should add fb_pre_bank/fb_rd_bank/fb_wr_bank. Driver used: scheduler.cmd_bank. Either the RTL should consume cmd_gen.fb_rd_bank as declared, or the manifest should stop claiming a direct connection.",
+      "paths": [
+        "structural"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "cmd": "python3 Validation/structural/integration_map_gen.py --findings /dev/stdout"
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "14f15f9",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/integration_map_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "structural/bank_tracker/MANIFEST_WRONG_SOURCE/cmd_wr_bank",
+      "kind": "manifest_defect",
+      "check_id": "MANIFEST_WRONG_SOURCE/cmd_wr_bank",
+      "taxonomy_id": "MANIFEST_WRONG_SOURCE",
+      "detectors": [
+        "structural:integration_map_findings"
+      ],
+      "owner_module": "bank_tracker",
+      "owner_candidates": [
+        "bank_tracker"
+      ],
+      "severity": "major",
+      "confidence": "confirmed",
+      "title": "bank_tracker.cmd_wr_bank declares source cmd_gen.fb_wr_bank, but the design needs glue",
+      "requirement": "The manifest says bank_tracker.cmd_wr_bank is driven directly by cmd_gen.fb_wr_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. ",
+      "spec_ref": null,
+      "expected": "bank_tracker.cmd_wr_bank declares source cmd_gen.fb_wr_bank, but the design needs glue",
+      "actual": "The manifest says bank_tracker.cmd_wr_bank is driven directly by cmd_gen.fb_wr_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses",
+      "detector": "structural:integration_map_findings",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker_manifest.json",
+          "signal": "cmd_wr_bank",
+          "text": "manifest port cmd_wr_bank"
+        }
+      ],
+      "mechanism": "The manifest says bank_tracker.cmd_wr_bank is driven directly by cmd_gen.fb_wr_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. The harness registers the scheduler's cmd_bank one cycle so it aligns with the REGISTERED fb pulses. This is testbench glue standing in for a missing design signal \u2014 see the filed finding; the Frontend should add fb_pre_bank/fb_rd_bank/fb_wr_bank. Driver used: scheduler.cmd_bank. Either the RTL should consume cmd_gen.fb_wr_bank as declared, or the manifest should stop claiming a direct connection.",
+      "paths": [
+        "structural"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "cmd": "python3 Validation/structural/integration_map_gen.py --findings /dev/stdout"
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "14f15f9",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/integration_map_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
       "id": "cmd_queue/SCHED_004",
       "kind": "rtl_defect",
       "check_id": "SCHED_004",
@@ -1020,6 +1314,104 @@
     },
     {
       "schema": "validation-findings/2",
+      "id": "structural/data_path/MANIFEST_WRONG_SOURCE/cmd_aux",
+      "kind": "manifest_defect",
+      "check_id": "MANIFEST_WRONG_SOURCE/cmd_aux",
+      "taxonomy_id": "MANIFEST_WRONG_SOURCE",
+      "detectors": [
+        "structural:integration_map_findings"
+      ],
+      "owner_module": "data_path",
+      "owner_candidates": [
+        "data_path"
+      ],
+      "severity": "major",
+      "confidence": "confirmed",
+      "title": "data_path.cmd_aux declares source cmd_gen.cmd_out_aux, but the design needs glue",
+      "requirement": "The manifest says data_path.cmd_aux is driven directly by cmd_gen.cmd_out_aux. It is not: cmd_gen's feedback carries no aux tag, but data_path needs the issued command's aux to tag read responses (rd_rsp_aux). Registered one cycle to align with the registered fb_rd_valid/fb_wr_valid pulses. Same mis",
+      "spec_ref": null,
+      "expected": "data_path.cmd_aux declares source cmd_gen.cmd_out_aux, but the design needs glue",
+      "actual": "The manifest says data_path.cmd_aux is driven directly by cmd_gen.cmd_out_aux. It is not: cmd_gen's feedback carries no aux tag, but data_path needs the issued command's aux to tag read responses (rd_",
+      "detector": "structural:integration_map_findings",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json",
+          "signal": "cmd_aux",
+          "text": "manifest port cmd_aux"
+        }
+      ],
+      "mechanism": "The manifest says data_path.cmd_aux is driven directly by cmd_gen.cmd_out_aux. It is not: cmd_gen's feedback carries no aux tag, but data_path needs the issued command's aux to tag read responses (rd_rsp_aux). Registered one cycle to align with the registered fb_rd_valid/fb_wr_valid pulses. Same missing-feedback-signal gap as the bank workaround \u2014 covered by the filed fb-bank finding; the design wants fb_aux. Driver used: scheduler.cmd_aux. Either the RTL should consume cmd_gen.cmd_out_aux as declared, or the manifest should stop claiming a direct connection.",
+      "paths": [
+        "structural"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "cmd": "python3 Validation/structural/integration_map_gen.py --findings /dev/stdout"
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "14f15f9",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/integration_map_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "structural/data_path/MANIFEST_WRONG_SOURCE/wr_data_valid",
+      "kind": "manifest_defect",
+      "check_id": "MANIFEST_WRONG_SOURCE/wr_data_valid",
+      "taxonomy_id": "MANIFEST_WRONG_SOURCE",
+      "detectors": [
+        "structural:integration_map_findings"
+      ],
+      "owner_module": "data_path",
+      "owner_candidates": [
+        "data_path"
+      ],
+      "severity": "major",
+      "confidence": "confirmed",
+      "title": "data_path.wr_data_valid declares source wb_port.req_valid, but the design needs expr_glue",
+      "requirement": "The manifest says data_path.wr_data_valid is driven directly by wb_port.req_valid. It is not: data_path buffers a write word when wb_port's write request is ACCEPTED (valid && we && ready). No single design port carries that event; it is the same accept condition cmd_queue enqueues on. Driver used: ",
+      "spec_ref": null,
+      "expected": "data_path.wr_data_valid declares source wb_port.req_valid, but the design needs expr_glue",
+      "actual": "The manifest says data_path.wr_data_valid is driven directly by wb_port.req_valid. It is not: data_path buffers a write word when wb_port's write request is ACCEPTED (valid && we && ready). No single ",
+      "detector": "structural:integration_map_findings",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json",
+          "signal": "wr_data_valid",
+          "text": "manifest port wr_data_valid"
+        }
+      ],
+      "mechanism": "The manifest says data_path.wr_data_valid is driven directly by wb_port.req_valid. It is not: data_path buffers a write word when wb_port's write request is ACCEPTED (valid && we && ready). No single design port carries that event; it is the same accept condition cmd_queue enqueues on. Driver used: wb_port.req_valid && wb_port.req_we && cmd_queue.enq_ready. Either the RTL should consume wb_port.req_valid as declared, or the manifest should stop claiming a direct connection.",
+      "paths": [
+        "structural"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "cmd": "python3 Validation/structural/integration_map_gen.py --findings /dev/stdout"
+      },
+      "drop": {
+        "git_head": "14f15f9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "14f15f9",
+      "last_seen": "14f15f9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/integration_map_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
       "id": "scheduler/REF_002",
       "kind": "rtl_defect",
       "check_id": "REF_002",
@@ -1042,25 +1434,25 @@
       "detector": "invariant:(path-level):REF_002",
       "anchor": [
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 202,
           "signal": "cmd_type",
           "text": "cmd_type  <= CMD_NOP;"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 213,
           "signal": "cmd_type",
           "text": "cmd_type  <= sel_type;"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 228,
           "signal": "cmd_bank",
           "text": "cmd_bank <= sel_bank;"
         },
         {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "file": "Frontend2/OutputFolders/TOPRTL/scheduler.sv",
           "line": 234,
           "signal": "cmd_row",
           "text": "cmd_row  <= q_row[sel_idx];"
@@ -1100,5 +1492,84 @@
       ]
     }
   ],
-  "resolved": []
+  "resolved": [],
+  "drop_status": {
+    "$schema": "validation-drop-status/1",
+    "drop": "12bbe90",
+    "partial": false,
+    "blocks_present": [
+      "addr_decoder",
+      "bank_tracker",
+      "calibration",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "init_fsm",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "blocks_absent": [],
+    "inconsistent_edges": [
+      {
+        "from": "wb_port.req_addr",
+        "to": "addr_decoder.req_addr",
+        "from_width": 28,
+        "to_width": 29
+      }
+    ],
+    "paths_run": [
+      "path_08_init_to_cal",
+      "path_09_init_to_refresh",
+      "path_14_status_init",
+      "path_15_status_cal",
+      "path_16_status_refresh",
+      "path_17_full_boot",
+      "path_21_wb_port_standalone",
+      "path_22_csr_standalone"
+    ],
+    "paths_blocked": {
+      "path_01_write_cmd": [
+        "width mismatch wb_port.req_addr(28)->addr_decoder.req_addr(29)"
+      ],
+      "path_02_read_cmd": [
+        "width mismatch wb_port.req_addr(28)->addr_decoder.req_addr(29)"
+      ],
+      "path_03_read_return": [
+        "width mismatch wb_port.req_addr(28)->addr_decoder.req_addr(29)"
+      ],
+      "path_04_scheduler_bank_loop": [
+        "width mismatch wb_port.req_addr(28)->addr_decoder.req_addr(29)"
+      ],
+      "path_05_scheduler_refresh_loop": [
+        "width mismatch wb_port.req_addr(28)->addr_decoder.req_addr(29)"
+      ],
+      "path_06_scheduler_dequeue": [
+        "width mismatch wb_port.req_addr(28)->addr_decoder.req_addr(29)"
+      ],
+      "path_07_backpressure": [
+        "width mismatch wb_port.req_addr(28)->addr_decoder.req_addr(29)"
+      ],
+      "path_10_csr_to_timing": [
+        "width mismatch wb_port.req_addr(28)->addr_decoder.req_addr(29)"
+      ],
+      "path_12_csr_timing_to_scheduling": [
+        "width mismatch wb_port.req_addr(28)->addr_decoder.req_addr(29)"
+      ],
+      "path_13_csr_refresh_to_scheduling": [
+        "width mismatch wb_port.req_addr(28)->addr_decoder.req_addr(29)"
+      ],
+      "path_18_full_write": [
+        "width mismatch wb_port.req_addr(28)->addr_decoder.req_addr(29)"
+      ],
+      "path_19_row_conflict": [
+        "width mismatch wb_port.req_addr(28)->addr_decoder.req_addr(29)"
+      ],
+      "path_20_refresh_preempt": [
+        "width mismatch wb_port.req_addr(28)->addr_decoder.req_addr(29)"
+      ]
+    },
+    "note": "A blocked path is not a failure and not a pass: it waits for the drop that brings its blocks or fixes the edge it crosses. Nothing was substituted."
+  }
 }

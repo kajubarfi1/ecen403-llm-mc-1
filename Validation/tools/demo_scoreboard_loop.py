@@ -40,6 +40,7 @@ from spec_register_model import SpecRegisterModel
 
 SPEC_PATH = os.path.join(ROOT, "Validation", "spec",
                          "llmmc_microarchitecturespec_filled.json")
+SPEC_PATH = os.environ.get("VALIDATION_SPEC", SPEC_PATH)   # the spec the drop was generated from, when it is not the default
 def walk_ops(spec):
     """(op, addr, wdata) rows from the spec-derived register walk — the same
     directed stimulus the live runners drive — instead of the legacy vector

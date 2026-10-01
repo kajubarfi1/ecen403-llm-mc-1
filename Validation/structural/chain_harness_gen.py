@@ -38,6 +38,7 @@ sys.path.insert(0, os.path.join(ROOT, "Validation", "sequences"))
 MAP_PATH = os.path.join(HERE, "integration_map.json")
 SPEC_PATH = os.path.join(ROOT, "Validation", "spec",
                          "llmmc_microarchitecturespec_filled.json")
+SPEC_PATH = os.environ.get("VALIDATION_SPEC", SPEC_PATH)   # the spec the drop was generated from, when it is not the default
 SCHEMA_PATH = os.path.join(ROOT, "Validation", "txn", "generated",
                            "schemas.json")
 CATALOG_PATH = os.path.join(ROOT, "Validation", "txn",
@@ -170,6 +171,13 @@ def generate(path_id, seq, imap, settle=DEFAULT_SETTLE, formal=False):
     errs = check_wiring(imap, blocks)
     if errs:
         raise WiringError("wiring conformance failed:\n  " + "\n  ".join(errs))
+    for e in imap.get("inconsistent_connections", []):
+        if e["from"].partition(".")[0] in blocks and e["to"].partition(".")[0] in blocks:
+            raise WiringError(
+                f"path {path_id} crosses {e['from']} ({e['from_width']}) -> {e['to']} "
+                f"({e['to_width']}): the drop's manifests disagree on this width, so the "
+                f"wire cannot be made and nothing is truncated or extended to fake it. "
+                f"The finding is filed (width_mismatch); the path waits for a drop that agrees.")
 
     period = spec["clocking_model"]["controller_clock_period_ns"]
     ports = {b: manifest_ports(b) for b in blocks}

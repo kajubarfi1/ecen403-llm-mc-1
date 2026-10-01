@@ -228,6 +228,62 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   every config_regs path with the cfg_timing/cfg_refresh broadcasts judged
   for the first time; second model 131/131 on the same trace; cmd_gen
   second model accepted (attempt 2), agrees 51/51.
+- *2026-10-01, evening — first drop from a synthesized spec.* Merging
+  main (12bbe90) brought Lehana's Phase-1 rewrite and Dawson's top-level
+  assembly (`TOPRTL/`). The map generator refused the drop: `wb_port.req_addr`
+  28 bits, `addr_decoder.req_addr` 29. Root cause is not a width bug: the
+  Phase-1 blocks were generated from a **compiled spec**
+  (`Frontend2/OutputFolders/generated_spec.json`, rev
+  `compiled_ddr31333_x16_1lane_1rank`: DDR3-1333, x16, one lane, 167 MHz,
+  28-bit host address, queue depth 4) while Phases 2–4 and TOPRTL are still
+  the golden 1600K design, and `Spec/` — what validation reads — is golden.
+  Validation had no check for any of this. Now it does:
+  - the resolver reads each block's `spec_revision` (manifest, else the RTL
+    `// Spec:` header) and the drop's shipped spec; `validate_drop` names
+    the spec it judges against, lists **foreign** blocks (another revision),
+    blocks every path that touches one, and files `spec_mismatch`
+    (critical) per foreign block — a design assembled from two specs has no
+    single contract. On the merged drop against the golden spec: 0 runnable,
+    22 blocked, 3 foreign (config_regs, init_fsm, wb_port).
+  - the whole flow takes the spec as data: `VALIDATION_SPEC=<path>` (21
+    tools, one override each). **Against the compiled spec the Phase-1
+    blocks pass 3/3** (`path_14`, `path_21`, `path_22`; register walk
+    131/131 with the compiled reset values, init SVA regenerated at the
+    compiled clock) and the 8 golden blocks are the foreign ones — the
+    first spec→RTL→validation loop on a spec nobody hand-wrote.
+  - the resolver no longer picks between differing copies of a block by
+    file age (it had chosen PHASE1RTL over TOPRTL by mtime): identical
+    copies are one file, differing copies resolve only through
+    `rtl_dirs_preferred` (the phase directories) or refuse.
+  - width-inconsistent manifest edges are findings (`width_mismatch`,
+    blamed by the width rules; `host_interface.address_width_bits` now
+    rules `wb_adr_i`/`req_addr`), kept out of the wiring, and every path
+    across them is blocked — never truncated to make a harness compile.
+    Width conformance runs in step 3; structural findings (spec, width,
+    manifest audit) reach findings v2 and `retry_instructions.json`; a
+    foreign block gets only its spec-mismatch finding. Any run with a
+    blocked path is isolated like a partial one (its own report dir), so a
+    stale report never speaks for a path that did not run.
+  - 12 overrides the new manifests made redundant were removed; the map is
+    now 72 manifest edges + 0 overrides.
+  Open: the drop must be regenerated from ONE spec before anything beyond
+  Phase 1 can be judged; `TOPRTL/` copies will diverge from the phase
+  outputs until then. Compiled-spec intake still reports the same 12 gaps.
+- *Drop identity and the handoff place (Lehana's question, 2026-10-01).*
+  Outbox folders and report stamps were named by `git rev-parse HEAD` of
+  the validator's checkout — after a merge, Jacob's commit, not hers; and
+  the loop will not go through git at all once everything runs on one
+  machine. Now a drop is named by its **content**: sha256 over each block's
+  RTL + manifest (first 12 hex), computable by either side from the files
+  alone (`rtl_drop.drop_id`); git HEAD and the manifests' commits are kept
+  in the stamp as information only. The merged drop is `a58933561396`. The
+  Frontend reads one fixed place, `findings/outbox/current/`
+  (`HANDOFF.json` with the drop id + spec revision, `retry_instructions.json`,
+  `findings_v2.json`, `DROP_STATUS.json`), refreshed by every run; the
+  per-drop archive stays at `outbox/<spec_revision>/<drop_id>/`. Contract
+  written for the Frontend: `findings/HANDOFF_CONTRACT.md`. `untested`
+  findings are now carried across drops until a run decides them (they
+  had been dropped after one carry).
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

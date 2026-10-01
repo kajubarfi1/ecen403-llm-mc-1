@@ -42,6 +42,7 @@ ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, os.path.join(ROOT, "Validation", "sequences"))
 
 SPEC = os.path.join(ROOT, "Validation", "spec", "llmmc_microarchitecturespec_filled.json")
+SPEC = os.environ.get("VALIDATION_SPEC", SPEC)   # the spec the drop was generated from, when it is not the default
 SCHEMAS = os.path.join(ROOT, "Validation", "txn", "generated", "schemas.json")
 CATALOG = os.path.join(ROOT, "Validation", "txn", "interface_catalog.json")
 

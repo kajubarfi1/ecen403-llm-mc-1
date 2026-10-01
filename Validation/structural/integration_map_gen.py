@@ -47,6 +47,7 @@ OVERRIDES_PATH = os.path.join(HERE, "integration_overrides.json")
 PATH_DEFS = os.path.join(ROOT, "Validation", "spec", "path_definitions.json")
 SPEC_PATH = os.path.join(ROOT, "Validation", "spec",
                          "llmmc_microarchitecturespec_filled.json")
+SPEC_PATH = os.environ.get("VALIDATION_SPEC", SPEC_PATH)   # the spec the drop was generated from, when it is not the default
 
 
 class MapError(Exception):
@@ -88,6 +89,7 @@ def blocks_in_order():
 
 def derive(manifests, blocks):
     derive.deferred = []
+    derive.inconsistent = []
     """Edges the manifests declare, in block order then manifest port order,
     plus the problems found on the way."""
     edges, errors = [], []
@@ -120,8 +122,11 @@ def derive(manifests, blocks):
                 errors.append(f"{b}.{name}: source {src} is an {prod['dir']}, not an output")
                 continue
             if str(prod["width"]) != str(p["width"]):
-                errors.append(f"{b}.{name} is {p['width']} wide but source {src} "
-                              f"is {prod['width']}")
+                # a real edge the design cannot carry: filed, kept out of the
+                # wiring (a harness never silently truncates or zero-extends),
+                # and every path across it is blocked until a drop fixes it
+                derive.inconsistent.append({"from": src, "to": f"{b}.{name}",
+                                            "from_width": prod["width"], "to_width": p["width"]})
                 continue
             edges.append({"from": src, "to": f"{b}.{name}"})
     return edges, errors
@@ -214,17 +219,61 @@ def build(manifests, blocks, ov):
         "ties": ov.get("ties", {}),
         "standalone_ties": ov.get("standalone_ties", {}),
         "deferred_connections": getattr(derive, "deferred", []) + deferred,
+        "inconsistent_connections": getattr(derive, "inconsistent", []),
         "requires": ov.get("requires", {}),
         "expr_glue": ov.get("expr_glue", []),
         "stubs": ov.get("stubs", []),
     }
-    report = {"manifest_edges": len(kept), "override_edges": len(overrides),
+    report = {"inconsistent": getattr(derive, "inconsistent", []),
+              "manifest_edges": len(kept), "override_edges": len(overrides),
               "superseded": superseded, "redundant": redundant, "missing": missing}
     return imap, report
 
 
+def _width_blame(edge):
+    """Which end departs from the spec, by the width rules (data). Both ends
+    are candidates when no rule decides."""
+    try:
+        sys.path.insert(0, HERE)
+        import width_conformance as WC
+        with open(SPEC_PATH) as f:
+            spec = json.load(f)
+        with open(os.path.join(HERE, "width_rules.json")) as f:
+            rules = json.load(f)
+        bad = {f"{r['block']}.{r['port']}" for r in WC.check(spec, rules) if r["state"] == "mismatch"}
+        spec_w = {f"{r['block']}.{r['port']}": (r["expected"], r["spec_path"]) for r in WC.check(spec, rules)
+                  if r["state"] in ("ok", "mismatch")}
+    except Exception:
+        bad, spec_w = set(), {}
+    owners = [e.partition(".")[0] for e in (edge["from"], edge["to"]) if e in bad]
+    ref = next((spec_w[e][1] for e in (edge["from"], edge["to"]) if e in spec_w), None)
+    exp = next((spec_w[e][0] for e in (edge["from"], edge["to"]) if e in spec_w), None)
+    if not owners:
+        owners = [edge["from"].partition(".")[0], edge["to"].partition(".")[0]]
+    return owners, ref, exp
+
+
 def to_findings(report, spec_rev):
     out = []
+    for e in report.get("inconsistent", []):
+        owners, ref, exp = _width_blame(e)
+        out.append({
+            "source": "validation", "target": "frontend", "kind": "width_mismatch",
+            "scope": owners[0], "owner_candidates": owners, "severity": "critical",
+            "spec_revision": spec_rev,
+            "title": f"{e['from']} is {e['from_width']} bits but drives {e['to']}, "
+                     f"which is {e['to_width']}",
+            "detail": (f"The manifests declare {e['to']} is driven by {e['from']}, and their "
+                       f"widths differ ({e['from_width']} -> {e['to_width']}). The wire cannot "
+                       f"be made; every path that crosses it is blocked until the drop agrees "
+                       f"with itself."
+                       + (f" The spec fixes this width: {ref} = {exp}, so the block(s) that "
+                          f"depart from it own the fix: {', '.join(owners)}." if ref else
+                          " The spec does not fix this width; either end may be the one to change.")),
+            "evidence": {**e, "spec_path": ref, "spec_value": exp},
+            "spec_ref": ref,
+            "status": "open",
+        })
     for blk, ports in sorted(report["missing"].items()):
         out.append({
             "source": "validation", "target": "frontend", "kind": "manifest_gap",

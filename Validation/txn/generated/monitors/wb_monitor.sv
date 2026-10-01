@@ -19,7 +19,7 @@ module wb_monitor #(
 ) (
     input  logic clk,
     input  logic rst_n,
-    input  logic [28:0] wb_adr_i,
+    input  logic [27:0] wb_adr_i,
     input  logic wb_cyc_i,
     input  logic [31:0] wb_dat_i,
     input  logic [3:0] wb_sel_i,

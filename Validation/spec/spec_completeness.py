@@ -42,6 +42,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 DEFAULT_SPEC = os.path.join(HERE, "llmmc_microarchitecturespec_filled.json")
+DEFAULT_SPEC = os.environ.get("VALIDATION_SPEC", DEFAULT_SPEC)   # the spec the drop was generated from, when it is not the default
 RULES = os.path.join(HERE, "completeness_rules.json")
 PATH_DEFS = os.path.join(HERE, "path_definitions.json")
 

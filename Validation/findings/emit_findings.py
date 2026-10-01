@@ -54,6 +54,7 @@ OUTBOX = os.path.join(ROOT, "Validation", "findings", "outbox")
 STAGE_RULES = os.path.join(ROOT, "Validation", "gates", "stage_invariant_rules.json")
 SVA_RULES = os.path.join(ROOT, "Validation", "sva", "sva_rules.json")
 SPEC = os.path.join(ROOT, "Validation", "spec", "llmmc_microarchitecturespec_filled.json")
+SPEC = os.environ.get("VALIDATION_SPEC", SPEC)   # the spec the drop was generated from, when it is not the default
 SCHEMAS = os.path.join(ROOT, "Validation", "txn", "generated", "schemas.json")
 VPLAN = os.path.join(ROOT, "Validation", "vplan", "vplan.json")
 
@@ -381,12 +382,17 @@ def emit(reports_dir, out_dir=None, drop_status=None):
     rules = Rules()
     absent = set((drop_status or {}).get("blocks_absent", []))
     blocked_paths = set((drop_status or {}).get("paths_blocked", {}))
+    foreign = set((drop_status or {}).get("foreign_spec_blocks", {}))
     schemas = load(SCHEMAS, {"interfaces": {}})["interfaces"]
     spec = load(SPEC, {})
     reps = [load(f) for f in sorted(glob.glob(os.path.join(reports_dir, "*_report.json")))]
     reps = [r for r in reps if r]
-    head = next((r.get("rtl_drop", {}).get("git_head") for r in reps
-                 if r.get("rtl_drop", {}).get("git_head")), "unknown")
+    head = (drop_status or {}).get("drop") or next(
+        (r.get("rtl_drop", {}).get("git_head") for r in reps
+         if r.get("rtl_drop", {}).get("git_head")), "unknown")
+    if drop_status:
+        # only the paths this drop ran are evidence about it
+        reps = [r for r in reps if r.get("path") not in blocked_paths]
     snaps = snapshot_signatures()
 
     findings = {}
@@ -448,9 +454,20 @@ def emit(reports_dir, out_dir=None, drop_status=None):
     # same ledger, keyed formal/<owner>/<rule>, so the retry adapter hands them
     # to the Frontend and the next drop's re-prove can resolve them.
     for ff in formal_findings(spec.get("revision", "unknown"), head):
-        if ff["owner_module"] in absent:
+        if ff["owner_module"] in absent or ff["owner_module"] in foreign:
             continue
         findings.setdefault(ff["id"], ff)
+    # Structural findings (widths against the spec, manifest audit) carry
+    # the same weight as any simulated check: model-free, on the drop itself.
+    for sf in structural_findings(spec.get("revision", "unknown"), head):
+        if sf["owner_module"] in absent:
+            continue
+        # a block generated from another spec gets exactly one finding, the
+        # spec mismatch: widths and sources measured against a spec it was
+        # never built to are not evidence about it
+        if sf["owner_module"] in foreign and sf["taxonomy_id"] != "SPEC_MISMATCH":
+            continue
+        findings.setdefault(sf["id"], sf)
 
     # Defects proven by the repair suite (repairs/repair_catalog.json): a
     # minimal fix in a copy of the drop silenced named checks with nothing new
@@ -459,7 +476,7 @@ def emit(reports_dir, out_dir=None, drop_status=None):
     # checks go quiet — so it is attached to the matching finding, or the
     # defect is filed on its own when no simulation check reaches it.
     for rf in repair_findings(head, rep_stage_root=reports_dir):
-        if rf["owner_module"] in absent:
+        if rf["owner_module"] in absent or rf["owner_module"] in foreign:
             continue
         cur = findings.get(rf["id"])
         if cur is None:
@@ -482,7 +499,9 @@ def emit(reports_dir, out_dir=None, drop_status=None):
         prev_head, prev_doc = prev
         now_ids = {f["id"] for f in findings.values()}
         for pf in prev_doc.get("findings", []):
-            if pf.get("status", "open") != "open" or pf["id"] in now_ids:
+            # `untested` is still open: a drop that could not test it carried
+            # it, and the next one carries it again until a run decides
+            if pf.get("status", "open") not in ("open", "untested") or pf["id"] in now_ids:
                 continue
             if drop_status and (pf["owner_module"] in absent
                                 or (pf.get("paths") and set(pf["paths"]) <= blocked_paths)):
@@ -584,6 +603,77 @@ def repair_findings(head, rep_stage_root=None):
             "introduced_in": None, "first_seen": head, "last_seen": head, "resolved_in": None,
             "status": "open", "related_manual_findings": [],
         })
+    return out
+
+
+STRUCTURAL_FILES = ("spec_revision_findings.json", "width_findings.json",
+                    "integration_map_findings.json")
+STRUCTURAL_KINDS = {"spec_mismatch": "critical", "width_mismatch": "critical", "rtl_bug": None,
+                    "manifest_wrong_source": None, "manifest_gap": None}
+
+
+def structural_findings(spec_rev, head):
+    """v2 records for the structural checks that run before any simulation
+    (width conformance against the spec, the integration map's manifest
+    audit). They are model-free: the manifest and the RTL port list are the
+    witness. Housekeeping findings addressed to validation itself are not
+    routed."""
+    out = []
+    for name in STRUCTURAL_FILES:
+        f = os.path.join(OUTBOX, name)
+        for x in load(f, {}).get("findings", []):
+            kind = x.get("kind")
+            if kind not in STRUCTURAL_KINDS or x.get("target") != "frontend":
+                continue
+            if x.get("status", "open") != "open":
+                continue
+            ev = x.get("evidence", {})
+            owner = x.get("scope", "unknown")
+            port = ev.get("port") or (ev.get("from") or ev.get("consumer") or "").split(".")[-1]
+            if kind == "spec_mismatch":
+                port = ev.get("block_spec_revision")
+            check_id = f"{kind.upper()}/{port}" if port else kind.upper()
+            anchor = []
+            for blk in [owner] + [c for c in x.get("owner_candidates", []) if c != owner]:
+                try:
+                    import rtl_drop as RD
+                    anchor.append({"file": os.path.relpath(RD.manifest_file(blk), ROOT),
+                                   "signal": port, "text": f"manifest port {port}"})
+                except Exception:
+                    pass
+            out.append({
+                "schema": "validation-findings/2",
+                "id": f"structural/{owner}/{check_id}",
+                "kind": "rtl_defect" if kind in ("width_mismatch", "rtl_bug") else "manifest_defect",
+                "check_id": check_id, "taxonomy_id": kind.upper(),
+                "detectors": [f"structural:{name[:-5]}"],
+                "owner_module": owner,
+                "owner_candidates": x.get("owner_candidates", [owner]),
+                "severity": STRUCTURAL_KINDS[kind] or x.get("severity", "major"),
+                "confidence": "confirmed",
+                "title": x.get("title", ""), "requirement": x.get("detail", "")[:300],
+                "spec_ref": x.get("spec_ref") or ev.get("spec_path"),
+                "expected": (f"spec revision {ev.get('validation_spec_revision')}" if kind == "spec_mismatch"
+                             else f"{ev.get('spec_path')} = {ev.get('spec_value')}"
+                             if ev.get("spec_path") else x.get("title", "")),
+                "actual": (f"generated from spec revision {ev.get('block_spec_revision')}" if kind == "spec_mismatch"
+                           else f"{ev.get('from', '')} {ev.get('from_width', '')} -> "
+                           f"{ev.get('to', '')} {ev.get('to_width', '')}".strip()
+                           if "from_width" in ev else
+                           f"{owner}.{port} is {ev.get('rtl_width')} bits" if "rtl_width" in ev
+                           else x.get("detail", "")[:200]),
+                "detector": f"structural:{name[:-5]}",
+                "anchor": anchor[:3],
+                "mechanism": x.get("detail", ""),
+                "paths": ["structural"], "occurrences": 1,
+                "repro": {"cmd": "python3 Validation/structural/width_conformance.py"
+                          if name.startswith("width") else
+                          "python3 Validation/structural/integration_map_gen.py --findings /dev/stdout"},
+                "drop": {"git_head": head, "spec_revision": spec_rev},
+                "introduced_in": None, "first_seen": head,
+                "last_seen": head, "resolved_in": None, "status": "open",
+                "related_manual_findings": [os.path.relpath(f, ROOT)],
+            })
     return out
 
 

@@ -135,6 +135,25 @@
       ],
       "severity": "critical",
       "requirement": "Host bus data ports are the host interface data width."
+    },
+    {
+      "block": "wb_port",
+      "spec_path": "host_interface.address_width_bits",
+      "ports": [
+        "wb_adr_i",
+        "req_addr"
+      ],
+      "severity": "critical",
+      "requirement": "The host byte address spans the spec's host address space on the bus and on the request the port forwards."
+    },
+    {
+      "block": "addr_decoder",
+      "spec_path": "host_interface.address_width_bits",
+      "ports": [
+        "req_addr"
+      ],
+      "severity": "critical",
+      "requirement": "The decoder consumes the full host byte address the port forwards."
     }
   ]
 }

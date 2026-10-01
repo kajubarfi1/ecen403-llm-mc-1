@@ -1,69 +1,8 @@
 {
   "$schema": "validation-integration-overrides/1",
-  "$comment": "Port-level wiring between the Frontend's blocks, declared as data. No integrated top-level exists in the RTL drop, so the validation subsystem generates its own integration harness (chain_harness_gen.py) from this map. Every connection is checkable against the manifests: named ports must exist and widths must agree \u2014 a rename or resize in a regenerated drop becomes a loud structural failure, not a silently unconnected net.",
-  "$provenance": "What the manifests cannot say. `connections` here are edges whose consumer manifest has no `source` field yet \u2014 each is a filed finding against the Frontend and should be deleted the moment the manifest declares it (integration_map_gen.py reports redundant entries). glue, expr_glue, ties, requires and stubs carry their own `why`.",
-  "connections": [
-    {
-      "from": "wb_port.req_valid",
-      "to": "cmd_queue.enq_valid",
-      "why": "consumer manifest has no `source` field (drop 5661e03: cmd_queue enq/deq, bank_tracker cmd_* feedback, refresh_ctrl ref_ack)"
-    },
-    {
-      "from": "wb_port.req_aux",
-      "to": "cmd_queue.enq_aux",
-      "why": "consumer manifest has no `source` field (drop 5661e03: cmd_queue enq/deq, bank_tracker cmd_* feedback, refresh_ctrl ref_ack)"
-    },
-    {
-      "from": "scheduler.deq_grant",
-      "to": "cmd_queue.deq_grant",
-      "why": "consumer manifest has no `source` field (drop 5661e03: cmd_queue enq/deq, bank_tracker cmd_* feedback, refresh_ctrl ref_ack)"
-    },
-    {
-      "from": "scheduler.deq_idx",
-      "to": "cmd_queue.deq_idx",
-      "why": "consumer manifest has no `source` field (drop 5661e03: cmd_queue enq/deq, bank_tracker cmd_* feedback, refresh_ctrl ref_ack)"
-    },
-    {
-      "from": "cmd_gen.fb_act_valid",
-      "to": "bank_tracker.cmd_act_valid",
-      "why": "consumer manifest has no `source` field (drop 5661e03: cmd_queue enq/deq, bank_tracker cmd_* feedback, refresh_ctrl ref_ack)"
-    },
-    {
-      "from": "cmd_gen.fb_act_bank",
-      "to": "bank_tracker.cmd_act_bank",
-      "why": "consumer manifest has no `source` field (drop 5661e03: cmd_queue enq/deq, bank_tracker cmd_* feedback, refresh_ctrl ref_ack)"
-    },
-    {
-      "from": "cmd_gen.fb_act_row",
-      "to": "bank_tracker.cmd_act_row",
-      "why": "consumer manifest has no `source` field (drop 5661e03: cmd_queue enq/deq, bank_tracker cmd_* feedback, refresh_ctrl ref_ack)"
-    },
-    {
-      "from": "cmd_gen.fb_pre_valid",
-      "to": "bank_tracker.cmd_pre_valid",
-      "why": "consumer manifest has no `source` field (drop 5661e03: cmd_queue enq/deq, bank_tracker cmd_* feedback, refresh_ctrl ref_ack)"
-    },
-    {
-      "from": "cmd_gen.fb_rd_valid",
-      "to": "bank_tracker.cmd_rd_valid",
-      "why": "consumer manifest has no `source` field (drop 5661e03: cmd_queue enq/deq, bank_tracker cmd_* feedback, refresh_ctrl ref_ack)"
-    },
-    {
-      "from": "cmd_gen.fb_wr_valid",
-      "to": "bank_tracker.cmd_wr_valid",
-      "why": "consumer manifest has no `source` field (drop 5661e03: cmd_queue enq/deq, bank_tracker cmd_* feedback, refresh_ctrl ref_ack)"
-    },
-    {
-      "from": "cmd_gen.fb_ref_valid",
-      "to": "bank_tracker.cmd_ref_valid",
-      "why": "consumer manifest has no `source` field (drop 5661e03: cmd_queue enq/deq, bank_tracker cmd_* feedback, refresh_ctrl ref_ack)"
-    },
-    {
-      "from": "scheduler.ref_ack",
-      "to": "refresh_ctrl.ref_ack",
-      "why": "consumer manifest has no `source` field (drop 5661e03: cmd_queue enq/deq, bank_tracker cmd_* feedback, refresh_ctrl ref_ack)"
-    }
-  ],
+  "$comment": "Port-level wiring between the Frontend's blocks, declared as data. No integrated top-level exists in the RTL drop, so the validation subsystem generates its own integration harness (chain_harness_gen.py) from this map. Every connection is checkable against the manifests: named ports must exist and widths must agree — a rename or resize in a regenerated drop becomes a loud structural failure, not a silently unconnected net.",
+  "$provenance": "What the manifests cannot say. `connections` here are edges whose consumer manifest has no `source` field yet — each is a filed finding against the Frontend and should be deleted the moment the manifest declares it (integration_map_gen.py reports redundant entries). glue, expr_glue, ties, requires and stubs carry their own `why`.",
+  "connections": [],
   "glue": [
     {
       "from": "scheduler.cmd_bank",
@@ -73,7 +12,7 @@
         "bank_tracker.cmd_wr_bank"
       ],
       "delay_cycles": 1,
-      "why": "cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. The harness registers the scheduler's cmd_bank one cycle so it aligns with the REGISTERED fb pulses. This is testbench glue standing in for a missing design signal \u2014 see the filed finding; the Frontend should add fb_pre_bank/fb_rd_bank/fb_wr_bank."
+      "why": "cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. The harness registers the scheduler's cmd_bank one cycle so it aligns with the REGISTERED fb pulses. This is testbench glue standing in for a missing design signal — see the filed finding; the Frontend should add fb_pre_bank/fb_rd_bank/fb_wr_bank."
     },
     {
       "from": "scheduler.cmd_aux",
@@ -81,7 +20,7 @@
         "data_path.cmd_aux"
       ],
       "delay_cycles": 1,
-      "why": "cmd_gen's feedback carries no aux tag, but data_path needs the issued command's aux to tag read responses (rd_rsp_aux). Registered one cycle to align with the registered fb_rd_valid/fb_wr_valid pulses. Same missing-feedback-signal gap as the bank workaround \u2014 covered by the filed fb-bank finding; the design wants fb_aux."
+      "why": "cmd_gen's feedback carries no aux tag, but data_path needs the issued command's aux to tag read responses (rd_rsp_aux). Registered one cycle to align with the registered fb_rd_valid/fb_wr_valid pulses. Same missing-feedback-signal gap as the bank workaround — covered by the filed fb-bank finding; the design wants fb_aux."
     }
   ],
   "expr_glue": [
@@ -93,7 +32,7 @@
     {
       "to": "calibration.zqcs_ack",
       "expr": "calibration.zqcs_req",
-      "why": "Nothing in the drop consumes zqcs_req: no scheduler or cmd_gen port accepts a ZQCS request, so periodic ZQ calibration can never be granted by the design itself \u2014 an integration gap (finding filed). The harness acks immediately so the calibration FSM does not wedge; the cal_zqcs monitor still observes every request."
+      "why": "Nothing in the drop consumes zqcs_req: no scheduler or cmd_gen port accepts a ZQCS request, so periodic ZQ calibration can never be granted by the design itself — an integration gap (finding filed). The harness acks immediately so the calibration FSM does not wedge; the cal_zqcs monitor still observes every request."
     }
   ],
   "ties": {
@@ -143,7 +82,7 @@
       "instance": "u_dram",
       "source": "Validation/structural/dram_stub.sv",
       "when_block": "data_path",
-      "$why": "Something must sit on the far side of the DDR pins or every read returns the tied-off bus. A behavioral DRAM: ACT opens rows, WR stores the burst word, RD replies after CL. Testbench component \u2014 nothing judges the design against it.",
+      "$why": "Something must sit on the far side of the DDR pins or every read returns the tied-off bus. A behavioral DRAM: ACT opens rows, WR stores the burst word, RD replies after CL. Testbench component — nothing judges the design against it.",
       "inputs": {
         "clk": "@clk",
         "rst_n": "@rst_n",
@@ -203,5 +142,25 @@
       "value": "1'b0",
       "why": "init_fsm absent (see sts_init_done)"
     }
-  }
+  },
+  "$history": [
+    {
+      "date": "2026-10-01",
+      "removed_connections": [
+        "cmd_gen.fb_act_bank->bank_tracker.cmd_act_bank",
+        "cmd_gen.fb_act_row->bank_tracker.cmd_act_row",
+        "cmd_gen.fb_act_valid->bank_tracker.cmd_act_valid",
+        "cmd_gen.fb_pre_valid->bank_tracker.cmd_pre_valid",
+        "cmd_gen.fb_rd_valid->bank_tracker.cmd_rd_valid",
+        "cmd_gen.fb_ref_valid->bank_tracker.cmd_ref_valid",
+        "cmd_gen.fb_wr_valid->bank_tracker.cmd_wr_valid",
+        "scheduler.deq_grant->cmd_queue.deq_grant",
+        "scheduler.deq_idx->cmd_queue.deq_idx",
+        "scheduler.ref_ack->refresh_ctrl.ref_ack",
+        "wb_port.req_aux->cmd_queue.enq_aux",
+        "wb_port.req_valid->cmd_queue.enq_valid"
+      ],
+      "why": "the drop's manifests now declare these sources (Frontend2 manifest fix, d77dc12); the map generator reported them redundant"
+    }
+  ]
 }

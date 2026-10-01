@@ -27,7 +27,9 @@ Usage (as a check):
 """
 
 import glob
+import hashlib
 import json
+import re
 import os
 import subprocess
 import sys
@@ -64,20 +66,82 @@ def roots():
     return out
 
 
+def _same(paths):
+    """True when every file has identical content."""
+    with open(paths[0], "rb") as f:
+        ref = f.read()
+    for q in paths[1:]:
+        with open(q, "rb") as f:
+            if f.read() != ref:
+                return False
+    return True
+
+
 def _find(block, pattern):
-    """First root with a match; within that root, prefer the paths the
-    config lists, then the newest copy. Returns (path, root) or (None, None)."""
-    pref = _config().get("manifest_dirs_preferred", [])
+    """First root with a match; within that root, prefer the directories the
+    config lists (`manifest_dirs_preferred` for manifests, `rtl_dirs_preferred`
+    for RTL). Several copies that are byte-identical are one file. Several
+    copies that DIFFER and none in a preferred directory is an ambiguous
+    drop: refused, never settled by file age -- the age heuristic once
+    resolved five blocks to a failed attempt, and on 2026-10-01 it picked
+    between a phase output and a top-level assembly generated from two
+    different specs. Returns (path, root) or (None, None)."""
+    cfg = _config()
+    pref = cfg.get("manifest_dirs_preferred", []) if pattern.endswith("_manifest.json") \
+        else cfg.get("rtl_dirs_preferred", [])
     for root in roots():
-        hits = glob.glob(os.path.join(root, "**", pattern), recursive=True)
+        hits = sorted(glob.glob(os.path.join(root, "**", pattern), recursive=True))
         if not hits:
             continue
         for d in pref:
             for h in hits:
                 if os.path.relpath(h, root).startswith(d + os.sep):
                     return h, root
-        hits.sort(key=lambda p: (-os.path.getmtime(p), p))
+        if len(hits) > 1 and not _same(hits):
+            raise DropError(
+                f"{block}: {len(hits)} differing copies of {pattern} under "
+                f"{os.path.relpath(root, ROOT)} ({', '.join(os.path.relpath(h, root) for h in hits)}) "
+                f"and none is in a preferred directory. Declare which layout is the drop "
+                f"(rtl_dirs_preferred / manifest_dirs_preferred in Validation/spec/rtl_drop.json); "
+                f"a differing copy is never chosen by age.")
         return hits[0], root
+    return None, None
+
+
+_SPEC_STAMP = re.compile(r"^//\s*Spec:\s*(\S+)\s+rev\s+(\S+)", re.M)
+
+
+def spec_stamp(block):
+    """(design_id, revision) the generator stamped on the block: the manifest's
+    `design_id`/`spec_revision` first, else the RTL header's `// Spec:` line,
+    else (None, None)."""
+    try:
+        with open(manifest_file(block)) as f:
+            m = json.load(f)
+        if m.get("spec_revision"):
+            return m.get("design_id"), m["spec_revision"]
+    except (DropError, OSError, ValueError):
+        pass
+    try:
+        with open(rtl_file(block), errors="replace") as f:
+            head = f.read(4000)
+    except DropError:
+        return None, None
+    m = _SPEC_STAMP.search(head)
+    return (m.group(1), m.group(2)) if m else (None, None)
+
+
+def shipped_spec():
+    """The spec the drop ships beside its RTL (generated_spec.json in a
+    root), as (path, revision), or (None, None)."""
+    for root in roots():
+        p = os.path.join(root, "generated_spec.json")
+        if os.path.exists(p):
+            try:
+                with open(p) as f:
+                    return p, json.load(f).get("revision")
+            except (OSError, ValueError):
+                return p, None
     return None, None
 
 
@@ -132,9 +196,60 @@ def _git_head():
         return None
 
 
+def _catalog_blocks():
+    with open(CATALOG) as f:
+        return sorted({d["block"] for d in json.load(f)["interfaces"].values()})
+
+
+def frontend_commits(blocks=None):
+    """{block: git_commit the Frontend's manifest records}, blocks without
+    one omitted."""
+    out = {}
+    for b in blocks or _catalog_blocks():
+        try:
+            with open(manifest_file(b)) as f:
+                c = json.load(f).get("git_commit")
+            if c:
+                out[b] = c
+        except (DropError, OSError, ValueError):
+            pass
+    return out
+
+
+def drop_id(blocks=None):
+    """The drop's identity, which names its reports and its outbox folder.
+
+    It is a hash of the drop's OWN files -- every block's RTL and manifest,
+    in block order -- so it depends on nothing outside the drop: not on
+    this repo's HEAD, not on the Frontend's, not on when the files were
+    written. The same files always get the same id; one changed byte is a
+    new drop. The Frontend can compute it from the files it just wrote
+    (sha256 over `<block>.sv` then `<block>_manifest.json` contents, blocks
+    sorted, first 12 hex digits) and match it against the result it reads
+    back. Blocks the drop lacks contribute nothing, so a partial drop and
+    the complete drop it grows into are different ids, as they should be.
+    """
+    h = hashlib.sha256()
+    n = 0
+    for b in sorted(blocks or _catalog_blocks()):
+        for fn in (rtl_file, manifest_file):
+            try:
+                p = fn(b)
+            except DropError:
+                continue
+            with open(p, "rb") as f:
+                h.update(b.encode())
+                h.update(f.read())
+                n += 1
+    return h.hexdigest()[:12] if n else "empty"
+
+
 def stamp(blocks):
     """Which files were validated, from which root, at which commit."""
-    out = {"git_head": _git_head(),
+    out = {"git_head": drop_id(blocks),          # the drop's identity: a content hash (see drop_id); key kept for every reader
+           "drop_id": drop_id(blocks),
+           "validated_at": _git_head(),          # informational only: this repo's HEAD, if any
+           "frontend_commits": frontend_commits(blocks),   # informational: what the manifests record
            "roots": [os.path.relpath(r, ROOT) for r in roots()],
            "blocks": {}}
     for b in blocks:
@@ -142,9 +257,13 @@ def stamp(blocks):
         for key, fn in (("rtl", rtl_file), ("manifest", manifest_file)):
             try:
                 entry[key] = os.path.relpath(fn(b), ROOT)
-            except DropError:
+            except DropError as e:
                 entry[key] = None
+                entry["error"] = str(e)
+        entry["spec_revision"] = spec_stamp(b)[1] if entry.get("rtl") else None
         out["blocks"][b] = entry
+    sp, rev = shipped_spec()
+    out["shipped_spec"] = {"path": os.path.relpath(sp, ROOT) if sp else None, "revision": rev}
     return out
 
 
@@ -153,13 +272,21 @@ def main() -> int:
         blocks = sorted({d["block"] for d in json.load(f)["interfaces"].values()})
     st = stamp(blocks)
     print(f"  drop roots : {', '.join(st['roots']) or 'NONE PRESENT'}")
-    print(f"  git head   : {st['git_head']}\n")
+    n_gen = len(set(st["frontend_commits"].values()))
+    print(f"  drop id    : {st['drop_id']}  (sha256 of the drop's RTL + manifests"
+          + (f"; the manifests record {n_gen} generation commits" if n_gen > 1 else "") + ")")
+    print(f"  validator  : HEAD {st['validated_at'] or '(no git)'}\n")
     bad = 0
     for b, e in st["blocks"].items():
         ok = e["rtl"] and e["manifest"]
         bad += not ok
-        print(f"  {'ok     ' if ok else 'MISSING'} {b:13} "
-              f"{e['rtl'] or '—':52} {e['manifest'] or '—'}")
+        tag = "ok     " if ok else ("AMBIG  " if "differing copies" in e.get("error", "") else "MISSING")
+        print(f"  {tag} {b:13} {e['rtl'] or '—':52} {e['manifest'] or '—'}"
+              + (f"  [spec {e['spec_revision']}]" if e.get("spec_revision") else ""))
+        if not ok and e.get("error"):
+            print(f"          {e['error'][:150]}")
+    if st["shipped_spec"]["path"]:
+        print(f"\n  drop ships spec: {st['shipped_spec']['path']} rev {st['shipped_spec']['revision']}")
     print(f"\n  {len(blocks) - bad}/{len(blocks)} block(s) resolved"
           + (f"; missing: {[b for b, e in st['blocks'].items() if not (e['rtl'] and e['manifest'])]}"
              if bad else ""))

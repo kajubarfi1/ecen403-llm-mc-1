@@ -1,4 +1,4 @@
-TOOL:	xrun	24.03-s013: Started on Oct 01, 2026 at 11:53:33 CDT
+TOOL:	xrun	24.03-s013: Started on Oct 01, 2026 at 12:03:32 CDT
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xrun: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
@@ -523,6 +523,12 @@ xmelab: *N,CGNSWA: (File: ./cov_conf.ccf, Line: 6): A covergroup is not (de)sele
 			FSM extracted for state register state
 		worklib.refresh_ctrl
 	Total FSMs extracted = 1
+    .init_addr(init_fsm__init_addr),
+                                 |
+xmelab: *W,CUVMPW (./chain_harness.sv,168|33): port sizes differ in port connection(14/15) for the instance(chain_harness) .
+bind init_fsm init_cmd_monitor u_init_cmd_mon (.*);
+                                                |
+xmelab: *W,CUVMPW (./chain_monitors_bind.sv,9|48): port sizes differ in port connection(15/14) for the instance(chain_harness.u_init_fsm)  for child port:  init_addr.
 xmelab: *W,ICFNFR: Module "*_txn_harness", specified on line 17 of file "./cov_conf.ccf", not found in the design.
 xmelab: *W,ICFNFR: Module "seq_driver", specified on line 18 of file "./cov_conf.ccf", not found in the design.
 xmelab: *W,ICFNFR: Module "dram_stub", specified on line 19 of file "./cov_conf.ccf", not found in the design.
@@ -607,10 +613,10 @@ xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environm
 		worklib.cfg_refresh_monitor:sv <0x3c309547>
 			streams:   3, words:  3291
 		worklib.chain_harness:sv <0x3652db56>
-			streams:  92, words: 26033
+			streams:  92, words: 26037
 		worklib.config_regs:sv <0x2477aa33>
 			streams:  64, words: 58855
-		worklib.init_fsm:sv <0x5fc9e37b>
+		worklib.init_fsm:sv <0x62bcc39e>
 			streams:  20, words: 25536
 		worklib.refresh_ctrl:sv <0x368c15e1>
 			streams:  16, words: 10952
@@ -731,4 +737,4 @@ coverage setup:
 coverage files:
   model(design data) :  ./cov_work/scope/icc_5514e1bd_6c5eb973.ucm (reused)
   data               :  ./cov_work/scope/path_09_init_to_refresh/icc_5514e1bd_6c5eb973.ucd
-TOOL:	xrun	24.03-s013: Exiting on Oct 01, 2026 at 11:53:34 CDT  (total: 00:00:01)
+TOOL:	xrun	24.03-s013: Exiting on Oct 01, 2026 at 12:03:34 CDT  (total: 00:00:02)

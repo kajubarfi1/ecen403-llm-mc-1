@@ -31,13 +31,25 @@ ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 OUTBOX = os.path.join(HERE, "outbox")
 
 
+SPEC = os.environ.get("VALIDATION_SPEC", os.path.join(
+    ROOT, "Validation", "spec", "llmmc_microarchitecturespec_filled.json"))
+
+
 def latest_findings():
-    for rev in sorted(os.listdir(OUTBOX)):
-        lp = os.path.join(OUTBOX, rev, "latest")
+    """The latest outbox of the spec revision being validated (findings are
+    filed per spec revision; another revision's outbox is another contract)."""
+    try:
+        with open(SPEC) as f:
+            rev = json.load(f).get("revision")
+    except (OSError, ValueError):
+        rev = None
+    revs = ([rev] if rev else []) + sorted(os.listdir(OUTBOX))
+    for r in revs:
+        lp = os.path.join(OUTBOX, r, "latest")
         if os.path.exists(lp):
             with open(lp) as f:
                 head = f.read().strip()
-            p = os.path.join(OUTBOX, rev, head, "findings_v2.json")
+            p = os.path.join(OUTBOX, r, head, "findings_v2.json")
             if os.path.exists(p):
                 return p
     return None
@@ -48,7 +60,7 @@ def adapt(doc):
     human = False
     for f in doc["findings"]:
         if f.get("status") not in (None, "open"):
-            continue
+            continue                      # untested ones are listed apart, below
         if f["kind"] in ("spec_gap",):
             human = True
         m = modules.setdefault(f["owner_module"], {
@@ -99,6 +111,45 @@ def adapt(doc):
     }
 
 
+CURRENT = os.path.join(OUTBOX, "current")
+
+
+def publish_current(drop_dir, ri):
+    """The one place the Frontend reads: outbox/current/ always holds the
+    newest validation result -- retry_instructions.json, findings_v2.json,
+    DROP_STATUS.json when the run was partial -- and HANDOFF.json saying
+    which drop (content id) and spec revision they belong to, so a loop can
+    check it is reading the result of the drop it handed over. Files are
+    copied, not linked (one local tree, no git, nothing to resolve). The
+    per-drop archive stays at outbox/<spec_revision>/<drop_id>/."""
+    import shutil
+    os.makedirs(CURRENT, exist_ok=True)
+    for f in os.listdir(CURRENT):
+        os.remove(os.path.join(CURRENT, f))
+    copied = []
+    for name in ("retry_instructions.json", "findings_v2.json", "DROP_STATUS.json"):
+        src = os.path.join(drop_dir, name)
+        if os.path.exists(src):
+            shutil.copy(src, os.path.join(CURRENT, name))
+            copied.append(name)
+    with open(os.path.join(CURRENT, "HANDOFF.json"), "w") as f:
+        json.dump({"$schema": "validation-handoff/1",
+                   "drop_id": ri["drop"],
+                   "drop_id_rule": "sha256 over each block's <block>.sv then <block>_manifest.json "
+                                   "contents, blocks sorted by name, first 12 hex digits "
+                                   "(Validation/structural/rtl_drop.py:drop_id)",
+                   "spec_revision": ri.get("spec_revision"),
+                   "status": ri["status"],
+                   "failed_modules": ri["failed_modules"],
+                   "generated_utc": ri["generated_utc"],
+                   "files": copied,
+                   "archive": os.path.relpath(drop_dir, ROOT),
+                   "read": "retry_instructions.json; check drop_id against the drop you handed over "
+                           "before acting on it. requires_human_review=true means a spec gap or "
+                           "waiver needs a person, not a regeneration."}, f, indent=2)
+    print(f"  current -> {os.path.relpath(CURRENT, ROOT)}/ ({', '.join(copied)}, HANDOFF.json)")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--findings", default=None)
@@ -118,6 +169,7 @@ def main() -> int:
     out = args.out or os.path.join(os.path.dirname(fp), "retry_instructions.json")
     with open(out, "w") as f:
         json.dump(ri, f, indent=2)
+    publish_current(os.path.dirname(fp), ri)
     print(f"  {ri['status']}: {len(ri['failed_modules'])} module(s) with failed checks: "
           f"{', '.join(ri['failed_modules'])}")
     for m, v in ri["retry_instructions"].items():
