@@ -179,7 +179,7 @@ class ConfigRegsGenerator:
     input  logic                    sts_cal_fail,
     input  logic                    sts_bist_done,
     input  logic                    sts_bist_fail,
-    input  logic [2:0]              sts_ref_pending_cnt,
+    input  logic [3:0]              sts_ref_pending_cnt,
     input  logic                    sts_self_refresh_active,
     input  logic [15:0]             sts_ecc_ce_count,
     input  logic                    sts_ecc_ue_event,
@@ -297,7 +297,7 @@ class ConfigRegsGenerator:
         L("    logic [31:0] rdata_mux;")
         L("    always_comb begin")
         L("        case (csr_adr_i)")
-        L("            ADDR_CTRL_STATUS: rdata_mux = {23'b0, sts_self_refresh_active, "
+        L("            ADDR_CTRL_STATUS: rdata_mux = {22'b0, sts_self_refresh_active, "
           "sts_ref_pending_cnt, sts_bist_fail, sts_bist_done, sts_cal_fail, sts_cal_done, sts_init_done};")
         L("            ADDR_CTRL_CONFIG: rdata_mux = reg_ctrl_config;")
         for rt in plain_rw:
@@ -424,7 +424,7 @@ class ConfigRegsGenerator:
         L(f"    logic        csr_err_o;")
         L(f"    logic        sts_init_done, sts_cal_done, sts_cal_fail;")
         L(f"    logic        sts_bist_done, sts_bist_fail;")
-        L(f"    logic [2:0]  sts_ref_pending_cnt;")
+        L(f"    logic [3:0]  sts_ref_pending_cnt;")
         L(f"    logic        sts_self_refresh_active;")
         L(f"    logic [15:0] sts_ecc_ce_count;")
         L(f"    logic        sts_ecc_ue_event, sts_ref_starve_event, sts_init_fail_event;")
@@ -533,11 +533,11 @@ class ConfigRegsGenerator:
         L(f"")
         L(f'        $display(""); $display("  -- Section C: CTRL_STATUS (RO) --");')
         L(f"        hw_reset();")
-        L(f"        sts_init_done=1; sts_cal_done=1; sts_ref_pending_cnt=3'd5;")
+        L(f"        sts_init_done=1; sts_cal_done=1; sts_ref_pending_cnt=4'd5;")
         L(f"        repeat(2) @(posedge clk);")
         L(f"        csr_read(8'h00, rdata);")
         L(f'        check($sformatf("C1: CTRL_STATUS reflects inputs (0x%08X)", rdata),')
-        L(f"              rdata[0]==1'b1 && rdata[1]==1'b1 && rdata[7:5]==3'd5);")
+        L(f"              rdata[0]==1'b1 && rdata[1]==1'b1 && rdata[8:5]==4'd5);")
         L(f"        csr_write(8'h00, 32'hFFFFFFFF); csr_read(8'h00, rdata);")
         L(f'        check("C2: CTRL_STATUS ignores writes", rdata[0]==1\'b1 && rdata[1]==1\'b1);')
         L(f"")
@@ -655,7 +655,7 @@ class ConfigRegsGenerator:
                      "source": "calibration.cal_fail"},
                     {"name": "sts_bist_done", "width": 1, "dir": "input"},
                     {"name": "sts_bist_fail", "width": 1, "dir": "input"},
-                    {"name": "sts_ref_pending_cnt", "width": 3, "dir": "input",
+                    {"name": "sts_ref_pending_cnt", "width": 4, "dir": "input",
                      "source": "refresh_ctrl.ref_pending_cnt"},
                     {"name": "sts_self_refresh_active", "width": 1, "dir": "input"},
                     {"name": "sts_ecc_ce_count", "width": 16, "dir": "input"},
