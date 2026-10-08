@@ -397,7 +397,6 @@ class ConfigRegsGenerator:
 
     def generate_testbench(self) -> str:
         p = self.p
-        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         tests = self._tb_test_registry()
 
         lines = []
@@ -405,7 +404,7 @@ class ConfigRegsGenerator:
         L(f"`timescale 1ns / 1ps")
         L(f"//==============================================================")
         L(f"// config_regs_tb.sv -- Enhanced testbench ({len(tests)} tests)")
-        L(f"// Generated: {ts}")
+        L(f"// Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)")
         L(f"// Generator: config_regs_gen.py (Phase 1, deterministic script)")
         L(f"//==============================================================")
         L(f"module config_regs_tb;")

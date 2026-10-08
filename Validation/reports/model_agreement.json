@@ -1,6 +1,6 @@
 {
   "$schema": "validation-model-agreement/1",
-  "generated_utc": "2026-10-08T17:19:55.449424Z",
+  "generated_utc": "2026-10-08T18:05:37.098698Z",
   "traces": 59,
   "rows": [
     {
@@ -39,46 +39,9 @@
       "traces": 53,
       "agree": 53,
       "disagree": 0,
-      "attribution_only": 15,
+      "attribution_only": 0,
       "disagreements": [],
-      "attribution": [
-        {
-          "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
-          "diffs": [
-            {
-              "id": "SCHED_004",
-              "attribution_differs": true,
-              "count": 13,
-              "primary_example": "SCHED_004 (cas_wrong_row): WR issued with open row 21701 but request asked for row 26495 @ [sched_cmd.command aux=0x7 bank=0x3 col=0x190 row=0x54c5 type=0x3 we=0x1] [cq_enq.enqueue bank=0x3 col=0x190 ",
-              "second_example": "SCHED_004 (cas_wrong_row): WRITE to bank 3 col 400: request wanted row 26495 but row 21701 is open @ [cq_enq.enqueue bank=0x3 col=0x190 row=0x677f we=0x1] [sched_cmd.command aux=0x7 bank=0x3 col=0x190"
-            }
-          ]
-        },
-        {
-          "trace": "Validation/reports/paths/path_07_backpressure_observed.jsonl",
-          "diffs": [
-            {
-              "id": "SCHED_004",
-              "attribution_differs": true,
-              "count": 2,
-              "primary_example": "SCHED_004 (cas_wrong_row): WR issued with open row 25778 but request asked for row 22655 @ [sched_cmd.command aux=0x0 bank=0x6 col=0x250 row=0x64b2 type=0x3 we=0x1] [cq_enq.enqueue bank=0x6 col=0x250 ",
-              "second_example": "SCHED_004 (cas_wrong_row): WRITE to bank 6 col 592: request wanted row 22655 but row 25778 is open @ [cq_enq.enqueue bank=0x6 col=0x250 row=0x587f we=0x1] [sched_cmd.command aux=0x0 bank=0x6 col=0x250"
-            }
-          ]
-        },
-        {
-          "trace": "Validation/reports/paths/path_20_refresh_preempt_observed.jsonl",
-          "diffs": [
-            {
-              "id": "SCHED_004",
-              "attribution_differs": true,
-              "count": 13,
-              "primary_example": "SCHED_004 (cas_wrong_row): WR issued with open row 21701 but request asked for row 26495 @ [sched_cmd.command aux=0x7 bank=0x3 col=0x190 row=0x54c5 type=0x3 we=0x1] [cq_enq.enqueue bank=0x3 col=0x190 ",
-              "second_example": "SCHED_004 (cas_wrong_row): WRITE to bank 3 col 400: request wanted row 26495 but row 21701 is open @ [cq_enq.enqueue bank=0x3 col=0x190 row=0x677f we=0x1] [sched_cmd.command aux=0x7 bank=0x3 col=0x190"
-            }
-          ]
-        }
-      ]
+      "attribution": []
     },
     {
       "scope": "config_regs",
@@ -166,21 +129,9 @@
       "traces": 53,
       "agree": 53,
       "disagree": 0,
-      "attribution_only": 6,
+      "attribution_only": 4,
       "disagreements": [],
       "attribution": [
-        {
-          "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
-          "diffs": [
-            {
-              "id": "REF_002",
-              "attribution_differs": true,
-              "count": 1,
-              "primary_example": "REF_002 (REFRESH issued while one or more banks are still active): REFRESH command issued with banks [2] still active (not precharged)",
-              "second_example": "REF_002 (refresh_during_active_bank): REFRESH issued while bank(s) [2] are still active (not precharged) @ [sched_cmd.command aux=0x0 bank=0x0 col=0x0 row=0x0 type=0x5 we=0x0]"
-            }
-          ]
-        },
         {
           "trace": "Validation/reports/paths/path_09_init_to_refresh_observed.jsonl",
           "diffs": [
@@ -202,6 +153,18 @@
               "count": 1,
               "primary_example": "SCHED_003 (Every refresh request must eventually be serviced with a REFRESH command): 1 refresh request(s) were never serviced with a REFRESH command",
               "second_example": "SCHED_003 (refresh_request_not_serviced): 1 refresh request(s) not serviced with REFRESH command (observed: 1, serviced: 0) @ [refresh_req.request pending=0x1 starve=0x0 urgent=0x0]"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/repairs/baseline/path_05_scheduler_refresh_loop_observed.jsonl",
+          "diffs": [
+            {
+              "id": "REF_002",
+              "attribution_differs": true,
+              "count": 1,
+              "primary_example": "REF_002 (REFRESH issued while one or more banks are still active): REFRESH command issued with banks [2] still active (not precharged)",
+              "second_example": "REF_002 (refresh_during_active_bank): REFRESH issued while bank(s) [2] are still active (not precharged) @ [sched_cmd.command aux=0x0 bank=0x0 col=0x0 row=0x0 type=0x5 we=0x0]"
             }
           ]
         }

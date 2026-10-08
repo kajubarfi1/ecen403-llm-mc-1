@@ -25,7 +25,9 @@ class Fake:
         self.run, self.review_rc, self.phase_fail = run, review_rc, phase_fail
         self.validation = list(validation)       # one status per validation call
         self.backend, self.feedback_rc = backend, feedback_rc
-        self.agent_fixes = ["wb_port"]      # what the fake agent's fix report claims
+        self.agent_fixes = ["wb_port"]      # what the fake agent's fix report claims (or {phase: [...]})
+        self.failed = ["wb_port"]           # what the fake validation reports as failed
+        self.backend_crash = False          # pipeline.py exits 1 without a report
         self.absent = []                     # blocks the fake validation reports absent
         self.calls = []
 
@@ -64,6 +66,10 @@ class Fake:
             return 0, ""
         if name == "validate_drop.py":
             status = self.validation.pop(0) if self.validation else "PASS"
+            if status == "STOP":
+                # a generator refused the drop: no handoff written for it
+                return 1, ("    [1] resolve blocks through the declared drop (git ffff00000000)\n"
+                           "    STOP: a generator refused the drop; its output is in the log.\n")
             os.makedirs(flow.OUTBOX_CURRENT, exist_ok=True)
             if self.absent:
                 with open(os.path.join(flow.OUTBOX_CURRENT, "DROP_STATUS.json"), "w") as f:
@@ -71,9 +77,9 @@ class Fake:
                                "paths_run": []}, f)
             with open(os.path.join(flow.OUTBOX_CURRENT, "HANDOFF.json"), "w") as f:
                 json.dump({"drop_id": "abc123", "status": status,
-                           "failed_modules": [] if status == "PASS" else ["wb_port"]}, f)
+                           "failed_modules": [] if status == "PASS" else self.failed}, f)
             with open(os.path.join(flow.OUTBOX_CURRENT, "retry_instructions.json"), "w") as f:
-                json.dump({"failed_modules": [] if status == "PASS" else ["wb_port"]}, f)
+                json.dump({"failed_modules": [] if status == "PASS" else self.failed}, f)
             return 0 if status == "PASS" else 1, ""
         if name == "to_frontend_error_report.py":
             retry = cmd[cmd.index("--retry") + 1]
@@ -86,14 +92,19 @@ class Fake:
             self.calls[-1] = (name, list(cmd), stdin, dict(env or {}))
             outdir = cmd[cmd.index("--output-dir") + 1]
             n = int(name[5])
-            if self.agent_fixes is not None:
+            fixes = (self.agent_fixes.get(n, []) if isinstance(self.agent_fixes, dict)
+                     else self.agent_fixes)
+            if fixes is not None:
                 os.makedirs(os.path.join(outdir, "VALIDATIONREPORT"), exist_ok=True)
                 with open(os.path.join(outdir, "VALIDATIONREPORT", f"phase{n}_fix_report.json"), "w") as f:
-                    json.dump({"results": [{"module": m, "final_status": "fixed"} for m in self.agent_fixes]}, f)
+                    json.dump({"results": [{"module": m, "final_status": "fixed"} for m in fixes]}, f)
             return self.feedback_rc, "ModuleNotFoundError: No module named 'anthropic'\n" if self.feedback_rc else ""
         if name == "pipeline.py":
             out_root = cmd[cmd.index("--out_root") + 1]
             os.makedirs(out_root, exist_ok=True)
+            if self.backend_crash:
+                # died before writing a report; an older PASS report may remain
+                return 1, "Traceback: ImportError\n"
             with open(os.path.join(out_root, "pipeline_final_report_TOPRTL.json"), "w") as f:
                 json.dump(self.backend or {"pipeline_status": "PASS", "artifacts": ["x/6_final.v"]}, f)
             return 0 if (self.backend or {}).get("pipeline_status", "PASS") == "PASS" else 1, ""
@@ -272,6 +283,24 @@ class TestHalts(FlowCase):
         self.assertEqual(be[be.index("--spec_revision") + 1], "fake_rev")
         self.assertEqual(be[be.index("--mode") + 1], "contract")
 
+    def test_backend_nonzero_exit_is_fail_even_with_a_stale_pass_report(self):
+        # backend handoff 2026-10-08: a report from an earlier round has the
+        # status key, so the old default took its PASS over a nonzero exit
+        os.environ["USE_DOCKER"] = "1"
+        fake = Fake(self.run_dir)
+        fake.backend_crash = True
+        run = flow.Run(self.run_dir, self.args())
+        os.makedirs(run.backend_dir, exist_ok=True)
+        stale = os.path.join(run.backend_dir, "pipeline_final_report_TOPRTL.json")
+        with open(stale, "w") as f:
+            json.dump({"pipeline_status": "PASS", "artifacts": ["old/6_final.v"]}, f)
+        import time; os.utime(stale, (time.time() - 3600, time.time() - 3600))
+        flow.sh = fake
+        rc = flow.run_flow(run, self.args())
+        st = [s for s in run.state["stages"] if s["stage"] == "backend"]
+        self.assertEqual(st[0]["status"], "FAIL", st)   # then the halt for a human
+        self.assertIsNone(run.state.get("netlist"), "a stale report's netlist is not this round's")
+
     def test_backend_synth_failure_is_the_frontend_edge_and_halts_for_the_format(self):
         os.environ["USE_DOCKER"] = "1"
         rc, run = self.go(Fake(self.run_dir, backend={"pipeline_status": "FAIL", "failed_stage": "synth",
@@ -373,6 +402,36 @@ class TestAgentOutcome(FlowCase):
         self.assertIn("anthropic", run.state["halt"]["why"])
         names = [c[0] for c in fake.calls]
         self.assertEqual(names.count("phase1_pipeline.py"), 1, "no blind regeneration")
+
+    def test_one_phase_fixing_is_enough_to_revalidate(self):
+        # phase 1 fixed wb_port, phase 2's agent gave up (API error): the
+        # drop changed, so it is validated again; the halt is only for
+        # "no phase changed anything" (2026-10-08 live run: bank_tracker fixed
+        # by phase 2, scheduler unresolved by phase 3, run halted)
+        self._agent(1); self._agent(2)
+        fake = Fake(self.run_dir, validation=["FAIL", "PASS"], feedback_rc=1)
+        fake.failed = ["wb_port", "bank_tracker"]
+        fake.agent_fixes = {1: ["wb_port"], 2: []}
+        rc, run = self.go(fake, phases="1,2")
+        self.assertEqual(rc, 0, run.state.get("halt"))
+        self.assertIn(("frontend_regeneration", "PARTIAL"), self.stages(run))
+        names = [c[0] for c in fake.calls]
+        self.assertEqual(names.count("validate_drop.py"), 2)
+        self.assertEqual(names.count("phase2_pipeline.py"), 2, "the unfixed phase is regenerated too")
+
+    def test_validation_stopped_before_judging_is_not_a_verdict(self):
+        # round 1 fails, the agent patches, round 2's validate_drop stops in
+        # its regenerate step (a manifest the patch broke): the stale handoff
+        # in outbox/current must not be read as round 2's FAIL
+        self._agent(1)
+        fake = Fake(self.run_dir, validation=["FAIL", "STOP"], feedback_rc=1)
+        fake.agent_fixes = ["wb_port"]
+        rc, run = self.go(fake, phases="1")
+        self.assertEqual(run.state["halt"]["stage"], "rtl_validation")
+        self.assertIn("stopped before judging drop ffff00000000", run.state["halt"]["why"])
+        self.assertIn("refused", run.state["halt"]["why"])
+        names = [c[0] for c in fake.calls]
+        self.assertEqual(names.count("phase1_validation_agent.py"), 1, "no agent on a non-verdict")
 
     def test_partial_fix_regenerates(self):
         self._agent(1)

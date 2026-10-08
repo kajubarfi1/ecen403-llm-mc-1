@@ -200,10 +200,13 @@ def main() -> int:
     if adopted:
         print(f"    ADOPTED the shipped spec: same revision, different content "
               f"(was id {prev_sha}); {os.path.relpath(default_spec, ROOT)} refreshed")
-    elif reused:
+    elif reused and ship_sha != val_sha:
         print(f"    WARNING: VALIDATION_SPEC names a different spec (id {val_sha}) "
               f"than the drop ships (id {ship_sha}) under the same revision; "
               f"judging against the caller's.")
+    elif reused:
+        print(f"    NOTE: revision {val_rev} has named more than one spec before "
+              f"(Validation/spec/revision_ids.json); SPEC_REVISION_REUSED stays filed")
     # every generator and judge below loads this spec and no other
     os.environ["VALIDATION_SPEC"] = spec_path
     if foreign:
@@ -444,6 +447,39 @@ def main() -> int:
     n_fail = sum(1 for v in verdicts.values() if v == "FAIL")
     n_err = len(verdicts) - n_pass - n_fail
     print(f"    pass={n_pass} fail={n_fail} error={n_err}")
+    errored = [p for p, v in verdicts.items() if v not in ("PASS", "FAIL")]
+    if errored:
+        # A path that did not run has no report for this drop. Its old one
+        # (from the previous drop, in the shared reports dir) must not be
+        # judged, compared or snapshotted as this drop's, and the findings it
+        # carried are untested, never resolved: it joins the blocked set.
+        derived = {}
+        for pdef in pdefs:
+            if pdef.get("judged_in"):
+                derived.setdefault(pdef["judged_in"]["host"], []).append(pdef["id"])
+        for p in errored:
+            for q in [p] + derived.get(p, []):
+                for f in glob.glob(os.path.join(report_dir, f"{q}_*")):
+                    os.remove(f)
+                blocked[q] = [f"run error ({verdicts[p]}): see {os.path.relpath(LOGS, ROOT)}/{head}_{p}.txt"]
+        print(f"    {len(errored)} path(s) did not run; their stale reports were removed and "
+              f"their findings are carried untested")
+        if drop_status is None:
+            drop_status = {"$schema": "validation-drop-status/1", "drop": head,
+                           "partial": False, "blocks_present": present,
+                           "blocks_absent": sorted(absent),
+                           "inconsistent_edges": bad_edges,
+                           "validation_spec_revision": val_rev,
+                           "foreign_spec_blocks": foreign,
+                           "paths_run": [p for p in paths if p not in errored],
+                           "paths_blocked": blocked,
+                           "note": "Paths listed as blocked with a run error did not simulate "
+                                   "on this drop (infrastructure, not design); nothing is "
+                                   "known about them from this run."}
+        else:
+            drop_status["paths_blocked"] = blocked
+            drop_status["paths_run"] = [p for p in drop_status.get("paths_run", paths)
+                                        if p not in errored]
 
     # 5. rollup ----------------------------------------------------------------
     if not args.skip_rollup and not args.skip_sim and not nothing_runs:

@@ -573,7 +573,7 @@ def generate(scope, retries=3, dry_run=False, verbose=True):
             "spec_revision": spec.get("revision"),
             "spec_sha256": spec_sha256(),
             "spec_path": os.path.relpath(SPEC_PATH, ROOT),
-            "model": os.environ.get("ANTHROPIC_MODEL", "(client default)"),
+            "model": _effective_model(),
             "accepted_by_gate": gate_name,
             "attempts": attempts,
             "input_ifaces": ins, "output_ifaces": outs,
@@ -616,6 +616,19 @@ def main() -> int:
 # =============================================================================
 # Re-grading an accepted model against the CURRENT spec
 # =============================================================================
+
+def _effective_model():
+    """The model the client actually called: the TAMU gateway serves its own
+    Opus deployment whatever ANTHROPIC_MODEL says."""
+    try:
+        import llm_client as LC
+        prov = os.environ.get("LLM_PROVIDER", "auto")
+        if prov == "tamu" or (prov == "auto" and not os.environ.get("ANTHROPIC_API_KEY")):
+            return f"tamu:{LC._config.get('tamu_model')}"
+    except Exception:
+        pass
+    return os.environ.get("ANTHROPIC_MODEL", "(client default)")
+
 
 def spec_sha256(path=None):
     """Content identity of the spec (see Validation/spec/spec_identity.py):

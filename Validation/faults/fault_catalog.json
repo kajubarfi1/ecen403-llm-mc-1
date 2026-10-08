@@ -173,8 +173,8 @@
       "block": "scheduler",
       "file": "PHASE3RTL/scheduler.sv",
       "description": "Row conflicts are never resolved: the PRECHARGE branch is unreachable.",
-      "from": "if (bank_is_active[b] && bank_pre_allowed[b]) begin",
-      "to": "if (1'b0 && bank_is_active[b] && bank_pre_allowed[b]) begin",
+      "from": "if (bank_is_active[b] && bank_pre_allowed[b] && !inflight_any[b] && !inflight_ref) begin",
+      "to": "if (1'b0 && bank_is_active[b] && bank_pre_allowed[b] && !inflight_any[b] && !inflight_ref) begin",
       "expect": [
         "id:SCHED_001",
         "log:DRIVER_STALL",
@@ -184,7 +184,8 @@
         "path_19_row_conflict"
       ],
       "masked_by": null,
-      "masked_until": "5661e03: scheduler_regrant (open): the baseline already drops requests (19 enqueued, 16 dequeued) through the slot re-grant defect, so this fault's dropped requests add 3 to a count that is already non-zero. Re-testable once that defect is fixed."
+      "masked_until": "5661e03: scheduler_regrant (open): the baseline already drops requests (19 enqueued, 16 dequeued) through the slot re-grant defect, so this fault's dropped requests add 3 to a count that is already non-zero. Re-testable once that defect is fixed.",
+      "reseeded": "2026-10-08: scheduler regenerated with the feedback-latency hold (drop a7cd3cb93546); the row-conflict PRE condition gained !inflight_any[b] && !inflight_ref"
     },
     {
       "id": "M13_data_path_dm_polarity",

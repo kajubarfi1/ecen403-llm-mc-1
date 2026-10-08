@@ -195,6 +195,61 @@ they are not vacuous. Scheduler is 48/48 on the new RTL.
   about 4x longer than the spec requires. Conservative, not a correctness bug,
   but it costs throughput and means the real tWTR/tRCD margins are untested.
 
+## 9. Reply to your evening addenda (`a7cd3cb93546`: 19/19 paths, 0 open findings)
+
+Thank you; both the result and the correction about SCHED_004 are noted. What
+we did with your asks:
+
+- **Ask 3 (timestamp in RTL headers): done.** The 8 generators that wrote
+  `// Generated: <time>` now write a fixed line pointing at the manifest's
+  `generated_utc`; all 11 RTL generators were run twice and are byte-identical
+  run to run. This is in the generators only: the drop in `OutputFolders/` is
+  still `a7cd3cb93546` and is not regenerated. The manifests still carry
+  `generated_utc` and `git_commit`, so `drop_id` still changes on every
+  regeneration; your `design_id` is the stable identity.
+- **Ask 1 (feed the failure into the next attempt): done in all four phase
+  agents.** A re-verify that fails now hands the next attempt the lint/sim
+  result, the failing lines, and, when 0 tests ran (the patch did not compile),
+  the first simulator errors from the log. A patch that is not valid Python
+  also reports why.
+- **Ask 2 (manifest `source` forms): done.** The agents' prompt states that
+  `source` is `<block>.<port>` or omitted, with `source_expr` for expressions,
+  and each agent now rejects and reverts any regenerated manifest whose
+  `source` is not `<block>.<port>`, so prose like the one your run produced can
+  no longer reach you.
+- **Bug found while doing this, in what we pushed last time:** the Phase 3 and
+  Phase 4 agents were missing `VALIDATION_SUBDIR` and the Phase 2 agent was
+  missing `import re` after an edit. A Phase 3/4 agent would have stopped with
+  a NameError before reading a report, and the Phase 2 agent on import.
+  `py_compile` does not catch this; fixed, and all four now import and pass a
+  static undefined-name check. If your 10/08 afternoon run hit a Phase 3
+  failure before attempt 1, this may be why.
+- **Your question 2 (`counter_clock`): decided, document it in the spec.**
+  `timing_model.counter_clock` now states that the `bank_tracker` timing
+  counters and the `refresh_ctrl` tREFI counter are loaded with `*_nCK` values
+  but decrement once per controller clock (`window_scale` = 4, taken from
+  `clock_ratio_ddr_to_controller`). It is in the golden spec and the compiler
+  (identical for the default preset), and `generated_spec.json` in the drop was
+  updated. Spec review: PASS, 0 blocking, 0 advisory. The RTL is unchanged, so
+  the drop id stays `a7cd3cb93546`; only the spec content (and so `spec_id`)
+  changed, under the same `revision` string, so expect `SPEC_REVISION_REUSED`
+  for the golden spec to be filed again until we bump its revision (it is
+  pinned in `backend/env.template`, so we have not changed it without telling
+  Dawson).
+- **Correction to what we said earlier ("conservative, not a correctness
+  bug"):** that is true of the minimum-spacing timings (tRCD, tRP, ..., tWTR):
+  the window is 4x longer than needed, so nothing is violated, but the real
+  margin is untested. It is NOT true of **tREFI**, which is a maximum
+  interval: `refresh_ctrl` counts 6240 controller cycles = 31.2 us, against the
+  7.8 us the spec requires. The spec field records this
+  (`effective_tREFI_ns: 31200.0`). Your tREFI check is "undetermined at bound
+  201", so it cannot have seen it. We have documented it as asked, but it is a
+  real refresh-interval deviation, and we would like to fix at least tREFI in
+  `refresh_ctrl` (load the interval in controller cycles); say if you would
+  rather we leave it so your checkers judge the design as it is.
+- Your age-bound observation on `path_07` is noted; we agree it needs a stated
+  policy before it can be a check. Not done.
+
 ## Questions
 
 Answered by your 10/08 reply: `observed`-only modules stay unpatched under

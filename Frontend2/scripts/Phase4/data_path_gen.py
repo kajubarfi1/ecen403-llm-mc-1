@@ -184,7 +184,6 @@ class DataPathGenerator:
     # ================================================================
     def generate_rtl(self) -> str:
         p = self.p
-        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         lines = []
         L = lines.append
@@ -192,7 +191,7 @@ class DataPathGenerator:
         L(f"////////////////////////////////////////////////////////////////////////////////")
         L(f"// Module:    data_path")
         L(f"// File:      data_path.sv")
-        L(f"// Generated: {ts}")
+        L(f"// Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)")
         L(f"// Generator:     Data Path / Alignment Generator (Phase 3)")
         L(f"// Spec:      {self.spec.get('design_id', 'N/A')} rev {self.spec.get('revision', 'N/A')}")
         L(f"//")

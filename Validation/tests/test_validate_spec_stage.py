@@ -32,11 +32,19 @@ class TestContract(unittest.TestCase):
         self.assertTrue(all(isinstance(x, str) for x in r["findings"]))
         self.assertIsInstance(r["validator"], str)
 
-    def test_golden_passes_with_its_gaps_advisory(self):
+    def test_golden_passes(self):
         r = run(GOLDEN)
         self.assertEqual(r["status"], "PASS", r["findings"][:3])
         self.assertEqual(r["review"]["blocking"], [])
-        self.assertTrue(any(x.startswith("[gap:") for x in r["findings"]))
+
+    def test_gaps_are_advisory_and_ask_for_a_human(self):
+        # the golden spec answers every intake question since 2026-10-08;
+        # a spec that does not still PASSES, with the gap advisory
+        s = copy.deepcopy(GOLDEN)
+        s["csr_register_map"].pop("unmapped_read_data", None)
+        r = run(s)
+        self.assertEqual(r["status"], "PASS", r["findings"][:3])
+        self.assertTrue(any(x.startswith("[gap:") for x in r["findings"]), r["findings"][:3])
         self.assertTrue(r["review"]["requires_human_review"])
 
 

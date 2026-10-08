@@ -1,124 +1,204 @@
 {
   "$schema": "validation-drop-comparison/1",
   "a": {
-    "dir": "Validation/reports/drops/5661e03",
-    "drop_head": "5661e03"
+    "dir": "Validation/reports/drops/4b86c7cd3705",
+    "drop_head": "4b86c7cd3705"
   },
   "b": {
     "dir": "Validation/reports/paths",
-    "drop_head": "4b86c7cd3705"
+    "drop_head": "a7cd3cb93546"
   },
   "strict": false,
-  "generated_utc": "2026-10-08T17:20:32.901916Z",
+  "generated_utc": "2026-10-08T18:31:19.647757Z",
   "rows": [
     {
       "path": "path_01_write_cmd",
-      "kind": "regression",
-      "new": {
-        "stage:cmd_gen": 1
+      "kind": "changed",
+      "new": {},
+      "gone": {
+        "assert:a_PROTO_002": 23,
+        "assert:a_TIMING_004": 23,
+        "assert:a_TIMING_005": 5,
+        "assert:a_TIMING_011": 1,
+        "id:PROTO_002": 12,
+        "illegal:cp_tfaw_spacing": 23,
+        "illegal:cp_trc_spacing": 23,
+        "illegal:cp_trfc_spacing": 1,
+        "illegal:cp_trrd_spacing": 23,
+        "stage:cmd_gen": 1,
+        "stage:cmd_queue+scheduler": 1,
+        "violations:cmd_queue+scheduler": 23
       },
-      "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
+      "matched_down": {
+        "matched:cmd_gen": [
+          98,
+          51
+        ]
+      },
       "matched_up": {},
       "verdict": [
         "fail",
-        "fail"
+        "pass"
       ]
     },
     {
       "path": "path_02_read_cmd",
-      "kind": "regression",
-      "new": {
-        "stage:cmd_gen": 1
+      "kind": "changed",
+      "new": {},
+      "gone": {
+        "assert:a_PROTO_002": 38,
+        "assert:a_TIMING_004": 38,
+        "assert:a_TIMING_011": 1,
+        "id:PROTO_002": 12,
+        "illegal:cp_tfaw_spacing": 38,
+        "illegal:cp_trc_spacing": 38,
+        "illegal:cp_trfc_spacing": 1,
+        "illegal:cp_trrd_spacing": 38,
+        "stage:cmd_gen": 1,
+        "stage:cmd_queue+scheduler": 1,
+        "violations:cmd_queue+scheduler": 38
       },
-      "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
+      "matched_down": {
+        "matched:cmd_gen": [
+          111,
+          50
+        ]
+      },
       "matched_up": {},
       "verdict": [
         "fail",
-        "fail"
+        "pass"
       ]
     },
     {
       "path": "path_03_read_return",
-      "kind": "regression",
-      "new": {
+      "kind": "fixed",
+      "new": {},
+      "gone": {
+        "assert:a_PROTO_002": 38,
+        "assert:a_TIMING_004": 38,
+        "assert:a_TIMING_011": 1,
+        "illegal:cp_tfaw_spacing": 38,
+        "illegal:cp_trc_spacing": 38,
+        "illegal:cp_trfc_spacing": 1,
+        "illegal:cp_trrd_spacing": 38,
         "stage:cmd_gen (support)": 1
       },
-      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "pass",
-        "fail"
+        "fail",
+        "pass"
       ]
     },
     {
       "path": "path_04_scheduler_bank_loop",
-      "kind": "regression",
-      "new": {
-        "stage:cmd_gen (support)": 1
+      "kind": "fixed",
+      "new": {},
+      "gone": {
+        "assert:a_PROTO_002": 23,
+        "assert:a_TIMING_004": 23,
+        "assert:a_TIMING_005": 5,
+        "assert:a_TIMING_011": 1,
+        "id:PROTO_002": 12,
+        "illegal:cp_tfaw_spacing": 23,
+        "illegal:cp_trc_spacing": 23,
+        "illegal:cp_trfc_spacing": 1,
+        "illegal:cp_trrd_spacing": 23,
+        "stage:(path-level)": 1,
+        "stage:cmd_gen (support)": 1,
+        "violations:(path-level)": 23
       },
-      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
         "fail",
-        "fail"
+        "pass"
       ]
     },
     {
       "path": "path_05_scheduler_refresh_loop",
-      "kind": "regression",
-      "new": {
-        "stage:cmd_gen (support)": 1
+      "kind": "fixed",
+      "new": {},
+      "gone": {
+        "assert:a_PROTO_002": 947,
+        "assert:a_TIMING_004": 946,
+        "assert:a_TIMING_005": 85,
+        "assert:a_TIMING_011": 13,
+        "assert:p_wr_no_overflow": 82,
+        "id:REF_002": 2,
+        "illegal:cp_tfaw_spacing": 946,
+        "illegal:cp_trc_spacing": 946,
+        "illegal:cp_trfc_spacing": 13,
+        "illegal:cp_trrd_spacing": 946,
+        "stage:(path-level)": 1,
+        "stage:cmd_gen (support)": 1,
+        "stage:scheduler": 1,
+        "violations:(path-level)": 1,
+        "violations:scheduler": 1
       },
-      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
         "fail",
-        "fail"
+        "pass"
       ]
     },
     {
       "path": "path_06_scheduler_dequeue",
-      "kind": "same",
+      "kind": "fixed",
       "new": {},
-      "gone": {},
+      "gone": {
+        "id:PROTO_002": 12,
+        "stage:cmd_queue+scheduler": 1,
+        "violations:cmd_queue+scheduler": 23
+      },
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
         "fail",
-        "fail"
+        "pass"
       ]
     },
     {
       "path": "path_07_backpressure",
-      "kind": "regression",
-      "new": {
-        "stage:cmd_gen (support)": 1
+      "kind": "fixed",
+      "new": {},
+      "gone": {
+        "assert:a_PROTO_002": 55,
+        "assert:a_TIMING_004": 55,
+        "assert:a_TIMING_005": 3,
+        "assert:a_TIMING_011": 1,
+        "assert:p_wr_no_overflow": 1,
+        "id:PROTO_002": 11,
+        "id:SCHED_004": 1,
+        "illegal:cp_tfaw_spacing": 55,
+        "illegal:cp_trc_spacing": 55,
+        "illegal:cp_trfc_spacing": 1,
+        "illegal:cp_trrd_spacing": 55,
+        "stage:cmd_gen (support)": 1,
+        "stage:cmd_queue+scheduler": 1,
+        "violations:cmd_queue+scheduler": 57
       },
-      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
         "fail",
-        "fail"
+        "pass"
       ]
     },
     {
@@ -151,18 +231,13 @@
     },
     {
       "path": "path_10_csr_to_timing",
-      "kind": "fixed",
+      "kind": "same",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {
-        "matched:config_regs": [
-          103,
-          131
-        ]
-      },
+      "matched_up": {},
       "verdict": [
         "pass",
         "pass"
@@ -170,18 +245,13 @@
     },
     {
       "path": "path_11_csr_to_refresh",
-      "kind": "fixed",
+      "kind": "same",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {
-        "matched:config_regs": [
-          103,
-          131
-        ]
-      },
+      "matched_up": {},
       "verdict": [
         "pass",
         "pass"
@@ -189,44 +259,38 @@
     },
     {
       "path": "path_12_csr_timing_to_scheduling",
-      "kind": "changed",
-      "new": {
+      "kind": "fixed",
+      "new": {},
+      "gone": {
+        "assert:a_TIMING_011": 4,
+        "illegal:cp_trfc_spacing": 4,
         "stage:cmd_gen (support)": 1
       },
-      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {
-        "matched:config_regs": [
-          103,
-          131
-        ]
-      },
+      "matched_up": {},
       "verdict": [
-        "pass",
-        "fail"
+        "fail",
+        "pass"
       ]
     },
     {
       "path": "path_13_csr_refresh_to_scheduling",
-      "kind": "changed",
-      "new": {
+      "kind": "fixed",
+      "new": {},
+      "gone": {
+        "assert:a_TIMING_011": 4,
+        "illegal:cp_trfc_spacing": 4,
         "stage:cmd_gen (support)": 1
       },
-      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {
-        "matched:config_regs": [
-          103,
-          131
-        ]
-      },
+      "matched_up": {},
       "verdict": [
-        "pass",
-        "fail"
+        "fail",
+        "pass"
       ]
     },
     {
@@ -287,50 +351,104 @@
     },
     {
       "path": "path_18_full_write",
-      "kind": "regression",
-      "new": {
-        "stage:cmd_gen": 1
+      "kind": "changed",
+      "new": {},
+      "gone": {
+        "assert:a_PROTO_002": 35,
+        "assert:a_TIMING_004": 35,
+        "assert:a_TIMING_005": 1,
+        "assert:a_TIMING_011": 1,
+        "id:PROTO_002": 12,
+        "illegal:cp_tfaw_spacing": 35,
+        "illegal:cp_trc_spacing": 35,
+        "illegal:cp_trfc_spacing": 1,
+        "illegal:cp_trrd_spacing": 35,
+        "stage:cmd_gen": 1,
+        "stage:cmd_queue+scheduler": 1,
+        "stage:data_path": 1,
+        "violations:cmd_queue+scheduler": 35
       },
-      "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
+      "matched_down": {
+        "matched:cmd_gen": [
+          107,
+          50
+        ]
+      },
+      "matched_up": {
+        "matched:data_path": [
+          27,
+          29
+        ]
+      },
       "verdict": [
         "fail",
-        "fail"
+        "pass"
       ]
     },
     {
       "path": "path_19_row_conflict",
-      "kind": "regression",
-      "new": {
-        "stage:cmd_gen (support)": 1
+      "kind": "fixed",
+      "new": {},
+      "gone": {
+        "assert:a_PROTO_002": 23,
+        "assert:a_TIMING_004": 23,
+        "assert:a_TIMING_005": 5,
+        "assert:a_TIMING_011": 1,
+        "id:PROTO_002": 12,
+        "illegal:cp_tfaw_spacing": 23,
+        "illegal:cp_trc_spacing": 23,
+        "illegal:cp_trfc_spacing": 1,
+        "illegal:cp_trrd_spacing": 23,
+        "stage:(path-level)": 1,
+        "stage:cmd_gen (support)": 1,
+        "violations:(path-level)": 23
       },
-      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
         "fail",
-        "fail"
+        "pass"
       ]
     },
     {
       "path": "path_20_refresh_preempt",
-      "kind": "regression",
-      "new": {
-        "stage:cmd_gen": 1
+      "kind": "changed",
+      "new": {},
+      "gone": {
+        "assert:a_PROTO_002": 947,
+        "assert:a_TIMING_004": 946,
+        "assert:a_TIMING_005": 85,
+        "assert:a_TIMING_011": 13,
+        "assert:p_wr_no_overflow": 82,
+        "id:PROTO_002": 11,
+        "id:REF_002": 1,
+        "id:SCHED_004": 1,
+        "illegal:cp_tfaw_spacing": 946,
+        "illegal:cp_trc_spacing": 946,
+        "illegal:cp_trfc_spacing": 13,
+        "illegal:cp_trrd_spacing": 946,
+        "stage:(path-level)": 1,
+        "stage:cmd_gen": 1,
+        "stage:cmd_queue+scheduler": 1,
+        "violations:(path-level)": 1,
+        "violations:cmd_queue+scheduler": 961
       },
-      "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
+      "matched_down": {
+        "matched:cmd_gen": [
+          3929,
+          1812
+        ]
+      },
       "matched_up": {},
       "verdict": [
         "fail",
-        "fail"
+        "pass"
       ]
     },
     {
@@ -349,18 +467,13 @@
     },
     {
       "path": "path_22_csr_standalone",
-      "kind": "fixed",
+      "kind": "same",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {
-        "matched:config_regs": [
-          103,
-          131
-        ]
-      },
+      "matched_up": {},
       "verdict": [
         "pass",
         "pass"

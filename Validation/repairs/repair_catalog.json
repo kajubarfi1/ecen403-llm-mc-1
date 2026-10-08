@@ -65,7 +65,9 @@
         }
       ],
       "confirmed_at_source": true,
-      "source_note": "scheduler.sv classifies from bank_is_active/bank_*_allowed, which bank_tracker updates from cmd_gen's registered feedback: a command issued at cycle N is reflected at N+3."
+      "source_note": "scheduler.sv classifies from bank_is_active/bank_*_allowed, which bank_tracker updates from cmd_gen's registered feedback: a command issued at cycle N is reflected at N+3.",
+      "resolved_in": "a7cd3cb93546",
+      "resolved_note": "Fixed at source by the Frontend (commit 6e2d7ad, 2026-10-08): the scheduler holds commands for the 2-cycle feedback latency and gates REF on every bank's ACT permission; tWTR is one device-wide counter gating READ. The edits no longer match the RTL and the checks they silenced are silent on the clean drop. Kept as the record of how the defects were attributed."
     },
     {
       "id": "R02_scheduler_refresh_trfc_gate",
@@ -99,7 +101,9 @@
         }
       ],
       "confirmed_at_source": true,
-      "source_note": "scheduler.sv: both REF selection branches test all_banks_idle only; no tRFC term, and bank_tracker exposes none for REF."
+      "source_note": "scheduler.sv: both REF selection branches test all_banks_idle only; no tRFC term, and bank_tracker exposes none for REF.",
+      "resolved_in": "a7cd3cb93546",
+      "resolved_note": "Fixed at source by the Frontend (commit 6e2d7ad, 2026-10-08): the scheduler holds commands for the 2-cycle feedback latency and gates REF on every bank's ACT permission; tWTR is one device-wide counter gating READ. The edits no longer match the RTL and the checks they silenced are silent on the clean drop. Kept as the record of how the defects were attributed."
     },
     {
       "id": "R03_bank_tracker_twtr_on_read",
@@ -137,7 +141,9 @@
         }
       ],
       "confirmed_at_source": true,
-      "source_note": "bank_tracker.sv permission block: ctr_wtr[b] appears in bank_pre_allowed only; bank_rd_allowed has ctr_rcd, ctr_ccd, ctr_rfc and no tWTR term."
+      "source_note": "bank_tracker.sv permission block: ctr_wtr[b] appears in bank_pre_allowed only; bank_rd_allowed has ctr_rcd, ctr_ccd, ctr_rfc and no tWTR term.",
+      "resolved_in": "a7cd3cb93546",
+      "resolved_note": "Fixed at source by the Frontend (commit 6e2d7ad, 2026-10-08): the scheduler holds commands for the 2-cycle feedback latency and gates REF on every bank's ACT permission; tWTR is one device-wide counter gating READ. The edits no longer match the RTL and the checks they silenced are silent on the clean drop. Kept as the record of how the defects were attributed."
     }
   ],
   "$stacking": "`base` lists repairs applied first, in order: later defects are only visible once earlier ones are out of the way, so repairs are cumulative and each is scored against the stack beneath it."

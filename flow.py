@@ -438,6 +438,17 @@ def stage_rtl_validation(run, args, partial=False, tag=None):
                         f"see flow.log", exit_code=rc)
     with open(hand) as f:
         h = json.load(f)
+    # validate_drop names the drop it resolved before it judges anything; a
+    # handoff for another drop is the previous round's, left in outbox/current
+    # when a generator refused this one (an agent's patch that broke a
+    # manifest, 2026-10-08). That is a stop before judging, never a verdict.
+    m = re.search(r"declared drop \(git ([0-9a-f]+)\)", txt)
+    if m and h.get("drop_id") != m.group(1):
+        stop = [l.strip() for l in txt.splitlines() if "STOP" in l or "refused" in l][-2:]
+        return run.halt("rtl_validation",
+                        f"validation stopped before judging drop {m.group(1)} "
+                        f"({' | '.join(stop) or f'validate_drop exited {rc}'}); the handoff in "
+                        f"outbox/current is for drop {h.get('drop_id')}. See flow.log", exit_code=rc)
     ds = {}
     if os.path.exists(os.path.join(dest, "DROP_STATUS.json")):
         with open(os.path.join(dest, "DROP_STATUS.json")) as f:
@@ -504,6 +515,7 @@ def stage_frontend_regeneration(run, args, package):
                         package=package, phases=no_agent)
     if not os.environ.get("ANTHROPIC_API_KEY"):
         return run.halt("frontend_regeneration", "the Frontend's validation agents need ANTHROPIC_API_KEY")
+    outcomes, reasons = {}, {}
     for n in sorted(written):
         agent = phase_agent(n)
         # An agent that takes our package directly (--retry, the ask in
@@ -526,22 +538,33 @@ def stage_frontend_regeneration(run, args, package):
         # report says which did; regenerating a generator the agent did not
         # change reproduces the same drop, so with nothing fixed the run
         # halts with the agent's reason instead of spinning to the cap.
-        fixed = fixed_modules(run, n)
-        if rc != 0 and not fixed:
-            tail = [l for l in txt.strip().splitlines() if l.strip()][-3:]
-            return run.halt("frontend_regeneration",
-                            f"phase {n} validation agent exited {rc} and fixed nothing: "
-                            + " | ".join(l.strip()[:120] for l in tail)
-                            + f". Package: {os.path.relpath(package, ROOT)}", phase=n, package=package)
+        fixed = fixed_modules(run, n, newer_than=ri)
+        outcomes[n] = fixed
+        tail = [l for l in txt.strip().splitlines() if l.strip()][-3:]
+        reasons[n] = f"exited {rc}: " + " | ".join(l.strip()[:120] for l in tail)
         run.record("frontend_regeneration", "PASS" if rc == 0 else "PARTIAL",
-                   f"phase {n} agent exited {rc}; fixed: {', '.join(fixed) or 'none'}", phase=n)
+                   f"phase {n} agent exited {rc}; fixed: {', '.join(fixed) or 'none'}"
+                   + ("" if fixed else ": " + " | ".join(l.strip()[:120] for l in tail)), phase=n)
+    # One phase fixing something is progress worth a validation round, even
+    # when another phase's agent gave up (its findings stay open in the next
+    # package). Only when NO phase changed a generator would regeneration
+    # reproduce the same drop, so only then does the run halt.
+    if not any(outcomes.values()):
+        why = "; ".join(f"phase {n} agent {reasons.get(n, 'ran')}" for n in sorted(outcomes))
+        return run.halt("frontend_regeneration",
+                        f"every phase agent fixed nothing ({why}). Package: {os.path.relpath(package, ROOT)}",
+                        package=package)
     return stage_rtl_generation(run, args, phases=sorted(written))
 
 
-def fixed_modules(run, n):
-    """Modules the phase agent's fix report marks fixed (phase{N}_fix_report.json)."""
+def fixed_modules(run, n, newer_than=None):
+    """Modules the phase agent's fix report marks fixed (phase{N}_fix_report.json).
+    With `newer_than`, a report older than that file is ignored: it belongs to
+    an earlier package."""
     p = os.path.join(run.drop, "VALIDATIONREPORT", f"phase{n}_fix_report.json")
     try:
+        if newer_than and os.path.getmtime(p) < os.path.getmtime(newer_than):
+            return []
         with open(p) as f:
             rep = json.load(f)
     except (OSError, ValueError):
@@ -581,14 +604,25 @@ def stage_backend(run, args):
            "--mode", getattr(args, "backend_mode", None) or "build"]
     if os.path.exists(env_file):
         cmd += ["--env_file", env_file]
+    t_start = time.time()
     rc, txt = sh(cmd, cwd=BACKEND_AGENTS, log=run.log, timeout=12 * 3600)
-    reports = [os.path.join(run.backend_dir, f) for f in os.listdir(run.backend_dir)
-               if f.startswith("pipeline_final_report_")] if os.path.isdir(run.backend_dir) else []
+    # Only a report this invocation wrote counts (one from an earlier round
+    # in the same out_root has the status key, and a stale PASS would be
+    # taken over a nonzero exit: backend handoff 2026-10-08). Newest first.
+    reports = sorted((os.path.join(run.backend_dir, f) for f in os.listdir(run.backend_dir)
+                      if f.startswith("pipeline_final_report_")
+                      and os.path.getmtime(os.path.join(run.backend_dir, f)) >= t_start - 1),
+                     key=os.path.getmtime, reverse=True) if os.path.isdir(run.backend_dir) else []
     rep = {}
     if reports:
         with open(reports[0]) as f:
             rep = json.load(f)
-    status = rep.get("pipeline_status", "FAIL" if rc else "PASS")
+    # the exit code decides first; a report can only confirm or detail it
+    status = "FAIL" if rc else rep.get("pipeline_status", "PASS")
+    if not rc and not reports:
+        status = "FAIL"
+        rep = {"failed_stage": "report", "error_message": "the backend exited 0 but wrote no "
+               "pipeline_final_report_*.json this round"}
     netlist = next((a for a in (rep.get("artifacts") or []) if str(a).endswith("6_final.v")), None)
     run.state["netlist"] = netlist
     run.record("backend", status, f"exit {rc}; failed_stage={rep.get('failed_stage')}; "

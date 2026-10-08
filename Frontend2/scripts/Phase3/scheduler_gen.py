@@ -44,10 +44,9 @@ class SchedulerGenerator:
 
     def generate_rtl(self):
         p = self.p
-        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         return f"""////////////////////////////////////////////////////////////////////////////////
 // Module:    scheduler
-// Generated: {ts}
+// Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)
 // Generator:     Scheduler Generator (Phase 3)
 //
 // FR-FCFS (First-Ready First-Come-First-Served) scheduler.

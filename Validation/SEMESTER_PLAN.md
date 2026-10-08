@@ -473,6 +473,55 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   in `findings/HANDOFF_FRONTEND_2026-10-08_reply.md` and
   `findings/HANDOFF_BACKEND_2026-10-08_reply.md`.
 
+- *2026-10-08, evening — the first real-model run of the whole loop.*
+  `flow.py --spec … --skip-backend`: spec review, phases 1–4 + top in 90 s,
+  round 1 on the fresh drop (same RTL as `4b86c7cd3705` up to header
+  timestamps; 5 of 19 paths lost to Olympus SSH resets, now retried with
+  backoff and carried untested instead of judged from old reports), then
+  Lehana's agents under `--yes` with a real model: **phase 2 fixed
+  bank_tracker** (global tWTR gate on READ; lint+sim PASS) but also rewrote
+  three manifest `source` fields to prose, which our map generator refused —
+  the flow then read the previous round's handoff as round 2's verdict (fixed:
+  a stop before judging is a halt, never a verdict); **phase 3 left scheduler
+  unresolved** (attempt 1 syntax error, attempt 2 a plausible feedback-lag
+  patch whose re-sim said `0 passed, 0 failed`, i.e. did not compile, and
+  attempt 3 hit "credit balance too low" on the API account). Halted for a
+  human as designed. Orchestrator rule changed: halt only when no phase
+  changed a generator. Three asks to Lehana (compile log into the next
+  attempt, manifest `source` contract, no timestamp in RTL headers) in the
+  reply's addendum; `MANIFEST_WRONG_SOURCE` now carries a `fix` that states
+  the accepted forms. Resume once the API account is funded.
+
+- *2026-10-08, night — Lehana's fixes land: drop `a7cd3cb93546`, 19 pass / 0 fail after our checker fix.*
+  Her section 8 fixed the scheduler (2-cycle feedback hold, REF gated on every
+  bank's ACT permission) and the device-wide tWTR, added `source_expr` to the
+  data_path manifest, and gave compiled specs a content-hash revision suffix.
+  Validated from a throwaway worktree of origin/main: **11 findings resolved**
+  (the whole scheduler family, REF_002, the data_path write-beat mismatch,
+  all five MANIFEST_WRONG_SOURCE), every scope agreeing with its second
+  opinion. Her four "stale on your side" were right: cmd_gen has carried
+  fb_{pre,rd,wr}_bank and cmd_out_aux since 09/29 and our glue overrides
+  superseded correct manifests — both retired; the map generator reads
+  `source_expr` (manifest-declared expressions are the driver, our override
+  becomes redundant). Three things found on our side: (1) repair-proven
+  findings R01–R03 re-filed on a drop that no longer has the defect — the
+  old repair matrix counted as evidence; now a repair files only when this
+  drop still raises the check or carries the edited text; (2) `SCHED_004`
+  on path_07/20 was the checker pairing a CAS with the oldest request by
+  (bank, col) while FR-FCFS served a younger one — rule restated (pair by
+  bank, row, col, we) with a legal variant, both checkers regenerated on Opus
+  via the TAMU gateway (the Anthropic account is out of credit) — accepted
+  first attempt once the pairing was stated for both traces, path_07/20
+  pass, **19/19, 15 resolved, and JasperGold on the new command path proves
+  12/13 at infinite bound (PROTO_001 and TIMING_008 included; tREFI still
+  undetermined) — 0 findings open, the first clean drop**;
+  (3) M12's
+  substitution re-seeded to the new PRE condition. Formal on the new command
+  path started (PROTO_001/TIMING_008 stay open until JasperGold clears
+  them). Observation for Lehana: a write waited 1.75 ms behind four younger
+  requests to its bank — legal without an age bound. Reply addendum 2 in
+  `findings/HANDOFF_FRONTEND_2026-10-08_reply.md`.
+
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the
 schema generator's default root and `faults/fault_catalog.json` now point

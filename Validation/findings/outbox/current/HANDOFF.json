@@ -1,23 +1,20 @@
 {
   "$schema": "validation-handoff/1",
-  "drop_id": "4b86c7cd3705",
-  "drop_id_rule": "sha256 over each block's <block>.sv then <block>_manifest.json contents, blocks sorted by name, first 12 hex digits (Validation/structural/rtl_drop.py:drop_id)",
+  "drop_id": "a7cd3cb93546",
+  "drop_id_rule": "sha256 over each block's <block>.sv then <block>_manifest.json contents (CRLF normalised to LF), blocks sorted by name, first 12 hex digits (Validation/structural/rtl_drop.py:drop_id)",
+  "design_id": "5959f6665487",
+  "design_id_rule": "drop_id with the volatile parts left out: RTL '// Generated' lines and the manifests' provenance keys; same design_id = same design regenerated (rtl_drop.py:design_id)",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "spec_id": "59b4edadb45f2bf8",
+  "spec_id": "2fb3bbdd55dd72be",
   "spec_id_rule": "sha256 of the spec's canonical JSON (sorted keys, no whitespace), first 16 hex digits (Validation/spec/spec_identity.py); revision alone has named two specs",
-  "status": "FAIL",
-  "failed_modules": [
-    "bank_tracker",
-    "cmd_queue",
-    "data_path",
-    "scheduler"
-  ],
-  "generated_utc": "2026-10-08T17:20:32.800323Z",
+  "status": "PASS",
+  "failed_modules": [],
+  "generated_utc": "2026-10-08T18:31:19.578129Z",
   "files": [
     "retry_instructions.json",
     "findings_v2.json",
     "SPEC_REVIEW.json"
   ],
-  "archive": "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/4b86c7cd3705",
+  "archive": "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/a7cd3cb93546",
   "read": "retry_instructions.json; check drop_id against the drop you handed over before acting on it. requires_human_review=true means a spec gap or waiver needs a person, not a regeneration."
 }

@@ -3,7 +3,7 @@
   "drop": "4b86c7cd3705",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "spec_id": "59b4edadb45f2bf8",
-  "generated_utc": "2026-10-08T17:20:32.744422Z",
+  "generated_utc": "2026-10-08T17:45:50.903198Z",
   "reports": "Validation/reports/paths",
   "finding_count": 17,
   "findings": [
@@ -994,7 +994,7 @@
           "text": "manifest port cmd_pre_bank"
         }
       ],
-      "mechanism": "The manifest says bank_tracker.cmd_pre_bank is driven directly by cmd_gen.fb_pre_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. The harness registers the scheduler's cmd_bank one cycle so it aligns with the REGISTERED fb pulses. This is testbench glue standing in for a missing design signal \u2014 see the filed finding; the Frontend should add fb_pre_bank/fb_rd_bank/fb_wr_bank. Driver used: scheduler.cmd_bank. Either the RTL should consume cmd_gen.fb_pre_bank as declared, or the manifest should stop claiming a direct connection.",
+      "mechanism": "The manifest says bank_tracker.cmd_pre_bank is driven directly by cmd_gen.fb_pre_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. The harness registers the scheduler's cmd_bank one cycle so it aligns with the REGISTERED fb pulses. This is testbench glue standing in for a missing design signal \u2014 see the filed finding; the Frontend should add fb_pre_bank/fb_rd_bank/fb_wr_bank. Driver used: scheduler.cmd_bank. Either the RTL should consume cmd_gen.fb_pre_bank as declared, or the manifest should name what drives it.",
       "paths": [
         "structural"
       ],
@@ -1043,7 +1043,7 @@
           "text": "manifest port cmd_rd_bank"
         }
       ],
-      "mechanism": "The manifest says bank_tracker.cmd_rd_bank is driven directly by cmd_gen.fb_rd_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. The harness registers the scheduler's cmd_bank one cycle so it aligns with the REGISTERED fb pulses. This is testbench glue standing in for a missing design signal \u2014 see the filed finding; the Frontend should add fb_pre_bank/fb_rd_bank/fb_wr_bank. Driver used: scheduler.cmd_bank. Either the RTL should consume cmd_gen.fb_rd_bank as declared, or the manifest should stop claiming a direct connection.",
+      "mechanism": "The manifest says bank_tracker.cmd_rd_bank is driven directly by cmd_gen.fb_rd_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. The harness registers the scheduler's cmd_bank one cycle so it aligns with the REGISTERED fb pulses. This is testbench glue standing in for a missing design signal \u2014 see the filed finding; the Frontend should add fb_pre_bank/fb_rd_bank/fb_wr_bank. Driver used: scheduler.cmd_bank. Either the RTL should consume cmd_gen.fb_rd_bank as declared, or the manifest should name what drives it.",
       "paths": [
         "structural"
       ],
@@ -1092,7 +1092,7 @@
           "text": "manifest port cmd_wr_bank"
         }
       ],
-      "mechanism": "The manifest says bank_tracker.cmd_wr_bank is driven directly by cmd_gen.fb_wr_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. The harness registers the scheduler's cmd_bank one cycle so it aligns with the REGISTERED fb pulses. This is testbench glue standing in for a missing design signal \u2014 see the filed finding; the Frontend should add fb_pre_bank/fb_rd_bank/fb_wr_bank. Driver used: scheduler.cmd_bank. Either the RTL should consume cmd_gen.fb_wr_bank as declared, or the manifest should stop claiming a direct connection.",
+      "mechanism": "The manifest says bank_tracker.cmd_wr_bank is driven directly by cmd_gen.fb_wr_bank. It is not: cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. The harness registers the scheduler's cmd_bank one cycle so it aligns with the REGISTERED fb pulses. This is testbench glue standing in for a missing design signal \u2014 see the filed finding; the Frontend should add fb_pre_bank/fb_rd_bank/fb_wr_bank. Driver used: scheduler.cmd_bank. Either the RTL should consume cmd_gen.fb_wr_bank as declared, or the manifest should name what drives it.",
       "paths": [
         "structural"
       ],
@@ -1194,7 +1194,7 @@
           "text": "manifest port cmd_aux"
         }
       ],
-      "mechanism": "The manifest says data_path.cmd_aux is driven directly by cmd_gen.cmd_out_aux. It is not: cmd_gen's feedback carries no aux tag, but data_path needs the issued command's aux to tag read responses (rd_rsp_aux). Registered one cycle to align with the registered fb_rd_valid/fb_wr_valid pulses. Same missing-feedback-signal gap as the bank workaround \u2014 covered by the filed fb-bank finding; the design wants fb_aux. Driver used: scheduler.cmd_aux. Either the RTL should consume cmd_gen.cmd_out_aux as declared, or the manifest should stop claiming a direct connection.",
+      "mechanism": "The manifest says data_path.cmd_aux is driven directly by cmd_gen.cmd_out_aux. It is not: cmd_gen's feedback carries no aux tag, but data_path needs the issued command's aux to tag read responses (rd_rsp_aux). Registered one cycle to align with the registered fb_rd_valid/fb_wr_valid pulses. Same missing-feedback-signal gap as the bank workaround \u2014 covered by the filed fb-bank finding; the design wants fb_aux. Driver used: scheduler.cmd_aux. Either the RTL should consume cmd_gen.cmd_out_aux as declared, or the manifest should name what drives it.",
       "paths": [
         "structural"
       ],
@@ -1243,7 +1243,7 @@
           "text": "manifest port wr_data_valid"
         }
       ],
-      "mechanism": "The manifest says data_path.wr_data_valid is driven directly by wb_port.req_valid. It is not: data_path buffers a write word when wb_port's write request is ACCEPTED (valid && we && ready). No single design port carries that event; it is the same accept condition cmd_queue enqueues on. Driver used: wb_port.req_valid && wb_port.req_we && cmd_queue.enq_ready. Either the RTL should consume wb_port.req_valid as declared, or the manifest should stop claiming a direct connection.",
+      "mechanism": "The manifest says data_path.wr_data_valid is driven directly by wb_port.req_valid. It is not: data_path buffers a write word when wb_port's write request is ACCEPTED (valid && we && ready). No single design port carries that event; it is the same accept condition cmd_queue enqueues on. Driver used: wb_port.req_valid && wb_port.req_we && cmd_queue.enq_ready. Either the RTL should consume wb_port.req_valid as declared, or the manifest should name what drives it.",
       "paths": [
         "structural"
       ],
@@ -1346,60 +1346,5 @@
       ]
     }
   ],
-  "resolved": [
-    {
-      "schema": "validation-findings/2",
-      "id": "structural/config_regs/SPEC_MISMATCH/compiled_ddr31333_x16_1lane_1rank",
-      "kind": "manifest_defect",
-      "check_id": "SPEC_MISMATCH/compiled_ddr31333_x16_1lane_1rank",
-      "taxonomy_id": "SPEC_MISMATCH",
-      "owner_module": "config_regs",
-      "severity": "critical",
-      "title": "config_regs was generated from spec rev compiled_ddr31333_x16_1lane_1rank; the drop is judged against rev golden_ddr3_1600k_x8_2lane_1rank",
-      "paths": [
-        "structural"
-      ],
-      "status": "resolved",
-      "resolved_in": "4b86c7cd3705",
-      "last_seen": "a58933561396",
-      "first_seen": "a58933561396",
-      "note": "open in drop a58933561396, not raised by drop 4b86c7cd3705"
-    },
-    {
-      "schema": "validation-findings/2",
-      "id": "structural/init_fsm/SPEC_MISMATCH/compiled_ddr31333_x16_1lane_1rank",
-      "kind": "manifest_defect",
-      "check_id": "SPEC_MISMATCH/compiled_ddr31333_x16_1lane_1rank",
-      "taxonomy_id": "SPEC_MISMATCH",
-      "owner_module": "init_fsm",
-      "severity": "critical",
-      "title": "init_fsm was generated from spec rev compiled_ddr31333_x16_1lane_1rank; the drop is judged against rev golden_ddr3_1600k_x8_2lane_1rank",
-      "paths": [
-        "structural"
-      ],
-      "status": "resolved",
-      "resolved_in": "4b86c7cd3705",
-      "last_seen": "a58933561396",
-      "first_seen": "a58933561396",
-      "note": "open in drop a58933561396, not raised by drop 4b86c7cd3705"
-    },
-    {
-      "schema": "validation-findings/2",
-      "id": "structural/wb_port/SPEC_MISMATCH/compiled_ddr31333_x16_1lane_1rank",
-      "kind": "manifest_defect",
-      "check_id": "SPEC_MISMATCH/compiled_ddr31333_x16_1lane_1rank",
-      "taxonomy_id": "SPEC_MISMATCH",
-      "owner_module": "wb_port",
-      "severity": "critical",
-      "title": "wb_port was generated from spec rev compiled_ddr31333_x16_1lane_1rank; the drop is judged against rev golden_ddr3_1600k_x8_2lane_1rank",
-      "paths": [
-        "structural"
-      ],
-      "status": "resolved",
-      "resolved_in": "4b86c7cd3705",
-      "last_seen": "a58933561396",
-      "first_seen": "a58933561396",
-      "note": "open in drop a58933561396, not raised by drop 4b86c7cd3705"
-    }
-  ]
+  "resolved": []
 }

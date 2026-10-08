@@ -65,13 +65,12 @@ class CalibrationGenerator:
 
     def generate_rtl(self) -> str:
         p = self.p
-        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         return f"""\
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    calibration
 // File:      calibration.sv
-// Generated: {ts}
+// Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)
 // Generator:     Calibration Generator (Phase 2)
 // Spec:      {self.spec.get('design_id', 'N/A')} rev {self.spec.get('revision', 'N/A')}
 //

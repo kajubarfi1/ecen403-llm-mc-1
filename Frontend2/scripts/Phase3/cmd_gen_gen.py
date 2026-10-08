@@ -39,10 +39,9 @@ class CmdGenGenerator:
 
     def generate_rtl(self):
         p = self.p
-        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         return f"""////////////////////////////////////////////////////////////////////////////////
 // Module:    cmd_gen
-// Generated: {ts}
+// Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)
 // Generator:     Command Generator Generator (Phase 3)
 //
 // Translates scheduler command type → DDR3 pin-level encoding.

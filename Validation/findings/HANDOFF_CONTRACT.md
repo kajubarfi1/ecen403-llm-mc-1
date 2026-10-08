@@ -38,9 +38,21 @@ design** — the 11 listed in `Validation/spec/path_definitions.json`
 `blocks` (`addr_decoder, bank_tracker, calibration, cmd_gen, cmd_queue,
 config_regs, data_path, init_fsm, refresh_ctrl, scheduler, wb_port`), not
 only the 9 the interface catalog names (fixed 2026-10-01; ids before that
-date covered 9). Nothing from git, nothing from timestamps.
-Same files → same id; one changed byte → a new drop. Reference
-implementation: `Validation/structural/rtl_drop.py: drop_id()`.
+date covered 9). Nothing from git, nothing from timestamps. **Bytes are
+hashed with CRLF normalised to LF** (2026-10-08: a Windows checkout
+computed a different id for the same files), so the id is the same on
+every teammate's machine. Same files → same id; one changed byte → a new
+drop. Reference implementation: `Validation/structural/rtl_drop.py: drop_id()`.
+
+**`design_id`** answers the other question, "did the design change": the
+same hash with the volatile parts left out — RTL lines that only carry the
+generation timestamp (`// Generated ...`) and the manifest's provenance keys
+(`generated_utc`, `git_commit`, `generated_by`, `generator_version`), the
+manifest hashed as canonical JSON. A regeneration with no spec change mints
+a new `drop_id` (new timestamps) but the same `design_id`
+(`a7cd3cb93546` and `4b86c7cd3705` are one design). Both ids are in
+`HANDOFF.json`; findings history keys on `drop_id`, "nothing was rebuilt"
+is read from `design_id`. Reference: `rtl_drop.py: design_id()`.
 
 ```python
 import hashlib, os
@@ -99,7 +111,7 @@ The third form judges the drop against the spec it ships instead of
 
 | file | what |
 |---|---|
-| `HANDOFF.json` | `drop_id`, `spec_revision`, `spec_id`, `status` (PASS/FAIL), `failed_modules`, `generated_utc`, path of the archive |
+| `HANDOFF.json` | `drop_id`, `design_id`, `spec_revision`, `spec_id`, `status` (PASS/FAIL), `failed_modules`, `generated_utc`, path of the archive |
 | `retry_instructions.json` | per module: `failed_checks[]` with `id`, `name`, `expected`, `actual`, `severity`, `confidence`, `spec_ref`, `anchor[]` (file/line/signal in the drop), `repro`, `fix` (when a repair proved it), `owner_candidates`; `requires_human_review`; `untested_in_this_drop[]`; `drop_status` (partial runs) |
 | `findings_v2.json` | the full records behind every check |
 | `DROP_STATUS.json` | present when paths were blocked: which blocks are absent / foreign, which paths ran, which wait and why |
