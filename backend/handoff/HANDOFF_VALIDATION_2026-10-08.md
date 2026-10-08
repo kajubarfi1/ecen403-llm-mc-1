@@ -122,7 +122,7 @@ Nitpick, your call: `retry_adapter.adapt` sets `pipeline: "validation"` on our
 findings too. `flow.py` overwrites `source`, so provenance is recoverable — but
 a reader of the package alone would attribute a timing defect to validation.
 
-## 4. The drop id is not reproducible off Linux
+## 4. The drop id: not reproducible off Linux, and it churns
 
 Resolved first: the `compiled_ddr3800_x8_1lane_1rank` revision we flagged earlier
 today is gone. The drop is back on `golden_ddr3_1600k_x8_2lane_1rank`, so the
@@ -161,9 +161,23 @@ data = open(p, "rb").read().replace(b"
 ```
 
 We prefer the normalise in `drop_id()`: it is correct regardless of how any
-teammate's git is configured, and it cannot be undone by a fresh clone. We are
-stamping findings with `4b86c7cd3705`, the team's value, not the one our tree
-computes.
+teammate's git is configured, and it cannot be undone by a fresh clone.
+
+Second point, separate from the line endings. `a7cd3cb93546` supersedes
+`4b86c7cd3705`, and **the RTL is identical between them** - all 11 blocks match byte
+for byte once the `// Generated:` header line is discounted. The id moved because the
+hash covers that timestamp and the regenerated manifests. So a new drop id does not
+imply a changed design, and re-running the generators with no spec change always
+mints one.
+
+That matters for your side more than ours. A stale-drop check keyed on the id will
+fire on a no-op regeneration, and findings carried across such a drop look like they
+were re-tested against new RTL when nothing was rebuilt. If it is useful, we can
+publish the RTL-only hash the backend computes alongside the drop id, so there is a
+value that answers "did the design change" as distinct from "are these the same
+bytes". Say the word and we will add it to the findings envelope.
+
+We are stamping findings with the team's published id, not the one our tree computes.
 
 ## 5. Per-block netlists
 

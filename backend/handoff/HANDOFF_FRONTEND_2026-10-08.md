@@ -1,9 +1,14 @@
 # Handoff to Frontend — 2026-10-08
 
-From Backend (Dawson) to Frontend, on drop `4b86c7cd3705`
-(`Frontend2/OutputFolders`, rev `golden_ddr3_1600k_x8_2lane_1rank`). Three things:
-one bug in the drop, one caveat on the drop id, and where the backend stands on
-timing. Nothing in `Frontend2/` was changed by us.
+From Backend (Dawson) to Frontend, on drop `a7cd3cb93546`
+(`Frontend2/OutputFolders`, rev `golden_ddr3_1600k_x8_2lane_1rank`), which supersedes
+`4b86c7cd3705`. One resolved bug recorded for its shape, one caveat on the drop id,
+one observation about what the id tracks, and where the backend stands on timing.
+Nothing in `Frontend2/` was changed by us.
+
+**The RTL did not change between those two drops.** All 11 blocks are byte-identical
+once the `// Generated:` line is discounted, so the netlists we are building now stay
+valid for `a7cd3cb93546`. That is lucky rather than guaranteed - see section 5.
 
 ## 1. Thank you for the single-spec drop
 
@@ -13,9 +18,10 @@ straight from `rtl_drop`'s resolution - all 22 files byte-identical to yours. Th
 earlier `compiled_ddr3800_x8_1lane_1rank` revision had us ready to flag a speed-bin
 change; that is withdrawn, the 200 MHz target stands.
 
-## 2. `data_path_manifest.json` says the wrong phase
+## 2. `data_path_manifest.json` phase - fixed, noted for the pattern
 
-In this drop - the freshly regenerated one, not a stale copy:
+**Resolved in `a7cd3cb93546`** - thank you. Recording it because the shape is worth
+remembering, not because anything is outstanding. In drop `4b86c7cd3705`:
 
 ```
 Frontend2/OutputFolders/PHASE4RTL/data_path.sv          <- the file
@@ -33,7 +39,8 @@ to its phase copy by globbing `PHASE*RTL/<block>.sv` in the drop rather than rea
 we trusted it, every `data_path` finding we emit would have pointed at a PHASE3RTL
 path that does not exist, and the agent reading it would have had nowhere to go.
 
-Anything else keying off `phase` is exposed the same way.
+Anything else keying off `phase` is exposed the same way, so the generator writing
+that field and the directory it writes into are worth keeping in one place.
 
 ## 3. Your drop id reproduces only on Linux
 
@@ -87,3 +94,21 @@ the period change from 10 ns, where closing is easy and the numbers mean nothing
 this target. A run over all 11 blocks of this drop is in progress; until it lands,
 treat `scheduler` as the only block known to miss and the rest as unknown, not as
 passing.
+
+## 5. The drop id churns on a no-op regeneration
+
+`4b86c7cd3705` and `a7cd3cb93546` have identical RTL. The id changed because the
+hash covers the `// Generated:` timestamp in every header and the regenerated
+manifests, so re-running the generators with no spec change always produces a new
+drop id.
+
+That makes the id a sound answer to "are these the same bytes" and an unreliable
+answer to "did the design change" - which is the question we and Validation actually
+ask when deciding whether a result still applies. Today it cost us a near-miss: we
+were ready to discard an hour of builds until we diffed the RTL and found nothing had
+moved.
+
+Not asking for a change to the id - it is doing what the contract says. But if the
+generators left the timestamp out of the file header, or wrote it somewhere the hash
+excludes, the id would track the design rather than the act of regenerating it, and
+all three of us could use it to decide what needs rebuilding.
