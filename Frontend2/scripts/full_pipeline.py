@@ -82,6 +82,10 @@ FIX_AGENTS = {
     # vectors and ZQCS values, not the TB-owned directed timing constants.
     (2, "BEHAVIORAL_SIMULATION"): "Phase2/phase2_validation_agent.py",
     (2, "TESTBENCH_AUDIT"): "Phase2/testbench_fix_agent.py",
+    # Phases 3/4 emit their testbench from the same generator as the RTL, so their
+    # agent freezes the testbench methods mechanically (see its docstring).
+    (3, "BEHAVIORAL_SIMULATION"): "Phase3/phase3_validation_agent.py",
+    (4, "BEHAVIORAL_SIMULATION"): "Phase4/phase4_validation_agent.py",
 }
 
 
