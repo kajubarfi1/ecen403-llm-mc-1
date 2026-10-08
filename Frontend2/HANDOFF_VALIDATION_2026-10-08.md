@@ -1,10 +1,15 @@
 # Handoff to Validation — 2026-10-08
 
 From Frontend (Lehana) to Validation (Jacob). Follows up
-`Validation/findings/HANDOFF_FRONTEND_2026-10-01_reply.md`. Your Q1–Q5 are
-closed; what is new is listed first.
+`Validation/findings/HANDOFF_FRONTEND_2026-10-01_reply.md`, and was extended
+twice the same day after your 10/08 reply.
 
-## 1. A drop to validate: `4b86c7cd3705`
+**Current drop: `a7cd3cb93546`. Read section 8 first**: it replies to your
+10/08 results, lists what we fixed, and lists four findings we think are stale
+on your side. Sections 1 to 7 are the history of how we got here; the drop ids
+quoted in them (`c85ae77d1d7c`, `4b86c7cd3705`) are superseded.
+
+## 1. The drop at the start of this thread: `4b86c7cd3705` (superseded by section 8)
 
 `Frontend2/OutputFolders/` was regenerated from
 `Spec/llmmc_microarchitecturespec_filled.json` (golden, rev
@@ -192,8 +197,15 @@ they are not vacuous. Scheduler is 48/48 on the new RTL.
 
 ## Questions
 
-1. Is `4b86c7cd3705` the drop you will run next? If you need anything else in
+Answered by your 10/08 reply: `observed`-only modules stay unpatched under
+`--yes`; `block_interfaces` is owned by `path_definitions.json` plus the
+manifests and is retired from the spec rules. Open now:
+
+1. Is `a7cd3cb93546` the drop you will run next? If you need anything else in
    `OutputFolders/` first, say so.
-2. `observed`-only modules under `--yes`: leave unpatched (current), or patch?
-3. `block_interfaces`: derive it from the manifests (our suggestion), or keep
-   `path_definitions.json` as the owner and stop asking the spec for it?
+2. Please re-check the four `MANIFEST_WRONG_SOURCE` findings against the stale
+   glue in `integration_overrides.json` (section 8). If you agree, delete
+   `glue[0]` and `glue[1]`; if you disagree, tell us which port is missing.
+3. The first real-model run of the fix agents (`--yes`) is still ahead. The
+   scheduler and `bank_tracker` findings are a good first target once your next
+   run shows what survives the new hold.
