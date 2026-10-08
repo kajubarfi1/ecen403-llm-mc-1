@@ -1,11 +1,11 @@
 {
-  "git_commit": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+  "git_commit": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "generated_utc": "2026-10-08T16:31:49.094811+00:00",
+  "generated_utc": "2026-10-08T17:40:18.718457+00:00",
   "clock_period_ns": 5.0,
   "module_name": "data_path",
   "file": "data_path.sv",
-  "phase": 3,
+  "phase": 4,
   "generator": "data_path_gen",
   "spec_version": "2.0.0",
   "design_id": "ddr3_mc_core_v2",
@@ -61,7 +61,8 @@
         "name": "wr_data_valid",
         "width": 1,
         "dir": "input",
-        "source": "wb_port.req_valid"
+        "source": "wb_port.req_valid",
+        "source_expr": "wb_port.req_valid && wb_port.req_we && cmd_queue.enq_ready"
       },
       {
         "name": "wr_data",

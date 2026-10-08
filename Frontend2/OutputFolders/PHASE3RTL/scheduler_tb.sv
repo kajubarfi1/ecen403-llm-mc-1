@@ -34,9 +34,14 @@ module scheduler_tb;
     endtask
     task automatic wc(int n); repeat(n) @(posedge clk); endtask
 
+    // Starting a new scenario: empty the queue and let any command still in
+    // the scheduler's feedback-latency window (FB_LAG = 2 cycles, plus one for
+    // the output register) drain, so the previous scenario's command cannot
+    // hold off this one. The hold itself is tested explicitly below.
     task automatic clear_queue();
         q_valid = '0;
         for(int i=0;i<DEPTH;i++) begin q_row[i]=0;q_col[i]=0;q_bank[i]=0;q_we[i]=0;q_aux[i]=0; end
+        repeat(4) @(posedge clk);
     endtask
 
     task automatic set_bank_idle();
@@ -101,25 +106,37 @@ module scheduler_tb;
         // T09–T11: Row-hit write
         clear_queue(); set_bank_idle(); set_bank_active(3'd2, 14'd200);
         q_valid[0]=1; q_row[0]=14'd200; q_col[0]=10'd77; q_bank[0]=3'd2; q_we[0]=1; q_aux[0]=4'd3;
-        wc(2);
-        check("RowHit WR: valid",    cmd_valid===1);
-        check("RowHit WR: type=WR",  cmd_type===CMD_WR);
-        check("RowHit WR: bank=2",   cmd_bank===3'd2);
+        begin
+            logic got; logic [3:0] ctype; logic [BANK_BITS-1:0] cbank;
+            logic cdeq; logic [IDX_BITS-1:0] cidx;
+            wait_cmd(got, ctype, cbank, cdeq, cidx, 8);
+            check("RowHit WR: valid",    got);
+            check("RowHit WR: type=WR",  got && ctype===CMD_WR);
+            check("RowHit WR: bank=2",   got && cbank===3'd2);
+        end
 
         // T12–T14: Row-miss to idle bank → ACT
         clear_queue(); set_bank_idle();
         q_valid[0]=1; q_row[0]=14'd300; q_bank[0]=3'd4; q_we[0]=0;
-        wc(2);
-        check("RowMiss idle: ACT",   cmd_type===CMD_ACT);
-        check("RowMiss: row=300",    cmd_row===14'd300);
-        check("RowMiss: !deq",       deq_grant===0);  // ACT doesn't dequeue
+        begin
+            logic got; logic [3:0] ctype; logic [BANK_BITS-1:0] cbank;
+            logic cdeq; logic [IDX_BITS-1:0] cidx;
+            wait_cmd(got, ctype, cbank, cdeq, cidx, 8);
+            check("RowMiss idle: ACT",   got && ctype===CMD_ACT);
+            check("RowMiss: row=300",    got && cmd_row===14'd300);
+            check("RowMiss: !deq",       got && cdeq===0);  // ACT doesn't dequeue
+        end
 
         // T15–T16: Row-miss to active bank → PRE first
         clear_queue(); set_bank_idle(); set_bank_active(3'd1, 14'd50);
         q_valid[0]=1; q_row[0]=14'd999; q_bank[0]=3'd1; q_we[0]=0;
-        wc(2);
-        check("RowMiss act: PRE",    cmd_type===CMD_PRE);
-        check("RowMiss act: bank=1", cmd_bank===3'd1);
+        begin
+            logic got; logic [3:0] ctype; logic [BANK_BITS-1:0] cbank;
+            logic cdeq; logic [IDX_BITS-1:0] cidx;
+            wait_cmd(got, ctype, cbank, cdeq, cidx, 8);
+            check("RowMiss act: PRE",    got && ctype===CMD_PRE);
+            check("RowMiss act: bank=1", got && cbank===3'd1);
+        end
 
         // T17–T18: Urgent refresh preempts (banks already idle -- REF fires
         // immediately. The "active bank forces PRE first" case is its own
@@ -127,17 +144,25 @@ module scheduler_tb;
         clear_queue(); set_bank_idle();
         q_valid[0]=1; q_row[0]=14'd100; q_bank[0]=3'd0; q_we[0]=0;
         ref_urgent=1;
-        wc(2);
-        check("UrgRef: type=REF",    cmd_type===CMD_REF);
-        check("UrgRef: ref_ack",     ref_ack===1);
+        begin
+            logic got; logic [3:0] ctype; logic [BANK_BITS-1:0] cbank;
+            logic cdeq; logic [IDX_BITS-1:0] cidx;
+            wait_cmd(got, ctype, cbank, cdeq, cidx, 8);
+            check("UrgRef: type=REF",    got && ctype===CMD_REF);
+            check("UrgRef: ref_ack",     got && ref_ack===1);
+        end
         ref_urgent=0; wc(2);
 
         // T19–T20: Normal refresh when idle
         clear_queue(); set_bank_idle();
         ref_required=1; ref_urgent=0;
-        wc(2);
-        check("NormRef: type=REF",   cmd_type===CMD_REF);
-        check("NormRef: ref_ack",    ref_ack===1);
+        begin
+            logic got; logic [3:0] ctype; logic [BANK_BITS-1:0] cbank;
+            logic cdeq; logic [IDX_BITS-1:0] cidx;
+            wait_cmd(got, ctype, cbank, cdeq, cidx, 8);
+            check("NormRef: type=REF",   got && ctype===CMD_REF);
+            check("NormRef: ref_ack",    got && ref_ack===1);
+        end
         ref_required=0; wc(2);
 
         // T21–T23: FR-FCFS priority (row-hit over row-miss). Poll for the
@@ -223,14 +248,77 @@ module scheduler_tb;
         // it first, never issue REF while any bank is still active.
         clear_queue(); set_bank_idle(); set_bank_active(3'd3, 14'd800);
         ref_urgent=1;
-        wc(2);
-        check("RefBlock: PRE not REF while active", cmd_type===CMD_PRE);
-        check("RefBlock: PRE targets active bank",  cmd_bank===3'd3);
-        set_bank_idle();  // simulate bank_tracker clearing the bank post-PRE
-        wc(2);
-        check("RefBlock: REF once banks idle",  cmd_type===CMD_REF);
-        check("RefBlock: ref_ack",              ref_ack===1);
+        begin
+            logic got; logic [3:0] ctype; logic [BANK_BITS-1:0] cbank;
+            logic cdeq; logic [IDX_BITS-1:0] cidx;
+            wait_cmd(got, ctype, cbank, cdeq, cidx, 8);
+            check("RefBlock: PRE not REF while active", got && ctype===CMD_PRE);
+            check("RefBlock: PRE targets active bank",  got && cbank===3'd3);
+            set_bank_idle();  // simulate bank_tracker clearing the bank post-PRE
+            wait_cmd(got, ctype, cbank, cdeq, cidx, 8);
+            check("RefBlock: REF once banks idle",  got && ctype===CMD_REF);
+            check("RefBlock: ref_ack",              got && ref_ack===1);
+        end
         ref_urgent=0; wc(2);
+
+        // T39-T47: feedback-latency hold (FB_LAG = 2). bank_tracker learns of a
+        // command two cycles after the scheduler registers it, and this
+        // testbench deliberately never updates the bank state, so the permission
+        // inputs stay stale exactly as they do in the real loop. Command
+        // pulses are sampled once per cycle (value seen at each posedge).
+        //
+        // ACT: a second ACT to the same bank must not follow within the window.
+        clear_queue(); set_bank_idle();
+        q_valid[0]=1; q_row[0]=14'd300; q_bank[0]=3'd4; q_we[0]=0;
+        begin
+            logic got; logic [3:0] ctype; logic [BANK_BITS-1:0] cbank;
+            logic cdeq; logic [IDX_BITS-1:0] cidx;
+            wait_cmd(got, ctype, cbank, cdeq, cidx, 8);
+            check("Hold ACT: first ACT issued",             got && ctype===CMD_ACT && cbank===3'd4);
+            @(posedge clk);
+            check("Hold ACT: no repeat ACT, cycle 1",       cmd_valid===0);
+            @(posedge clk);
+            check("Hold ACT: no repeat ACT, cycle 2",       cmd_valid===0);
+            @(posedge clk);
+            check("Hold ACT: window ends after 2 cycles",   cmd_valid===1 && cmd_type===CMD_ACT);
+        end
+
+        // REF: a REFRESH must not follow an ACT that bank_tracker has not yet
+        // recorded (banks still read idle); it waits out the window.
+        clear_queue(); set_bank_idle();
+        q_valid[0]=1; q_row[0]=14'd301; q_bank[0]=3'd5; q_we[0]=0;
+        begin
+            logic got; logic [3:0] ctype; logic [BANK_BITS-1:0] cbank;
+            logic cdeq; logic [IDX_BITS-1:0] cidx;
+            wait_cmd(got, ctype, cbank, cdeq, cidx, 8);
+            check("Hold REF: ACT issued first",             got && ctype===CMD_ACT);
+            q_valid[0]=0; ref_urgent=1;
+            @(posedge clk);
+            check("Hold REF: no REF, cycle 1",              cmd_valid===0);
+            @(posedge clk);
+            check("Hold REF: no REF, cycle 2",              cmd_valid===0);
+            @(posedge clk);
+            check("Hold REF: REF once the window is over",  cmd_valid===1 && cmd_type===CMD_REF);
+        end
+        ref_urgent=0; wc(2);
+
+        // RD after WR: tWTR in bank_tracker is not visible for two cycles, so
+        // the scheduler itself must not select a READ right after a WRITE.
+        clear_queue(); set_bank_idle();
+        set_bank_active(3'd0, 14'd100); set_bank_active(3'd1, 14'd200);
+        q_valid[0]=1; q_row[0]=14'd100; q_bank[0]=3'd0; q_we[0]=1;
+        begin
+            logic got; logic [3:0] ctype; logic [BANK_BITS-1:0] cbank;
+            logic cdeq; logic [IDX_BITS-1:0] cidx;
+            wait_cmd(got, ctype, cbank, cdeq, cidx, 8);
+            check("Hold RD: WR issued first",               got && ctype===CMD_WR);
+            q_valid[0]=0; q_valid[1]=1; q_row[1]=14'd200; q_bank[1]=3'd1; q_we[1]=0;
+            @(posedge clk);
+            @(posedge clk);
+            check("Hold RD: no RD while the WR is in flight", cmd_valid===0);
+            @(posedge clk);
+            check("Hold RD: RD allowed after the window",   cmd_valid===1 && cmd_type===CMD_RD);
+        end
 
         $display("\n== %0d/%0d passed ==\n", pass_count, pass_count+fail_count);
         $finish;

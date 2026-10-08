@@ -137,14 +137,20 @@ module bank_tracker_tb;
         repeat(2) @(posedge clk);
         check($sformatf("H2: bank_wr_allowed[0] after tCCD=%0d", 2), bank_wr_allowed[0]===1'b1);
 
-        // -- Section I: tWTR gates PRE after a WR --
+        // -- Section I: tWTR is a device-wide write-to-READ turnaround (JESD79-3).
+        //    It gates RD to every bank, runs from the end of the write data
+        //    (tWTR + CWL + BL/2 after the WR), and does not gate PRE (tWR does).
         hw_reset();
         do_act(3'd0, 16'h0);
-        repeat(5) @(posedge clk);  // let RAS clear first so WTR is the sole limiter below
+        do_act(3'd1, 16'h1);
+        repeat(5) @(posedge clk);   // both banks clear of tRCD/tRAS
+        check("I0: bank_rd_allowed[1] before the WR", bank_rd_allowed[1]===1'b1);
         do_wr(3'd0);
-        check("I1: bank_pre_allowed[0] blocked right after WR (tWTR)", bank_pre_allowed[0]===1'b0);
-        repeat(4) @(posedge clk);
-        check($sformatf("I2: bank_pre_allowed[0] after tWTR=%0d", 4), bank_pre_allowed[0]===1'b1);
+        check("I1: bank_rd_allowed[1] blocked right after a WR to bank 0 (tWTR)", bank_rd_allowed[1]===1'b0);
+        repeat(2 + 1) @(posedge clk);   // tCCD is over; only tWTR can still block
+        check("I2: bank_rd_allowed[1] still blocked after tCCD (tWTR window not over)", bank_rd_allowed[1]===1'b0);
+        repeat(16) @(posedge clk);
+        check($sformatf("I3: bank_rd_allowed[1] after tWTR+CWL+BL/2=%0d", 16), bank_rd_allowed[1]===1'b1);
 
         // -- Section J: REF forces all-idle + tRFC gate --
         hw_reset();

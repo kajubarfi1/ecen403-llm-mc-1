@@ -46,8 +46,8 @@
     },
     "scheduler": {
       "status": "PASS",
-      "test_count": 37,
-      "pass_count": 37,
+      "test_count": 48,
+      "pass_count": 48,
       "fail_count": 0,
       "pass_lines": [
         "V T01 PASS: Reset: !valid",
@@ -86,7 +86,18 @@
         "V T34 PASS: RefBlock: PRE not REF while active",
         "V T35 PASS: RefBlock: PRE targets active bank",
         "V T36 PASS: RefBlock: REF once banks idle",
-        "V T37 PASS: RefBlock: ref_ack"
+        "V T37 PASS: RefBlock: ref_ack",
+        "V T38 PASS: Hold ACT: first ACT issued",
+        "V T39 PASS: Hold ACT: no repeat ACT, cycle 1",
+        "V T40 PASS: Hold ACT: no repeat ACT, cycle 2",
+        "V T41 PASS: Hold ACT: window ends after 2 cycles",
+        "V T42 PASS: Hold REF: ACT issued first",
+        "V T43 PASS: Hold REF: no REF, cycle 1",
+        "V T44 PASS: Hold REF: no REF, cycle 2",
+        "V T45 PASS: Hold REF: REF once the window is over",
+        "V T46 PASS: Hold RD: WR issued first",
+        "V T47 PASS: Hold RD: no RD while the WR is in flight",
+        "V T48 PASS: Hold RD: RD allowed after the window"
       ],
       "fail_lines": [],
       "assertion_errors": [],
@@ -140,6 +151,6 @@
       "log_file": "cmd_gen_xrun.log"
     }
   },
-  "timestamp": "2026-10-08T11:31:48.088802",
+  "timestamp": "2026-10-08T12:39:39.014779",
   "server": "olympus.ece.tamu.edu"
 }

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    scheduler
-// Generated: 2026-10-08 11:31:22
+// Generated: 2026-10-08 12:39:16
 // Generator:     Scheduler Generator (Phase 3)
 //
 // FR-FCFS (First-Ready First-Come-First-Served) scheduler.
@@ -75,6 +75,67 @@ module scheduler #(
     // JEDEC: REF is only legal once every bank is precharged.
     wire all_banks_idle = ~(|bank_is_active);
 
+    // ════════════════════════════════════════════════════
+    // Feedback-latency hold (FB_LAG = 2 cycles)
+    // ════════════════════════════════════════════════════
+    // A command selected in cycle N is registered at the end of N (cmd_*),
+    // cmd_gen registers its fb_* strobes at the end of N+1, and bank_tracker
+    // updates its state/counters at the end of N+2. So the permissions this
+    // module reads in cycles N+1 and N+2 do not yet reflect that command, and
+    // selecting from them re-issues it (ACT to an already-active bank, an
+    // ACT inside tRC/tRRD, a REF or RD straight after the PRE/ACT/WR that
+    // should have blocked it). Track what was issued in the last two cycles
+    // (cmd_* now, d1_* one cycle ago) and hold anything those could change.
+    logic                 d1_valid;
+    logic [3:0]           d1_type;
+    logic [BANK_BITS-1:0] d1_bank;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            d1_valid <= 1'b0;
+            d1_type  <= CMD_NOP;
+            d1_bank  <= '0;
+        end else begin
+            d1_valid <= cmd_valid;
+            d1_type  <= cmd_type;
+            d1_bank  <= cmd_bank;
+        end
+    end
+
+    logic [NUM_BANKS-1:0] inflight_any;    // any command to this bank in flight
+    logic [NUM_BANKS-1:0] inflight_state;  // an ACT or PRE to this bank in flight
+    logic                 inflight_ref;    // a REFRESH in flight (all banks)
+    logic                 inflight_act;    // an ACT in flight (tRRD / tFAW, any bank)
+    logic                 inflight_wr;     // a WRITE in flight (tWTR, any bank)
+    always_comb begin
+        inflight_any   = '0;
+        inflight_state = '0;
+        inflight_ref   = 1'b0;
+        inflight_act   = 1'b0;
+        inflight_wr    = 1'b0;
+        if (cmd_valid) begin
+            if (cmd_type == CMD_REF) inflight_ref = 1'b1;
+            else if (cmd_type != CMD_NOP) begin
+                inflight_any[cmd_bank] = 1'b1;
+                if (cmd_type == CMD_ACT || cmd_type == CMD_PRE) inflight_state[cmd_bank] = 1'b1;
+                if (cmd_type == CMD_ACT) inflight_act = 1'b1;
+                if (cmd_type == CMD_WR)  inflight_wr  = 1'b1;
+            end
+        end
+        if (d1_valid) begin
+            if (d1_type == CMD_REF) inflight_ref = 1'b1;
+            else if (d1_type != CMD_NOP) begin
+                inflight_any[d1_bank] = 1'b1;
+                if (d1_type == CMD_ACT || d1_type == CMD_PRE) inflight_state[d1_bank] = 1'b1;
+                if (d1_type == CMD_ACT) inflight_act = 1'b1;
+                if (d1_type == CMD_WR)  inflight_wr  = 1'b1;
+            end
+        end
+    end
+
+    // REF needs every bank idle AND past tRP/tRC/tRFC (bank_act_allowed
+    // already folds those counters in), and no ACT/REF still in flight.
+    wire ref_ok = all_banks_idle && (&bank_act_allowed) && !inflight_act && !inflight_ref;
+
     always_comb begin
         for (int i = 0; i < DEPTH; i++) begin
             logic [BANK_BITS-1:0] b;
@@ -91,7 +152,8 @@ module scheduler #(
             is_row_hit[i]   = q_valid[i] && bank_is_active[b] &&
                                (bank_open_row[b] == q_row[i]);
             is_cas_ready[i] = is_row_hit[i] && !recently_granted &&
-                               (q_we[i] ? bank_wr_allowed[b] : bank_rd_allowed[b]);
+                               !inflight_state[b] && !inflight_ref &&
+                               (q_we[i] ? bank_wr_allowed[b] : (bank_rd_allowed[b] && !inflight_wr));
             is_act_needed[i] = q_valid[i] && (!bank_is_active[b] ||
                                (bank_open_row[b] != q_row[i]));
         end
@@ -128,13 +190,13 @@ module scheduler #(
         // never a raw un-gated REF (see Defect 5 in
         // Frontend2/VALIDATION_INTEGRATION_PLAN.md).
         if (ref_urgent) begin
-            if (all_banks_idle) begin
+            if (ref_ok) begin
                 sel_valid  = 1'b1;
                 sel_type   = CMD_REF;
                 sel_is_ref = 1'b1;
             end else begin
                 for (int b = 0; b < NUM_BANKS; b++) begin
-                    if (bank_is_active[b] && bank_pre_allowed[b] && !sel_valid) begin
+                    if (bank_is_active[b] && bank_pre_allowed[b] && !inflight_any[b] && !inflight_ref && !sel_valid) begin
                         sel_valid      = 1'b1;
                         sel_type       = CMD_PRE;
                         sel_from_queue = 1'b0;
@@ -158,12 +220,12 @@ module scheduler #(
                     if (is_act_needed[i] && !sel_valid) begin
                         logic [BANK_BITS-1:0] b;
                         b = q_bank[i];
-                        if (bank_is_active[b] && bank_pre_allowed[b]) begin
+                        if (bank_is_active[b] && bank_pre_allowed[b] && !inflight_any[b] && !inflight_ref) begin
                             // Need PRE first
                             sel_valid = 1'b1;
                             sel_idx   = i[IDX_BITS-1:0];
                             sel_type  = CMD_PRE;
-                        end else if (!bank_is_active[b] && bank_act_allowed[b]) begin
+                        end else if (!bank_is_active[b] && bank_act_allowed[b] && !inflight_any[b] && !inflight_act && !inflight_ref) begin
                             // Bank idle, can ACT
                             sel_valid = 1'b1;
                             sel_idx   = i[IDX_BITS-1:0];
@@ -175,13 +237,13 @@ module scheduler #(
             // Priority 4: Normal refresh (when no other work) -- same
             // idle-gate / force-precharge-first behavior as urgent refresh.
             if (!sel_valid && ref_required) begin
-                if (all_banks_idle) begin
+                if (ref_ok) begin
                     sel_valid  = 1'b1;
                     sel_type   = CMD_REF;
                     sel_is_ref = 1'b1;
                 end else begin
                     for (int b = 0; b < NUM_BANKS; b++) begin
-                        if (bank_is_active[b] && bank_pre_allowed[b] && !sel_valid) begin
+                        if (bank_is_active[b] && bank_pre_allowed[b] && !inflight_any[b] && !inflight_ref && !sel_valid) begin
                             sel_valid      = 1'b1;
                             sel_type       = CMD_PRE;
                             sel_from_queue = 1'b0;

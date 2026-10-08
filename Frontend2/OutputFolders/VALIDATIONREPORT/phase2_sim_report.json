@@ -80,8 +80,8 @@
     },
     "bank_tracker": {
       "status": "PASS",
-      "test_count": 31,
-      "pass_count": 31,
+      "test_count": 33,
+      "pass_count": 33,
       "fail_count": 0,
       "pass_lines": [
         "[PASS] A1: all_banks_idle at reset",
@@ -109,8 +109,10 @@
         "[PASS] G3: faw_allows_act recovers ~tFAW=10 cycles after 1st ACT",
         "[PASS] H1: bank_wr_allowed[0] blocked right after RD (tCCD)",
         "[PASS] H2: bank_wr_allowed[0] after tCCD=2",
-        "[PASS] I1: bank_pre_allowed[0] blocked right after WR (tWTR)",
-        "[PASS] I2: bank_pre_allowed[0] after tWTR=4",
+        "[PASS] I0: bank_rd_allowed[1] before the WR",
+        "[PASS] I1: bank_rd_allowed[1] blocked right after a WR to bank 0 (tWTR)",
+        "[PASS] I2: bank_rd_allowed[1] still blocked after tCCD (tWTR window not over)",
+        "[PASS] I3: bank_rd_allowed[1] after tWTR+CWL+BL/2=16",
         "[PASS] J1: bank_is_active all clear after REF",
         "[PASS] J2: all_banks_idle after REF",
         "[PASS] J3: bank_act_allowed[0] blocked right after REF (tRFC)",
@@ -121,6 +123,6 @@
       "log_file": "bank_tracker_xrun.log"
     }
   },
-  "timestamp": "2026-10-08T11:31:11.869288",
+  "timestamp": "2026-10-08T12:35:34.689622",
   "server": "olympus.ece.tamu.edu"
 }
