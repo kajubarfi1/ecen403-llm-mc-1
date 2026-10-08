@@ -1,8 +1,8 @@
 {
-  "$comment": "Grading rules for STAGE INVARIANT CHECKERS — the agent-generated LegalityCheckers required by composed-path stages whose output stream is order-nondeterministic (sched_cmd under FR-FCFS). A stage checker observes the stage's input AND output streams in order and asserts set/state properties: conservation (nothing dropped, nothing invented), bank-state legality of the command stream, and refresh service. Timing stays with SVA. Traces here are synthesised from the spec's failure_taxonomy plus the proposed extensions below; the checker never sees them.",
+  "$comment": "Grading rules for STAGE INVARIANT CHECKERS \u2014 the agent-generated LegalityCheckers required by composed-path stages whose output stream is order-nondeterministic (sched_cmd under FR-FCFS). A stage checker observes the stage's input AND output streams in order and asserts set/state properties: conservation (nothing dropped, nothing invented), bank-state legality of the command stream, and refresh service. Timing stays with SVA. Traces here are synthesised from the spec's failure_taxonomy plus the proposed extensions below; the checker never sees them.",
   "$trace_format": "Each trace step is [iface, kind, {field: value}]. A value may be a symbolic command name (e.g. 'ACT') for the stage's command_field; it is resolved through the catalog command_encoding of encoding_iface at grade time. Missing schema fields default to 0.",
   "proposed_taxonomy_extensions": {
-    "$why": "The spec's failure_taxonomy covers timing, protocol state, init, data and CSR, but has no ids for scheduler conservation or refresh-service liveness — properties any queue+arbiter can violate. These ids are used locally and routed up the chain as a spec-gap finding proposing their adoption.",
+    "$why": "The spec's failure_taxonomy covers timing, protocol state, init, data and CSR, but has no ids for scheduler conservation or refresh-service liveness \u2014 properties any queue+arbiter can violate. These ids are used locally and routed up the chain as a spec-gap finding proposing their adoption.",
     "SCHED_001": "Enqueued request never issued as a command (dropped request; starvation at end of trace).",
     "SCHED_002": "Command issued that corresponds to no enqueued request (invented command).",
     "SCHED_003": "Refresh request raised but never serviced with a REFRESH command.",
@@ -191,11 +191,57 @@
               }
             ]
           ],
-          "why": "The write issues with no preceding ACTIVATE to bank 2."
+          "why": "The write issues with no preceding ACTIVATE to bank 2.",
+          "legal_variants": {
+            "precharge_is_per_bank": [
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "ACT",
+                  "bank": 0,
+                  "row": 1,
+                  "aux": 1
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "ACT",
+                  "bank": 1,
+                  "row": 2,
+                  "aux": 1
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "PRE",
+                  "bank": 1,
+                  "aux": 1
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "WR",
+                  "bank": 0,
+                  "row": 1,
+                  "col": 4,
+                  "we": 1,
+                  "aux": 1
+                }
+              ]
+            ]
+          },
+          "$legal_variants_note": "precharge_is_per_bank: a PRECHARGE closes the bank it names and no other; this stream carries no address, so there is no precharge-all here and the aux tag is never an address bit (a regenerated checker once read aux bit 0 as A10 and closed every bank, 2026-10-08)."
         },
         {
           "id": "PROTO_002",
-          "requirement": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE.",
+          "requirement": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE. State convention: a bank is 'active' from its ACTIVATE until a PRECHARGE to it, or any REFRESH (which closes every bank whether or not it was legal, so an illegal REFRESH is reported once as REF_002 and does not cascade into this rule on the next ACTIVATE).",
           "legal": [
             [
               "cq_enq",
@@ -328,7 +374,7 @@
         },
         {
           "id": "REF_002",
-          "requirement": "REFRESH issued while one or more banks are still active (not precharged).",
+          "requirement": "REFRESH issued while one or more banks are still active (not precharged). State convention: after any REFRESH every bank is treated as precharged (idle), legal or not -- a REFRESH issued with a bank open is this violation and RESYNCHRONISES the bank model; the ACTIVATE that follows is not a second violation.",
           "legal": [
             [
               "refresh_req",
@@ -398,7 +444,7 @@
         },
         {
           "id": "SCHED_004",
-          "requirement": "A READ/WRITE must execute against the row its request asked for: when the CAS for a request issues, the row open in that bank (set by the most recent ACTIVATE to it) must be the request's row. An ACTIVATE that no pending request asked for is NOT a violation by itself — a controller may open a row speculatively — only a CAS landing on the wrong row is.",
+          "requirement": "A READ/WRITE must execute against the row its request asked for: when the CAS for a request issues, the row open in that bank (set by the most recent ACTIVATE to it) must be the request's row. An ACTIVATE that no pending request asked for is NOT a violation by itself \u2014 a controller may open a row speculatively \u2014 only a CAS landing on the wrong row is.",
           "legal": [
             [
               "cq_enq",
@@ -473,7 +519,7 @@
             ]
           ],
           "why": "Bank 2 was asked for row 5 but row 9 was opened; the WRITE that follows lands in row 9. Report it at the WRITE.",
-          "restated": "Restated 2026-09-29. The first wording ('every ACTIVATE must open a row some pending request asked for') fired 314 times on UberDDR3, which opens the next bank's row ahead of the request — legal, and verified correct by the Micron model. The invariant that matters is where the data lands."
+          "restated": "Restated 2026-09-29. The first wording ('every ACTIVATE must open a row some pending request asked for') fired 314 times on UberDDR3, which opens the next bank's row ahead of the request \u2014 legal, and verified correct by the Micron model. The invariant that matters is where the data lands."
         }
       ]
     },
@@ -569,7 +615,7 @@
         },
         {
           "id": "REF_002",
-          "requirement": "REFRESH issued while one or more banks are still active (not precharged).",
+          "requirement": "REFRESH issued while one or more banks are still active (not precharged). State convention: after any REFRESH every bank is treated as precharged (idle), legal or not -- a REFRESH issued with a bank open is this violation and RESYNCHRONISES the bank model; the ACTIVATE that follows is not a second violation.",
           "legal": [
             [
               "sched_cmd",
@@ -688,11 +734,57 @@
               }
             ]
           ],
-          "why": "A CAS with no preceding ACTIVATE has no open row to address."
+          "why": "A CAS with no preceding ACTIVATE has no open row to address.",
+          "legal_variants": {
+            "precharge_is_per_bank": [
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "ACT",
+                  "bank": 0,
+                  "row": 1,
+                  "aux": 1
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "ACT",
+                  "bank": 1,
+                  "row": 2,
+                  "aux": 1
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "PRE",
+                  "bank": 1,
+                  "aux": 1
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "WR",
+                  "bank": 0,
+                  "row": 1,
+                  "col": 4,
+                  "we": 1,
+                  "aux": 1
+                }
+              ]
+            ]
+          },
+          "$legal_variants_note": "precharge_is_per_bank: a PRECHARGE closes the bank it names and no other; this stream carries no address, so there is no precharge-all here and the aux tag is never an address bit (a regenerated checker once read aux bit 0 as A10 and closed every bank, 2026-10-08)."
         },
         {
           "id": "PROTO_002",
-          "requirement": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE.",
+          "requirement": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE. State convention: a bank is 'active' from its ACTIVATE until a PRECHARGE to it, or any REFRESH (which closes every bank whether or not it was legal, so an illegal REFRESH is reported once as REF_002 and does not cascade into this rule on the next ACTIVATE).",
           "legal": [
             [
               "sched_cmd",
@@ -741,11 +833,50 @@
               }
             ]
           ],
-          "why": "A second ACTIVATE to bank 0 without a PRECHARGE between them."
+          "why": "A second ACTIVATE to bank 0 without a PRECHARGE between them.",
+          "legal_variants": {
+            "after_illegal_refresh": [
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "ACT",
+                  "bank": 0,
+                  "row": 1
+                }
+              ],
+              [
+                "refresh_req",
+                "request",
+                {
+                  "urgent": 0,
+                  "pending": 1,
+                  "starve": 0
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "REF"
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "ACT",
+                  "bank": 0,
+                  "row": 1
+                }
+              ]
+            ]
+          },
+          "$legal_variants_note": "Each variant is a further LEGAL trace for this rule (no violation of this id may fire on it). after_illegal_refresh pins the state convention: REFRESH closes every bank, so the ACTIVATE after an illegal REFRESH is not a second violation."
         },
         {
           "id": "REF_002",
-          "requirement": "REFRESH issued while one or more banks are still active (not precharged).",
+          "requirement": "REFRESH issued while one or more banks are still active (not precharged). State convention: after any REFRESH every bank is treated as precharged (idle), legal or not -- a REFRESH issued with a bank open is this violation and RESYNCHRONISES the bank model; the ACTIVATE that follows is not a second violation.",
           "legal": [
             [
               "sched_cmd",
@@ -865,7 +996,7 @@
         },
         {
           "id": "PROTO_002",
-          "requirement": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE.",
+          "requirement": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE. State convention: a bank is 'active' from its ACTIVATE until a PRECHARGE to it, a precharge-all (A10), or any REFRESH (which closes every bank whether or not it was legal, so an illegal REFRESH is reported once as REF_002 and does not cascade into this rule on the next ACTIVATE).",
           "legal": [
             [
               "ddr_cmd",
@@ -918,7 +1049,7 @@
         },
         {
           "id": "REF_002",
-          "requirement": "REFRESH issued while one or more banks are still active (not precharged).",
+          "requirement": "REFRESH issued while one or more banks are still active (not precharged). State convention: after any REFRESH every bank is treated as precharged (idle), legal or not -- a REFRESH issued with a bank open is this violation and RESYNCHRONISES the bank model; the ACTIVATE that follows is not a second violation. A PRECHARGE with A10 set closes every bank likewise.",
           "legal": [
             [
               "ddr_cmd",
@@ -1161,7 +1292,7 @@
         },
         {
           "id": "REF_002",
-          "requirement": "REFRESH issued while one or more banks are still active (not precharged).",
+          "requirement": "REFRESH issued while one or more banks are still active (not precharged). State convention: after any REFRESH every bank is treated as precharged (idle), legal or not -- a REFRESH issued with a bank open is this violation and RESYNCHRONISES the bank model; the ACTIVATE that follows is not a second violation. A PRECHARGE with A10 set closes every bank likewise.",
           "legal": [
             [
               "ddr_cmd",
@@ -1408,7 +1539,7 @@
         },
         {
           "id": "PROTO_002",
-          "requirement": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE.",
+          "requirement": "ACTIVATE issued to a bank that already has an active row without intervening PRECHARGE. State convention: a bank is 'active' from its ACTIVATE until a PRECHARGE to it, a precharge-all (A10), or any REFRESH (which closes every bank whether or not it was legal, so an illegal REFRESH is reported once as REF_002 and does not cascade into this rule on the next ACTIVATE).",
           "legal": [
             [
               "cq_enq",
@@ -1533,11 +1664,88 @@
               }
             ]
           ],
-          "why": "The second ACTIVATE to bank 2 has no PRECHARGE before it."
+          "why": "The second ACTIVATE to bank 2 has no PRECHARGE before it.",
+          "legal_variants": {
+            "after_illegal_refresh": [
+              [
+                "cq_enq",
+                "enqueue",
+                {
+                  "row": 5,
+                  "bank": 2,
+                  "col": 8,
+                  "we": 1
+                }
+              ],
+              [
+                "ddr_cmd",
+                "command",
+                {
+                  "cmd": "ACT",
+                  "bank": 2,
+                  "addr": 5
+                }
+              ],
+              [
+                "ddr_cmd",
+                "command",
+                {
+                  "cmd": "WR",
+                  "bank": 2,
+                  "addr": 8
+                }
+              ],
+              [
+                "refresh_req",
+                "request",
+                {
+                  "urgent": 0,
+                  "pending": 1,
+                  "starve": 0
+                }
+              ],
+              [
+                "ddr_cmd",
+                "command",
+                {
+                  "cmd": "REF"
+                }
+              ],
+              [
+                "cq_enq",
+                "enqueue",
+                {
+                  "row": 5,
+                  "bank": 2,
+                  "col": 8,
+                  "we": 1
+                }
+              ],
+              [
+                "ddr_cmd",
+                "command",
+                {
+                  "cmd": "ACT",
+                  "bank": 2,
+                  "addr": 5
+                }
+              ],
+              [
+                "ddr_cmd",
+                "command",
+                {
+                  "cmd": "WR",
+                  "bank": 2,
+                  "addr": 8
+                }
+              ]
+            ]
+          },
+          "$legal_variants_note": "Each variant is a further LEGAL trace for this rule (no violation of this id may fire on it). after_illegal_refresh pins the state convention: REFRESH closes every bank, so the ACTIVATE after an illegal REFRESH is not a second violation."
         },
         {
           "id": "SCHED_004",
-          "requirement": "A READ/WRITE must execute against the row its request asked for: when the CAS for a request issues, the row open in that bank (set by the most recent ACTIVATE to it) must be the request's row. An ACTIVATE that no pending request asked for is NOT a violation by itself — a controller may open a row speculatively — only a CAS landing on the wrong row is.",
+          "requirement": "A READ/WRITE must execute against the row its request asked for: when the CAS for a request issues, the row open in that bank (set by the most recent ACTIVATE to it) must be the request's row. An ACTIVATE that no pending request asked for is NOT a violation by itself \u2014 a controller may open a row speculatively \u2014 only a CAS landing on the wrong row is.",
           "legal": [
             [
               "cq_enq",
@@ -1608,7 +1816,7 @@
             ]
           ],
           "why": "Bank 2 was asked for row 5 but row 9 was opened; the WRITE that follows lands in row 9. Report it at the WRITE.",
-          "restated": "Restated 2026-09-29. The first wording ('every ACTIVATE must open a row some pending request asked for') fired 314 times on UberDDR3, which opens the next bank's row ahead of the request — legal, and verified correct by the Micron model. The invariant that matters is where the data lands."
+          "restated": "Restated 2026-09-29. The first wording ('every ACTIVATE must open a row some pending request asked for') fired 314 times on UberDDR3, which opens the next bank's row ahead of the request \u2014 legal, and verified correct by the Micron model. The invariant that matters is where the data lands."
         },
         {
           "id": "PROTO_001",
@@ -1775,7 +1983,7 @@
       "rules": [
         {
           "id": "REF_002",
-          "requirement": "REFRESH issued while one or more banks are still active (not precharged).",
+          "requirement": "REFRESH issued while one or more banks are still active (not precharged). State convention: after any REFRESH every bank is treated as precharged (idle), legal or not -- a REFRESH issued with a bank open is this violation and RESYNCHRONISES the bank model; the ACTIVATE that follows is not a second violation. A PRECHARGE with A10 set closes every bank likewise.",
           "legal": [
             [
               "refresh_req",
@@ -1961,7 +2169,7 @@
       "rules": [
         {
           "id": "INIT_001",
-          "requirement": "Mode register commands must be issued in the order the spec's initialization_sequence states (MR2, MR3, MR1, MR0 — each an MRS whose bank field is the MR number), followed by ZQCL, before init_done.",
+          "requirement": "Mode register commands must be issued in the order the spec's initialization_sequence states (MR2, MR3, MR1, MR0 \u2014 each an MRS whose bank field is the MR number), followed by ZQCL, before init_done.",
           "legal": [
             [
               "init_cmd",
@@ -2079,7 +2287,7 @@
               }
             ]
           ],
-          "why": "MR0 was programmed first. The spec (initialization_sequence.$derived.init_sequence_order) requires MR2 → MR3 → MR1 → MR0: MR0's DLL reset must come after the other registers are set."
+          "why": "MR0 was programmed first. The spec (initialization_sequence.$derived.init_sequence_order) requires MR2 \u2192 MR3 \u2192 MR1 \u2192 MR0: MR0's DLL reset must come after the other registers are set."
         },
         {
           "id": "INIT_003",
@@ -2548,7 +2756,7 @@
               }
             ]
           ],
-          "why": "A refresh request was raised before initialisation completed — the DRAM cannot accept REFRESH before its mode registers are programmed."
+          "why": "A refresh request was raised before initialisation completed \u2014 the DRAM cannot accept REFRESH before its mode registers are programmed."
         },
         {
           "id": "REF_004",
@@ -2638,5 +2846,8 @@
     "CAL_002": [
       "calibration"
     ]
-  }
+  },
+  "$lessons": [
+    "2026-10-08: the bank model's state after an ILLEGAL command is a convention, and the rules state it (REFRESH closes every bank, legal or not). Two checkers that chose differently disagreed on one PROTO_002 per trace after an illegal REFRESH -- the same defect counted twice by one of them, not a missed defect."
+  ]
 }

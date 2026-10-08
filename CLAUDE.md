@@ -128,6 +128,12 @@ the final stage runs the backend's per-block netlists through the paths
 Edges whose counterpart does not exist yet halt and say so: phases without a
 validation agent (3, 4) and a top-level-only netlist. `--phases 1` runs a Phase-1-only loop (partial validation, no top-level, no backend); `--revalidate` re-judges a drop changed under a resumed run; `--dry-run` prints the plan. Tests: `tests/test_flow.py`.
 The Validation⇄Frontend contract is `Validation/findings/HANDOFF_CONTRACT.md`.
+A spec is identified by its content (`Validation/spec/spec_identity.py`), not
+only its `revision`: the golden spec has changed under one revision string, so
+`validate_drop.py` judges against the spec the drop ships, files
+`SPEC_REVISION_REUSED` when the revision was reused, and re-grades every
+agent-generated model under that spec before judging (stale ones are
+regenerated).
 
 ## Working conventions
 - User's email: lehanar57@tamu.edu.

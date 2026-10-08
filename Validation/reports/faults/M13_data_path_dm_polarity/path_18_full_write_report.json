@@ -3,7 +3,7 @@
   "path": "path_18_full_write",
   "strategy": "composed",
   "verdict": "fail",
-  "timestamp": "2026-09-30T12:11:17.597800",
+  "timestamp": "2026-10-08T12:17:14.088679",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,48 +21,86 @@
   "window_cycles": 400,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "5661e03",
+    "git_head": "78a3de87b2d2",
+    "drop_id": "78a3de87b2d2",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "608d29d",
+    "frontend_commits": {
+      "addr_decoder": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "bank_tracker": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "cmd_gen": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "cmd_queue": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "config_regs": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "data_path": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "refresh_ctrl": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "scheduler": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "wb_port": "9c21084cdda21e528b57299e638eef2b79fef2ec"
+    },
     "roots": [
       "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders"
     ],
     "blocks": {
       "addr_decoder": {
         "rtl": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE2RTL/addr_decoder.sv",
-        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE2RTL/addr_decoder_manifest.json"
+        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "bank_tracker": {
         "rtl": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
-        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE2RTL/bank_tracker_manifest.json"
+        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "cmd_gen": {
         "rtl": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE3RTL/cmd_gen.sv",
-        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json"
+        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "cmd_queue": {
         "rtl": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE3RTL/cmd_queue.sv",
-        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json"
+        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "config_regs": {
         "rtl": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
-        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json"
+        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "data_path": {
         "rtl": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json"
+        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "refresh_ctrl": {
         "rtl": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
-        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json"
+        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "scheduler": {
         "rtl": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
-        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json"
+        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "wb_port": {
         "rtl": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
-        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json"
+        "manifest": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       }
-    }
+    },
+    "shipped_spec": {
+      "path": "Validation/faults/work/M13_data_path_dm_polarity/Frontend2/OutputFolders/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
   },
   "stages": [
     {
@@ -70,22 +108,9 @@
       "kind": "exact",
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
       "scope": "wb_port",
-      "verdict": "fail",
-      "summary": "scope=wb_port  strategy=exact  status=fail  matched=26/38  missing=4 unexpected=16 value=8",
-      "detail": [
-        "  req[9] unexpected: the design produced [req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0] with nothing predicted",
-        "  req[10] unexpected: the design produced [req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0] with nothing predicted",
-        "  req[11] unexpected: the design produced [req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0] with nothing predicted",
-        "  req[12] unexpected: the design produced [req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0] with nothing predicted",
-        "  req[13] unexpected: the design produced [req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0] with nothing predicted",
-        "  req[14] unexpected: the design produced [req.request addr=0x409f134 data=0x0 mask=0x0 we=0x0] with nothing predicted",
-        "  req[2] missing: predicted [req.request addr=0x1fb5355e data=0x0 mask=0x0 we=0x0] but the design produced nothing",
-        "  req[4] value: predicted [req.request addr=0x184b9da5 data=0x0 mask=0x0 we=0x0] but observed [req.request addr=0x18f2a0a3 data=0xc9e9c616 mask=0x0 we=0x0]",
-        "  req[5] value: predicted [req.request addr=0x18f2a0a3 data=0x0 mask=0x0 we=0x0] but observed [req.request addr=0x18f2a0a3 data=0xc9e9c616 mask=0x0 we=0x0]",
-        "  req[6] value: predicted [req.request addr=0x1c81394b data=0x0 mask=0x0 we=0x0] but observed [req.request addr=0x18f2a0a3 data=0xc9e9c616 mask=0x0 we=0x0]",
-        "  req[7] value: predicted [req.request addr=0x68ae3c7 data=0x0 mask=0x0 we=0x0] but observed [req.request addr=0x1c81394b data=0xc9e9c616 mask=0x0 we=0x0]",
-        "  ... and 8 more"
-      ]
+      "verdict": "pass",
+      "summary": "scope=wb_port  strategy=exact  status=pass  matched=28/28  (28 output transaction(s) matched)",
+      "detail": []
     },
     {
       "stage": "addr_decoder",
@@ -93,7 +118,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
       "scope": "addr_decoder",
       "verdict": "pass",
-      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=36/36  (36 output transaction(s) matched)",
+      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)",
       "detail": []
     },
     {
@@ -102,20 +127,20 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
       "scope": "cmd_queue_scheduler",
       "verdict": "fail",
-      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=37",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=35",
       "detail": [
-        "  PROTO_002 (double_activate): ACTIVATE to bank 7 which already has active row @ [sched_cmd.command aux=0x5 bank=0x7 col=0xa0 row=0x7204 type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 7 which already has active row @ [sched_cmd.command aux=0x5 bank=0x7 col=0xa0 row=0x7204 type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has active row @ [sched_cmd.command aux=0x8 bank=0x4 col=0x338 row=0x6196 type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has active row @ [sched_cmd.command aux=0x8 bank=0x4 col=0x338 row=0x6196 type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 7 which already has active row @ [sched_cmd.command aux=0x7 bank=0x7 col=0xd8 row=0x5b6 type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 7 which already has active row @ [sched_cmd.command aux=0x7 bank=0x7 col=0xd8 row=0x5b6 type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has active row @ [sched_cmd.command aux=0xa bank=0x6 col=0x118 row=0x38c0 type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has active row @ [sched_cmd.command aux=0x6 bank=0x4 col=0x1e0 row=0x1a2b type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has active row @ [sched_cmd.command aux=0x6 bank=0x4 col=0x1e0 row=0x1a2b type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 3 which already has active row @ [sched_cmd.command aux=0xb bank=0x3 col=0x180 row=0x3bab type=0x1 we=0x1]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 3 which already has active row @ [sched_cmd.command aux=0xb bank=0x3 col=0x180 row=0x3bab type=0x1 we=0x1]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has active row @ [sched_cmd.command aux=0x9 bank=0x6 col=0x298 row=0x6c0f type=0x1 we=0x0]"
+        "  PROTO_002 (double_activate): ACTIVATE to bank 7 which already has active row @ [sched_cmd.command aux=0x4 bank=0x7 col=0xa0 row=0x7204 type=0x1 we=0x0]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 7 which already has active row @ [sched_cmd.command aux=0x4 bank=0x7 col=0xa0 row=0x7204 type=0x1 we=0x0]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has active row @ [sched_cmd.command aux=0x5 bank=0x4 col=0x1e0 row=0x1a2b type=0x1 we=0x0]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has active row @ [sched_cmd.command aux=0x5 bank=0x4 col=0x1e0 row=0x1a2b type=0x1 we=0x0]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 7 which already has active row @ [sched_cmd.command aux=0x6 bank=0x7 col=0xd8 row=0x5b6 type=0x1 we=0x0]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 7 which already has active row @ [sched_cmd.command aux=0x6 bank=0x7 col=0xd8 row=0x5b6 type=0x1 we=0x0]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has active row @ [sched_cmd.command aux=0x7 bank=0x4 col=0x338 row=0x6196 type=0x1 we=0x0]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has active row @ [sched_cmd.command aux=0x7 bank=0x4 col=0x338 row=0x6196 type=0x1 we=0x0]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has active row @ [sched_cmd.command aux=0x8 bank=0x6 col=0x298 row=0x6c0f type=0x1 we=0x0]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has active row @ [sched_cmd.command aux=0x8 bank=0x6 col=0x298 row=0x6c0f type=0x1 we=0x0]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has active row @ [sched_cmd.command aux=0x9 bank=0x6 col=0x118 row=0x38c0 type=0x1 we=0x0]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has active row @ [sched_cmd.command aux=0x9 bank=0x6 col=0x118 row=0x38c0 type=0x1 we=0x0]"
       ]
     },
     {
@@ -123,9 +148,14 @@
       "kind": "exact",
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
       "scope": "cmd_gen",
-      "verdict": "pass",
-      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=125/125  (125 output transaction(s) matched)",
-      "detail": []
+      "verdict": "fail",
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=107/107  (107 output transaction(s) matched)  SVA fired: a_PROTO_002 x35, a_TIMING_004 x35, a_TIMING_005 x1, a_TIMING_011 x1",
+      "detail": [
+        "a_PROTO_002 fired 35x (assertion bound to cmd_gen)",
+        "a_TIMING_004 fired 35x (assertion bound to cmd_gen)",
+        "a_TIMING_005 fired 1x (assertion bound to cmd_gen)",
+        "a_TIMING_011 fired 1x (assertion bound to cmd_gen)"
+      ]
     },
     {
       "stage": "data_path",
@@ -133,8 +163,9 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/data_path_predictor.py",
       "scope": "data_path",
       "verdict": "fail",
-      "summary": "scope=data_path  strategy=exact  status=fail  matched=12/40  missing=8 unexpected=2 value=20",
+      "summary": "scope=data_path  strategy=exact  status=fail  matched=9/29  missing=2 value=18",
       "detail": [
+        "  ddr_wr_beat[8] value: predicted [ddr_wr_beat.beat data=0xaf57 mask=0x0] but observed [ddr_wr_beat.beat data=0xaf57 mask=0x3]",
         "  ddr_wr_beat[9] value: predicted [ddr_wr_beat.beat data=0x8d6 mask=0x2] but observed [ddr_wr_beat.beat data=0x8d6 mask=0x1]",
         "  ddr_wr_beat[10] value: predicted [ddr_wr_beat.beat data=0xa1af mask=0x0] but observed [ddr_wr_beat.beat data=0xa1af mask=0x3]",
         "  ddr_wr_beat[11] value: predicted [ddr_wr_beat.beat data=0xaa2c mask=0x1] but observed [ddr_wr_beat.beat data=0xaa2c mask=0x2]",
@@ -144,9 +175,8 @@
         "  ddr_wr_beat[15] value: predicted [ddr_wr_beat.beat data=0x792 mask=0x3] but observed [ddr_wr_beat.beat data=0x792 mask=0x0]",
         "  ddr_wr_beat[16] value: predicted [ddr_wr_beat.beat data=0xe8f8 mask=0x3] but observed [ddr_wr_beat.beat data=0xe8f8 mask=0x0]",
         "  ddr_wr_beat[17] value: predicted [ddr_wr_beat.beat data=0x8c5f mask=0x0] but observed [ddr_wr_beat.beat data=0x8c5f mask=0x3]",
-        "  ddr_wr_beat[18] value: predicted [ddr_wr_beat.beat data=0x2741 mask=0x3] but observed [ddr_wr_beat.beat data=0x2741 mask=0x0]",
-        "  ddr_wr_beat[19] value: predicted [ddr_wr_beat.beat data=0x176 mask=0x2] but observed [ddr_wr_beat.beat data=0x176 mask=0x1]",
-        "  ... and 10 more"
+        "  ddr_wr_beat[18] missing: predicted [ddr_wr_beat.beat data=0x2741 mask=0x3] but the design produced nothing",
+        "  ddr_wr_beat[19] missing: predicted [ddr_wr_beat.beat data=0x176 mask=0x2] but the design produced nothing"
       ]
     }
   ],

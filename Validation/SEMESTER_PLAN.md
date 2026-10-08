@@ -400,6 +400,78 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   the phase directory's manifest as it does the RTL, and the flow halts when
   a block the run generated was not judged (it had said COMPLETE). Reply
   addendum in `findings/HANDOFF_FRONTEND_2026-10-01_reply.md`.
+- *2026-10-08 — the scheduler-family second-checker disagreements, explained.*
+  Four checker scopes disagreed with their second opinions (cmd_queue_scheduler
+  15/53, scheduler 6/53, path_19 4/41, bank_tracker_scheduler 4/54). Two
+  causes, neither a missed defect:
+  (1) **attribution, not substance** — SCHED_004 110 vs 110, REF_002 4 vs 4,
+  SCHED_003 2 vs 2: identical counts, different witness transaction (the
+  command vs the request that asked for the row, or none). The comparator
+  keyed on the witness; it now keys on the count per rule and reports
+  witness differences apart (`attribution_only` column).
+  (2) **state after an illegal command** — one PROTO_002 per trace on
+  path_05/20: the design issues REFRESH with bank 2 open (REF_002, both
+  agree) then re-ACTIVATEs bank 2; the primary treats REFRESH as closing
+  every bank (so the ACT is legal), the second kept bank 2 open (so it
+  counted a second violation). A convention, now stated in every REF_002 /
+  PROTO_002 requirement ("REFRESH closes every bank, legal or not; an
+  illegal REFRESH is reported once and does not cascade") and pinned in the
+  gate as a legal variant (`legal_variants.after_illegal_refresh`; the
+  StageInvariantGate grades variants like the main legal trace).
+  Regenerating the two second opinions under the stated convention exposed
+  a third lesson: the convention sentence mentioned "a PRECHARGE with A10
+  set", and on `sched_cmd` — a stream with no address — the regenerated
+  model read **aux bit 0 as A10** and closed every bank on each odd-tagged
+  PRECHARGE: 3505 phantom PROTO_001s. The A10 clause is removed from
+  address-less stages and a second variant (`precharge_is_per_bank`) pins
+  it; the gate then rejected that model on the variant before the next
+  regeneration passed. Result: every checker scope agrees with its second
+  opinion on every trace (bank_tracker_scheduler 54/54, path_19 41/41,
+  cmd_queue_scheduler 53/53 + 15 attribution-only, scheduler 53/53 + 6).
+  The 9 open scheduler findings stand on two independent models. Ledger
+  50/57, faults 23/23. Only data_path (6/41, the DM-polarity spec gap)
+  remains in disagreement.
+
+- *2026-10-08, afternoon — the first single-spec drop (`4b86c7cd3705`), and
+  the spec that changed under one name.* Lehana's drop resolves 11/11 from
+  one golden spec; the three `SPEC_MISMATCH` findings resolve. Simulated on
+  Olympus: **8 pass / 11 fail, 17 findings** (the scheduler family on two
+  models, the data_path write-beat `observed`, five `MANIFEST_WRONG_SOURCE`
+  now major/confirmed). First judging said 7/12 with 20 new CTRL_STATUS
+  mismatches on config_regs; none was the design. (1) Validation's default
+  spec copy was the 09-24 golden file — `ref_pending_cnt [7:5]`, no DM
+  polarity — under the **same revision string** as the drop's
+  `generated_spec.json` (`[8:5]`), so the revision check passed and the
+  predictor was judged against the wrong contract. A spec is now identified
+  by content (`spec/spec_identity.py`, sha256 of canonical JSON; written
+  beside every `spec_revision`); `validate_drop` adopts the shipped spec
+  when a known revision carries different content and files
+  `SPEC_REVISION_REUSED`, remembered per revision in `spec/revision_ids.json`
+  so the finding outlives the adoption. (2) The config_regs predictor,
+  accepted 10-01, masked `ref_pending & 0x7`; its gate never drove a level
+  across its full width. Gate step 10 does (top bit and all ones per
+  mirrored RO field), and `validate_drop` step 3a **re-grades every accepted
+  model under the drop's spec** and regenerates the rejected ones
+  (provenance carries the spec id). The regenerated model then broadcast its
+  baseline `cfg_timing` on the first read — 5 paths failed on a transaction
+  the change-qualified monitor never records — so the broadcast step now
+  rejects any update for reset itself; second attempt accepted, config_regs
+  clean, `path_16_status_refresh` passes on the 4-bit field. (3) DM polarity
+  is now in the spec, so the bus-bridge gate grades the per-beat mask
+  (inverted byte-enable slice under `active_high_mask`); the data_path second
+  opinion, which copied the enables through, was rejected and regenerated.
+  Agreement: every scope, every trace (config_regs 57/57, data_path 41/41).
+  Faults 23/23; M07's reset value now comes from the spec (`{reset:TIMING_0}`)
+  instead of being re-seeded at each spec change. **Open from this drop:**
+  M06 (REF_001) is killed by REF_002/TIMING_011 growth, not by REF_001 — the
+  4-bit field now shows the count climbing to 11 on `csr_sts_level`, but
+  the `refresh_req` monitor samples `pending` only on the rising edge of
+  `ref_required` (always 1). Next: a change-qualified refresh-level stream
+  into the path_05/scheduler checkers (catalog entry, stage input_ifaces,
+  REF_001 gate traces, four regenerations, re-sim). Dawson's asks (`--drop_id`,
+  `--spec_revision`, `--mode`, renderer losses, provenance) are done; replies
+  in `findings/HANDOFF_FRONTEND_2026-10-08_reply.md` and
+  `findings/HANDOFF_BACKEND_2026-10-08_reply.md`.
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

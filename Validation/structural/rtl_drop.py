@@ -267,8 +267,13 @@ def drop_id(blocks=None):
 
 def stamp(blocks):
     """Which files were validated, from which root, at which commit."""
-    out = {"git_head": drop_id(blocks),          # the drop's identity: a content hash (see drop_id); key kept for every reader
-           "drop_id": drop_id(blocks),
+    # the drop's identity is the WHOLE drop's hash, whichever blocks this run
+    # used (a per-path stamp over a subset gave every path a different id and
+    # the emitter named the outbox after the first report it read, 2026-10-08)
+    whole = drop_id()
+    out = {"git_head": whole,                    # the drop's identity: a content hash (see drop_id); key kept for every reader
+           "drop_id": whole,
+           "blocks_used": sorted(blocks),
            "validated_at": _git_head(),          # informational only: this repo's HEAD, if any
            "frontend_commits": frontend_commits(blocks),   # informational: what the manifests record
            "roots": [os.path.relpath(r, ROOT) for r in roots()],

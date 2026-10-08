@@ -57,6 +57,25 @@ class FaultError(Exception):
 # building the mutant drop
 # --------------------------------------------------------------------------
 
+def expand_spec_values(text):
+    """Expand `{reset:REG}` / `{reset-1:REG}` / `{reset+1:REG}` to the
+    register's 8-hex-digit reset value from the spec being judged against,
+    so a fault about a reset value follows the spec instead of being
+    re-seeded by hand at every spec change (M07, 2026-10-01 and 2026-10-08)."""
+    if "{reset" not in text:
+        return text
+    spec_path = os.environ.get("VALIDATION_SPEC", os.path.join(
+        ROOT, "Validation", "spec", "llmmc_microarchitecturespec_filled.json"))
+    with open(spec_path) as f:
+        regs = {r["name"]: r for r in json.load(f)["csr_register_map"]["registers"]}
+
+    def sub(m):
+        delta = int(m.group(1) or 0)
+        val = int(str(regs[m.group(2)]["reset_value"]), 16) + delta
+        return f"{val & 0xFFFFFFFF:08X}"
+    return re.sub(r"\{reset([+-]\d+)?:([A-Za-z0-9_]+)\}", sub, text)
+
+
 def build(fault, drop_root):
     src = os.path.join(ROOT, drop_root)
     dst_root = os.path.join(WORK, fault["id"])
@@ -69,6 +88,8 @@ def build(fault, drop_root):
     # needs two sites in one, is still ONE injected bug.
     edits = fault.get("edits") or [{"file": fault["file"], "from": fault["from"],
                                     "to": fault["to"]}]
+    edits = [dict(e, **{"from": expand_spec_values(e["from"]),
+                        "to": expand_spec_values(e["to"])}) for e in edits]
     for e in edits:
         target = os.path.join(dst, e.get("file", fault.get("file")))
         with open(target) as f:

@@ -55,6 +55,16 @@ STAGE_RULES = os.path.join(ROOT, "Validation", "gates", "stage_invariant_rules.j
 SVA_RULES = os.path.join(ROOT, "Validation", "sva", "sva_rules.json")
 SPEC = os.path.join(ROOT, "Validation", "spec", "llmmc_microarchitecturespec_filled.json")
 SPEC = os.environ.get("VALIDATION_SPEC", SPEC)   # the spec the drop was generated from, when it is not the default
+
+
+def _spec_id():
+    """Content id of the spec (revision alone has named two specs)."""
+    try:
+        sys.path.insert(0, os.path.join(ROOT, "Validation", "spec"))
+        from spec_identity import spec_sha256
+        return spec_sha256(SPEC)
+    except (OSError, ValueError, ImportError):
+        return None
 SCHEMAS = os.path.join(ROOT, "Validation", "txn", "generated", "schemas.json")
 VPLAN = os.path.join(ROOT, "Validation", "vplan", "vplan.json")
 
@@ -525,6 +535,7 @@ def emit(reports_dir, out_dir=None, drop_status=None):
                  key=lambda f: (order.get(f["severity"], 3), f["owner_module"], f["check_id"]))
     doc = {"schema": "validation-findings/2", "drop": head,
            "spec_revision": spec.get("revision"),
+           "spec_id": _spec_id(),
            "generated_utc": datetime.utcnow().isoformat() + "Z",
            "reports": os.path.relpath(reports_dir, ROOT),
            "finding_count": len(out), "findings": out + untested, "resolved": resolved}

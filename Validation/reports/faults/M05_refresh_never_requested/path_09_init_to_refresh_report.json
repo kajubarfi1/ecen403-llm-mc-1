@@ -3,7 +3,7 @@
   "path": "path_09_init_to_refresh",
   "strategy": "invariant",
   "verdict": "fail",
-  "timestamp": "2026-09-30T12:11:16.615931",
+  "timestamp": "2026-10-08T12:16:57.349785",
   "blocks": [
     "config_regs",
     "init_fsm",
@@ -15,24 +15,44 @@
   "window_cycles": 180000,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "5661e03",
+    "git_head": "3a2ab36d9820",
+    "drop_id": "3a2ab36d9820",
+    "blocks_used": [
+      "config_regs",
+      "init_fsm",
+      "refresh_ctrl"
+    ],
+    "validated_at": "608d29d",
+    "frontend_commits": {
+      "config_regs": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "init_fsm": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "refresh_ctrl": "9c21084cdda21e528b57299e638eef2b79fef2ec"
+    },
     "roots": [
       "Validation/faults/work/M05_refresh_never_requested/Frontend2/OutputFolders"
     ],
     "blocks": {
       "config_regs": {
         "rtl": "Validation/faults/work/M05_refresh_never_requested/Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
-        "manifest": "Validation/faults/work/M05_refresh_never_requested/Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json"
+        "manifest": "Validation/faults/work/M05_refresh_never_requested/Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "init_fsm": {
         "rtl": "Validation/faults/work/M05_refresh_never_requested/Frontend2/OutputFolders/PHASE1RTL/init_fsm.sv",
-        "manifest": "Validation/faults/work/M05_refresh_never_requested/Frontend2/OutputFolders/PHASE1RTL/init_fsm_manifest.json"
+        "manifest": "Validation/faults/work/M05_refresh_never_requested/Frontend2/OutputFolders/PHASE1RTL/init_fsm_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "refresh_ctrl": {
         "rtl": "Validation/faults/work/M05_refresh_never_requested/Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
-        "manifest": "Validation/faults/work/M05_refresh_never_requested/Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json"
+        "manifest": "Validation/faults/work/M05_refresh_never_requested/Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       }
-    }
+    },
+    "shipped_spec": {
+      "path": "Validation/faults/work/M05_refresh_never_requested/Frontend2/OutputFolders/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
   },
   "stages": [
     {
@@ -41,7 +61,7 @@
       "model": null,
       "scope": "init_fsm",
       "verdict": "sva",
-      "note": "time-driven stage; pacing owned by SVA"
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
     },
     {
       "stage": "refresh_ctrl",
@@ -49,7 +69,7 @@
       "model": null,
       "scope": "refresh_ctrl",
       "verdict": "sva",
-      "note": "time-driven stage; pacing owned by SVA"
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
     },
     {
       "stage": "(path-level)",

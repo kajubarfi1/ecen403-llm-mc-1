@@ -3,7 +3,7 @@
   "path": "path_19_row_conflict",
   "strategy": "invariant",
   "verdict": "fail",
-  "timestamp": "2026-09-30T12:11:16.309383",
+  "timestamp": "2026-10-08T12:16:52.718908",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,50 +21,103 @@
   "window_cycles": 400,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "5661e03",
+    "git_head": "4ad4b5ad3f88",
+    "drop_id": "4ad4b5ad3f88",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "608d29d",
+    "frontend_commits": {
+      "addr_decoder": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "bank_tracker": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "cmd_gen": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "cmd_queue": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "config_regs": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "data_path": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "refresh_ctrl": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "scheduler": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "wb_port": "9c21084cdda21e528b57299e638eef2b79fef2ec"
+    },
     "roots": [
       "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders"
     ],
     "blocks": {
       "addr_decoder": {
         "rtl": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE2RTL/addr_decoder.sv",
-        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE2RTL/addr_decoder_manifest.json"
+        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "bank_tracker": {
         "rtl": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
-        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE2RTL/bank_tracker_manifest.json"
+        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "cmd_gen": {
         "rtl": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE3RTL/cmd_gen.sv",
-        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json"
+        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "cmd_queue": {
         "rtl": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE3RTL/cmd_queue.sv",
-        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json"
+        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "config_regs": {
         "rtl": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
-        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json"
+        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "data_path": {
         "rtl": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json"
+        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "refresh_ctrl": {
         "rtl": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
-        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json"
+        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "scheduler": {
         "rtl": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
-        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json"
+        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "wb_port": {
         "rtl": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
-        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json"
+        "manifest": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       }
-    }
+    },
+    "shipped_spec": {
+      "path": "Validation/faults/work/M04_bank_tracker_trrd_zero/Frontend2/OutputFolders/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
   },
   "stages": [
+    {
+      "stage": "cmd_gen (support)",
+      "kind": "sva",
+      "scope": "cmd_gen",
+      "model": null,
+      "verdict": "fail",
+      "summary": "SVA fired: a_PROTO_002 x38, a_TIMING_004 x38, a_TIMING_005 x9, a_TIMING_006 x18, a_TIMING_011 x1",
+      "detail": [
+        "a_PROTO_002 fired 38x (assertion bound to cmd_gen, not a judged stage)",
+        "a_TIMING_004 fired 38x (assertion bound to cmd_gen, not a judged stage)",
+        "a_TIMING_005 fired 9x (assertion bound to cmd_gen, not a judged stage)",
+        "a_TIMING_006 fired 18x (assertion bound to cmd_gen, not a judged stage)",
+        "a_TIMING_011 fired 1x (assertion bound to cmd_gen, not a judged stage)"
+      ]
+    },
     {
       "stage": "(path-level)",
       "kind": "invariant",

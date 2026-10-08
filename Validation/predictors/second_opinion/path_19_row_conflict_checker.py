@@ -1,325 +1,342 @@
 from txn_contract import LegalityChecker, Txn, Violation
-from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Set, Tuple
+from dataclasses import field
+from typing import List, Dict, Optional, Tuple
 
 
-@dataclass
-class PendingRequest:
-    """Tracks an enqueued request awaiting CAS."""
-    row: int
-    col: int
-    bank: int
-    we: int
-    txn: Txn
+# Command encoding table derived from the schema
+CMD_DECODE = {
+    0b0000: "MRS",
+    0b0001: "REF",
+    0b0010: "PRE",
+    0b0011: "ACT",
+    0b0100: "WR",
+    0b0101: "RD",
+    0b0111: "NOP",
+    0b1111: "DESL",
+}
+
+# Which commands are CAS (column-access) commands
+CAS_CMDS = {"RD", "WR"}
+
+# A10 bit index for precharge-all detection per JESD79-3
+A10_BIT = 10
 
 
-class SchedulerLegalityChecker(LegalityChecker):
+class DDRCommandPathChecker(LegalityChecker):
     """
-    Legality checker for the full command path from host request to DDR pins.
-    
-    Checks invariants from spec:
-    - SCHED_001: Every enqueued request must eventually issue as matching CAS
-    - SCHED_002: No CAS may issue without corresponding enqueued request
-    - PROTO_001: RD/WR to bank with no active row
-    - PROTO_002: ACT to bank that already has active row
-    - SCHED_004: CAS must land on row the request asked for
+    Legality checker for the full command path from host request (cq_enq)
+    to DDR pins (ddr_cmd).
+
+    Checks covered:
+      SCHED_001 - Every enqueued request must eventually issue as a matching CAS.
+      SCHED_002 - No CAS may issue without a corresponding enqueued request.
+      PROTO_001 - READ/WRITE to a bank with no active row.
+      PROTO_002 - ACTIVATE to an already-active bank without intervening PRECHARGE.
+      SCHED_004 - CAS must execute against the row its request asked for.
     """
-    
+
     INPUT_IFACES = ('cq_enq',)
     OUTPUT_IFACES = ('ddr_cmd',)
     COVERS = ('SCHED_001', 'SCHED_002', 'PROTO_001', 'PROTO_002', 'SCHED_004')
-    
-    # Command encoding table derived from schema
-    CMD_ENCODING = {
-        'MRS': 0b0000,
-        'REF': 0b0001,
-        'PRE': 0b0010,
-        'ACT': 0b0011,
-        'WR': 0b0100,
-        'RD': 0b0101,
-        'NOP': 0b0111,
-        'DESL': 0b1111,
-    }
-    
-    # Reverse mapping for lookup
-    CMD_DECODE = {v: k for k, v in CMD_ENCODING.items()}
-    
-    # Commands that are CAS operations (per JESD79-3, READ and WRITE are column access)
-    CAS_CMDS = frozenset({CMD_ENCODING['RD'], CMD_ENCODING['WR']})
-    
-    # A10 bit position for precharge-all detection (JESD79-3 Table 2)
-    A10_BIT = 10
-    
+
     def __init__(self, spec: dict):
-        """Initialize checker from spec."""
-        # Extract geometry from spec for validation bounds
-        geometry = spec.get('memory_geometry', {})
-        self._row_bits = geometry.get('row_bits', 15)
-        self._col_bits = geometry.get('column_bits', 10)
-        self._bank_bits = geometry.get('bank_bits', 3)
-        
-        # Derived bank count from spec
-        arch = spec.get('controller_architecture', {})
-        derived = arch.get('$derived', {})
-        self._num_banks = derived.get('bank_count', 1 << self._bank_bits)
-        
+        # Read geometry from spec
+        geom = spec["memory_geometry"]
+        self._num_banks = 2 ** geom["bank_bits"]  # 8 banks per spec
+        self._row_bits = geom["row_bits"]          # 15
+        self._col_bits = geom["column_bits"]       # 10
+
         self.reset()
-    
+
     def reset(self) -> None:
         """Return all tracked state to power-on."""
-        # Bank state: None means idle (no active row), int means row number open
-        # Per JESD79-3, banks start in idle (precharged) state after power-on
-        self._bank_open_row: Dict[int, Optional[int]] = {
+        # Bank state tracking: None means idle/precharged, int value means active row
+        # Per JESD79-3: all banks start in idle (precharged) state after reset
+        self._bank_active_row: Dict[int, Optional[int]] = {
             b: None for b in range(self._num_banks)
         }
-        
-        # Pending requests: list of requests awaiting CAS
-        # Keyed by (bank, col, we) for matching, but row matters for SCHED_004
-        self._pending_requests: List[PendingRequest] = []
-        
-        # Track all observed transactions for violation reporting
-        self._txn_count = 0
-    
+
+        # Pending requests queue: list of dicts with keys: row, col, bank, we, txn, matched
+        # Each entry represents an enqueued request that hasn't been matched to a CAS yet.
+        self._pending_requests: List[dict] = []
+
+        # Transaction sequence counter for ordering
+        self._seq = 0
+
     def observe(self, txn: Txn) -> List[Violation]:
-        """Consume one observed transaction and return any rule violations."""
-        self._txn_count += 1
+        """Consume one observed transaction and return any violations."""
+        self._seq += 1
         violations = []
-        
-        iface = txn.iface
-        kind = txn.kind
-        fields = txn.fields
-        
-        if iface == 'cq_enq' and kind == 'enqueue':
-            # Input: request entering command queue
-            violations.extend(self._handle_enqueue(txn, fields))
-        elif iface == 'ddr_cmd' and kind == 'command':
-            # Output: DDR command on pins
-            violations.extend(self._handle_ddr_cmd(txn, fields))
-        
+
+        if txn.iface == 'cq_enq' and txn.kind == 'enqueue':
+            violations.extend(self._observe_enqueue(txn))
+        elif txn.iface == 'ddr_cmd' and txn.kind == 'command':
+            violations.extend(self._observe_ddr_command(txn))
+
         return violations
-    
-    def _handle_enqueue(self, txn: Txn, fields: dict) -> List[Violation]:
-        """Handle request enqueue - track for later matching."""
-        row = fields.get('row', 0)
-        col = fields.get('col', 0)
-        bank = fields.get('bank', 0)
-        we = fields.get('we', 0)
-        
-        # Record pending request
-        req = PendingRequest(row=row, col=col, bank=bank, we=we, txn=txn)
-        self._pending_requests.append(req)
-        
+
+    def _observe_enqueue(self, txn: Txn) -> List[Violation]:
+        """Track an enqueued request."""
+        entry = {
+            'row': txn.fields['row'],
+            'col': txn.fields['col'],
+            'bank': txn.fields['bank'],
+            'we': txn.fields['we'],
+            'txn': txn,
+            'matched': False,
+            'seq': self._seq,
+        }
+        self._pending_requests.append(entry)
         return []
-    
-    def _handle_ddr_cmd(self, txn: Txn, fields: dict) -> List[Violation]:
-        """Handle DDR command - check protocol and request matching."""
+
+    def _observe_ddr_command(self, txn: Txn) -> List[Violation]:
+        """Process a DDR command and check protocol/scheduling rules."""
         violations = []
-        
-        cmd = fields.get('cmd', self.CMD_ENCODING['NOP'])
-        addr = fields.get('addr', 0)
-        bank = fields.get('bank', 0)
-        
-        cmd_name = self.CMD_DECODE.get(cmd, 'UNKNOWN')
-        
-        if cmd == self.CMD_ENCODING['ACT']:
-            violations.extend(self._handle_activate(txn, bank, addr))
-        elif cmd == self.CMD_ENCODING['PRE']:
-            violations.extend(self._handle_precharge(txn, bank, addr))
-        elif cmd == self.CMD_ENCODING['REF']:
-            # REFRESH: per JESD79-3, all banks must be precharged
-            # This is REF_002 in spec but not in our COVERS, so we don't check it here
-            # After refresh all banks remain precharged (JESD79-3 Section 4.11)
-            pass
-        elif cmd in self.CAS_CMDS:
-            violations.extend(self._handle_cas(txn, cmd, bank, addr))
-        # NOP, DESL, MRS: no bank state changes relevant to our invariants
-        
+        cmd_raw = txn.fields['cmd']
+        addr = txn.fields['addr']
+        bank = txn.fields['bank']
+
+        cmd_name = CMD_DECODE.get(cmd_raw)
+        if cmd_name is None:
+            # Unknown command encoding; not something the spec defines as checkable
+            return violations
+
+        # Dispatch table for command types
+        handler = self._CMD_HANDLERS.get(cmd_name)
+        if handler is not None:
+            violations.extend(handler(self, txn, cmd_name, bank, addr))
+
         return violations
-    
-    def _handle_activate(self, txn: Txn, bank: int, row_addr: int) -> List[Violation]:
+
+    def _handle_act(self, txn: Txn, cmd_name: str, bank: int, addr: int) -> List[Violation]:
         """
-        Handle ACTIVATE command.
-        
-        PROTO_002: ACTIVATE to bank that already has active row is illegal.
-        Per JESD79-3 Table 2, ACT opens row_addr in the specified bank.
+        ACTIVATE command handler.
+
+        PROTO_002 (failure_taxonomy): ACTIVATE issued to a bank that already has an
+        active row without intervening PRECHARGE.
+
+        Per the invariant description:
+        "State convention: a bank is 'active' from its ACTIVATE until a PRECHARGE to it,
+        a precharge-all (A10), or any REFRESH (which closes every bank whether or not
+        it was legal, so an illegal REFRESH is reported once as REF_002 and does not
+        cascade into this rule on the next ACTIVATE)."
         """
         violations = []
-        
-        current_row = self._bank_open_row.get(bank)
-        
-        if current_row is not None:
-            # Bank already has an active row - PROTO_002 violation
-            # Per spec: "ACTIVATE issued to a bank that already has an active row
-            # without intervening PRECHARGE"
+
+        if self._bank_active_row[bank] is not None:
+            # PROTO_002: Double activate
             violations.append(Violation(
-                rule='double_activate',
-                detail=f'ACT to bank {bank} which already has row {current_row} active; '
-                       f'new row {row_addr}',
-                severity='critical',
-                taxonomy_id='PROTO_002',
-                txns=[txn]
+                rule="double_activate",
+                detail=(
+                    f"ACTIVATE to bank {bank} which already has row "
+                    f"{self._bank_active_row[bank]} active (new row={addr})"
+                ),
+                severity="critical",
+                taxonomy_id="PROTO_002",
+                txns=[txn],
             ))
-        
-        # Update bank state: row is now open
-        # Per JESD79-3, the row address on the address pins becomes the active row
-        self._bank_open_row[bank] = row_addr
-        
+
+        # Regardless of violation, update state: the bank is now active with this row.
+        # An implementation that double-activates still results in the new row being
+        # considered open for subsequent CAS matching purposes.
+        self._bank_active_row[bank] = addr
+
         return violations
-    
-    def _handle_precharge(self, txn: Txn, bank: int, addr: int) -> List[Violation]:
+
+    def _handle_pre(self, txn: Txn, cmd_name: str, bank: int, addr: int) -> List[Violation]:
         """
-        Handle PRECHARGE command.
-        
-        Per JESD79-3 Section 4.10 and Table 2:
-        - If A10 is HIGH: precharge all banks (PREA)
-        - If A10 is LOW: precharge only the addressed bank
-        
-        The spec explicitly states: "A PRECHARGE closes only the addressed bank
-        unless address bit A10 is set (JESD79-3 precharge-all); the bank number
-        never means 'all banks'."
+        PRECHARGE command handler.
+
+        Per JESD79-3 Section 3.8 / the invariant clarification:
+        "A PRECHARGE closes only the addressed bank unless address bit A10 is set
+        (JESD79-3 precharge-all); the bank number never means 'all banks'."
         """
-        # Check A10 for precharge-all (JESD79-3 Section 4.10)
-        a10_set = (addr >> self.A10_BIT) & 1
-        
+        # Check A10 for precharge-all per JESD79-3
+        a10_set = (addr >> A10_BIT) & 1
+
         if a10_set:
             # Precharge all banks
             for b in range(self._num_banks):
-                self._bank_open_row[b] = None
+                self._bank_active_row[b] = None
         else:
-            # Precharge only specified bank
-            self._bank_open_row[bank] = None
-        
+            # Precharge single bank
+            self._bank_active_row[bank] = None
+
         return []
-    
-    def _handle_cas(self, txn: Txn, cmd: int, bank: int, col_addr: int) -> List[Violation]:
+
+    def _handle_ref(self, txn: Txn, cmd_name: str, bank: int, addr: int) -> List[Violation]:
         """
-        Handle CAS command (READ or WRITE).
-        
-        PROTO_001: RD/WR to bank with no active row is illegal.
-        SCHED_002: CAS with no matching enqueued request is illegal.
-        SCHED_004: CAS must land on the row the request asked for.
-        
-        Per stage note: "A CAS matches an enqueued request when its bank matches,
-        the DDR addr carries the request's col, the command direction matches we,
-        and the bank's open row (set by the preceding ACT's addr) is the request's row."
+        REFRESH command handler.
+
+        Per the invariant for PROTO_002:
+        "any REFRESH (which closes every bank whether or not it was legal, so an
+        illegal REFRESH is reported once as REF_002 and does not cascade into this
+        rule on the next ACTIVATE)."
+
+        Note: REF_002 is NOT in our COVERS list, so we don't report it, but we
+        still must update state correctly (close all banks) to avoid false
+        PROTO_002 cascades.
+        """
+        # REFRESH closes all banks per JESD79-3 and per the spec's state convention
+        for b in range(self._num_banks):
+            self._bank_active_row[b] = None
+
+        return []
+
+    def _handle_cas(self, txn: Txn, cmd_name: str, bank: int, addr: int) -> List[Violation]:
+        """
+        READ or WRITE command handler.
+
+        Checks:
+          PROTO_001: CAS to bank with no active row.
+          SCHED_002: CAS with no matching enqueued request.
+          SCHED_004: CAS row mismatch (open row != request's row).
+
+        Matching rule (from stage note):
+        "A CAS matches an enqueued request when its bank matches, the DDR addr
+        carries the request's col, the command direction matches we, and the
+        bank's open row (set by the preceding ACT's addr) is the request's row."
         """
         violations = []
-        
-        is_write = (cmd == self.CMD_ENCODING['WR'])
-        cmd_name = 'WR' if is_write else 'RD'
-        expected_we = 1 if is_write else 0
-        
-        current_row = self._bank_open_row.get(bank)
-        
-        # PROTO_001: Check bank is active
+        is_write = 1 if cmd_name == "WR" else 0
+
+        # PROTO_001: CAS to idle bank
+        # Per failure_taxonomy PROTO_001: "READ/WRITE issued to a bank that has no active row."
+        current_row = self._bank_active_row[bank]
         if current_row is None:
-            # Per spec: "READ/WRITE issued to a bank that has no active row"
             violations.append(Violation(
-                rule='cas_to_idle_bank',
-                detail=f'{cmd_name} to bank {bank} which has no active row',
-                severity='major',
-                taxonomy_id='PROTO_001',
-                txns=[txn]
+                rule="cas_to_idle_bank",
+                detail=f"{cmd_name} issued to bank {bank} which has no active row",
+                severity="major",
+                taxonomy_id="PROTO_001",
+                txns=[txn],
             ))
-            # Cannot match request if bank is idle - also report SCHED_002
-            # But we should still try to find a matching request to consume it
-        
-        # Find matching request
+            # With no active row, we cannot meaningfully match a request or check
+            # SCHED_004, but we still check SCHED_002 (no matching request).
+            # Since current_row is None, no request can match on row, so we try
+            # to find a request matching bank+col+we only for SCHED_002 detection.
+            # Actually, per the matching rule, the bank's open row must match the
+            # request's row. Since there is no open row, no request can match,
+            # so this CAS is also SCHED_002.
+            violations.append(Violation(
+                rule="cas_no_matching_request",
+                detail=(
+                    f"{cmd_name} to bank {bank}, col(addr)={addr} has no matching "
+                    f"enqueued request (bank has no active row, so no row can match)"
+                ),
+                severity="critical",
+                taxonomy_id="SCHED_002",
+                txns=[txn],
+            ))
+            return violations
+
+        # Bank is active with current_row. Now find a matching request.
+        # The col is carried in the DDR addr field for CAS commands.
+        # Per the stage note, we extract col from addr.
+        cas_col = addr & ((1 << self._col_bits) - 1)
+
+        # Search for a matching unmatched request (FIFO order for determinism,
+        # but any match is legal under FR-FCFS).
         # Match criteria from stage note:
-        # - bank matches
-        # - addr carries col
-        # - command direction matches we
-        # - bank's open row matches request's row (for SCHED_004)
-        
-        match_idx = None
-        wrong_row_match_idx = None
-        wrong_row_request = None
-        
-        for idx, req in enumerate(self._pending_requests):
-            if req.bank != bank:
+        #   - bank matches
+        #   - DDR addr carries the request's col
+        #   - command direction matches we
+        #   - bank's open row == request's row
+        matched_idx = None
+        # Also track if there's a request matching bank+col+we but with wrong row
+        # (for SCHED_004 reporting)
+        wrong_row_candidates = []
+
+        for i, req in enumerate(self._pending_requests):
+            if req['matched']:
                 continue
-            if req.col != col_addr:
+            if req['bank'] != bank:
                 continue
-            if req.we != expected_we:
+            if req['we'] != is_write:
                 continue
-            
-            # Found a request matching bank, col, direction
-            # Check if row matches what's open
-            if current_row is not None and req.row == current_row:
-                # Perfect match
-                match_idx = idx
+            if req['col'] != cas_col:
+                continue
+            # bank, col, we match. Check row.
+            if req['row'] == current_row:
+                # Full match
+                matched_idx = i
                 break
-            elif current_row is not None:
-                # Row mismatch - potential SCHED_004
-                # Keep looking for exact match, but remember this
-                if wrong_row_match_idx is None:
-                    wrong_row_match_idx = idx
-                    wrong_row_request = req
-            elif current_row is None:
-                # Bank is idle (PROTO_001 already reported)
-                # Still try to consume the request
-                if wrong_row_match_idx is None:
-                    wrong_row_match_idx = idx
-                    wrong_row_request = req
-        
-        if match_idx is not None:
-            # Perfect match found - consume the request
-            self._pending_requests.pop(match_idx)
-        elif wrong_row_match_idx is not None:
-            # Found request matching bank/col/we but wrong row
-            req = wrong_row_request
-            
-            if current_row is not None:
-                # SCHED_004: CAS landed on wrong row
-                # Per spec: "when the CAS for a request issues, the row open in
-                # that bank (set by the most recent ACTIVATE to it) must be the
-                # request's row"
-                violations.append(Violation(
-                    rule='cas_wrong_row',
-                    detail=f'{cmd_name} to bank {bank} col {col_addr}: open row is '
-                           f'{current_row} but request asked for row {req.row}',
-                    severity='critical',
-                    taxonomy_id='SCHED_004',
-                    txns=[txn, req.txn]
-                ))
-            
-            # Consume the request even though it violated SCHED_004
-            self._pending_requests.pop(wrong_row_match_idx)
-        else:
-            # SCHED_002: No matching request found at all
-            # Per spec: "No CAS may issue that corresponds to no enqueued request"
+            else:
+                # bank+col+we match but row mismatch
+                wrong_row_candidates.append(i)
+
+        if matched_idx is not None:
+            # Successful match - mark request as served
+            self._pending_requests[matched_idx]['matched'] = True
+        elif wrong_row_candidates:
+            # SCHED_004: There is a request for this bank+col+we but the open row
+            # doesn't match what the request asked for.
+            # Per the invariant: "when the CAS for a request issues, the row open
+            # in that bank must be the request's row."
+            # We pick the first candidate (oldest) as the one the CAS was
+            # presumably intended for.
+            cand_idx = wrong_row_candidates[0]
+            cand = self._pending_requests[cand_idx]
             violations.append(Violation(
-                rule='cas_no_request',
-                detail=f'{cmd_name} to bank {bank} col {col_addr} has no matching '
-                       f'enqueued request',
-                severity='critical',
-                taxonomy_id='SCHED_002',
-                txns=[txn]
+                rule="cas_wrong_row",
+                detail=(
+                    f"{cmd_name} to bank {bank}, col={cas_col}: open row is "
+                    f"{current_row} but request's row is {cand['row']}"
+                ),
+                severity="critical",
+                taxonomy_id="SCHED_004",
+                txns=[txn, cand['txn']],
             ))
-        
+            # Mark the request as consumed so we don't double-report it
+            self._pending_requests[cand_idx]['matched'] = True
+        else:
+            # SCHED_002: No enqueued request matches this CAS at all
+            violations.append(Violation(
+                rule="cas_no_matching_request",
+                detail=(
+                    f"{cmd_name} to bank {bank}, col={cas_col}, "
+                    f"open_row={current_row}, we={is_write} "
+                    f"has no matching enqueued request"
+                ),
+                severity="critical",
+                taxonomy_id="SCHED_002",
+                txns=[txn],
+            ))
+
         return violations
-    
+
+    # Command handler dispatch table
+    _CMD_HANDLERS = {
+        "ACT": _handle_act,
+        "PRE": _handle_pre,
+        "REF": _handle_ref,
+        "RD":  _handle_cas,
+        "WR":  _handle_cas,
+        # NOP, DESL, MRS: no action needed for our invariants
+    }
+
     def final(self) -> List[Violation]:
         """
         End-of-trace rules.
-        
-        SCHED_001: Every enqueued request must eventually issue as matching CAS.
-        Outstanding requests at end of trace are violations.
+
+        SCHED_001: Every enqueued request must eventually issue as a matching CAS.
+        "Outstanding requests at end of trace are dropped."
+        - Per the invariant description, outstanding requests at EOT are violations.
         """
         violations = []
-        
-        # SCHED_001: Check for outstanding requests
-        # Per spec: "Outstanding requests at end of trace are dropped"
-        # This means they are violations that should be reported
+
         for req in self._pending_requests:
-            direction = 'WRITE' if req.we else 'READ'
-            violations.append(Violation(
-                rule='request_not_serviced',
-                detail=f'{direction} request to bank {req.bank} row {req.row} '
-                       f'col {req.col} never issued as CAS',
-                severity='critical',
-                taxonomy_id='SCHED_001',
-                txns=[req.txn]
-            ))
-        
+            if not req['matched']:
+                violations.append(Violation(
+                    rule="request_not_served",
+                    detail=(
+                        f"Enqueued request (bank={req['bank']}, row={req['row']}, "
+                        f"col={req['col']}, we={req['we']}) was never issued as a "
+                        f"matching CAS"
+                    ),
+                    severity="critical",
+                    taxonomy_id="SCHED_001",
+                    txns=[req['txn']],
+                ))
+
         return violations

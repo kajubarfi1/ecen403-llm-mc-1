@@ -260,7 +260,8 @@
     "pack_mode": "pack_32_to_16",
     "alignment_bytes_required": 4,
     "endianness": "little",
-    "byte_enable_semantics": "wishbone_sel_per_byte"
+    "byte_enable_semantics": "wishbone_sel_per_byte",
+    "ddr_dm_polarity": "active_high_mask"
   },
 
   "phy_interface": {
@@ -288,9 +289,9 @@
           { "name": "cal_fail",       "bits": "2",    "access": "RO", "reset_value": 0, "description": "1 if calibration failed" },
           { "name": "bist_done",      "bits": "3",    "access": "RO", "reset_value": 0, "description": "1 when BIST complete" },
           { "name": "bist_fail",      "bits": "4",    "access": "RO", "reset_value": 0, "description": "1 if BIST failed" },
-          { "name": "ref_pending_cnt","bits": "7:5",  "access": "RO", "reset_value": 0, "description": "Pending refresh count (0-8)" },
-          { "name": "self_refresh_active","bits": "8","access": "RO", "reset_value": 0, "description": "1 when in self-refresh" },
-          { "name": "reserved",       "bits": "31:9", "access": "RO", "reset_value": 0, "description": "Reserved" }
+          { "name": "ref_pending_cnt","bits": "8:5",  "access": "RO", "reset_value": 0, "description": "Pending refresh count (0-8)" },
+          { "name": "self_refresh_active","bits": "9","access": "RO", "reset_value": 0, "description": "1 when in self-refresh" },
+          { "name": "reserved",       "bits": "31:10", "access": "RO", "reset_value": 0, "description": "Reserved" }
         ]
       },
       {

@@ -9,7 +9,7 @@
 module refresh_ctrl_fcov (
     input logic [3:0] cfg_max_postpone,
     input logic clk,
-    input logic [2:0] ref_pending_cnt,
+    input logic [3:0] ref_pending_cnt,
     input logic ref_required,
     input logic rst_n
 );

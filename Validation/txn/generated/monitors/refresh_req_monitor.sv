@@ -19,7 +19,7 @@ module refresh_req_monitor #(
 ) (
     input  logic clk,
     input  logic rst_n,
-    input  logic [2:0] ref_pending_cnt,
+    input  logic [3:0] ref_pending_cnt,
     input  logic ref_required,
     input  logic ref_starve_flag,
     input  logic ref_urgent

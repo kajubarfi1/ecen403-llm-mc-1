@@ -38,6 +38,7 @@ Usage:
 """
 
 import argparse
+import glob
 import json
 import os
 import re
@@ -570,6 +571,8 @@ def generate(scope, retries=3, dry_run=False, verbose=True):
             "scope": scope, "strategy": strategy,
             "generated_utc": datetime.now(timezone.utc).isoformat(),
             "spec_revision": spec.get("revision"),
+            "spec_sha256": spec_sha256(),
+            "spec_path": os.path.relpath(SPEC_PATH, ROOT),
             "model": os.environ.get("ANTHROPIC_MODEL", "(client default)"),
             "accepted_by_gate": gate_name,
             "attempts": attempts,
@@ -605,6 +608,62 @@ def main() -> int:
     except PredictorAgentError as e:
         print(f"  {e}", file=sys.stderr)
         return 2
+
+
+
+
+
+# =============================================================================
+# Re-grading an accepted model against the CURRENT spec
+# =============================================================================
+
+def spec_sha256(path=None):
+    """Content identity of the spec (see Validation/spec/spec_identity.py):
+    what the provenance and the stale-model check compare, since `revision`
+    alone has named two different specs."""
+    sys.path.insert(0, os.path.join(ROOT, "Validation", "spec"))
+    from spec_identity import spec_sha256 as _sha
+    return _sha(path or SPEC_PATH)
+
+
+def accepted_models():
+    """[(scope, kind, model_path, provenance_path)] for every model in
+    Validation/predictors that has a provenance record."""
+    out = []
+    for prov in sorted(glob.glob(os.path.join(OUT_DIR, "*.provenance.json"))):
+        base = os.path.basename(prov)[:-len(".provenance.json")]
+        scope, _, kind = base.rpartition("_")
+        path = os.path.join(OUT_DIR, base + ".py")
+        if kind in ("predictor", "checker") and os.path.exists(path):
+            out.append((scope, kind, path, prov))
+    return out
+
+
+def regrade(scope, path):
+    """Grade an already-accepted model against the spec and schemas as they
+    are NOW. Returns (failures, gate_name, strategy). A model accepted under
+    an earlier spec that the current spec's gate rejects is stale: it must
+    be regenerated, never patched, and nothing it says about the drop is
+    evidence until then."""
+    with open(SPEC_PATH) as f:
+        spec = json.load(f)
+    with open(SCHEMA_PATH) as f:
+        schemas = json.load(f)["interfaces"]
+    with open(CATALOG_PATH) as f:
+        catalog = json.load(f)["interfaces"]
+    schemas = {k: {kk: vv for kk, vv in v.items() if kk != "manifest"}
+               for k, v in schemas.items()}
+    stage = stage_entry(scope)
+    if stage is not None:
+        strategy = "invariant"
+        ins, outs = stage["input_ifaces"], stage["output_ifaces"]
+    else:
+        strategy = strategy_for_scope(scope, PATH_DEFS, default="exact")
+        if STRATEGY_NEEDS_MODEL[strategy] is None:
+            return [], None, strategy
+        ins, outs = scope_interfaces(scope, catalog, schemas)
+    failures, gate = evaluate(path, spec, schemas, strategy, ins, outs)
+    return failures, gate, strategy
 
 
 if __name__ == "__main__":

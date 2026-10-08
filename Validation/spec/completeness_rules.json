@@ -119,10 +119,11 @@
       "id": "INTERFACE_CONTRACTS",
       "kind": "path_interfaces",
       "require": "block_interfaces",
-      "disposition": "decision",
+      "disposition": "retired",
       "question": "For every pair of blocks a path connects, what are the port-level signals, widths and handshake between them?",
       "consequence": "The drop shipped 11 blocks and no top level; two block pairs did not compose (no bank on cmd_gen's feedback, nothing consuming calibration's ZQCS request). Validation had to author a 75-connection map by hand. Interfaces that are not specified cannot be generated consistently on both sides.",
-      "discovered_by": "integration_map.json glue entries; fb-bank and ZQCS findings"
+      "discovered_by": "integration_map.json glue entries; fb-bank and ZQCS findings",
+      "retired": "2026-10-08: the block-to-block hops are owned by the Frontend's manifests (every consumer port declares its `source`; 72 edges, 0 overrides on drop 4b86c7cd3705) and by Validation's integration map derived from them -- not by the spec. The spec states the design's contract with the host and the DRAM; how blocks are wired is the generator's statement, checked by integration_map_gen against the manifests and by width_conformance against the spec."
     },
     {
       "id": "TAXONOMY_NAMES_TIMING_PARAMS",

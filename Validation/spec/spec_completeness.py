@@ -71,8 +71,10 @@ def taxonomy_ids(node):
 
 def check_rule(rule, spec, pdefs):
     """Returns (status, detail) with status in ok / gap / not_applicable /
-    invalid_value."""
+    invalid_value / retired."""
     kind = rule["kind"]
+    if rule.get("disposition") == "retired":
+        return "retired", rule.get("retired", "retired")
     if "when_present" in rule:
         _, present = get(spec, rule["when_present"])
         if not present:

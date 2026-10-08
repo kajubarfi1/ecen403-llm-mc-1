@@ -26,7 +26,7 @@ module csr_sts_level_monitor #(
     input  logic sts_cal_fail,
     input  logic [15:0] sts_ecc_ce_count,
     input  logic sts_init_done,
-    input  logic [2:0] sts_ref_pending_cnt,
+    input  logic [3:0] sts_ref_pending_cnt,
     input  logic sts_self_refresh_active
 );
 
@@ -37,7 +37,7 @@ module csr_sts_level_monitor #(
     $display("TXN csr_sts_level reset t=%0t", $time);
   end
 
-  logic [37:0] csr_sts_level_prev;
+  logic [38:0] csr_sts_level_prev;
 
   // Transaction detected when: 1'b1 (emit only when the observed state changes)
   always @(posedge clk) begin

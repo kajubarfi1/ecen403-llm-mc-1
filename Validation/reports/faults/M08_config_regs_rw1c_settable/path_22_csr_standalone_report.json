@@ -3,7 +3,7 @@
   "path": "path_22_csr_standalone",
   "strategy": "exact",
   "verdict": "fail",
-  "timestamp": "2026-10-01T12:34:47.141779",
+  "timestamp": "2026-10-08T12:17:03.283808",
   "blocks": [
     "config_regs"
   ],
@@ -13,11 +13,14 @@
   "window_cycles": 64,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "8c839e2a30ee",
-    "drop_id": "8c839e2a30ee",
-    "validated_at": "3b542a6",
+    "git_head": "6086b4aab832",
+    "drop_id": "6086b4aab832",
+    "blocks_used": [
+      "config_regs"
+    ],
+    "validated_at": "608d29d",
     "frontend_commits": {
-      "config_regs": "9864df2a61f41c5bec35955b94302505f27e1829"
+      "config_regs": "9c21084cdda21e528b57299e638eef2b79fef2ec"
     },
     "roots": [
       "Validation/faults/work/M08_config_regs_rw1c_settable/Frontend2/OutputFolders"
@@ -26,13 +29,14 @@
       "config_regs": {
         "rtl": "Validation/faults/work/M08_config_regs_rw1c_settable/Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
         "manifest": "Validation/faults/work/M08_config_regs_rw1c_settable/Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
-        "spec_revision": "compiled_ddr31333_x16_1lane_1rank"
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       }
     },
     "shipped_spec": {
       "path": "Validation/faults/work/M08_config_regs_rw1c_settable/Frontend2/OutputFolders/generated_spec.json",
-      "revision": "compiled_ddr31333_x16_1lane_1rank"
-    }
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
   },
   "stages": [
     {
@@ -41,9 +45,9 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
       "scope": "config_regs",
       "verdict": "fail",
-      "summary": "scope=config_regs  strategy=exact  status=fail  matched=127/131  value=4",
+      "summary": "scope=config_regs  strategy=exact  status=fail  matched=127/131  WAIVED=2 field comparison(s)  value=4",
       "detail": [
-        "scope=config_regs  strategy=exact  status=fail  matched=127/131  value=4",
+        "scope=config_regs  strategy=exact  status=fail  matched=127/131  WAIVED=2 field comparison(s)  value=4",
         "  csr_rsp[65] value: predicted [csr_rsp.read_data addr=0x1c data=0x0 err=0x0] but observed [csr_rsp.read_data addr=0x1c data=0x20000 err=0x0]",
         "  csr_rsp[67] value: predicted [csr_rsp.read_data addr=0x1c data=0x0 err=0x0] but observed [csr_rsp.read_data addr=0x1c data=0x20000 err=0x0]",
         "  csr_rsp[69] value: predicted [csr_rsp.read_data addr=0x1c data=0x0 err=0x0] but observed [csr_rsp.read_data addr=0x1c data=0x20000 err=0x0]",

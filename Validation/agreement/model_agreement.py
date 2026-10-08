@@ -104,16 +104,29 @@ def _fmt(x):
 
 
 def compare_chk(a, b):
+    """Per rule id: a disagreement is a different NUMBER of violations. Two
+    checkers that file the same count under a rule but blame different
+    witness transactions (one points at the command, the other at the
+    request that asked for the row) agree about the design; that is
+    recorded as `attribution_differs`, not as a disagreement (2026-10-08:
+    SCHED_004 110 vs 110 on 15 traces had counted as 15 disagreements)."""
     (ca, fa), (cb, fb) = a, b
     ids = sorted({k[0] for k in ca} | {k[0] for k in cb})
     diffs = []
     for tid in ids:
         sa = {k for k in ca if k[0] == tid}
         sb = {k for k in cb if k[0] == tid}
-        if sa != sb:
-            diffs.append({"id": tid, "primary_only": len(sa - sb),
-                          "second_only": len(sb - sa), "both": len(sa & sb),
+        if sa == sb:
+            continue
+        na, nb = sum(ca[k] for k in sa), sum(cb[k] for k in sb)
+        if na == nb:
+            diffs.append({"id": tid, "attribution_differs": True, "count": na,
                           "primary_example": fa.get(tid), "second_example": fb.get(tid)})
+            continue
+        diffs.append({"id": tid, "primary_only": len(sa - sb),
+                      "second_only": len(sb - sa), "both": len(sa & sb),
+                      "primary_count": na, "second_count": nb,
+                      "primary_example": fa.get(tid), "second_example": fb.get(tid)})
     return diffs
 
 
@@ -135,7 +148,7 @@ def main() -> int:
         m1, kind = load_model(f1, spec)
         m2, _ = load_model(f2, spec)
         ran = agree = 0
-        disagreements = []
+        disagreements, attribution = [], []
         for p, tr in loaded.items():
             if not any(t.iface in m1.INPUT_IFACES for t in tr):
                 continue
@@ -147,15 +160,19 @@ def main() -> int:
             except Exception as e:
                 d = [{"error": f"{type(e).__name__}: {e}"}]
             ran += 1
-            if d:
-                disagreements.append({"trace": os.path.relpath(p, ROOT), "diffs": d})
+            subst = [x for x in d if not x.get("attribution_differs")]
+            if subst:
+                disagreements.append({"trace": os.path.relpath(p, ROOT), "diffs": subst})
             else:
                 agree += 1
+                if d:
+                    attribution.append({"trace": os.path.relpath(p, ROOT), "diffs": d})
         rows.append({"scope": scope, "kind": kind, "traces": ran, "agree": agree,
-                     "disagree": ran - agree, "disagreements": disagreements[:6]})
-    print(f"  {'scope':34} kind       traces agree disagree")
+                     "disagree": ran - agree, "attribution_only": len(attribution),
+                     "disagreements": disagreements[:6], "attribution": attribution[:3]})
+    print(f"  {'scope':34} kind       traces agree disagree  (attribution-only)")
     for r in rows:
-        print(f"  {r['scope']:34} {r['kind']:10} {r['traces']:>5} {r['agree']:>5} {r['disagree']:>8}")
+        print(f"  {r['scope']:34} {r['kind']:10} {r['traces']:>5} {r['agree']:>5} {r['disagree']:>8}  {r.get('attribution_only', 0):>6}")
         for d in r["disagreements"][:1]:
             for x in d["diffs"][:3]:
                 if "error" in x:

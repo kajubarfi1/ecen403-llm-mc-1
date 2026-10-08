@@ -125,7 +125,7 @@ class FlowCase(unittest.TestCase):
     def args(self, **kw):
         base = dict(request=None, preset="balanced", choices=None, spec=None, goal=None, phases=None, revalidate=False,
                     resume=None, run_dir=self.run_dir, max_spec_rounds=2, max_rtl_rounds=4,
-                    max_backend_rounds=2, validate_per_phase=False, skip_backend=False,
+                    max_backend_rounds=2, validate_per_phase=False, skip_backend=False, backend_mode="build",
                     dry_run=False)
         base.update(kw)
         return type("A", (), base)()
@@ -262,6 +262,15 @@ class TestHalts(FlowCase):
         os.environ.pop("USE_DOCKER", None)
         rc, run2 = self.go(Fake(self.run_dir))
         self.assertIn(run2.state["halt"]["stage"], ("backend", "final_validation"))
+
+    def test_backend_gets_drop_id_spec_revision_and_mode(self):
+        os.environ["USE_DOCKER"] = "1"
+        fake = Fake(self.run_dir)
+        rc, run = self.go(fake, backend_mode="contract")
+        be = [c for c in fake.calls if c[0] == "pipeline.py"][0][1]
+        self.assertEqual(be[be.index("--drop_id") + 1], "abc123")
+        self.assertEqual(be[be.index("--spec_revision") + 1], "fake_rev")
+        self.assertEqual(be[be.index("--mode") + 1], "contract")
 
     def test_backend_synth_failure_is_the_frontend_edge_and_halts_for_the_format(self):
         os.environ["USE_DOCKER"] = "1"

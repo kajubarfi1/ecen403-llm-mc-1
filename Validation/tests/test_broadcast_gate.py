@@ -73,6 +73,7 @@ class Predictor(TransactionPredictor):
         return d
 
     def reset(self):
+        self.levels = {}
         self.val = {}
         for off, r in self.regs.items():
             v = 0
@@ -96,7 +97,15 @@ class Predictor(TransactionPredictor):
             out.append(Txn("cfg_refresh", "update", dict(r)))
         return out
 
+    LEVELS = {"init_done": "init_done", "cal_done": "cal_done", "cal_fail": "cal_fail",
+              "bist_done": "bist_done", "bist_fail": "bist_fail",
+              "ref_pending": "ref_pending_cnt", "self_refresh": "self_refresh_active",
+              "ecc_ce_count": "ecc_ce_count", "bist_fail_addr": "bist_fail_addr"}
+
     def process(self, txn):
+        if txn.iface == "csr_sts_level":
+            self.levels.update(txn.fields)
+            return []
         if txn.iface != "csr":
             return []
         if txn.kind == "reset":
@@ -129,9 +138,13 @@ class Predictor(TransactionPredictor):
             return out
         v = self.val[addr]
         for f in r["fields"]:
+            hi, lo = _bits(f["bits"])
+            fm = (1 << (hi - lo + 1)) - 1
             if f.get("access", "RO").upper() == "WO":
-                hi, lo = _bits(f["bits"])
-                v &= ~(((1 << (hi - lo + 1)) - 1) << lo)
+                v &= ~(fm << lo)
+            for lname, fname in self.LEVELS.items():
+                if fname == f["name"]:
+                    v = (v & ~(fm << lo)) | ((self.levels.get(lname, 0) & fm) << lo)   # MUT:LEVELW
         return [Txn("csr_rsp", "read_data", {"addr": addr, "data": v, "err": 0})]
 
     def drain(self):
@@ -187,6 +200,28 @@ class TestBroadcastStep(unittest.TestCase):
                                        '"trcd": "tRP_nCK", "trp": "tRCD_nCK"'))
         self.assertTrue(fails, "a trcd<->trp swap passed the gate")
 
+    def test_level_field_truncated_to_old_width_rejected(self):
+        # the 2026-10-08 case: ref_pending_cnt became 4 bits under the same
+        # spec revision; a model still masking it to 3 bits read 8 as 0
+        fails, _ = _grade(self._mutant(
+            "((self.levels.get(lname, 0) & fm) << lo)   # MUT:LEVELW",
+            "((self.levels.get(lname, 0) & (fm >> 1)) << lo)"))
+        self.assertTrue(any("ref_pending" in f and "whole width" in f for f in fails), fails[:3])
+
+    def test_level_field_ignored_rejected(self):
+        fails, _ = _grade(self._mutant(
+            '        if txn.iface == "csr_sts_level":\n            self.levels.update(txn.fields)',
+            '        if txn.iface == "csr_sts_level":\n            pass'))
+        self.assertTrue(any("hardware level" in f for f in fails), fails[:3])
+
+    def test_baseline_broadcast_after_reset_rejected(self):
+        # the 2026-10-08 regeneration: 'last emitted' seeded with None, so the
+        # first read after reset broadcast the reset values; the monitor is
+        # change-qualified and records nothing, and 5 paths failed on it
+        fails, _ = _grade(self._mutant("        self.last_t = self._timing()\n",
+                                       "        self.last_t = None\n"))
+        self.assertTrue(any("Nothing is emitted for reset itself" in f for f in fails), fails[:3])
+
     def test_generated_models_pass_the_same_gate(self):
         for p in (os.path.join(V, "predictors", "config_regs_predictor.py"),
                   os.path.join(V, "predictors", "second_opinion", "config_regs_predictor.py")):
@@ -199,3 +234,34 @@ class TestBroadcastStep(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestUnpackMaskPolarity(unittest.TestCase):
+    """The bus-bridge gate grades the per-beat data mask with the polarity
+    the spec declares (2026-10-08: ddr_dm_polarity decided; the second
+    data_path model copied the byte enables through and was rejected)."""
+
+    def _mine(self, masks):
+        from txn_contract import Txn
+        return [Txn("ddr_wr_beat", "beat", {"data": 0, "mask": m}) for m in masks]
+
+    def _grade(self, pol, masks):
+        import predictor_gates as G
+        spec = {"data_path_mapping": ({"ddr_dm_polarity": pol} if pol else {})}
+        u = {"geometry_section": "data_path_mapping", "from_field": "data", "data_field": "data",
+             "mask_from_field": "mask", "mask_field": "mask", "polarity_key": "ddr_dm_polarity"}
+        return G.BusBridgeGate._grade_unpack_mask(
+            spec, u, "ddr_wr_beat", "dp_wr", {"data": 0, "mask": 0xD}, self._mine(masks),
+            chan=16, endian="little", n=2)
+
+    def test_active_high_mask_inverts_the_enables(self):
+        self.assertEqual(self._grade("active_high_mask", [2, 0]), [])
+        self.assertTrue(self._grade("active_high_mask", [1, 3]))
+
+    def test_active_low_mask_copies_the_enables(self):
+        self.assertEqual(self._grade("active_low_mask", [1, 3]), [])
+        self.assertTrue(self._grade("active_low_mask", [2, 0]))
+
+    def test_silent_spec_grades_nothing(self):
+        self.assertEqual(self._grade(None, [1, 3]), [])
+        self.assertEqual(self._grade(None, [2, 0]), [])

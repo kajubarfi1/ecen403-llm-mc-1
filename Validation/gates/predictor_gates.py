@@ -66,6 +66,13 @@ class GateNotApplicable(Exception):
 # Register-map gate
 # =============================================================================
 
+def by_field_name(by_field, reg, hi, lo):
+    for n, (r, h, l, _a) in by_field.items():
+        if r is reg and h == hi and l == lo:
+            return n
+    return "?"
+
+
 class RegisterMapGate:
     """Grades a predictor for a memory-mapped register block.
 
@@ -370,11 +377,74 @@ class RegisterMapGate:
         # register's current field value. Fields with no register behind
         # them (self-clearing pulses) are not graded here.
         fails += cls._grade_broadcasts(predictor, regs, schemas, type(predictor),
-                                       ri, wk, oi, write)
+                                       ri, wk, oi, write, rk)
+
+        # --- 10. read-only fields mirror the hardware levels, full width ----
+        fails += cls._grade_level_mirrors(predictor, regs, schemas, type(predictor),
+                                          ri, read, mask)
         return fails
 
     @classmethod
-    def _grade_broadcasts(cls, predictor, regs, schemas, pcls, ri, wk, rsp_iface, write):
+    def _grade_level_mirrors(cls, predictor, regs, schemas, pcls, ri, read, mask):
+        """A read-only field whose port is a hardware level (`sts_<field>`)
+        reads back exactly the level, at the field's bit position, over the
+        field's WHOLE width. Drive the top bit alone and all ones: a model
+        built for a narrower field (the 3-bit `ref_pending_cnt` of an
+        earlier spec, masked `& 0x7` after the spec made it 4 bits) passes
+        every other step and fails here. Every other mirrored field must
+        still read zero, so a field driven at the wrong offset is named."""
+        fails = []
+        by_field = {}
+        for reg in regs:
+            for name, hi, lo, acc, rst in cls._fields(reg):
+                by_field[name] = (reg, hi, lo, acc)
+        for li in pcls.INPUT_IFACES:
+            if li == ri or li not in schemas:
+                continue
+            for kind, fields in schemas[li]["kinds"].items():
+                mapped = {}
+                for fname, info in fields.items():
+                    port = info.get("port", "")
+                    for pre in ("sts_",):
+                        stem = port[len(pre):] if port.startswith(pre) else None
+                        if stem in by_field and by_field[stem][3] == "RO":
+                            mapped[fname] = by_field[stem] + (int(info.get("width", 1)),)
+                if not mapped:
+                    continue
+                for fname, (reg, hi, lo, _acc, w) in mapped.items():
+                    fw = hi - lo + 1
+                    if w != fw:
+                        fails.append(
+                            f"{li}.{kind}.{fname} is {w} bit(s) wide but mirrors "
+                            f"{reg['name']}.{by_field_name(by_field, reg, hi, lo)} "
+                            f"[{hi}:{lo}] ({fw} bits); the schema and the register "
+                            f"map disagree -- not the model's fault, but it cannot be "
+                            f"graded on this field.")
+                        continue
+                    for val in sorted({1, 1 << (fw - 1), (1 << fw) - 1}):
+                        predictor.reset()
+                        lv = {f2: 0 for f2 in fields}
+                        lv[fname] = val
+                        predictor.process(Txn(li, kind, lv))
+                        got, err = read(_parse_offset(reg["offset"]))
+                        if err:
+                            fails.append(f"{reg['name']} after {li}.{kind}.{fname}={val:#x}: {err}")
+                            break
+                        want = (val << lo) & mask
+                        if got != want:
+                            fails.append(
+                                f"{reg['name']}: with hardware level {li}.{kind}.{fname} = "
+                                f"{val:#x} (port {fields[fname]['port']}, {fw} bits) a read "
+                                f"returned {got:#010x}; the read-only field at bits "
+                                f"[{hi}:{lo}] mirrors that level over its whole width, so "
+                                f"the register must read {want:#010x}. Take the field's "
+                                f"width and position from the register map, never from a "
+                                f"literal.")
+                            break
+        return fails
+
+    @classmethod
+    def _grade_broadcasts(cls, predictor, regs, schemas, pcls, ri, wk, rsp_iface, write, rk):
         fails = []
         by_field = {}
         for reg in regs:
@@ -392,6 +462,28 @@ class RegisterMapGate:
                             mapped[fname] = by_field[port[len(pre):]]
                 if not mapped:
                     continue
+                # nothing is emitted for reset itself: the fields hold their
+                # reset values through reset and the first CHANGE is the first
+                # update. A model that broadcasts its baseline on the first
+                # transaction it sees predicts an update the monitor (change-
+                # qualified) never records, and every path fails on it.
+                predictor.reset()
+                any_reg = regs[0]
+                quiet = []
+                for probe, txn in (("a read", Txn(ri, rk, {"addr": _parse_offset(any_reg["offset"])})),
+                                   ("a write that changes nothing",
+                                    Txn(ri, wk, {"addr": _parse_offset(any_reg["offset"]),
+                                                 "data": cls._reset_readback(any_reg, (1 << 64) - 1)}))):
+                    out = predictor.process(txn) or []
+                    if any(t.iface == oi and t.kind == kind for t in out):
+                        quiet.append(probe)
+                if quiet:
+                    fails.append(
+                        f"{oi}: after reset, {' and '.join(quiet)} produced a {oi}.{kind}. "
+                        f"Nothing is emitted for reset itself: the fields hold their reset "
+                        f"values through reset and the first change after it is the first "
+                        f"update. Seed the 'last emitted' state with the reset values, not "
+                        f"with None.")
                 # one write per register that carries a mapped RW field
                 regs_hit = {}
                 for fname, (reg, hi, lo, acc, rst) in mapped.items():
@@ -633,7 +725,40 @@ class BusBridgeGate:
                         f"{[hex(w_) for w_ in want]} — the "
                         f"{'low' if endian == 'little' else 'high'} half of "
                         f"the word is the first beat driven.")
+                    continue
+                fails += cls._grade_unpack_mask(spec, u, oi, src, drive, mine, chan, endian, n)
         return fails
+
+    @classmethod
+    def _grade_unpack_mask(cls, spec, u, oi, src, drive, mine, chan, endian, n):
+        """The per-beat data mask follows the host byte enables, sliced per
+        beat like the data, with the polarity the spec declares
+        (`ddr_dm_polarity`: active_high_mask = DM is 1 for a byte NOT
+        written, i.e. the inverted enable; active_low_mask = DM equals the
+        enable). Ungraded when the catalog declares no mask fields or the
+        spec is silent -- then the two models may still disagree on it."""
+        mf, mff = u.get("mask_field"), u.get("mask_from_field")
+        if not (mf and mff) or mff not in drive:
+            return []
+        pol = (spec.get(u.get("geometry_section", "data_path_mapping"), {})
+               .get(u.get("polarity_key", "ddr_dm_polarity")))
+        if pol not in ("active_high_mask", "active_low_mask"):
+            return []
+        ch_bytes = chan // 8
+        enables = drive[mff]
+        slices = [(enables >> (i * ch_bytes)) & ((1 << ch_bytes) - 1) for i in range(n)]
+        if endian != "little":
+            slices = list(reversed(slices))
+        want = [(~e & ((1 << ch_bytes) - 1)) if pol == "active_high_mask" else e
+                for e in slices]
+        got = [t.fields.get(mf) for t in mine]
+        if got != want:
+            return [f"{oi}.{mf} beats are {got} for {src}.{mff}={enables:#x}; the spec "
+                    f"declares ddr_dm_polarity = {pol}, so each beat's mask is the "
+                    f"{'INVERTED ' if pol == 'active_high_mask' else ''}byte-enable "
+                    f"slice for that beat: {want}. Take the polarity from the spec's "
+                    f"data_path_mapping, never assume it."]
+        return []
 
     @staticmethod
     def _bridges(predictor_cls, catalog, schemas):
@@ -1201,16 +1326,24 @@ class StageInvariantGate:
                        if got else "It reported nothing at all.")
                     + f" Return a Violation with taxonomy_id={cid!r}.")
 
-            good = cls._trace(rule["legal"], stage, schemas, catalog)
-            got_ok = [v for v in cls._run(checker, good)
-                      if getattr(v, "taxonomy_id", "") == cid]
-            if got_ok:
-                fails.append(
-                    f"{cid}: the checker reported a violation on a LEGAL "
-                    f"trace. A rule that fires on correct behaviour is worse "
-                    f"than no rule — it trains people to ignore the checker. "
-                    f"Legal trace: "
-                    + "; ".join(f"{i}.{k} {f}" for i, k, f in rule["legal"]))
+            # the rule's legal trace, plus any named legal variants (a
+            # variant pins a convention: e.g. the ACTIVATE after an illegal
+            # REFRESH is not a second PROTO_002, because REFRESH closes every
+            # bank whether or not it was legal)
+            legals = [("legal", rule["legal"])] + sorted(
+                (k, v) for k, v in rule.get("legal_variants", {}).items() if not k.startswith("$"))
+            for lname, ltrace in legals:
+                good = cls._trace(ltrace, stage, schemas, catalog)
+                got_ok = [v for v in cls._run(checker, good)
+                          if getattr(v, "taxonomy_id", "") == cid]
+                if got_ok:
+                    fails.append(
+                        f"{cid}: the checker reported a violation on a LEGAL "
+                        f"trace ({lname}). A rule that fires on correct behaviour is worse "
+                        f"than no rule — it trains people to ignore the checker. "
+                        + (f"Requirement: {rule['requirement']} " if lname != "legal" else "")
+                        + f"Legal trace: "
+                        + "; ".join(f"{i}.{k} {f}" for i, k, f in ltrace))
         return fails
 
 

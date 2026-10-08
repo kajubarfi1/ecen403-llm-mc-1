@@ -1,298 +1,259 @@
 from txn_contract import TransactionPredictor, Txn
 from typing import List
-from collections import deque
 
 
 class DataPathPredictor(TransactionPredictor):
     """
-    Transaction predictor for data_path validation scope.
+    Transaction predictor for the data_path validation scope.
     
-    Models the data width conversion between host interface (32-bit) and
-    DDR interface (16-bit) per the data_path_mapping section of the spec.
+    Models the PACK and UNPACK sides of data_path_mapping:
+    
+    UNPACK (write path): Each 32-bit host write word is split into
+    host_width/channel_width = 2 DDR beats of 16 bits each, low half first
+    (little endian). The 4-bit byte-enable mask is sliced into 2-bit groups
+    per beat, and INVERTED per ddr_dm_polarity = active_high_mask
+    (DM=1 masks/inhibits the byte, so DM = ~byte_enable).
+    Spec refs: data_path_mapping.pack_mode, data_path_mapping.endianness,
+    data_path_mapping.ddr_dm_polarity.
+    
+    PACK (read path): After a read command on dp_cmd, host_width/channel_width = 2
+    beats from ddr_rd_beat are packed into one 32-bit host word, low half first
+    (little endian). The aux field from the read command is echoed back.
+    Spec refs: data_path_mapping.pack_mode, data_path_mapping.endianness,
+    controller_architecture.aux_width.
     """
-    
+
     INPUT_IFACES = ('ddr_rd_beat', 'dp_cmd', 'dp_wr')
     OUTPUT_IFACES = ('ddr_wr_beat', 'dp_rd_rsp')
-    
+
     def __init__(self, spec: dict):
         self._spec = spec
-        
-        # Extract data path mapping parameters from spec
-        # Spec section: data_path_mapping
-        data_path_mapping = spec.get('data_path_mapping', {})
-        self._ddr_width_bits = data_path_mapping.get('ddr_channel_width_bits', 16)
-        self._host_width_bits = data_path_mapping.get('host_width_bits', 32)
-        self._endianness = data_path_mapping.get('endianness', 'little')
-        
-        # Spec section: controller_architecture
-        controller_arch = spec.get('controller_architecture', {})
-        self._aux_width = controller_arch.get('aux_width', 4)
-        
-        # Spec section: memory_geometry
-        memory_geom = spec.get('memory_geometry', {})
-        self._burst_length = memory_geom.get('burst_length', 8)
-        
-        # Derived: number of DDR beats per host word
-        # Per data_path_mapping.pack_mode: "pack_32_to_16"
-        # 32-bit host word packs to 2x 16-bit DDR beats
-        self._beats_per_host_word = self._host_width_bits // self._ddr_width_bits
-        
-        # Masks per spec
-        # host_interface.granularity_bits = 8, so 4 byte enables for 32-bit
-        # phy_interface.dm_enabled = true, dq_width_bits = 16, so 2 DM bits
-        self._host_mask_width = self._host_width_bits // 8  # 4 bits
-        self._ddr_mask_width = self._ddr_width_bits // 8    # 2 bits
-        
+
+        # Extract configuration from spec
+        dpm = spec['data_path_mapping']
+        self._host_width_bits = dpm['host_width_bits']
+        self._channel_width_bits = dpm['ddr_channel_width_bits']
+        # Number of DDR beats per host word
+        # Spec: pack_mode = "pack_32_to_16" => ratio = host_width / channel_width = 2
+        self._beats_per_word = self._host_width_bits // self._channel_width_bits
+
+        # Endianness determines beat ordering: "little" => low half first
+        # Spec ref: data_path_mapping.endianness
+        self._endianness = dpm['endianness']
+
+        # DM polarity: "active_high_mask" means DM=1 masks (inhibits) the byte
+        # So DM = inverted byte-enable
+        # Spec ref: data_path_mapping.ddr_dm_polarity
+        self._dm_polarity = dpm['ddr_dm_polarity']
+
+        # Aux width from controller_architecture
+        # Spec ref: controller_architecture.aux_width
+        self._aux_width = spec['controller_architecture']['aux_width']
+
+        # Byte-enable semantics from spec
+        # Spec ref: data_path_mapping.byte_enable_semantics
+        self._be_semantics = dpm['byte_enable_semantics']
+
+        # Derived masks
+        self._channel_mask = (1 << self._channel_width_bits) - 1
+        self._bytes_per_beat = self._channel_width_bits // 8  # 2 bytes per 16-bit beat
+        self._dm_bits_per_beat = self._bytes_per_beat  # 2 DM bits per beat (one per byte lane)
+        self._host_bytes = self._host_width_bits // 8  # 4 bytes per 32-bit word
+        self._dm_mask_per_beat = (1 << self._dm_bits_per_beat) - 1
+
         self.reset()
-    
+
     def reset(self) -> None:
         """Return all modeled state to power-on values."""
-        # Queue of pending read commands (each entry is the aux value)
-        # Per spec section controller_architecture: read data flows from DDR
-        # back to host with aux tagging for response routing
-        self._pending_read_aux = deque()
-        
-        # Accumulator for incoming DDR read beats
-        # We need to combine beats_per_host_word beats into one host word
-        self._read_beat_accumulator = []
-    
+        # Write path state: buffer for write data words waiting for a write command
+        self._wr_data_queue: List[dict] = []
+
+        # Read path state: pending read commands waiting for DDR beats
+        self._rd_cmd_queue: List[dict] = []
+        # Accumulator for incoming DDR read beats for the current read command
+        self._rd_beat_accumulator: List[int] = []
+
     def process(self, txn: Txn) -> List[Txn]:
-        """
-        Process one input transaction and return any output transactions it implies.
-        
-        Data path behavior per spec section data_path_mapping:
-        - pack_mode: "pack_32_to_16" - 32-bit host data packs to 2x 16-bit DDR
-        - endianness: "little" - lower address bytes in lower bit positions
-        - byte_enable_semantics: "wishbone_sel_per_byte" per Wishbone B4 3.1.3
-        """
         iface = txn.iface
         kind = txn.kind
-        
-        if iface == 'dp_cmd':
-            return self._process_cmd(txn)
-        elif iface == 'dp_wr':
-            return self._process_wr(txn)
-        elif iface == 'ddr_rd_beat':
-            return self._process_rd_beat(txn)
-        else:
-            # Unknown interface - ignore per contract
+
+        # Dispatch table keyed by (iface, kind)
+        dispatch = {
+            ('dp_wr', 'write'): self._handle_dp_wr,
+            ('dp_cmd', 'write'): self._handle_dp_cmd_write,
+            ('dp_cmd', 'read'): self._handle_dp_cmd_read,
+            ('ddr_rd_beat', 'beat'): self._handle_ddr_rd_beat,
+        }
+
+        handler = dispatch.get((iface, kind))
+        if handler is None:
+            # Unknown interface or kind — return nothing per contract
             return []
-    
-    def _process_cmd(self, txn: Txn) -> List[Txn]:
+
+        return handler(txn)
+
+    def _handle_dp_wr(self, txn: Txn) -> List[Txn]:
         """
-        Process data path command.
+        Host write data accepted by the data path.
+        Buffer the data+mask; actual DDR beats are emitted when the write command arrives.
         
-        Per spec section data_path_mapping and controller_architecture:
-        - read command: signals that DDR read beats will arrive, aux tags response
-        - write command: signals that host write data should be sent to DDR
+        Spec ref: dp_wr schema — fields: data (32-bit), mask (4-bit byte-enable).
+        The note on ddr_wr_beat says it "derives from dp_wr", meaning write data
+        flows from dp_wr through dp_cmd(write) to ddr_wr_beat.
+        
+        Based on the interface catalog note, each accepted host write word is emitted
+        as beats. We buffer write data here and emit beats when we receive it,
+        since the dp_wr transaction represents data already accepted by the data path.
+        
+        Re-reading the note: "each accepted host write word is emitted as 
+        host_width/channel_width beats on the DDR side" — this is the UNPACK operation.
+        The dp_wr is the input; ddr_wr_beat is the output derived from it.
+        
+        The relationship between dp_cmd(write) and dp_wr: dp_cmd triggers the command,
+        dp_wr provides the data. Looking at the schema, dp_wr is a separate stream.
+        
+        Since the note says ddr_wr_beat "derives from: dp_wr", the most literal reading
+        is that each dp_wr directly produces the DDR write beats.
         """
-        kind = txn.kind
-        fields = txn.fields
-        
-        if kind == 'read':
-            # Spec: controller_architecture.aux_width = 4
-            # The aux field travels with the read to tag the response
-            aux = fields.get('aux', 0)
-            self._pending_read_aux.append(aux)
-            return []
-        
-        elif kind == 'write':
-            # Write command indicates write burst start
-            # Actual data comes via dp_wr transactions
-            # No output generated from command alone
-            return []
-        
-        else:
-            # Unknown command kind - ignore
-            return []
-    
-    def _process_wr(self, txn: Txn) -> List[Txn]:
+        data = txn.fields['data']
+        mask = txn.fields['mask']
+
+        return self._unpack_write(data, mask)
+
+    def _unpack_write(self, data: int, mask: int) -> List[Txn]:
         """
-        Process host write data and generate DDR write beats.
+        UNPACK: Split a 32-bit host word into beats_per_word 16-bit DDR beats.
         
-        Per spec section data_path_mapping:
-        - pack_mode: "pack_32_to_16" - split 32-bit host word to 2x 16-bit DDR
-        - endianness: "little" - per JESD79-3 and Wishbone B4 3.1.3, 
-          lower address bytes map to lower DQ pins
+        Spec ref: data_path_mapping.endianness = "little" => low half first.
+        Spec ref: data_path_mapping.ddr_dm_polarity = "active_high_mask" =>
+            DM=1 means mask/inhibit that byte => DM = ~byte_enable per byte.
         
-        Per spec section phy_interface:
-        - dm_enabled: true - data mask is active
-        - dq_width_bits: 16
+        Per the interface catalog note on ddr_wr_beat:
+        "each beat's mask is the INVERTED byte-enable slice"
         """
-        if txn.kind != 'write':
-            return []
-        
-        fields = txn.fields
-        host_data = fields.get('data', 0)
-        host_mask = fields.get('mask', 0)
-        
-        outputs = []
-        
-        # Build table of beat extractions based on endianness
-        # Per spec data_path_mapping.endianness = "little"
-        # Little endian: beat 0 = lower bits, beat 1 = upper bits
-        # Per JESD79-3 section 3.1: DQ[7:0] carries lower byte, DQ[15:8] upper byte
-        beat_extraction_table = self._build_write_beat_table()
-        
-        for beat_idx in range(self._beats_per_host_word):
-            data_shift, data_mask, mask_shift, mask_bits = beat_extraction_table[beat_idx]
-            
-            # Extract 16-bit data for this beat
-            beat_data = (host_data >> data_shift) & data_mask
-            
-            # Extract 2-bit mask for this beat
-            # Per Wishbone B4 3.1.3: SEL_O indicates valid byte lanes
-            # Per JESD79-3 4.6: DM is asserted to mask (not write) bytes
-            # The mask semantics depend on interpretation - assuming mask=1 means write
-            beat_mask = (host_mask >> mask_shift) & mask_bits
-            
-            out_txn = Txn(
+        results = []
+
+        for beat_idx in range(self._beats_per_word):
+            # For little endian: beat 0 = low bits, beat 1 = high bits
+            # Spec ref: data_path_mapping.endianness = "little"
+            if self._endianness == 'little':
+                bit_offset = beat_idx * self._channel_width_bits
+                mask_bit_offset = beat_idx * self._bytes_per_beat
+            else:
+                # Big endian: beat 0 = high bits (reverse order)
+                bit_offset = (self._beats_per_word - 1 - beat_idx) * self._channel_width_bits
+                mask_bit_offset = (self._beats_per_word - 1 - beat_idx) * self._bytes_per_beat
+
+            # Extract the data slice for this beat
+            beat_data = (data >> bit_offset) & self._channel_mask
+
+            # Extract the byte-enable slice for this beat
+            # mask field is 4 bits for 4 bytes; each beat takes bytes_per_beat bits
+            beat_be = (mask >> mask_bit_offset) & self._dm_mask_per_beat
+
+            # Apply DM polarity inversion
+            # Spec ref: ddr_dm_polarity = "active_high_mask"
+            # "DM=1 masks the byte, so each beat's mask is the INVERTED byte-enable slice"
+            # Per the interface note (decided 2026-10-08, graded by the gate)
+            if self._dm_polarity == 'active_high_mask':
+                beat_dm = (~beat_be) & self._dm_mask_per_beat
+            else:
+                # active_low_mask: DM=0 masks => DM = byte_enable directly
+                beat_dm = beat_be & self._dm_mask_per_beat
+
+            results.append(Txn(
                 iface='ddr_wr_beat',
                 kind='beat',
                 fields={
                     'data': beat_data,
-                    'mask': beat_mask
+                    'mask': beat_dm,
                 }
-            )
-            outputs.append(out_txn)
-        
-        return outputs
-    
-    def _build_write_beat_table(self):
+            ))
+
+        return results
+
+    def _handle_dp_cmd_write(self, txn: Txn) -> List[Txn]:
         """
-        Build extraction table for converting host word to DDR beats.
+        Write command on dp_cmd. The actual data beats are produced by dp_wr,
+        so the write command itself does not produce output transactions.
         
-        Returns list of tuples: (data_shift, data_mask, mask_shift, mask_bits)
-        
-        Per spec data_path_mapping.endianness = "little":
-        - Beat 0: bits [15:0] of host word, mask bits [1:0]
-        - Beat 1: bits [31:16] of host word, mask bits [3:2]
+        Spec ref: dp_cmd schema has only 'aux' field for write kind.
+        The write command coordinates the data path but the data comes from dp_wr.
         """
-        table = []
-        bits_per_beat = self._ddr_width_bits  # 16
-        mask_bits_per_beat = self._ddr_mask_width  # 2
-        data_mask = (1 << bits_per_beat) - 1  # 0xFFFF
-        mask_mask = (1 << mask_bits_per_beat) - 1  # 0x3
-        
-        if self._endianness == 'little':
-            # Little endian: lower bits first
-            for i in range(self._beats_per_host_word):
-                data_shift = i * bits_per_beat
-                mask_shift = i * mask_bits_per_beat
-                table.append((data_shift, data_mask, mask_shift, mask_mask))
-        else:
-            # Big endian: upper bits first
-            # Per JESD79-3 this would be non-standard but handle if spec says so
-            for i in range(self._beats_per_host_word):
-                data_shift = (self._beats_per_host_word - 1 - i) * bits_per_beat
-                mask_shift = (self._beats_per_host_word - 1 - i) * mask_bits_per_beat
-                table.append((data_shift, data_mask, mask_shift, mask_mask))
-        
-        return table
-    
-    def _process_rd_beat(self, txn: Txn) -> List[Txn]:
+        # Write commands don't directly produce output; dp_wr does.
+        return []
+
+    def _handle_dp_cmd_read(self, txn: Txn) -> List[Txn]:
         """
-        Process DDR read beat and generate host read response when complete.
+        Read command on dp_cmd. Queue the command so we know how many beats
+        to collect from ddr_rd_beat and what aux to echo back.
         
-        Per spec section data_path_mapping:
-        - pack_mode: "pack_32_to_16" - combine 2x 16-bit DDR to 32-bit host
-        - endianness: "little" - first beat is lower bits
-        
-        Per spec section controller_architecture:
-        - aux_width: 4 - aux tag from read command flows to response
+        Spec ref: dp_cmd read kind has 'aux' field.
+        Spec ref: dp_rd_rsp response kind has 'aux' field that echoes the command's aux.
         """
-        if txn.kind != 'beat':
+        aux = txn.fields['aux']
+        self._rd_cmd_queue.append({
+            'aux': aux,
+            'beats_remaining': self._beats_per_word,
+            'beat_data': [],
+        })
+        return []
+
+    def _handle_ddr_rd_beat(self, txn: Txn) -> List[Txn]:
+        """
+        DDR read beat arriving from PHY. Accumulate beats_per_word beats,
+        then pack into a host word and emit dp_rd_rsp.
+        
+        Spec ref: PACK side — host_width/channel_width beats pack into one host word,
+        low half first for little endianness.
+        Spec ref: data_path_mapping.endianness = "little"
+        """
+        if not self._rd_cmd_queue:
+            # Beat without a pending read command — spec doesn't define this case.
+            # Most literal reading: ignore spurious beats.
             return []
-        
-        fields = txn.fields
-        beat_data = fields.get('data', 0)
-        
-        # Accumulate beat
-        self._read_beat_accumulator.append(beat_data)
-        
-        # Check if we have enough beats for one host word
-        if len(self._read_beat_accumulator) < self._beats_per_host_word:
+
+        beat_data = txn.fields['data']
+        cmd = self._rd_cmd_queue[0]
+        cmd['beat_data'].append(beat_data)
+        cmd['beats_remaining'] -= 1
+
+        if cmd['beats_remaining'] > 0:
             return []
+
+        # All beats collected — pack into host word
+        self._rd_cmd_queue.pop(0)
+        return [self._pack_read(cmd)]
+
+    def _pack_read(self, cmd: dict) -> Txn:
+        """
+        PACK: Combine beats_per_word 16-bit beats into one 32-bit host word.
         
-        # We have enough beats - assemble host word
-        host_data = self._assemble_read_data(self._read_beat_accumulator[:self._beats_per_host_word])
-        
-        # Remove consumed beats
-        self._read_beat_accumulator = self._read_beat_accumulator[self._beats_per_host_word:]
-        
-        # Get aux from pending read command
-        # Per spec: aux tags the response to the originating command
-        if self._pending_read_aux:
-            aux = self._pending_read_aux.popleft()
-        else:
-            # No pending command - per spec this shouldn't happen in valid traces
-            # Per Wishbone B4 3.1.7: responses must correspond to requests
-            # Use 0 as default since spec is silent on error handling here
-            aux = 0
-        
-        out_txn = Txn(
+        Spec ref: data_path_mapping.endianness = "little" => first beat is low half.
+        """
+        host_data = 0
+        for beat_idx, beat_val in enumerate(cmd['beat_data']):
+            if self._endianness == 'little':
+                bit_offset = beat_idx * self._channel_width_bits
+            else:
+                bit_offset = (self._beats_per_word - 1 - beat_idx) * self._channel_width_bits
+            host_data |= (beat_val & self._channel_mask) << bit_offset
+
+        return Txn(
             iface='dp_rd_rsp',
             kind='response',
             fields={
                 'data': host_data,
-                'aux': aux
+                'aux': cmd['aux'],
             }
         )
-        
-        return [out_txn]
-    
-    def _assemble_read_data(self, beats: List[int]) -> int:
-        """
-        Assemble host word from DDR beats.
-        
-        Per spec data_path_mapping.endianness = "little":
-        - Beat 0 provides bits [15:0]
-        - Beat 1 provides bits [31:16]
-        
-        Returns assembled 32-bit host word.
-        """
-        assembly_table = self._build_read_assembly_table()
-        
-        host_data = 0
-        for beat_idx, beat_data in enumerate(beats):
-            shift = assembly_table[beat_idx]
-            host_data |= (beat_data & ((1 << self._ddr_width_bits) - 1)) << shift
-        
-        return host_data
-    
-    def _build_read_assembly_table(self):
-        """
-        Build assembly table for combining DDR beats into host word.
-        
-        Returns list of shift amounts for each beat index.
-        
-        Per spec data_path_mapping.endianness = "little":
-        - Beat 0 -> shift 0 (bits 15:0)
-        - Beat 1 -> shift 16 (bits 31:16)
-        """
-        table = []
-        bits_per_beat = self._ddr_width_bits  # 16
-        
-        if self._endianness == 'little':
-            for i in range(self._beats_per_host_word):
-                table.append(i * bits_per_beat)
-        else:
-            # Big endian: first beat goes to upper bits
-            for i in range(self._beats_per_host_word):
-                table.append((self._beats_per_host_word - 1 - i) * bits_per_beat)
-        
-        return table
-    
+
     def drain(self) -> List[Txn]:
         """
-        Return any pending output transactions at end of trace.
+        No pending outputs expected at end of trace under normal operation.
         
-        Per spec: at trace end, any accumulated partial read data would be
-        incomplete. Per Wishbone B4 3.2.1: a cycle must complete before
-        termination. Incomplete data indicates trace truncation.
-        
-        We do not emit partial responses as spec requires complete burst
-        transfers (memory_geometry.burst_length = 8).
+        If there are partially accumulated read beats, the spec doesn't define
+        what happens with incomplete bursts. Most literal reading: do not emit
+        partial responses.
         """
-        # No partial outputs - incomplete bursts are trace artifacts
         return []

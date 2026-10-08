@@ -185,7 +185,8 @@ class TestDropId(TestResolver):
         self._blk("a", "module a; endmodule")
         st = RD.stamp(["a"])
         self.assertEqual(st["git_head"], st["drop_id"])
-        self.assertEqual(st["drop_id"], RD.drop_id(["a"]))
+        self.assertEqual(st["drop_id"], RD.drop_id(), "the WHOLE drop's id, not this run's subset")
+        self.assertEqual(st["blocks_used"], ["a"])
         self.assertIn("validated_at", st)
 
 

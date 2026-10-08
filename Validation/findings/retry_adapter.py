@@ -101,9 +101,13 @@ def adapt(doc):
         "$schema": "validation-retry-instructions/1",
         **({"untested_in_this_drop": untested} if untested else {}),
         "status": "FAIL" if modules else "PASS",
-        "pipeline": "validation",
+        # who produced the findings: validation, or the backend's emitter
+        # (its documents carry `producer`); a reader of the package alone
+        # should not attribute a timing defect to validation
+        "pipeline": doc.get("producer") or "validation",
         "drop": doc["drop"],
         "spec_revision": doc.get("spec_revision"),
+        "spec_id": doc.get("spec_id"),
         "generated_utc": datetime.utcnow().isoformat() + "Z",
         "failed_modules": sorted(modules),
         "retry_instructions": modules,
@@ -141,6 +145,10 @@ def publish_current(drop_dir, ri):
                                    "contents, blocks sorted by name, first 12 hex digits "
                                    "(Validation/structural/rtl_drop.py:drop_id)",
                    "spec_revision": ri.get("spec_revision"),
+                   "spec_id": ri.get("spec_id"),
+                   "spec_id_rule": "sha256 of the spec's canonical JSON (sorted keys, no "
+                                   "whitespace), first 16 hex digits (Validation/spec/"
+                                   "spec_identity.py); revision alone has named two specs",
                    "status": ri["status"],
                    "failed_modules": ri["failed_modules"],
                    "generated_utc": ri["generated_utc"],

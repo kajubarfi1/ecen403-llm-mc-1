@@ -98,8 +98,8 @@
       "block": "config_regs",
       "file": "PHASE1RTL/config_regs.sv",
       "description": "TIMING_0 resets to a value one off the spec's reset value.",
-      "from": "reg_timing_0 <= 32'h21180909;",
-      "to": "reg_timing_0 <= 32'h21180908;",
+      "from": "reg_timing_0 <= 32'h{reset:TIMING_0};",
+      "to": "reg_timing_0 <= 32'h{reset-1:TIMING_0};",
       "expect": [
         "matched:config_regs"
       ],
@@ -107,7 +107,7 @@
         "path_12_csr_timing_to_scheduling",
         "path_22_csr_standalone"
       ],
-      "reseeded": "2026-10-01: Phase-1 regenerated from compiled_ddr31333 (TIMING_0 reset 0x21180909); same fault, new value"
+      "reseeded": "2026-10-01: Phase-1 regenerated from compiled_ddr31333 (TIMING_0 reset 0x21180909); same fault, new value; 2026-10-08: the value now comes from the spec ({reset:TIMING_0}), no re-seeding at the next spec change"
     },
     {
       "id": "M08_config_regs_rw1c_settable",

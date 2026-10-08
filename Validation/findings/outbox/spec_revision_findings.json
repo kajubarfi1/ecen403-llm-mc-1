@@ -1,14 +1,42 @@
 {
   "$schema": "validation-findings/1",
-  "spec_revision": "compiled_ddr31333_x8_2lane_1rank",
-  "validation_spec": "runs/phase1_loop_1/spec/generated_spec.json",
-  "shipped_spec": "runs/phase1_loop_1/drop/generated_spec.json",
-  "shipped_spec_revision": "compiled_ddr31333_x8_2lane_1rank",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "spec_id": "59b4edadb45f2bf8",
+  "validation_spec": "Validation/spec/llmmc_microarchitecturespec_filled.json",
+  "shipped_spec": "Frontend2/OutputFolders/generated_spec.json",
+  "shipped_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "block_revisions": {
-    "config_regs": "compiled_ddr31333_x8_2lane_1rank",
-    "init_fsm": "compiled_ddr31333_x8_2lane_1rank",
-    "wb_port": "compiled_ddr31333_x8_2lane_1rank"
+    "addr_decoder": "golden_ddr3_1600k_x8_2lane_1rank",
+    "bank_tracker": "golden_ddr3_1600k_x8_2lane_1rank",
+    "calibration": "golden_ddr3_1600k_x8_2lane_1rank",
+    "cmd_gen": "golden_ddr3_1600k_x8_2lane_1rank",
+    "cmd_queue": "golden_ddr3_1600k_x8_2lane_1rank",
+    "config_regs": "golden_ddr3_1600k_x8_2lane_1rank",
+    "data_path": "golden_ddr3_1600k_x8_2lane_1rank",
+    "init_fsm": "golden_ddr3_1600k_x8_2lane_1rank",
+    "refresh_ctrl": "golden_ddr3_1600k_x8_2lane_1rank",
+    "scheduler": "golden_ddr3_1600k_x8_2lane_1rank",
+    "wb_port": "golden_ddr3_1600k_x8_2lane_1rank"
   },
-  "finding_count": 0,
-  "findings": []
+  "finding_count": 1,
+  "findings": [
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "spec_revision_reused",
+      "scope": "spec",
+      "severity": "major",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "spec revision golden_ddr3_1600k_x8_2lane_1rank has named more than one spec (ids e7da1af6b67b7e06, 59b4edadb45f2bf8)",
+      "detail": "The drop ships Frontend2/OutputFolders/generated_spec.json with revision golden_ddr3_1600k_x8_2lane_1rank, but Validation has recorded more than one content id under that revision (Validation/spec/revision_ids.json). A revision must change whenever the content does; otherwise manifests, provenance records and findings that cite it cannot say which spec they mean. Bump `revision` (or derive it from the content) in the compiler whenever the golden file changes.",
+      "evidence": {
+        "shipped_spec": "Frontend2/OutputFolders/generated_spec.json",
+        "shipped_spec_id": "59b4edadb45f2bf8",
+        "validation_spec_id": "e7da1af6b67b7e06",
+        "adopted": false
+      },
+      "spec_ref": "revision",
+      "status": "open"
+    }
+  ]
 }

@@ -45,16 +45,29 @@ def _lines(check):
     out.append(f"  actual:   {check.get('actual')}")
     if check.get("spec_ref"):
         out.append(f"  spec:     {check['spec_ref']}")
+    # anchors: a line when the producer has one (simulation), a signal with
+    # its bit and role when it does not (the backend's timing paths name an
+    # endpoint and a startpoint register, never a line)
     for a in (check.get("anchor") or [])[:3]:
-        out.append(f"  at {a.get('file')}:{a.get('line')}  {a.get('signal') or ''}  {str(a.get('text') or '')[:80]}")
+        where = a.get("file") or "?"
+        if a.get("line") is not None:
+            where += f":{a['line']}"
+        sig = a.get("signal") or ""
+        if sig and a.get("bit") is not None:
+            sig += f"[{a['bit']}]"
+        if sig and a.get("role"):
+            sig += f" ({a['role']})"
+        out.append(f"  at {where}  {sig}  {str(a.get('text') or '')[:80]}".rstrip())
     if check.get("fix"):
         out.append(f"  fix hypothesis: {check['fix']}")
     rep = check.get("repro") or {}
-    if isinstance(rep, dict) and rep.get("cmd"):
-        out.append(f"  repro: {rep['cmd']}")
+    cmd = rep.get("cmd") or rep.get("command") if isinstance(rep, dict) else (rep if isinstance(rep, str) else None)
+    if cmd:
+        out.append(f"  repro: {cmd}")
     occ = check.get("occurrences")
     if occ:
-        out.append(f"  occurrences: {occ} on {', '.join(check.get('paths') or [])[:120]}")
+        paths = ", ".join(check.get("paths") or [])[:120]
+        out.append(f"  occurrences: {occ}" + (f" on {paths}" if paths else ""))
     return out
 
 

@@ -20,7 +20,7 @@ module refresh_ack_monitor #(
     input  logic clk,
     input  logic rst_n,
     input  logic ref_ack,
-    input  logic [2:0] ref_pending_cnt
+    input  logic [3:0] ref_pending_cnt
 );
 
   // A reset is a real event a stateful predictor must see. Without it the

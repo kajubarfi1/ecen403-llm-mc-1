@@ -1,6 +1,6 @@
 {
   "$schema": "validation-fault-matrix/1",
-  "generated_utc": "2026-10-07T20:05:17.305505Z",
+  "generated_utc": "2026-10-08T17:17:17.612835Z",
   "drop_root": "Frontend2/OutputFolders",
   "faults_total": 23,
   "faults_killed": 23,
@@ -11,6 +11,7 @@
       "fault": "M01_cmd_gen_bank_stuck",
       "block": "cmd_gen",
       "path": "path_01_write_cmd",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "ACTIVATE always targets bank 0 (bank field dropped on the DDR pins).",
       "expect": [
         "stage:cmd_gen",
@@ -19,12 +20,12 @@
       "masked_by": null,
       "killed": true,
       "expected_hit": [
-        "stage:cmd_gen",
         "assert:a_PROTO_001"
       ],
-      "expected_missed": [],
+      "expected_missed": [
+        "stage:cmd_gen"
+      ],
       "new": {
-        "stage:cmd_gen": 1,
         "assert:a_PROTO_001": 16,
         "assert:a_TIMING_003": 2
       },
@@ -51,6 +52,7 @@
       "fault": "M02_cmd_gen_act_encoded_as_pre",
       "block": "cmd_gen",
       "path": "path_01_write_cmd",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "ACTIVATE is driven with the PRECHARGE pin encoding.",
       "expect": [
         "stage:cmd_gen",
@@ -59,12 +61,12 @@
       "masked_by": null,
       "killed": true,
       "expected_hit": [
-        "stage:cmd_gen",
         "assert:a_PROTO_001"
       ],
-      "expected_missed": [],
+      "expected_missed": [
+        "stage:cmd_gen"
+      ],
       "new": {
-        "stage:cmd_gen": 1,
         "assert:a_PROTO_001": 19
       },
       "grew": {},
@@ -85,6 +87,7 @@
       "fault": "M03_bank_tracker_tras_short",
       "block": "bank_tracker",
       "path": "path_19_row_conflict",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "tRAS timer loaded with 1 instead of the configured value; PRECHARGE follows ACTIVATE too early. (Replaces a tRCD fault that was equivalent: at this clock tRCD is 3 cycles and the ACT->CAS pipeline is structurally longer, so no timer bug can violate it.)",
       "expect": [
         "assert:a_TIMING_003",
@@ -99,22 +102,22 @@
         "illegal:cp_tras_spacing"
       ],
       "new": {
-        "assert:a_TIMING_003": 66,
+        "assert:a_TIMING_003": 108,
         "assert:p_stall_hold": 3,
-        "log:DRIVER_STALL": 3
+        "log:DRIVER_STALL": 6
       },
       "grew": {
         "violations:(path-level)": [
           23,
-          148
+          232
         ],
         "assert:a_TIMING_004": [
           23,
-          132
+          216
         ],
         "assert:a_PROTO_002": [
           23,
-          132
+          216
         ]
       },
       "fewer_matched": {},
@@ -127,6 +130,7 @@
       "fault": "M04_bank_tracker_trrd_zero",
       "block": "bank_tracker",
       "path": "path_19_row_conflict",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "tRRD timer never loaded; ACTIVATEs to different banks may be back-to-back. (Replaces a tRC fault that was equivalent: tRC = tRAS + tRP, and both are enforced separately, so a broken tRC timer alone cannot produce a violation.)",
       "expect": [
         "assert:a_TIMING_005",
@@ -166,6 +170,7 @@
       "fault": "M05_refresh_never_requested",
       "block": "refresh_ctrl",
       "path": "path_09_init_to_refresh",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "The tREFI tick is never raised; no refresh is ever requested.",
       "expect": [
         "id:REF_004"
@@ -194,6 +199,7 @@
       "fault": "M06_refresh_pending_runaway",
       "block": "refresh_ctrl",
       "path": "path_05_scheduler_refresh_loop",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "An acknowledge increments the postpone counter instead of decrementing it.",
       "expect": [
         "id:REF_001"
@@ -228,7 +234,8 @@
     {
       "fault": "M07_config_regs_reset_value",
       "block": "config_regs",
-      "path": "path_22_csr_standalone",
+      "path": "path_12_csr_timing_to_scheduling",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "TIMING_0 resets to a value one off the spec's reset value.",
       "expect": [
         "matched:config_regs"
@@ -253,14 +260,14 @@
         "config_regs"
       ],
       "blame_names_block": true,
-      "baseline_verdict": "pass",
+      "baseline_verdict": "fail",
       "mutant_verdict": "fail"
     },
     {
       "fault": "M07_config_regs_reset_value",
       "block": "config_regs",
       "path": "path_22_csr_standalone",
-      "spec_revision": "compiled_ddr31333_x16_1lane_1rank",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "TIMING_0 resets to a value one off the spec's reset value.",
       "expect": [
         "matched:config_regs"
@@ -291,7 +298,8 @@
     {
       "fault": "M08_config_regs_rw1c_settable",
       "block": "config_regs",
-      "path": "path_22_csr_standalone",
+      "path": "path_12_csr_timing_to_scheduling",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "RW1C flag becomes settable by a bus write (write-1 sets instead of clears). (Replaces a lost-latch fault that was unobservable: the starvation event is unreachable in this RTL, see the ref_pending_cnt width finding.)",
       "expect": [
         "matched:config_regs"
@@ -316,14 +324,14 @@
         "config_regs"
       ],
       "blame_names_block": true,
-      "baseline_verdict": "pass",
+      "baseline_verdict": "fail",
       "mutant_verdict": "fail"
     },
     {
       "fault": "M08_config_regs_rw1c_settable",
       "block": "config_regs",
       "path": "path_22_csr_standalone",
-      "spec_revision": "compiled_ddr31333_x16_1lane_1rank",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "RW1C flag becomes settable by a bus write (write-1 sets instead of clears). (Replaces a lost-latch fault that was unobservable: the starvation event is unreachable in this RTL, see the ref_pending_cnt width finding.)",
       "expect": [
         "matched:config_regs"
@@ -355,6 +363,7 @@
       "fault": "M09_addr_decoder_bank_slice",
       "block": "addr_decoder",
       "path": "path_01_write_cmd",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "Bank bits taken from the wrong address slice.",
       "expect": [
         "stage:addr_decoder"
@@ -385,7 +394,8 @@
     {
       "fault": "M10_wb_port_we_inverted",
       "block": "wb_port",
-      "path": "path_21_wb_port_standalone",
+      "path": "path_01_write_cmd",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "Write-enable inverted on the internal request.",
       "expect": [
         "stage:wb_port"
@@ -397,7 +407,9 @@
       ],
       "expected_missed": [],
       "new": {
-        "stage:wb_port": 1
+        "stage:wb_port": 1,
+        "assert:p_tag_no_overflow": 448,
+        "assert:p_tag": 13
       },
       "grew": {},
       "fewer_matched": {
@@ -410,14 +422,14 @@
         "wb_port"
       ],
       "blame_names_block": true,
-      "baseline_verdict": "pass",
+      "baseline_verdict": "fail",
       "mutant_verdict": "fail"
     },
     {
       "fault": "M10_wb_port_we_inverted",
       "block": "wb_port",
       "path": "path_21_wb_port_standalone",
-      "spec_revision": "compiled_ddr31333_x16_1lane_1rank",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "Write-enable inverted on the internal request.",
       "expect": [
         "stage:wb_port"
@@ -449,6 +461,7 @@
       "fault": "M11_cmd_queue_row_corrupted",
       "block": "cmd_queue",
       "path": "path_01_write_cmd",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "Row address stored inverted on enqueue. (Detected only after SCHED_004 \u2014 ACTIVATE row must correspond to a pending request \u2014 was added to the stage rules and the checker regenerated: the first draft of the suite found a rule gap, not an RTL gap.)",
       "expect": [
         "id:SCHED_004"
@@ -478,6 +491,7 @@
       "fault": "M12_scheduler_no_precharge",
       "block": "scheduler",
       "path": "path_19_row_conflict",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "Row conflicts are never resolved: the PRECHARGE branch is unreachable.",
       "expect": [
         "id:SCHED_001",
@@ -507,6 +521,7 @@
       "fault": "M13_data_path_dm_polarity",
       "block": "data_path",
       "path": "path_18_full_write",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "DDR data mask driven with host byte-enable polarity (not inverted).",
       "expect": [
         "stage:data_path",
@@ -520,25 +535,16 @@
       "expected_missed": [
         "stage:data_path"
       ],
-      "new": {
-        "stage:wb_port": 1,
-        "assert:p_stall_hold": 8,
-        "assert:p_tag": 13
-      },
+      "new": {},
       "grew": {},
       "fewer_matched": {
-        "matched:wb_port": [
-          28,
-          26
-        ],
         "matched:data_path": [
           27,
-          12
+          9
         ]
       },
       "blamed_stages": [
-        "data_path",
-        "wb_port"
+        "data_path"
       ],
       "blame_names_block": true,
       "baseline_verdict": "fail",
@@ -547,7 +553,8 @@
     {
       "fault": "M14_init_fsm_skip_mr2",
       "block": "init_fsm",
-      "path": "path_14_status_init",
+      "path": "path_08_init_to_cal",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "Init sequence skips MR2 (goes straight to MR3).",
       "expect": [
         "id:INIT_001",
@@ -555,55 +562,35 @@
       ],
       "masked_by": null,
       "killed": true,
-      "expected_hit": [],
-      "expected_missed": [
+      "expected_hit": [
         "id:INIT_001",
         "id:INIT_003"
       ],
+      "expected_missed": [],
       "new": {
+        "stage:init_fsm": 1,
+        "stage:(path-level)": 1,
+        "violations:(path-level)": 6,
+        "id:INIT_001": 4,
+        "id:INIT_003": 2,
         "assert:a_INIT_001": 3,
         "assert:a_INIT_001_then": 1
       },
       "grew": {},
       "fewer_matched": {},
-      "blamed_stages": [],
+      "blamed_stages": [
+        "(path-level)",
+        "init_fsm"
+      ],
       "blame_names_block": true,
       "baseline_verdict": "pass",
-      "mutant_verdict": "pass"
+      "mutant_verdict": "fail"
     },
     {
       "fault": "M14_init_fsm_skip_mr2",
       "block": "init_fsm",
       "path": "path_14_status_init",
-      "spec_revision": "compiled_ddr31333_x16_1lane_1rank",
-      "description": "Init sequence skips MR2 (goes straight to MR3).",
-      "expect": [
-        "id:INIT_001",
-        "id:INIT_003"
-      ],
-      "masked_by": null,
-      "killed": true,
-      "expected_hit": [],
-      "expected_missed": [
-        "id:INIT_001",
-        "id:INIT_003"
-      ],
-      "new": {
-        "assert:a_INIT_001": 3,
-        "assert:a_INIT_001_then": 1
-      },
-      "grew": {},
-      "fewer_matched": {},
-      "blamed_stages": [],
-      "blame_names_block": true,
-      "baseline_verdict": "pass",
-      "mutant_verdict": "pass"
-    },
-    {
-      "fault": "M14_init_fsm_skip_mr2",
-      "block": "init_fsm",
-      "path": "path_14_status_init",
-      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "Init sequence skips MR2 (goes straight to MR3).",
       "expect": [
         "id:INIT_001",
@@ -634,6 +621,7 @@
       "fault": "M15_calibration_early_done",
       "block": "calibration",
       "path": "path_08_init_to_cal",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "cal_done asserted without waiting for init_done.",
       "expect": [
         "id:CAL_001"
@@ -645,6 +633,7 @@
       ],
       "expected_missed": [],
       "new": {
+        "stage:calibration": 1,
         "stage:(path-level)": 1,
         "violations:(path-level)": 1,
         "id:CAL_001": 1,
@@ -654,7 +643,8 @@
       "grew": {},
       "fewer_matched": {},
       "blamed_stages": [
-        "(path-level)"
+        "(path-level)",
+        "calibration"
       ],
       "blame_names_block": true,
       "baseline_verdict": "pass",
@@ -664,6 +654,7 @@
       "fault": "M16_refresh_ctrl_before_init",
       "block": "refresh_ctrl",
       "path": "path_09_init_to_refresh",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "Refresh requests are raised before initialisation completes: the tREFI counter runs from reset and ref_required is not gated on init_done.",
       "expect": [
         "id:REF_003"
@@ -693,6 +684,7 @@
       "fault": "M17_scheduler_ignores_refresh",
       "block": "scheduler",
       "path": "path_05_scheduler_refresh_loop",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "The scheduler never selects REFRESH: refresh requests are raised and never serviced, so the postpone budget is exhausted.",
       "expect": [
         "id:SCHED_003",
@@ -720,6 +712,7 @@
       "fault": "M18_calibration_zqcs_before_done",
       "block": "calibration",
       "path": "path_08_init_to_cal",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "The periodic ZQCS timer runs from reset instead of from cal_done, so a ZQCS request is raised before calibration completes.",
       "expect": [
         "id:CAL_002"
@@ -747,7 +740,8 @@
     {
       "fault": "M19_init_fsm_tzqinit_short",
       "block": "init_fsm",
-      "path": "path_14_status_init",
+      "path": "path_08_init_to_cal",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "init_done is raised 4 cycles after ZQCL instead of tZQinit (128).",
       "expect": [
         "assert:a_INIT_002_init_done"
@@ -772,32 +766,7 @@
       "fault": "M19_init_fsm_tzqinit_short",
       "block": "init_fsm",
       "path": "path_14_status_init",
-      "spec_revision": "compiled_ddr31333_x16_1lane_1rank",
-      "description": "init_done is raised 4 cycles after ZQCL instead of tZQinit (128).",
-      "expect": [
-        "assert:a_INIT_002_init_done"
-      ],
-      "masked_by": null,
-      "killed": true,
-      "expected_hit": [
-        "assert:a_INIT_002_init_done"
-      ],
-      "expected_missed": [],
-      "new": {
-        "assert:a_INIT_002_init_done": 1
-      },
-      "grew": {},
-      "fewer_matched": {},
-      "blamed_stages": [],
-      "blame_names_block": true,
-      "baseline_verdict": "pass",
-      "mutant_verdict": "pass"
-    },
-    {
-      "fault": "M19_init_fsm_tzqinit_short",
-      "block": "init_fsm",
-      "path": "path_14_status_init",
-      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "init_done is raised 4 cycles after ZQCL instead of tZQinit (128).",
       "expect": [
         "assert:a_INIT_002_init_done"
@@ -824,7 +793,37 @@
     {
       "fault": "M20_cas_without_activate",
       "block": "scheduler",
+      "path": "path_19_row_conflict",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "description": "Every pending request is treated as a row hit and bank_tracker permits CAS on an idle bank: READ/WRITE issue with no ACTIVATE.",
+      "expect": [
+        "id:PROTO_001",
+        "assert:a_PROTO_001"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [
+        "id:PROTO_001",
+        "assert:a_PROTO_001"
+      ],
+      "expected_missed": [],
+      "new": {
+        "id:PROTO_001": 5,
+        "id:SCHED_004": 5,
+        "assert:a_PROTO_001": 15
+      },
+      "grew": {},
+      "fewer_matched": {},
+      "blamed_stages": [],
+      "blame_names_block": true,
+      "baseline_verdict": "fail",
+      "mutant_verdict": "fail"
+    },
+    {
+      "fault": "M20_cas_without_activate",
+      "block": "scheduler",
       "path": "path_01_write_cmd",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "Every pending request is treated as a row hit and bank_tracker permits CAS on an idle bank: READ/WRITE issue with no ACTIVATE.",
       "expect": [
         "id:PROTO_001",
@@ -856,37 +855,10 @@
       "mutant_verdict": "fail"
     },
     {
-      "fault": "M20_cas_without_activate",
-      "block": "scheduler",
-      "path": "path_19_row_conflict",
-      "description": "Every pending request is treated as a row hit and bank_tracker permits CAS on an idle bank: READ/WRITE issue with no ACTIVATE.",
-      "expect": [
-        "id:PROTO_001",
-        "assert:a_PROTO_001"
-      ],
-      "masked_by": null,
-      "killed": true,
-      "expected_hit": [
-        "id:PROTO_001",
-        "assert:a_PROTO_001"
-      ],
-      "expected_missed": [],
-      "new": {
-        "id:PROTO_001": 5,
-        "id:SCHED_004": 5,
-        "assert:a_PROTO_001": 15
-      },
-      "grew": {},
-      "fewer_matched": {},
-      "blamed_stages": [],
-      "blame_names_block": true,
-      "baseline_verdict": "fail",
-      "mutant_verdict": "fail"
-    },
-    {
       "fault": "M21_calibration_zqcs_ungated",
       "block": "calibration",
       "path": "path_08_init_to_cal",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "The ZQCS request is no longer gated on cal_done and its timer runs from reset: zqcs_req rises before calibration completes. (M18 alone cannot reach a_CAL_002 because the drop's zqcs_req = zqcs_pending & cal_done_r gate is structural.)",
       "expect": [
         "assert:a_CAL_002",
@@ -918,7 +890,8 @@
     {
       "fault": "M22_init_fsm_done_before_zqcl",
       "block": "init_fsm",
-      "path": "path_14_status_init",
+      "path": "path_08_init_to_cal",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "init_done is also asserted while the FSM sits in S_MR0, i.e. before ZQCL has been issued.",
       "expect": [
         "assert:a_INIT_003_init_done",
@@ -927,54 +900,32 @@
       "masked_by": null,
       "killed": true,
       "expected_hit": [
-        "assert:a_INIT_003_init_done"
-      ],
-      "expected_missed": [
-        "id:INIT_003"
-      ],
-      "new": {
-        "assert:a_INIT_003_init_done": 1
-      },
-      "grew": {},
-      "fewer_matched": {},
-      "blamed_stages": [],
-      "blame_names_block": true,
-      "baseline_verdict": "pass",
-      "mutant_verdict": "pass"
-    },
-    {
-      "fault": "M22_init_fsm_done_before_zqcl",
-      "block": "init_fsm",
-      "path": "path_14_status_init",
-      "spec_revision": "compiled_ddr31333_x16_1lane_1rank",
-      "description": "init_done is also asserted while the FSM sits in S_MR0, i.e. before ZQCL has been issued.",
-      "expect": [
         "assert:a_INIT_003_init_done",
         "id:INIT_003"
       ],
-      "masked_by": null,
-      "killed": true,
-      "expected_hit": [
-        "assert:a_INIT_003_init_done"
-      ],
-      "expected_missed": [
-        "id:INIT_003"
-      ],
+      "expected_missed": [],
       "new": {
-        "assert:a_INIT_003_init_done": 1
+        "stage:(path-level)": 1,
+        "violations:(path-level)": 6,
+        "id:INIT_003": 4,
+        "id:INIT_001": 2,
+        "assert:a_INIT_003_init_done": 1,
+        "assert:a_CAL_001": 1
       },
       "grew": {},
       "fewer_matched": {},
-      "blamed_stages": [],
+      "blamed_stages": [
+        "(path-level)"
+      ],
       "blame_names_block": true,
       "baseline_verdict": "pass",
-      "mutant_verdict": "pass"
+      "mutant_verdict": "fail"
     },
     {
       "fault": "M22_init_fsm_done_before_zqcl",
       "block": "init_fsm",
       "path": "path_14_status_init",
-      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "init_done is also asserted while the FSM sits in S_MR0, i.e. before ZQCL has been issued.",
       "expect": [
         "assert:a_INIT_003_init_done",
@@ -1004,7 +955,8 @@
     {
       "fault": "M23_init_fsm_mrs_after_zqcl",
       "block": "init_fsm",
-      "path": "path_14_status_init",
+      "path": "path_08_init_to_cal",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "MR0 is programmed the cycle after ZQCL instead of before it: a command lands inside the tZQinit window and ZQCL precedes the last MRS.",
       "expect": [
         "assert:a_INIT_002",
@@ -1018,49 +970,27 @@
       ],
       "expected_missed": [],
       "new": {
+        "stage:(path-level)": 1,
+        "violations:(path-level)": 2,
+        "id:INIT_001": 1,
+        "id:INIT_003": 1,
         "assert:a_INIT_001_then": 1,
         "assert:a_INIT_002": 1
       },
       "grew": {},
       "fewer_matched": {},
-      "blamed_stages": [],
+      "blamed_stages": [
+        "(path-level)"
+      ],
       "blame_names_block": true,
       "baseline_verdict": "pass",
-      "mutant_verdict": "pass"
+      "mutant_verdict": "fail"
     },
     {
       "fault": "M23_init_fsm_mrs_after_zqcl",
       "block": "init_fsm",
       "path": "path_14_status_init",
-      "spec_revision": "compiled_ddr31333_x16_1lane_1rank",
-      "description": "MR0 is programmed the cycle after ZQCL instead of before it: a command lands inside the tZQinit window and ZQCL precedes the last MRS.",
-      "expect": [
-        "assert:a_INIT_002",
-        "assert:a_INIT_001_then"
-      ],
-      "masked_by": null,
-      "killed": true,
-      "expected_hit": [
-        "assert:a_INIT_002",
-        "assert:a_INIT_001_then"
-      ],
-      "expected_missed": [],
-      "new": {
-        "assert:a_INIT_001_then": 1,
-        "assert:a_INIT_002": 1
-      },
-      "grew": {},
-      "fewer_matched": {},
-      "blamed_stages": [],
-      "blame_names_block": true,
-      "baseline_verdict": "pass",
-      "mutant_verdict": "pass"
-    },
-    {
-      "fault": "M23_init_fsm_mrs_after_zqcl",
-      "block": "init_fsm",
-      "path": "path_14_status_init",
-      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
       "description": "MR0 is programmed the cycle after ZQCL instead of before it: a command lands inside the tZQinit window and ZQCL precedes the last MRS.",
       "expect": [
         "assert:a_INIT_002",

@@ -19,6 +19,16 @@ The drop should ship the spec it was generated from as
 that spec's `revision`; a block from another revision is **foreign** and
 gets one finding (`SPEC_MISMATCH`) and nothing else.
 
+A revision is a name; the content is what Validation judges against. The
+**spec id** is sha256 of the spec's canonical JSON (sorted keys, no
+whitespace), first 16 hex digits (`Validation/spec/spec_identity.py`).
+Validation records it next to every `spec_revision` it writes (handoff,
+findings, model provenance). The revision must change whenever the content
+does: when the shipped spec carries a known revision with a different id,
+Validation adopts the shipped spec (it is what the RTL was generated from)
+and files one `SPEC_REVISION_REUSED` finding (2026-10-08: `CTRL_STATUS`
+grew a bit and the intake fields were added under one revision string).
+
 ## 2. What names a drop
 
 `drop_id` = first 12 hex digits of SHA-256 over, for each block in sorted
@@ -89,7 +99,7 @@ The third form judges the drop against the spec it ships instead of
 
 | file | what |
 |---|---|
-| `HANDOFF.json` | `drop_id`, `spec_revision`, `status` (PASS/FAIL), `failed_modules`, `generated_utc`, path of the archive |
+| `HANDOFF.json` | `drop_id`, `spec_revision`, `spec_id`, `status` (PASS/FAIL), `failed_modules`, `generated_utc`, path of the archive |
 | `retry_instructions.json` | per module: `failed_checks[]` with `id`, `name`, `expected`, `actual`, `severity`, `confidence`, `spec_ref`, `anchor[]` (file/line/signal in the drop), `repro`, `fix` (when a repair proved it), `owner_candidates`; `requires_human_review`; `untested_in_this_drop[]`; `drop_status` (partial runs) |
 | `findings_v2.json` | the full records behind every check |
 | `DROP_STATUS.json` | present when paths were blocked: which blocks are absent / foreign, which paths ran, which wait and why |

@@ -35,16 +35,42 @@ def statuses(spec, rules, pdefs):
     return {r["id"]: sc.check_rule(r, spec, pdefs)[0] for r in rules}
 
 
+def gapped(spec):
+    """The spec as it was before the 2026-10 decisions: every intake
+    question unanswered. Built from the current copy so the test does not
+    depend on which spec the copy holds today (validate_drop refreshes it
+    from the drop)."""
+    spec = copy.deepcopy(spec)
+    for k in ("unmapped_read_data", "unmapped_write_behavior", "access_violation_error",
+              "read_byte_enable_semantics", "status_read_sampling"):
+        spec["csr_register_map"].pop(k, None)
+    spec["data_path_mapping"].pop("ddr_dm_polarity", None)
+    spec["timing_model"].pop("tMRD", None)
+    spec["timing_model"].pop("tMOD", None)
+    spec["controller_architecture"].pop("speculative_activate", None)
+    tax = spec["failure_taxonomy"]
+    tax["categories" if "categories" in tax else "entries"] = [
+        e for e in (tax.get("categories") or tax.get("entries") or [])
+        if not str(e.get("id", "")).startswith("SCHED_")
+        and e.get("id") not in ("TIMING_012", "TIMING_013", "TIMING_014")]
+    spec.pop("block_interfaces", None)
+    return spec
+
+
 class TestIntakeGate(unittest.TestCase):
 
     def test_current_spec_gaps_are_the_ones_found_in_simulation(self):
         spec, rules, pdefs = load()
+        spec = gapped(spec)
         st = statuses(spec, rules, pdefs)
         for rid in ("CSR_UNMAPPED_READ_DATA", "CSR_READ_BYTE_ENABLES",
                     "CSR_STATUS_READ_SAMPLING", "DDR_DM_POLARITY",
-                    "TAXONOMY_SCHEDULER_FAMILY", "INTERFACE_CONTRACTS",
+                    "TAXONOMY_SCHEDULER_FAMILY",
                     "TAXONOMY_NAMES_TIMING_PARAMS", "INIT_TMRD", "INIT_TMOD"):
             self.assertEqual(st[rid], "gap", rid)
+        # the hop contracts are owned by the manifests + path_definitions now;
+        # the rule stays in the file as a record but is retired, never a gap
+        self.assertEqual(st["INTERFACE_CONTRACTS"], "retired")
         # the one unnamed timing parameter is tREFI
         rule = next(r for r in rules if r["id"] == "TAXONOMY_NAMES_TIMING_PARAMS")
         _, detail = sc.check_rule(rule, spec, pdefs)
@@ -75,7 +101,7 @@ class TestIntakeGate(unittest.TestCase):
             {"from": a, "to": b} for p in pdefs
             for a, b in zip(p["blocks"], p["blocks"][1:])]
         st = statuses(spec, rules, pdefs)
-        self.assertTrue(all(s == "ok" for s in st.values()), st)
+        self.assertTrue(all(s in ("ok", "retired") for s in st.values()), st)
 
     def test_value_outside_vocabulary_is_rejected(self):
         spec, rules, pdefs = load()
@@ -101,11 +127,16 @@ class TestIntakeGate(unittest.TestCase):
         spec["block_interfaces"] = [{"from": a, "to": b} for a, b in hops[1:]]
         rule = next(r for r in rules if r["kind"] == "path_interfaces")
         status, detail = sc.check_rule(rule, spec, pdefs)
+        self.assertEqual(status, "retired", "retired rules are never a gap")
+        # the check itself still works when the rule is live
+        rule = {k: v for k, v in rule.items() if k != "disposition"}
+        status, detail = sc.check_rule(rule, spec, pdefs)
         self.assertEqual(status, "gap")
         self.assertIn(f"{hops[0][0]}->{hops[0][1]}", detail)
 
     def test_findings_carry_a_patch_and_the_standard(self):
         spec, rules, pdefs = load()
+        spec = gapped(spec)
         gaps = [(r,) + sc.check_rule(r, spec, pdefs) for r in rules
                 if sc.check_rule(r, spec, pdefs)[0] == "gap"]
         out = sc.findings_for(gaps, spec)

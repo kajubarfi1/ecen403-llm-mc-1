@@ -459,6 +459,7 @@ def stage_rtl_validation(run, args, partial=False, tag=None):
               + (f"; {blocked} path(s) blocked" if blocked else "")
               + f"; package: {os.path.relpath(dest, ROOT)}")
     stage = "rtl_validation" + (f":{tag}" if tag else "")
+    run.state["drop_id"] = h["drop_id"]
     run.record(stage, h["status"], detail, drop_id=h["drop_id"], package=dest)
     if h["status"] == "PASS":
         if blocked and not partial:
@@ -570,7 +571,14 @@ def stage_backend(run, args):
                         "resume, or rerun with --skip-backend")
     run.state["rounds"]["backend"] += 1
     env_file = os.path.join(BACKEND_AGENTS, ".env")
-    cmd = [PY, BACKEND_PIPELINE, "--bundle_dir", bundle, "--out_root", run.backend_dir]
+    with open(run.state["spec"]) as f:
+        rev = json.load(f).get("revision") or ""
+    # the backend names its outbox by the drop it ran on and the spec revision
+    # it was given (Backend handoff 2026-10-08); it cannot compute either
+    # without reaching into other subsystems, so the flow passes both
+    cmd = [PY, BACKEND_PIPELINE, "--bundle_dir", bundle, "--out_root", run.backend_dir,
+           "--drop_id", run.state.get("drop_id") or "", "--spec_revision", rev,
+           "--mode", getattr(args, "backend_mode", None) or "build"]
     if os.path.exists(env_file):
         cmd += ["--env_file", env_file]
     rc, txt = sh(cmd, cwd=BACKEND_AGENTS, log=run.log, timeout=12 * 3600)
@@ -818,7 +826,7 @@ def plan(args):
     have = [n for n, *_ in PHASES if os.path.exists(phase_agent(n))]
     print(f"  5 frontend_regeneration Frontend  Phase{{N}}/phase{{N}}_validation_agent.py on our package "
           f"(agents present for phases {have}; others halt)")
-    print(f"  6 backend               Backend   {'SKIPPED (--skip-backend)' if args.skip_backend else os.path.relpath(BACKEND_PIPELINE, ROOT) + ' --bundle_dir <run>/drop/TOPRTL'}"
+    print(f"  6 backend               Backend   {'SKIPPED (--skip-backend)' if args.skip_backend else os.path.relpath(BACKEND_PIPELINE, ROOT) + ' --bundle_dir <run>/drop/TOPRTL --drop_id <id> --spec_revision <rev> --mode ' + (getattr(args, 'backend_mode', None) or 'build')}"
           + ("" if args.skip_backend else f"  (cap {args.max_backend_rounds} rounds; needs USE_DOCKER=1)"))
     print(f"  7 backend_to_frontend   edge      backend/findings/outbox -> retry package -> phase agents -> validate again")
     print(f"  8 final_validation      Validation  backend netlists through the paths (run_path --netlist, sky130 models)")
@@ -848,6 +856,9 @@ def main() -> int:
     ap.add_argument("--validate-per-phase", action="store_true",
                     help="run a partial validation after each Frontend phase, not only at the end")
     ap.add_argument("--skip-backend", action="store_true")
+    ap.add_argument("--backend-mode", choices=["contract", "synth", "build", "full"], default="build",
+                    help="backend depth (passed through as its --mode): contract = seconds, no ORFS; "
+                         "synth = minutes; build = sign-off (~1 h for 11 blocks); full = + optimisation")
     ap.add_argument("--revalidate", action="store_true",
                     help="with --resume: validate the drop again even though the last "
                          "validation passed (the drop changed under the run)")

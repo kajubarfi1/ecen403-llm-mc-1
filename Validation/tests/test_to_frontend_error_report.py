@@ -52,6 +52,28 @@ class TestErrorReport(unittest.TestCase):
         self.assertEqual(m["fail_lines"], [])
         self.assertTrue(os.path.exists(os.path.join(tmp, "VALIDATIONREPORT", "phase3_error_report.json")))
 
+    def test_backend_timing_anchor_and_repro_survive(self):
+        """The backend's findings have no line, a signal with bit and role, and
+        repro.command; the renderer lost all three (Backend handoff 2026-10-08)."""
+        retry = {"drop": "abc", "failed_modules": ["scheduler"], "retry_instructions": {
+            "scheduler": {"module": "scheduler", "failed_checks": [
+                {"id": "TIMING/cmd_aux", "name": "closes timing at 5 ns", "expected": "slack >= 0",
+                 "actual": "WNS -0.9 ns", "detectors": ["sta:opensta:setup"], "occurrences": 1, "paths": [],
+                 "anchor": [{"file": "PHASE3RTL/scheduler.sv", "signal": "cmd_aux", "bit": 3, "role": "endpoint"},
+                            {"file": "PHASE3RTL/scheduler.sv", "signal": "q_bank", "bit": 33, "role": "startpoint"}],
+                 "repro": {"command": "pipeline_batch.py --bundle_dirs bundles/scheduler"},
+                 "fix": "split the compare"}]}}}
+        tmp = tempfile.mkdtemp()
+        written = T.write_error_reports(retry, tmp)
+        with open(written[3]) as f:
+            text = "\n".join(json.load(f)["sim_result"]["modules"]["scheduler"]["fail_lines"])
+        self.assertNotIn(":None", text)
+        self.assertIn("cmd_aux[3] (endpoint)", text)
+        self.assertIn("q_bank[33] (startpoint)", text)
+        self.assertIn("repro: pipeline_batch.py --bundle_dirs bundles/scheduler", text)
+        self.assertNotIn("occurrences: 1 on\n", text + "\n")
+        self.assertIn("occurrences: 1", text)
+
     def test_no_failed_modules_writes_nothing(self):
         tmp = tempfile.mkdtemp()
         self.assertEqual(T.write_error_reports({"retry_instructions": {}, "failed_modules": []}, tmp), {})

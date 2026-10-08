@@ -64,6 +64,55 @@ def banner(n, title):
     print("    " + "-" * 68)
 
 
+def resolve_judging_spec(spec_path, val_rev, val_sha, ship_path, ship_rev, ship_sha,
+                         explicit, default_spec):
+    """Which spec this run judges against, given the one loaded (`spec_path`)
+    and the one the drop ships. Returns (spec_path, spec_id, reused, prev_id,
+    adopted).
+
+    `reused`: the shipped spec carries the same revision with different
+    content, a Frontend finding either way. When the loaded spec is the
+    default copy, the shipped one is adopted (the RTL was generated from it)
+    and the copy is refreshed so every standalone tool loads the same spec.
+    When the caller named a spec (VALIDATION_SPEC, as the flow does) that
+    choice stands and the difference is only reported."""
+    differs = bool(ship_path) and ship_rev == val_rev and ship_sha != val_sha
+    # the ledger of ids seen per revision: once a revision has named two
+    # specs the finding stands on every run until the revision changes,
+    # not only on the run that noticed (adopting the shipped spec would
+    # otherwise make the next run look clean)
+    if differs:
+        record_revision_id(ship_rev, val_sha)       # the id this revision named before
+    ids = record_revision_id(ship_rev, ship_sha) if ship_path else []
+    reused = differs or len(ids) > 1
+    if not differs or explicit:
+        return spec_path, val_sha, reused, (ids[-2] if len(ids) > 1 else None), False
+    import shutil
+    shutil.copyfile(ship_path, default_spec)
+    return default_spec, ship_sha, True, val_sha, True
+
+
+REVISION_IDS = os.path.join(ROOT, "Validation", "spec", "revision_ids.json")
+
+
+def record_revision_id(revision, spec_id):
+    """Append `spec_id` to the ids seen under `revision`; return the list."""
+    try:
+        with open(REVISION_IDS) as f:
+            led = json.load(f)
+    except (OSError, ValueError):
+        led = {"$schema": "validation-revision-ids/1",
+               "note": "spec ids (Validation/spec/spec_identity.py) seen per spec revision; "
+                       "more than one id under a revision is SPEC_REVISION_REUSED",
+               "revisions": {}}
+    seen = led["revisions"].setdefault(revision, [])
+    if spec_id not in seen:
+        seen.append(spec_id)
+        with open(REVISION_IDS, "w") as f:
+            json.dump(led, f, indent=2)
+    return seen
+
+
 def runnable_paths(pdefs, only=None):
     ps = [p["id"] for p in pdefs if not p.get("judged_in")]
     if only:
@@ -85,6 +134,8 @@ def main() -> int:
     ap.add_argument("--partial", action="store_true",
                     help="phase-partial drop: run every path whose blocks the drop "
                          "provides, report the rest as blocked, never substitute")
+    ap.add_argument("--no-model-regen", action="store_true",
+                    help="stop on a stale model instead of regenerating it")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -125,18 +176,36 @@ def main() -> int:
     # about it is evidence, so every path that includes it is blocked and the
     # mismatch is filed. The drop's own shipped spec is named so the run can
     # be repeated against it.
-    spec_path = os.environ.get("VALIDATION_SPEC", os.path.join(
-        ROOT, "Validation", "spec", "llmmc_microarchitecturespec_filled.json"))
+    default_spec = os.path.join(ROOT, "Validation", "spec",
+                                "llmmc_microarchitecturespec_filled.json")
+    explicit_spec = "VALIDATION_SPEC" in os.environ
+    spec_path = os.environ.get("VALIDATION_SPEC", default_spec)
     with open(spec_path) as f:
         val_rev = json.load(f).get("revision")
     stamps = {b: RD.spec_stamp(b)[1] for b in present}
     foreign = {b: r for b, r in stamps.items() if r and r != val_rev}
     unstamped = [b for b, r in stamps.items() if not r]
     ship_path, ship_rev = RD.shipped_spec()
-    print(f"    validation spec : rev {val_rev} ({os.path.relpath(spec_path, ROOT)})")
+    # A revision is a name; the content id says whether two files are the
+    # same spec. The same revision has named different specs (2026-10-08).
+    sys.path.insert(0, os.path.join(ROOT, "Validation", "spec"))
+    from spec_identity import spec_sha256
+    val_sha, ship_sha = spec_sha256(spec_path), (spec_sha256(ship_path) if ship_path else None)
+    print(f"    validation spec : rev {val_rev} id {val_sha} ({os.path.relpath(spec_path, ROOT)})")
     if ship_path:
-        print(f"    drop ships spec : rev {ship_rev} ({os.path.relpath(ship_path, ROOT)})"
+        print(f"    drop ships spec : rev {ship_rev} id {ship_sha} ({os.path.relpath(ship_path, ROOT)})"
               + ("" if ship_rev == val_rev else "   <-- NOT the spec being judged against"))
+    spec_path, val_sha, reused, prev_sha, adopted = resolve_judging_spec(
+        spec_path, val_rev, val_sha, ship_path, ship_rev, ship_sha, explicit_spec, default_spec)
+    if adopted:
+        print(f"    ADOPTED the shipped spec: same revision, different content "
+              f"(was id {prev_sha}); {os.path.relpath(default_spec, ROOT)} refreshed")
+    elif reused:
+        print(f"    WARNING: VALIDATION_SPEC names a different spec (id {val_sha}) "
+              f"than the drop ships (id {ship_sha}) under the same revision; "
+              f"judging against the caller's.")
+    # every generator and judge below loads this spec and no other
+    os.environ["VALIDATION_SPEC"] = spec_path
     if foreign:
         by_rev = {}
         for b, r in foreign.items():
@@ -163,9 +232,29 @@ def main() -> int:
                          "shipped_spec": os.path.relpath(ship_path, ROOT) if ship_path else None,
                          "shipped_spec_revision": ship_rev},
             "spec_ref": "revision", "status": "open"})
+    if reused:
+        spec_findings.append({
+            "source": "validation", "target": "frontend", "kind": "spec_revision_reused",
+            "scope": "spec", "severity": "major", "spec_revision": val_rev,
+            "title": f"spec revision {val_rev} has named more than one spec "
+                     f"(ids {', '.join(record_revision_id(ship_rev, ship_sha))})",
+            "detail": (f"The drop ships {os.path.relpath(ship_path, ROOT)} with revision {val_rev}, "
+                       f"but Validation has recorded more than one content id under that "
+                       f"revision (Validation/spec/revision_ids.json). A revision must change whenever the "
+                       f"content does; otherwise manifests, provenance records and findings "
+                       f"that cite it cannot say which spec they mean. Bump `revision` (or "
+                       f"derive it from the content) in the compiler whenever the golden file "
+                       f"changes."
+                       + (" Validation adopted the shipped spec for this run." if adopted else "")),
+            "evidence": {"shipped_spec": os.path.relpath(ship_path, ROOT),
+                         "shipped_spec_id": ship_sha,
+                         "validation_spec_id": prev_sha or val_sha,
+                         "adopted": adopted},
+            "spec_ref": "revision", "status": "open"})
     os.makedirs(os.path.join(ROOT, "Validation", "findings", "outbox"), exist_ok=True)
     with open(os.path.join(ROOT, "Validation", "findings", "outbox", "spec_revision_findings.json"), "w") as f:
         json.dump({"$schema": "validation-findings/1", "spec_revision": val_rev,
+                   "spec_id": val_sha,
                    "validation_spec": os.path.relpath(spec_path, ROOT),
                    "shipped_spec": os.path.relpath(ship_path, ROOT) if ship_path else None,
                    "shipped_spec_revision": ship_rev, "block_revisions": stamps,
@@ -219,6 +308,53 @@ def main() -> int:
                 return 1
     else:
         banner(3, "regenerate: skipped")
+
+    # 3a. the models still hold under THIS spec --------------------------------
+    # Every predictor/checker was accepted by a gate under some spec. The
+    # gate is re-run under the spec being judged against now; a model it
+    # rejects is stale (a 3-bit CTRL_STATUS field model under a 4-bit spec,
+    # 2026-10-08) and is regenerated by the agent, never patched. Nothing a
+    # stale model says about the drop is evidence.
+    banner("3a", "re-grade the accepted models under this spec")
+    sys.path.insert(0, os.path.join(ROOT, "Validation", "agents"))
+    import predictor_agent as PA
+    stale = []
+    for scope, kind, mpath, prov in PA.accepted_models():
+        failures, gate, _strategy = PA.regrade(scope, mpath)
+        with open(prov) as f:
+            pdoc = json.load(f)
+        under = pdoc.get("spec_sha256")
+        if failures:
+            stale.append((scope, kind, failures))
+            print(f"    STALE {scope:34} {kind:9} gate {gate}: {len(failures)} fault(s) "
+                  f"(accepted under spec id {under or '?'}, now {val_sha})")
+            print(f"          {failures[0][:150]}")
+        else:
+            if under != val_sha:
+                pdoc["spec_sha256"] = val_sha
+                pdoc.setdefault("regraded", []).append(
+                    {"spec_sha256": val_sha, "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
+                with open(prov, "w") as f:
+                    json.dump(pdoc, f, indent=2)
+            print(f"    ok    {scope:34} {kind:9} gate {gate}")
+    if stale:
+        if args.no_model_regen:
+            print(f"    STOP: {len(stale)} stale model(s) and --no-model-regen; regenerate with "
+                  + ", ".join(f"predictor_agent.py --scope {s}" for s, _k, _f in stale))
+            return 1
+        for scope, kind, _f in stale:
+            print(f"    regenerating {scope} {kind} (predictor_agent, gated) ...")
+            rc, out = sh(f"python3 Validation/agents/predictor_agent.py --scope {scope} --retries 3",
+                         log, check=False)
+            tail = [l for l in out.strip().splitlines() if l.strip()][-1:] or [""]
+            print(f"    {'ok  ' if rc == 0 else 'FAIL'} {scope:34} {tail[0].strip()[:90]}")
+            if rc != 0:
+                print("    STOP: the agent could not produce a model the gate accepts. That is a "
+                      "generation failure, not a design finding; the drop has not been judged.")
+                print(f"    log: {os.path.relpath(log, ROOT)}")
+                return 1
+        # the primary model changed: the agreement record against the second
+        # opinion is stale until step 8 recomputes it
 
     # 3b. what can run ----------------------------------------------------------
     # A path is blocked when its closure needs an absent block, or crosses an

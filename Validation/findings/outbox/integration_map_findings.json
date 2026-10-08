@@ -5,29 +5,6 @@
     {
       "source": "validation",
       "target": "frontend",
-      "kind": "width_mismatch",
-      "scope": "wb_port",
-      "owner_candidates": [
-        "wb_port"
-      ],
-      "severity": "critical",
-      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-      "title": "wb_port.req_addr is 27 bits but drives addr_decoder.req_addr, which is 29",
-      "detail": "The manifests declare addr_decoder.req_addr is driven by wb_port.req_addr, and their widths differ (27 -> 29). The wire cannot be made; every path that crosses it is blocked until the drop agrees with itself. The spec fixes this width: host_interface.address_width_bits = 29, so the block(s) that depart from it own the fix: wb_port.",
-      "evidence": {
-        "from": "wb_port.req_addr",
-        "to": "addr_decoder.req_addr",
-        "from_width": 27,
-        "to_width": 29,
-        "spec_path": "host_interface.address_width_bits",
-        "spec_value": 29
-      },
-      "spec_ref": "host_interface.address_width_bits",
-      "status": "open"
-    },
-    {
-      "source": "validation",
-      "target": "frontend",
       "kind": "manifest_wrong_source",
       "scope": "bank_tracker",
       "severity": "major",

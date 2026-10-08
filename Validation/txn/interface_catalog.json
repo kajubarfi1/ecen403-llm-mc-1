@@ -754,12 +754,15 @@
       },
       "role": "response",
       "derives_from": {
-        "$note": "UNPACK side of the spec's data_path_mapping: each accepted host write word is emitted as host_width/channel_width beats on the DDR side, low half first for little endianness. Mask polarity is deliberately unchecked - the spec declares wishbone sel semantics for the host side only.",
+        "$note": "UNPACK side of the spec's data_path_mapping: each accepted host write word is emitted as host_width/channel_width beats on the DDR side, low half first for little endianness. The mask is sliced per beat like the data, with the polarity data_path_mapping.ddr_dm_polarity declares (active_high_mask: DM=1 masks the byte, so each beat's mask is the INVERTED byte-enable slice; decided 2026-10-08, graded by the gate).",
         "interface": "dp_wr",
         "unpack": {
           "geometry_section": "data_path_mapping",
           "from_field": "data",
-          "data_field": "data"
+          "data_field": "data",
+          "mask_from_field": "mask",
+          "mask_field": "mask",
+          "polarity_key": "ddr_dm_polarity"
         }
       }
     }
