@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    wb_port
 // File:      wb_port.sv
-// Generated: 2026-09-24 13:46:12
+// Generated: 2026-10-08 11:30:16
 // Generator:     Wishbone Port Interface Generator (Phase 1)
 // Spec:      ddr3_mc_core_v2 rev golden_ddr3_1600k_x8_2lane_1rank
 //

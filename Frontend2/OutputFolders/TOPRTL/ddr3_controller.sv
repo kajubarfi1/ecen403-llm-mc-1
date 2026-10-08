@@ -131,7 +131,7 @@ module ddr3_controller (
     logic              w_data_path__rd_rsp_valid;
     logic              w_init_fsm__init_done;
     logic              w_init_fsm__init_fail;
-    logic [2:0]        w_refresh_ctrl__ref_pending_cnt;
+    logic [3:0]        w_refresh_ctrl__ref_pending_cnt;
     logic              w_refresh_ctrl__ref_required;
     logic              w_refresh_ctrl__ref_starve_flag;
     logic              w_refresh_ctrl__ref_urgent;

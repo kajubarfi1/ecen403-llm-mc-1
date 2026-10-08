@@ -8,7 +8,7 @@ module refresh_ctrl_tb;
     logic [23:0] cfg_tREFI_nCK;
     logic [3:0]  cfg_max_postpone, cfg_urgent_threshold;
     logic        ref_required, ref_urgent, ref_ack, ref_starve_flag;
-    logic [2:0]  ref_pending_cnt;
+    logic [3:0]  ref_pending_cnt;
     int pass_count=0, fail_count=0, total_tests=0;
 
     refresh_ctrl dut (.*);
@@ -42,7 +42,7 @@ module refresh_ctrl_tb;
 
         // -- Section A: reset / pre-init_done defaults --
         check("A1: ref_required low before init_done", ref_required===1'b0);
-        check("A2: ref_pending_cnt zero before init_done", ref_pending_cnt===3'd0);
+        check("A2: ref_pending_cnt zero before init_done", ref_pending_cnt===4'd0);
         check("A3: ref_starve_flag low before init_done", ref_starve_flag===1'b0);
 
         // -- Section B: tREFI ticks accumulate postpone count --
@@ -50,7 +50,7 @@ module refresh_ctrl_tb;
         begin
             logic changed;
             wait_for_pending_change(200, changed);
-            check("B1: ref_pending_cnt increments after init_done (tick 1)", changed && ref_pending_cnt > 3'd0);
+            check("B1: ref_pending_cnt increments after init_done (tick 1)", changed && ref_pending_cnt > 4'd0);
             check("B2: ref_required asserted once pending > 0", ref_required===1'b1);
         end
 

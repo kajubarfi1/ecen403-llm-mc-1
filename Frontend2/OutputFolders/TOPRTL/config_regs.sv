@@ -22,7 +22,7 @@ module config_regs #(
     input  logic                    sts_cal_fail,
     input  logic                    sts_bist_done,
     input  logic                    sts_bist_fail,
-    input  logic [2:0]              sts_ref_pending_cnt,
+    input  logic [3:0]              sts_ref_pending_cnt,
     input  logic                    sts_self_refresh_active,
     input  logic [15:0]             sts_ecc_ce_count,
     input  logic                    sts_ecc_ue_event,
@@ -170,7 +170,7 @@ module config_regs #(
     logic [31:0] rdata_mux;
     always_comb begin
         case (csr_adr_i)
-            ADDR_CTRL_STATUS: rdata_mux = {23'b0, sts_self_refresh_active, sts_ref_pending_cnt, sts_bist_fail, sts_bist_done, sts_cal_fail, sts_cal_done, sts_init_done};
+            ADDR_CTRL_STATUS: rdata_mux = {22'b0, sts_self_refresh_active, sts_ref_pending_cnt, sts_bist_fail, sts_bist_done, sts_cal_fail, sts_cal_done, sts_init_done};
             ADDR_CTRL_CONFIG: rdata_mux = reg_ctrl_config;
             ADDR_TIMING_0: rdata_mux = reg_timing_0;
             ADDR_TIMING_1: rdata_mux = reg_timing_1;

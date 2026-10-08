@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    data_path
 // File:      data_path.sv
-// Generated: 2026-09-24 13:43:38
+// Generated: 2026-10-08 11:31:49
 // Generator:     Data Path / Alignment Generator (Phase 3)
 // Spec:      ddr3_mc_core_v2 rev golden_ddr3_1600k_x8_2lane_1rank
 //
