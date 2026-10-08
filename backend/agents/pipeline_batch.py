@@ -61,6 +61,10 @@ SKIP_BLOCKS = {}
 # The runner and sign-off provenance checks now catch that corruption rather than
 # reporting it as success, but the default should not steer into it in the first
 # place. Raise this only if you have evidence your machine tolerates more.
+# Filesystem mtime granularity, not clock skew: the subprocess runs on this
+# machine, so a second of slack is enough to avoid rejecting a real report.
+REPORT_MTIME_SLACK_S = 1.0
+
 SAFE_MAX_WORKERS = 2
 
 
@@ -131,6 +135,8 @@ def run_block(
     optimize_fmax: bool,
     mode: str,
     optimize_power: bool,
+    drop_id: Optional[str],
+    spec_revision: Optional[str],
     block_colour: str,
     print_lock: threading.Lock,
 ) -> Dict[str, Any]:
@@ -156,6 +162,12 @@ def run_block(
         cmd.append("--optimize_fmax")
     if optimize_power:
         cmd.append("--optimize_power")
+    # What ties a finding to the RTL it ran on. Without these the emitter writes to
+    # outbox/unknown/, which the orchestrator never looks in - a silent dead letter.
+    if drop_id:
+        cmd += ["--drop_id", drop_id]
+    if spec_revision:
+        cmd += ["--spec_revision", spec_revision]
 
     start_time = time.time()
 
@@ -199,6 +211,30 @@ def run_block(
     validator: Dict[str, Any] = {}
     pipeline_status = "UNKNOWN"
 
+    # A report from an earlier run is not evidence about this one. pipeline.py writes
+    # it last, so anything older than this run's start cannot be ours - and a run that
+    # died on import writes none at all. Without this test a crash in 0.2s reads as a
+    # clean PASS with the previous run's area, power, DRC and LVS attached, which is
+    # the most convincing kind of wrong answer this pipeline can give.
+    fresh = (report_path.exists()
+             and report_path.stat().st_mtime >= start_time - REPORT_MTIME_SLACK_S)
+
+    if not fresh:
+        tail = [l for l in lines[-12:] if l.strip()]
+        return {
+            "block_name":   block_name,
+            "bundle_dir":   str(bundle_dir),
+            "status":       "ERROR" if exit_code != 0 else "NO_REPORT",
+            "exit_code":    exit_code,
+            "error":        ("pipeline.py wrote no report for this run"
+                             + (f" (exit {exit_code})" if exit_code else "")
+                             + (" - last output: " + " | ".join(tail[-3:]) if tail else "")),
+            "elapsed_s":    round(elapsed, 1),
+            "metrics":      {},
+            "validator":    {},
+            "output_tail":  tail,
+        }
+
     if report_path.exists():
         try:
             report = json.loads(report_path.read_text())
@@ -226,7 +262,8 @@ def run_block(
 
     # Also check block-specific reporter summary for richer metrics
     reporter_summary_path = out_root / "reporter" / block_name / "reporter_summary.json"
-    if reporter_summary_path.exists():
+    if (reporter_summary_path.exists()
+            and reporter_summary_path.stat().st_mtime >= start_time - REPORT_MTIME_SLACK_S):
         try:
             rs = json.loads(reporter_summary_path.read_text())
             m = rs.get("metrics", {})
@@ -240,6 +277,11 @@ def run_block(
             })
         except Exception:
             pass
+
+    # The report is this run's, but it cannot outrank the exit code: pipeline.py can
+    # write PASS and then die in teardown. Disagreement goes to the process.
+    if exit_code != 0 and pipeline_status == "PASS":
+        pipeline_status = "FAIL"
 
     return {
         "block_name":      block_name,
@@ -274,6 +316,12 @@ def print_summary(results: List[Dict[str, Any]], total_elapsed: float) -> None:
 
         status_str = c("PASS", "green") if passed else c(status, "red")
         print(f"\n  {c(block, 'bold')}  [{status_str}]  ({elapsed}s)")
+
+        # A block with no metrics produced none; say so rather than printing an
+        # empty entry that reads like a block with nothing to report.
+        if r.get("error"):
+            print(f"    {c('no result', 'red')}    : {r['error']}")
+            continue
 
         if m.get("wns_ns") is not None:
             print(f"    WNS          : {m['wns_ns']} ns")
@@ -351,6 +399,13 @@ def main() -> int:
                     help="Enable Fmax optimization for all blocks")
     ap.add_argument("--optimize_power",   action="store_true", default=False,
                     help="Enable power optimization for all blocks")
+    ap.add_argument("--drop_id", default=None,
+                    help="The frontend drop's content id, passed to every block so its "
+                         "findings can be tied to the RTL they ran on.")
+    ap.add_argument("--spec_revision", default=None,
+                    help="The spec revision these bundles came from. The orchestrator "
+                         "looks the findings outbox up by it; without it findings land "
+                         "in outbox/unknown/ where nothing reads them.")
     ap.add_argument("--mode", default="build",
                     choices=["contract", "synth", "build", "full"],
                     help="How far to take each block. contract (seconds, no Docker), "
@@ -400,6 +455,9 @@ def main() -> int:
     print(f"  mode        : {args.mode}")
     print(f"  opt_fmax    : {args.optimize_fmax}")
     print(f"  opt_power   : {args.optimize_power}")
+    print(f"  spec_rev    : {args.spec_revision or '(none - findings go to outbox/unknown)'}")
+    if args.drop_id:
+        print(f"  drop_id     : {args.drop_id}")
     print("=" * 70 + "\n")
 
     print_lock = threading.Lock()
@@ -416,6 +474,8 @@ def main() -> int:
                 enable_autotuner=args.enable_autotuner,
                 mode=args.mode,
                 optimize_fmax=args.optimize_fmax,
+                drop_id=args.drop_id,
+                spec_revision=args.spec_revision,
                 optimize_power=args.optimize_power,
                 block_colour=BLOCK_COLOURS[i % len(BLOCK_COLOURS)],
                 print_lock=print_lock,

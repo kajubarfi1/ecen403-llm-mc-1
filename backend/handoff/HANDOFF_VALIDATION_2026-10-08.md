@@ -46,15 +46,59 @@ regenerated anyway.
 compute it ourselves without reaching into `Validation/structural/rtl_drop.py`,
 which resolves paths through your `rtl_drop.json` to read the Frontend's files —
 backend would be coupled to two other subsystems' layout and would stop running
-standalone. You already have the id at `flow.py:462`. One line:
+standalone. You have the id in hand at `flow.py:462`, but `record()` appends it to
+`state["stages"][-1]`, not to `run.state`, so it needs carrying across. Two lines
+- in `stage_rtl_validation`, after `h` is loaded:
 
 ```python
-cmd = [PY, BACKEND_PIPELINE, "--bundle_dir", bundle, "--out_root", run.backend_dir,
-       "--drop_id", run.state.get("drop_id") or ""]
+run.state["drop_id"] = h["drop_id"]
+```
+
+and in `stage_backend`:
+
+```python
+if run.state.get("drop_id"):
+    cmd += ["--drop_id", run.state["drop_id"]]
 ```
 
 Our side accepts it and falls back to `git_head` when it is absent, so the order
 of landing does not matter.
+
+**The drop_id confirmation in your own contract is not implemented.**
+`HANDOFF_CONTRACT.md` §4 says: read `HANDOFF.json`, confirm `drop_id` equals the id
+of the drop just written, *else validation has not run on it yet*. `flow.py` never
+computes the drop's id - `rtl_drop.drop_id()` is not called anywhere in it - so
+that comparison cannot happen. Combined with the stale-report issue below, a round
+where `validate_drop.py` fails without refreshing `outbox/current` would be read as
+a verdict on the current drop. This is your call, not a backend need, but it is the
+check that would have caught our failure today.
+
+**`stage_backend` can report PASS for a run that failed.** `flow.py:583`:
+
+```python
+status = rep.get("pipeline_status", "FAIL" if rc else "PASS")
+```
+
+The default fires only when the key is *absent*. A `pipeline_final_report_*.json`
+left in `run.backend_dir` by an earlier round has the key, so a stale PASS is
+taken over a nonzero `rc`. Suggest keying on `rc` first, and treating a report
+older than the round's start as not ours:
+
+```python
+if rc != 0:
+    status = "FAIL"
+```
+
+We hit exactly this on our side today: `pipeline_batch.py` read `exit_code` and
+never used it, so eleven blocks that died on import in 0.2s reported PASS with
+three-week-old area, power, DRC and LVS attached. It is the fifth place this
+pattern has turned up in the backend, and it is the most expensive kind of bug we
+have had, because the wrong answer looks like a good one. Worth checking
+`stage_rtl_validation` for the same shape.
+
+Related, lower stakes: `reports[0]` from an unsorted `os.listdir` picks an
+arbitrary report when `run.backend_dir` holds more than one design, which it will
+once a multi-block bundle or a second round writes there.
 
 ## 3. `to_frontend_error_report.py` loses three things
 
