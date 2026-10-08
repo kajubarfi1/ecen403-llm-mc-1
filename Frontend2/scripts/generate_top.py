@@ -80,7 +80,7 @@ SUPPLEMENTAL_CONNECTIONS = []
 # Ports whose manifest-declared `source` is functionally wrong (the RTL
 # needs glue/expr_glue instead of a straight wire) -- the manifest's claim
 # is ignored for these targets.
-OVERRIDDEN_BY_GLUE = {"data_path.wr_data_valid"}
+OVERRIDDEN_BY_GLUE = set()   # plus every port whose manifest declares `source_expr`
 
 # Registered (1-cycle) glue: NONE needed as of this drop. cmd_gen.sv
 # already carries real, correctly-registered fb_pre_bank/fb_rd_bank/
@@ -100,10 +100,23 @@ GLUE = []
 # wb_port's write request is actually ACCEPTED (valid && we && ready) --
 # not on every req_valid pulse (which also fires on reads and on
 # stalled/unaccepted writes).
-EXPR_GLUE = [
-    {"target": "data_path.wr_data_valid",
-     "terms": ["wb_port.req_valid", "wb_port.req_we", "cmd_queue.enq_ready"]},
-]
+# Now declared by the consumer's own manifest as `source_expr` (see
+# _manifest_expr_glue); this table stays for expressions a manifest cannot carry.
+EXPR_GLUE = []
+
+
+def _manifest_expr_glue(manifests) -> list:
+    """Expression-driven inputs, from `source_expr` ("a.x && b.y && c.z") on a
+    manifest port -- the manifest is the integration contract, so the
+    expression lives there rather than in a table in this script."""
+    out = []
+    for block in BLOCK_ORDER:
+        for name, p in manifests[block]["ports"].items():
+            expr = p.get("source_expr")
+            if expr and p["dir"] == "input":
+                terms = [t.strip() for t in expr.split("&&")]
+                out.append({"target": f"{block}.{name}", "terms": terms})
+    return out
 
 KNOWN_GAPS = [
     "calibration.zqcs_req / calibration.zqcs_ack: no block issues or "
@@ -133,6 +146,7 @@ def load_manifests(base_dir: Path) -> dict:
                 ports[p["name"]] = {
                     "dir": p["dir"], "width": p["width"], "group": group,
                     "source": p.get("source"),
+                    "source_expr": p.get("source_expr"),
                 }
         manifests[block] = {"manifest": m, "ports": ports, "sv_path": svpath}
     return manifests
@@ -156,13 +170,14 @@ def build_edges(manifests: dict):
         edges.append((src, dst))
         seen_targets.add(dst)
 
+    expr_targets = {e["target"] for e in _manifest_expr_glue(manifests)}
     # 1. manifest-declared `source` fields (skip the two glue supersedes).
     for block in BLOCK_ORDER:
         for name, p in manifests[block]["ports"].items():
             dst = f"{block}.{name}"
             if p["dir"] != "input" or not p["source"]:
                 continue
-            if dst in OVERRIDDEN_BY_GLUE:
+            if dst in OVERRIDDEN_BY_GLUE or dst in expr_targets:
                 continue
             add_edge(p["source"], dst)
 
@@ -236,7 +251,7 @@ def build_wiring(manifests: dict, edges: list):
             input_net[t] = reg_net
 
     expr_wires = []  # (wire_name, [term_nets], target_width)
-    for eg in EXPR_GLUE:
+    for eg in EXPR_GLUE + _manifest_expr_glue(manifests):
         tb, tp = eg["target"].split(".")
         term_nets = []
         for term in eg["terms"]:
