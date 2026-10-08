@@ -4,17 +4,13 @@
 |        DDR3 MEMORY CONTROLLER -- PHASE 4 PIPELINE (Frontend2)        |
 |                                                                      |
 |  Flow:                                                               |
-|    1 RTL generation script (self-contained: RTL + its own spec-only  |
-|    testbench + manifest, deterministic, zero LLM calls)              |
-|    -> generation check                                               |
+|    1 RTL generation script + 1 testbench generator (parallel,        |
+|    deterministic, zero LLM calls) -> generation check                |
 |        -> Lint Gate (real Verilator via SSH/Slurm)                   |
 |        -> Sim Gate (real Xcelium via SSH/Slurm) -> Success           |
 |                                                                      |
-|  No gen_testbenches node: data_path_gen.py's own run() already       |
-|  writes data_path_tb.sv via its own generate_testbench() (note the   |
-|  method name -- generate_testbench(), not generate_tb() like Phase   |
-|  3's generators) -- nothing else writes to that path, same           |
-|  no-race situation as Phase 3. See Frontend2/IMPLEMENTATION_PLAN.md. |
+|  The testbench comes from Phase4/tb_generator.py, which reads ONLY   |
+|  the spec (never data_path_gen.py), same as Phase 1/2/3.             |
 |                                                                      |
 |  No retry loop -- see Phase 1/2/3 pipelines for rationale.           |
 |                                                                      |
@@ -45,6 +41,7 @@ for p in (HERE, AGENTS_DIR):
 
 from langgraph.graph import StateGraph, END
 from gate_policy import gate_passes
+from tb_generator import TestbenchGenerator
 from data_path_gen import DataPathGenerator
 
 try:
@@ -111,6 +108,16 @@ def gen_data_path(state: GraphState) -> dict:
 # ===================================================
 # GENERATION CHECK (no retry -- a failure here is a real bug)
 # ===================================================
+def gen_testbenches(state: GraphState) -> dict:
+    print("\n  +- Generating testbenches (spec-only, independent of RTL)")
+    try:
+        tbg = TestbenchGenerator(state["spec_path"])
+        written = tbg.write_phase4(state["phase4_rtl_dir"])
+        return {"modules": {"testbenches": {"status": "success", "files": written}}}
+    except Exception as e:
+        return {"modules": {"testbenches": {"status": "error", "errors": [str(e)]}}}
+
+
 def check_generation(state: GraphState) -> dict:
     print(f"\n{'=' * 62}")
     print("  GENERATION CHECK")
@@ -443,6 +450,7 @@ def build_graph():
 
     g.add_node("start", start)
     g.add_node("gen_data_path", gen_data_path)
+    g.add_node("gen_testbenches", gen_testbenches)
     g.add_node("check_generation", check_generation)
     g.add_node("lint_gate", lint_gate)
     g.add_node("sim_gate", sim_gate)
@@ -453,7 +461,9 @@ def build_graph():
 
     g.set_entry_point("start")
     g.add_edge("start", "gen_data_path")
+    g.add_edge("start", "gen_testbenches")
     g.add_edge("gen_data_path", "check_generation")
+    g.add_edge("gen_testbenches", "check_generation")
 
     g.add_conditional_edges("check_generation", route_after_generation,
         {"lint_gate": "lint_gate", "generation_failure": "generation_failure"})

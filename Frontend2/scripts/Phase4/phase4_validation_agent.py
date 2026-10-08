@@ -10,18 +10,10 @@
 |  the GENERATOR script (never the emitted .sv), shows a diff, applies |
 |  only on 'a' (or --yes, guarded), then regenerates and re-verifies.  |
 |                                                                      |
-|  The circular-dependency problem, solved mechanically. Phase 1/2 get |
-|  their testbench from a separate spec-only tb_generator.py. Here the |
-|  testbench is emitted by the SAME generator file as the RTL, so an   |
-|  agent that may edit that file could "fix" a failure by editing the  |
-|  test. Two checks make that impossible to do silently:               |
-|    1. before anything is written, the testbench methods (generate_testbench, _tb_test_registry)      |
-|       must be AST-identical to the current ones;                     |
-|    2. after regenerating, the emitted <module>_tb.sv must be         |
-|       byte-identical to the one the failure was observed against.    |
-|  Either failing rejects the patch (and, under --yes, reverts it; in  |
-|  interactive mode check 2 asks a human, since a legitimate           |
-|  parameter fix can show up in testbench localparams).                |
+|  The testbench is a separate, spec-only file (Phase4/tb_generator.py) |
+|  that this agent is not given to edit, same as Phase 1/2. It used to  |
+|  be emitted by the RTL generator itself; that was moved out so a fix |
+|  can't be graded by a test the same code wrote.                      |
 |                                                                      |
 |  Usage:                                                              |
 |    python3 Frontend2/scripts/Phase4/phase4_validation_agent.py   |
@@ -76,9 +68,7 @@ MAX_ATTEMPTS_PER_MODULE = 3
 
 P4_MODULES = ("data_path",)
 PHASE4_RTL_SUBDIR = "PHASE4RTL"
-# Methods that emit or feed the testbench; a patch may not change them.
-TB_METHODS = ("generate_testbench", "_tb_test_registry")
-VALIDATION_SUBDIR = "VALIDATIONREPORT"
+
 
 # module -> (generator .py filename stem, class name)
 GENERATOR_INFO = {
@@ -160,12 +150,12 @@ PROPOSE_FIX_TOOL = {
 
 SYSTEM_PROMPT = """You are fixing a deterministic Python RTL generator in a DDR3 \
 memory controller project. The generator is a plain class whose methods \
-(generate_rtl, generate_tb, generate_manifest, run) build up SystemVerilog \
+(generate_rtl, generate_manifest, run) build up SystemVerilog \
 and a JSON manifest as Python strings from self.p (derived parameters, a \
 dict computed from the spec) and self.spec (the loaded microarchitecture \
 spec JSON). Its RTL output was uploaded to Cadence Xcelium on a real \
-cluster and simulated against the testbench THIS SAME generator emits \
-(generate_tb / generate_testbench); you are given the real, actual failure \
+cluster and simulated against the testbench from Phase4/tb_generator.py \
+(a SEPARATE, spec-only testbench -- not written by this generator); you are given the real, actual failure \
 output below -- not a hypothetical.
 
 Ground rules:
@@ -173,12 +163,11 @@ Ground rules:
 artifact regenerated from the generator every run; a fix that only lives \
 in the .sv would be silently overwritten and the bug would resurface the \
 next time anyone runs this pipeline.
-- The testbench methods (generate_testbench, _tb_test_registry) are FROZEN. They are checked mechanically: \
-a patch that changes them, or that changes the emitted testbench text in any \
-way (for example by altering a derived parameter the testbench also reads), \
-is rejected. Fix the RTL side only. If the failure looks like the testbench's \
-expected value is wrong rather than the RTL, say so plainly in root_cause and \
-set confidence to low instead of trying to edit the test.
+- The testbench (Phase4/tb_generator.py) is a separate file you are not \
+given and cannot edit here -- if the failure looks like the testbench's \
+expected value is wrong rather than this module's RTL, say so plainly in \
+root_cause and set confidence to low rather than forcing an RTL-side fix \
+that doesn't actually address the real problem.
 - The fix must generalize: this generator runs against many different \
 specs (different speed grades, densities, device widths, geometries). A \
 fix that hardcodes a value that happens to be correct only for the spec \
@@ -261,8 +250,8 @@ EMITTED RTL ({context['module']}.sv, what was actually simulated):
 {context['rtl_source']}
 ```
 
-TESTBENCH ({context['module']}_tb.sv, emitted by the same generator but FROZEN -- \
-read-only evidence of what the RTL is being checked against):
+TESTBENCH ({context['module']}_tb.sv, written by Phase4/tb_generator.py, NOT \
+by the generator you're fixing):
 ```systemverilog
 {context['tb_source']}
 ```
@@ -327,19 +316,6 @@ def _parse_xrun_output(stdout: str):
     passed_own = bool(m) and m.group(1) == m.group(2) and not fail_lines
     test_count = len(pass_lines) + len(fail_lines)
     return (passed_legacy or passed_own), test_count, pass_lines, fail_lines, assertion_errors
-
-
-def _tb_methods_changed(old_source: str, new_source: str) -> list:
-    """Names of TB_METHODS whose AST differs between the two generator sources
-    (or that disappeared). Comments/whitespace don't count; any code does."""
-    def grab(src):
-        out = {}
-        for node in ast.walk(ast.parse(src)):
-            if isinstance(node, ast.FunctionDef) and node.name in TB_METHODS:
-                out[node.name] = ast.dump(node)
-        return out
-    o, n = grab(old_source), grab(new_source)
-    return sorted(k for k in set(o) | set(n) if o.get(k) != n.get(k))
 
 
 def _reverify_module(rtl_dir: Path, module: str) -> dict:
@@ -482,13 +458,6 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
             continue
 
         old_source = context["generator_source"]
-        tb_changed = _tb_methods_changed(old_source, new_source)
-        if tb_changed:
-            print(f"  REJECTED: the proposal edits frozen testbench method(s): {', '.join(tb_changed)}")
-            record["attempts"].append({"attempt": attempt, "status": "touches_testbench",
-                                        "methods": tb_changed, "root_cause": proposal.get("root_cause")})
-            continue
-        tb_before = context["tb_source"]
         diff = "\n".join(difflib.unified_diff(
             old_source.splitlines(), new_source.splitlines(),
             fromfile=f"{gen_stem}.py (current)", tofile=f"{gen_stem}.py (proposed)",
@@ -542,20 +511,6 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
                                         "error": str(e), "diff": diff,
                                         "root_cause": proposal.get("root_cause")})
             break
-
-        tb_after = (rtl_dir / f"{module}_tb.sv").read_text()
-        if tb_after != tb_before:
-            print("  WARNING: the emitted testbench text changed after this patch. The failure was "
-                  "observed against the old testbench, so a pass now would not prove the RTL fix.")
-            keep = (not AUTO_YES) and input(
-                "  keep the patch anyway (a human has judged the testbench change legitimate)? "
-                "(y/N): ").strip().lower() == "y"
-            if not keep:
-                _revert(gen_path, old_source, module, spec_path, output_dir)
-                record["attempts"].append({"attempt": attempt, "status": "testbench_changed",
-                                            "diff": diff, "root_cause": proposal.get("root_cause"),
-                                            "reverted": True})
-                continue
 
         reverify = _reverify_module(rtl_dir, module)
         sim_status = reverify["sim"].get("status")
