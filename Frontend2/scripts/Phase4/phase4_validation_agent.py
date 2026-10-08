@@ -68,6 +68,7 @@ MAX_ATTEMPTS_PER_MODULE = 3
 
 P4_MODULES = ("data_path",)
 PHASE4_RTL_SUBDIR = "PHASE4RTL"
+VALIDATION_SUBDIR = "VALIDATIONREPORT"
 
 
 # module -> (generator .py filename stem, class name)
@@ -174,6 +175,9 @@ fix that hardcodes a value that happens to be correct only for the spec \
 attached to THIS failure is not a real fix -- prefer deriving from \
 self.p or self.spec over a new literal constant, exactly the way the \
 surrounding code already does for parameters that vary by spec.
+- A manifest port's `source` is exactly `<block>.<port>` of a port that exists, or omitted. \
+Never put prose in it. If an input has no single direct driver, omit `source` or give the \
+expression in `source_expr` ("a.x && b.y"); the integration map refuses anything else.
 - Preserve the class's public interface exactly (name, __init__ signature, \
 method names) -- other code imports and instantiates this class by name.
 - Minimal, targeted change. Do not refactor, reformat, or touch logic \
@@ -221,6 +225,37 @@ def _anthropic_client():
     return anthropic.Anthropic()
 
 
+def _previous_block(context: dict) -> str:
+    """What happened to the previous attempt in this same run, so the model can
+    tell a wrong fix from a typo (a patch that does not compile re-sims as
+    '0 passed, 0 failed', which looks like nothing at all)."""
+    prev = context.get("previous_attempt")
+    if not prev:
+        return ""
+    return ("YOUR PREVIOUS ATTEMPT DID NOT VERIFY (under --yes it was reverted and the generator "
+            "below is the original; otherwise the generator below already contains it):\n"
+            f"  {prev}\n\n")
+
+
+_SOURCE_RE = re.compile(r"^[A-Za-z0-9_]+\.[A-Za-z0-9_]+$")
+
+
+def _manifest_source_problems(rtl_dir: Path, module: str) -> list:
+    """Every consumer port's `source` must be <block>.<port> (the integration
+    map refuses anything else), or absent."""
+    try:
+        m = json.loads((rtl_dir / f"{module}_manifest.json").read_text())
+    except Exception as e:
+        return [f"manifest unreadable: {e}"]
+    out = []
+    for group, plist in m.get("ports", {}).items():
+        for port in plist:
+            src = port.get("source")
+            if src is not None and not _SOURCE_RE.match(str(src)):
+                out.append(f"{module}.{port['name']}: source {src!r} is not <block>.<port>")
+    return out
+
+
 def _failure_block(context: dict) -> str:
     if context.get("external_findings"):
         return ("VALIDATION-SUBSYSTEM FINDINGS (system-level checks from the Validation\n"
@@ -238,7 +273,7 @@ def _failure_block(context: dict) -> str:
 def _propose_fix(client, context: dict) -> dict:
     user_msg = f"""FAILING MODULE: {context['module']}
 
-{_failure_block(context)}
+{_previous_block(context)}{_failure_block(context)}
 
 CURRENT GENERATOR SOURCE ({context['generator_path']}):
 ```python
@@ -362,9 +397,12 @@ def _reverify_module(rtl_dir: Path, module: str) -> dict:
               f"{len(pass_lines)} passed, {len(fail_lines)} failed")
         for line in fail_lines[:10]:
             print(f"      | {line}")
+        log_head = "\n".join([l for l in stdout.splitlines()
+                              if "*E" in l or "rror" in l][:12])
         return {
             "lint": lint_mod,
             "sim": {"status": "PASS" if passed else "FAIL", "test_count": test_count,
+                    "log_head": log_head,
                     "pass_count": len(pass_lines), "fail_count": len(fail_lines),
                     "fail_lines": fail_lines, "assertion_errors": assertion_errors},
         }
@@ -419,6 +457,7 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
     gen_path = HERE / f"{gen_stem}.py"
 
     record = {"module": module, "attempts": []}
+    prev_feedback = None
 
     for attempt in range(1, MAX_ATTEMPTS_PER_MODULE + 1):
         print(f"\n{'#' * 62}")
@@ -438,6 +477,7 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
             "tb_source": (rtl_dir / f"{module}_tb.sv").read_text(),
             "manifest_source": (rtl_dir / f"{module}_manifest.json").read_text(),
             "spec_source": Path(spec_path).read_text(),
+            "previous_attempt": prev_feedback,
         }
 
         print("  asking Claude to diagnose + propose a fix...")
@@ -453,6 +493,7 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
             ast.parse(new_source)
         except SyntaxError as e:
             print(f"  REJECTED: proposed source is not valid Python: {e}")
+            prev_feedback = f"the proposed generator was not valid Python: {e}"
             record["attempts"].append({"attempt": attempt, "status": "invalid_syntax",
                                         "error": str(e), "root_cause": proposal.get("root_cause")})
             continue
@@ -512,6 +553,20 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
                                         "root_cause": proposal.get("root_cause")})
             break
 
+        bad_src = _manifest_source_problems(rtl_dir, module)
+        if bad_src:
+            print("  REJECTED: the regenerated manifest has invalid `source` fields:")
+            for b in bad_src:
+                print(f"    {b}")
+            _revert(gen_path, old_source, module, spec_path, output_dir)
+            prev_feedback = ("the regenerated manifest had invalid `source` fields (must be "
+                             "<block>.<port> or omitted; use `source_expr` for expressions): "
+                             + "; ".join(bad_src[:5]))
+            record["attempts"].append({"attempt": attempt, "status": "bad_manifest_source",
+                                        "problems": bad_src, "reverted": True,
+                                        "root_cause": proposal.get("root_cause")})
+            continue
+
         reverify = _reverify_module(rtl_dir, module)
         sim_status = reverify["sim"].get("status")
         lint_status = reverify["lint"].get("status")
@@ -525,6 +580,17 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
             "reverification": reverify, "fixed": fixed,
         })
 
+        if not fixed:
+            sim_info = reverify["sim"]
+            prev_feedback = (
+                f"the patch was applied, then lint {lint_status}, sim {sim_status} "
+                f"({sim_info.get('pass_count', 0)} passed, {sim_info.get('fail_count', 0)} failed). "
+                + ("NO tests ran, which usually means the patched RTL or testbench did not "
+                   "compile. First errors from the simulator log:\n" + sim_info.get("log_head", "")
+                   if sim_info.get("test_count", 0) == 0 else
+                   "Failing lines: " + " | ".join(sim_info.get("fail_lines", [])[:6]))
+                + (" Lint errors: " + "; ".join(map(str, reverify["lint"].get("errors", [])[:4]))
+                   if reverify["lint"].get("status") == "FAIL" else ""))
         if AUTO_YES and not fixed:
             _revert(gen_path, old_source, module, spec_path, output_dir)
             record["attempts"][-1]["reverted"] = True
