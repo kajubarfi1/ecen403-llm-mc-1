@@ -64,10 +64,9 @@ against a real model.
 ## 5. Still open on our side
 
 - (Phase 3/4 fix agents: done, see section 6 below.)
-- The spec-gap agent is not yet wired to `completeness_rules.json`
-  (`options` / `consequence`), and the remaining intake gaps (taxonomy ids,
-  tMRD/tMOD, `block_interfaces`, the CSR semantics) are not yet emitted by the
-  compiler.
+- `block_interfaces` (INTERFACE_CONTRACTS) is the one intake gap left; see
+  section 7. (The rest are closed, and the gap agent now reads
+  `completeness_rules.json`; see section 7.)
 - `Frontend2/` testbench fix agents have no `--yes`.
 
 ## 6. Addendum (same day): Phase 3/4 fix agents, and a bug fix
@@ -91,8 +90,39 @@ against a real model.
   into `PHASE{N}RTL/`. If your flow ran those agents before this, a "did not
   verify" outcome may have been this bug.
 
+## 7. Addendum 2 (same day): the intake gaps are emitted
+
+The golden spec and `microarch_compiler.py` now state the fields your intake
+gate asks for. Your `validate_spec_stage` on the golden spec and on the compiled
+presets: PASS, 0 blocking, **1 advisory (INTERFACE_CONTRACTS) instead of 12**.
+
+- `timing_model.tMRD = 5.0` and `tMOD = 15.0` ns (JESD79-3: 4 nCK;
+  max(12 nCK, 15 ns)), computed from tCK in the compiler.
+- `failure_taxonomy`: `SCHED_001..003` (dropped request, invented command,
+  refresh never serviced) and `TIMING_012..014` (tREFI, tMRD, tMOD). The
+  compiler appends these to the golden file's taxonomy and never replaces an id;
+  the golden spec carries the same entries so the two agree.
+- Your pinned conventions are now stated in the spec: `unmapped_read_data =
+  zero`, `unmapped_write_behavior = ignored_with_error`,
+  `access_violation_error = silent`, `read_byte_enable_semantics = ignored`,
+  `status_read_sampling = previous_edge`, `speculative_activate = allowed`.
+  **We adopted these as defaults because they are what you judge under; they
+  are not a verified description of the RTL and are still an owner decision.**
+  They sit in `INTAKE_CONVENTIONS` in the compiler. Because the spec now states
+  them, your "pinned convention" and "the spec says" are the same thing; if the
+  RTL disagrees with one, that becomes a real finding.
+- The RTL is unchanged by this. The drop `4b86c7cd3705` is still current.
+- The spec-gap agent (`microarch_gap_agent.py`) now puts the matching
+  `completeness_rules.json` entries (options, standard, consequence) in its
+  prompt and may not emit a value outside a rule's `options`.
+- Still open: `block_interfaces` for the 19 hops. We think it should be
+  generated from the manifests' `source` fields rather than hand-written;
+  your call whether the spec or `path_definitions.json` owns it.
+
 ## Questions
 
 1. Is `4b86c7cd3705` the drop you will run next? If you need anything else in
    `OutputFolders/` first, say so.
 2. `observed`-only modules under `--yes`: leave unpatched (current), or patch?
+3. `block_interfaces`: derive it from the manifests (our suggestion), or keep
+   `path_definitions.json` as the owner and stop asking the spec for it?
