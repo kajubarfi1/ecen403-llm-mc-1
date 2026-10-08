@@ -122,29 +122,62 @@ Nitpick, your call: `retry_adapter.adapt` sets `pipeline: "validation"` on our
 findings too. `flow.py` overwrites `source`, so provenance is recoverable — but
 a reader of the package alone would attribute a timing defect to validation.
 
-## 4. The outbox will not be found today
+## 4. The drop id is not reproducible off Linux
 
-`backend_findings()` looks up `outbox/<spec_revision>/latest` using the current
-spec's `revision`. That is now `compiled_ddr3800_x8_1lane_1rank`; our only
-committed outbox is under `golden_ddr3_1600k_x8_2lane_1rank`, so the edge would
-halt with "emitted no findings" until the outbox is regenerated.
+Resolved first: the `compiled_ddr3800_x8_1lane_1rank` revision we flagged earlier
+today is gone. The drop is back on `golden_ddr3_1600k_x8_2lane_1rank`, so the
+200 MHz target stands and our bundles are on the right spec. We also removed the
+stale `SPEC_REVISION` default that would have written findings to a folder nothing
+reads while looking like success; it now takes `--spec_revision` and warns when it
+has neither.
 
-We removed the stale default that caused this: the backend used to fall back to
-`golden_ddr3_1600k_x8_2lane_1rank` when `SPEC_REVISION` was unset, which wrote
-findings to a folder nothing reads and looked like success. It now takes
-`--spec_revision` (or `SPEC_REVISION`) and warns loudly when it has neither.
+But the id itself does not survive a Windows checkout. `drop_id()` hashes raw file
+bytes, this repo has no `.gitattributes`, and git hands a Windows clone CRLF:
 
-**For the Frontend:** that revision says **ddr3800**, not ddr3_1600. Our bundles
-and the 200 MHz target came from a 1600 spec. If the speed bin genuinely changed,
-every timing number we have is against the wrong part and the team should know
-before we regenerate against it. If it is a naming artifact, say so and we
-proceed.
+| computed on | drop id |
+|---|---|
+| our checkout, as git delivered it | `ec49d485ca8d` |
+| the same tree, LF-normalised | `4b86c7cd3705` |
+| Frontend's published value | `4b86c7cd3705` |
+
+So `HANDOFF_CONTRACT.md` §2 - "Same files always get the same id; one changed byte
+is a new drop" - holds only within one line-ending convention, and Frontend's claim
+that their id "equals `rtl_drop.drop_id()` on this tree" is true on Olympus and
+false on either of our laptops. Anything comparing a locally computed id against a
+published one therefore always sees a mismatch, which is the failure mode that
+looks like a stale drop when nothing is stale.
+
+Two fixes, either is fine, yours to choose:
+
+```python
+data = open(p, "rb").read().replace(b"
+", b"
+")   # in drop_id(), or
+```
+
+```
+*.sv   text eol=lf        # .gitattributes
+*.json text eol=lf
+```
+
+We prefer the normalise in `drop_id()`: it is correct regardless of how any
+teammate's git is configured, and it cannot be undone by a fresh clone. We are
+stamping findings with `4b86c7cd3705`, the team's value, not the one our tree
+computes.
 
 ## 5. Per-block netlists
 
-Agreed — a top-level netlist has no block path to run on. We will run
-`pipeline_batch.py` over all 11 bundles so `runner/<block>/6_final.v` exists per
-block. It is a multi-hour unattended run; expect them this week.
+Agreed - a top-level netlist has no block path to run on. Running
+`pipeline_batch.py` over all 11 blocks of drop `4b86c7cd3705` so
+`runner/<block>/6_final.v` exists per block. Multi-hour unattended run; expect them
+this week.
+
+Note the bundles these are built from: not `backend/bundles/`, which your handoff
+named. That set is months old - up to 506 lines adrift from the current drop per
+block - and netlists from it would not correspond to anything you have judged. We
+re-cut `backend/bundles_frontend2/` from `rtl_drop`'s own resolution, so all 22
+files are byte-identical to the drop and every manifest carries the golden revision.
+Worth pointing `flow.py` at that path rather than `bundles/`.
 
 Your `wb_port/6_final.v` result (**19/19** on `path_21_wb_port_standalone`) is the
 first behavioural confirmation of a backend netlist we have. Thank you for
@@ -153,5 +186,17 @@ chasing the two checker defects rather than filing them against the netlist.
 ## 6. `--backend-mode`
 
 Yes, please. `contract` / `synth` / `build` / `full`; `build` stays the default.
-`contract` is seconds and runs no ORFS, which is what a plan or a smoke test
-wants. Mapping is literal — pass the string through to `--mode`.
+Mapping is literal - pass the string through to `--mode`.
+
+One correction to our own pitch: `contract` runs no ORFS but is **~20 s per block**,
+not seconds, because intake still makes an LLM call per block. Eleven blocks is
+about two minutes wall clock at two workers. Dropping that call is on our list; until
+then, budget for it rather than treating `contract` as free.
+
+Also worth knowing, since it bears on the stale-report issue in §2: we found a sixth
+instance of that pattern today, and this one defeats a freshness check. A
+contract-mode run reported WNS, area, Fmax and power for all 11 blocks, taken from
+ORFS artifacts dated 2026-09-24 - written into a summary file seconds old. The file
+was genuinely fresh; its contents were three weeks stale. Our guard only fired on a
+nonzero exit code, and a mode that runs nothing exits 0. If `flow.py` ever trusts a
+report's mtime as proof of provenance, that is the hole.
