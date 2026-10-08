@@ -809,6 +809,21 @@ def _apply_intake_answers(spec: dict) -> None:
         for k, v in fields.items():
             spec[section].setdefault(k, v)
     spec["data_path_mapping"].setdefault("ddr_dm_polarity", "active_high_mask")
+    ratio = spec["clocking_model"]["clock_ratio_ddr_to_controller"]
+    tm.setdefault("counter_clock", {
+        "clock": "controller",
+        "load_units": "nCK",
+        "window_scale": ratio,
+        "applies_to": ["bank_tracker: tRCD, tRP, tRAS, tRC, tRRD, tFAW, tWR, tRTP, tCCD, tRFC, tWTR",
+                       "refresh_ctrl: tREFI"],
+        "effect": "each counter is loaded with a *_nCK value (DDR clocks) but decrements once per "
+                  "controller clock, so every enforced window lasts window_scale times the spec value",
+        "minimum_spacing_timings": "conservative: the window is longer than the minimum, so no "
+                                   "minimum-spacing violation; the real margin is not exercised",
+        "maximum_interval_timings": "NOT conservative: tREFI is a maximum interval, so the longer "
+                                    "window makes the effective refresh interval exceed the spec value",
+        "effective_tREFI_ns": round(tm["tREFI"] * ratio, 6),
+    })
 
 
 def _load_failure_taxonomy() -> dict:

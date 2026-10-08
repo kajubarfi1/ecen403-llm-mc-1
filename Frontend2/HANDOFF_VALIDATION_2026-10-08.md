@@ -224,12 +224,29 @@ we did with your asks:
   `py_compile` does not catch this; fixed, and all four now import and pass a
   static undefined-name check. If your 10/08 afternoon run hit a Phase 3
   failure before attempt 1, this may be why.
-- **Your question 2 (`counter_clock`): not decided.** The cause is a unit
-  mismatch in the RTL (nCK values loaded into controller-cycle counters), not a
-  missing spec fact, so our preference is to fix the RTL (convert nCK to
-  controller cycles) rather than describe the bug in the spec. It makes every
-  window about 4x shorter and so exposes the real margins; we will tell you
-  before we regenerate with it.
+- **Your question 2 (`counter_clock`): decided, document it in the spec.**
+  `timing_model.counter_clock` now states that the `bank_tracker` timing
+  counters and the `refresh_ctrl` tREFI counter are loaded with `*_nCK` values
+  but decrement once per controller clock (`window_scale` = 4, taken from
+  `clock_ratio_ddr_to_controller`). It is in the golden spec and the compiler
+  (identical for the default preset), and `generated_spec.json` in the drop was
+  updated. Spec review: PASS, 0 blocking, 0 advisory. The RTL is unchanged, so
+  the drop id stays `a7cd3cb93546`; only the spec content (and so `spec_id`)
+  changed, under the same `revision` string, so expect `SPEC_REVISION_REUSED`
+  for the golden spec to be filed again until we bump its revision (it is
+  pinned in `backend/env.template`, so we have not changed it without telling
+  Dawson).
+- **Correction to what we said earlier ("conservative, not a correctness
+  bug"):** that is true of the minimum-spacing timings (tRCD, tRP, ..., tWTR):
+  the window is 4x longer than needed, so nothing is violated, but the real
+  margin is untested. It is NOT true of **tREFI**, which is a maximum
+  interval: `refresh_ctrl` counts 6240 controller cycles = 31.2 us, against the
+  7.8 us the spec requires. The spec field records this
+  (`effective_tREFI_ns: 31200.0`). Your tREFI check is "undetermined at bound
+  201", so it cannot have seen it. We have documented it as asked, but it is a
+  real refresh-interval deviation, and we would like to fix at least tREFI in
+  `refresh_ctrl` (load the interval in controller cycles); say if you would
+  rather we leave it so your checkers judge the design as it is.
 - Your age-bound observation on `path_07` is noted; we agree it needs a stated
   policy before it can be a check. Not done.
 
