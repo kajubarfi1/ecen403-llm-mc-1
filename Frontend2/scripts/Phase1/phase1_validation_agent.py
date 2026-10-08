@@ -416,7 +416,10 @@ def _regenerate(module: str, spec_path: str, output_dir: str) -> None:
         del sys.modules[mod_name]  # force re-import of the file we just edited
     module_obj = importlib.import_module(mod_name)
     cls = getattr(module_obj, class_name)
-    cls(spec_path, output_dir).run()
+    # The generators write into the directory they are given; the pipeline gives
+    # them PHASE1RTL/, and re-verification reads PHASE1RTL/ -- so regenerate there,
+    # not into the pipeline root (which would leave re-verify looking at stale RTL).
+    cls(spec_path, str(Path(output_dir) / PHASE1_RTL_SUBDIR)).run()
 
 
 # ======================================================================
