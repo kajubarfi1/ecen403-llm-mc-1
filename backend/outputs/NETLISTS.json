@@ -1,0 +1,111 @@
+{
+  "$comment": "Per-block gate-level netlists for Validation's final stage (run_path.py --netlist <block>=<path>).",
+  "drop_id": "4b86c7cd3705",
+  "design_equivalent_drop": "a7cd3cb93546",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "built_utc": "2026-10-08",
+  "mode": "build",
+  "clock_period_ns": 5.0,
+  "bundles": "backend/bundles_frontend2 (re-cut byte-identical to the drop)",
+  "blocks": {
+    "addr_decoder": {
+      "netlist": "backend/outputs/addr_decoder/6_final.v",
+      "fmax_mhz": null,
+      "wns_ns": null,
+      "sta": "N/A (no timing paths)",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "bytes": 1290
+    },
+    "bank_tracker": {
+      "netlist": "backend/outputs/bank_tracker/6_final.v",
+      "fmax_mhz": 214.31,
+      "wns_ns": 0.333851,
+      "sta": "PASS",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "bytes": 454078
+    },
+    "calibration": {
+      "netlist": "backend/outputs/calibration/6_final.v",
+      "fmax_mhz": 416.8,
+      "wns_ns": 2.60077,
+      "sta": "PASS",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "bytes": 11863
+    },
+    "cmd_gen": {
+      "netlist": "backend/outputs/cmd_gen/6_final.v",
+      "fmax_mhz": 378.81,
+      "wns_ns": 2.36012,
+      "sta": "PASS",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "bytes": 27187
+    },
+    "cmd_queue": {
+      "netlist": "backend/outputs/cmd_queue/6_final.v",
+      "fmax_mhz": 277.7,
+      "wns_ns": 1.39902,
+      "sta": "PASS",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "bytes": 221802
+    },
+    "config_regs": {
+      "netlist": "backend/outputs/config_regs/6_final.v",
+      "fmax_mhz": 280.83,
+      "wns_ns": 1.43916,
+      "sta": "PASS",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "bytes": 136991
+    },
+    "data_path": {
+      "netlist": "backend/outputs/data_path/6_final.v",
+      "fmax_mhz": 224.07,
+      "wns_ns": 0.537044,
+      "sta": "PASS",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "bytes": 362485
+    },
+    "init_fsm": {
+      "netlist": "backend/outputs/init_fsm/6_final.v",
+      "fmax_mhz": 317.1,
+      "wns_ns": 1.84643,
+      "sta": "PASS",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "bytes": 21335
+    },
+    "refresh_ctrl": {
+      "netlist": "backend/outputs/refresh_ctrl/6_final.v",
+      "fmax_mhz": 265.39,
+      "wns_ns": 1.23194,
+      "sta": "PASS",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "bytes": 18983
+    },
+    "scheduler": {
+      "netlist": "backend/outputs/scheduler/6_final.v",
+      "fmax_mhz": 169.06,
+      "wns_ns": -0.914878,
+      "sta": "FAIL",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "bytes": 561892
+    },
+    "wb_port": {
+      "netlist": "backend/outputs/wb_port/6_final.v",
+      "fmax_mhz": 248.97,
+      "wns_ns": 0.983423,
+      "sta": "PASS",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "bytes": 46904
+    }
+  }
+}

@@ -212,3 +212,51 @@ the two checker defects rather than filing them against the netlist.
 is **~20 s per block**, not seconds, because intake still makes an LLM call each.
 Eleven blocks is about two minutes at two workers. Dropping that call is on our list;
 until then budget for it rather than treating `contract` as free.
+
+## 7. Addendum: answering your reply
+
+Read `HANDOFF_BACKEND_2026-10-08_reply.md` and verified the four items against main.
+`stage_backend` now decides on `rc` first and only considers reports written after the
+stage started, newest first; `stage_rtl_validation` halts on a drop-id mismatch;
+`drop_id()` normalises CRLF; the renderer carries `signal[bit] (role)` and the repro.
+Nothing from §2 or §3 is outstanding. Sections 2 and 3 above were rewritten once
+already today after we pushed a version asking for work you had finished - we have
+re-read before writing this one.
+
+**`spec_id`: yes, please pass it.** Implemented on our side already, so the flag is
+live whenever `flow.py` sends it: `pipeline.py --spec_id`, `pipeline_batch.py
+--spec_id`, carried into `drop` beside `drop_id` and `spec_revision`. That one
+revision string having named three different spec contents is the more dangerous
+version of the problem we raised in §4 - a revision-keyed outbox path cannot tell
+them apart, and our findings would read as judged against a spec they never saw. We
+are leaving the outbox path keyed on revision as you say, with `spec_id` inside the
+document.
+
+**`design_id`: agreed, and we withdraw the RTL-only hash we offered.** One definition
+is worth more than two that nearly agree. We will read `design_id` from
+`HANDOFF.json` rather than computing anything ourselves. Noting for the record that
+the Frontend has since removed the timestamp from generated headers (`67f969a`), so
+`drop_id` and `design_id` should now converge on a no-op regeneration, which is the
+outcome we were after.
+
+**Netlists: delivered, and one path to confirm.** All 11 are committed at
+`backend/outputs/<block>/6_final.v`, with `backend/outputs/NETLISTS.json` carrying
+the drop, the spec revision, the clock period and each block's Fmax, WNS, DRC and LVS
+result. That follows the convention your 10-07 handoff referenced ("the netlists
+committed under `backend/outputs/`") and replaces the three August ones, which were
+superseded - including the `wb_port` netlist behind your 19/19, so that result is
+worth re-running against the current one.
+
+Your reply says `backend/outputs/runner/<block>/`, with the extra `runner/` level.
+`find_netlists()` reads `<run>/backend/runner/<block>/`, which is correct for an
+orchestrated run because you pass `--out_root <run>/backend` and we create `runner/`
+beneath it - that path needs nothing from us. The committed copies are for running
+the final stage without a full orchestrated run. If you would rather they sat at
+`backend/outputs/runner/<block>/`, say so and we will move them; we did not want to
+fork the convention on a guess.
+
+**Still open from our side:** §3 above, that we cannot yet report a finding as
+resolved, because we only emit on failure. Your `untested_in_this_drop` looks like
+the right home for the modules an emission cannot speak for - confirm and we will
+populate it.
+

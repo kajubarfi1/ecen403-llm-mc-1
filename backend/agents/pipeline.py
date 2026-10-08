@@ -112,6 +112,7 @@ class PipelineState(TypedDict):
     # What ties a finding to the RTL it ran on. Both come from the orchestrator; a
     # standalone block run has neither and says so when it emits.
     drop_id:            Optional[str]
+    spec_id:            Optional[str]
     spec_revision:      Optional[str]
 
     # ── Agent outputs ────────────────────────────────────────────────────────
@@ -994,6 +995,11 @@ def _emit_timing_finding(state: PipelineState, design_name: str,
                   "--spec_revision; the orchestrator looks the outbox up by it, so "
                   "this finding may be written where nothing reads it.")
         drop = {"drop_id": state.get("drop_id"),
+                # Validation identifies a spec by content as well as by revision: the
+                # string golden_ddr3_1600k_x8_2lane_1rank has named three different spec
+                # contents, so a finding stamped only with the revision does not say
+                # what it was judged against (their reply, 2026-10-08 §4).
+                "spec_id": state.get("spec_id") or os.environ.get("SPEC_ID") or None,
                 "git_head": head,
                 "spec_revision": rev or "unknown"}
         f = ef.timing_finding(
@@ -2648,6 +2654,9 @@ def main() -> int:
                     help="The frontend drop's content id (Validation's rtl_drop.py: "
                          "drop_id()). Passed by the orchestrator; findings are filed "
                          "under it so they can be tied to the RTL they ran on.")
+    ap.add_argument("--spec_id", default=None,
+                    help="Content hash of the spec (Validation's spec_identity.py), carried "
+                         "in findings beside the revision.")
     ap.add_argument("--spec_revision", default=None,
                     help="The spec revision this drop was generated from. The "
                          "orchestrator looks the findings outbox up by it.")
@@ -2668,6 +2677,7 @@ def main() -> int:
         "env_file":         str(args.env_file),
         "mode":             args.mode,
         "drop_id":          args.drop_id,
+        "spec_id":          args.spec_id,
         "spec_revision":    args.spec_revision,
         "enable_autotuner":       args.enable_autotuner or optimize,
         "optimize_fmax":          args.optimize_fmax or optimize,

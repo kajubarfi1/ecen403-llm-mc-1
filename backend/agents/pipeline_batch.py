@@ -136,6 +136,7 @@ def run_block(
     mode: str,
     optimize_power: bool,
     drop_id: Optional[str],
+    spec_id: Optional[str],
     spec_revision: Optional[str],
     block_colour: str,
     print_lock: threading.Lock,
@@ -168,6 +169,8 @@ def run_block(
         cmd += ["--drop_id", drop_id]
     if spec_revision:
         cmd += ["--spec_revision", spec_revision]
+    if spec_id:
+        cmd += ["--spec_id", spec_id]
 
     start_time = time.time()
 
@@ -402,6 +405,8 @@ def main() -> int:
     ap.add_argument("--drop_id", default=None,
                     help="The frontend drop's content id, passed to every block so its "
                          "findings can be tied to the RTL they ran on.")
+    ap.add_argument("--spec_id", default=None,
+                    help="Content hash of the spec, from Validation's handoff.")
     ap.add_argument("--spec_revision", default=None,
                     help="The spec revision these bundles came from. The orchestrator "
                          "looks the findings outbox up by it; without it findings land "
@@ -475,6 +480,7 @@ def main() -> int:
                 mode=args.mode,
                 optimize_fmax=args.optimize_fmax,
                 drop_id=args.drop_id,
+                spec_id=args.spec_id,
                 spec_revision=args.spec_revision,
                 optimize_power=args.optimize_power,
                 block_colour=BLOCK_COLOURS[i % len(BLOCK_COLOURS)],

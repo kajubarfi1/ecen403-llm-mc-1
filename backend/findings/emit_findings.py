@@ -333,6 +333,10 @@ def main() -> int:
     ap.add_argument("--repro", default=None)
     ap.add_argument("--outbox", type=Path, default=Path(__file__).resolve().parent / "outbox")
     ap.add_argument("--repo", type=Path, default=Path(__file__).resolve().parent.parent)
+    ap.add_argument("--spec-id", default=None,
+                    help="Content hash of the spec (Validation's spec_identity.py). The "
+                         "revision string has named three different spec contents, so the "
+                         "revision alone does not say which spec a finding was judged against.")
     ap.add_argument("--drop-id", default=None,
                     help="The drop's content id (Validation's rtl_drop.py: drop_id()). "
                          "The orchestrator passes it; without it the outbox falls back "
@@ -350,7 +354,8 @@ def main() -> int:
         print(f"FINDINGS WARNING: no git repo above {a.repo} - the drop stamp will be "
               f"incomplete, so this finding cannot be tied to a code state. "
               f"Pass --repo pointing into the team checkout.")
-    drop = {"drop_id": a.drop_id, "git_head": head, "spec_revision": a.spec_revision}
+    drop = {"drop_id": a.drop_id, "spec_id": a.spec_id, "git_head": head,
+            "spec_revision": a.spec_revision}
     repro = a.repro or f"pipeline_batch.py --bundle_dirs bundles/{a.design}"
     f = timing_finding(a.design, a.period, parsed, a.rtl, repro, drop,
                        a.mechanism, a.suggested_fix)
