@@ -4,17 +4,15 @@
 |        DDR3 MEMORY CONTROLLER -- PHASE 3 PIPELINE (Frontend2)        |
 |                                                                      |
 |  Flow:                                                               |
-|    3 RTL generation scripts (each self-contained: RTL + its own      |
-|    spec-only testbench + manifest, all parallel, all deterministic,  |
-|    zero LLM calls) -> generation check                               |
+|    3 RTL generation scripts + 1 testbench generator (all parallel,   |
+|    all deterministic, zero LLM calls) -> generation check            |
 |        -> Lint Gate (real Verilator via SSH/Slurm)                   |
 |        -> Sim Gate (real Xcelium via SSH/Slurm) -> Success           |
 |                                                                      |
-|  No separate gen_testbenches node: unlike Phase 1/2, each Phase 3    |
-|  generator's own run() already writes module_tb.sv via its own       |
-|  generate_tb() -- nothing else writes to that path, so there's no    |
-|  race condition to guard against (see Frontend2/IMPLEMENTATION_PLAN  |
-|  .md and the wb_port_gen.py lesson from Phase 1).                    |
+|  Testbenches come from Phase3/tb_generator.py, which reads ONLY the  |
+|  spec (never the RTL generators), same as Phase 1/2. They used to be |
+|  emitted by each RTL generator from the same derived parameters as   |
+|  the RTL; that coupling is gone.                                     |
 |                                                                      |
 |  No retry loop -- see Phase 1/2 pipelines for rationale.             |
 |                                                                      |
@@ -45,6 +43,7 @@ for p in (HERE, AGENTS_DIR):
 
 from langgraph.graph import StateGraph, END
 from gate_policy import gate_passes
+from tb_generator import TestbenchGenerator
 from cmd_queue_gen import CmdQueueGenerator
 from scheduler_gen import SchedulerGenerator
 from cmd_gen_gen import CmdGenGenerator
@@ -125,6 +124,16 @@ def gen_cmd_gen(state: GraphState) -> dict:
 # ===================================================
 # GENERATION CHECK (no retry -- a failure here is a real bug)
 # ===================================================
+def gen_testbenches(state: GraphState) -> dict:
+    print("\n  +- Generating testbenches (spec-only, independent of RTL)")
+    try:
+        tbg = TestbenchGenerator(state["spec_path"])
+        written = tbg.write_phase3(state["phase3_rtl_dir"])
+        return {"modules": {"testbenches": {"status": "success", "files": written}}}
+    except Exception as e:
+        return {"modules": {"testbenches": {"status": "error", "errors": [str(e)]}}}
+
+
 def check_generation(state: GraphState) -> dict:
     print(f"\n{'=' * 62}")
     print("  GENERATION CHECK")
@@ -463,6 +472,7 @@ def build_graph():
     g.add_node("gen_cmd_queue", gen_cmd_queue)
     g.add_node("gen_scheduler", gen_scheduler)
     g.add_node("gen_cmd_gen", gen_cmd_gen)
+    g.add_node("gen_testbenches", gen_testbenches)
     g.add_node("check_generation", check_generation)
     g.add_node("lint_gate", lint_gate)
     g.add_node("sim_gate", sim_gate)
@@ -475,10 +485,12 @@ def build_graph():
     g.add_edge("start", "gen_cmd_queue")
     g.add_edge("start", "gen_scheduler")
     g.add_edge("start", "gen_cmd_gen")
+    g.add_edge("start", "gen_testbenches")
 
     g.add_edge("gen_cmd_queue", "check_generation")
     g.add_edge("gen_scheduler", "check_generation")
     g.add_edge("gen_cmd_gen", "check_generation")
+    g.add_edge("gen_testbenches", "check_generation")
 
     g.add_conditional_edges("check_generation", route_after_generation,
         {"lint_gate": "lint_gate", "generation_failure": "generation_failure"})

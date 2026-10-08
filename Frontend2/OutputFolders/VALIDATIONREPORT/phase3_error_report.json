@@ -51,26 +51,28 @@
       "scheduler": {
         "status": "FAIL",
         "test_count": 37,
-        "pass_count": 29,
-        "fail_count": 8,
+        "pass_count": 30,
+        "fail_count": 7,
         "pass_lines": [
           "V T01 PASS: Reset: !valid",
           "V T02 PASS: Reset: NOP",
           "V T03 PASS: Reset: !deq",
           "V T04 PASS: Reset: !ref_ack",
           "V T05 PASS: Empty: NOP",
-          "V T09 PASS: RowHit WR: valid",
-          "V T10 PASS: RowHit WR: type=WR",
+          "V T06 PASS: RowHit RD: valid",
+          "V T07 PASS: RowHit RD: type=RD",
+          "V T08 PASS: RowHit RD: deq",
           "V T11 PASS: RowHit WR: bank=2",
-          "V T12 PASS: RowMiss idle: ACT",
           "V T13 PASS: RowMiss: row=300",
           "V T14 PASS: RowMiss: !deq",
-          "V T15 PASS: RowMiss act: PRE",
           "V T16 PASS: RowMiss act: bank=1",
-          "V T19 PASS: NormRef: type=REF",
-          "V T20 PASS: NormRef: ref_ack",
+          "V T17 PASS: UrgRef: type=REF",
+          "V T18 PASS: UrgRef: ref_ack",
+          "V T21 PASS: FRFCFS: picks hit",
           "V T22 PASS: FRFCFS: idx=1",
+          "V T23 PASS: FRFCFS: deq",
           "V T24 PASS: MultiBank: valid",
+          "V T25 PASS: MultiBank: first",
           "V T26 PASS: TimingBlk: no CAS",
           "V T27 PASS: TimingOk: CAS now",
           "V T28 PASS: Blocked: NOP ok",
@@ -79,20 +81,18 @@
           "V T31 PASS: Aux: row",
           "V T32 PASS: Regrant: first grant",
           "V T33 PASS: Regrant: no re-grant next cycle",
-          "V T34 PASS: RefBlock: PRE not REF while active",
           "V T35 PASS: RefBlock: PRE targets active bank",
           "V T36 PASS: RefBlock: REF once banks idle",
           "V T37 PASS: RefBlock: ref_ack"
         ],
         "fail_lines": [
-          "X T06 FAIL: RowHit RD: valid cmd=0 valid=0",
-          "X T07 FAIL: RowHit RD: type=RD cmd=0 valid=0",
-          "X T08 FAIL: RowHit RD: deq cmd=0 valid=0",
-          "X T17 FAIL: UrgRef: type=REF cmd=4 valid=1",
-          "X T18 FAIL: UrgRef: ref_ack cmd=4 valid=1",
-          "X T21 FAIL: FRFCFS: picks hit cmd=4 valid=1",
-          "X T23 FAIL: FRFCFS: deq cmd=4 valid=1",
-          "X T25 FAIL: MultiBank: first cmd=3 valid=1"
+          "X T09 FAIL: RowHit WR: valid cmd=0 valid=0",
+          "X T10 FAIL: RowHit WR: type=WR cmd=0 valid=0",
+          "X T12 FAIL: RowMiss idle: ACT cmd=0 valid=0",
+          "X T15 FAIL: RowMiss act: PRE cmd=0 valid=0",
+          "X T19 FAIL: NormRef: type=REF cmd=0 valid=0",
+          "X T20 FAIL: NormRef: ref_ack cmd=0 valid=0",
+          "X T34 FAIL: RefBlock: PRE not REF while active cmd=0 valid=0"
         ],
         "assertion_errors": [],
         "log_file": "scheduler_xrun.log"
@@ -145,12 +145,12 @@
         "log_file": "cmd_gen_xrun.log"
       }
     },
-    "timestamp": "2026-09-24T12:42:47.436518",
+    "timestamp": "2026-10-08T12:38:10.874444",
     "server": "olympus.ece.tamu.edu"
   },
   "failed_modules": [
     "scheduler"
   ],
   "requires_human_review": true,
-  "timestamp": "2026-09-24T12:42:47.439717"
+  "timestamp": "2026-10-08T12:38:10.876640"
 }

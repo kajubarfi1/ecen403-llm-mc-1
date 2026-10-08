@@ -392,6 +392,8 @@ endmodule
         tRCD, tRP, tRAS, tRC = 3, 2, 5, 6
         tRRD, tFAW, tWTR, tWR, tRTP, tCCD, tRFC = 2, 10, 4, 3, 2, 2, 5
         row_test = 0x1234
+        # tWTR is measured from the end of the write data: CWL + BL/2 after the WR.
+        wtr_total = tWTR + self.tm["CWL_cycles"] + self.geo["burst_length"] // 2
 
         return f"""`timescale 1ns / 1ps
 module bank_tracker_tb;
@@ -532,14 +534,20 @@ module bank_tracker_tb;
         repeat({tCCD}) @(posedge clk);
         check($sformatf("H2: bank_wr_allowed[0] after tCCD=%0d", {tCCD}), bank_wr_allowed[0]===1'b1);
 
-        // -- Section I: tWTR gates PRE after a WR --
+        // -- Section I: tWTR is a device-wide write-to-READ turnaround (JESD79-3).
+        //    It gates RD to every bank, runs from the end of the write data
+        //    (tWTR + CWL + BL/2 after the WR), and does not gate PRE (tWR does).
         hw_reset();
         do_act(3'd0, 16'h0);
-        repeat({tRAS}) @(posedge clk);  // let RAS clear first so WTR is the sole limiter below
+        do_act(3'd1, 16'h1);
+        repeat({tRAS}) @(posedge clk);   // both banks clear of tRCD/tRAS
+        check("I0: bank_rd_allowed[1] before the WR", bank_rd_allowed[1]===1'b1);
         do_wr(3'd0);
-        check("I1: bank_pre_allowed[0] blocked right after WR (tWTR)", bank_pre_allowed[0]===1'b0);
-        repeat({tWTR}) @(posedge clk);
-        check($sformatf("I2: bank_pre_allowed[0] after tWTR=%0d", {tWTR}), bank_pre_allowed[0]===1'b1);
+        check("I1: bank_rd_allowed[1] blocked right after a WR to bank 0 (tWTR)", bank_rd_allowed[1]===1'b0);
+        repeat({tCCD} + 1) @(posedge clk);   // tCCD is over; only tWTR can still block
+        check("I2: bank_rd_allowed[1] still blocked after tCCD (tWTR window not over)", bank_rd_allowed[1]===1'b0);
+        repeat({wtr_total}) @(posedge clk);
+        check($sformatf("I3: bank_rd_allowed[1] after tWTR+CWL+BL/2=%0d", {wtr_total}), bank_rd_allowed[1]===1'b1);
 
         // -- Section J: REF forces all-idle + tRFC gate --
         hw_reset();

@@ -1,11 +1,12 @@
 // bank_tracker.sv -- 8 independent per-bank state machines, DDR3 bank
-// timing constraints (tRCD/tRP/tRAS/tRC/tWTR/tWR/tRTP per bank; tRRD/tCCD/
+// timing constraints (tRCD/tRP/tRAS/tRC/tWR/tRTP per bank; tRRD/tCCD/tWTR/
 // tRFC shared), tFAW 4-ACT rolling window, combinational permission vectors.
 module bank_tracker #(
     parameter NUM_BANKS  = 8,
     parameter BANK_BITS  = 3,
     parameter ROW_BITS   = 15,
-    parameter CTR_WIDTH  = 8
+    parameter CTR_WIDTH  = 8,
+    parameter WTR_DATA   = 12   // CWL + BL/2: WR command -> end of write data
 ) (
     input  logic                       clk,
     input  logic                       rst_n,
@@ -57,7 +58,7 @@ module bank_tracker #(
     logic [CTR_WIDTH-1:0] ctr_rp  [NUM_BANKS];
     logic [CTR_WIDTH-1:0] ctr_ras [NUM_BANKS];
     logic [CTR_WIDTH-1:0] ctr_rc  [NUM_BANKS];
-    logic [CTR_WIDTH-1:0] ctr_wtr [NUM_BANKS];
+    logic [CTR_WIDTH-1:0] ctr_wtr;   // device-wide write-to-read turnaround (tWTR), see below
     logic [CTR_WIDTH-1:0] ctr_wr  [NUM_BANKS];
     logic [CTR_WIDTH-1:0] ctr_rtp [NUM_BANKS];
 
@@ -81,7 +82,6 @@ module bank_tracker #(
                     ctr_rp[gi]   <= '0;
                     ctr_ras[gi]  <= '0;
                     ctr_rc[gi]   <= '0;
-                    ctr_wtr[gi]  <= '0;
                     ctr_wr[gi]   <= '0;
                     ctr_rtp[gi]  <= '0;
                 end else begin
@@ -118,12 +118,7 @@ module bank_tracker #(
                     else if (ctr_rp[gi] != 0)
                         ctr_rp[gi] <= ctr_rp[gi] - 1'b1;
 
-                    // tWTR / tWR load on WR to this bank
-                    if (cmd_wr_valid && cmd_wr_bank == gi[BANK_BITS-1:0])
-                        ctr_wtr[gi] <= cfg_tWTR_nCK[CTR_WIDTH-1:0];
-                    else if (ctr_wtr[gi] != 0)
-                        ctr_wtr[gi] <= ctr_wtr[gi] - 1'b1;
-
+                    // tWR loads on WR to this bank (gates PRE to it)
                     if (cmd_wr_valid && cmd_wr_bank == gi[BANK_BITS-1:0])
                         ctr_wr[gi] <= cfg_tWR_nCK[CTR_WIDTH-1:0];
                     else if (ctr_wr[gi] != 0)
@@ -139,13 +134,22 @@ module bank_tracker #(
         end
     endgenerate
 
-    // Global counters: tRRD on any ACT, tCCD on any RD or WR, tRFC on REF.
+    // Global counters: tRRD on any ACT, tCCD on any RD or WR, tRFC on REF,
+    // tWTR on any WR. tWTR is the write-to-READ turnaround of the whole data
+    // bus (JESD79-3), so it is device-wide and gates RD to every bank; it has
+    // nothing to do with PRECHARGE (that is tWR, per bank, above).
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             ctr_rrd <= '0;
             ctr_ccd <= '0;
             ctr_rfc <= '0;
+            ctr_wtr <= '0;
         end else begin
+            if (cmd_wr_valid)
+                ctr_wtr <= cfg_tWTR_nCK[CTR_WIDTH-1:0] + WTR_DATA[CTR_WIDTH-1:0];
+            else if (ctr_wtr != 0)
+                ctr_wtr <= ctr_wtr - 1'b1;
+
             if (cmd_act_valid)
                 ctr_rrd <= cfg_tRRD_nCK[CTR_WIDTH-1:0];
             else if (ctr_rrd != 0)
@@ -204,6 +208,7 @@ module bank_tracker #(
             bank_rd_allowed[b]  = (bk_state[b] == BANK_ACTIVE)
                                 && (ctr_rcd[b] == 0)
                                 && (ctr_ccd    == 0)
+                                && (ctr_wtr    == 0)
                                 && (ctr_rfc    == 0);
             bank_wr_allowed[b]  = (bk_state[b] == BANK_ACTIVE)
                                 && (ctr_rcd[b] == 0)
@@ -213,7 +218,6 @@ module bank_tracker #(
                                 && (ctr_ras[b] == 0)
                                 && (ctr_rtp[b] == 0)
                                 && (ctr_wr[b]  == 0)
-                                && (ctr_wtr[b] == 0)
                                 && (ctr_rfc    == 0);
         end
     end

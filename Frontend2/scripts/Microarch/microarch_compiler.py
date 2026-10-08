@@ -791,6 +791,14 @@ TAXONOMY_ADDITIONS = [
 ]
 
 
+def _content_tag(spec: dict) -> str:
+    """8 hex digits of sha256 over the spec's canonical JSON, revision excluded."""
+    import hashlib
+    body = {k: v for k, v in spec.items() if k != "revision"}
+    return hashlib.sha256(json.dumps(body, sort_keys=True, separators=(",", ":"),
+                                     default=str).encode()).hexdigest()[:8]
+
+
 def _apply_intake_answers(spec: dict) -> None:
     """Add the intake-gate fields (never overwriting a value already set)."""
     tCK = spec["timing_model"]["tCK_ns"]
@@ -966,6 +974,10 @@ def compile_spec(choices: dict) -> dict:
         },
     }
     _apply_intake_answers(spec)
+    # A revision names ONE spec. Suffix it with a hash of the content so two
+    # different specs can never share a revision (Validation filed
+    # SPEC_REVISION_REUSED when the same string named three different specs).
+    spec["revision"] = f"{spec['revision']}_{_content_tag(spec)}"
 
     checks = run_consistency_checks(spec)
     consistency_ok = all(c["pass"] for c in checks)
