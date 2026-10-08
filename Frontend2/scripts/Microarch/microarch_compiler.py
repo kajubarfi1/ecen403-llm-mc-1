@@ -557,11 +557,11 @@ def _csr_map(dc: dict, geom: dict, choices: dict, host: dict,
                  "description": "1 when BIST complete"},
                 {"name": "bist_fail", "bits": "4", "access": "RO", "reset_value": 0,
                  "description": "1 if BIST failed"},
-                {"name": "ref_pending_cnt", "bits": "7:5", "access": "RO",
+                {"name": "ref_pending_cnt", "bits": "8:5", "access": "RO",
                  "reset_value": 0, "description": "Pending refresh count (0-8)"},
-                {"name": "self_refresh_active", "bits": "8", "access": "RO",
+                {"name": "self_refresh_active", "bits": "9", "access": "RO",
                  "reset_value": 0, "description": "1 when in self-refresh"},
-                {"name": "reserved", "bits": "31:9", "access": "RO",
+                {"name": "reserved", "bits": "31:10", "access": "RO",
                  "reset_value": 0, "description": "Reserved"},
              ]},
             {"name": "CTRL_CONFIG", "offset": "0x04", "access": "RW",
@@ -749,16 +749,73 @@ _STATIC_SECTIONS = {
 }
 
 
+# ======================================================================
+# INTAKE ANSWERS: spec fields Validation's intake gate (Validation/spec/
+# completeness_rules.json) requires the spec to state.
+#   standard-determined (JESD79-3) -> computed from tCK below
+#   convention                      -> the conventions Validation judges the
+#       RTL under (HANDOFF_FRONTEND_2026-10-01.md section 3). They are adopted
+#       as this compiler's defaults; they are NOT a verified description of
+#       what the RTL does and are an owner decision (change them here).
+# ======================================================================
+INTAKE_CONVENTIONS = {
+    "csr_register_map": {
+        "unmapped_read_data": "zero",
+        "unmapped_write_behavior": "ignored_with_error",
+        "access_violation_error": "silent",
+        "read_byte_enable_semantics": "ignored",
+        "status_read_sampling": "previous_edge",
+    },
+    "controller_architecture": {"speculative_activate": "allowed"},
+}
+
+# Failure-taxonomy ids the intake rules require. Merged over the golden
+# taxonomy by _load_failure_taxonomy (existing ids are never replaced).
+TAXONOMY_ADDITIONS = [
+    {"id": "TIMING_012", "name": "tREFI violation", "severity": "critical",
+     "description": "Average refresh interval tREFI exceeded: refreshes not issued often enough.",
+     "scope": "timing"},
+    {"id": "TIMING_013", "name": "tMRD violation", "severity": "major",
+     "description": "Two MRS commands issued closer together than tMRD.", "scope": "timing"},
+    {"id": "TIMING_014", "name": "tMOD violation", "severity": "major",
+     "description": "A non-MRS command issued before tMOD elapsed after an MRS command.",
+     "scope": "timing"},
+    {"id": "SCHED_001", "name": "Dropped request", "severity": "critical",
+     "description": "An enqueued host request is never issued to DRAM.", "scope": "scheduling"},
+    {"id": "SCHED_002", "name": "Invented command", "severity": "critical",
+     "description": "A DRAM command is issued that matches no queued request or required maintenance.",
+     "scope": "scheduling"},
+    {"id": "SCHED_003", "name": "Refresh never serviced", "severity": "critical",
+     "description": "A pending refresh is never issued (starved by the scheduler).",
+     "scope": "scheduling"},
+]
+
+
+def _apply_intake_answers(spec: dict) -> None:
+    """Add the intake-gate fields (never overwriting a value already set)."""
+    tCK = spec["timing_model"]["tCK_ns"]
+    tm = spec["timing_model"]
+    tm.setdefault("tMRD", round(4 * tCK, 6))                  # JESD79-3: 4 nCK
+    tm.setdefault("tMOD", round(max(12 * tCK, 15.0), 6))      # max(12 nCK, 15 ns)
+    for section, fields in INTAKE_CONVENTIONS.items():
+        for k, v in fields.items():
+            spec[section].setdefault(k, v)
+    spec["data_path_mapping"].setdefault("ddr_dm_polarity", "active_high_mask")
+
+
 def _load_failure_taxonomy() -> dict:
-    """The failure taxonomy is config-independent; reuse the golden file's
-    copy verbatim if it is available, else fall back to a minimal set."""
+    """The golden file's taxonomy (config-independent), plus TAXONOMY_ADDITIONS
+    for any id it does not already have; a minimal set if the file is missing."""
     golden = Path(__file__).resolve().parents[3] / "Spec" \
         / "llmmc_microarchitecturespec_filled.json"
     try:
-        g = json.loads(golden.read_text())
-        return g["failure_taxonomy"]
+        tax = json.loads(golden.read_text())["failure_taxonomy"]
     except Exception:
-        return {"categories": []}
+        tax = {"categories": []}
+    have = {c.get("id") for c in tax.get("categories", [])}
+    tax["categories"] = list(tax.get("categories", [])) + \
+        [dict(c) for c in TAXONOMY_ADDITIONS if c["id"] not in have]
+    return tax
 
 
 def compile_spec(choices: dict) -> dict:
@@ -884,6 +941,8 @@ def compile_spec(choices: dict) -> dict:
             "alignment_bytes_required": max(1, chan_w // 8),
             "endianness": "little",
             "byte_enable_semantics": "wishbone_sel_per_byte",
+            # JESD79-3: DM=1 masks the byte (host sel=1 means write, so data_path drives ~sel)
+            "ddr_dm_polarity": "active_high_mask",
         },
         "phy_interface": {
             "mode": "abstract",
@@ -906,6 +965,7 @@ def compile_spec(choices: dict) -> dict:
             "reset_polarity": "active_low",
         },
     }
+    _apply_intake_answers(spec)
 
     checks = run_consistency_checks(spec)
     consistency_ok = all(c["pass"] for c in checks)

@@ -1,24 +1,24 @@
 {
-  "git_commit": "3b542a6fb408020e3de91d0f5e38ad5b859710f0",
-  "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
-  "generated_utc": "2026-10-01T18:23:11.332695+00:00",
-  "clock_period_ns": 10.0,
+  "git_commit": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "generated_utc": "2026-10-08T16:30:16.218404+00:00",
+  "clock_period_ns": 5.0,
   "module_name": "wb_port",
   "file": "wb_port.sv",
   "phase": 1,
   "generator": "wb_port_gen",
   "spec_version": "2.0.0",
-  "design_id": "ddr3_mc_800_x8_1lane_1rank",
+  "design_id": "ddr3_mc_core_v2",
   "parameters": {
     "DATA_WIDTH": 32,
-    "ADDR_WIDTH": 27,
+    "ADDR_WIDTH": 29,
     "SEL_WIDTH": 4,
     "AUX_WIDTH": 4,
     "MAX_BURST_LEN": 8,
-    "QUEUE_DEPTH": 4,
+    "QUEUE_DEPTH": 16,
     "BURST_CTR_W": 4,
     "TAG_FIFO_DEPTH": 16,
-    "ROW_BITS": 14
+    "ROW_BITS": 15
   },
   "ports": {
     "clock_reset": [
@@ -51,7 +51,7 @@
       },
       {
         "name": "wb_adr_i",
-        "width": 27,
+        "width": 29,
         "dir": "input"
       },
       {
@@ -110,7 +110,7 @@
       },
       {
         "name": "req_addr",
-        "width": 27,
+        "width": 29,
         "dir": "output"
       },
       {

@@ -92,6 +92,9 @@
     "tCCD": 5.0,
     "tREFI": 7800.0,
 
+    "tMRD": 5.0,
+    "tMOD": 15.0,
+
     "CL_cycles": 11,
     "CWL_cycles": 8,
 
@@ -132,6 +135,7 @@
     "num_ports": 1,
     "arbiter_policy": "round_robin",
     "scheduler_policy": "fr_fcfs",
+    "speculative_activate": "allowed",
     "row_policy": "open_page",
     "command_queue_depth": 16,
     "lookahead_depth": 8,
@@ -260,7 +264,8 @@
     "pack_mode": "pack_32_to_16",
     "alignment_bytes_required": 4,
     "endianness": "little",
-    "byte_enable_semantics": "wishbone_sel_per_byte"
+    "byte_enable_semantics": "wishbone_sel_per_byte",
+    "ddr_dm_polarity": "active_high_mask"
   },
 
   "phy_interface": {
@@ -274,6 +279,11 @@
 
   "csr_register_map": {
     "base_address": "0x00000000",
+    "unmapped_read_data": "zero",
+    "unmapped_write_behavior": "ignored_with_error",
+    "access_violation_error": "silent",
+    "read_byte_enable_semantics": "ignored",
+    "status_read_sampling": "previous_edge",
     "address_width_bits": 8,
     "data_width_bits": 32,
     "registers": [
@@ -288,9 +298,9 @@
           { "name": "cal_fail",       "bits": "2",    "access": "RO", "reset_value": 0, "description": "1 if calibration failed" },
           { "name": "bist_done",      "bits": "3",    "access": "RO", "reset_value": 0, "description": "1 when BIST complete" },
           { "name": "bist_fail",      "bits": "4",    "access": "RO", "reset_value": 0, "description": "1 if BIST failed" },
-          { "name": "ref_pending_cnt","bits": "7:5",  "access": "RO", "reset_value": 0, "description": "Pending refresh count (0-8)" },
-          { "name": "self_refresh_active","bits": "8","access": "RO", "reset_value": 0, "description": "1 when in self-refresh" },
-          { "name": "reserved",       "bits": "31:9", "access": "RO", "reset_value": 0, "description": "Reserved" }
+          { "name": "ref_pending_cnt","bits": "8:5",  "access": "RO", "reset_value": 0, "description": "Pending refresh count (0-8)" },
+          { "name": "self_refresh_active","bits": "9","access": "RO", "reset_value": 0, "description": "1 when in self-refresh" },
+          { "name": "reserved",       "bits": "31:10", "access": "RO", "reset_value": 0, "description": "Reserved" }
         ]
       },
       {
@@ -597,7 +607,13 @@
         "severity": "minor",
         "description": "Write to read-only register or read from write-only register.",
         "scope": "config_regs"
-      }
+      },
+      {"id": "TIMING_012", "name": "tREFI violation", "severity": "critical", "description": "Average refresh interval tREFI exceeded: refreshes not issued often enough.", "scope": "timing"},
+      {"id": "TIMING_013", "name": "tMRD violation", "severity": "major", "description": "Two MRS commands issued closer together than tMRD.", "scope": "timing"},
+      {"id": "TIMING_014", "name": "tMOD violation", "severity": "major", "description": "A non-MRS command issued before tMOD elapsed after an MRS command.", "scope": "timing"},
+      {"id": "SCHED_001", "name": "Dropped request", "severity": "critical", "description": "An enqueued host request is never issued to DRAM.", "scope": "scheduling"},
+      {"id": "SCHED_002", "name": "Invented command", "severity": "critical", "description": "A DRAM command is issued that matches no queued request or required maintenance.", "scope": "scheduling"},
+      {"id": "SCHED_003", "name": "Refresh never serviced", "severity": "critical", "description": "A pending refresh is never issued (starved by the scheduler).", "scope": "scheduling"}
     ]
   },
 

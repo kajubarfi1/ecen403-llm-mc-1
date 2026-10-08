@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    cmd_gen
-// Generated: 2026-09-24 13:43:38
+// Generated: 2026-10-08 11:31:22
 // Generator:     Command Generator Generator (Phase 3)
 //
 // Translates scheduler command type → DDR3 pin-level encoding.

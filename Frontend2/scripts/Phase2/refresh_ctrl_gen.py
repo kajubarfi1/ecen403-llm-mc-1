@@ -90,7 +90,7 @@ module refresh_ctrl #(
     output logic                    ref_required,
     output logic                    ref_urgent,
     input  logic                    ref_ack,
-    output logic [2:0]              ref_pending_cnt,
+    output logic [3:0]              ref_pending_cnt,
     output logic                    ref_starve_flag
 );
 
@@ -144,7 +144,7 @@ module refresh_ctrl #(
     assign ref_urgent      = ref_required
                            & (postpone_cnt >= cfg_urgent_threshold)
                            & cfg_ref_priority;
-    assign ref_pending_cnt = postpone_cnt[2:0];
+    assign ref_pending_cnt = postpone_cnt[3:0];
 
     // Starvation detect -- registered 1-cycle pulse when a tick arrives
     // while already saturated at cfg_max_postpone.
@@ -202,7 +202,7 @@ endmodule
                     {"name": "ref_ack", "width": 1, "dir": "input", "source": "scheduler.ref_ack"},
                 ],
                 "status_out": [
-                    {"name": "ref_pending_cnt", "width": 3, "dir": "output"},
+                    {"name": "ref_pending_cnt", "width": 4, "dir": "output"},
                     {"name": "ref_starve_flag", "width": 1, "dir": "output"},
                 ],
             },

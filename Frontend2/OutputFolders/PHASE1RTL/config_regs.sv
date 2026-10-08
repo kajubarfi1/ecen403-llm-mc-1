@@ -22,7 +22,7 @@ module config_regs #(
     input  logic                    sts_cal_fail,
     input  logic                    sts_bist_done,
     input  logic                    sts_bist_fail,
-    input  logic [2:0]              sts_ref_pending_cnt,
+    input  logic [3:0]              sts_ref_pending_cnt,
     input  logic                    sts_self_refresh_active,
     input  logic [15:0]             sts_ecc_ce_count,
     input  logic                    sts_ecc_ue_event,
@@ -95,22 +95,22 @@ module config_regs #(
     // Register storage
     logic [31:0] reg_timing_0;
     always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n) reg_timing_0 <= 32'h150F0606;
+        if (!rst_n) reg_timing_0 <= 32'h271C0B0B;
         else if (csr_wr && addr_valid && csr_adr_i == ADDR_TIMING_0) reg_timing_0 <= csr_dat_i;
 
     logic [31:0] reg_timing_1;
     always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n) reg_timing_1 <= 32'h2C100404;
+        if (!rst_n) reg_timing_1 <= 32'h80200606;
         else if (csr_wr && addr_valid && csr_adr_i == ADDR_TIMING_1) reg_timing_1 <= csr_dat_i;
 
     logic [31:0] reg_timing_2;
     always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n) reg_timing_2 <= 32'h05060406;
+        if (!rst_n) reg_timing_2 <= 32'h080B060C;
         else if (csr_wr && addr_valid && csr_adr_i == ADDR_TIMING_2) reg_timing_2 <= csr_dat_i;
 
     logic [31:0] reg_timing_3;
     always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n) reg_timing_3 <= 32'h000C3004;
+        if (!rst_n) reg_timing_3 <= 32'h00186004;
         else if (csr_wr && addr_valid && csr_adr_i == ADDR_TIMING_3) reg_timing_3 <= csr_dat_i;
 
     logic [31:0] reg_refresh_config;
@@ -129,17 +129,17 @@ module config_regs #(
     always_ff @(posedge clk or negedge rst_n)
         if (!rst_n) reg_bist_addr_start <= 32'h00000000;
         else if (csr_wr && addr_valid && csr_adr_i == ADDR_BIST_ADDR_START)
-            reg_bist_addr_start <= (csr_dat_i & 32'h07FFFFFF) | (reg_bist_addr_start & 32'hF8000000);  // reserved bits pinned
+            reg_bist_addr_start <= (csr_dat_i & 32'h1FFFFFFF) | (reg_bist_addr_start & 32'hE0000000);  // reserved bits pinned
 
     logic [31:0] reg_bist_addr_end;
     always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n) reg_bist_addr_end <= 32'h07FFFFFF;
+        if (!rst_n) reg_bist_addr_end <= 32'h1FFFFFFF;
         else if (csr_wr && addr_valid && csr_adr_i == ADDR_BIST_ADDR_END)
-            reg_bist_addr_end <= (csr_dat_i & 32'h07FFFFFF) | (reg_bist_addr_end & 32'hF8000000);  // reserved bits pinned
+            reg_bist_addr_end <= (csr_dat_i & 32'h1FFFFFFF) | (reg_bist_addr_end & 32'hE0000000);  // reserved bits pinned
 
     logic [31:0] reg_ctrl_config;
     always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) reg_ctrl_config <= 32'h0000000A;
+        if (!rst_n) reg_ctrl_config <= 32'h00000009;
         else if (csr_wr && addr_valid && csr_adr_i == ADDR_CTRL_CONFIG)
             reg_ctrl_config <= (csr_dat_i & 32'h000000FF) | (reg_ctrl_config & 32'hFFFFFF00);  // reserved bits pinned
         else begin
@@ -170,7 +170,7 @@ module config_regs #(
     logic [31:0] rdata_mux;
     always_comb begin
         case (csr_adr_i)
-            ADDR_CTRL_STATUS: rdata_mux = {23'b0, sts_self_refresh_active, sts_ref_pending_cnt, sts_bist_fail, sts_bist_done, sts_cal_fail, sts_cal_done, sts_init_done};
+            ADDR_CTRL_STATUS: rdata_mux = {22'b0, sts_self_refresh_active, sts_ref_pending_cnt, sts_bist_fail, sts_bist_done, sts_cal_fail, sts_cal_done, sts_init_done};
             ADDR_CTRL_CONFIG: rdata_mux = reg_ctrl_config;
             ADDR_TIMING_0: rdata_mux = reg_timing_0;
             ADDR_TIMING_1: rdata_mux = reg_timing_1;

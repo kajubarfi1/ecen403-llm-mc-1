@@ -80,6 +80,7 @@ MAX_TOKENS = 32000  # corrected_generator_source alone can be a 750+ line file;
                      # 16000 was observed truncating mid-file in practice.
 _REQUIRED_PROPOSAL_KEYS = ("root_cause", "corrected_generator_source", "explanation",
                            "shift_left_recommendations", "confidence")
+AUTO_YES = False   # --yes: apply without the human prompt (guardrails below)
 MAX_ATTEMPTS_PER_MODULE = 3   # each attempt still requires a human 'apply'
 
 P1_MODULES = ("init_fsm", "config_regs", "wb_port")
@@ -219,7 +220,9 @@ def _load_external_findings(path: str) -> dict:
                          f"expected={c.get('expected')} actual={c.get('actual')}"
                          + (f" | anchors: {anchors}" if anchors else "")
                          + (f" | Validation's proven repair hint: {c['fix']}" if c.get("fix") else ""))
-        out[module] = {"external_findings": lines}
+        out[module] = {"external_findings": lines,
+                       "confirmed": any(isinstance(c, dict) and c.get("confidence") == "confirmed"
+                                        for c in checks)}
     return out
 
 
@@ -413,12 +416,27 @@ def _regenerate(module: str, spec_path: str, output_dir: str) -> None:
         del sys.modules[mod_name]  # force re-import of the file we just edited
     module_obj = importlib.import_module(mod_name)
     cls = getattr(module_obj, class_name)
-    cls(spec_path, output_dir).run()
+    # The generators write into the directory they are given; the pipeline gives
+    # them PHASE1RTL/, and re-verification reads PHASE1RTL/ -- so regenerate there,
+    # not into the pipeline root (which would leave re-verify looking at stale RTL).
+    cls(spec_path, str(Path(output_dir) / PHASE1_RTL_SUBDIR)).run()
 
 
 # ======================================================================
 # per-module fix flow
 # ======================================================================
+def _revert(gen_path, old_source, module, spec_path, output_dir) -> None:
+    """--yes guardrail: a patch that did not verify is undone, and the module
+    is regenerated from the restored generator so the RTL matches it again."""
+    gen_path.write_text(old_source)
+    _invalidate_pyc(gen_path)
+    print(f"  --yes: patch did not verify; restored {gen_path.name}")
+    try:
+        _regenerate(module, spec_path, output_dir)
+    except Exception as e:
+        print(f"  WARNING: regenerating from the restored generator failed: {e}")
+
+
 def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
                      client) -> dict:
     rtl_dir = Path(output_dir) / PHASE1_RTL_SUBDIR
@@ -480,9 +498,13 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
         print(f"\n  PROPOSED DIFF ({gen_path}):")
         print(diff if diff.strip() else "  (no textual diff -- proposal is identical to current source)")
 
-        choice = input(
-            "\n  [a]pply and re-verify / [r]etry (ask again) / "
-            "[s]kip this module: ").strip().lower()
+        if AUTO_YES:
+            choice = "a"
+            print("\n  --yes: applying without review (diff logged, re-verify on, reverts on failure)")
+        else:
+            choice = input(
+                "\n  [a]pply and re-verify / [r]etry (ask again) / "
+                "[s]kip this module: ").strip().lower()
 
         if choice == "s":
             record["attempts"].append({"attempt": attempt, "status": "skipped_by_human",
@@ -492,6 +514,11 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
             record["attempts"].append({"attempt": attempt, "status": "rejected_by_human",
                                         "root_cause": proposal.get("root_cause")})
             continue
+
+        if AUTO_YES:
+            log_dir = Path(output_dir) / VALIDATION_SUBDIR / "auto_patches"
+            log_dir.mkdir(parents=True, exist_ok=True)
+            (log_dir / f"phase1_{module}_attempt{attempt}.diff").write_text(diff + "\n")
 
         gen_path.write_text(new_source)
         _invalidate_pyc(gen_path)
@@ -503,6 +530,8 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
             _regenerate(module, spec_path, output_dir)
         except Exception as e:
             print(f"  ERROR regenerating: {e}")
+            if AUTO_YES:
+                _revert(gen_path, old_source, module, spec_path, output_dir)
             record["attempts"].append({"attempt": attempt, "status": "regen_error",
                                         "error": str(e), "diff": diff,
                                         "root_cause": proposal.get("root_cause")})
@@ -521,6 +550,10 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
             "reverification": reverify, "fixed": fixed,
         })
 
+        if AUTO_YES and not fixed:
+            _revert(gen_path, old_source, module, spec_path, output_dir)
+            record["attempts"][-1]["reverted"] = True
+
         if fixed:
             print(f"\n  {module}: FIXED -- lint {lint_status}, sim PASS on re-verification.")
             record["final_status"] = "fixed"
@@ -528,6 +561,8 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
 
         print(f"\n  {module}: still failing after this patch (lint {lint_status}, "
               f"sim {sim_status}).")
+        if AUTO_YES:
+            continue   # next attempt, from the restored source
         if attempt < MAX_ATTEMPTS_PER_MODULE:
             cont = input("  Try another proposal? (y/N): ").strip().lower()
             if cont != "y":
@@ -542,9 +577,16 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--output-dir", help="pipeline output dir (skips the prompt)")
     ap.add_argument("--spec", help="spec JSON path (skips the prompt)")
+    ap.add_argument("--yes", action="store_true",
+                    help="apply patches without the human prompt. Guardrails: diffs are logged to "
+                         "VALIDATIONREPORT/auto_patches/, every patch is re-verified, a patch that "
+                         "does not verify is reverted, and with --findings only modules with a "
+                         "'confirmed' check are patched ('observed' ones are reported)")
     ap.add_argument("--findings", help="Validation findings JSON from the Frontend Orchestrator; "
                                        "replaces the Xcelium error-report precondition")
     args = ap.parse_args()
+    global AUTO_YES
+    AUTO_YES = args.yes
 
     # full_pipeline.py drives this with both flags set, since it already
     # knows them; run standalone with neither and it prompts like every
@@ -561,6 +603,14 @@ def main() -> int:
         if not failing:
             print("No findings for a Phase 1 module in --findings -- nothing to fix.")
             return 0
+        if AUTO_YES:
+            observed_only = [m for m in failing if not modules[m].get("confirmed")]
+            failing = [m for m in failing if modules[m].get("confirmed")]
+            for m in observed_only:
+                print(f"  --yes: {m} has only 'observed' findings (a predictor's word, not model-free "
+                      f"evidence) -- reported, not auto-patched. Run without --yes to review it.")
+            if not failing:
+                return 0
     else:
         err_path = Path(output_dir) / VALIDATION_SUBDIR / "phase1_error_report.json"
         if not err_path.is_file():

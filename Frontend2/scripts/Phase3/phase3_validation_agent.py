@@ -1,32 +1,31 @@
 #!/usr/bin/env python3
 """
 +======================================================================+
-|      PHASE 2 VALIDATION AGENT -- LLM-driven, human-confirmed          |
+|      PHASE 3 VALIDATION AGENT -- LLM-driven, human-confirmed        |
 |                                                                      |
-|  Direct port of Phase1/phase1_validation_agent.py for Phase 2's 4    |
-|  modules (addr_decoder, calibration, refresh_ctrl, bank_tracker).    |
-|  Same design, same reasoning -- see that file's docstring for the    |
-|  full rationale. Short version: reads phase2_error_report.json for a |
-|  real Xcelium BEHAVIORAL_SIMULATION failure, sends Claude the        |
-|  failure + the generator source + the emitted RTL/testbench/manifest |
-|  + the spec, and proposes a patch to the GENERATOR (never the        |
-|  emitted .sv directly -- it's a build artifact, regenerated every    |
-|  run). Human must type 'apply' before anything is written. On apply: |
-|  regenerate, re-lint, re-sim just that module to confirm the fix     |
-|  actually holds, not just that the LLM said so.                      |
+|  RTL fix agent for Phase 3: cmd_queue, scheduler, cmd_gen.        |
+|  Same shape as Phase1/phase1_validation_agent.py: reads a failure    |
+|  (phase3_error_report.json from a real Xcelium failure, or         |
+|  Validation's findings via --findings), asks Claude for a patch to   |
+|  the GENERATOR script (never the emitted .sv), shows a diff, applies |
+|  only on 'a' (or --yes, guarded), then regenerates and re-verifies.  |
 |                                                                      |
-|  NOTE: unlike Phase 1, there is no Phase 2 testbench-audit gate or   |
-|  testbench fix agent -- investigated on 2026-09-29 and Phase 2's     |
-|  testbenches (Phase2/tb_generator.py) don't have the bug class that  |
-|  motivated Phase 1's (no spec-derived-then-hardcoded-stale literals; |
-|  timing checks drive their own directed constants as runtime inputs, |
-|  self-consistent by construction). A hollow auditor that always      |
-|  passes isn't worth building. If that ever changes, testbench_fix_   |
-|  agent.py and testbench_auditor.py are the templates to port.        |
+|  The circular-dependency problem, solved mechanically. Phase 1/2 get |
+|  their testbench from a separate spec-only tb_generator.py. Here the |
+|  testbench is emitted by the SAME generator file as the RTL, so an   |
+|  agent that may edit that file could "fix" a failure by editing the  |
+|  test. Two checks make that impossible to do silently:               |
+|    1. before anything is written, the testbench methods (generate_tb)      |
+|       must be AST-identical to the current ones;                     |
+|    2. after regenerating, the emitted <module>_tb.sv must be         |
+|       byte-identical to the one the failure was observed against.    |
+|  Either failing rejects the patch (and, under --yes, reverts it; in  |
+|  interactive mode check 2 asks a human, since a legitimate           |
+|  parameter fix can show up in testbench localparams).                |
 |                                                                      |
 |  Usage:                                                              |
-|    python3 Frontend2/scripts/Phase2/phase2_validation_agent.py       |
-|      [--output-dir DIR] [--spec PATH]                                |
+|    python3 Frontend2/scripts/Phase3/phase3_validation_agent.py   |
+|      [--output-dir DIR] [--spec PATH] [--findings F] [--yes]         |
 +======================================================================+
 """
 from __future__ import annotations
@@ -34,6 +33,7 @@ from __future__ import annotations
 import argparse
 import ast
 import difflib
+import re
 import importlib
 import importlib.util
 import json
@@ -74,16 +74,17 @@ MAX_TOKENS = 32000
 AUTO_YES = False   # --yes: apply without the human prompt (guardrails below)
 MAX_ATTEMPTS_PER_MODULE = 3
 
-P2_MODULES = ("addr_decoder", "calibration", "refresh_ctrl", "bank_tracker")
-PHASE2_RTL_SUBDIR = "PHASE2RTL"
+P3_MODULES = ("cmd_queue", "scheduler", "cmd_gen")
+PHASE3_RTL_SUBDIR = "PHASE3RTL"
+# Methods that emit or feed the testbench; a patch may not change them.
+TB_METHODS = ("generate_tb",)
 VALIDATION_SUBDIR = "VALIDATIONREPORT"
 
 # module -> (generator .py filename stem, class name)
 GENERATOR_INFO = {
-    "addr_decoder": ("addr_decoder_gen", "AddrDecoderGenerator"),
-    "calibration": ("calibration_gen", "CalibrationGenerator"),
-    "refresh_ctrl": ("refresh_ctrl_gen", "RefreshCtrlGenerator"),
-    "bank_tracker": ("bank_tracker_gen", "BankTrackerGenerator"),
+    "cmd_queue": ("cmd_queue_gen", "CmdQueueGenerator"),
+    "scheduler": ("scheduler_gen", "SchedulerGenerator"),
+    "cmd_gen": ("cmd_gen_gen", "CmdGenGenerator"),
 }
 
 _REQUIRED_PROPOSAL_KEYS = ("root_cause", "corrected_generator_source", "explanation",
@@ -165,21 +166,21 @@ memory controller project. The generator is a plain class whose methods \
 and a JSON manifest as Python strings from self.p (derived parameters, a \
 dict computed from the spec) and self.spec (the loaded microarchitecture \
 spec JSON). Its RTL output was uploaded to Cadence Xcelium on a real \
-cluster and simulated against Phase2/tb_generator.py's testbench for this \
-module (a SEPARATE, spec-only, independently-derived testbench -- not \
-written by this generator); you are given the real, actual failure output \
-below -- not a hypothetical.
+cluster and simulated against the testbench THIS SAME generator emits \
+(generate_tb / generate_testbench); you are given the real, actual failure \
+output below -- not a hypothetical.
 
 Ground rules:
 - Edit the GENERATOR source, never the emitted .sv. The .sv is a build \
 artifact regenerated from the generator every run; a fix that only lives \
 in the .sv would be silently overwritten and the bug would resurface the \
 next time anyone runs this pipeline.
-- The testbench (Phase2/tb_generator.py) is a separate file you are not \
-given and cannot edit here -- if the failure looks like the testbench's \
-expected value is wrong rather than this module's RTL, say so plainly in \
-root_cause and set confidence to low rather than forcing an RTL-side fix \
-that doesn't actually address the real problem.
+- The testbench methods (generate_tb) are FROZEN. They are checked mechanically: \
+a patch that changes them, or that changes the emitted testbench text in any \
+way (for example by altering a derived parameter the testbench also reads), \
+is rejected. Fix the RTL side only. If the failure looks like the testbench's \
+expected value is wrong rather than the RTL, say so plainly in root_cause and \
+set confidence to low instead of trying to edit the test.
 - The fix must generalize: this generator runs against many different \
 specs (different speed grades, densities, device widths, geometries). A \
 fix that hardcodes a value that happens to be correct only for the spec \
@@ -239,7 +240,7 @@ def _failure_block(context: dict) -> str:
                 "team's drop; the local Xcelium unit sim for this module PASSED, so the\n"
                 "defect is a behavior the unit testbench does not cover):\n"
                 + "\n".join("    " + l for l in context["external_findings"]))
-    return (f"SIMULATION FAILURE (from phase2_error_report.json):\n"
+    return (f"SIMULATION FAILURE (from phase3_error_report.json):\n"
             f"  {context['pass_count']}/{context['test_count']} tests passed.\n"
             "  Failing test lines:\n"
             + "\n".join("    " + l for l in context["fail_lines"]) + "\n"
@@ -262,8 +263,8 @@ EMITTED RTL ({context['module']}.sv, what was actually simulated):
 {context['rtl_source']}
 ```
 
-TESTBENCH ({context['module']}_tb.sv, written by Phase2/tb_generator.py, NOT \
-by the generator you're fixing):
+TESTBENCH ({context['module']}_tb.sv, emitted by the same generator but FROZEN -- \
+read-only evidence of what the RTL is being checked against):
 ```systemverilog
 {context['tb_source']}
 ```
@@ -305,22 +306,42 @@ FULL SPEC JSON (the design this was generated against):
 
 
 # ======================================================================
-# re-verification: single-module lint + sim, mirroring phase2_pipeline.py
+# re-verification: single-module lint + sim, mirroring phase3_pipeline.py
 # ======================================================================
+_SUMMARY_RE = re.compile(r"==\s*(\d+)/(\d+)\s*passed\s*==")
+
+
 def _parse_xrun_output(stdout: str):
-    """Mirrors Phase2/phase2_pipeline.py's _parse_xrun_output exactly."""
+    """Mirrors the Phase 3/4 pipelines: their testbenches report
+    'V T01 PASS: ...' / 'X T01 FAIL: ...' / '== N/M passed ==', and the
+    spec-only convention '[PASS]' / '[FAIL]' / 'ALL N TESTS PASSED'."""
     pass_lines, fail_lines, assertion_errors = [], [], []
     for line in stdout.split("\n"):
         stripped = line.strip()
-        if "[PASS]" in stripped:
+        if "[PASS]" in stripped or re.match(r"V T\d+ PASS:", stripped):
             pass_lines.append(stripped)
-        elif "[FAIL]" in stripped:
+        elif "[FAIL]" in stripped or re.match(r"X T\d+ FAIL:", stripped):
             fail_lines.append(stripped)
         elif "*E,ASRTST" in stripped or "*E," in stripped:
             assertion_errors.append(stripped)
-    passed = "ALL" in stdout and "TESTS PASSED" in stdout and not fail_lines
+    passed_legacy = "ALL" in stdout and "TESTS PASSED" in stdout and not fail_lines
+    m = _SUMMARY_RE.search(stdout)
+    passed_own = bool(m) and m.group(1) == m.group(2) and not fail_lines
     test_count = len(pass_lines) + len(fail_lines)
-    return passed, test_count, pass_lines, fail_lines, assertion_errors
+    return (passed_legacy or passed_own), test_count, pass_lines, fail_lines, assertion_errors
+
+
+def _tb_methods_changed(old_source: str, new_source: str) -> list:
+    """Names of TB_METHODS whose AST differs between the two generator sources
+    (or that disappeared). Comments/whitespace don't count; any code does."""
+    def grab(src):
+        out = {}
+        for node in ast.walk(ast.parse(src)):
+            if isinstance(node, ast.FunctionDef) and node.name in TB_METHODS:
+                out[node.name] = ast.dump(node)
+        return out
+    o, n = grab(old_source), grab(new_source)
+    return sorted(k for k in set(o) | set(n) if o.get(k) != n.get(k))
 
 
 def _reverify_module(rtl_dir: Path, module: str) -> dict:
@@ -397,9 +418,9 @@ def _regenerate(module: str, spec_path: str, output_dir: str) -> None:
     module_obj = importlib.import_module(mod_name)
     cls = getattr(module_obj, class_name)
     # The generators write into the directory they are given; the pipeline gives
-    # them PHASE2RTL/, and re-verification reads PHASE2RTL/ -- so regenerate there,
+    # them PHASE3RTL/, and re-verification reads PHASE3RTL/ -- so regenerate there,
     # not into the pipeline root (which would leave re-verify looking at stale RTL).
-    cls(spec_path, str(Path(output_dir) / PHASE2_RTL_SUBDIR)).run()
+    cls(spec_path, str(Path(output_dir) / PHASE3_RTL_SUBDIR)).run()
 
 
 # ======================================================================
@@ -419,7 +440,7 @@ def _revert(gen_path, old_source, module, spec_path, output_dir) -> None:
 
 def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
                      client) -> dict:
-    rtl_dir = Path(output_dir) / PHASE2_RTL_SUBDIR
+    rtl_dir = Path(output_dir) / PHASE3_RTL_SUBDIR
     gen_stem, _ = GENERATOR_INFO[module]
     gen_path = HERE / f"{gen_stem}.py"
 
@@ -463,6 +484,13 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
             continue
 
         old_source = context["generator_source"]
+        tb_changed = _tb_methods_changed(old_source, new_source)
+        if tb_changed:
+            print(f"  REJECTED: the proposal edits frozen testbench method(s): {', '.join(tb_changed)}")
+            record["attempts"].append({"attempt": attempt, "status": "touches_testbench",
+                                        "methods": tb_changed, "root_cause": proposal.get("root_cause")})
+            continue
+        tb_before = context["tb_source"]
         diff = "\n".join(difflib.unified_diff(
             old_source.splitlines(), new_source.splitlines(),
             fromfile=f"{gen_stem}.py (current)", tofile=f"{gen_stem}.py (proposed)",
@@ -498,7 +526,7 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
         if AUTO_YES:
             log_dir = Path(output_dir) / VALIDATION_SUBDIR / "auto_patches"
             log_dir.mkdir(parents=True, exist_ok=True)
-            (log_dir / f"phase2_{module}_attempt{attempt}.diff").write_text(diff + "\n")
+            (log_dir / f"phase3_{module}_attempt{attempt}.diff").write_text(diff + "\n")
 
         gen_path.write_text(new_source)
         _invalidate_pyc(gen_path)
@@ -516,6 +544,20 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
                                         "error": str(e), "diff": diff,
                                         "root_cause": proposal.get("root_cause")})
             break
+
+        tb_after = (rtl_dir / f"{module}_tb.sv").read_text()
+        if tb_after != tb_before:
+            print("  WARNING: the emitted testbench text changed after this patch. The failure was "
+                  "observed against the old testbench, so a pass now would not prove the RTL fix.")
+            keep = (not AUTO_YES) and input(
+                "  keep the patch anyway (a human has judged the testbench change legitimate)? "
+                "(y/N): ").strip().lower() == "y"
+            if not keep:
+                _revert(gen_path, old_source, module, spec_path, output_dir)
+                record["attempts"].append({"attempt": attempt, "status": "testbench_changed",
+                                            "diff": diff, "root_cause": proposal.get("root_cause"),
+                                            "reverted": True})
+                continue
 
         reverify = _reverify_module(rtl_dir, module)
         sim_status = reverify["sim"].get("status")
@@ -576,9 +618,9 @@ def main() -> int:
 
     if args.findings:
         modules = _load_external_findings(args.findings)
-        failing = [m for m in P2_MODULES if m in modules]
+        failing = [m for m in P3_MODULES if m in modules]
         if not failing:
-            print("No findings for a Phase 2 module in --findings -- nothing to fix.")
+            print("No findings for a Phase 3 module in --findings -- nothing to fix.")
             return 0
         if AUTO_YES:
             observed_only = [m for m in failing if not modules[m].get("confirmed")]
@@ -589,10 +631,10 @@ def main() -> int:
             if not failing:
                 return 0
     else:
-        err_path = Path(output_dir) / VALIDATION_SUBDIR / "phase2_error_report.json"
+        err_path = Path(output_dir) / VALIDATION_SUBDIR / "phase3_error_report.json"
         if not err_path.is_file():
             print(f"Not found: {err_path}")
-            print("(this reads the failure report a real Phase 2 sim-gate FAIL leaves behind)")
+            print("(this reads the failure report a real Phase 3 sim-gate FAIL leaves behind)")
             return 1
 
         error_report = json.loads(err_path.read_text())
@@ -604,10 +646,10 @@ def main() -> int:
             return 1
 
         modules = error_report.get("sim_result", {}).get("modules", {})
-        failing = [m for m in P2_MODULES if modules.get(m, {}).get("status") == "FAIL"]
+        failing = [m for m in P3_MODULES if modules.get(m, {}).get("status") == "FAIL"]
 
         if not failing:
-            print("No FAILED modules in phase2_error_report.json -- nothing to fix.")
+            print("No FAILED modules in phase3_error_report.json -- nothing to fix.")
             return 0
 
     print(f"Failing module(s): {', '.join(failing)}")
@@ -617,13 +659,13 @@ def main() -> int:
     results = [_fix_one_module(m, modules[m], spec_path, output_dir, client) for m in failing]
 
     report = {
-        "generated_by": "Frontend2/scripts/Phase2/phase2_validation_agent.py",
+        "generated_by": "Frontend2/scripts/Phase3/phase3_validation_agent.py",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "git_commit": _git_commit(),
         "model": MODEL,
         "modules": results,
     }
-    out_path = Path(output_dir) / VALIDATION_SUBDIR / "phase2_fix_report.json"
+    out_path = Path(output_dir) / VALIDATION_SUBDIR / "phase3_fix_report.json"
     out_path.write_text(json.dumps(report, indent=2))
 
     print(f"\n{'#' * 62}")

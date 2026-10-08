@@ -71,6 +71,28 @@ MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-5-5")
 MAX_TOKENS = 32000
 MAX_ATTEMPTS = 3
 COMPILER = HERE / "microarch_compiler.py"
+RULES = HERE.parents[2] / "Validation" / "spec" / "completeness_rules.json"
+
+
+def _rules_for(findings: list) -> list:
+    """The completeness rules (Validation's authority on allowed values, the
+    standard's answer and the consequence) that these findings are about.
+    A finding names its rule by id in its title/detail/id text; unmatched
+    findings simply get no rule."""
+    try:
+        rules = json.loads(RULES.read_text())["rules"]
+    except Exception:
+        return []
+    blob = json.dumps(findings)
+    hits = []
+    for r in rules:
+        keys = {r["id"], r.get("require", ""), r.get("require_prefix", "")} - {""}
+        q = r.get("question", "")[:50]
+        if any(k in blob for k in keys) or (q and q in blob):
+            hits.append({k: r[k] for k in ("id", "kind", "disposition", "require", "options",
+                                            "standard", "question", "consequence",
+                                            "require_prefix", "minimum") if k in r})
+    return hits
 
 PATCH_TOOL = {
     "name": "propose_compiler_patch",
@@ -122,6 +144,8 @@ Rules:
 llmmc_microarchitecture.schema.json), such as a type or enum mismatch, is a decision about \
 which side changes. You must not edit the schema and must not silently change the \
 compiler's output type: answer needs_owner_decision with both options.
+- Where a completeness rule is supplied, it is the authority on allowed values: never \
+emit a value outside its `options`.
 - Never invent a design value. If the finding (or the file) supplies a value -- e.g. a \
 "Validation proposes ..." line -- use it. If it needs a decision with no proposed value \
 or a real trade-off (a field width vs. a cap, a new section whose shape nobody has \
@@ -151,8 +175,21 @@ def _client():
     return anthropic.Anthropic()
 
 
+def _rules_block(findings: list) -> str:
+    rules = _rules_for(findings)
+    if not rules:
+        return ""
+    return ("VALIDATION'S COMPLETENESS RULES for these findings (authoritative: a value you "
+            "emit must be one of `options`; for disposition 'standard' use the standard's value; "
+            "for 'decision' use the owner's pinned value from INTAKE_CONVENTIONS in the "
+            "compiler if one exists, otherwise ask via needs_owner_decision and offer exactly "
+            "`options`, quoting `consequence`):\n"
+            f"{json.dumps(rules, indent=2)}\n\n")
+
+
 def _ask(client, findings: list, spec: dict, feedback: str | None) -> dict:
     user = (f"SPEC-GAP FINDINGS (verbatim from Validation):\n{json.dumps(findings, indent=2)}\n\n"
+            f"{_rules_block(findings)}"
             f"CURRENT COMPILER SOURCE (microarch_compiler.py):\n```python\n{COMPILER.read_text()}\n```\n\n"
             f"CURRENT SPEC (sections: {', '.join(spec)}):\n```json\n{json.dumps(spec, indent=1)[:60000]}\n```\n")
     if feedback:

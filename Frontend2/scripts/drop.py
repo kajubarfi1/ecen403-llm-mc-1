@@ -41,19 +41,20 @@ def _block_files(root: Path) -> dict:
     return blocks
 
 
-CATALOG = Path(__file__).resolve().parents[2] / "Validation" / "txn" / "interface_catalog.json"
+PATH_DEFS = Path(__file__).resolve().parents[2] / "Validation" / "spec" / "path_definitions.json"
+# The 11 controller blocks. Validation's drop_id() hashes these (changed
+# 2026-10-01 from its interface catalog's 9, per HANDOFF_CONTRACT.md §2).
+ALL_BLOCKS = ("addr_decoder", "bank_tracker", "calibration", "cmd_gen", "cmd_queue",
+              "config_regs", "data_path", "init_fsm", "refresh_ctrl", "scheduler", "wb_port")
 
 
-def catalog_blocks() -> list | None:
-    """The blocks Validation's drop_id covers. The contract says "each
-    block", but Validation/structural/rtl_drop.py:drop_id() hashes only the
-    blocks in its interface catalog (today 9 of 11: no addr_decoder or
-    bank_tracker), so matching its id means using the same set. None when
-    the catalog isn't on disk (then every block in the drop is hashed)."""
+def catalog_blocks() -> list:
+    """The blocks a drop id covers: `blocks` in Validation's
+    path_definitions.json, falling back to the fixed 11 if it isn't on disk."""
     try:
-        return sorted({d["block"] for d in json.loads(CATALOG.read_text())["interfaces"].values()})
+        return sorted(json.loads(PATH_DEFS.read_text())["blocks"])
     except Exception:
-        return None
+        return sorted(ALL_BLOCKS)
 
 
 def compute_drop_id(root, blocks=None) -> str:
