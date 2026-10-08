@@ -63,14 +63,33 @@ against a real model.
 
 ## 5. Still open on our side
 
-- Phase 3/4 fix agents (scheduler / cmd_gen / data_path findings still halt
-  your flow). Their testbenches live in the same file as the RTL generator, so
-  the Phase 1 split-agent pattern needs its own design.
+- (Phase 3/4 fix agents: done, see section 6 below.)
 - The spec-gap agent is not yet wired to `completeness_rules.json`
   (`options` / `consequence`), and the remaining intake gaps (taxonomy ids,
   tMRD/tMOD, `block_interfaces`, the CSR semantics) are not yet emitted by the
   compiler.
 - `Frontend2/` testbench fix agents have no `--yes`.
+
+## 6. Addendum (same day): Phase 3/4 fix agents, and a bug fix
+
+- `Phase3/phase3_validation_agent.py` (cmd_queue, scheduler, cmd_gen) and
+  `Phase4/phase4_validation_agent.py` (data_path) exist, with `--findings` and
+  the guarded `--yes`. Your `flow.py` should find them via `--help`, so
+  scheduler / cmd_gen / data_path findings no longer have to halt it.
+- Their testbench is emitted by the same generator as the RTL, so the agents
+  refuse a patch that (1) changes the testbench methods (`generate_tb`;
+  `generate_testbench` + `_tb_test_registry`) or (2) changes the emitted
+  `_tb.sv` after regenerating. Under `--yes` (2) reverts the patch; interactively
+  a human may keep it, since a legitimate parameter fix can show up in
+  testbench constants. This means a finding whose real fix is a testbench
+  change is not auto-patchable; it needs a person.
+- Tested with a mocked model only (RTL-only patch accepted; testbench edit
+  rejected; testbench drift reverted); not yet run against a real failure.
+- Bug fixed in the Phase 1/2 agents: they regenerated the module into the
+  pipeline root while re-verification reads `PHASE{N}RTL/`, so a correct patch
+  could never verify (and `--yes` would have reverted it). They now regenerate
+  into `PHASE{N}RTL/`. If your flow ran those agents before this, a "did not
+  verify" outcome may have been this bug.
 
 ## Questions
 
