@@ -1,38 +1,14 @@
 {
   "$schema": "validation-integration-overrides/1",
-  "$comment": "Port-level wiring between the Frontend's blocks, declared as data. No integrated top-level exists in the RTL drop, so the validation subsystem generates its own integration harness (chain_harness_gen.py) from this map. Every connection is checkable against the manifests: named ports must exist and widths must agree — a rename or resize in a regenerated drop becomes a loud structural failure, not a silently unconnected net.",
-  "$provenance": "What the manifests cannot say. `connections` here are edges whose consumer manifest has no `source` field yet — each is a filed finding against the Frontend and should be deleted the moment the manifest declares it (integration_map_gen.py reports redundant entries). glue, expr_glue, ties, requires and stubs carry their own `why`.",
+  "$comment": "Port-level wiring between the Frontend's blocks, declared as data. No integrated top-level exists in the RTL drop, so the validation subsystem generates its own integration harness (chain_harness_gen.py) from this map. Every connection is checkable against the manifests: named ports must exist and widths must agree \u2014 a rename or resize in a regenerated drop becomes a loud structural failure, not a silently unconnected net.",
+  "$provenance": "What the manifests cannot say. `connections` here are edges whose consumer manifest has no `source` field yet \u2014 each is a filed finding against the Frontend and should be deleted the moment the manifest declares it (integration_map_gen.py reports redundant entries). glue, expr_glue, ties, requires and stubs carry their own `why`.",
   "connections": [],
-  "glue": [
-    {
-      "from": "scheduler.cmd_bank",
-      "to": [
-        "bank_tracker.cmd_pre_bank",
-        "bank_tracker.cmd_rd_bank",
-        "bank_tracker.cmd_wr_bank"
-      ],
-      "delay_cycles": 1,
-      "why": "cmd_gen's feedback interface carries a bank number only for ACTIVATE (fb_act_bank); its PRE/RD/WR pulses are bankless, yet bank_tracker needs cmd_pre_bank/cmd_rd_bank/cmd_wr_bank to track per-bank state. The harness registers the scheduler's cmd_bank one cycle so it aligns with the REGISTERED fb pulses. This is testbench glue standing in for a missing design signal — see the filed finding; the Frontend should add fb_pre_bank/fb_rd_bank/fb_wr_bank."
-    },
-    {
-      "from": "scheduler.cmd_aux",
-      "to": [
-        "data_path.cmd_aux"
-      ],
-      "delay_cycles": 1,
-      "why": "cmd_gen's feedback carries no aux tag, but data_path needs the issued command's aux to tag read responses (rd_rsp_aux). Registered one cycle to align with the registered fb_rd_valid/fb_wr_valid pulses. Same missing-feedback-signal gap as the bank workaround — covered by the filed fb-bank finding; the design wants fb_aux."
-    }
-  ],
+  "glue": [],
   "expr_glue": [
-    {
-      "to": "data_path.wr_data_valid",
-      "expr": "wb_port.req_valid && wb_port.req_we && cmd_queue.enq_ready",
-      "why": "data_path buffers a write word when wb_port's write request is ACCEPTED (valid && we && ready). No single design port carries that event; it is the same accept condition cmd_queue enqueues on."
-    },
     {
       "to": "calibration.zqcs_ack",
       "expr": "calibration.zqcs_req",
-      "why": "Nothing in the drop consumes zqcs_req: no scheduler or cmd_gen port accepts a ZQCS request, so periodic ZQ calibration can never be granted by the design itself — an integration gap (finding filed). The harness acks immediately so the calibration FSM does not wedge; the cal_zqcs monitor still observes every request."
+      "why": "Nothing in the drop consumes zqcs_req: no scheduler or cmd_gen port accepts a ZQCS request, so periodic ZQ calibration can never be granted by the design itself \u2014 an integration gap (finding filed). The harness acks immediately so the calibration FSM does not wedge; the cal_zqcs monitor still observes every request."
     }
   ],
   "ties": {
@@ -82,7 +58,7 @@
       "instance": "u_dram",
       "source": "Validation/structural/dram_stub.sv",
       "when_block": "data_path",
-      "$why": "Something must sit on the far side of the DDR pins or every read returns the tied-off bus. A behavioral DRAM: ACT opens rows, WR stores the burst word, RD replies after CL. Testbench component — nothing judges the design against it.",
+      "$why": "Something must sit on the far side of the DDR pins or every read returns the tied-off bus. A behavioral DRAM: ACT opens rows, WR stores the burst word, RD replies after CL. Testbench component \u2014 nothing judges the design against it.",
       "inputs": {
         "clk": "@clk",
         "rst_n": "@rst_n",
@@ -161,6 +137,18 @@
         "wb_port.req_valid->cmd_queue.enq_valid"
       ],
       "why": "the drop's manifests now declare these sources (Frontend2 manifest fix, d77dc12); the map generator reported them redundant"
+    }
+  ],
+  "retired": [
+    {
+      "utc": "2026-10-08",
+      "what": "glue scheduler.cmd_bank->bank_tracker.cmd_{pre,rd,wr}_bank and scheduler.cmd_aux->data_path.cmd_aux",
+      "why": "cmd_gen has carried fb_pre_bank/fb_rd_bank/fb_wr_bank and cmd_out_aux since 09/29 (Frontend commit d77dc12); the manifests' declared sources are the real drivers. The glue predated them and superseded correct manifests, filing four MANIFEST_WRONG_SOURCE findings that were ours, not the Frontend's."
+    },
+    {
+      "utc": "2026-10-08",
+      "what": "expr_glue data_path.wr_data_valid = wb_port.req_valid && wb_port.req_we && cmd_queue.enq_ready",
+      "why": "the data_path manifest declares the same expression as source_expr (Frontend commit 6e2d7ad); the map generator reads source_expr, so the override was redundant"
     }
   ]
 }

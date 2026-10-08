@@ -1,0 +1,145 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_19_row_conflict",
+  "strategy": "invariant",
+  "verdict": "fail",
+  "timestamp": "2026-10-08T12:20:29.651698",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_19_row_conflict_seed1.json",
+  "stimulus_generator": "random",
+  "autonomous": false,
+  "window_cycles": 400,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "4b86c7cd3705",
+    "drop_id": "4b86c7cd3705",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "608d29d",
+    "frontend_commits": {
+      "addr_decoder": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "bank_tracker": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "cmd_gen": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "cmd_queue": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "config_regs": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "data_path": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "refresh_ctrl": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "scheduler": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "wb_port": "9c21084cdda21e528b57299e638eef2b79fef2ec"
+    },
+    "roots": [
+      "Frontend2/OutputFolders"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/addr_decoder.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "bank_tracker": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_gen": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_queue": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "config_regs": {
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "data_path": {
+        "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "refresh_ctrl": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "scheduler": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "wb_port": {
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "Frontend2/OutputFolders/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "cmd_gen (support)",
+      "kind": "sva",
+      "scope": "cmd_gen",
+      "model": null,
+      "verdict": "fail",
+      "summary": "SVA fired: a_PROTO_002 x23, a_TIMING_004 x23, a_TIMING_005 x5, a_TIMING_011 x1",
+      "detail": [
+        "a_PROTO_002 fired 23x (assertion bound to cmd_gen, not a judged stage)",
+        "a_TIMING_004 fired 23x (assertion bound to cmd_gen, not a judged stage)",
+        "a_TIMING_005 fired 5x (assertion bound to cmd_gen, not a judged stage)",
+        "a_TIMING_011 fired 1x (assertion bound to cmd_gen, not a judged stage)"
+      ]
+    },
+    {
+      "stage": "(path-level)",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_19_row_conflict_checker.py",
+      "scope": "path_19_row_conflict",
+      "verdict": "fail",
+      "summary": "scope=path_19_row_conflict  strategy=invariant  status=fail  violations=23",
+      "detail": [
+        "  PROTO_002 (double_activate): ACTIVATE to bank 5 which already has row 7922 active @ [ddr_cmd.command addr=0x1ef2 bank=0x5 cmd=0x3]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has row 25546 active @ [ddr_cmd.command addr=0x63ca bank=0x4 cmd=0x3]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has row 5454 active @ [ddr_cmd.command addr=0x154e bank=0x6 cmd=0x3]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has row 5454 active @ [ddr_cmd.command addr=0x154e bank=0x6 cmd=0x3]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 5 which already has row 5666 active @ [ddr_cmd.command addr=0x1622 bank=0x5 cmd=0x3]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has row 24982 active @ [ddr_cmd.command addr=0x6196 bank=0x4 cmd=0x3]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has row 24982 active @ [ddr_cmd.command addr=0x6196 bank=0x4 cmd=0x3]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has row 14528 active @ [ddr_cmd.command addr=0x38c0 bank=0x6 cmd=0x3]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 2 which already has row 27924 active @ [ddr_cmd.command addr=0x6d14 bank=0x2 cmd=0x3]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 2 which already has row 27924 active @ [ddr_cmd.command addr=0x6d14 bank=0x2 cmd=0x3]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has row 19881 active @ [ddr_cmd.command addr=0x4da9 bank=0x4 cmd=0x3]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has row 22655 active @ [ddr_cmd.command addr=0x587f bank=0x6 cmd=0x3]"
+      ]
+    }
+  ],
+  "log": "Validation/reports/paths/path_19_row_conflict_sim.log",
+  "observed_trace": "Validation/reports/paths/path_19_row_conflict_observed.jsonl"
+}

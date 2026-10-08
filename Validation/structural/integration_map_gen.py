@@ -74,7 +74,8 @@ def load_manifests(blocks):
         for group, plist in m.get("ports", {}).items():
             for p in plist:
                 ports[p["name"]] = {"width": p["width"], "dir": p["dir"],
-                                    "group": group, "source": p.get("source")}
+                                    "group": group, "source": p.get("source"),
+                                    "source_expr": p.get("source_expr")}
         out[b] = ports
     return out
 
@@ -93,9 +94,17 @@ def derive(manifests, blocks):
     """Edges the manifests declare, in block order then manifest port order,
     plus the problems found on the way."""
     edges, errors = [], []
+    derive.declared_expr = {}
     for b in blocks:
         for name, p in manifests[b].items():
             src = p.get("source")
+            if p.get("source_expr"):
+                # The manifest declares the input as an expression of other
+                # blocks' ports (Frontend, 2026-10-08: `source_expr`, with
+                # `source` its first term). That is the driver; no direct
+                # edge is derived from the first term.
+                derive.declared_expr[f"{b}.{name}"] = p["source_expr"]
+                continue
             if not src:
                 continue
             if p["dir"] != "input":
@@ -147,6 +156,16 @@ def build(manifests, blocks, ov):
             glued[t] = ("glue", g["from"], g.get("why", ""))
     for e in ov.get("expr_glue", []):
         glued[e["to"]] = ("expr_glue", e["expr"], e.get("why", ""))
+    # Expressions the manifests declare themselves win over our overrides: an
+    # override for the same port is redundant (housekeeping), and the harness
+    # builds the glue from the manifest's expression.
+    declared = getattr(derive, "declared_expr", {})
+    redundant_expr = [{"from": glued[t][1], "to": t, "kind": "expr_glue"}
+                      for t in declared if t in glued]
+    for t, expr in declared.items():
+        glued[t] = ("expr_glue", expr, "declared by the manifest (source_expr)")
+    expr_glue = ([e for e in ov.get("expr_glue", []) if e["to"] not in declared]
+                 + [{"to": t, "expr": expr, "declared_by": "manifest"} for t, expr in declared.items()])
     superseded, kept = [], []
     for c in derived:
         if c["to"] in glued:
@@ -157,7 +176,7 @@ def build(manifests, blocks, ov):
 
     # Overrides: edges the manifests lack. Redundant ones are reported.
     have = {(c["from"], c["to"]) for c in kept}
-    redundant, overrides, deferred = [], [], []
+    redundant, overrides, deferred = list(redundant_expr), [], []
     for c in ov.get("connections", []):
         key = (c["from"], c["to"])
         if key in have:
@@ -207,6 +226,7 @@ def build(manifests, blocks, ov):
         "$derivation": {
             "generated_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "manifest_edges": len(kept),
+            "manifest_expressions": declared,
             "override_edges": len(overrides),
             "superseded_manifest_sources": superseded,
             "override_connections": overrides,
@@ -221,7 +241,7 @@ def build(manifests, blocks, ov):
         "deferred_connections": getattr(derive, "deferred", []) + deferred,
         "inconsistent_connections": getattr(derive, "inconsistent", []),
         "requires": ov.get("requires", {}),
-        "expr_glue": ov.get("expr_glue", []),
+        "expr_glue": expr_glue,
         "stubs": ov.get("stubs", []),
     }
     report = {"inconsistent": getattr(derive, "inconsistent", []),
@@ -297,7 +317,18 @@ def to_findings(report, spec_rev):
             "detail": (f"The manifest says {s['to']} is driven directly by {s['from']}. "
                        f"It is not: {s['why']} Driver used: {s['driver']}. Either the "
                        f"RTL should consume {s['from']} as declared, or the manifest "
-                       f"should stop claiming a direct connection."),
+                       f"should name what drives it."),
+            # The contract, stated, because an agent answered the sentence
+            # above by writing prose into `source` (2026-10-08), which the
+            # map generator refuses: a source is a port or nothing.
+            "fix": (f"A manifest `source` is \"<block>.<port>\" naming a port that exists "
+                    f"in the drop, never free text. Preferred: make the RTL match the "
+                    f"manifest -- have {s['from'].split('.')[0]} drive {s['from']} so "
+                    f"{s['to']} is connected as declared. Otherwise set "
+                    f"\"source\": \"{s['driver']}\" (the port that drives it in the design today"
+                    + (", through registered glue the harness supplies" if s["superseded_by"] == "glue"
+                       else ", through an expression the harness supplies")
+                    + ")."),
             "evidence": {"consumer": s["to"], "declared_source": s["from"],
                          "driver": s["driver"], "kind": s["superseded_by"]},
             "status": "open",

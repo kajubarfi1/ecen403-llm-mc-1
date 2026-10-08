@@ -1,0 +1,113 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_10_csr_to_timing",
+  "strategy": "exact",
+  "verdict": "pass",
+  "timestamp": "2026-10-08T12:30:51.859856",
+  "blocks": [
+    "config_regs",
+    "bank_tracker"
+  ],
+  "derived_from": {
+    "host": "path_12_csr_timing_to_scheduling",
+    "stage": "config_regs"
+  },
+  "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+  "stimulus_generator": "register_walk",
+  "stages": [
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "pass",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=131/131  WAIVED=2 field comparison(s)  (131 output transaction(s) matched)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+  "observed_trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+  "rtl_drop": {
+    "git_head": "3596e1ec698e",
+    "drop_id": "3596e1ec698e",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "8d5770e",
+    "frontend_commits": {
+      "addr_decoder": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "bank_tracker": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "cmd_gen": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "cmd_queue": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "config_regs": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "data_path": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "refresh_ctrl": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "scheduler": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "wb_port": "8d5770ec4f8069d14daf1f9749db6a13676c691e"
+    },
+    "roots": [
+      "runs/2026-10-08-full-loop/drop"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "runs/2026-10-08-full-loop/drop/PHASE2RTL/addr_decoder.sv",
+        "manifest": "runs/2026-10-08-full-loop/drop/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "bank_tracker": {
+        "rtl": "runs/2026-10-08-full-loop/drop/PHASE2RTL/bank_tracker.sv",
+        "manifest": "runs/2026-10-08-full-loop/drop/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_gen": {
+        "rtl": "runs/2026-10-08-full-loop/drop/PHASE3RTL/cmd_gen.sv",
+        "manifest": "runs/2026-10-08-full-loop/drop/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_queue": {
+        "rtl": "runs/2026-10-08-full-loop/drop/PHASE3RTL/cmd_queue.sv",
+        "manifest": "runs/2026-10-08-full-loop/drop/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "config_regs": {
+        "rtl": "runs/2026-10-08-full-loop/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/2026-10-08-full-loop/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "data_path": {
+        "rtl": "runs/2026-10-08-full-loop/drop/PHASE4RTL/data_path.sv",
+        "manifest": "runs/2026-10-08-full-loop/drop/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "refresh_ctrl": {
+        "rtl": "runs/2026-10-08-full-loop/drop/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "runs/2026-10-08-full-loop/drop/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "scheduler": {
+        "rtl": "runs/2026-10-08-full-loop/drop/PHASE3RTL/scheduler.sv",
+        "manifest": "runs/2026-10-08-full-loop/drop/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "wb_port": {
+        "rtl": "runs/2026-10-08-full-loop/drop/PHASE1RTL/wb_port.sv",
+        "manifest": "runs/2026-10-08-full-loop/drop/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/2026-10-08-full-loop/drop/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
+  },
+  "coverage_collected": true
+}

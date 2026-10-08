@@ -133,7 +133,27 @@ class CadenceSSHAgent:
             if pw:
                 kwargs["password"] = pw
 
-        self.client.connect(**kwargs)
+        # Olympus resets connections when too many open at once (the
+        # Frontend's own gates plus our parallel paths): "Error reading SSH
+        # protocol banner" / ECONNRESET. That is load, not a broken path, so
+        # retry with backoff before giving up; a path must never be judged
+        # from a stale report because a socket blinked.
+        last = None
+        for attempt in range(1, 7):
+            try:
+                self.client.connect(**kwargs)
+                break
+            except (paramiko.SSHException, socket.error, EOFError, OSError) as e:
+                last = e
+                self.client.close()
+                self.client = paramiko.SSHClient()
+                self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                wait = 5 * attempt + (os.getpid() % 7)
+                print(f"    ssh connect attempt {attempt} failed ({type(e).__name__}: "
+                      f"{str(e)[:80]}); retrying in {wait}s")
+                time.sleep(wait)
+        else:
+            raise last
         self.connected = True
 
         result = self._head_exec("echo $HOME")

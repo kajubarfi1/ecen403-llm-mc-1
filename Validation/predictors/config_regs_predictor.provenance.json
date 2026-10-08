@@ -3,7 +3,7 @@
   "strategy": "exact",
   "generated_utc": "2026-10-08T17:12:41.423621+00:00",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "spec_sha256": "59b4edadb45f2bf8",
+  "spec_sha256": "2fb3bbdd55dd72be",
   "spec_path": "Validation/spec/llmmc_microarchitecturespec_filled.json",
   "model": "claude-opus-4-6",
   "accepted_by_gate": "register_map",
@@ -24,5 +24,19 @@
     "cfg_timing",
     "csr_rsp"
   ],
-  "note": "Generated from the spec and transaction schemas only; no RTL was supplied to the model. Accepted by a gate whose expectations are composed from the same spec by code the model never saw."
+  "note": "Generated from the spec and transaction schemas only; no RTL was supplied to the model. Accepted by a gate whose expectations are composed from the same spec by code the model never saw.",
+  "regraded": [
+    {
+      "spec_sha256": "2fb3bbdd55dd72be",
+      "utc": "2026-10-08T17:30:34Z"
+    },
+    {
+      "spec_sha256": "59b4edadb45f2bf8",
+      "utc": "2026-10-08T17:45:42Z"
+    },
+    {
+      "spec_sha256": "2fb3bbdd55dd72be",
+      "utc": "2026-10-08T17:53:50Z"
+    }
+  ]
 }

@@ -444,7 +444,7 @@
         },
         {
           "id": "SCHED_004",
-          "requirement": "A READ/WRITE must execute against the row its request asked for: when the CAS for a request issues, the row open in that bank (set by the most recent ACTIVATE to it) must be the request's row. An ACTIVATE that no pending request asked for is NOT a violation by itself \u2014 a controller may open a row speculatively \u2014 only a CAS landing on the wrong row is.",
+          "requirement": "A READ/WRITE must execute against the row its request asked for: when the CAS for a request issues, the row open in that bank (set by the most recent ACTIVATE to it) must be the request's row. An ACTIVATE that no pending request asked for is NOT a violation by itself \u2014 a controller may open a row speculatively \u2014 only a CAS landing on the wrong row is. Pairing: a CAS is paired with the pending request to its (bank, col, we) whose row equals the CAS's row field when one exists; otherwise with the OLDEST pending request to that (bank, col, we). The violation is judged against the paired request's row: the bank's open row must equal it. Under FR-FCFS a younger request may be served before an older one to the same bank, each against its own row; that is legal and pairs by row.",
           "legal": [
             [
               "cq_enq",
@@ -518,8 +518,80 @@
               }
             ]
           ],
-          "why": "Bank 2 was asked for row 5 but row 9 was opened; the WRITE that follows lands in row 9. Report it at the WRITE.",
-          "restated": "Restated 2026-09-29. The first wording ('every ACTIVATE must open a row some pending request asked for') fired 314 times on UberDDR3, which opens the next bank's row ahead of the request \u2014 legal, and verified correct by the Micron model. The invariant that matters is where the data lands."
+          "why": "Bank 2 was asked for row 5 but row 9 was opened; the WRITE that follows lands in row 9. Report it at the WRITE. Variant (2026-10-08, drop a7cd3cb93546, path_07/20): two writes to one bank and column with different rows; the scheduler served the younger first. A checker that pairs a CAS with the oldest request by (bank, col) reported both as wrong-row; pairing by (bank, row, col, we) reports nothing.",
+          "restated": "Restated 2026-09-29. The first wording ('every ACTIVATE must open a row some pending request asked for') fired 314 times on UberDDR3, which opens the next bank's row ahead of the request \u2014 legal, and verified correct by the Micron model. The invariant that matters is where the data lands.",
+          "legal_variants": {
+            "younger_request_served_first": [
+              [
+                "cq_enq",
+                "enqueue",
+                {
+                  "row": 5,
+                  "bank": 2,
+                  "col": 8,
+                  "we": 1
+                }
+              ],
+              [
+                "cq_enq",
+                "enqueue",
+                {
+                  "row": 9,
+                  "bank": 2,
+                  "col": 8,
+                  "we": 1
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "ACT",
+                  "bank": 2,
+                  "row": 9
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "WR",
+                  "bank": 2,
+                  "col": 8,
+                  "we": 1,
+                  "row": 9
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "PRE",
+                  "bank": 2
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "ACT",
+                  "bank": 2,
+                  "row": 5
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "WR",
+                  "bank": 2,
+                  "col": 8,
+                  "we": 1,
+                  "row": 5
+                }
+              ]
+            ]
+          }
         }
       ]
     },
@@ -1745,7 +1817,7 @@
         },
         {
           "id": "SCHED_004",
-          "requirement": "A READ/WRITE must execute against the row its request asked for: when the CAS for a request issues, the row open in that bank (set by the most recent ACTIVATE to it) must be the request's row. An ACTIVATE that no pending request asked for is NOT a violation by itself \u2014 a controller may open a row speculatively \u2014 only a CAS landing on the wrong row is.",
+          "requirement": "A READ/WRITE must execute against the row its request asked for: when the CAS for a request issues, the row open in that bank (set by the most recent ACTIVATE to it) must be the request's row. An ACTIVATE that no pending request asked for is NOT a violation by itself \u2014 a controller may open a row speculatively \u2014 only a CAS landing on the wrong row is. Pairing: a CAS is paired with the pending request to its (bank, col, we) whose row equals the CAS's row field when one exists; otherwise with the OLDEST pending request to that (bank, col, we). The violation is judged against the paired request's row: the bank's open row must equal it. Under FR-FCFS a younger request may be served before an older one to the same bank, each against its own row; that is legal and pairs by row.",
           "legal": [
             [
               "cq_enq",
@@ -1815,8 +1887,80 @@
               }
             ]
           ],
-          "why": "Bank 2 was asked for row 5 but row 9 was opened; the WRITE that follows lands in row 9. Report it at the WRITE.",
-          "restated": "Restated 2026-09-29. The first wording ('every ACTIVATE must open a row some pending request asked for') fired 314 times on UberDDR3, which opens the next bank's row ahead of the request \u2014 legal, and verified correct by the Micron model. The invariant that matters is where the data lands."
+          "why": "Bank 2 was asked for row 5 but row 9 was opened; the WRITE that follows lands in row 9. Report it at the WRITE. Variant (2026-10-08, drop a7cd3cb93546, path_07/20): two writes to one bank and column with different rows; the scheduler served the younger first. A checker that pairs a CAS with the oldest request by (bank, col) reported both as wrong-row; pairing by (bank, row, col, we) reports nothing.",
+          "restated": "Restated 2026-09-29. The first wording ('every ACTIVATE must open a row some pending request asked for') fired 314 times on UberDDR3, which opens the next bank's row ahead of the request \u2014 legal, and verified correct by the Micron model. The invariant that matters is where the data lands.",
+          "legal_variants": {
+            "younger_request_served_first": [
+              [
+                "cq_enq",
+                "enqueue",
+                {
+                  "row": 5,
+                  "bank": 2,
+                  "col": 8,
+                  "we": 1
+                }
+              ],
+              [
+                "cq_enq",
+                "enqueue",
+                {
+                  "row": 9,
+                  "bank": 2,
+                  "col": 8,
+                  "we": 1
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "ACT",
+                  "bank": 2,
+                  "row": 9
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "WR",
+                  "bank": 2,
+                  "col": 8,
+                  "we": 1,
+                  "row": 9
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "PRE",
+                  "bank": 2
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "ACT",
+                  "bank": 2,
+                  "row": 5
+                }
+              ],
+              [
+                "sched_cmd",
+                "command",
+                {
+                  "type": "WR",
+                  "bank": 2,
+                  "col": 8,
+                  "we": 1,
+                  "row": 5
+                }
+              ]
+            ]
+          }
         },
         {
           "id": "PROTO_001",

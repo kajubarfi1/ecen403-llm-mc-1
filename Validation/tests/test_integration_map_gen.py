@@ -56,6 +56,25 @@ class Derivation(unittest.TestCase):
                          [("prod.out_b", "cons.in_b")])
         self.assertEqual(rep["missing"], {})
 
+    def test_manifest_source_expr_is_the_driver(self):
+        # Frontend 2026-10-08: a consumer input may declare `source_expr`
+        # (an expression of other blocks' ports) with `source` its first
+        # term. The expression is the driver: no direct edge from the first
+        # term, no superseded finding, and an override expr_glue for the same
+        # port is redundant.
+        m = copy.deepcopy(MANIFESTS)
+        m["cons"]["in_a"]["source_expr"] = "prod.out_a && prod.out_b"
+        ov = copy.deepcopy(OV)
+        ov["expr_glue"] = [{"to": "cons.in_a", "expr": "prod.out_a && prod.out_b", "why": "old"}]
+        imap, rep = G.build(m, BLOCKS, ov)
+        edges = {(c["from"], c["to"]) for c in imap["connections"]}
+        self.assertNotIn(("prod.out_a", "cons.in_a"), edges)
+        self.assertEqual([e for e in imap["expr_glue"] if e["to"] == "cons.in_a"],
+                         [{"to": "cons.in_a", "expr": "prod.out_a && prod.out_b", "declared_by": "manifest"}])
+        self.assertEqual([(c["to"], c.get("kind")) for c in rep["redundant"]], [("cons.in_a", "expr_glue")])
+        self.assertEqual([s["to"] for s in rep["superseded"]], ["cons.in_c"], "only the glue target")
+        self.assertNotIn("in_a", rep["missing"].get("cons", []), "an expression-driven port is not sourceless")
+
     def test_source_naming_missing_port_refuses(self):
         m = copy.deepcopy(MANIFESTS)
         m["cons"]["in_a"]["source"] = "prod.nope"

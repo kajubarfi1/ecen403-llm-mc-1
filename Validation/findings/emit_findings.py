@@ -561,6 +561,19 @@ def emit(reports_dir, out_dir=None, drop_status=None):
 
 
 
+def _defect_at_source(r):
+    """True when the repair's `from` text is still in the current drop's
+    RTL for that block (the resolver's copy, not the catalogue's root)."""
+    try:
+        sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
+        import rtl_drop as RD
+        with open(RD.rtl_file(r["block"]), errors="replace") as f:
+            src = f.read()
+    except Exception:
+        return False
+    return all(e["from"] in src for e in r.get("edits", []))
+
+
 def repair_findings(head, rep_stage_root=None):
     """One v2 record per repair whose expected checks the CURRENT drop still
     raises: owner = the repaired block, anchor = the edited lines, evidence =
@@ -579,10 +592,12 @@ def repair_findings(head, rep_stage_root=None):
         rows = [x for x in mat["rows"] if x.get("repair") == r["id"] and not x.get("error")]
         silenced = sorted({k for x in rows for k in x.get("silenced_expected", {})})
         still = [k for k in r["expect_gone"] if k in cur_keys]
-        # Filed when the delivered drop still raises the check, when the
-        # repair was seen to silence it, or when the defect was read at
-        # source (a check the current stimulus does not reach is still a bug).
-        if not rows or not (still or silenced or r.get("confirmed_at_source")):
+        # Filed when the delivered drop still raises the check, or when the
+        # defect was read at source and the source still carries it. The
+        # repair matrix was computed on an earlier drop: that it silenced a
+        # check THEN is attribution, not evidence that THIS drop has the
+        # defect (a7cd3cb93546 fixed R01-R03 and they were still filed).
+        if not rows or not (still or (r.get("confirmed_at_source") and _defect_at_source(r))):
             continue
         # the check ids this repair speaks for, as taxonomy ids
         tids = sorted({k.split(":", 1)[1].replace("a_", "", 1)

@@ -1,0 +1,183 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_20_refresh_preempt",
+  "strategy": "invariant",
+  "verdict": "fail",
+  "timestamp": "2026-10-08T12:20:30.636858",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_20_refresh_preempt_seed1.json",
+  "stimulus_generator": "refresh_stress",
+  "autonomous": false,
+  "window_cycles": 6000,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "4b86c7cd3705",
+    "drop_id": "4b86c7cd3705",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "608d29d",
+    "frontend_commits": {
+      "addr_decoder": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "bank_tracker": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "cmd_gen": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "cmd_queue": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "config_regs": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "data_path": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "refresh_ctrl": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "scheduler": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "wb_port": "9c21084cdda21e528b57299e638eef2b79fef2ec"
+    },
+    "roots": [
+      "Frontend2/OutputFolders"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/addr_decoder.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "bank_tracker": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_gen": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_queue": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "config_regs": {
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "data_path": {
+        "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "refresh_ctrl": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "scheduler": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "wb_port": {
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "Frontend2/OutputFolders/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "pass",
+      "summary": "scope=wb_port  strategy=exact  status=pass  matched=600/600  (600 output transaction(s) matched)",
+      "detail": []
+    },
+    {
+      "stage": "addr_decoder",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
+      "scope": "addr_decoder",
+      "verdict": "pass",
+      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=600/600  (600 output transaction(s) matched)",
+      "detail": []
+    },
+    {
+      "stage": "cmd_queue+scheduler",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
+      "scope": "cmd_queue_scheduler",
+      "verdict": "fail",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=961",
+      "detail": [
+        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has active row @ [sched_cmd.command aux=0x3 bank=0x4 col=0x50 row=0x63ca type=0x1 we=0x1]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has active row @ [sched_cmd.command aux=0x3 bank=0x4 col=0x50 row=0x63ca type=0x1 we=0x1]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 7 which already has active row @ [sched_cmd.command aux=0x2 bank=0x7 col=0xa0 row=0x3b6f type=0x1 we=0x1]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 5 which already has active row @ [sched_cmd.command aux=0x6 bank=0x5 col=0x330 row=0x6a17 type=0x1 we=0x1]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 5 which already has active row @ [sched_cmd.command aux=0x6 bank=0x5 col=0x330 row=0x6a17 type=0x1 we=0x1]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 1 which already has active row @ [sched_cmd.command aux=0x3 bank=0x1 col=0xe8 row=0x176 type=0x1 we=0x1]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 1 which already has active row @ [sched_cmd.command aux=0x3 bank=0x1 col=0xe8 row=0x176 type=0x1 we=0x1]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 3 which already has active row @ [sched_cmd.command aux=0x7 bank=0x3 col=0x190 row=0x54c5 type=0x1 we=0x1]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 3 which already has active row @ [sched_cmd.command aux=0x7 bank=0x3 col=0x190 row=0x54c5 type=0x1 we=0x1]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 7 which already has active row @ [sched_cmd.command aux=0x8 bank=0x7 col=0x268 row=0x415a type=0x1 we=0x1]",
+        "  PROTO_002 (double_activate): ACTIVATE to bank 7 which already has active row @ [sched_cmd.command aux=0x8 bank=0x7 col=0x268 row=0x415a type=0x1 we=0x1]",
+        "  SCHED_004 (cas_wrong_row): WR issued with open row 21701 but request asked for row 26495 @ [sched_cmd.command aux=0x7 bank=0x3 col=0x190 row=0x54c5 type=0x3 we=0x1] [cq_enq.enqueue bank=0x3 col=0x190 row=0x677f we=0x1]"
+      ]
+    },
+    {
+      "stage": "refresh_ctrl",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "refresh_ctrl",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
+    },
+    {
+      "stage": "cmd_gen",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
+      "scope": "cmd_gen",
+      "verdict": "fail",
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=3929/3929  (3929 output transaction(s) matched)  SVA fired: a_PROTO_002 x947, a_TIMING_004 x946, a_TIMING_005 x85, a_TIMING_011 x13",
+      "detail": [
+        "a_PROTO_002 fired 947x (assertion bound to cmd_gen)",
+        "a_TIMING_004 fired 946x (assertion bound to cmd_gen)",
+        "a_TIMING_005 fired 85x (assertion bound to cmd_gen)",
+        "a_TIMING_011 fired 13x (assertion bound to cmd_gen)"
+      ]
+    },
+    {
+      "stage": "(path-level)",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_20_refresh_preempt_checker.py",
+      "scope": "path_20_refresh_preempt",
+      "verdict": "fail",
+      "summary": "scope=path_20_refresh_preempt  strategy=invariant  status=fail  violations=1",
+      "detail": [
+        "scope=path_20_refresh_preempt  strategy=invariant  status=fail  violations=1",
+        "  REF_002: REFRESH issued while banks [2] are still active @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]"
+      ]
+    }
+  ],
+  "log": "Validation/reports/paths/path_20_refresh_preempt_sim.log",
+  "observed_trace": "Validation/reports/paths/path_20_refresh_preempt_observed.jsonl"
+}

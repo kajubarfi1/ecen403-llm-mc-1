@@ -5,7 +5,7 @@
   "drop": "4b86c7cd3705",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "spec_id": "59b4edadb45f2bf8",
-  "generated_utc": "2026-10-08T17:20:32.800323Z",
+  "generated_utc": "2026-10-08T17:45:50.933069Z",
   "failed_modules": [
     "bank_tracker",
     "cmd_queue",
@@ -980,62 +980,7 @@
       "message": "1 check(s) failed on drop 4b86c7cd3705; 0 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
     }
   },
-  "resolved_since_previous_drop": [
-    {
-      "schema": "validation-findings/2",
-      "id": "structural/config_regs/SPEC_MISMATCH/compiled_ddr31333_x16_1lane_1rank",
-      "kind": "manifest_defect",
-      "check_id": "SPEC_MISMATCH/compiled_ddr31333_x16_1lane_1rank",
-      "taxonomy_id": "SPEC_MISMATCH",
-      "owner_module": "config_regs",
-      "severity": "critical",
-      "title": "config_regs was generated from spec rev compiled_ddr31333_x16_1lane_1rank; the drop is judged against rev golden_ddr3_1600k_x8_2lane_1rank",
-      "paths": [
-        "structural"
-      ],
-      "status": "resolved",
-      "resolved_in": "4b86c7cd3705",
-      "last_seen": "a58933561396",
-      "first_seen": "a58933561396",
-      "note": "open in drop a58933561396, not raised by drop 4b86c7cd3705"
-    },
-    {
-      "schema": "validation-findings/2",
-      "id": "structural/init_fsm/SPEC_MISMATCH/compiled_ddr31333_x16_1lane_1rank",
-      "kind": "manifest_defect",
-      "check_id": "SPEC_MISMATCH/compiled_ddr31333_x16_1lane_1rank",
-      "taxonomy_id": "SPEC_MISMATCH",
-      "owner_module": "init_fsm",
-      "severity": "critical",
-      "title": "init_fsm was generated from spec rev compiled_ddr31333_x16_1lane_1rank; the drop is judged against rev golden_ddr3_1600k_x8_2lane_1rank",
-      "paths": [
-        "structural"
-      ],
-      "status": "resolved",
-      "resolved_in": "4b86c7cd3705",
-      "last_seen": "a58933561396",
-      "first_seen": "a58933561396",
-      "note": "open in drop a58933561396, not raised by drop 4b86c7cd3705"
-    },
-    {
-      "schema": "validation-findings/2",
-      "id": "structural/wb_port/SPEC_MISMATCH/compiled_ddr31333_x16_1lane_1rank",
-      "kind": "manifest_defect",
-      "check_id": "SPEC_MISMATCH/compiled_ddr31333_x16_1lane_1rank",
-      "taxonomy_id": "SPEC_MISMATCH",
-      "owner_module": "wb_port",
-      "severity": "critical",
-      "title": "wb_port was generated from spec rev compiled_ddr31333_x16_1lane_1rank; the drop is judged against rev golden_ddr3_1600k_x8_2lane_1rank",
-      "paths": [
-        "structural"
-      ],
-      "status": "resolved",
-      "resolved_in": "4b86c7cd3705",
-      "last_seen": "a58933561396",
-      "first_seen": "a58933561396",
-      "note": "open in drop a58933561396, not raised by drop 4b86c7cd3705"
-    }
-  ],
+  "resolved_since_previous_drop": [],
   "requires_human_review": false,
   "source": "Validation/findings/emit_findings.py -> retry_adapter.py"
 }
