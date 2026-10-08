@@ -109,15 +109,28 @@ def interval_bound(spec, rule):
     return n, ns, period, mult, n * mult
 
 
+# A command stream whose catalog entry has a qualifier (init_cmd is a command
+# only while init_cmd_valid): the match is ANDed with it. Without this, a
+# design that leaves the command code on the bus between commands (the
+# backend's init_fsm netlist held MRS for an extra cycle) counts one command
+# twice and INIT_001 fires on a correct sequence. Pin-encoded streams
+# (ddr_cmd) have no qualifier and match on the code alone, as before.
+_CMD_QUAL = {}
+
+
 def cmd_match(enc, names, sig):
-    """SystemVerilog expression: the command signal is one of these."""
+    """SystemVerilog expression: the command signal is one of these (and the
+    stream's qualifier, when the catalog declares one)."""
     missing = [n for n in names if n not in enc]
     if missing:
         raise SvaGenError(f"command encoding has no entry for {missing}; "
                           f"known: {sorted(k for k in enc if not k.startswith('$'))}")
     if len(names) == 1:
-        return f"({sig} == {enc[names[0]]})"
-    return "(" + " || ".join(f"{sig} == {enc[n]}" for n in names) + ")"
+        m = f"({sig} == {enc[names[0]]})"
+    else:
+        m = "(" + " || ".join(f"{sig} == {enc[n]}" for n in names) + ")"
+    q = _CMD_QUAL.get(sig)
+    return f"({q} && {m})" if q else m
 
 
 def gen_separation(rule, spec, enc, sig, bank):  # noqa: C901
@@ -182,7 +195,7 @@ def gen_window(rule, spec, enc, sig):
   logic [{n - 1}:0] {rid.lower()}_hist;
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) {rid.lower()}_hist <= '0;
-    else        {rid.lower()}_hist <= {{{rid.lower()}_hist[{n - 2}:0], {act}}};
+    else        {rid.lower()}_hist <= {{{rid.lower()}_hist[{n - 2}:0], $sampled({act})}};
   end
 
   property p_{rid};
@@ -223,7 +236,7 @@ def gen_max_interval(rule, spec, enc, sig):
     if (!rst_n) begin
       {lo}_since <= '0;
       {lo}_armed <= 1'b0;
-    end else if ({cmd}) begin
+    end else if ($sampled({cmd})) begin
       {lo}_since <= '0;
       {lo}_armed <= 1'b1;
     end else if ({lo}_since != 32'hFFFF_FFFF) begin
@@ -297,8 +310,8 @@ def gen_sequence(rule, spec, enc, sig, bank):
       {lo}_step <= '0;
       {lo}_then_seen <= 1'b0;
     end else begin
-      if ({ocmd}) {lo}_step <= {lo}_step + 1;
-      if ({then}) {lo}_then_seen <= 1'b1;
+      if ($sampled({ocmd})) {lo}_step <= {lo}_step + 1;
+      if ($sampled({then})) {lo}_then_seen <= 1'b1;
     end
   end
   property p_{rid};
@@ -306,7 +319,7 @@ def gen_sequence(rule, spec, enc, sig, bank):
     {ocmd} |-> ({lo}_step < {n}) && ({bank} == {lo}_order[{lo}_step]);
   endproperty
   a_{rid}: assert property (p_{rid})
-    else $error("[{rid}] {rule['ordered_command']} out of the spec's order");
+    else $error("[{rid}] {rule['ordered_command']} out of the spec's order: step %0d expected {bank}=%0d, saw {bank}=%0d (valid=%b cmd=%h)", $sampled({lo}_step), ($sampled({lo}_step) < {n}) ? {lo}_order[$sampled({lo}_step)] : -1, $sampled({bank}), $sampled({_CMD_QUAL.get(sig, "1'b1")}), $sampled({sig}));
   property p_{rid}_then;
     @(posedge clk) disable iff (!rst_n)
     {then} |-> ({lo}_step == {n});
@@ -399,6 +412,12 @@ def generate(spec, rules, catalog, schemas):
     kind = next(iter(schemas[iface]["kinds"]))
     fields = schemas[iface]["kinds"][kind]
     sig = fields[rules["command_signals"]["cmd_field"]]["port"]
+    qual = catalog[iface].get("qualifier")
+    qual = qual if (qual and re.fullmatch(r"[A-Za-z_]\w*", qual) and qual != sig
+                    and qual not in ("1'b1",)) else None
+    _CMD_QUAL.clear()
+    if qual:
+        _CMD_QUAL[sig] = qual
     bank = fields[rules["command_signals"]["bank_field"]]["port"]
     bank_w = fields[rules["command_signals"]["bank_field"]]["width"]
     nbanks = 1 << int(spec["memory_geometry"]["bank_bits"])
@@ -444,9 +463,9 @@ def generate(spec, rules, catalog, schemas):
   wire pre_all = {pre} && {addr}[{pa_bit}];
   always @(posedge clk or negedge rst_n) begin   // plain always: initialiser + always_ff would be two drivers
     if (!rst_n)        row_open <= '0;
-    else if (pre_all)  row_open <= '0;
-    else if ({act})    row_open[{bank}] <= 1'b1;
-    else if ({pre})    row_open[{bank}] <= 1'b0;
+    else if ($sampled(pre_all))  row_open <= '0;
+    else if ($sampled({act}))    row_open[$sampled({bank})] <= 1'b1;
+    else if ($sampled({pre}))    row_open[$sampled({bank})] <= 1'b0;
   end
   // Multi-Purpose Register mode (JESD79-3 MR3 A2): while enabled, READs return
   // the MPR pattern and need no open row — this is how a controller calibrates
@@ -457,7 +476,7 @@ def generate(spec, rules, catalog, schemas):
   logic mpr_en = 1'b0;
   always @(posedge clk or negedge rst_n) begin   // plain always: initialiser + always_ff would be two drivers
     if (!rst_n)                                  mpr_en <= 1'b0;
-    else if ({mrs} && {bank} == {mr3_sel})   mpr_en <= {addr}[{mpr_bit}];
+    else if ($sampled({mrs}) && $sampled({bank}) == {mr3_sel})   mpr_en <= $sampled({addr}[{mpr_bit}]);
   end
 
 """
@@ -473,7 +492,8 @@ def generate(spec, rules, catalog, schemas):
            + [r["id"] for r in rules["state_rules"]])
     addr_port = (f",\n    input logic [ADDR_W-1:0] {addr}" if addr_f else "")
     for ev in sorted({r["event"] for r in rules["event_rules"]}
-                     | {r["event"] for r in rules["sequence_rules"] if r.get("event")}):
+                     | {r["event"] for r in rules["sequence_rules"] if r.get("event")}
+                     | ({qual} if qual else set())):
         addr_port += f",\n    input logic {ev}"
     addr_param = (f",\n    parameter int ADDR_W = {fields[addr_f]['width']}"
                   if addr_f else "")

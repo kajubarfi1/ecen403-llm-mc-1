@@ -30,6 +30,7 @@ import getpass
 import glob
 import json
 import os
+import shutil
 import subprocess
 import sys
 from datetime import datetime
@@ -38,6 +39,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, os.path.join(ROOT, "Validation", "agents"))
 sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
+sys.path.insert(0, HERE)                     # install_sky130_models (gate-level runs)
 
 from sim_runner import CadenceSSHAgent
 import check_path_chains as CPC
@@ -137,12 +139,24 @@ def stage_jobs(path_def, catalog):
     return jobs, None
 
 
-def judge(trace, jobs, path_id, rep_dir):
+def judge(trace, jobs, path_id, rep_dir, fired_by_block=None):
+    """Stage verdicts. `fired_by_block` is {block: {assertion: count}} from
+    the simulation log: an assertion bound to a stage's block that fired is
+    that stage's verdict, whatever its model says -- an SVA-owned stage has
+    no other judge, and a modelled stage's model does not see timing."""
+    fired_by_block = fired_by_block or {}
     results = []
     for j in jobs:
+        blk = j.get("stage")
+        fired = fired_by_block.get(blk) if blk else None
         if j["kind"] == "autonomous":
-            results.append({**j, "verdict": "sva",
-                            "note": "time-driven stage; pacing owned by SVA"})
+            if fired:
+                results.append({**j, "verdict": "fail",
+                                "summary": "SVA fired: " + ", ".join(f"{a} x{n}" for a, n in sorted(fired.items())),
+                                "detail": [f"{a} fired {n}x (see the sim log)" for a, n in sorted(fired.items())]})
+            else:
+                results.append({**j, "verdict": "sva",
+                                "note": "time-driven stage; pacing owned by SVA; no assertion fired"})
             continue
         if not (j["model"] and os.path.exists(j["model"])):
             results.append({**j, "verdict": "missing_model"})
@@ -154,9 +168,26 @@ def judge(trace, jobs, path_id, rep_dir):
         first = next((l for l in out.splitlines() if "status=" in l), "")
         verdict = ("pass" if "status=pass" in first
                    else "unknown" if "status=unknown" in first else "fail")
+        detail = out.strip().splitlines()[-12:] if verdict == "fail" else []
+        if fired:
+            verdict = "fail"
+            detail = [f"{a} fired {n}x (assertion bound to {blk})" for a, n in sorted(fired.items())] + detail
+            first = (first.strip() + "  SVA fired: " + ", ".join(f"{a} x{n}" for a, n in sorted(fired.items()))).strip()
         results.append({**j, "verdict": verdict, "summary": first.strip(),
-                        "detail": out.strip().splitlines()[-12:]
-                        if verdict == "fail" else []})
+                        "detail": detail})
+    # An assertion that fired in a block the path instantiates but does not
+    # judge as a stage (support closure: cmd_gen under a CSR path) still
+    # fails the path -- the design violated the spec while this path ran.
+    # path_03/12/13 had passed with cmd_gen timing assertions firing.
+    staged = {j.get("stage") for j in jobs}
+    for blk, fired in sorted(fired_by_block.items()):
+        if blk in staged:
+            continue
+        results.append({"stage": f"{blk} (support)", "kind": "sva", "scope": blk, "model": None,
+                        "verdict": "fail",
+                        "summary": "SVA fired: " + ", ".join(f"{a} x{n}" for a, n in sorted(fired.items())),
+                        "detail": [f"{a} fired {n}x (assertion bound to {blk}, not a judged stage)"
+                                   for a, n in sorted(fired.items())]})
     # path-level checker, if one was generated for this path
     pl = os.path.join(PREDICTORS, f"{path_id}_checker.py")
     if os.path.exists(pl):
@@ -207,6 +238,15 @@ def main() -> int:
                     help="do not simulate: re-judge the existing trace in the "
                          "report dir (after a checker or predictor was "
                          "regenerated) and rewrite the report")
+    ap.add_argument("--netlist", action="append", default=[], metavar="BLOCK=FILE",
+                    help="simulate this block's gate-level netlist (the backend's "
+                         "6_final.v) in place of its RTL; the sky130 cell models "
+                         "must be installed (tools/install_sky130_models.py). The "
+                         "report is tagged gate_<block> and stamps the swap")
+    ap.add_argument("--probe", default=None, metavar="NETS[@T0:T1]",
+                    help="debug: print these harness nets every clock (comma-separated, "
+                         "e.g. init_fsm__init_cmd_valid,init_fsm__init_bank), optionally "
+                         "only between two times in ps; PROBE lines are echoed from the log")
     ap.add_argument("--report-dir", default=None,
                     help="where to write the report/log/trace (default "
                          "Validation/reports/paths; a tagged run must not "
@@ -315,14 +355,51 @@ def main() -> int:
         driver_files = []
     else:
         driver_files = [os.path.join(work, "seq_driver.sv")]
+    # gate-level: a block's netlist replaces its RTL. Same module name and
+    # ports (the netlist was synthesized from that RTL), so the harness,
+    # monitors and SVA bind unchanged; what differs is that the design is
+    # now what the backend produced. The netlist is uploaded under a name
+    # that says so, and the run needs the installed cell models.
+    netlists = {}
+    for spec in args.netlist:
+        b, _, f = spec.partition("=")
+        if b not in blocks:
+            print(f"--netlist {b}: block is not in this path ({', '.join(blocks)})")
+            return 1
+        if not os.path.exists(f):
+            print(f"--netlist {b}: {f} not found")
+            return 1
+        netlists[b] = os.path.abspath(f)
+    if netlists and not args.tag:
+        args.tag = "gate_" + "_".join(sorted(netlists))
     rtl = []
     for b in blocks:
+        if b in netlists:
+            staged = os.path.join(work, f"{b}_netlist.v")
+            shutil.copy(netlists[b], staged)
+            rtl.append(staged)
+            continue
         p = rtl_file(b)
         if not p:
             print(f"no RTL for block {b!r}")
             return 1
         rtl.append(p)
     harness = os.path.join(work, "chain_harness.sv")
+    if args.probe:
+        nets, _, win = args.probe.partition("@")
+        nets = [n.strip() for n in nets.split(",") if n.strip()]
+        cond = ""
+        if win:
+            t0, _, t1 = win.partition(":")
+            cond = f"if ($time >= {t0} && $time <= {t1}) "
+        fmt = " ".join(f"{n}=%0h" for n in nets)
+        line = (f"  always @(posedge clk) {cond}$display(\"PROBE t=%0t {fmt}\", $time, "
+                + ", ".join(nets) + ");\n")
+        with open(harness) as f:
+            src = f.read()
+        i = src.rfind("endmodule")
+        with open(harness, "w") as f:
+            f.write(src[:i] + line + src[i:])
 
     if observe:
         # An observe path has no models by design: its blocks run
@@ -387,7 +464,11 @@ def main() -> int:
                 cov = (f"-coverage A -covoverwrite -covfile ./cov_conf.ccf "
                        f"-covtest {args.path}")
             names = " ".join(os.path.basename(p) for p in uploads)
-            cmd = (f"xrun -sv -access +rwc -timescale 1ns/1ps -clean {cov} "
+            gate = ""
+            if netlists:
+                from install_sky130_models import XRUN_NETLIST_ARGS
+                gate = XRUN_NETLIST_ARGS + " "
+            cmd = (f"xrun -sv -access +rwc -timescale 1ns/1ps -clean {cov} {gate}"
                    f"{names} -top chain_harness 2>&1")
             print(f"\nRunning: xrun ... -top chain_harness  "
                   f"({len(uploads)} file(s))")
@@ -419,6 +500,7 @@ def main() -> int:
         for e in errors[:12]:
             print(f"    {e[:160]}")
         return 2
+    fired_by_block = {}
     if asserts:
         import re as _re
         counts = {}
@@ -426,6 +508,11 @@ def main() -> int:
             m = _re.search(r"Assertion \S*\.(\w+) has failed", l)
             if m:
                 counts[m.group(1)] = counts.get(m.group(1), 0) + 1
+                # which block the assertion is bound into: ...u_<block>.u_<block>_sva.a_X
+                mb = _re.search(r"\.u_(\w+)\.u_\w+_sva\.", l)
+                if mb:
+                    fired_by_block.setdefault(mb.group(1), {})
+                    fired_by_block[mb.group(1)][m.group(1)] = fired_by_block[mb.group(1)].get(m.group(1), 0) + 1
             elif "EILLVU" in l:
                 m = _re.search(r"coverpoint \(\S*\.(\w+)\)", l)
                 key = "illegal bin: " + (m.group(1) if m else "?")
@@ -434,6 +521,11 @@ def main() -> int:
               f"the design's own checks disagree with its behavior:")
         for name, n in sorted(counts.items(), key=lambda kv: -kv[1]):
             print(f"    {name:24} {n}x")
+    if args.probe:
+        probes = [l for l in lines if l.startswith("PROBE ")]
+        print(f"\n  PROBE ({len(probes)} sample(s)):")
+        for l in probes[:60]:
+            print("    " + l)
     if "HARNESS_TIMEOUT" in stdout:
         print("\n  HARNESS TIMEOUT — the chain wedged; trace is partial.")
     stalls = [l for l in lines if "DRIVER_STALL" in l]
@@ -457,7 +549,7 @@ def main() -> int:
     print(out.strip())
 
     # --- judge -------------------------------------------------------------
-    results = judge(trace, jobs, args.path, rep_dir)
+    results = judge(trace, jobs, args.path, rep_dir, fired_by_block)
     print("\n" + "=" * 66)
     worst = "pass"
     for r in results:
@@ -507,7 +599,8 @@ def main() -> int:
         "autonomous": autonomous,
         "window_cycles": args.settle,
         "coverage_collected": not args.no_coverage,
-        "rtl_drop": __import__("rtl_drop").stamp(blocks),
+        "rtl_drop": {**__import__("rtl_drop").stamp(blocks),
+                     "netlists": {b: os.path.relpath(f, ROOT) for b, f in netlists.items()}},
         "stages": results,
         "log": os.path.relpath(log_path, ROOT),
         "observed_trace": os.path.relpath(trace, ROOT),

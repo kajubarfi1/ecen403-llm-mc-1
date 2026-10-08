@@ -121,9 +121,12 @@ Frontend through its own phase validation agents
 (`Frontend2/scripts/Phase{N}/phase{N}_validation_agent.py`, fed our package
 rendered as that phase's error report by
 `Validation/findings/to_frontend_error_report.py`); spec-review findings go
-back to the microarch agent through the request text. Edges whose
-counterpart does not exist yet halt and say so: phases without a validation
-agent (3, 4), the backend→frontend artifact, and the netlist validation stage. `--dry-run` prints the plan. Tests: `tests/test_flow.py`.
+back to the microarch agent through the request text. Backend findings
+(`backend/findings/outbox`, our envelope) are routed back the same way, and
+the final stage runs the backend's per-block netlists through the paths
+(`run_path.py --netlist`, sky130 models via `tools/install_sky130_models.py`).
+Edges whose counterpart does not exist yet halt and say so: phases without a
+validation agent (3, 4) and a top-level-only netlist. `--phases 1` runs a Phase-1-only loop (partial validation, no top-level, no backend); `--revalidate` re-judges a drop changed under a resumed run; `--dry-run` prints the plan. Tests: `tests/test_flow.py`.
 The Validation⇄Frontend contract is `Validation/findings/HANDOFF_CONTRACT.md`.
 
 ## Working conventions

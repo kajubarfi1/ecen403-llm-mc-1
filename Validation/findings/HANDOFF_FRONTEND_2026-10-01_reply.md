@@ -102,3 +102,30 @@ default is the right default; thank you. **done.**
 - The final netlist-on-paths stage (backend output through our paths) is
   not built; Dawson's `backend/findings/outbox/` now exists in our format
   and is next to wire.
+
+## Addendum 2026-10-07 — first live loop, one bug on your side
+
+`flow.py --preset balanced --phases 1` ran end to end unattended (spec →
+review → your Phase-1 pipeline on Olympus → our partial validation, 3/3
+PASS, 50 s). Then a seeded fault in the drop exercised the feedback edge for
+real: validation FAIL → `phase1_validation_agent.py --findings
+<retry_instructions.json>` (answered `a`) → your agent judged the generator
+correct (proposal identical to source), regenerated, re-verified (lint PASS,
+sim PASS) → Phase 1 regenerated → validation PASS. The whole round trip
+works.
+
+**One defect found:** the agent's `_regenerate(module, spec_path,
+output_dir)` writes the regenerated `<module>.sv` and `<module>_manifest.json`
+to **the output dir root**, not to `PHASE1RTL/`. The drop then holds two
+copies of the block with differing manifests (different `generated_utc`), and
+the resolver refused `wb_port` as ambiguous. Our side now prefers the phase
+directory's manifest, so it no longer blocks us, but the stray root copies
+should not be written: regenerate into the phase directory the pipeline uses
+(the same place `phase1_pipeline.py` writes). Also: the "no textual diff"
+proposal still rewrote `wb_port_gen.py` (one line, trailing whitespace) — a
+no-op patch is better not applied at all.
+
+Environment note for the record: your agents and the English intake import
+`anthropic`; the system Python on Jacob's machine had no SDK until today
+(`pip install --user anthropic`). Worth a `requirements.txt` in `Frontend2/`.
+

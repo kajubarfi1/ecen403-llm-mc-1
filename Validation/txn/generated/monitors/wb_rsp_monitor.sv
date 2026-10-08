@@ -20,7 +20,7 @@ module wb_rsp_monitor #(
     input  logic clk,
     input  logic rst_n,
     input  logic wb_ack_o,
-    input  logic [27:0] wb_adr_i,
+    input  logic [26:0] wb_adr_i,
     input  logic [31:0] wb_dat_o,
     input  logic wb_we_i
 );

@@ -87,8 +87,12 @@ def _find(block, pattern):
     between a phase output and a top-level assembly generated from two
     different specs. Returns (path, root) or (None, None)."""
     cfg = _config()
-    pref = cfg.get("manifest_dirs_preferred", []) if pattern.endswith("_manifest.json") \
-        else cfg.get("rtl_dirs_preferred", [])
+    # manifests: the consolidated lint copies first, then the phase
+    # directories (the same preference as the RTL -- a repair agent that
+    # drops a regenerated manifest at the drop root must not make the phase
+    # copy ambiguous, 2026-10-07)
+    pref = (cfg.get("manifest_dirs_preferred", []) + cfg.get("rtl_dirs_preferred", [])
+            if pattern.endswith("_manifest.json") else cfg.get("rtl_dirs_preferred", []))
     for root in roots():
         hits = sorted(glob.glob(os.path.join(root, "**", pattern), recursive=True))
         if not hits:

@@ -1,6 +1,6 @@
 {
   "$schema": "validation-fault-matrix/1",
-  "generated_utc": "2026-10-01T17:35:24.016292Z",
+  "generated_utc": "2026-10-07T20:05:17.305505Z",
   "drop_root": "Frontend2/OutputFolders",
   "faults_total": 23,
   "faults_killed": 23,
@@ -600,6 +600,37 @@
       "mutant_verdict": "pass"
     },
     {
+      "fault": "M14_init_fsm_skip_mr2",
+      "block": "init_fsm",
+      "path": "path_14_status_init",
+      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "description": "Init sequence skips MR2 (goes straight to MR3).",
+      "expect": [
+        "id:INIT_001",
+        "id:INIT_003"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [],
+      "expected_missed": [
+        "id:INIT_001",
+        "id:INIT_003"
+      ],
+      "new": {
+        "stage:init_fsm": 1,
+        "assert:a_INIT_001": 3,
+        "assert:a_INIT_001_then": 1
+      },
+      "grew": {},
+      "fewer_matched": {},
+      "blamed_stages": [
+        "init_fsm"
+      ],
+      "blame_names_block": true,
+      "baseline_verdict": "pass",
+      "mutant_verdict": "fail"
+    },
+    {
       "fault": "M15_calibration_early_done",
       "block": "calibration",
       "path": "path_08_init_to_cal",
@@ -763,6 +794,34 @@
       "mutant_verdict": "pass"
     },
     {
+      "fault": "M19_init_fsm_tzqinit_short",
+      "block": "init_fsm",
+      "path": "path_14_status_init",
+      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "description": "init_done is raised 4 cycles after ZQCL instead of tZQinit (128).",
+      "expect": [
+        "assert:a_INIT_002_init_done"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [
+        "assert:a_INIT_002_init_done"
+      ],
+      "expected_missed": [],
+      "new": {
+        "stage:init_fsm": 1,
+        "assert:a_INIT_002_init_done": 1
+      },
+      "grew": {},
+      "fewer_matched": {},
+      "blamed_stages": [
+        "init_fsm"
+      ],
+      "blame_names_block": true,
+      "baseline_verdict": "pass",
+      "mutant_verdict": "fail"
+    },
+    {
       "fault": "M20_cas_without_activate",
       "block": "scheduler",
       "path": "path_01_write_cmd",
@@ -912,6 +971,37 @@
       "mutant_verdict": "pass"
     },
     {
+      "fault": "M22_init_fsm_done_before_zqcl",
+      "block": "init_fsm",
+      "path": "path_14_status_init",
+      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "description": "init_done is also asserted while the FSM sits in S_MR0, i.e. before ZQCL has been issued.",
+      "expect": [
+        "assert:a_INIT_003_init_done",
+        "id:INIT_003"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [
+        "assert:a_INIT_003_init_done"
+      ],
+      "expected_missed": [
+        "id:INIT_003"
+      ],
+      "new": {
+        "stage:init_fsm": 1,
+        "assert:a_INIT_003_init_done": 1
+      },
+      "grew": {},
+      "fewer_matched": {},
+      "blamed_stages": [
+        "init_fsm"
+      ],
+      "blame_names_block": true,
+      "baseline_verdict": "pass",
+      "mutant_verdict": "fail"
+    },
+    {
       "fault": "M23_init_fsm_mrs_after_zqcl",
       "block": "init_fsm",
       "path": "path_14_status_init",
@@ -965,6 +1055,37 @@
       "blame_names_block": true,
       "baseline_verdict": "pass",
       "mutant_verdict": "pass"
+    },
+    {
+      "fault": "M23_init_fsm_mrs_after_zqcl",
+      "block": "init_fsm",
+      "path": "path_14_status_init",
+      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "description": "MR0 is programmed the cycle after ZQCL instead of before it: a command lands inside the tZQinit window and ZQCL precedes the last MRS.",
+      "expect": [
+        "assert:a_INIT_002",
+        "assert:a_INIT_001_then"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [
+        "assert:a_INIT_002",
+        "assert:a_INIT_001_then"
+      ],
+      "expected_missed": [],
+      "new": {
+        "stage:init_fsm": 1,
+        "assert:a_INIT_001_then": 1,
+        "assert:a_INIT_002": 1
+      },
+      "grew": {},
+      "fewer_matched": {},
+      "blamed_stages": [
+        "init_fsm"
+      ],
+      "blame_names_block": true,
+      "baseline_verdict": "pass",
+      "mutant_verdict": "fail"
     }
   ]
 }

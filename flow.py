@@ -44,10 +44,13 @@ say so instead of pretending:
     retry_instructions.json directly (--findings); an agent without that
     option gets our findings rendered as its phase error report. Phases that
     have no agent yet (3, 4) halt with the package.
-  * backend -> frontend change requests have no agreed artifact yet; a backend
-    failure that names the RTL halts with the backend report.
-  * the final netlist validation on our paths is not built yet; the stage
-    halts with NOT_IMPLEMENTED and the netlist's location.
+  * backend -> frontend: the backend's findings (backend/findings/outbox, in
+    Validation's envelope) become a retry package through the same adapter
+    and go to the Frontend's phase agents; the regenerated drop is validated
+    again before the backend runs again.
+  * final validation runs the backend's per-block netlists through every
+    path that instantiates the block (run_path --netlist, sky130 models
+    installed on the simulator); a top-level netlist waits for a top-level path.
 
 Usage:
     python3 flow.py "DDR3-1333 x16, one byte lane, balanced"       # English
@@ -352,6 +355,9 @@ def stage_rtl_generation(run, args, phases=None):
         return rc
     os.makedirs(run.drop, exist_ok=True)
     spec = run.state["spec"]
+    only = sorted(int(x) for x in str(args.phases).split(",")) if getattr(args, "phases", None) else None
+    if phases is None and only:
+        phases = only
     # the drop ships the spec it was generated from (validation reads it)
     shutil.copy(spec, os.path.join(run.drop, "generated_spec.json"))
     env = os.environ.copy()
@@ -389,7 +395,12 @@ def stage_rtl_generation(run, args, phases=None):
             rc = stage_rtl_validation(run, args, partial=True, tag=f"phase{n}")
             if rc:
                 return rc
-    # top-level assembly
+    # top-level assembly (not for a phase-limited run: the top needs all four)
+    if only and set(only) != {1, 2, 3, 4}:
+        run.state["drop"] = run.drop
+        run.record("rtl_generation", "PASS", f"phase(s) {only} generated; top-level assembly "
+                   f"skipped (--phases)")
+        return 0
     if not os.path.exists(GENERATE_TOP):
         return run.halt("rtl_generation", f"missing {os.path.relpath(GENERATE_TOP, ROOT)}")
     rc, txt = sh([PY, GENERATE_TOP, "--output-dir", run.drop, "--spec", spec],
@@ -417,6 +428,7 @@ def stage_rtl_validation(run, args, partial=False, tag=None):
     env = os.environ.copy()
     env["VALIDATION_RTL_DROP_ROOTS"] = run.drop
     env["VALIDATION_SPEC"] = run.state["spec"]
+    partial = partial or bool(getattr(args, "phases", None))
     cmd = [PY, VALIDATE_DROP] + (["--partial"] if partial else [])
     rc, txt = sh(cmd, cwd=ROOT, env=env, log=run.log, timeout=4 * 3600)
     _copy_current(run, dest)
@@ -431,6 +443,18 @@ def stage_rtl_validation(run, args, partial=False, tag=None):
         with open(os.path.join(dest, "DROP_STATUS.json")) as f:
             ds = json.load(f)
     blocked = len(ds.get("paths_blocked", {}))
+    # a block this run generated must have been judged: absent (unresolved,
+    # ambiguous copies) or foreign means the drop is not what the run thinks
+    only = sorted(int(x) for x in str(args.phases).split(",")) if getattr(args, "phases", None) else [1, 2, 3, 4]
+    mine = {b for n, _, _, _, blocks in PHASES if n in only for b in blocks}
+    unjudged = sorted((mine & set(ds.get("blocks_absent", []))) | (mine & set(ds.get("foreign_spec_blocks", {}))))
+    if unjudged:
+        run.record("rtl_validation", "FAIL", f"generated block(s) not judged: {', '.join(unjudged)}; "
+                   f"package: {os.path.relpath(dest, ROOT)}", package=dest)
+        return run.halt("rtl_validation", f"block(s) this run generated could not be judged: "
+                        f"{', '.join(unjudged)} (absent, ambiguous copies in the drop, or from "
+                        f"another spec -- see DROP_STATUS.json and the resolver's report in flow.log)",
+                        package=dest, unjudged=unjudged)
     detail = (f"{h['status']}; failed modules: {', '.join(h['failed_modules']) or 'none'}"
               + (f"; {blocked} path(s) blocked" if blocked else "")
               + f"; package: {os.path.relpath(dest, ROOT)}")
@@ -497,16 +521,43 @@ def stage_frontend_regeneration(run, args, package):
         # answered 'a'). The review of what it changed is the next validation
         # round, the rtl-round cap, and the agent's own re-verify/revert.
         rc, txt = sh(cmd, cwd=os.path.dirname(agent), stdin="a\n" * 40, log=run.log, timeout=3600)
+        # The agent exits 0 only when every module ends 'fixed'. Its fix
+        # report says which did; regenerating a generator the agent did not
+        # change reproduces the same drop, so with nothing fixed the run
+        # halts with the agent's reason instead of spinning to the cap.
+        fixed = fixed_modules(run, n)
+        if rc != 0 and not fixed:
+            tail = [l for l in txt.strip().splitlines() if l.strip()][-3:]
+            return run.halt("frontend_regeneration",
+                            f"phase {n} validation agent exited {rc} and fixed nothing: "
+                            + " | ".join(l.strip()[:120] for l in tail)
+                            + f". Package: {os.path.relpath(package, ROOT)}", phase=n, package=package)
         run.record("frontend_regeneration", "PASS" if rc == 0 else "PARTIAL",
-                   f"phase {n} agent exited {rc}" + ("" if rc == 0 else " (not every module fixed)"),
-                   phase=n)
+                   f"phase {n} agent exited {rc}; fixed: {', '.join(fixed) or 'none'}", phase=n)
     return stage_rtl_generation(run, args, phases=sorted(written))
+
+
+def fixed_modules(run, n):
+    """Modules the phase agent's fix report marks fixed (phase{N}_fix_report.json)."""
+    p = os.path.join(run.drop, "VALIDATIONREPORT", f"phase{n}_fix_report.json")
+    try:
+        with open(p) as f:
+            rep = json.load(f)
+    except (OSError, ValueError):
+        return []
+    out = []
+    for m in rep.get("modules", rep.get("results", [])) if isinstance(rep, dict) else []:
+        if isinstance(m, dict) and m.get("final_status") == "fixed":
+            out.append(m.get("module", "?"))
+    if isinstance(rep, dict) and isinstance(rep.get("modules"), dict):
+        out = [k for k, v in rep["modules"].items() if isinstance(v, dict) and v.get("final_status") == "fixed"]
+    return out
 
 
 def stage_backend(run, args):
     """Backend: RTL -> GDSII on the assembled top (drop/TOPRTL is a bundle)."""
-    if args.skip_backend:
-        run.record("backend", "SKIPPED", "--skip-backend")
+    if args.skip_backend or getattr(args, "phases", None):
+        run.record("backend", "SKIPPED", "--skip-backend" if args.skip_backend else "--phases run")
         return 0
     bundle = os.path.join(run.drop, "TOPRTL")
     if not os.path.isdir(bundle):
@@ -545,31 +596,124 @@ def stage_backend(run, args):
                     f"{os.path.relpath(reports[0], ROOT) if reports else 'none'}")
 
 
+BACKEND_OUTBOX = os.path.join(ROOT, "backend", "findings", "outbox")
+
+
+def backend_findings(spec_rev):
+    """The backend's newest findings_v2.json for this spec revision (its
+    emitter writes Validation's envelope: backend/findings/emit_findings.py)."""
+    lp = os.path.join(BACKEND_OUTBOX, spec_rev or "", "latest")
+    if not os.path.exists(lp):
+        return None
+    with open(lp) as f:
+        head = f.read().strip()
+    p = os.path.join(BACKEND_OUTBOX, spec_rev, head, "findings_v2.json")
+    return p if os.path.exists(p) else None
+
+
 def stage_backend_to_frontend(run, args, report):
-    """Backend asked for an RTL change. No agreed artifact exists yet for
-    this edge (the backend's report is not in a shape the Frontend reads),
-    so the run halts with it. When the format is agreed, this becomes:
-    translate -> feedback agent -> regenerate -> validate again -> backend."""
+    """Backend asked for an RTL change. Its findings (our envelope, written
+    by backend/findings/emit_findings.py) become a retry package through
+    the same adapter validation uses, and go to the Frontend's phase agents
+    like a validation package; then the regenerated drop is validated again
+    before the backend runs again."""
     rounds = run.state["rounds"]["backend"]
     if rounds >= args.max_backend_rounds:
         return run.halt("backend_to_frontend", f"{rounds} backend round(s) without a pass "
                         f"(cap {args.max_backend_rounds})")
-    return run.halt("backend_to_frontend",
-                    "the backend's failure names the RTL (synthesis), which is a request to the "
-                    "Frontend -- but there is no agreed backend->frontend artifact yet. Backend "
-                    f"report: {os.path.relpath(report, ROOT) if report else 'none'}. When the "
-                    "format exists this edge routes it like a validation package.", report=report)
+    with open(run.state["spec"]) as f:
+        rev = json.load(f).get("revision")
+    src = backend_findings(rev)
+    if not src:
+        return run.halt("backend_to_frontend",
+                        "the backend's failure names the RTL but it emitted no findings for "
+                        f"spec revision {rev} (backend/findings/outbox/<rev>/latest). Backend "
+                        f"report: {os.path.relpath(report, ROOT) if report else 'none'}.", report=report)
+    sys.path.insert(0, os.path.join(VALIDATION, "findings"))
+    import retry_adapter as RA
+    with open(src) as f:
+        doc = json.load(f)
+    ri = RA.adapt(doc)
+    ri["source"] = "backend/findings/emit_findings.py -> Validation/findings/retry_adapter.py"
+    pkg = os.path.join(run.backend_dir, f"retry_round_{rounds}")
+    os.makedirs(pkg, exist_ok=True)
+    with open(os.path.join(pkg, "retry_instructions.json"), "w") as f:
+        json.dump(ri, f, indent=2)
+    shutil.copy(src, os.path.join(pkg, "findings_v2.json"))
+    run.record("backend_to_frontend", "ROUTED", f"{len(ri['failed_modules'])} module(s) from the "
+               f"backend's findings: {', '.join(ri['failed_modules'])}; package {os.path.relpath(pkg, ROOT)}")
+    if not ri["failed_modules"]:
+        return run.halt("backend_to_frontend", "the backend's findings name no module; "
+                        f"see {os.path.relpath(src, ROOT)}")
+    return stage_frontend_regeneration(run, args, pkg)
+
+
+RUN_PATH = os.path.join(VALIDATION, "tools", "run_path.py")
+PATH_DEFS = os.path.join(VALIDATION, "spec", "path_definitions.json")
+
+
+def find_netlists(run):
+    """{block: 6_final.v} the backend produced in this run: one per bundle
+    directory under backend/runner/<design>/ (pipeline_batch names a design
+    after its bundle, i.e. the block), plus the top-level bundle's netlist
+    under its own name."""
+    out = {}
+    root = os.path.join(run.backend_dir, "runner")
+    if not os.path.isdir(root):
+        return out
+    for d in sorted(os.listdir(root)):
+        p = os.path.join(root, d, "6_final.v")
+        if os.path.exists(p):
+            out[d] = p
+    return out
 
 
 def stage_final_validation(run, args):
-    """Validation of the backend's netlist on the same paths the RTL passed.
-    Not built yet (needs the platform's cell models on the simulator); the
-    stage says so and names the netlist."""
-    return run.halt("final_validation",
-                    "NOT_IMPLEMENTED: running the backend netlist (6_final.v) through the "
-                    "validation paths needs the sky130hd cell models on Olympus and a netlist "
-                    "harness; the netlist is at " + str(run.state.get("netlist")) +
-                    ". Everything before this stage passed.")
+    """Validation of the backend's netlists on the same paths the RTL passed:
+    every path whose blocks include a block with a netlist is run again with
+    that netlist in the block's place (run_path --netlist; the sky130 cell
+    models installed by tools/install_sky130_models.py). A top-level netlist
+    (ddr3_controller) has no block path yet and is reported as such."""
+    nets = find_netlists(run)
+    blocks = {b: p for b, p in nets.items() if b != "TOPRTL" and b != "ddr3_controller"}
+    if not blocks:
+        return run.halt("final_validation",
+                        "the backend produced no per-block netlist to run (only "
+                        + (", ".join(nets) if nets else "nothing") +
+                        "); per-block bundles (backend/agents/pipeline_batch.py on "
+                        "backend/bundles/<block>) give runner/<block>/6_final.v, which "
+                        "this stage runs through every path that instantiates the block. "
+                        "A top-level netlist needs a top-level path, not built yet.",
+                        netlists=nets)
+    with open(PATH_DEFS) as f:
+        pdefs = [p for p in json.load(f)["paths"] if not p.get("judged_in")]
+    dest = os.path.join(run.val_dir, "gate")
+    os.makedirs(dest, exist_ok=True)
+    env = os.environ.copy()
+    env["VALIDATION_RTL_DROP_ROOTS"] = run.drop
+    env["VALIDATION_SPEC"] = run.state["spec"]
+    verdicts = {}
+    for p in pdefs:
+        swap = [b for b in p["blocks"] if b in blocks]
+        if not swap:
+            continue
+        cmd = [PY, RUN_PATH, "--path", p["id"], "--report-dir", dest, "--timeout", "1500"]
+        for b in swap:
+            cmd += ["--netlist", f"{b}={blocks[b]}"]
+        rc, txt = sh(cmd, cwd=ROOT, env=env, log=run.log, timeout=3600)
+        m = re.search(r"path verdict : (\w+)", txt)
+        verdicts[p["id"]] = (m.group(1) if m else f"rc={rc}", swap)
+    n_pass = sum(1 for v, _ in verdicts.values() if v == "PASS")
+    n_fail = sum(1 for v, _ in verdicts.values() if v == "FAIL")
+    detail = "; ".join(f"{pid}:{v} ({'+'.join(sw)} gate-level)" for pid, (v, sw) in verdicts.items())
+    run.record("final_validation", "PASS" if n_fail == 0 and n_pass else "FAIL",
+               f"{n_pass} pass / {n_fail} fail / {len(verdicts) - n_pass - n_fail} other over "
+               f"{len(blocks)} netlist(s): {detail}", netlists=blocks, verdicts=verdicts)
+    if n_fail or not n_pass:
+        return run.halt("final_validation", f"gate-level: {n_fail} path(s) failed with the backend's "
+                        f"netlist in place of the RTL the paths passed with; reports in "
+                        f"{os.path.relpath(dest, ROOT)}")
+    return 0
 
 
 # --------------------------------------------------------------------------
@@ -582,6 +726,9 @@ def run_flow(run, args):
     st = run.state
     st["status"] = "running"
     st["halt"] = None
+    if getattr(args, "revalidate", False):
+        # the backend verdict (if any) was for the previous drop
+        st["stages"] = [x for x in st["stages"] if x["stage"] not in ("backend", "final_validation")]
     run.save()
 
     if not st.get("spec"):
@@ -598,10 +745,13 @@ def run_flow(run, args):
             return rc
 
     # validation <-> frontend loop
+    revalidate = bool(getattr(args, "revalidate", False))
     while True:
         last = [s for s in st["stages"] if s["stage"] == "rtl_validation"]
-        if last and last[-1]["status"] == "PASS" and last[-1]["utc"] > _stage_utc(st, "rtl_generation"):
+        if (last and last[-1]["status"] == "PASS" and last[-1]["utc"] > _stage_utc(st, "rtl_generation")
+                and not revalidate):
             break
+        revalidate = False
         rc = stage_rtl_validation(run, args)
         if rc == 2:
             return rc
@@ -623,18 +773,18 @@ def run_flow(run, args):
         if rc == 0:
             break
         report = [s for s in st["stages"] if s["stage"] == "backend"][-1].get("report")
-        rc = stage_backend_to_frontend(run, args, report)
+        rc = stage_backend_to_frontend(run, args, report)     # routes, regenerates
         if rc:
             return rc
-        # (when the edge is live) regenerate -> validate -> backend again
-        rc = stage_rtl_validation(run, args)
+        rc = stage_rtl_validation(run, args)                   # the regenerated drop, before the backend again
         if rc:
             return rc if rc == 2 else run.halt("rtl_validation", "failed after a backend-requested change")
 
-    if args.skip_backend:
+    if args.skip_backend or getattr(args, "phases", None):
         st["status"] = "complete"
         run.save()
-        run.log("COMPLETE (backend skipped): the RTL drop passed validation.")
+        run.log("COMPLETE (backend skipped): the RTL drop passed validation"
+                + (f" (phase(s) {args.phases} only)" if getattr(args, "phases", None) else "") + ".")
         return 0
     rc = stage_final_validation(run, args)
     if rc:
@@ -658,7 +808,10 @@ def plan(args):
     print(f"  1 spec_synthesis        Frontend  {src}" + ("" if args.spec else
           f"\n      {os.path.relpath(MICROARCH_CLI, ROOT)} ... --out <run>/spec/generated_spec.json"))
     print(f"  2 spec_review           Validation  {os.path.relpath(SPEC_STAGE, ROOT)}  (FAIL halts)")
-    print(f"  3 rtl_generation        Frontend  phase1..4 pipelines (stdin: spec, <run>/drop) + generate_top.py"
+    ph = getattr(args, "phases", None)
+    print(f"  3 rtl_generation        Frontend  "
+          + (f"phase {ph} pipeline(s) only (stdin: spec, <run>/drop); no top-level assembly, backend skipped"
+             if ph else "phase1..4 pipelines (stdin: spec, <run>/drop) + generate_top.py")
           + ("  [validate --partial after each phase]" if args.validate_per_phase else ""))
     print(f"  4 rtl_validation        Validation  validate_drop.py on <run>/drop against the shipped spec"
           f"  -> <run>/validation/round_N/  (cap {args.max_rtl_rounds} rounds)")
@@ -667,8 +820,8 @@ def plan(args):
           f"(agents present for phases {have}; others halt)")
     print(f"  6 backend               Backend   {'SKIPPED (--skip-backend)' if args.skip_backend else os.path.relpath(BACKEND_PIPELINE, ROOT) + ' --bundle_dir <run>/drop/TOPRTL'}"
           + ("" if args.skip_backend else f"  (cap {args.max_backend_rounds} rounds; needs USE_DOCKER=1)"))
-    print(f"  7 backend_to_frontend   edge      no agreed artifact yet: halts with the backend report")
-    print(f"  8 final_validation      Validation  netlist on the validation paths  [NOT_IMPLEMENTED: halts]")
+    print(f"  7 backend_to_frontend   edge      backend/findings/outbox -> retry package -> phase agents -> validate again")
+    print(f"  8 final_validation      Validation  backend netlists through the paths (run_path --netlist, sky130 models)")
     print(f"  env: ANTHROPIC_API_KEY {'set' if os.environ.get('ANTHROPIC_API_KEY') else 'MISSING'}, "
           f"OLYMPUS_KEY {'set' if os.environ.get('OLYMPUS_KEY') else 'MISSING (phase pipelines would prompt)'}, "
           f"USE_DOCKER {os.environ.get('USE_DOCKER') or 'unset'}")
@@ -688,9 +841,16 @@ def main() -> int:
     ap.add_argument("--max-spec-rounds", type=int, default=2)
     ap.add_argument("--max-rtl-rounds", type=int, default=4)
     ap.add_argument("--max-backend-rounds", type=int, default=2)
+    ap.add_argument("--phases", default=None, metavar="N[,N]",
+                    help="generate only these Frontend phases (e.g. 1 for a Phase-1 loop); "
+                         "the drop is validated as partial and the top-level assembly and "
+                         "backend are skipped")
     ap.add_argument("--validate-per-phase", action="store_true",
                     help="run a partial validation after each Frontend phase, not only at the end")
     ap.add_argument("--skip-backend", action="store_true")
+    ap.add_argument("--revalidate", action="store_true",
+                    help="with --resume: validate the drop again even though the last "
+                         "validation passed (the drop changed under the run)")
     ap.add_argument("--dry-run", action="store_true", help="print the plan and exit")
     args = ap.parse_args()
 

@@ -1,80 +1,14 @@
 {
   "$schema": "validation-findings/1",
-  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "validation_spec": "Validation/spec/llmmc_microarchitecturespec_filled.json",
-  "shipped_spec": "Frontend2/OutputFolders/generated_spec.json",
-  "shipped_spec_revision": "compiled_ddr31333_x16_1lane_1rank",
+  "spec_revision": "compiled_ddr31333_x8_2lane_1rank",
+  "validation_spec": "runs/phase1_loop_1/spec/generated_spec.json",
+  "shipped_spec": "runs/phase1_loop_1/drop/generated_spec.json",
+  "shipped_spec_revision": "compiled_ddr31333_x8_2lane_1rank",
   "block_revisions": {
-    "addr_decoder": "golden_ddr3_1600k_x8_2lane_1rank",
-    "bank_tracker": "golden_ddr3_1600k_x8_2lane_1rank",
-    "calibration": "golden_ddr3_1600k_x8_2lane_1rank",
-    "cmd_gen": "golden_ddr3_1600k_x8_2lane_1rank",
-    "cmd_queue": "golden_ddr3_1600k_x8_2lane_1rank",
-    "config_regs": "compiled_ddr31333_x16_1lane_1rank",
-    "data_path": "golden_ddr3_1600k_x8_2lane_1rank",
-    "init_fsm": "compiled_ddr31333_x16_1lane_1rank",
-    "refresh_ctrl": "golden_ddr3_1600k_x8_2lane_1rank",
-    "scheduler": "golden_ddr3_1600k_x8_2lane_1rank",
-    "wb_port": "compiled_ddr31333_x16_1lane_1rank"
+    "config_regs": "compiled_ddr31333_x8_2lane_1rank",
+    "init_fsm": "compiled_ddr31333_x8_2lane_1rank",
+    "wb_port": "compiled_ddr31333_x8_2lane_1rank"
   },
-  "finding_count": 3,
-  "findings": [
-    {
-      "source": "validation",
-      "target": "frontend",
-      "kind": "spec_mismatch",
-      "scope": "config_regs",
-      "severity": "critical",
-      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-      "title": "config_regs was generated from spec rev compiled_ddr31333_x16_1lane_1rank; the drop is judged against rev golden_ddr3_1600k_x8_2lane_1rank",
-      "detail": "The block's manifest says spec_revision = compiled_ddr31333_x16_1lane_1rank. The other blocks of this drop and the spec validation loads are rev golden_ddr3_1600k_x8_2lane_1rank. A design assembled from two specs has no single contract: every path through config_regs is blocked until the drop is regenerated from one spec (the drop ships Frontend2/OutputFolders/generated_spec.json, rev compiled_ddr31333_x16_1lane_1rank).",
-      "evidence": {
-        "block": "config_regs",
-        "block_spec_revision": "compiled_ddr31333_x16_1lane_1rank",
-        "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-        "shipped_spec": "Frontend2/OutputFolders/generated_spec.json",
-        "shipped_spec_revision": "compiled_ddr31333_x16_1lane_1rank"
-      },
-      "spec_ref": "revision",
-      "status": "open"
-    },
-    {
-      "source": "validation",
-      "target": "frontend",
-      "kind": "spec_mismatch",
-      "scope": "init_fsm",
-      "severity": "critical",
-      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-      "title": "init_fsm was generated from spec rev compiled_ddr31333_x16_1lane_1rank; the drop is judged against rev golden_ddr3_1600k_x8_2lane_1rank",
-      "detail": "The block's manifest says spec_revision = compiled_ddr31333_x16_1lane_1rank. The other blocks of this drop and the spec validation loads are rev golden_ddr3_1600k_x8_2lane_1rank. A design assembled from two specs has no single contract: every path through init_fsm is blocked until the drop is regenerated from one spec (the drop ships Frontend2/OutputFolders/generated_spec.json, rev compiled_ddr31333_x16_1lane_1rank).",
-      "evidence": {
-        "block": "init_fsm",
-        "block_spec_revision": "compiled_ddr31333_x16_1lane_1rank",
-        "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-        "shipped_spec": "Frontend2/OutputFolders/generated_spec.json",
-        "shipped_spec_revision": "compiled_ddr31333_x16_1lane_1rank"
-      },
-      "spec_ref": "revision",
-      "status": "open"
-    },
-    {
-      "source": "validation",
-      "target": "frontend",
-      "kind": "spec_mismatch",
-      "scope": "wb_port",
-      "severity": "critical",
-      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-      "title": "wb_port was generated from spec rev compiled_ddr31333_x16_1lane_1rank; the drop is judged against rev golden_ddr3_1600k_x8_2lane_1rank",
-      "detail": "The block's manifest says spec_revision = compiled_ddr31333_x16_1lane_1rank. The other blocks of this drop and the spec validation loads are rev golden_ddr3_1600k_x8_2lane_1rank. A design assembled from two specs has no single contract: every path through wb_port is blocked until the drop is regenerated from one spec (the drop ships Frontend2/OutputFolders/generated_spec.json, rev compiled_ddr31333_x16_1lane_1rank).",
-      "evidence": {
-        "block": "wb_port",
-        "block_spec_revision": "compiled_ddr31333_x16_1lane_1rank",
-        "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-        "shipped_spec": "Frontend2/OutputFolders/generated_spec.json",
-        "shipped_spec_revision": "compiled_ddr31333_x16_1lane_1rank"
-      },
-      "spec_ref": "revision",
-      "status": "open"
-    }
-  ]
+  "finding_count": 0,
+  "findings": []
 }

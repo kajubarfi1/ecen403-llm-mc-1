@@ -1,6 +1,6 @@
 {
   "$schema": "validation-findings/1",
-  "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+  "spec_revision": "compiled_ddr31333_x8_2lane_1rank",
   "finding_count": 12,
   "findings": [
     {
@@ -9,7 +9,7 @@
       "kind": "spec_gap",
       "scope": "csr_register_map",
       "severity": "major",
-      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "spec_revision": "compiled_ddr31333_x8_2lane_1rank",
       "title": "[intake] What data accompanies a read of an address the register map does not declare?",
       "detail": "csr_register_map.unmapped_read_data is not stated. A spec-derived model and a design can both be 'correct' with different answers; the comparison is unfalsifiable until this is stated. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: VP_CSR_006 \u2014 design returned 0xDEADBEEF, model returned 0; waived as W-001.",
       "evidence": {
@@ -35,7 +35,7 @@
       "kind": "spec_gap",
       "scope": "csr_register_map",
       "severity": "major",
-      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "spec_revision": "compiled_ddr31333_x8_2lane_1rank",
       "title": "[intake] What happens on a write to an undeclared address \u2014 error flag, silent drop, or both?",
       "detail": "csr_register_map.unmapped_write_behavior is not stated. Error-flag comparison on unmapped writes rests on an assumption. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: sibling of VP_CSR_006 (the error flag happened to agree; the spec never said it must).",
       "evidence": {
@@ -60,7 +60,7 @@
       "kind": "spec_gap",
       "scope": "csr_register_map",
       "severity": "major",
-      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "spec_revision": "compiled_ddr31333_x8_2lane_1rank",
       "title": "[intake] Does a write to a read-only register (or a read of a write-only one) set the response error flag, or is it acknowledged silently and ignored?",
       "detail": "csr_register_map.access_violation_error is not stated. failure_taxonomy names CSR_001 'CSR access violation' but the register map never says the response flags it. A regenerated predictor assumed err=1 on RO writes; the drop acks with err=0. Neither is wrong until this is decided. Until then the catalog pins 'silent' so models agree with each other. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: config_regs primary regeneration 2026-10-01 (4 write_ack err mismatches on path_22).",
       "evidence": {
@@ -84,7 +84,7 @@
       "kind": "spec_gap",
       "scope": "csr_register_map",
       "severity": "major",
-      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "spec_revision": "compiled_ddr31333_x8_2lane_1rank",
       "title": "[intake] Do byte enables mean anything on a READ, and what value is expected on the request?",
       "detail": "csr_register_map.read_byte_enable_semantics is not stated. A model predicted full enables on reads; the bus drove none. Neither is wrong. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: byte_enable_semantics finding (path_18).",
       "evidence": {
@@ -109,7 +109,7 @@
       "kind": "spec_gap",
       "scope": "csr_register_map",
       "severity": "major",
-      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "spec_revision": "compiled_ddr31333_x8_2lane_1rank",
       "title": "[intake] When a status register is read in the same cycle its source changes, does the read return the old or the new value?",
       "detail": "csr_register_map.status_read_sampling is not stated. A one-cycle coincidence produced a mismatch that no waiver can express. Registered designs return the old value; the spec must say so. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: csr_status_read_coherency finding (path_12/13, CTRL_STATUS.ref_pending_cnt).",
       "evidence": {
@@ -133,7 +133,7 @@
       "kind": "spec_gap",
       "scope": "data_path_mapping",
       "severity": "major",
-      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "spec_revision": "compiled_ddr31333_x8_2lane_1rank",
       "title": "[intake] On the DDR channel, does the data-mask pin mask or enable a byte?",
       "detail": "data_path_mapping.ddr_dm_polarity is not stated. The design drives ~sel (JEDEC-correct); a spec-derived model carried sel through unchanged. The standard decides this one. The applicable standard (JESD79-3 (DDR3)) answers this: active_high_mask \u2014 DM=1 masks the byte. The host-side wishbone sel (1 = write this byte) is the inverse convention. Validation adopts that value and keeps checking; please state it in the spec. First encountered as: byte_enable_semantics finding (data_path pack/unpack gate).",
       "evidence": {
@@ -157,7 +157,7 @@
       "kind": "spec_gap",
       "scope": "TAXONOMY_SCHEDULER_FAMILY",
       "severity": "minor",
-      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "spec_revision": "compiled_ddr31333_x8_2lane_1rank",
       "title": "[intake] Does the failure taxonomy have ids for what a queue + arbiter can do wrong \u2014 drop a request, invent a command, starve a refresh?",
       "detail": "no failure_taxonomy id starts with 'SCHED_'; needed for: dropped request, invented command, refresh never serviced. Checkers reported real defects under locally proposed ids (SCHED_001..003) that the spec cannot name. Disposition: vocabulary \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: taxonomy_gap finding (stage invariant checkers).",
       "evidence": {
@@ -191,7 +191,7 @@
       "kind": "spec_gap",
       "scope": "block_interfaces",
       "severity": "major",
-      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "spec_revision": "compiled_ddr31333_x8_2lane_1rank",
       "title": "[intake] For every pair of blocks a path connects, what are the port-level signals, widths and handshake between them?",
       "detail": "spec has no 'block_interfaces' section; 19 block-to-block hops are declared by path_definitions and none has an interface contract. The drop shipped 11 blocks and no top level; two block pairs did not compose (no bank on cmd_gen's feedback, nothing consuming calibration's ZQCS request). Validation had to author a 75-connection map by hand. Interfaces that are not specified cannot be generated consistently on both sides. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: integration_map.json glue entries; fb-bank and ZQCS findings.",
       "evidence": {
@@ -223,7 +223,7 @@
       "kind": "spec_gap",
       "scope": "TAXONOMY_NAMES_TIMING_PARAMS",
       "severity": "minor",
-      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "spec_revision": "compiled_ddr31333_x8_2lane_1rank",
       "title": "[intake] Does the failure taxonomy have an id for violating EVERY timing parameter the timing model states?",
       "detail": "failure_taxonomy names no failure for ['tREFI']; every stated timing parameter needs a violation id. A parameter with no failure id has no assertion name to report under; tREFI had none, so the refresh-interval assertion reports under a proposed TIMING_012. Disposition: vocabulary \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: sva_rules.json max_interval_rules (tREFI) \u2014 no taxonomy id names tREFI.",
       "evidence": {
@@ -250,7 +250,7 @@
       "kind": "spec_gap",
       "scope": "timing_model",
       "severity": "major",
-      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "spec_revision": "compiled_ddr31333_x8_2lane_1rank",
       "title": "[intake] What is the minimum spacing between consecutive mode-register-set commands (tMRD)?",
       "detail": "timing_model.tMRD is not stated. The init sequence issues four MRS commands; without tMRD their spacing cannot be asserted, so INIT_002 is only partially checkable. The applicable standard (JESD79-3 (DDR3)) answers this: 4 nCK \u2014 MRS-to-MRS command spacing. Stated in nanoseconds in timing_model (4 x tCK). Validation adopts that value and keeps checking; please state it in the spec. First encountered as: sva_rules.json command_groups[init] \u2014 only tZQinit could be generated.",
       "evidence": {
@@ -271,7 +271,7 @@
       "kind": "spec_gap",
       "scope": "timing_model",
       "severity": "major",
-      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "spec_revision": "compiled_ddr31333_x8_2lane_1rank",
       "title": "[intake] What is the minimum delay from a mode-register-set command to the next non-MRS command (tMOD)?",
       "detail": "timing_model.tMOD is not stated. ZQCL after the last MRS cannot be checked for tMOD without it. The applicable standard (JESD79-3 (DDR3)) answers this: max(12 nCK, 15 ns) \u2014 MRS to any non-MRS command. Validation adopts that value and keeps checking; please state it in the spec. First encountered as: sva_rules.json command_groups[init].",
       "evidence": {
@@ -292,7 +292,7 @@
       "kind": "spec_gap",
       "scope": "controller_architecture",
       "severity": "major",
-      "spec_revision": "compiled_ddr3800_x8_1lane_1rank",
+      "spec_revision": "compiled_ddr31333_x8_2lane_1rank",
       "title": "[intake] May the scheduler open a row that no pending request has asked for yet (look-ahead / speculative ACTIVATE)?",
       "detail": "controller_architecture.speculative_activate is not stated. A checker that forbids it fires on a correct look-ahead controller; one that allows it cannot flag a wasted ACTIVATE. Validation assumes 'allowed' until the spec says otherwise. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: SCHED_004 fired 314x on the known-good UberDDR3 reference (2026-09-29).",
       "evidence": {

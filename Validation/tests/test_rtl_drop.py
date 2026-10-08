@@ -118,6 +118,18 @@ class TestCopiesAndStamps(TestResolver):
         os.utime(os.path.join(self.root_a, "top", "blk.sv"), (2_000_000_000, 2_000_000_000))
         self.assertTrue(RD.rtl_file("blk").endswith(os.path.join("p1", "blk.sv")))
 
+    def test_manifest_prefers_phase_dir_over_a_root_copy(self):
+        with open(self.cfg) as f:
+            cfg = json.load(f)
+        cfg["rtl_dirs_preferred"] = ["p1"]
+        with open(self.cfg, "w") as f:
+            json.dump(cfg, f)
+        _write(os.path.join(self.root_a, "p1", "blk.sv"), "module blk; endmodule")
+        _write(os.path.join(self.root_a, "p1", "blk_manifest.json"), json.dumps({"ports": {}, "spec_revision": "phase"}))
+        _write(os.path.join(self.root_a, "blk_manifest.json"), json.dumps({"ports": {}, "spec_revision": "root_copy"}))
+        self.assertTrue(RD.manifest_file("blk").endswith(os.path.join("p1", "blk_manifest.json")))
+        self.assertEqual(RD.spec_stamp("blk")[1], "phase")
+
     def test_spec_stamp_from_manifest_then_header(self):
         _write(os.path.join(self.root_a, "p1", "blk.sv"), "// Spec:      design_x rev rev_from_header\nmodule blk; endmodule")
         _write(os.path.join(self.root_a, "p1", "blk_manifest.json"),

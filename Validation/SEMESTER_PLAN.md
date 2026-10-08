@@ -332,6 +332,74 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   and halts before RTL generation for want of `OLYMPUS_KEY` (the phase
   pipelines prompt for a password otherwise). 12 state-machine tests with
   every subsystem faked at the subprocess boundary (`tests/test_flow.py`).
+- *2026-10-07 — netlists on our paths, and two checker defects they found.*
+  The final stage is real: `run_path.py --netlist <block>=<6_final.v>`
+  simulates the backend's gate-level netlist in place of the block's RTL on
+  any path (same module name and ports, so harness, monitors and SVA bind
+  unchanged); the sky130_fd_sc_hd functional models (88 cells + 23 UDPs,
+  mirrored from the open PDK under `refdesigns/sky130/`, Apache-2.0) are
+  installed on Olympus by `tools/install_sky130_models.py`, which smoke-
+  compiles a real netlist against them. `flow.py`'s `final_validation`
+  runs every per-block netlist through every path that instantiates the
+  block. On the netlists committed under `backend/outputs/` (August RTL,
+  golden spec; run on a snapshot of the golden Phase-1 drop,
+  `rtl_snapshots/golden_phase1_14f15f9/`): **wb_port PASS 19/19 on
+  path_21; init_fsm PASS on path_14** — after two defects in our own
+  checkers, both found only because a gate-level design behaves
+  differently from RTL in simulation:
+  (1) the generated SVA's auxiliary trackers (INIT_001 step counter, tFAW
+  history, tREFI window, bank-open state, MPR enable) read design signals
+  in the active region while the properties use preponed samples; UDP
+  flops in a netlist update in the active region, so the counter ran one
+  cycle ahead and INIT_001 fired on a correct MRS burst. Every tracker now
+  reads through `$sampled()`, and command matches are ANDed with the
+  stream's qualifier (`init_cmd_valid`). RTL results unchanged (path_14
+  baseline PASS, boot faults 4/4 still killed). `--probe` on run_path (a
+  cycle-by-cycle display of named nets) is what diagnosed it.
+  (2) the path verdict ignored fired assertions: an SVA-owned stage was
+  "SVA-OWNED" whatever fired, and a support block's assertions (cmd_gen
+  under a CSR path) never touched the verdict — path_03/12/13 had PASSED
+  on 14f15f9 with cmd_gen timing assertions firing 77/4/4 times (the
+  findings were filed; the verdict and the pass count were wrong). A fired
+  assertion is now the verdict of its stage, and a support block's fire is
+  a failing row of its own; re-judged on a consistent golden drop all three
+  are FAIL, so 14f15f9 stands at 8 pass / 11 fail, not 11 / 8.
+  Backend edge wired: `flow.py` reads `backend/findings/outbox/<rev>/latest`
+  (Dawson's emitter writes our envelope), adapts it with `retry_adapter`
+  (his `suggested_fix` → our `fix`), routes it to the phase agents, and
+  validates the regenerated drop before the backend runs again. Reply to
+  his five PENDING fields: `findings/HANDOFF_BACKEND_2026-10-07.md` (all
+  accepted; asks for the content drop id and a signal in the anchor; asks
+  for per-block netlists, which this stage needs).
+- *2026-10-07, evening — the first real loop.* Jacob's SSH key authorized
+  on Olympus (`OLYMPUS_USER`/`OLYMPUS_KEY` in `setup.env`), `flow.py
+  --phases N` for a phase-limited loop (no top-level assembly, backend
+  skipped, drop validated as partial), `--revalidate` for a drop changed
+  under a run. **`flow.py --preset balanced --phases 1` completed end to end
+  in 50 s:** spec `compiled_ddr31333_x8_2lane_1rank` synthesized and
+  reviewed (0 blocking, 12 advisory) → Lehana's Phase-1 pipeline
+  unattended (init_fsm 11/11, config_regs 36/36, wb_port 4/4 in Xcelium on
+  Olympus, Verilator lint PASS) → partial validation of the drop
+  (`c2173182198d`): path_14/21/22 PASS, 0 findings, 19 paths blocked
+  awaiting phases 2–4 → `outbox/current/` updated. First time all of
+  spec → RTL → validation ran as one command on a spec nobody hand-wrote.
+  Then the feedback edge, live, in a throwaway worktree (her agent patches
+  the worktree's generator, not the tree): a seeded wb_port fault in the
+  run's drop → validation FAIL (2 findings, drop `454712b454d7`) →
+  `phase1_validation_agent.py --findings` on our package (claude-sonnet-5
+  on her side) → proposal identical to the generator (correct: the fault was
+  in the RTL copy), applied, regenerated, re-verified on Olympus → Phase 1
+  regenerated → validation PASS, the 2 findings resolved. Three things it
+  surfaced: (1) the system Python had no `anthropic` SDK — her agent crashed
+  the first time and the flow regenerated blindly; the SDK is installed and
+  the flow now halts when an agent fixed nothing (it reads her
+  `phase1_fix_report.json`); (2) a resumed run inherited its round count and
+  hit the cap before the agent ran — right for a real run, so the test reset
+  it; (3) her `_regenerate` writes the repaired block to the drop ROOT, not
+  `PHASE1RTL/`, which made the manifest ambiguous — the resolver now prefers
+  the phase directory's manifest as it does the RTL, and the flow halts when
+  a block the run generated was not judged (it had said COMPLETE). Reply
+  addendum in `findings/HANDOFF_FRONTEND_2026-10-01_reply.md`.
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

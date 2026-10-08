@@ -1,15 +1,15 @@
 {
   "$schema": "validation-drop-comparison/1",
   "a": {
-    "dir": "Validation/reports/drops/14f15f9",
-    "drop_head": "14f15f9"
+    "dir": "Validation/reports/drops/5661e03",
+    "drop_head": "5661e03"
   },
   "b": {
-    "dir": "Validation/reports/partial/12bbe90",
-    "drop_head": "12bbe90"
+    "dir": "Validation/reports/partial/c2173182198d",
+    "drop_head": "011fd23ddb6b"
   },
   "strict": false,
-  "generated_utc": "2026-10-01T17:08:35.783901Z",
+  "generated_utc": "2026-10-08T01:20:05.640008Z",
   "rows": [
     {
       "path": "path_14_status_init",
@@ -41,13 +41,18 @@
     },
     {
       "path": "path_22_csr_standalone",
-      "kind": "same",
+      "kind": "fixed",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {},
+      "matched_up": {
+        "matched:config_regs": [
+          103,
+          131
+        ]
+      },
       "verdict": [
         "pass",
         "pass"

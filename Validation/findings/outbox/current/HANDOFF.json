@@ -1,23 +1,17 @@
 {
   "$schema": "validation-handoff/1",
-  "drop_id": "a58933561396",
+  "drop_id": "c2173182198d",
   "drop_id_rule": "sha256 over each block's <block>.sv then <block>_manifest.json contents, blocks sorted by name, first 12 hex digits (Validation/structural/rtl_drop.py:drop_id)",
-  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "status": "FAIL",
-  "failed_modules": [
-    "bank_tracker",
-    "config_regs",
-    "data_path",
-    "init_fsm",
-    "scheduler",
-    "wb_port"
-  ],
-  "generated_utc": "2026-10-01T17:35:39.642331Z",
+  "spec_revision": "compiled_ddr31333_x8_2lane_1rank",
+  "status": "PASS",
+  "failed_modules": [],
+  "generated_utc": "2026-10-08T01:20:05.588087Z",
   "files": [
     "retry_instructions.json",
     "findings_v2.json",
-    "DROP_STATUS.json"
+    "DROP_STATUS.json",
+    "SPEC_REVIEW.json"
   ],
-  "archive": "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/a58933561396",
+  "archive": "Validation/findings/outbox/compiled_ddr31333_x8_2lane_1rank/c2173182198d",
   "read": "retry_instructions.json; check drop_id against the drop you handed over before acting on it. requires_human_review=true means a spec gap or waiver needs a person, not a regeneration."
 }

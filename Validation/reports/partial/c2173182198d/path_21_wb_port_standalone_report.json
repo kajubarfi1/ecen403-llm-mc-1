@@ -1,0 +1,51 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_21_wb_port_standalone",
+  "strategy": "exact",
+  "verdict": "pass",
+  "timestamp": "2026-10-07T20:19:45.893291",
+  "blocks": [
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_21_wb_port_standalone_seed1.json",
+  "stimulus_generator": "random",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "aa335f0f9fd4",
+    "drop_id": "aa335f0f9fd4",
+    "validated_at": "2d8252e",
+    "frontend_commits": {
+      "wb_port": "2d8252e36d6883f17b27e3695a083058e3dc0734"
+    },
+    "roots": [
+      "runs/phase1_loop_1/drop"
+    ],
+    "blocks": {
+      "wb_port": {
+        "rtl": "runs/phase1_loop_1/drop/PHASE1RTL/wb_port.sv",
+        "manifest": "runs/phase1_loop_1/drop/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "compiled_ddr31333_x8_2lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/phase1_loop_1/drop/generated_spec.json",
+      "revision": "compiled_ddr31333_x8_2lane_1rank"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "pass",
+      "summary": "scope=wb_port  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/partial/c2173182198d/path_21_wb_port_standalone_sim.log",
+  "observed_trace": "Validation/reports/partial/c2173182198d/path_21_wb_port_standalone_observed.jsonl"
+}

@@ -1,41 +1,6 @@
 {
   "$schema": "validation-findings/1",
-  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "finding_count": 2,
-  "findings": [
-    {
-      "source": "validation",
-      "target": "frontend",
-      "kind": "rtl_bug",
-      "scope": "wb_port",
-      "severity": "critical",
-      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-      "title": "wb_port.wb_adr_i is 28 bits; the spec declares 29",
-      "detail": "host_interface.address_width_bits = 29, so wb_port.wb_adr_i must be 29 bits wide; the design makes it 28. The host byte address spans the spec's host address space on the bus and on the request the port forwards.",
-      "evidence": {
-        "spec_path": "host_interface.address_width_bits",
-        "spec_value": 29,
-        "port": "wb_adr_i",
-        "rtl_width": 28
-      },
-      "status": "open"
-    },
-    {
-      "source": "validation",
-      "target": "frontend",
-      "kind": "rtl_bug",
-      "scope": "wb_port",
-      "severity": "critical",
-      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-      "title": "wb_port.req_addr is 28 bits; the spec declares 29",
-      "detail": "host_interface.address_width_bits = 29, so wb_port.req_addr must be 29 bits wide; the design makes it 28. The host byte address spans the spec's host address space on the bus and on the request the port forwards.",
-      "evidence": {
-        "spec_path": "host_interface.address_width_bits",
-        "spec_value": 29,
-        "port": "req_addr",
-        "rtl_width": 28
-      },
-      "status": "open"
-    }
-  ]
+  "spec_revision": "compiled_ddr31333_x8_2lane_1rank",
+  "finding_count": 0,
+  "findings": []
 }

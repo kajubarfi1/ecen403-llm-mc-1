@@ -1,0 +1,51 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_22_csr_standalone",
+  "strategy": "exact",
+  "verdict": "pass",
+  "timestamp": "2026-10-07T20:19:44.667016",
+  "blocks": [
+    "config_regs"
+  ],
+  "sequence": "Validation/sequences/generated/path_22_csr_standalone_seed1.json",
+  "stimulus_generator": "register_walk",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "011fd23ddb6b",
+    "drop_id": "011fd23ddb6b",
+    "validated_at": "2d8252e",
+    "frontend_commits": {
+      "config_regs": "2d8252e36d6883f17b27e3695a083058e3dc0734"
+    },
+    "roots": [
+      "runs/phase1_loop_1/drop"
+    ],
+    "blocks": {
+      "config_regs": {
+        "rtl": "runs/phase1_loop_1/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/phase1_loop_1/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "compiled_ddr31333_x8_2lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/phase1_loop_1/drop/generated_spec.json",
+      "revision": "compiled_ddr31333_x8_2lane_1rank"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "pass",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=131/131  (131 output transaction(s) matched)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/partial/c2173182198d/path_22_csr_standalone_sim.log",
+  "observed_trace": "Validation/reports/partial/c2173182198d/path_22_csr_standalone_observed.jsonl"
+}

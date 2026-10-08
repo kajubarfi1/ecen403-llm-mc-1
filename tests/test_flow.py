@@ -25,6 +25,8 @@ class Fake:
         self.run, self.review_rc, self.phase_fail = run, review_rc, phase_fail
         self.validation = list(validation)       # one status per validation call
         self.backend, self.feedback_rc = backend, feedback_rc
+        self.agent_fixes = ["wb_port"]      # what the fake agent's fix report claims
+        self.absent = []                     # blocks the fake validation reports absent
         self.calls = []
 
     def __call__(self, cmd, cwd=None, stdin=None, env=None, log=None, timeout=None):
@@ -63,6 +65,10 @@ class Fake:
         if name == "validate_drop.py":
             status = self.validation.pop(0) if self.validation else "PASS"
             os.makedirs(flow.OUTBOX_CURRENT, exist_ok=True)
+            if self.absent:
+                with open(os.path.join(flow.OUTBOX_CURRENT, "DROP_STATUS.json"), "w") as f:
+                    json.dump({"partial": True, "blocks_absent": self.absent, "paths_blocked": {"path_21_wb_port_standalone": ["wb_port"]},
+                               "paths_run": []}, f)
             with open(os.path.join(flow.OUTBOX_CURRENT, "HANDOFF.json"), "w") as f:
                 json.dump({"drop_id": "abc123", "status": status,
                            "failed_modules": [] if status == "PASS" else ["wb_port"]}, f)
@@ -78,7 +84,13 @@ class Fake:
             return 0, json.dumps(written) + "\n"
         if name.endswith("_validation_agent.py"):
             self.calls[-1] = (name, list(cmd), stdin, dict(env or {}))
-            return self.feedback_rc, ""
+            outdir = cmd[cmd.index("--output-dir") + 1]
+            n = int(name[5])
+            if self.agent_fixes is not None:
+                os.makedirs(os.path.join(outdir, "VALIDATIONREPORT"), exist_ok=True)
+                with open(os.path.join(outdir, "VALIDATIONREPORT", f"phase{n}_fix_report.json"), "w") as f:
+                    json.dump({"results": [{"module": m, "final_status": "fixed"} for m in self.agent_fixes]}, f)
+            return self.feedback_rc, "ModuleNotFoundError: No module named 'anthropic'\n" if self.feedback_rc else ""
         if name == "pipeline.py":
             out_root = cmd[cmd.index("--out_root") + 1]
             os.makedirs(out_root, exist_ok=True)
@@ -92,7 +104,7 @@ class FlowCase(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp(prefix="flow_")
         self.run_dir = os.path.join(self.tmp, "run")
-        self.saved = (flow.sh, flow.OUTBOX_CURRENT, flow.phase_agent, flow.agent_findings_flag, flow.agent_takes_yes)
+        self.saved = (flow.sh, flow.OUTBOX_CURRENT, flow.phase_agent, flow.agent_findings_flag, flow.agent_takes_yes, flow.BACKEND_OUTBOX)
         self.direct = False
         flow.agent_findings_flag = lambda agent: "--findings" if self.direct else None
         flow.agent_takes_yes = lambda agent: False
@@ -105,13 +117,13 @@ class FlowCase(unittest.TestCase):
         flow.QUIET = True
 
     def tearDown(self):
-        flow.sh, flow.OUTBOX_CURRENT, flow.phase_agent, flow.agent_findings_flag, flow.agent_takes_yes = self.saved
+        flow.sh, flow.OUTBOX_CURRENT, flow.phase_agent, flow.agent_findings_flag, flow.agent_takes_yes, flow.BACKEND_OUTBOX = self.saved
         flow.QUIET = False
         shutil.rmtree(self.tmp, ignore_errors=True)
         os.environ.pop("OLYMPUS_KEY", None)
 
     def args(self, **kw):
-        base = dict(request=None, preset="balanced", choices=None, spec=None, goal=None,
+        base = dict(request=None, preset="balanced", choices=None, spec=None, goal=None, phases=None, revalidate=False,
                     resume=None, run_dir=self.run_dir, max_spec_rounds=2, max_rtl_rounds=4,
                     max_backend_rounds=2, validate_per_phase=False, skip_backend=False,
                     dry_run=False)
@@ -128,6 +140,12 @@ class FlowCase(unittest.TestCase):
     def stages(self, run):
         return [(s["stage"], s["status"]) for s in run.state["stages"]]
 
+    def _agent(self, n):
+        p = os.path.join(self.tmp, f"phase{n}_validation_agent.py")
+        open(p, "w").close()
+        self.agents[n] = p
+
+
 
 class TestHappyPath(FlowCase):
     def test_order_and_artifacts_up_to_the_unbuilt_final_stage(self):
@@ -135,7 +153,7 @@ class TestHappyPath(FlowCase):
         rc, run = self.go(Fake(self.run_dir))
         self.assertEqual(rc, 2)
         self.assertEqual(run.state["halt"]["stage"], "final_validation")
-        self.assertIn("NOT_IMPLEMENTED", run.state["halt"]["why"])
+        self.assertIn("no per-block netlist", run.state["halt"]["why"])   # the fake backend wrote none
         st = self.stages(run)
         order = [s for s, _ in st]
         self.assertEqual(order[:3], ["spec_synthesis", "spec_review", "rtl_generation"])
@@ -198,11 +216,6 @@ class TestHalts(FlowCase):
         self.assertIn("phase 2 failed at LINT", run.state["halt"]["why"])
         self.assertEqual(run.state["halt"]["phase"], 2)
 
-    def _agent(self, n):
-        p = os.path.join(self.tmp, f"phase{n}_validation_agent.py")
-        open(p, "w").close()
-        self.agents[n] = p
-
     def test_validation_fail_without_a_phase_agent_halts_with_the_package(self):
         rc, run = self.go(Fake(self.run_dir, validation=["FAIL"]))        # wb_port: phase 1, no agent
         self.assertEqual(run.state["halt"]["stage"], "frontend_regeneration")
@@ -255,7 +268,64 @@ class TestHalts(FlowCase):
         rc, run = self.go(Fake(self.run_dir, backend={"pipeline_status": "FAIL", "failed_stage": "synth",
                                                       "error_message": "synthesis_error"}))
         self.assertEqual(run.state["halt"]["stage"], "backend_to_frontend")
-        self.assertIn("no agreed backend->frontend artifact", run.state["halt"]["why"])
+        self.assertIn("emitted no findings", run.state["halt"]["why"])
+
+    def test_backend_findings_are_routed_to_the_phase_agents(self):
+        os.environ["USE_DOCKER"] = "1"
+        self._agent(1)
+        # the backend's outbox, in our envelope, naming wb_port
+        flow.BACKEND_OUTBOX = os.path.join(self.tmp, "backend_outbox")
+        d = os.path.join(flow.BACKEND_OUTBOX, "fake_rev", "h1")
+        os.makedirs(d)
+        with open(os.path.join(d, "findings_v2.json"), "w") as f:
+            json.dump({"drop": {"git_head": "h1"}, "spec_revision": "fake_rev", "findings": [
+                {"id": "wb_port/TIMING/x", "kind": "timing_defect", "check_id": "TIMING/x",
+                 "owner_module": "wb_port", "severity": "critical", "confidence": "observed",
+                 "title": "t", "expected": "slack >= 0", "actual": "WNS -0.9", "status": "open",
+                 "suggested_fix": "shorten the path", "repro": {"command": "x"}}]}, f)
+        with open(os.path.join(flow.BACKEND_OUTBOX, "fake_rev", "latest"), "w") as f:
+            f.write("h1\n")
+        fake = Fake(self.run_dir, validation=["PASS", "PASS"],
+                    backend={"pipeline_status": "FAIL", "failed_stage": "synth", "error_message": "synthesis_error"})
+        rc, run = self.go(fake, max_backend_rounds=2)
+        names = [c[0] for c in fake.calls]
+        self.assertIn(("backend_to_frontend", "ROUTED"), self.stages(run))
+        self.assertIn("phase1_validation_agent.py", names, "wb_port is phase 1: its agent gets the package")
+        pkg = os.path.join(self.run_dir, "backend", "retry_round_1", "retry_instructions.json")
+        with open(pkg) as f:
+            ri = json.load(f)
+        self.assertEqual(ri["failed_modules"], ["wb_port"])
+        self.assertEqual(ri["retry_instructions"]["wb_port"]["failed_checks"][0]["fix"], "shorten the path")
+        self.assertEqual(names.count("validate_drop.py"), 2, "the regenerated drop is validated again")
+
+    def test_final_stage_runs_each_netlist_through_its_paths(self):
+        os.environ["USE_DOCKER"] = "1"
+        self.run_paths = []
+        fake = Fake(self.run_dir, backend={"pipeline_status": "PASS", "artifacts": []})
+        orig = fake.__call__
+
+        def call(cmd, cwd=None, stdin=None, env=None, log=None, timeout=None):
+            name = os.path.basename(next((c for c in cmd if c.endswith(".py")), ""))
+            if name == "pipeline.py":
+                rc, out = orig(cmd, cwd, stdin, env, log, timeout)
+                out_root = cmd[cmd.index("--out_root") + 1]
+                os.makedirs(os.path.join(out_root, "runner", "wb_port"))
+                open(os.path.join(out_root, "runner", "wb_port", "6_final.v"), "w").close()
+                return rc, out
+            if name == "run_path.py":
+                self.run_paths.append(cmd)
+                return 0, "  path verdict : PASS\n"
+            return orig(cmd, cwd, stdin, env, log, timeout)
+        flow.sh = call
+        a = self.args()
+        run = flow.Run(self.run_dir, a)
+        rc = flow.run_flow(run, a)
+        self.assertEqual(rc, 0, run.state["halt"])
+        self.assertEqual(run.state["status"], "complete")
+        paths = [c[c.index("--path") + 1] for c in self.run_paths]
+        self.assertIn("path_21_wb_port_standalone", paths)
+        self.assertTrue(all("--netlist" in c and any(x.startswith("wb_port=") for x in c) for c in self.run_paths))
+        self.assertNotIn("path_14_status_init", paths, "no netlist for init_fsm/config_regs: not run")
 
     def test_missing_olympus_key_halts_before_phases(self):
         os.environ.pop("OLYMPUS_KEY", None)
@@ -264,6 +334,71 @@ class TestHalts(FlowCase):
         self.assertEqual(run.state["halt"]["stage"], "rtl_generation")
         self.assertIn("OLYMPUS_KEY", run.state["halt"]["why"])
         self.assertFalse(any(c[0].startswith("phase") for c in fake.calls))
+
+
+class TestPhaseLimitedLoop(FlowCase):
+    def test_phases_1_generates_only_phase_1_validates_partial_and_completes(self):
+        self._agent(1)
+        fake = Fake(self.run_dir, validation=["FAIL", "PASS"])
+        rc, run = self.go(fake, phases="1")
+        self.assertEqual(rc, 0, run.state["halt"])
+        self.assertEqual(run.state["status"], "complete")
+        names = [c[0] for c in fake.calls]
+        self.assertEqual(names.count("phase1_pipeline.py"), 2)      # initial + regeneration
+        self.assertNotIn("phase2_pipeline.py", names)
+        self.assertNotIn("generate_top.py", names, "no top-level assembly on a phase-limited run")
+        self.assertNotIn("pipeline.py", names, "backend skipped")
+        vd = [c for c in fake.calls if c[0] == "validate_drop.py"]
+        self.assertTrue(all("--partial" in c[1] for c in vd), "a Phase-1 drop is validated as partial")
+        self.assertEqual(len(vd), 2)
+
+
+class TestAgentOutcome(FlowCase):
+    def test_agent_that_fixed_nothing_halts_with_its_reason(self):
+        self._agent(1)
+        fake = Fake(self.run_dir, validation=["FAIL", "PASS"], feedback_rc=1)
+        fake.agent_fixes = []
+        rc, run = self.go(fake, phases="1")
+        self.assertEqual(run.state["halt"]["stage"], "frontend_regeneration")
+        self.assertIn("fixed nothing", run.state["halt"]["why"])
+        self.assertIn("anthropic", run.state["halt"]["why"])
+        names = [c[0] for c in fake.calls]
+        self.assertEqual(names.count("phase1_pipeline.py"), 1, "no blind regeneration")
+
+    def test_partial_fix_regenerates(self):
+        self._agent(1)
+        fake = Fake(self.run_dir, validation=["FAIL", "PASS"], feedback_rc=1)
+        fake.agent_fixes = ["wb_port"]           # exit 1 (not every module) but one fixed
+        rc, run = self.go(fake, phases="1")
+        self.assertEqual(rc, 0, run.state["halt"])
+        self.assertIn(("frontend_regeneration", "PARTIAL"), self.stages(run))
+
+
+class TestGeneratedBlockMustBeJudged(FlowCase):
+    def test_generated_block_absent_from_the_drop_halts_even_on_pass(self):
+        fake = Fake(self.run_dir, validation=["PASS"])
+        fake.absent = ["wb_port"]
+        rc, run = self.go(fake, phases="1")
+        self.assertEqual(run.state["halt"]["stage"], "rtl_validation")
+        self.assertIn("wb_port", run.state["halt"]["why"])
+        self.assertEqual(run.state["halt"]["unjudged"], ["wb_port"])
+
+
+class TestRevalidate(FlowCase):
+    def test_resume_with_revalidate_runs_validation_again(self):
+        self._agent(1)
+        rc, run = self.go(Fake(self.run_dir), phases="1")
+        self.assertEqual(run.state["status"], "complete")
+        fake = Fake(self.run_dir, validation=["FAIL", "PASS"])
+        flow.sh = fake
+        a = self.args(phases="1", revalidate=True)
+        run2 = flow.Run(self.run_dir)
+        rc = flow.run_flow(run2, a)
+        self.assertEqual(rc, 0, run2.state["halt"])
+        names = [c[0] for c in fake.calls]
+        self.assertEqual(names.count("validate_drop.py"), 2)
+        self.assertEqual(names.count("phase1_validation_agent.py"), 1)
+        self.assertEqual(run2.state["rounds"]["rtl"], 3)
 
 
 class TestResume(FlowCase):

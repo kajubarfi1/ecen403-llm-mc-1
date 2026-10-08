@@ -113,6 +113,17 @@ A phase is accepted when every path its blocks can run passes and the
 block's standalone path (if any) passes; the verdict is explicitly scoped to
 the blocks present.
 
+## 5c. Gate-level (the backend's netlists)
+
+A block's netlist (`6_final.v`) is accepted when every path that
+instantiates the block passes with the netlist in the RTL's place
+(`run_path.py --netlist`), judged by the same models, rules and assertions
+as the RTL, with the platform's functional cell models and zero delay. A
+netlist that passes RTL-equivalent behaviour but not timing is the
+backend's finding (STA), not this gate's. Current: wb_port and init_fsm
+netlists from `backend/outputs/` pass their paths; the other nine await
+per-block backend runs.
+
 ## 6. Formal
 
 For the composed command path (`formal/chain_formal.sv`), every generated

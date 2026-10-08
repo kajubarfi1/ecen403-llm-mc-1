@@ -70,20 +70,22 @@ def adapt(doc):
             "id": f["check_id"],
             "name": (f.get("requirement") or f["title"])[:160],
             "pass": False,
-            "expected": f["expected"],
-            "actual": f["actual"],
-            "severity": f["severity"],
-            "confidence": f["confidence"],
+            "expected": f.get("expected"),
+            "actual": f.get("actual"),
+            "severity": f.get("severity", "major"),
+            "confidence": f.get("confidence", "observed"),
             "spec_ref": f.get("spec_ref"),
             "anchor": f.get("anchor", [])[:3],
             "owner_candidates": f.get("owner_candidates", []),
-            "occurrences": f["occurrences"],
-            "paths": f["paths"],
-            "repro": f["repro"],
+            "occurrences": f.get("occurrences", 1),
+            "paths": f.get("paths", []),
+            "repro": f.get("repro"),
             "introduced_in": f.get("introduced_in"),
             "repair": f.get("repair"),
-            "fix": (f.get("mechanism") or {}).get("fix_hypothesis")
-                   if isinstance(f.get("mechanism"), dict) else None,
+            # a remedy, from whichever producer stated one: validation's repair
+            # mechanism, or the backend's suggested_fix (PENDING(4) in its emitter)
+            "fix": ((f.get("mechanism") or {}).get("fix_hypothesis")
+                    if isinstance(f.get("mechanism"), dict) else None) or f.get("suggested_fix"),
             "finding_id": f["id"],
         })
     for m in modules.values():

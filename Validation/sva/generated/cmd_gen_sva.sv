@@ -166,7 +166,7 @@ module cmd_gen_sva #(
   logic [7:0] timing_006_hist;
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) timing_006_hist <= '0;
-    else        timing_006_hist <= {timing_006_hist[6:0], (ddr_cmd == 4'b0011)};
+    else        timing_006_hist <= {timing_006_hist[6:0], $sampled((ddr_cmd == 4'b0011))};
   end
 
   property p_TIMING_006;
@@ -193,7 +193,7 @@ module cmd_gen_sva #(
     if (!rst_n) begin
       timing_012_since <= '0;
       timing_012_armed <= 1'b0;
-    end else if ((ddr_cmd == 4'b0001)) begin
+    end else if ($sampled((ddr_cmd == 4'b0001))) begin
       timing_012_since <= '0;
       timing_012_armed <= 1'b1;
     end else if (timing_012_since != 32'hFFFF_FFFF) begin
@@ -223,9 +223,9 @@ module cmd_gen_sva #(
   wire pre_all = (ddr_cmd == 4'b0010) && ddr_addr[10];
   always @(posedge clk or negedge rst_n) begin   // plain always: initialiser + always_ff would be two drivers
     if (!rst_n)        row_open <= '0;
-    else if (pre_all)  row_open <= '0;
-    else if ((ddr_cmd == 4'b0011))    row_open[ddr_bank] <= 1'b1;
-    else if ((ddr_cmd == 4'b0010))    row_open[ddr_bank] <= 1'b0;
+    else if ($sampled(pre_all))  row_open <= '0;
+    else if ($sampled((ddr_cmd == 4'b0011)))    row_open[$sampled(ddr_bank)] <= 1'b1;
+    else if ($sampled((ddr_cmd == 4'b0010)))    row_open[$sampled(ddr_bank)] <= 1'b0;
   end
   // Multi-Purpose Register mode (JESD79-3 MR3 A2): while enabled, READs return
   // the MPR pattern and need no open row — this is how a controller calibrates
@@ -236,7 +236,7 @@ module cmd_gen_sva #(
   logic mpr_en = 1'b0;
   always @(posedge clk or negedge rst_n) begin   // plain always: initialiser + always_ff would be two drivers
     if (!rst_n)                                  mpr_en <= 1'b0;
-    else if ((ddr_cmd == 4'b0000) && ddr_bank == 3)   mpr_en <= ddr_addr[2];
+    else if ($sampled((ddr_cmd == 4'b0000)) && $sampled(ddr_bank) == 3)   mpr_en <= $sampled(ddr_addr[2]);
   end
 
   // ---- PROTO_001 -------------------------------------------------------

@@ -3,7 +3,7 @@
   "path": "path_21_wb_port_standalone",
   "strategy": "exact",
   "verdict": "pass",
-  "timestamp": "2026-10-01T12:03:40.148400",
+  "timestamp": "2026-10-07T14:53:00.202542",
   "blocks": [
     "wb_port"
   ],
@@ -13,15 +13,28 @@
   "window_cycles": 64,
   "coverage_collected": true,
   "rtl_drop": {
-    "git_head": "12bbe90",
+    "git_head": "cabeb91ef4ba",
+    "drop_id": "cabeb91ef4ba",
+    "validated_at": "2d8252e",
+    "frontend_commits": {
+      "wb_port": "fd2a561795ec86a2aa5628363c28d361ce0d2279"
+    },
     "roots": [
-      "Frontend2/OutputFolders"
+      "Validation/rtl_snapshots/golden_phase1_14f15f9"
     ],
     "blocks": {
       "wb_port": {
-        "rtl": "Frontend2/OutputFolders/TOPRTL/wb_port.sv",
-        "manifest": "Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json"
+        "rtl": "Validation/rtl_snapshots/golden_phase1_14f15f9/PHASE1RTL/wb_port.sv",
+        "manifest": "Validation/rtl_snapshots/golden_phase1_14f15f9/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       }
+    },
+    "shipped_spec": {
+      "path": null,
+      "revision": null
+    },
+    "netlists": {
+      "wb_port": "backend/outputs/wb_port/6_final.v"
     }
   },
   "stages": [

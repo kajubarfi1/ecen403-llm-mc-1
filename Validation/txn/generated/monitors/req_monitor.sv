@@ -19,7 +19,7 @@ module req_monitor #(
 ) (
     input  logic clk,
     input  logic rst_n,
-    input  logic [27:0] req_addr,
+    input  logic [26:0] req_addr,
     input  logic req_ready,
     input  logic req_valid,
     input  logic [31:0] req_wdata,
