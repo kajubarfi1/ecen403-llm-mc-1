@@ -651,13 +651,24 @@ def reporter_node(state: PipelineState) -> PipelineState:
     # reporting someone else's. The values are kept under `withheld_values` so the
     # failure is still debuggable, but nothing downstream can mistake them for this
     # run's results.
-    if exit_code != 0:
+    # The same hazard from the other direction: a gate tier that runs no ORFS exits 0,
+    # so the test above does not fire, while _parse_metrics still finds the previous
+    # run's reports in the tree and returns them. On 2026-10-08 a contract-mode run of
+    # all 11 blocks reported WNS, area, Fmax and power taken from artifacts dated
+    # 2026-09-24 - laundered through a summary file written seconds earlier, so a
+    # freshness check on the file cannot catch it. Metrics belong to the run that
+    # produced them, and a run that built nothing produced none.
+    ran_orfs = mode_of(state)["runs_orfs"]
+    if exit_code != 0 or not ran_orfs:
         stale = {k: v for k, v in metrics.items() if v is not None}
         metrics = {k: None for k in metrics}
         if stale:
             metrics["withheld_values"] = stale
         metrics["metrics_withheld"] = (
-            "run failed; the ORFS reports on disk may describe an earlier run")
+            "run failed; the ORFS reports on disk may describe an earlier run"
+            if exit_code != 0 else
+            f"mode '{state.get('mode') or DEFAULT_MODE}' runs no ORFS; "
+            f"any reports on disk describe an earlier run")
 
     metrics["exit_code"]    = exit_code
     metrics["failed_stage"] = failed_stage
