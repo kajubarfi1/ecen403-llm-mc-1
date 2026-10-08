@@ -39,88 +39,74 @@ first drop after this change will read as "old resolved, new opened" once. It
 coincides with the spec-revision change in §3, so the outbox is being
 regenerated anyway.
 
-## 2. What we need from `flow.py`
+## 2. What you have already done, and the two left
 
-**`--drop_id` is not passed.** You asked us to name the outbox by drop id, but
-`stage_backend` sends only `--bundle_dir`, `--out_root`, `--env_file`. We cannot
-compute it ourselves without reaching into `Validation/structural/rtl_drop.py`,
-which resolves paths through your `rtl_drop.json` to read the Frontend's files —
-backend would be coupled to two other subsystems' layout and would stop running
-standalone. You have the id in hand at `flow.py:462`, but `record()` appends it to
-`state["stages"][-1]`, not to `run.state`, so it needs carrying across. Two lines
-- in `stage_rtl_validation`, after `h` is loaded:
+Checked against main at `9e51329` before writing this - an earlier version of this
+file asked for things you had already fixed, which was our failure to re-read.
+
+**Done, thank you:** `run.state["drop_id"] = h["drop_id"]` at `flow.py:462` and both
+`--drop_id` and `--spec_revision` passed at `flow.py:580`, plus `--backend-mode`.
+Our first finding from a real run landed in
+`backend/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/4b86c7cd3705/` because of
+it. And every defect we reported in `to_frontend_error_report.py` is fixed in
+`8d5770e` - `repro.command` is read, the anchor no longer prints `:None`, `bit` and
+`role` survive, and the dangling `occurrences: N on` is gone. We re-rendered our
+scheduler finding through your chain and it comes out complete.
+
+Two things are still open in `stage_backend`.
+
+**`reports[0]` from an unsorted listdir** (`flow.py:585`):
 
 ```python
-run.state["drop_id"] = h["drop_id"]
+reports = [... for f in os.listdir(run.backend_dir) if f.startswith("pipeline_final_report_")]
 ```
 
-and in `stage_backend`:
+With one design per run directory this is fine. The moment a multi-block bundle or a
+second round writes there, it picks an arbitrary report and attributes it to the
+stage. Sorting is not the fix either - the right report is the one for the design
+that was run.
 
-```python
-if run.state.get("drop_id"):
-    cmd += ["--drop_id", run.state["drop_id"]]
-```
-
-Our side accepts it and falls back to `git_head` when it is absent, so the order
-of landing does not matter.
-
-**The drop_id confirmation in your own contract is not implemented.**
-`HANDOFF_CONTRACT.md` §4 says: read `HANDOFF.json`, confirm `drop_id` equals the id
-of the drop just written, *else validation has not run on it yet*. `flow.py` never
-computes the drop's id - `rtl_drop.drop_id()` is not called anywhere in it - so
-that comparison cannot happen. Combined with the stale-report issue below, a round
-where `validate_drop.py` fails without refreshing `outbox/current` would be read as
-a verdict on the current drop. This is your call, not a backend need, but it is the
-check that would have caught our failure today.
-
-**`stage_backend` can report PASS for a run that failed.** `flow.py:583`:
+**A stale report still outranks `rc`** (`flow.py:590`):
 
 ```python
 status = rep.get("pipeline_status", "FAIL" if rc else "PASS")
 ```
 
-The default fires only when the key is *absent*. A `pipeline_final_report_*.json`
-left in `run.backend_dir` by an earlier round has the key, so a stale PASS is
-taken over a nonzero `rc`. Suggest keying on `rc` first, and treating a report
-older than the round's start as not ours:
+The default fires only when the key is absent, so a report left by an earlier round
+makes the stage report PASS over a nonzero `rc`. We hit the identical bug in our own
+batch on 2026-10-08: eleven blocks died on import in 0.2s and reported PASS with
+three-week-old DRC, LVS, area and power attached. `if rc != 0: status = "FAIL"` ahead
+of that line closes it.
 
-```python
-if rc != 0:
-    status = "FAIL"
-```
+Worth knowing how far that pattern goes, because it bit us twice more the same day. A
+mode that runs no ORFS exits 0, so our own exit-code guard never fired and a
+contract-mode run reported metrics read from month-old artifacts - through a summary
+file written seconds earlier, so an mtime check could not catch it either. And our
+per-block emitter, writing into one shared drop folder, treated a sibling block's
+findings as the previous drop's: with two failing blocks only the last survived and
+the first was recorded as resolved. All three are fixed on our side. If `flow.py`
+ever treats a file's freshness as proof of its provenance, that is the shape to look
+for.
 
-We hit exactly this on our side today: `pipeline_batch.py` read `exit_code` and
-never used it, so eleven blocks that died on import in 0.2s reported PASS with
-three-week-old area, power, DRC and LVS attached. It is the fifth place this
-pattern has turned up in the backend, and it is the most expensive kind of bug we
-have had, because the wrong answer looks like a good one. Worth checking
-`stage_rtl_validation` for the same shape.
+## 3. Resolution needs a pass signal, and we cannot give it yet
 
-Related, lower stakes: `reports[0]` from an unsorted `os.listdir` picks an
-arbitrary report when `run.backend_dir` holds more than one design, which it will
-once a multi-block bundle or a second round writes there.
+One limitation to declare rather than have you discover it.
 
-## 3. `to_frontend_error_report.py` loses three things
+We emit a finding only when a block fails. So when a block that failed last drop
+passes this one, nothing is written and its finding stays `open` forever - it is
+never recorded as resolved. The reverse is now handled: resolution is scoped to the
+modules an emission actually speaks for, so a block that was not built is no longer
+reported as fixed. But a genuine fix will also not be reported, which is the worse
+half.
 
-Rendering our finding through your chain (`retry_adapter.adapt` →
-`write_error_reports`) works — `failed_modules: ["scheduler"]`, phase 3, the
-`fix` lands. But `_lines()` at `Validation/findings/to_frontend_error_report.py:40`
-drops content the model needs:
+Closing it means emitting a record for every block we build, pass or fail, so the
+outbox carries results rather than only complaints. That is a change to our pipeline
+rather than a contract question, and it is next on our list. Until then, treat an
+open backend finding as "open as of the last drop that failed it", and `0` findings
+from us as "nothing failed", not "everything we previously reported is fixed".
 
-| line | what the model sees | why |
-|---|---|---|
-| 49 | `scheduler.sv:None` | `:{a.get('line')}` is unconditional; your own §3 says timing has no line |
-| 49 | `cmd_aux` with no bit, no role | reads `signal` and `text` only — `bit` and `role` never arrive |
-| 53 | no `repro:` line at all | reads `rep.get("cmd")`; ours is `repro.command`, which the adapter passes through unchanged |
-| 58 | `occurrences: 1 on` | `paths` is empty, leaving a dangling "on" |
-
-The third is the substantive one — the reproduction command never reaches the
-Frontend. Your handoff said the adapter accepts `command` or `cmd`, and it does;
-the renderer does not.
-
-Nitpick, your call: `retry_adapter.adapt` sets `pipeline: "validation"` on our
-findings too. `flow.py` overwrites `source`, so provenance is recoverable — but
-a reader of the package alone would attribute a timing defect to validation.
+If `untested_in_this_drop` is the right place for the modules we did not build, say
+so and we will populate it.
 
 ## 4. The drop id: not reproducible off Linux, and it churns
 
@@ -179,38 +165,50 @@ bytes". Say the word and we will add it to the findings envelope.
 
 We are stamping findings with the team's published id, not the one our tree computes.
 
-## 5. Per-block netlists
+## 5. Per-block netlists - delivered
 
-Agreed - a top-level netlist has no block path to run on. Running
-`pipeline_batch.py` over all 11 blocks of drop `4b86c7cd3705` so
-`runner/<block>/6_final.v` exists per block. Multi-hour unattended run; expect them
-this week.
+All 11 are built, from drop `4b86c7cd3705` (RTL identical to `a7cd3cb93546`, see §4):
+`agents/pipeline_out/runner/<block>/6_final.v`. 42 minutes wall clock, 11 blocks,
+`build` mode. Point `run_path.py --netlist` at those.
 
-Note the bundles these are built from: not `backend/bundles/`, which your handoff
-named. That set is months old - up to 506 lines adrift from the current drop per
-block - and netlists from it would not correspond to anything you have judged. We
-re-cut `backend/bundles_frontend2/` from `rtl_drop`'s own resolution, so all 22
-files are byte-identical to the drop and every manifest carries the golden revision.
-Worth pointing `flow.py` at that path rather than `bundles/`.
+Not from `backend/bundles/`, which your handoff named - that set is months old, up to
+506 lines adrift per block, and netlists from it would correspond to nothing you have
+judged. We re-cut `backend/bundles_frontend2/` from `rtl_drop`'s own resolution, so
+all 22 files are byte-identical to the drop. Worth pointing `flow.py` there.
+
+**And the timing answer you have been waiting on. Ten of eleven blocks close at
+200 MHz.** DRC 0 violations and LVS PASS on all eleven:
+
+| block | Fmax | WNS @ 5 ns | |
+|---|---|---|---|
+| calibration | 416.8 | +2.601 | |
+| cmd_gen | 378.8 | +2.360 | |
+| init_fsm | 317.1 | +1.846 | |
+| config_regs | 280.8 | +1.439 | |
+| cmd_queue | 277.7 | +1.399 | |
+| refresh_ctrl | 265.4 | +1.232 | |
+| wb_port | 249.0 | +0.983 | |
+| data_path | 224.1 | +0.537 | |
+| bank_tracker | 214.3 | +0.334 | |
+| **scheduler** | **169.1** | **-0.915** | misses |
+| addr_decoder | n/a | n/a | combinational, no timing paths |
+
+Two cautions on reading that as good news. `bank_tracker` and `data_path` close with
+0.33 ns and 0.54 ns of margin, and the top level has to add clock distribution and
+inter-block wiring on top; a block that closes standalone at 214 MHz is not a block
+that closes in the assembled controller. And this supersedes every timing number we
+reported before 2026-09-24 - nine of those were measured at a 10 ns period, where
+closing means nothing for this target.
+
+`scheduler` is the one real defect, and §1's finding is the routable version of it.
 
 Your `wb_port/6_final.v` result (**19/19** on `path_21_wb_port_standalone`) is the
-first behavioural confirmation of a backend netlist we have. Thank you for
-chasing the two checker defects rather than filing them against the netlist.
+first behavioural confirmation of a backend netlist we have. Thank you for chasing
+the two checker defects rather than filing them against the netlist.
 
-## 6. `--backend-mode`
+## 6. `--backend-mode` - done on your side
 
-Yes, please. `contract` / `synth` / `build` / `full`; `build` stays the default.
-Mapping is literal - pass the string through to `--mode`.
-
-One correction to our own pitch: `contract` runs no ORFS but is **~20 s per block**,
-not seconds, because intake still makes an LLM call per block. Eleven blocks is
-about two minutes wall clock at two workers. Dropping that call is on our list; until
-then, budget for it rather than treating `contract` as free.
-
-Also worth knowing, since it bears on the stale-report issue in §2: we found a sixth
-instance of that pattern today, and this one defeats a freshness check. A
-contract-mode run reported WNS, area, Fmax and power for all 11 blocks, taken from
-ORFS artifacts dated 2026-09-24 - written into a summary file seconds old. The file
-was genuinely fresh; its contents were three weeks stale. Our guard only fired on a
-nonzero exit code, and a mode that runs nothing exits 0. If `flow.py` ever trusts a
-report's mtime as proof of provenance, that is the hole.
+`flow.py:581` passes it. One correction to our own pitch: `contract` runs no ORFS but
+is **~20 s per block**, not seconds, because intake still makes an LLM call each.
+Eleven blocks is about two minutes at two workers. Dropping that call is on our list;
+until then budget for it rather than treating `contract` as free.

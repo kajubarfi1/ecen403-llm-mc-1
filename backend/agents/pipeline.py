@@ -873,9 +873,27 @@ def _drop_root(bundle: Optional[str]) -> Optional[Path]:
                 return parent
         except OSError:
             pass
+    # Last, look for the team checkout. The backend commonly sits BESIDE it rather
+    # than inside it (ddr3_backend/ and ecen403-llm-mc-1/ as siblings), so walking
+    # up the parents is not enough - the first version of this searched only
+    # ancestors and the 2026-10-08 batch therefore anchored all 11 blocks on the
+    # backend's own bundle copy, a file nobody edits. It passed in testing only
+    # because the test set BACKEND_GIT_REPO, which a real run has no reason to.
     repo = (os.environ.get("BACKEND_GIT_REPO") or "").strip()
-    bases = ([Path(repo)] if repo else []) + list(BACKEND_ROOT.parents)
-    for base in bases:
+    cands = [Path(repo)] if repo else []
+    # Three levels is enough to reach a sibling checkout without scanning the whole
+    # drive, and stops this from finding an unrelated Frontend2/ somewhere above.
+    for base in [BACKEND_ROOT, *list(BACKEND_ROOT.parents)[:3]]:
+        cands.append(base)
+        try:
+            cands.extend(c for c in base.iterdir() if c.is_dir())
+        except OSError:
+            pass
+    seen = set()
+    for base in cands:
+        if base in seen:
+            continue
+        seen.add(base)
         cand = base / "Frontend2" / "OutputFolders"
         if cand.is_dir():
             return cand

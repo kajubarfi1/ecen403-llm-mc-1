@@ -1,0 +1,87 @@
+{
+  "schema": "validation-findings/2",
+  "drop": {
+    "drop_id": "4b86c7cd3705",
+    "git_head": null,
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+  },
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "generated_utc": "2026-10-08T18:39:32+00:00",
+  "producer": "backend",
+  "finding_count": 1,
+  "findings": [
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/TIMING/cmd_row",
+      "kind": "timing_defect",
+      "check_id": "TIMING/cmd_row",
+      "taxonomy_id": "TIMING_001",
+      "detectors": [
+        "sta:opensta:setup"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "observed",
+      "title": "scheduler: does not close timing at 5.0 ns",
+      "requirement": "scheduler must close timing at the clock period of 5.0 ns (200 MHz)",
+      "spec_ref": "clocking_model.controller_clock_period_ns",
+      "expected": "slack >= 0 ns at a 5.0 ns period",
+      "actual": "WNS -0.910 ns, TNS -29.320 ns, Fmax 169.20 MHz",
+      "detector": "sta:opensta:setup",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "cmd_row",
+          "bit": 5,
+          "role": "endpoint"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "q_bank",
+          "bit": 47,
+          "role": "startpoint"
+        }
+      ],
+      "mechanism": "Arrival is 6.15 ns against 5.23 required. About 1.9 ns goes to the bank-state lookup and 15-bit row comparison before a candidate is selected, and about 3.1 ns to selection plus the 16-way 15-bit output mux on cmd_row/cmd_col after it. Fanouts are 1-5 and capacitances near zero, so this is logic depth, not wire load.",
+      "paths": [],
+      "occurrences": 2,
+      "suggested_fix": "Add a pipeline stage: register the candidate classification, or register sel_idx and mux the outputs the next cycle. A tree priority encoder alone was measured on a copy of this block and recovers only 0.13 ns of the 0.92 ns needed, because it does not touch the row comparison before selection or the output mux after it. Either staging costs a cycle of latency and changes the cmd_queue handshake, so it needs a spec decision.",
+      "evidence": {
+        "worst_path": {
+          "startpoint": "q_bank[47]",
+          "startpoint_kind": "input port clocked by core_clk",
+          "endpoint": "cmd_row[5]$_DFFE_PN0P_",
+          "slack_ns": -0.91,
+          "logic_levels": 34,
+          "buffers": 18,
+          "arrival_ns": 6.15,
+          "required_ns": 5.23,
+          "path_group": "core_clk"
+        },
+        "wns_ns": -0.91,
+        "tns_ns": -29.32,
+        "failing_paths_reported": 2,
+        "spread": "many endpoints failing, not a single outlier"
+      },
+      "repro": {
+        "command": "pipeline_batch.py --bundles_root ../bundles_frontend2 --mode build --spec_revision golden_ddr3_1600k_x8_2lane_1rank --drop_id 4b86c7cd3705"
+      },
+      "drop": {
+        "drop_id": "4b86c7cd3705",
+        "git_head": null,
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "4b86c7cd3705",
+      "last_seen": "4b86c7cd3705",
+      "resolved_in": null,
+      "status": "open",
+      "generated_utc": "2026-10-08T18:39:32+00:00",
+      "related_manual_findings": []
+    }
+  ],
+  "resolved": []
+}

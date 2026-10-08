@@ -249,30 +249,64 @@ def write_outbox(findings: List[Dict[str, Any]], outbox: Path, drop: Dict[str, A
     """
     rev = drop.get("spec_revision") or "unknown"
     head = drop_key(drop)
+    d = outbox / rev / head
+
+    # What a sibling block already wrote for THIS drop. The batch runs one process
+    # per block and each emits into the same drop, so without this the second block
+    # to finish reads the first's file as "the previous drop", does not find its
+    # finding among its own, and reports it resolved - which deletes it. Verified
+    # 2026-10-08: with two failing blocks only the last one survived, and the first
+    # was handed to Validation as fixed.
+    existing: Dict[str, Any] = {}
+    carried_resolved: List[Dict[str, Any]] = []
+    cur_file = d / "findings_v2.json"
+    if cur_file.exists():
+        try:
+            doc = json.loads(cur_file.read_text(encoding="utf-8"))
+            for f in doc.get("findings", []):
+                existing[f["id"]] = f
+            carried_resolved = doc.get("resolved", []) or []
+        except Exception:
+            existing, carried_resolved = {}, []
+
+    # The previous drop is whatever `latest` names, unless that is this drop already.
     prev: Dict[str, Any] = {}
     latest = outbox / rev / "latest"
     if latest.exists():
         try:
-            prev_path = outbox / rev / latest.read_text(encoding="utf-8").strip() / "findings_v2.json"
-            if prev_path.exists():
+            prev_key = latest.read_text(encoding="utf-8").strip()
+            prev_path = outbox / rev / prev_key / "findings_v2.json"
+            if prev_key and prev_key != head and prev_path.exists():
                 for f in json.loads(prev_path.read_text(encoding="utf-8")).get("findings", []):
                     prev[f["id"]] = f
         except Exception:
             prev = {}
 
-    current = {f["id"] for f in findings}
     for f in findings:
-        old = prev.get(f["id"])
-        if old:                       # seen before: keep its history
-            f["first_seen"] = old.get("first_seen", f["first_seen"])
-            f["introduced_in"] = old.get("introduced_in")
-    resolved = []
-    for fid, old in prev.items():
-        if fid not in current and old.get("status") == "open":
-            old = dict(old, status="resolved", resolved_in=head, last_seen=old.get("last_seen"))
-            resolved.append(old)
+        was = prev.get(f["id"]) or existing.get(f["id"])
+        if was:                       # seen before: keep its history
+            f["first_seen"] = was.get("first_seen", f["first_seen"])
+            f["introduced_in"] = was.get("introduced_in")
 
-    d = outbox / rev / head
+    merged = dict(existing)
+    for f in findings:
+        merged[f["id"]] = f
+
+    # Resolution is scoped to the modules this emission actually has a result for.
+    # A block that was not built in this drop was not re-tested, and calling its open
+    # finding resolved tells Validation it was fixed. Theirs is the right word for it
+    # - untested_in_this_drop - and a finding we cannot speak to stays open.
+    speaking_for = {f.get("owner_module") for f in findings if f.get("owner_module")}
+    resolved = list(carried_resolved)
+    already = {r.get("id") for r in resolved}
+    for fid, was in prev.items():
+        if (fid not in merged and fid not in already
+                and was.get("status") == "open"
+                and was.get("owner_module") in speaking_for):
+            resolved.append(dict(was, status="resolved", resolved_in=head,
+                                 last_seen=was.get("last_seen")))
+
+    findings = sorted(merged.values(), key=lambda f: f["id"])
     d.mkdir(parents=True, exist_ok=True)
     payload = {
         "schema": SCHEMA,

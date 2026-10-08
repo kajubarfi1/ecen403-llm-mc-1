@@ -69,11 +69,26 @@ stamping our findings `4b86c7cd3705` either way.
 
 Honest state, so nobody plans around a number we have not measured.
 
-`scheduler` misses: **WNS -0.95 ns at a 5.0 ns period, Fmax 168 MHz**, consistent
-across two earlier RTL generations. Stated with one caveat: that figure comes from a
-build we cannot now trace to a specific bundle, because the ORFS design directory has
-been overwritten since. It has not yet been reproduced on *this* drop's `scheduler`.
-The run in progress will confirm or revise it, and we will send the number either way.
+Measured on this drop, all 11 blocks, `build` mode, 42 minutes. **Ten of eleven close
+at 200 MHz**, DRC clean and LVS passing on all eleven:
+
+| block | Fmax | | block | Fmax |
+|---|---|---|---|---|
+| calibration | 416.8 | | refresh_ctrl | 265.4 |
+| cmd_gen | 378.8 | | wb_port | 249.0 |
+| init_fsm | 317.1 | | data_path | 224.1 |
+| config_regs | 280.8 | | bank_tracker | 214.3 |
+| cmd_queue | 277.7 | | **scheduler** | **169.1** |
+
+`addr_decoder` is combinational and has no timing paths.
+
+`scheduler` misses at **WNS -0.915 ns, Fmax 169.1 MHz** - consistent with the two
+earlier RTL generations, so this is stable behaviour and not a fluke of one build.
+Note also that `bank_tracker` and `data_path` close with only 0.33 ns and 0.54 ns
+spare, and the assembled controller adds clock distribution and inter-block wiring on
+top of that. A block closing standalone at 214 MHz is not a block that closes in the
+full chip, so please do not read nine passes as the top level being safe.
+
 We tested the fix we suggested to Lehana - replacing the
 serial priority chains with a tree encoder - on a copy, and it recovers only
 **0.13 ns of the 0.92 ns needed**, about 14%. Our original diagnosis was wrong: the
