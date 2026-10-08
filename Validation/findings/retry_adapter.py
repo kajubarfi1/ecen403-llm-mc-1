@@ -120,6 +120,15 @@ def adapt(doc):
 CURRENT = os.path.join(OUTBOX, "current")
 
 
+def _design_id():
+    try:
+        sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
+        import rtl_drop as RD
+        return RD.design_id()
+    except Exception:
+        return None
+
+
 def publish_current(drop_dir, ri):
     """The one place the Frontend reads: outbox/current/ always holds the
     newest validation result -- retry_instructions.json, findings_v2.json,
@@ -142,8 +151,12 @@ def publish_current(drop_dir, ri):
         json.dump({"$schema": "validation-handoff/1",
                    "drop_id": ri["drop"],
                    "drop_id_rule": "sha256 over each block's <block>.sv then <block>_manifest.json "
-                                   "contents, blocks sorted by name, first 12 hex digits "
-                                   "(Validation/structural/rtl_drop.py:drop_id)",
+                                   "contents (CRLF normalised to LF), blocks sorted by name, first 12 hex "
+                                   "digits (Validation/structural/rtl_drop.py:drop_id)",
+                   "design_id": _design_id(),
+                   "design_id_rule": "drop_id with the volatile parts left out: RTL '// Generated' lines and "
+                                     "the manifests' provenance keys; same design_id = same design "
+                                     "regenerated (rtl_drop.py:design_id)",
                    "spec_revision": ri.get("spec_revision"),
                    "spec_id": ri.get("spec_id"),
                    "spec_id_rule": "sha256 of the spec's canonical JSON (sorted keys, no "

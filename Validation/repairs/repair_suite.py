@@ -139,7 +139,8 @@ def main() -> int:
     with open(CATALOG) as f:
         cat = json.load(f)
     reps = [r for r in cat["repairs"]
-            if not args.only or any(r["id"].startswith(p) for p in args.only)]
+            if (not args.only or any(r["id"].startswith(p) for p in args.only))
+            and not (r.get("resolved_in") and not args.only)]   # fixed at source: run only when named
     if not args.score_only:
         jobs, seen = [], set()
         for r in reps:

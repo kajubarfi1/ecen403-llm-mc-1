@@ -604,14 +604,25 @@ def stage_backend(run, args):
            "--mode", getattr(args, "backend_mode", None) or "build"]
     if os.path.exists(env_file):
         cmd += ["--env_file", env_file]
+    t_start = time.time()
     rc, txt = sh(cmd, cwd=BACKEND_AGENTS, log=run.log, timeout=12 * 3600)
-    reports = [os.path.join(run.backend_dir, f) for f in os.listdir(run.backend_dir)
-               if f.startswith("pipeline_final_report_")] if os.path.isdir(run.backend_dir) else []
+    # Only a report this invocation wrote counts (one from an earlier round
+    # in the same out_root has the status key, and a stale PASS would be
+    # taken over a nonzero exit: backend handoff 2026-10-08). Newest first.
+    reports = sorted((os.path.join(run.backend_dir, f) for f in os.listdir(run.backend_dir)
+                      if f.startswith("pipeline_final_report_")
+                      and os.path.getmtime(os.path.join(run.backend_dir, f)) >= t_start - 1),
+                     key=os.path.getmtime, reverse=True) if os.path.isdir(run.backend_dir) else []
     rep = {}
     if reports:
         with open(reports[0]) as f:
             rep = json.load(f)
-    status = rep.get("pipeline_status", "FAIL" if rc else "PASS")
+    # the exit code decides first; a report can only confirm or detail it
+    status = "FAIL" if rc else rep.get("pipeline_status", "PASS")
+    if not rc and not reports:
+        status = "FAIL"
+        rep = {"failed_stage": "report", "error_message": "the backend exited 0 but wrote no "
+               "pipeline_final_report_*.json this round"}
     netlist = next((a for a in (rep.get("artifacts") or []) if str(a).endswith("6_final.v")), None)
     run.state["netlist"] = netlist
     run.record("backend", status, f"exit {rc}; failed_stage={rep.get('failed_stage')}; "

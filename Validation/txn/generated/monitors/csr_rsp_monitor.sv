@@ -4,7 +4,7 @@
 //
 // Interface : csr_rsp   (CSR response stream (read data / error status) out of config_regs)
 // Block     : config_regs
-// Manifest  : ../../../../private/tmp/claude-501/-Users-jacob-Capstone-ecen403-llm-mc-1/3f4c2279-68de-43b3-be57-c25da6ceaf5f/scratchpad/main_wt/Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

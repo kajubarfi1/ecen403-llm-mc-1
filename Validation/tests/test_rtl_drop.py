@@ -192,3 +192,26 @@ class TestDropId(TestResolver):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestDesignIdentity(TestDropId):
+    """The drop id is the same on every checkout (CRLF normalised) and the
+    design id ignores what a regeneration changes without changing the
+    design (backend handoff 2026-10-08)."""
+
+    def test_crlf_checkout_gets_the_same_drop_id(self):
+        self._blk("a", "module a;\n  wire x;\nendmodule\n")
+        lf = RD.drop_id(["a"])
+        _write(os.path.join(self.root_a, "p1", "a.sv"), "module a;\r\n  wire x;\r\nendmodule\r\n")
+        self.assertEqual(lf, RD.drop_id(["a"]))
+        self.assertEqual(RD.design_id(["a"]), RD.design_id(["a"]))
+
+    def test_design_id_ignores_timestamp_header_and_provenance(self):
+        self._blk("a", "// Generated: 2026-10-08 11:30:16\nmodule a;\nendmodule\n", commit="aaaa")
+        d1, g1 = RD.drop_id(["a"]), RD.design_id(["a"])
+        self._blk("a", "// Generated: 2026-10-08 12:29:05\nmodule a;\nendmodule\n", commit="bbbb")
+        d2, g2 = RD.drop_id(["a"]), RD.design_id(["a"])
+        self.assertNotEqual(d1, d2, "a regeneration is a new drop")
+        self.assertEqual(g1, g2, "but not a new design")
+        self._blk("a", "// Generated: 2026-10-08 12:29:05\nmodule a;\n  wire y;\nendmodule\n", commit="bbbb")
+        self.assertNotEqual(g2, RD.design_id(["a"]), "a changed line is a changed design")

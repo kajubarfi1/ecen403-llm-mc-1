@@ -4,7 +4,7 @@
 //
 // Interface : refresh_req   (Refresh request raised by the refresh controller)
 // Block     : refresh_ctrl
-// Manifest  : ../../../../private/tmp/claude-501/-Users-jacob-Capstone-ecen403-llm-mc-1/3f4c2279-68de-43b3-be57-c25da6ceaf5f/scratchpad/main_wt/Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

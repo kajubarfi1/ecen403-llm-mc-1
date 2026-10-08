@@ -260,8 +260,60 @@ def drop_id(blocks=None):
                 continue
             with open(p, "rb") as f:
                 h.update(b.encode())
-                h.update(f.read())
+                # line endings are the checkout's, not the drop's: a Windows
+                # clone gets CRLF from git and computed ec49d485ca8d where
+                # the Frontend published 4b86c7cd3705 (backend, 2026-10-08)
+                h.update(f.read().replace(b"\r\n", b"\n"))
                 n += 1
+    return h.hexdigest()[:12] if n else "empty"
+
+
+# What a regeneration changes without changing the design: the RTL header's
+# generation timestamp and the manifest's provenance fields. Everything else
+# in a file is design.
+VOLATILE_RTL_LINE = re.compile(rb"^\s*//\s*Generated\b.*$")
+VOLATILE_MANIFEST_KEYS = ("generated_utc", "git_commit", "generated_by", "generator_version")
+
+
+def design_id(blocks=None):
+    """The DESIGN's identity: `drop_id` with the volatile parts out -- RTL
+    lines that only carry the generation timestamp, manifest keys that only
+    carry provenance (VOLATILE_*). Two drops with equal design ids are the
+    same design regenerated (a7cd3cb93546 vs 4b86c7cd3705: RTL byte-identical
+    but for `// Generated:`); a changed design id is a changed design. The
+    drop id still names the files and the reports; this answers "did the
+    design change", which a stale-drop check keyed on the drop id cannot."""
+    h = hashlib.sha256()
+    n = 0
+    for b in sorted(blocks or all_blocks()):
+        try:
+            p = rtl_file(b)
+        except DropError:
+            p = None
+        if p:
+            with open(p, "rb") as f:
+                lines = [l for l in f.read().replace(b"\r\n", b"\n").split(b"\n")
+                         if not VOLATILE_RTL_LINE.match(l)]
+            h.update(b.encode())
+            h.update(b"\n".join(lines))
+            n += 1
+        try:
+            p = manifest_file(b)
+        except DropError:
+            p = None
+        if p:
+            try:
+                with open(p) as f:
+                    m = json.load(f)
+                for k in VOLATILE_MANIFEST_KEYS:
+                    m.pop(k, None)
+                canon = json.dumps(m, sort_keys=True, separators=(",", ":")).encode()
+            except ValueError:
+                with open(p, "rb") as f:
+                    canon = f.read().replace(b"\r\n", b"\n")
+            h.update(b.encode())
+            h.update(canon)
+            n += 1
     return h.hexdigest()[:12] if n else "empty"
 
 
@@ -273,6 +325,7 @@ def stamp(blocks):
     whole = drop_id()
     out = {"git_head": whole,                    # the drop's identity: a content hash (see drop_id); key kept for every reader
            "drop_id": whole,
+           "design_id": design_id(),            # the design's identity: timestamps and provenance left out (see design_id)
            "blocks_used": sorted(blocks),
            "validated_at": _git_head(),          # informational only: this repo's HEAD, if any
            "frontend_commits": frontend_commits(blocks),   # informational: what the manifests record

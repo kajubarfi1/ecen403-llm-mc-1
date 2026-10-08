@@ -50,6 +50,8 @@ class TestCatalogAppliesToDrop(unittest.TestCase):
         RS.WORK = tmp
         try:
             for r in cat["repairs"]:
+                if r.get("resolved_in"):
+                    continue        # fixed at source; its edits match an older drop
                 RS.build(r, cat["drop_root"], cat)
         finally:
             RS.WORK = w

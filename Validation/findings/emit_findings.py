@@ -589,6 +589,8 @@ def repair_findings(head, rep_stage_root=None):
                                   os.path.basename(f)[:-len("_report.json")]) or {})
     out = []
     for r in cat["repairs"]:
+        if r.get("resolved_in"):
+            continue                 # the defect was fixed at source; the record stays in the catalogue
         rows = [x for x in mat["rows"] if x.get("repair") == r["id"] and not x.get("error")]
         silenced = sorted({k for x in rows for k in x.get("silenced_expected", {})})
         still = [k for k in r["expect_gone"] if k in cur_keys]

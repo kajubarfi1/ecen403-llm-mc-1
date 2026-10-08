@@ -27,6 +27,7 @@ class Fake:
         self.backend, self.feedback_rc = backend, feedback_rc
         self.agent_fixes = ["wb_port"]      # what the fake agent's fix report claims (or {phase: [...]})
         self.failed = ["wb_port"]           # what the fake validation reports as failed
+        self.backend_crash = False          # pipeline.py exits 1 without a report
         self.absent = []                     # blocks the fake validation reports absent
         self.calls = []
 
@@ -101,6 +102,9 @@ class Fake:
         if name == "pipeline.py":
             out_root = cmd[cmd.index("--out_root") + 1]
             os.makedirs(out_root, exist_ok=True)
+            if self.backend_crash:
+                # died before writing a report; an older PASS report may remain
+                return 1, "Traceback: ImportError\n"
             with open(os.path.join(out_root, "pipeline_final_report_TOPRTL.json"), "w") as f:
                 json.dump(self.backend or {"pipeline_status": "PASS", "artifacts": ["x/6_final.v"]}, f)
             return 0 if (self.backend or {}).get("pipeline_status", "PASS") == "PASS" else 1, ""
@@ -278,6 +282,24 @@ class TestHalts(FlowCase):
         self.assertEqual(be[be.index("--drop_id") + 1], "abc123")
         self.assertEqual(be[be.index("--spec_revision") + 1], "fake_rev")
         self.assertEqual(be[be.index("--mode") + 1], "contract")
+
+    def test_backend_nonzero_exit_is_fail_even_with_a_stale_pass_report(self):
+        # backend handoff 2026-10-08: a report from an earlier round has the
+        # status key, so the old default took its PASS over a nonzero exit
+        os.environ["USE_DOCKER"] = "1"
+        fake = Fake(self.run_dir)
+        fake.backend_crash = True
+        run = flow.Run(self.run_dir, self.args())
+        os.makedirs(run.backend_dir, exist_ok=True)
+        stale = os.path.join(run.backend_dir, "pipeline_final_report_TOPRTL.json")
+        with open(stale, "w") as f:
+            json.dump({"pipeline_status": "PASS", "artifacts": ["old/6_final.v"]}, f)
+        import time; os.utime(stale, (time.time() - 3600, time.time() - 3600))
+        flow.sh = fake
+        rc = flow.run_flow(run, self.args())
+        st = [s for s in run.state["stages"] if s["stage"] == "backend"]
+        self.assertEqual(st[0]["status"], "FAIL", st)   # then the halt for a human
+        self.assertIsNone(run.state.get("netlist"), "a stale report's netlist is not this round's")
 
     def test_backend_synth_failure_is_the_frontend_edge_and_halts_for_the_format(self):
         os.environ["USE_DOCKER"] = "1"
