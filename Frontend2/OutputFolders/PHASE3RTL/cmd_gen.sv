@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    cmd_gen
-// Generated: 2026-10-08 12:39:16
+// Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)
 // Generator:     Command Generator Generator (Phase 3)
 //
 // Translates scheduler command type → DDR3 pin-level encoding.

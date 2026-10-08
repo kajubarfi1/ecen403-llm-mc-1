@@ -59,8 +59,8 @@
     },
     "refresh_ctrl": {
       "status": "PASS",
-      "test_count": 10,
-      "pass_count": 10,
+      "test_count": 11,
+      "pass_count": 11,
       "fail_count": 0,
       "pass_lines": [
         "[PASS] A1: ref_required low before init_done",
@@ -68,6 +68,7 @@
         "[PASS] A3: ref_starve_flag low before init_done",
         "[PASS] B1: ref_pending_cnt increments after init_done (tick 1)",
         "[PASS] B2: ref_required asserted once pending > 0",
+        "[PASS] B3: tREFI interval = 8 controller cycles (got 8)",
         "[PASS] C1: ref_urgent asserts at pending>=2 (got 2)",
         "[PASS] D1: ref_pending_cnt saturates at 4 (got 4)",
         "[PASS] E1: ref_starve_flag pulses while saturated",
@@ -123,6 +124,6 @@
       "log_file": "bank_tracker_xrun.log"
     }
   },
-  "timestamp": "2026-10-08T12:35:34.689622",
+  "timestamp": "2026-10-08T13:45:08.136682",
   "server": "olympus.ece.tamu.edu"
 }

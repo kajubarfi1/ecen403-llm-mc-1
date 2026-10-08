@@ -4,9 +4,9 @@ From Frontend (Lehana) to Validation (Jacob). Follows up
 `Validation/findings/HANDOFF_FRONTEND_2026-10-01_reply.md`, and was extended
 twice the same day after your 10/08 reply.
 
-**Current drop: `a7cd3cb93546`. Read section 8 first**: it replies to your
-10/08 results, lists what we fixed, and lists four findings we think are stale
-on your side. Sections 1 to 7 are the history of how we got here; the drop ids
+**Current drop: `dab971c2aab9` (design_id `3973ce99af71`). Read section 10, then
+section 8**: section 10 is the newest change (a real refresh-interval fix),
+section 8 replies to your 10/08 results. Sections 1 to 7 are the history of how we got here; the drop ids
 quoted in them (`c85ae77d1d7c`, `4b86c7cd3705`) are superseded.
 
 ## 1. The drop at the start of this thread: `4b86c7cd3705` (superseded by section 8)
@@ -249,6 +249,37 @@ we did with your asks:
   rather we leave it so your checkers judge the design as it is.
 - Your age-bound observation on `path_07` is noted; we agree it needs a stated
   policy before it can be a check. Not done.
+
+## 10. tREFI fixed: new drop `dab971c2aab9`
+
+You said nothing yet on whether to leave tREFI as it was, so this is our call:
+we fixed it, because it was the one place where the nCK-vs-controller-cycle
+mismatch was not conservative (section 9, correction).
+
+- `refresh_ctrl`: the interval counter is now loaded with
+  `floor(cfg_tREFI_nCK / CLK_RATIO) - 1` (CLK_RATIO = 4, taken from the spec's
+  clocking), so the interval is exactly `floor(6240 / 4) = 1560` controller
+  cycles = 7.8 us, where before it was 6240 cycles = 31.2 us. The testbench
+  drives its directed interval in nCK and checks the measured tick-to-tick
+  interval (B3); that check fails on the old RTL (33 cycles for an 8-cycle
+  interval) and passes on the new one. A latent width bug in the same
+  testbench (`start_val` was 3 bits against the 4-bit count) is fixed too.
+- `timing_model.counter_clock` no longer lists tREFI as affected; it now says
+  `bank_tracker` windows are scaled by 4 (conservative) and records that
+  `refresh_ctrl` tREFI is converted and exact. Golden spec and compiler agree;
+  your spec review: PASS, 0 blocking, 0 advisory. Same `revision` string, new
+  content: `SPEC_REVISION_REUSED` will be filed again for the golden spec.
+- The drop was regenerated in full (the RTL generators no longer write
+  timestamps, so every block is now regenerated from deterministic output):
+  Phases 1 to 4 and the top pass lint and sim on Olympus (init_fsm 11,
+  config_regs 36, wb_port 4, addr_decoder 24, calibration 8, refresh_ctrl 11,
+  bank_tracker 33, cmd_queue 32, scheduler 48, cmd_gen 36, data_path 29).
+  `drop_id` `dab971c2aab9` equals `rtl_drop.drop_id()` on this tree; the
+  only block whose logic changed is `refresh_ctrl`.
+- Your tREFI assertion ("undetermined at bound 201") should now be able to
+  find the interval correct rather than long; we have not run it.
+- Still the same on our side: `bank_tracker` counts nCK values in controller
+  cycles (documented, conservative, not changed).
 
 ## Questions
 

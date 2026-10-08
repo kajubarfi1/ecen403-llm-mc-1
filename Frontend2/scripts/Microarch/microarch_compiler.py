@@ -814,15 +814,14 @@ def _apply_intake_answers(spec: dict) -> None:
         "clock": "controller",
         "load_units": "nCK",
         "window_scale": ratio,
-        "applies_to": ["bank_tracker: tRCD, tRP, tRAS, tRC, tRRD, tFAW, tWR, tRTP, tCCD, tRFC, tWTR",
-                       "refresh_ctrl: tREFI"],
-        "effect": "each counter is loaded with a *_nCK value (DDR clocks) but decrements once per "
-                  "controller clock, so every enforced window lasts window_scale times the spec value",
+        "applies_to": ["bank_tracker: tRCD, tRP, tRAS, tRC, tRRD, tFAW, tWR, tRTP, tCCD, tRFC, tWTR"],
+        "effect": "each bank_tracker counter is loaded with a *_nCK value (DDR clocks) but decrements "
+                  "once per controller clock, so every enforced window lasts window_scale times the "
+                  "spec value",
         "minimum_spacing_timings": "conservative: the window is longer than the minimum, so no "
                                    "minimum-spacing violation; the real margin is not exercised",
-        "maximum_interval_timings": "NOT conservative: tREFI is a maximum interval, so the longer "
-                                    "window makes the effective refresh interval exceed the spec value",
-        "effective_tREFI_ns": round(tm["tREFI"] * ratio, 6),
+        "not_scaled": ["refresh_ctrl: tREFI is a maximum interval, so it is converted to controller "
+                       "cycles (floor of tREFI_nCK / window_scale) and the refresh interval is exact"],
     })
 
 

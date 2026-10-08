@@ -40,6 +40,7 @@ class RefreshCtrlGenerator:
         self.ca = self.spec["controller_architecture"]
         self.dc = self.spec["timing_model"]["$derived_cycles"]
         self.rp = self.ca["refresh_policy"]
+        self.clk = self.spec["clocking_model"]
         self.p = self._derive()
 
     # ==================================================================
@@ -53,6 +54,11 @@ class RefreshCtrlGenerator:
         p["URGENT_THRESH"] = self.rp["urgent_threshold"]
         p["REFRESH_PRIORITY"] = self.rp["refresh_priority"]
         p["REFI_CTR_W"] = max(1, p["tREFI_nCK"].bit_length())
+        # DDR clocks per controller clock. cfg_tREFI_nCK is in nCK (DDR clocks)
+        # but refi_ctr ticks once per controller clock, so the load value must
+        # be converted or the refresh interval comes out CLK_RATIO times too long.
+        p["CLK_RATIO"] = int(round(self.clk["controller_clock_period_ns"]
+                                   / self.clk["$derived"]["tCK_ns"]))
         p["POST_CTR_W"] = max(1, p["MAX_POSTPONE"].bit_length())
         return p
 
@@ -77,6 +83,7 @@ class RefreshCtrlGenerator:
 // urgent-threshold escalation, refresh starvation detection.
 module refresh_ctrl #(
     parameter REFI_CTR_W = {p['REFI_CTR_W']},
+    parameter CLK_RATIO  = {p['CLK_RATIO']},   // DDR clocks per controller clock
     parameter POST_CTR_W = {p['POST_CTR_W']}
 ) (
     input  logic                    clk,
@@ -97,6 +104,14 @@ module refresh_ctrl #(
     // tREFI interval counter -- counts down from cfg_tREFI_nCK; init_done
     // gates all activity (held quiescent before init completes).
     logic [REFI_CTR_W-1:0] refi_ctr;
+
+    // cfg_tREFI_nCK is in DDR clocks; this counter ticks once per controller
+    // clock. Convert (floor: tREFI is a MAXIMUM interval, so round down), then
+    // subtract 1 because counting N..0 inclusive takes N+1 cycles, so the
+    // interval is exactly floor(tREFI_nCK / CLK_RATIO) controller cycles.
+    wire [23:0]            refi_cycles = cfg_tREFI_nCK / CLK_RATIO;
+    wire [REFI_CTR_W-1:0]  refi_load   = (refi_cycles == 24'd0) ? '0
+                                         : refi_cycles[REFI_CTR_W-1:0] - 1'b1;
     logic                  refi_tick;
 
     always_ff @(posedge clk or negedge rst_n) begin
@@ -109,7 +124,7 @@ module refresh_ctrl #(
         end else begin
             refi_tick <= 1'b0;
             if (refi_ctr == '0) begin
-                refi_ctr  <= cfg_tREFI_nCK[REFI_CTR_W-1:0];
+                refi_ctr  <= refi_load;
                 refi_tick <= 1'b1;
             end else begin
                 refi_ctr <= refi_ctr - 1'b1;
@@ -171,7 +186,7 @@ endmodule
             "phase": 2, "generator": "refresh_ctrl_gen",
             "dependencies": ["config_regs"],
             "parameters": {
-                "REFI_CTR_W": p["REFI_CTR_W"], "POST_CTR_W": p["POST_CTR_W"],
+                "REFI_CTR_W": p["REFI_CTR_W"], "POST_CTR_W": p["POST_CTR_W"], "CLK_RATIO": p["CLK_RATIO"],
                 "tREFI_nCK": p["tREFI_nCK"], "tRFC_nCK": p["tRFC_nCK"],
                 "MAX_POSTPONE": p["MAX_POSTPONE"], "URGENT_THRESH": p["URGENT_THRESH"],
             },

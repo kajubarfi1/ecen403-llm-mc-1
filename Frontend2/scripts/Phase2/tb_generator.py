@@ -228,7 +228,11 @@ endmodule
     def generate_refresh_ctrl_tb(self) -> str:
         ctrl_period = self.clocking["controller_clock_period_ns"]
         # Directed, TB-owned test constants (independent of spec scale).
-        trefi, max_postpone, urgent_thresh = 8, 4, 2
+        trefi, max_postpone, urgent_thresh = 8, 4, 2     # trefi is in CONTROLLER cycles
+        # cfg_tREFI_nCK is in DDR clocks (nCK); refresh_ctrl must convert it to
+        # controller cycles, so drive trefi * (DDR clocks per controller clock).
+        ratio = int(round(ctrl_period / self.clocking["$derived"]["tCK_ns"]))
+        trefi_nck = trefi * ratio
 
         return f"""`timescale 1ns / 1ps
 module refresh_ctrl_tb;
@@ -255,7 +259,7 @@ module refresh_ctrl_tb;
     // give up after max_cyc cycles. Black-box: doesn't assume exact
     // internal tick timing, just that a change eventually happens.
     task automatic wait_for_pending_change(input int max_cyc, output logic changed);
-        logic [2:0] start_val;
+        logic [3:0] start_val;
         int cyc;
         start_val = ref_pending_cnt;
         changed = 0;
@@ -268,7 +272,7 @@ module refresh_ctrl_tb;
     initial begin
         $dumpfile("refresh_ctrl_tb.vcd"); $dumpvars(0, refresh_ctrl_tb);
         rst_n=0; init_done=0; cfg_force_refresh=0; ref_ack=0;
-        cfg_tREFI_nCK={trefi}; cfg_max_postpone={max_postpone};
+        cfg_tREFI_nCK={trefi_nck}; cfg_max_postpone={max_postpone};
         cfg_urgent_threshold={urgent_thresh}; cfg_ref_priority=1;
         repeat(5) @(posedge clk); rst_n=1; repeat(2) @(posedge clk);
 
@@ -284,6 +288,18 @@ module refresh_ctrl_tb;
             wait_for_pending_change(200, changed);
             check("B1: ref_pending_cnt increments after init_done (tick 1)", changed && ref_pending_cnt > 4'd0);
             check("B2: ref_required asserted once pending > 0", ref_required===1'b1);
+        end
+        // The interval between ticks is tREFI in CONTROLLER cycles: the nCK
+        // value from the config register must be divided by the clock ratio
+        // ({ratio} DDR clocks per controller clock), not counted 1:1.
+        begin
+            int c; logic ch; logic [3:0] v;
+            v = ref_pending_cnt; c = 0; ch = 0;
+            while (!ch && c < 4*{trefi}+10) begin
+                @(posedge clk); c++;
+                if (ref_pending_cnt !== v) ch = 1;
+            end
+            check($sformatf("B3: tREFI interval = %0d controller cycles (got %0d)", {trefi}, c), ch && c == {trefi});
         end
 
         // -- Section C: urgent escalation at cfg_urgent_threshold --

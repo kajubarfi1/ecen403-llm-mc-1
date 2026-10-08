@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    cmd_queue
-// Generated: 2026-10-08 12:39:16
+// Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)
 // Generator:     Command Queue Generator (Phase 3)
 //
 // 16-deep command queue. Accepts decoded requests from addr_decoder,

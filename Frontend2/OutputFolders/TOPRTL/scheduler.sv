@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    scheduler
-// Generated: 2026-10-08 12:39:16
+// Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)
 // Generator:     Scheduler Generator (Phase 3)
 //
 // FR-FCFS (First-Ready First-Come-First-Served) scheduler.
