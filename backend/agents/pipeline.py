@@ -109,6 +109,10 @@ class PipelineState(TypedDict):
     out_root:           str
     env_file:           str
     enable_autotuner:   bool
+    # What ties a finding to the RTL it ran on. Both come from the orchestrator; a
+    # standalone block run has neither and says so when it emits.
+    drop_id:            Optional[str]
+    spec_revision:      Optional[str]
 
     # ── Agent outputs ────────────────────────────────────────────────────────
     intake_report:      Optional[Dict[str, Any]]
@@ -838,29 +842,84 @@ def _build_fallback_report(summary: Dict[str, Any]) -> str:
 
 # ── 2e. Validator Node ───────────────────────────────────────────────────────
 
-def _anchor_path(state: PipelineState, resolved: Dict[str, Any]) -> Optional[str]:
-    """Where the RTL came from, as something the owner can actually open.
+PHASE_DIR_RE = re.compile(r"^PHASE\d+RTL$", re.IGNORECASE)
 
-    The packager keeps only the basename, which is not locatable. The bundle it was
-    read from is, so anchor on that. PENDING: an upstream repo-relative path would be
-    better still (Frontend2/OutputFolders/PHASE3RTL/scheduler.sv), but the backend is
-    not told it - that needs a manifest field the frontend fills in.
+
+def _drop_root(bundle: Optional[str]) -> Optional[Path]:
+    """The frontend drop this bundle was cut from, if it can be located.
+
+    Three ways, strongest first: stated outright; inferred from the bundle, because
+    the orchestrator runs the backend on <drop>/TOPRTL; or the contract's own drop
+    root, which is where a standalone block run should look.
+    """
+    env = (os.environ.get("FRONTEND_DROP_ROOT") or "").strip()
+    if env and Path(env).is_dir():
+        return Path(env)
+    if bundle:
+        parent = Path(bundle).resolve().parent
+        try:
+            if any(PHASE_DIR_RE.match(c.name) for c in parent.iterdir() if c.is_dir()):
+                return parent
+        except OSError:
+            pass
+    repo = (os.environ.get("BACKEND_GIT_REPO") or "").strip()
+    bases = ([Path(repo)] if repo else []) + list(BACKEND_ROOT.parents)
+    for base in bases:
+        cand = base / "Frontend2" / "OutputFolders"
+        if cand.is_dir():
+            return cand
+    return None
+
+
+def _anchor_path(state: PipelineState, resolved: Dict[str, Any]) -> Optional[str]:
+    """The file whoever has to fix this RTL would open.
+
+    Settled with Validation 2026-10-08: that is the drop's phase copy
+    (Frontend2/OutputFolders/PHASE3RTL/scheduler.sv), not the backend's bundle copy.
+    The frontend's phase agents regenerate the phase copy; nobody edits ours, so an
+    anchor pointing at it sends the reader to a dead end.
+
+    The phase is found by looking rather than read from the manifest's `phase` field:
+    on the 2026-10-08 drop that field still said 3 for data_path, which had moved to
+    PHASE4RTL. Per the handoff contract a TOPRTL/ copy is never chosen over a phase
+    copy. Falls back to the bundle path when no drop is in reach, which is honest -
+    it says where the backend read the file - but it is not routable.
     """
     name = resolved.get("rtl_filename")
     if not name:
         return None
     bundle = state.get("bundle_dir")
+
+    drop = _drop_root(bundle)
+    if drop:
+        hits = sorted(c / name for c in drop.iterdir()
+                      if c.is_dir() and PHASE_DIR_RE.match(c.name) and (c / name).is_file())
+        if hits:
+            return _repo_relative(hits[0])
+
     if not bundle:
         return name
     full = (Path(bundle) / name).resolve()
-    # An absolute path from the machine that ran the flow means nothing to the team
-    # that has to fix the RTL. Express it relative to the backend root, with forward
-    # slashes so it reads the same on any platform.
-    root = Path(__file__).resolve().parent.parent
-    try:
-        return full.relative_to(root).as_posix()
-    except ValueError:
-        return full.name
+    return _repo_relative(full, fallback_root=BACKEND_ROOT)
+
+
+def _repo_relative(full: Path, fallback_root: Optional[Path] = None) -> str:
+    """A path the team can read, not one from the machine that ran the flow.
+
+    Relative to the enclosing checkout where there is one, forward slashes so it
+    reads the same on every platform.
+    """
+    roots = [p for p in (fallback_root,) if p]
+    repo = (os.environ.get("BACKEND_GIT_REPO") or "").strip()
+    if repo:
+        roots.append(Path(repo))
+    roots += [p for p in full.parents if (p / ".git").exists()]
+    for root in roots:
+        try:
+            return full.relative_to(root).as_posix()
+        except ValueError:
+            continue
+    return full.name
 
 
 def _emit_timing_finding(state: PipelineState, design_name: str,
@@ -877,7 +936,7 @@ def _emit_timing_finding(state: PipelineState, design_name: str,
 
         rpt = artifacts.get("timing_rpt")
         if not rpt or not Path(rpt).exists():
-            print("[findings] no timing report among this run's artifacts — nothing to parse.")
+            print("[findings] no timing report among this run's artifacts - nothing to parse.")
             return
         parsed = ef.parse_timing_report(Path(rpt))
         # The period the design was actually constrained to. current_clock_period_ns
@@ -886,7 +945,7 @@ def _emit_timing_finding(state: PipelineState, design_name: str,
         period = (state.get("current_clock_period_ns")
                   or resolved.get("clock_period_ns"))
         if not period:
-            print("[findings] no clock period resolved — cannot state what was missed.")
+            print("[findings] no clock period resolved - cannot state what was missed.")
             return
         # The backend may sit inside the team repo or beside it as a working copy.
         # BACKEND_GIT_REPO covers the second case; without a head the finding cannot
@@ -895,11 +954,19 @@ def _emit_timing_finding(state: PipelineState, design_name: str,
         repo = Path(env_repo) if env_repo else ef.find_repo(FINDINGS_ROOT)
         head = ef.git_head(repo) if repo and Path(repo).exists() else None
         if not head:
-            print("[findings] WARNING: no git head resolved — set BACKEND_GIT_REPO to the "
+            print("[findings] WARNING: no git head resolved - set BACKEND_GIT_REPO to the "
                   "team checkout so findings carry a drop stamp.")
-        drop = {"git_head": head,
-                "spec_revision": os.environ.get("SPEC_REVISION",
-                                                "golden_ddr3_1600k_x8_2lane_1rank")}
+        # The orchestrator names the drop by content; a standalone run has no id and
+        # falls back to the git head. SPEC_REVISION has no safe default: the outbox is
+        # looked up by it, so a stale one writes where nothing will read.
+        rev = (state.get("spec_revision") or os.environ.get("SPEC_REVISION") or "").strip()
+        if not rev:
+            print("[findings] WARNING: no spec revision - set SPEC_REVISION or pass "
+                  "--spec_revision; the orchestrator looks the outbox up by it, so "
+                  "this finding may be written where nothing reads it.")
+        drop = {"drop_id": state.get("drop_id"),
+                "git_head": head,
+                "spec_revision": rev or "unknown"}
         f = ef.timing_finding(
             design_name, float(period), parsed,
             rtl_path=_anchor_path(state, resolved),
@@ -916,7 +983,7 @@ def _emit_timing_finding(state: PipelineState, design_name: str,
                   f"slack={w.get('slack_ns')}ns  levels={w.get('logic_levels')}")
         print(f"[findings] wrote {out}")
     except Exception as e:
-        print(f"[findings] could not emit a timing finding ({type(e).__name__}: {e}) — "
+        print(f"[findings] could not emit a timing finding ({type(e).__name__}: {e}) - "
               f"the pipeline verdict is unaffected.")
 
 
@@ -1192,8 +1259,9 @@ def validator_node(state: PipelineState) -> PipelineState:
 # KLayout decks in signoff/lvs/. signoff/lvs/README.md documents each deck fix and
 # the negative controls proving these checks fail on broken layouts.
 
-SIGNOFF_ROOT      = Path(__file__).resolve().parent.parent / "signoff"
-FINDINGS_ROOT     = Path(__file__).resolve().parent.parent / "findings"
+BACKEND_ROOT      = Path(__file__).resolve().parent.parent
+SIGNOFF_ROOT      = BACKEND_ROOT / "signoff"
+FINDINGS_ROOT     = BACKEND_ROOT / "findings"
 SIGNOFF_TIMEOUT_S = 3 * 3600
 
 
@@ -2547,6 +2615,13 @@ def main() -> int:
                     help="After a clean PASS, tighten clock period to maximize Fmax (up to 3 iterations)")
     ap.add_argument("--optimize_power",   action="store_true", default=False,
                     help="After a clean PASS, use Claude to minimize power while preserving timing (up to 3 iterations)")
+    ap.add_argument("--drop_id", default=None,
+                    help="The frontend drop's content id (Validation's rtl_drop.py: "
+                         "drop_id()). Passed by the orchestrator; findings are filed "
+                         "under it so they can be tied to the RTL they ran on.")
+    ap.add_argument("--spec_revision", default=None,
+                    help="The spec revision this drop was generated from. The "
+                         "orchestrator looks the findings outbox up by it.")
     ap.add_argument("--mode", choices=sorted(MODES), default=DEFAULT_MODE,
                     help="How far to take the run. "
                          + "; ".join(f"{k} ({v['cost']})" for k, v in MODES.items()))
@@ -2563,6 +2638,8 @@ def main() -> int:
         "out_root":         str(args.out_root),
         "env_file":         str(args.env_file),
         "mode":             args.mode,
+        "drop_id":          args.drop_id,
+        "spec_revision":    args.spec_revision,
         "enable_autotuner":       args.enable_autotuner or optimize,
         "optimize_fmax":          args.optimize_fmax or optimize,
         "optimize_power":         args.optimize_power or optimize,

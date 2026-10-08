@@ -1,0 +1,113 @@
+# Handoff to Validation — 2026-10-08
+
+From Backend (Dawson) to Validation (Jacob), answering
+`Validation/findings/HANDOFF_BACKEND_2026-10-07.md`. Anchors are done and the
+whole chain is verified end to end. Four things need a change on your side and
+one needs the Frontend. Nothing outside `backend/` was changed by us.
+
+## 1. Anchors — done
+
+`backend/findings/emit_findings.py` now anchors on the drop's phase copy, found
+by looking rather than from the manifest, and names the signal at both ends of
+the critical path:
+
+```json
+"anchor": [
+  {"file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+   "signal": "cmd_aux", "bit": 3,  "role": "endpoint"},
+  {"file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+   "signal": "q_bank",  "bit": 33, "role": "startpoint"}
+]
+```
+
+`bit` and `role` are additive — a consumer reading only `file` and `signal` is
+unaffected. Both ends are given because a timing fix usually needs both: the
+endpoint is the register that misses, the startpoint is where its path begins.
+
+**Do not trust a manifest's `phase` field.** On the current drop
+`backend/bundles/data_path/data_path_manifest.json` still says `phase: 3` while
+the block lives in `PHASE4RTL`. We resolve by globbing `PHASE*RTL/<file>` in the
+drop root and never choosing `TOPRTL/`, per the contract §1. Verified: all 11
+blocks resolve, `data_path` to PHASE4RTL, and a bundle that *is* `<drop>/TOPRTL`
+(how `flow.py` invokes us) still resolves to the phase copy.
+
+**One-time id change.** Finding ids were keyed on the indexed endpoint
+(`TIMING/cmd_row[5]`); they are now keyed on the signal alone
+(`TIMING/cmd_aux`). The bit moves between runs while the defect does not, so the
+old form broke lifecycle tracking the same way the synthesis suffix did. The
+first drop after this change will read as "old resolved, new opened" once. It
+coincides with the spec-revision change in §3, so the outbox is being
+regenerated anyway.
+
+## 2. What we need from `flow.py`
+
+**`--drop_id` is not passed.** You asked us to name the outbox by drop id, but
+`stage_backend` sends only `--bundle_dir`, `--out_root`, `--env_file`. We cannot
+compute it ourselves without reaching into `Validation/structural/rtl_drop.py`,
+which resolves paths through your `rtl_drop.json` to read the Frontend's files —
+backend would be coupled to two other subsystems' layout and would stop running
+standalone. You already have the id at `flow.py:462`. One line:
+
+```python
+cmd = [PY, BACKEND_PIPELINE, "--bundle_dir", bundle, "--out_root", run.backend_dir,
+       "--drop_id", run.state.get("drop_id") or ""]
+```
+
+Our side accepts it and falls back to `git_head` when it is absent, so the order
+of landing does not matter.
+
+## 3. `to_frontend_error_report.py` loses three things
+
+Rendering our finding through your chain (`retry_adapter.adapt` →
+`write_error_reports`) works — `failed_modules: ["scheduler"]`, phase 3, the
+`fix` lands. But `_lines()` at `Validation/findings/to_frontend_error_report.py:40`
+drops content the model needs:
+
+| line | what the model sees | why |
+|---|---|---|
+| 49 | `scheduler.sv:None` | `:{a.get('line')}` is unconditional; your own §3 says timing has no line |
+| 49 | `cmd_aux` with no bit, no role | reads `signal` and `text` only — `bit` and `role` never arrive |
+| 53 | no `repro:` line at all | reads `rep.get("cmd")`; ours is `repro.command`, which the adapter passes through unchanged |
+| 58 | `occurrences: 1 on` | `paths` is empty, leaving a dangling "on" |
+
+The third is the substantive one — the reproduction command never reaches the
+Frontend. Your handoff said the adapter accepts `command` or `cmd`, and it does;
+the renderer does not.
+
+Nitpick, your call: `retry_adapter.adapt` sets `pipeline: "validation"` on our
+findings too. `flow.py` overwrites `source`, so provenance is recoverable — but
+a reader of the package alone would attribute a timing defect to validation.
+
+## 4. The outbox will not be found today
+
+`backend_findings()` looks up `outbox/<spec_revision>/latest` using the current
+spec's `revision`. That is now `compiled_ddr3800_x8_1lane_1rank`; our only
+committed outbox is under `golden_ddr3_1600k_x8_2lane_1rank`, so the edge would
+halt with "emitted no findings" until the outbox is regenerated.
+
+We removed the stale default that caused this: the backend used to fall back to
+`golden_ddr3_1600k_x8_2lane_1rank` when `SPEC_REVISION` was unset, which wrote
+findings to a folder nothing reads and looked like success. It now takes
+`--spec_revision` (or `SPEC_REVISION`) and warns loudly when it has neither.
+
+**For the Frontend:** that revision says **ddr3800**, not ddr3_1600. Our bundles
+and the 200 MHz target came from a 1600 spec. If the speed bin genuinely changed,
+every timing number we have is against the wrong part and the team should know
+before we regenerate against it. If it is a naming artifact, say so and we
+proceed.
+
+## 5. Per-block netlists
+
+Agreed — a top-level netlist has no block path to run on. We will run
+`pipeline_batch.py` over all 11 bundles so `runner/<block>/6_final.v` exists per
+block. It is a multi-hour unattended run; expect them this week.
+
+Your `wb_port/6_final.v` result (**19/19** on `path_21_wb_port_standalone`) is the
+first behavioural confirmation of a backend netlist we have. Thank you for
+chasing the two checker defects rather than filing them against the netlist.
+
+## 6. `--backend-mode`
+
+Yes, please. `contract` / `synth` / `build` / `full`; `build` stays the default.
+`contract` is seconds and runs no ORFS, which is what a plan or a smoke test
+wants. Mapping is literal — pass the string through to `--mode`.

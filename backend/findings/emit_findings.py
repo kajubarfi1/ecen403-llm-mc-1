@@ -118,6 +118,49 @@ def parse_timing_report(path: Path) -> Dict[str, Any]:
     return {"wns_ns": wns, "tns_ns": tns, "paths": unique}
 
 
+def split_signal(name: Optional[str]) -> Dict[str, Any]:
+    """An STA endpoint name as something locatable in the RTL.
+
+    `cmd_row[11]$_DFFE_PN0P_` is three things glued together: the signal, the bit of
+    it, and a synthesis-generated instance suffix. Only the signal survives
+    re-synthesis, so it is what an id and an anchor key on. The bit is kept beside it
+    because which slice of a vector is slow is worth knowing, but it is not part of
+    the identity - the worst bit moves between runs while the defect does not.
+    """
+    if not name:
+        return {}
+    base = name.split("$")[0]
+    m = re.match(r"^(.*?)\[(\d+)\]$", base)
+    if m:
+        return {"signal": m.group(1), "bit": int(m.group(2))}
+    return {"signal": base}
+
+
+def drop_key(drop: Dict[str, Any]) -> str:
+    """What names this drop in the outbox and in lifecycle fields.
+
+    Validation settled on content, not git (HANDOFF_BACKEND_2026-10-07 answer 5):
+    on one machine with drops generated in place there is no git head. The
+    orchestrator computes the id and passes it down; `git_head` stays as a fallback
+    for standalone backend runs, which still need somewhere to write.
+    """
+    return drop.get("drop_id") or drop.get("git_head") or "nohead"
+
+
+def _anchor(rtl_path: Optional[str], end: Dict[str, Any],
+            start: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Validation's `anchor[]`: where in the drop to look. `role` is additive - a
+    consumer that ignores it still reads file and signal."""
+    if not rtl_path:
+        return []
+    out = [{"file": rtl_path}]
+    if end.get("signal"):
+        out[0] = {"file": rtl_path, **end, "role": "endpoint"}
+    if start.get("signal") and start.get("signal") != end.get("signal"):
+        out.append({"file": rtl_path, **start, "role": "startpoint"})
+    return out
+
+
 def timing_finding(design: str, period_ns: float, parsed: Dict[str, Any],
                    rtl_path: Optional[str], repro: str, drop: Dict[str, Any],
                    mechanism: Optional[str] = None,
@@ -138,11 +181,12 @@ def timing_finding(design: str, period_ns: float, parsed: Dict[str, Any],
         spread = ("many endpoints failing, not a single outlier"
                   if ratio > 3 else "concentrated on the worst path")
 
-    # The endpoint carries a synthesis-generated suffix (cmd_row[5]$_DFFE_PN0P_).
-    # That name changes when the block is re-synthesised, so an id built from it
-    # would not match itself across drops and lifecycle tracking would silently
-    # break. Key on the RTL signal; the full instance stays in the evidence.
-    signal = worst["endpoint"].split("$")[0] if worst else None
+    # The endpoint carries a bit index and a synthesis-generated suffix
+    # (cmd_row[11]$_DFFE_PN0P_), neither of which survives re-synthesis. An id built
+    # from either would not match itself across drops and lifecycle tracking would
+    # break silently. Key on the signal alone; the full instance stays in the evidence.
+    end, start = split_signal(worst["endpoint"]) if worst else {},                  split_signal(worst["startpoint"]) if worst else {}
+    signal = end.get("signal")
     check_id = f"TIMING/{signal}" if signal else "TIMING/unknown"
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     return {
@@ -165,10 +209,13 @@ def timing_finding(design: str, period_ns: float, parsed: Dict[str, Any],
                    + (f", TNS {tns:+.3f} ns" if tns is not None else "")
                    + (f", Fmax {1000.0 / (period_ns - wns):.2f} MHz" if period_ns - wns > 0 else "")),
         "detector": "sta:opensta:setup",
-        # PENDING(3): Validation anchors to file and line. The backend can name the
-        # file but not the line - synthesis does not preserve it - so line is omitted
-        # rather than guessed.
-        "anchor": ([{"file": rtl_path}] if rtl_path else []),
+        # Settled with Validation 2026-10-08: anchor on the Frontend2 source path (the
+        # file its agents regenerate, not the backend's bundle copy) and name the
+        # signal, which is what lets those agents find the logic. No line number -
+        # synthesis does not preserve one, and Validation does not expect it here.
+        # Both ends of the critical path are given: the endpoint is the register that
+        # misses, the startpoint is where its path begins, and a fix usually needs both.
+        "anchor": _anchor(rtl_path, end, start),
         "mechanism": mechanism,
         "paths": [],
         "occurrences": len(paths),
@@ -184,8 +231,8 @@ def timing_finding(design: str, period_ns: float, parsed: Dict[str, Any],
         "repro": {"command": repro},
         "drop": drop,
         "introduced_in": None,
-        "first_seen": drop.get("git_head"),
-        "last_seen": drop.get("git_head"),
+        "first_seen": drop_key(drop),
+        "last_seen": drop_key(drop),
         "resolved_in": None,
         "status": "open",
         "generated_utc": now,
@@ -201,7 +248,7 @@ def write_outbox(findings: List[Dict[str, Any]], outbox: Path, drop: Dict[str, A
     this an orchestrator cannot tell a fixed defect from one that was never re-tested.
     """
     rev = drop.get("spec_revision") or "unknown"
-    head = drop.get("git_head") or "nohead"
+    head = drop_key(drop)
     prev: Dict[str, Any] = {}
     latest = outbox / rev / "latest"
     if latest.exists():
@@ -252,6 +299,10 @@ def main() -> int:
     ap.add_argument("--repro", default=None)
     ap.add_argument("--outbox", type=Path, default=Path(__file__).resolve().parent / "outbox")
     ap.add_argument("--repo", type=Path, default=Path(__file__).resolve().parent.parent)
+    ap.add_argument("--drop-id", default=None,
+                    help="The drop's content id (Validation's rtl_drop.py: drop_id()). "
+                         "The orchestrator passes it; without it the outbox falls back "
+                         "to the git head.")
     ap.add_argument("--spec-revision", default="golden_ddr3_1600k_x8_2lane_1rank")
     ap.add_argument("--mechanism", default=None)
     ap.add_argument("--suggested-fix", default=None)
@@ -265,7 +316,7 @@ def main() -> int:
         print(f"FINDINGS WARNING: no git repo above {a.repo} - the drop stamp will be "
               f"incomplete, so this finding cannot be tied to a code state. "
               f"Pass --repo pointing into the team checkout.")
-    drop = {"git_head": head, "spec_revision": a.spec_revision}
+    drop = {"drop_id": a.drop_id, "git_head": head, "spec_revision": a.spec_revision}
     repro = a.repro or f"pipeline_batch.py --bundle_dirs bundles/{a.design}"
     f = timing_finding(a.design, a.period, parsed, a.rtl, repro, drop,
                        a.mechanism, a.suggested_fix)
