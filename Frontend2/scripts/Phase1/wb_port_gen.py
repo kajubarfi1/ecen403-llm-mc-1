@@ -128,7 +128,6 @@ class WishbonePortGenerator:
     # ================================================================
     def generate_rtl(self) -> str:
         p = self.p
-        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         lines = []
         L = lines.append
@@ -136,7 +135,7 @@ class WishbonePortGenerator:
         L(f"////////////////////////////////////////////////////////////////////////////////")
         L(f"// Module:    wb_port")
         L(f"// File:      wb_port.sv")
-        L(f"// Generated: {ts}")
+        L(f"// Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)")
         L(f"// Generator:     Wishbone Port Interface Generator (Phase 1)")
         L(f"// Spec:      {self.spec.get('design_id', 'N/A')} rev {self.spec.get('revision', 'N/A')}")
         L(f"//")
@@ -426,7 +425,6 @@ class WishbonePortGenerator:
 
     def generate_testbench(self) -> str:
         p = self.p
-        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         aw = p["ADDR_WIDTH"]
         dw = p["DATA_WIDTH"]
@@ -443,7 +441,7 @@ class WishbonePortGenerator:
         L(f"`timescale 1ns / 1ps")
         L(f"//==============================================================")
         L(f"// wb_port_tb.sv -- Enhanced testbench ({len(tests)} tests)")
-        L(f"// Generated: {ts}")
+        L(f"// Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)")
         L(f"// Generator:     Wishbone Port Interface Generator (Phase 1)")
         L(f"//")
         L(f"// Sections:")

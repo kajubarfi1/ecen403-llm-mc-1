@@ -195,6 +195,44 @@ they are not vacuous. Scheduler is 48/48 on the new RTL.
   about 4x longer than the spec requires. Conservative, not a correctness bug,
   but it costs throughput and means the real tWTR/tRCD margins are untested.
 
+## 9. Reply to your evening addenda (`a7cd3cb93546`: 19/19 paths, 0 open findings)
+
+Thank you; both the result and the correction about SCHED_004 are noted. What
+we did with your asks:
+
+- **Ask 3 (timestamp in RTL headers): done.** The 8 generators that wrote
+  `// Generated: <time>` now write a fixed line pointing at the manifest's
+  `generated_utc`; all 11 RTL generators were run twice and are byte-identical
+  run to run. This is in the generators only: the drop in `OutputFolders/` is
+  still `a7cd3cb93546` and is not regenerated. The manifests still carry
+  `generated_utc` and `git_commit`, so `drop_id` still changes on every
+  regeneration; your `design_id` is the stable identity.
+- **Ask 1 (feed the failure into the next attempt): done in all four phase
+  agents.** A re-verify that fails now hands the next attempt the lint/sim
+  result, the failing lines, and, when 0 tests ran (the patch did not compile),
+  the first simulator errors from the log. A patch that is not valid Python
+  also reports why.
+- **Ask 2 (manifest `source` forms): done.** The agents' prompt states that
+  `source` is `<block>.<port>` or omitted, with `source_expr` for expressions,
+  and each agent now rejects and reverts any regenerated manifest whose
+  `source` is not `<block>.<port>`, so prose like the one your run produced can
+  no longer reach you.
+- **Bug found while doing this, in what we pushed last time:** the Phase 3 and
+  Phase 4 agents were missing `VALIDATION_SUBDIR` and the Phase 2 agent was
+  missing `import re` after an edit. A Phase 3/4 agent would have stopped with
+  a NameError before reading a report, and the Phase 2 agent on import.
+  `py_compile` does not catch this; fixed, and all four now import and pass a
+  static undefined-name check. If your 10/08 afternoon run hit a Phase 3
+  failure before attempt 1, this may be why.
+- **Your question 2 (`counter_clock`): not decided.** The cause is a unit
+  mismatch in the RTL (nCK values loaded into controller-cycle counters), not a
+  missing spec fact, so our preference is to fix the RTL (convert nCK to
+  controller cycles) rather than describe the bug in the spec. It makes every
+  window about 4x shorter and so exposes the real margins; we will tell you
+  before we regenerate with it.
+- Your age-bound observation on `path_07` is noted; we agree it needs a stated
+  policy before it can be a check. Not done.
+
 ## Questions
 
 Answered by your 10/08 reply: `observed`-only modules stay unpatched under

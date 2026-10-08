@@ -69,7 +69,6 @@ class AddrDecoderGenerator:
 
     def generate_rtl(self) -> str:
         p = self.p
-        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         # Bit slicing for row-bank-column mapping:
         # addr[1:0]   = byte offset (2 bits, ignored — word aligned)
@@ -95,7 +94,7 @@ class AddrDecoderGenerator:
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    addr_decoder
 // File:      addr_decoder.sv
-// Generated: {ts}
+// Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)
 // Generator:     Address Decoder Generator (Phase 2)
 // Spec:      {self.spec.get('design_id', 'N/A')} rev {self.spec.get('revision', 'N/A')}
 //

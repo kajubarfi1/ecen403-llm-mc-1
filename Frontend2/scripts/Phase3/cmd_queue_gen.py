@@ -44,10 +44,9 @@ class CmdQueueGenerator:
 
     def generate_rtl(self):
         p = self.p
-        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         return f"""////////////////////////////////////////////////////////////////////////////////
 // Module:    cmd_queue
-// Generated: {ts}
+// Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)
 // Generator:     Command Queue Generator (Phase 3)
 //
 // {p['DEPTH']}-deep command queue. Accepts decoded requests from addr_decoder,
