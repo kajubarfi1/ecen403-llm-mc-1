@@ -114,7 +114,11 @@ Still open (roadmap items 2, 6, 7 — and 5 for real):
 their own CLIs: Frontend spec synthesis → Validation spec review → Frontend RTL
 generation (phases 1–4 + top) → Validation of the drop → (Frontend
 regeneration on findings) → backend RTL→GDSII → (backend→frontend change
-requests) → final netlist validation. Runs live in `runs/<run_id>/` with
+requests) → final netlist validation. With no design input (`python3 flow.py`)
+the spec stage opens `microarch_cli.py`'s interactive session on the terminal
+(`MICROARCH_DEFAULT_OUT_DIR` = the run's `spec/`, `MICROARCH_SINGLE_SPEC=1` ends
+it once a spec is accepted); a one-shot English request that needs
+clarification, and a spec-review FAIL on an interactive spec, reopen it. Runs live in `runs/<run_id>/` with
 `RUN_STATE.json`; a halted run resumes with `--resume`. Loops are capped
 (`--max-rtl-rounds`, `--max-backend-rounds`). Validation findings go back to the
 Frontend through its own phase validation agents

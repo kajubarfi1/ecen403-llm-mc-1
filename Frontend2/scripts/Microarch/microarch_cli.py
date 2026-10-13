@@ -214,8 +214,12 @@ def _report_payload(res: dict, proposal: dict | None) -> dict:
 def _print_banner() -> None:
     print()
     print(mcol.header("  DDR3 Microarchitecture Generator") + mcol.dim("  --  English -> spec"))
-    print(mcol.dim("  Produces the spec JSON. full_pipeline.py takes it from here if you"))
-    print(mcol.dim("  got here via its 'synthesize a new spec' option."))
+    if os.environ.get("MICROARCH_SINGLE_SPEC"):
+        print(mcol.dim("  Produces the spec JSON. Once you accept a spec, flow.py carries it"))
+        print(mcol.dim("  through review, RTL, validation and GDSII."))
+    else:
+        print(mcol.dim("  Produces the spec JSON. full_pipeline.py takes it from here if you"))
+        print(mcol.dim("  got here via its 'synthesize a new spec' option."))
     print()
     print("  Type a description of the controller you want. Commands:")
     for cmd, desc in [
@@ -381,6 +385,18 @@ def _handle_result(res: dict, proposal: dict | None) -> bool:
         return True
     _print_result(res, proposal)
     default = _default_out(res["spec"])
+    # flow.py sets this: the session exists to produce the one spec the run
+    # continues with, so it ends as soon as the person accepts one, and the
+    # spec goes where flow.py reads it (no other path offered).
+    if os.environ.get("MICROARCH_SINGLE_SPEC"):
+        if input("  " + mcol.prompt("show full JSON? (y/N): ")).strip().lower() == "y":
+            print(json.dumps(res["spec"], indent=2))
+        ans = input("\n  " + mcol.prompt("use this spec for the run? (Y = continue to RTL "
+                                          "generation / n = keep refining): ")).strip().lower()
+        if ans in ("n", "no"):
+            return True
+        _write(res["spec"], _report_payload(res, proposal), default)
+        return False
     ans = input("\n  " + mcol.prompt(f"write spec? [{default}]  (Enter=yes / path / n): ")).strip()
     if ans.lower() in ("n", "no"):
         pass

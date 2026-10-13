@@ -53,6 +53,7 @@ say so instead of pretending:
     installed on the simulator); a top-level netlist waits for a top-level path.
 
 Usage:
+    python3 flow.py                                                # interactive: describe it, answer the agent
     python3 flow.py "DDR3-1333 x16, one byte lane, balanced"       # English
     python3 flow.py --preset balanced
     python3 flow.py --choices my_choices.json
@@ -124,6 +125,19 @@ BACKEND_AGENTS = os.path.join(ROOT, "backend", "agents")
 BACKEND_PIPELINE = os.path.join(BACKEND_AGENTS, "pipeline.py")
 
 QUIET = False          # tests: keep the run log out of stdout
+
+
+def is_tty():
+    """A person at a terminal, who can hold the microarch agent's
+    interactive session (tests replace this)."""
+    return sys.stdin.isatty() and sys.stdout.isatty()
+
+
+def interactive_session(env, cwd):
+    """The Frontend's interactive spec session (microarch_cli.py, no
+    arguments) on the user's own terminal: its prompts cannot go through
+    sh(), which captures output. Returns its exit code."""
+    return subprocess.call([PY, MICROARCH_CLI], cwd=cwd, env=env)
 
 STAGES = ["spec_synthesis", "spec_review", "rtl_generation", "rtl_validation",
           "frontend_regeneration", "backend", "backend_to_frontend",
@@ -259,6 +273,8 @@ def stage_spec_synthesis(run, args, feedback=""):
         return 0
     if not os.path.exists(MICROARCH_CLI):
         return run.halt("spec_synthesis", f"missing {os.path.relpath(MICROARCH_CLI, ROOT)}")
+    if getattr(args, "interactive", False):
+        return _spec_interactive(run, args, out, feedback)
     cmd = [PY, MICROARCH_CLI]
     if args.request:
         cmd.append(args.request + feedback)
@@ -274,15 +290,53 @@ def stage_spec_synthesis(run, args, feedback=""):
                         "Frontend's microarch agent (a --preset or --choices run does not)")
     run.state["rounds"]["spec"] += 1
     rc, txt = sh(cmd, cwd=os.path.dirname(MICROARCH_CLI), log=run.log, timeout=1800)
+    if rc == 3 and args.request and is_tty():
+        # the agent could not finish from the request alone: hand the person
+        # the conversation instead of halting
+        run.record("spec_synthesis", "RETRY", "the microarch agent needs clarification; "
+                                              "opening the interactive session")
+        args.interactive = True
+        run.state["request"]["interactive"] = True
+        return _spec_interactive(run, args, out, "")
     if rc == 3:
         return run.halt("spec_synthesis", "the microarch agent needs clarification; its "
-                        "questions are in flow.log -- answer them in the request and rerun",
+                        "questions are in flow.log -- answer them in the request and rerun "
+                        "(or run flow.py from a terminal to answer them interactively)",
                         exit_code=rc)
     if rc != 0 or not os.path.exists(out):
         return run.halt("spec_synthesis", f"microarch_cli exited {rc}; no spec written", exit_code=rc)
     run.state["spec"] = out
     run.record("spec_synthesis", "PASS", os.path.relpath(out, ROOT)
                + (" (revised on review findings)" if feedback else ""))
+    if feedback:
+        return stage_spec_review(run, args)
+    return 0
+
+
+def _spec_interactive(run, args, out, feedback):
+    """The microarch agent's interactive session writes the spec straight
+    into the run (MICROARCH_DEFAULT_OUT_DIR) and ends once the person
+    accepts one (MICROARCH_SINGLE_SPEC). On a review retry the findings are
+    shown before the session opens; the person revises with them in view."""
+    if not is_tty():
+        return run.halt("spec_synthesis", "an interactive spec session needs a terminal; give "
+                        "an English request, --preset, --choices or --spec instead")
+    if os.path.exists(out):
+        os.remove(out)                      # only a spec from this session counts
+    if feedback:
+        print("\n  " + feedback.strip() + "\n  Describe the controller again with these in mind.\n")
+    env = os.environ.copy()
+    env["MICROARCH_DEFAULT_OUT_DIR"] = run.spec_dir
+    env["MICROARCH_SINGLE_SPEC"] = "1"
+    run.state["rounds"]["spec"] += 1
+    run.log(f"$ {os.path.relpath(MICROARCH_CLI, ROOT)}   (interactive session)")
+    rc = interactive_session(env, os.path.dirname(MICROARCH_CLI))
+    if not os.path.exists(out):
+        return run.halt("spec_synthesis", f"the interactive session ended (exit {rc}) without "
+                        f"accepting a spec", exit_code=rc)
+    run.state["spec"] = out
+    run.record("spec_synthesis", "PASS", os.path.relpath(out, ROOT) + " (interactive session"
+               + (", revised on review findings)" if feedback else ")"))
     if feedback:
         return stage_spec_review(run, args)
     return 0
@@ -307,10 +361,12 @@ def stage_spec_review(run, args):
         with open(review) as f:
             blocking = json.load(f).get("blocking", [])
     run.record("spec_review", "FAIL", f"{len(blocking)} blocking; review: {os.path.relpath(review, ROOT)}")
-    if not args.request:
+    interactive = getattr(args, "interactive", False) and is_tty()
+    if not args.request and not interactive:
         return run.halt("spec_review", "the spec fails its review (schema / JEDEC / register map) "
-                        "and came from a preset, a choices file or a file, which the microarch "
-                        "agent cannot revise. Fix the spec (or the compiler) and resume.",
+                        "and came from a preset, a choices file, a file or an interactive session "
+                        "without a terminal, which the microarch agent cannot revise. Fix the spec "
+                        "(or the compiler) and resume.",
                         review=review)
     if run.state["rounds"]["spec"] >= args.max_spec_rounds:
         return run.halt("spec_review", f"{run.state['rounds']['spec']} synthesis round(s) and "
@@ -323,8 +379,9 @@ def stage_spec_review(run, args):
                 + "\n".join(f"  - {b}" for b in blocking[:12]))
     run.state["spec"] = None
     run.save()
-    run.record("spec_review", "RETRY", f"findings returned to the microarch agent (round "
-                                       f"{run.state['rounds']['spec'] + 1})")
+    run.record("spec_review", "RETRY", f"findings returned to the "
+                                       f"{'interactive session' if interactive else 'microarch agent'} "
+                                       f"(round {run.state['rounds']['spec'] + 1})")
     return stage_spec_synthesis(run, args, feedback=feedback)
 
 
@@ -844,10 +901,15 @@ def _stage_utc(st, stage):
 
 def plan(args):
     print("flow plan (dry run):")
-    src = (f"English request: {args.request!r}" if args.request else
+    src = ("interactive session (you describe the controller; the agent asks what it needs)"
+           if getattr(args, "interactive", False) else
+           f"English request: {args.request!r}" if args.request else
            f"preset {args.preset}" if args.preset else
            f"choices {args.choices}" if args.choices else f"supplied spec {args.spec}")
-    print(f"  1 spec_synthesis        Frontend  {src}" + ("" if args.spec else
+    print(f"  1 spec_synthesis        Frontend  {src}" + (
+          "" if args.spec else
+          f"\n      {os.path.relpath(MICROARCH_CLI, ROOT)} on your terminal; the accepted spec -> "
+          f"<run>/spec/generated_spec.json" if getattr(args, "interactive", False) else
           f"\n      {os.path.relpath(MICROARCH_CLI, ROOT)} ... --out <run>/spec/generated_spec.json"))
     print(f"  2 spec_review           Validation  {os.path.relpath(SPEC_STAGE, ROOT)}  (FAIL halts)")
     ph = getattr(args, "phases", None)
@@ -898,6 +960,9 @@ def main() -> int:
                          "validation passed (the drop changed under the run)")
     ap.add_argument("--dry-run", action="store_true", help="print the plan and exit")
     args = ap.parse_args()
+    # no design input: the Frontend's microarch agent asks for it
+    args.interactive = None if args.resume else not (args.request or args.preset
+                                                       or args.choices or args.spec)
 
     load_env()
     if args.dry_run:
@@ -910,16 +975,17 @@ def main() -> int:
             return 2
         run = Run(run_dir)
         saved = run.state.get("request", {})
-        for k in ("request", "preset", "choices", "spec", "goal"):
+        for k in ("request", "preset", "choices", "spec", "goal", "interactive"):
             if getattr(args, k) is None and saved.get(k):
                 setattr(args, k, saved[k])
         run.log(f"resuming {run.state['run_id']} (last: "
                 f"{run.state['stages'][-1]['stage'] + ' ' + run.state['stages'][-1]['status'] if run.state['stages'] else 'nothing yet'})")
     else:
-        if not (args.request or args.preset or args.choices or args.spec):
-            ap.error("give an English request, --preset, --choices or --spec (or --resume)")
+        if args.interactive and not is_tty():
+            ap.error("give an English request, --preset, --choices or --spec (or --resume); "
+                     "without one flow.py opens an interactive session, which needs a terminal")
         slug = re.sub(r"[^a-z0-9]+", "_", (args.request or args.preset or
-                      os.path.basename(args.choices or args.spec)).lower())[:24].strip("_")
+                      os.path.basename(args.choices or args.spec or "interactive")).lower())[:24].strip("_")
         run_dir = os.path.abspath(args.run_dir or os.path.join(
             RUNS, f"{datetime.now().strftime('%Y%m%d-%H%M%S')}-{slug}"))
         run = Run(run_dir, args)

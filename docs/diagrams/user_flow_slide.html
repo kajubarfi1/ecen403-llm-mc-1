@@ -1,0 +1,193 @@
+<title>LLM-MC User Flow Slide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: a fixed 16:9 frame (1920x1080 viewBox) scaled to the window, ready to screenshot onto a white slide.
+   Deliberately single-theme (light), since it is pasted onto slides. */
+:root {
+  --page: #e9e4e4; --slide: #ffffff; --fg: #1f1a1b; --muted: #6b5f61;
+  --accent: #500000; --accent-soft: #f6eded; --loop: #a4590f; --loop-soft: #fbf1e6;
+  --display: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+html, body { height: 100%; }
+body { background: var(--page); color: var(--fg); margin: 0; font-family: var(--display);
+        display: grid; place-items: center; padding-inline: 16px; padding-block: 16px; box-sizing: border-box; }
+.slide { width: min(100%, calc((100vh - 72px) * 16 / 9)); aspect-ratio: 16 / 9; max-width: 100%;
+          background: var(--slide); box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 8px 24px rgba(0,0,0,.08); }
+.slide svg { display: block; width: 100%; height: 100%; }
+.hint { color: var(--muted); font-size: 13px; margin-top: 10px; text-align: center; }
+.term { fill: #1d1b22; stroke: #3a3742; }
+.termbar { fill: #2d2a33; }
+.termtitle { font: 14px var(--display); fill: #a9a4b3; }
+.t { font: 15px var(--mono); fill: #e6e3ec; }
+.t.cmd { fill: #9cdcfe; font-weight: 600; }
+.t.hd { fill: #ffffff; font-weight: 600; }
+.t.dim { fill: #8d889a; }
+.t.in { fill: #f0c674; }
+.t.warn { fill: #e8b04a; font-weight: 600; }
+.t.ok { fill: #7fd18b; }
+.t.okb { fill: #7fd18b; font-weight: 600; }
+.t.fail { fill: #f28b82; }
+.doc { fill: #fdfcfa; stroke: #cfc6c7; }
+.docbar { fill: var(--accent); }
+.doctitle { font: 600 14px var(--mono); fill: #f6e9e9; }
+.d { font: 16px var(--display); fill: #2a2324; }
+.d.dh { font-weight: 700; font-size: 19px; fill: var(--accent); }
+.d.sec { font-weight: 700; fill: var(--fg); }
+.d.dim { fill: #8a7d7f; }
+.d.okd { font: 600 14px var(--mono); fill: #2e7d3c; }
+.stepdot { fill: var(--accent); }
+.stepn { font: 700 24px var(--display); fill: #ffffff; }
+.steplabel { font: 700 34px var(--display); fill: var(--fg); }
+.flow { stroke: var(--accent); stroke-width: 3; fill: none; }
+.loop { stroke: var(--loop); stroke-width: 2.6; stroke-dasharray: 9 6; fill: none; }
+.alabel { font: 20px var(--display); fill: var(--muted); }
+.decision { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 3; }
+.dtext { font: 700 22px var(--display); fill: var(--fg); }
+.nopill { fill: var(--loop-soft); stroke: var(--loop); stroke-width: 2; }
+.nolabel { font: 600 17px var(--display); fill: var(--loop); }
+#ah-flow path { fill: var(--accent); }
+#ah-loop path { fill: var(--loop); }
+</style>
+<div>
+<div class="slide">
+<svg viewBox="0 0 1920 1080" role="img" aria-label="What the user sees: 1 set up with USAGE.md, 2 describe the controller in the terminal, 3 review and accept the spec, then the automated spec review; if it fails the session reopens at step 2, if it passes 4 the pipeline runs on its own for about an hour and 5 the user collects the results in the run folder.">
+<defs>
+<marker id="ah-flow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="ah-loop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+</defs>
+<rect width="1920" height="1080" fill="#ffffff"/>
+<circle cx="227.79999999999995" cy="102" r="21" class="stepdot"/><text x="227.79999999999995" y="111" text-anchor="middle" class="stepn">1</text><text x="260.79999999999995" y="114" class="steplabel">Set up with USAGE.md</text>
+<circle cx="685.8" cy="102" r="21" class="stepdot"/><text x="685.8" y="111" text-anchor="middle" class="stepn">2</text><text x="718.8" y="114" class="steplabel">Describe the controller</text>
+<circle cx="1275.0" cy="102" r="21" class="stepdot"/><text x="1275.0" y="111" text-anchor="middle" class="stepn">3</text><text x="1308.0" y="114" class="steplabel">Review and accept the spec</text>
+<g transform="translate(206.79999999999995,140) scale(0.82)">
+<rect width="400" height="410" rx="10" class="doc"/>
+<rect width="400" height="32" rx="10" class="docbar"/>
+<rect y="22" width="400" height="10" class="docbar"/>
+<text x="16" y="21" class="doctitle">USAGE.md</text>
+<text x="18" y="60" class="d dh" xml:space="preserve">Getting Started with</text>
+<text x="18" y="81" class="d dh" xml:space="preserve">LLM Memory Controller</text>
+<text x="18" y="123" class="d dim" xml:space="preserve">1  Introduction</text>
+<text x="18" y="144" class="d dim" xml:space="preserve">2  System Requirements</text>
+<text x="18" y="165" class="d sec" xml:space="preserve">3  Installation</text>
+<text x="18" y="186" class="d " xml:space="preserve">    ☑  Clone the repository</text>
+<text x="18" y="207" class="d " xml:space="preserve">    ☑  Python 3.10 environment</text>
+<text x="18" y="228" class="d " xml:space="preserve">    ☑  Install dependencies</text>
+<text x="18" y="249" class="d " xml:space="preserve">    ☑  Docker + OpenROAD</text>
+<text x="18" y="270" class="d " xml:space="preserve">    ☑  .env: API key, NetID</text>
+<text x="18" y="291" class="d " xml:space="preserve">    ☑  Olympus SSH key</text>
+<text x="18" y="312" class="d " xml:space="preserve">    ☑  Verify: flow.py --dry-run</text>
+<text x="18" y="333" class="d sec" xml:space="preserve">4  Quick Start</text>
+<text x="18" y="354" class="d dim" xml:space="preserve">5  Recovering from a Halted Run</text>
+<text x="18" y="375" class="d dim" xml:space="preserve">6  Command Reference</text>
+<text x="18" y="396" class="d okd" xml:space="preserve">env: all settings detected ✓</text>
+</g>
+<g transform="translate(664.8,140) scale(0.82)">
+<rect width="560" height="410" rx="10" class="term"/>
+<rect width="560" height="32" rx="10" class="termbar"/>
+<rect y="22" width="560" height="10" class="termbar"/>
+<circle cx="18" cy="16" r="5.5" fill="#ff5f57"/><circle cx="36" cy="16" r="5.5" fill="#febc2e"/><circle cx="54" cy="16" r="5.5" fill="#28c840"/>
+<text x="280.0" y="21" text-anchor="middle" class="termtitle">Terminal — flow.py</text>
+<text x="18" y="60" class="t cmd" xml:space="preserve">$ python3 flow.py</text>
+<text x="18" y="81" class="t hd" xml:space="preserve">DDR3 Microarchitecture Generator</text>
+<text x="18" y="102" class="t dim" xml:space="preserve">-- before we start ------------------</text>
+<text x="18" y="123" class="t " xml:space="preserve">What&#x27;s the primary goal?</text>
+<text x="18" y="144" class="t " xml:space="preserve">  1. Best performance</text>
+<text x="18" y="165" class="t " xml:space="preserve">  2. Best power savings</text>
+<text x="18" y="186" class="t " xml:space="preserve">  3. Lowest cost / smallest area</text>
+<text x="18" y="207" class="t " xml:space="preserve">  4. Balanced / not sure yet</text>
+<text x="18" y="228" class="t in" xml:space="preserve">choice [1]: 1</text>
+<text x="18" y="270" class="t " xml:space="preserve">Anything specific to add?</text>
+<text x="18" y="291" class="t in" xml:space="preserve">&gt; DDR3-1600, 4Gb, 2 ranks, ECC</text>
+<text x="18" y="333" class="t warn" xml:space="preserve">NEEDS CLARIFICATION:</text>
+<text x="18" y="354" class="t " xml:space="preserve">  [byte_lanes] How many byte lanes?</text>
+<text x="18" y="375" class="t in" xml:space="preserve">&gt; 4</text>
+</g>
+<g transform="translate(1254.0,140) scale(0.82)">
+<rect width="560" height="410" rx="10" class="term"/>
+<rect width="560" height="32" rx="10" class="termbar"/>
+<rect y="22" width="560" height="10" class="termbar"/>
+<circle cx="18" cy="16" r="5.5" fill="#ff5f57"/><circle cx="36" cy="16" r="5.5" fill="#febc2e"/><circle cx="54" cy="16" r="5.5" fill="#28c840"/>
+<text x="280.0" y="21" text-anchor="middle" class="termtitle">Terminal — flow.py</text>
+<text x="18" y="60" class="t dim" xml:space="preserve">-- resolved configuration -----------</text>
+<text x="18" y="81" class="t " xml:space="preserve">  speed_grade       DDR3-1600</text>
+<text x="18" y="102" class="t " xml:space="preserve">  density           4Gb</text>
+<text x="18" y="123" class="t " xml:space="preserve">  ranks             2</text>
+<text x="18" y="144" class="t " xml:space="preserve">  byte_lanes        4</text>
+<text x="18" y="165" class="t " xml:space="preserve">  ecc_mode          1</text>
+<text x="18" y="186" class="t dim" xml:space="preserve">-- JEDEC-derived ---------------------</text>
+<text x="18" y="207" class="t " xml:space="preserve">  tCK       1.25 ns   ctrl 200 MHz</text>
+<text x="18" y="228" class="t " xml:space="preserve">  CL / CWL  11 / 8</text>
+<text x="18" y="249" class="t dim" xml:space="preserve">-- consistency -----------------------</text>
+<text x="18" y="270" class="t ok" xml:space="preserve">  [OK] 27/27 checks pass</text>
+<text x="18" y="312" class="t " xml:space="preserve">use this spec for the run?</text>
+<text x="18" y="333" class="t dim" xml:space="preserve">(Y = continue / n = keep refining)</text>
+<text x="18" y="354" class="t in" xml:space="preserve">&gt; Y</text>
+<text x="18" y="375" class="t ok" xml:space="preserve">wrote runs/…/spec/generated_spec.json</text>
+</g>
+<line x1="540.8" y1="308.1" x2="656.8" y2="308.1" class="flow" marker-end="url(#ah-flow)"/>
+<text x="599.8" y="294.1" text-anchor="middle" class="alabel">ready</text>
+<line x1="1130.0" y1="308.1" x2="1246.0" y2="308.1" class="flow" marker-end="url(#ah-flow)"/>
+<text x="1189.0" y="294.1" text-anchor="middle" class="alabel">proposes</text>
+<polyline points="1483.6,482.2 1483.6,528.2 370.79999999999995,528.2 370.79999999999995,702.1" class="flow" marker-end="url(#ah-flow)"/>
+<text x="1047.1999999999998" y="556.2" text-anchor="middle" class="alabel">accept → automated spec review</text>
+<polygon points="370.79999999999995,710.1 490.79999999999995,798.1 370.79999999999995,886.1 250.79999999999995,798.1" class="decision"/>
+<text x="370.79999999999995" y="792.1" text-anchor="middle" class="dtext">Spec review</text>
+<text x="370.79999999999995" y="818.1" text-anchor="middle" class="dtext">passes?</text>
+<line x1="496.79999999999995" y1="798.1" x2="656.8" y2="798.1" class="flow" marker-end="url(#ah-flow)"/>
+<text x="577.8" y="784.1" text-anchor="middle" class="alabel">yes</text>
+<polyline points="246.79999999999995,798.1 116.79999999999995,798.1 116.79999999999995,500.2 894.4,500.2 894.4,484.2" class="loop" marker-end="url(#ah-loop)"/>
+<text x="220.79999999999995" y="784.1" text-anchor="middle" class="nolabel">no</text>
+<text transform="translate(100.79999999999995,649.15) rotate(-90)" text-anchor="middle" class="nolabel">findings shown, back to step 2</text>
+<circle cx="685.8" cy="612" r="21" class="stepdot"/><text x="685.8" y="621" text-anchor="middle" class="stepn">4</text><text x="718.8" y="624" class="steplabel">Pipeline runs on its own</text>
+<circle cx="1275.0" cy="612" r="21" class="stepdot"/><text x="1275.0" y="621" text-anchor="middle" class="stepn">5</text><text x="1308.0" y="624" class="steplabel">Collect the results</text>
+<g transform="translate(664.8,650) scale(0.82)">
+<rect width="560" height="410" rx="10" class="term"/>
+<rect width="560" height="32" rx="10" class="termbar"/>
+<rect y="22" width="560" height="10" class="termbar"/>
+<circle cx="18" cy="16" r="5.5" fill="#ff5f57"/><circle cx="36" cy="16" r="5.5" fill="#febc2e"/><circle cx="54" cy="16" r="5.5" fill="#28c840"/>
+<text x="280.0" y="21" text-anchor="middle" class="termtitle">Terminal — flow.py</text>
+<text x="18" y="60" class="t ok" xml:space="preserve">[14:02:11] spec_synthesis         PASS</text>
+<text x="18" y="81" class="t ok" xml:space="preserve">[14:02:15] spec_review            PASS</text>
+<text x="18" y="102" class="t dim" xml:space="preserve">-- phase 1: init_fsm, config_regs, …</text>
+<text x="18" y="123" class="t dim" xml:space="preserve">-- phase 2: addr_decoder, …</text>
+<text x="18" y="144" class="t dim" xml:space="preserve">-- phase 3: cmd_queue, scheduler, …</text>
+<text x="18" y="165" class="t dim" xml:space="preserve">-- phase 4: data_path</text>
+<text x="18" y="186" class="t ok" xml:space="preserve">[14:09:40] rtl_generation         PASS</text>
+<text x="18" y="207" class="t fail" xml:space="preserve">[14:21:03] rtl_validation         FAIL</text>
+<text x="18" y="228" class="t ok" xml:space="preserve">[14:24:30] frontend_regeneration  PASS</text>
+<text x="18" y="249" class="t ok" xml:space="preserve">[14:31:12] rtl_validation         PASS</text>
+<text x="18" y="270" class="t ok" xml:space="preserve">[15:02:47] backend                PASS</text>
+<text x="18" y="291" class="t ok" xml:space="preserve">[15:10:05] final_validation       PASS</text>
+<text x="18" y="333" class="t okb" xml:space="preserve">COMPLETE: spec, RTL, GDSII and</text>
+<text x="18" y="354" class="t okb" xml:space="preserve">netlist validated.</text>
+</g>
+<g transform="translate(1254.0,650) scale(0.82)">
+<rect width="560" height="410" rx="10" class="term"/>
+<rect width="560" height="32" rx="10" class="termbar"/>
+<rect y="22" width="560" height="10" class="termbar"/>
+<circle cx="18" cy="16" r="5.5" fill="#ff5f57"/><circle cx="36" cy="16" r="5.5" fill="#febc2e"/><circle cx="54" cy="16" r="5.5" fill="#28c840"/>
+<text x="280.0" y="21" text-anchor="middle" class="termtitle">Terminal — results</text>
+<text x="18" y="60" class="t cmd" xml:space="preserve">$ ls runs/20261013-140211-interactive</text>
+<text x="18" y="102" class="t " xml:space="preserve">RUN_STATE.json    stage outcomes</text>
+<text x="18" y="123" class="t " xml:space="preserve">flow.log          full run log</text>
+<text x="18" y="144" class="t hd" xml:space="preserve">spec/</text>
+<text x="18" y="165" class="t " xml:space="preserve">  generated_spec.json</text>
+<text x="18" y="186" class="t " xml:space="preserve">  SPEC_REVIEW.json</text>
+<text x="18" y="207" class="t hd" xml:space="preserve">drop/</text>
+<text x="18" y="228" class="t " xml:space="preserve">  PHASE1RTL … PHASE4RTL</text>
+<text x="18" y="249" class="t dim" xml:space="preserve">    *.sv   *_tb.sv   *_manifest.json</text>
+<text x="18" y="270" class="t " xml:space="preserve">  TOPRTL/    top-level controller</text>
+<text x="18" y="291" class="t hd" xml:space="preserve">validation/</text>
+<text x="18" y="312" class="t " xml:space="preserve">  round_1/   round_2/</text>
+<text x="18" y="333" class="t hd" xml:space="preserve">backend/</text>
+<text x="18" y="354" class="t " xml:space="preserve">  GDSII layout + sign-off reports</text>
+</g>
+<line x1="1130.0" y1="798.1" x2="1246.0" y2="798.1" class="flow" marker-end="url(#ah-flow)"/>
+<text x="1189.0" y="784.1" text-anchor="middle" class="alabel">≈ 1 hour</text>
+</svg>
+</div>
+<p class="hint">Screenshot the white frame (16:9) and paste it onto a slide. Terminal text is representative of real output.</p>
+</div>

@@ -29,6 +29,7 @@ class Fake:
         self.failed = ["wb_port"]           # what the fake validation reports as failed
         self.backend_crash = False          # pipeline.py exits 1 without a report
         self.absent = []                     # blocks the fake validation reports absent
+        self.synth_rc = 0                    # microarch_cli.py one-shot exit (3 = needs clarification)
         self.calls = []
 
     def __call__(self, cmd, cwd=None, stdin=None, env=None, log=None, timeout=None):
@@ -36,6 +37,8 @@ class Fake:
         name = os.path.basename(script)
         self.calls.append((name, list(cmd), stdin, dict(env or {})))
         if name == "microarch_cli.py":
+            if self.synth_rc:
+                return self.synth_rc, "NEEDS CLARIFICATION:\n  [ranks] how many?\n"
             out = cmd[cmd.index("--out") + 1]
             os.makedirs(os.path.dirname(out), exist_ok=True)
             with open(out, "w") as f:
@@ -116,6 +119,8 @@ class FlowCase(unittest.TestCase):
         self.tmp = tempfile.mkdtemp(prefix="flow_")
         self.run_dir = os.path.join(self.tmp, "run")
         self.saved = (flow.sh, flow.OUTBOX_CURRENT, flow.phase_agent, flow.agent_findings_flag, flow.agent_takes_yes, flow.BACKEND_OUTBOX)
+        self.saved_tty = (flow.is_tty, flow.interactive_session)
+        flow.is_tty = lambda: False
         self.direct = False
         flow.agent_findings_flag = lambda agent: "--findings" if self.direct else None
         flow.agent_takes_yes = lambda agent: False
@@ -129,6 +134,7 @@ class FlowCase(unittest.TestCase):
 
     def tearDown(self):
         flow.sh, flow.OUTBOX_CURRENT, flow.phase_agent, flow.agent_findings_flag, flow.agent_takes_yes, flow.BACKEND_OUTBOX = self.saved
+        flow.is_tty, flow.interactive_session = self.saved_tty
         flow.QUIET = False
         shutil.rmtree(self.tmp, ignore_errors=True)
         os.environ.pop("OLYMPUS_KEY", None)
@@ -137,7 +143,7 @@ class FlowCase(unittest.TestCase):
         base = dict(request=None, preset="balanced", choices=None, spec=None, goal=None, phases=None, revalidate=False,
                     resume=None, run_dir=self.run_dir, max_spec_rounds=2, max_rtl_rounds=4,
                     max_backend_rounds=2, validate_per_phase=False, skip_backend=False, backend_mode="build",
-                    dry_run=False)
+                    dry_run=False, interactive=False)
         base.update(kw)
         return type("A", (), base)()
 
@@ -467,6 +473,96 @@ class TestRevalidate(FlowCase):
         self.assertEqual(names.count("validate_drop.py"), 2)
         self.assertEqual(names.count("phase1_validation_agent.py"), 1)
         self.assertEqual(run2.state["rounds"]["rtl"], 3)
+
+
+class TestInteractive(FlowCase):
+    """No design input: the Frontend's microarch agent holds the session on
+    the user's terminal and writes the spec straight into the run."""
+
+    def setUp(self):
+        super().setUp()
+        flow.is_tty = lambda: True
+        self.sessions = []                   # env of each session opened
+        self.accept = []                     # per session: does the person accept a spec?
+
+        def session(env, cwd):
+            self.sessions.append(dict(env))
+            if self.accept.pop(0) if self.accept else True:
+                with open(os.path.join(env["MICROARCH_DEFAULT_OUT_DIR"], "generated_spec.json"), "w") as f:
+                    json.dump({"revision": "fake_rev"}, f)
+            return 0
+        flow.interactive_session = session
+
+    def test_session_writes_the_spec_into_the_run_and_the_flow_continues(self):
+        fake = Fake(self.run_dir)
+        rc, run = self.go(fake, preset=None, interactive=True, skip_backend=True)
+        self.assertEqual(rc, 0, run.state["halt"])
+        self.assertEqual(len(self.sessions), 1)
+        self.assertEqual(self.sessions[0]["MICROARCH_DEFAULT_OUT_DIR"], run.spec_dir)
+        self.assertEqual(self.sessions[0]["MICROARCH_SINGLE_SPEC"], "1")
+        self.assertNotIn("microarch_cli.py", [c[0] for c in fake.calls], "not run through sh()")
+        self.assertEqual(run.state["spec"], os.path.join(run.spec_dir, "generated_spec.json"))
+        self.assertIn(("spec_synthesis", "PASS"), self.stages(run))
+        self.assertEqual(run.state["status"], "complete")
+
+    def test_session_ended_without_a_spec_halts(self):
+        self.accept = [False]
+        rc, run = self.go(Fake(self.run_dir), preset=None, interactive=True)
+        self.assertEqual(rc, 2)
+        self.assertEqual(run.state["halt"]["stage"], "spec_synthesis")
+        self.assertIn("without accepting a spec", run.state["halt"]["why"])
+
+    def test_without_a_terminal_halts(self):
+        flow.is_tty = lambda: False
+        rc, run = self.go(Fake(self.run_dir), preset=None, interactive=True)
+        self.assertEqual(run.state["halt"]["stage"], "spec_synthesis")
+        self.assertIn("needs a terminal", run.state["halt"]["why"])
+        self.assertEqual(self.sessions, [])
+
+    def test_clarification_on_a_one_shot_request_opens_the_session(self):
+        fake = Fake(self.run_dir)
+        fake.synth_rc = 3
+        rc, run = self.go(fake, preset=None, request="a fast controller", skip_backend=True)
+        self.assertEqual(rc, 0, run.state["halt"])
+        self.assertEqual(len(self.sessions), 1)
+        self.assertIn(("spec_synthesis", "RETRY"), self.stages(run))
+        self.assertTrue(run.state["request"]["interactive"])
+
+    def test_clarification_without_a_terminal_still_halts(self):
+        flow.is_tty = lambda: False
+        fake = Fake(self.run_dir)
+        fake.synth_rc = 3
+        rc, run = self.go(fake, preset=None, request="a fast controller")
+        self.assertEqual(run.state["halt"]["stage"], "spec_synthesis")
+        self.assertIn("needs clarification", run.state["halt"]["why"])
+        self.assertEqual(self.sessions, [])
+
+    def test_review_fail_reopens_the_session_then_passes(self):
+        fake = Fake(self.run_dir, review_rc=1)
+        rc, run = self.go(fake, preset=None, interactive=True, skip_backend=True)
+        self.assertEqual(rc, 0, run.state["halt"])
+        self.assertEqual(len(self.sessions), 2)
+        self.assertIn(("spec_review", "RETRY"), self.stages(run))
+        self.assertEqual(run.state["rounds"]["spec"], 2)
+
+    def test_review_fail_round_cap(self):
+        fake = Fake(self.run_dir, review_rc=5)
+        rc, run = self.go(fake, preset=None, interactive=True, max_spec_rounds=2)
+        self.assertEqual(run.state["halt"]["stage"], "spec_review")
+        self.assertIn("cap 2", run.state["halt"]["why"])
+        self.assertEqual(len(self.sessions), 2)
+
+    def test_no_design_input_without_a_terminal_is_a_usage_error(self):
+        flow.is_tty = lambda: False
+        argv = sys.argv
+        sys.argv = ["flow.py", "--run-dir", self.run_dir]
+        try:
+            with self.assertRaises(SystemExit) as e:
+                flow.main()
+        finally:
+            sys.argv = argv
+        self.assertEqual(e.exception.code, 2)
+        self.assertFalse(os.path.exists(self.run_dir))
 
 
 class TestResume(FlowCase):
