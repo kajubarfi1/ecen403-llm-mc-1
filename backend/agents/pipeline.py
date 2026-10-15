@@ -901,6 +901,32 @@ def _drop_root(bundle: Optional[str]) -> Optional[Path]:
     return None
 
 
+def _block_paths(bundle: Optional[str]) -> Dict[str, str]:
+    """Every block in the drop, by name, mapped to the file an owner would open.
+
+    The full chip's worst path names a block by its instance (u_scheduler.cmd_row),
+    and the fix belongs in that block's RTL, not the top module. This is what lets a
+    top-level finding resolve to a real owner; without it the finding blames
+    ddr3_controller, which the Frontend's phase agents do not generate, and it routes
+    nowhere. Empty when no drop is in reach, which simply leaves the design as owner.
+    """
+    drop = _drop_root(bundle)
+    if not drop:
+        return {}
+    out: Dict[str, str] = {}
+    try:
+        for d in sorted(drop.iterdir()):
+            if not (d.is_dir() and PHASE_DIR_RE.match(d.name)):
+                continue
+            for f in sorted(d.glob("*.sv")):
+                if f.stem.endswith("_tb"):      # testbenches are not blocks
+                    continue
+                out.setdefault(f.stem, _repo_relative(f))
+    except OSError:
+        return {}
+    return out
+
+
 def _anchor_path(state: PipelineState, resolved: Dict[str, Any]) -> Optional[str]:
     """The file whoever has to fix this RTL would open.
 
@@ -1006,7 +1032,8 @@ def _emit_timing_finding(state: PipelineState, design_name: str,
             design_name, float(period), parsed,
             rtl_path=_anchor_path(state, resolved),
             repro=f"pipeline_batch.py --bundle_dirs {state.get('bundle_dir', '<bundle>')}",
-            drop=drop)
+            drop=drop,
+            block_paths=_block_paths(state.get("bundle_dir")))
         if not f:
             return
         out = ef.write_outbox([f], FINDINGS_ROOT / "outbox", drop)
