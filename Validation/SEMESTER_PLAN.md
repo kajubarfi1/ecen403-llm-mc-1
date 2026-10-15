@@ -585,6 +585,31 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   Result on the clean drop: 0 starve events, pending peaks at 6 of 8. M06
   now raises REF_001 x63 as new evidence, M17 REF_001 x23 + SCHED_003.
 
+- *2026-10-15, afternoon — the Phase 2 loop closed; the all-phase loop
+  reaches her Phase 3 agent and stops there.* Jacob's key was funded all
+  along (a test call succeeds; the 10/08 "credit balance" was that day's).
+  `flow.py --phases 1,2`: clean 8/8. Four of our own faults on the way:
+  (1) step 3a re-graded models whose streams are absent from a partial drop
+  and called wb_port stale (now skipped as n/a); (2) a resumed `--phases`
+  run lost `--partial` (request fields restored on resume); (3) path_09
+  picked `refresh_ack` as an entry on the partial drop (an autonomous path
+  takes no entry); (4) the RTL-round cap counted infrastructure halts
+  (counts rounds since the last PASS now). Then M05 planted in
+  refresh_ctrl: FAIL → REF_004 **confirmed by the path_09 twin** (twin
+  agreement now runs in every validation, step 5b, and the emitter adds a
+  `twin:<scope>` detector; this is what lets `--yes` act, since her agents
+  patch only `confirmed`) → her Phase 2 agent named the planted line, fixed,
+  re-verified → regenerate → PASS 8/8, resolved. All phases: clean 19/19
+  (formal findings now keyed by design id, so a regeneration with no logic
+  change keeps its proofs); M17 planted in the scheduler → FAIL on 3 paths,
+  REF_001 + SCHED_003 twin-confirmed → her Phase 3 agent exits after one
+  attempt with a truncated tool call ("missing required field(s):
+  corrected_generator_source ... stop_reason='tool_use'"): the full
+  scheduler generator does not fit the response. Ask 4 to Lehana (reply
+  addendum 5). Also fixed: the scoreboard's `rules:` line was read as a
+  DATA_001 finding (excluded). `tools/seed_into_drop.py` plants a catalogue
+  fault into a run's drop for these experiments.
+
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the
 schema generator's default root and `faults/fault_catalog.json` now point

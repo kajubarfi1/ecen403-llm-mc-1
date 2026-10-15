@@ -145,7 +145,9 @@ class FlowCase(unittest.TestCase):
                     max_backend_rounds=2, validate_per_phase=False, skip_backend=False, backend_mode="build",
                     dry_run=False, interactive=False)
         base.update(kw)
-        return type("A", (), base)()
+        a = type("A", (), {})()
+        a.__dict__.update(base)          # instance attributes, so vars(args) records them as the real run does
+        return a
 
     def go(self, fake, **kw):
         flow.sh = fake
@@ -253,7 +255,7 @@ class TestHalts(FlowCase):
         self.assertEqual(names.count("phase1_pipeline.py"), 2)   # wb_port is phase 1
         self.assertEqual(names.count("phase2_pipeline.py"), 1)
         self.assertEqual(names.count("validate_drop.py"), 2)
-        self.assertEqual(run.state["rounds"]["rtl"], 2)
+        self.assertEqual(run.state["rounds"]["rtl_total"], 2)
 
     def test_agent_that_takes_retry_gets_our_package_directly(self):
         self._agent(1)
@@ -271,7 +273,7 @@ class TestHalts(FlowCase):
         rc, run = self.go(Fake(self.run_dir, validation=["FAIL"] * 6), max_rtl_rounds=2, skip_backend=True)
         self.assertEqual(run.state["halt"]["stage"], "frontend_regeneration")
         self.assertIn("cap 2", run.state["halt"]["why"])
-        self.assertEqual(run.state["rounds"]["rtl"], 2)
+        self.assertEqual(run.state["rounds"]["rtl_total"], 2)
 
     def test_backend_needs_docker(self):
         rc, run = self.go(Fake(self.run_dir))
@@ -483,6 +485,30 @@ class TestAgentOutcome(FlowCase):
         self.assertIn(("frontend_regeneration", "PARTIAL"), self.stages(run))
 
 
+class TestPathsThatDidNotRun(FlowCase):
+    def test_a_run_error_is_a_halt_not_a_pass(self):
+        # validate_drop lists a path that did not simulate as blocked with a
+        # "run error" reason and reports PASS on the rest; the flow must not
+        # read that as the drop's verdict
+        self._agent(1)
+        fake = Fake(self.run_dir, validation=["PASS"])
+        fake.absent = []
+        orig = fake.__call__
+
+        def call(cmd, cwd=None, stdin=None, env=None, log=None, timeout=None):
+            name = os.path.basename(next((c for c in cmd if c.endswith(".py")), ""))
+            rc, out = orig(cmd, cwd, stdin, env, log, timeout)
+            if name == "validate_drop.py":
+                with open(os.path.join(flow.OUTBOX_CURRENT, "DROP_STATUS.json"), "w") as f:
+                    json.dump({"partial": True, "blocks_absent": [], "paths_run": ["path_14_status_init"],
+                               "paths_blocked": {"path_09_init_to_refresh": ["run error (rc=2): see logs"]}}, f)
+            return rc, out
+        rc, run = self.go(call, phases="1")
+        self.assertEqual(run.state["halt"]["stage"], "rtl_validation")
+        self.assertIn("did not simulate", run.state["halt"]["why"])
+        self.assertIn("path_09_init_to_refresh", run.state["halt"]["why"])
+
+
 class TestGeneratedBlockMustBeJudged(FlowCase):
     def test_generated_block_absent_from_the_drop_halts_even_on_pass(self):
         fake = Fake(self.run_dir, validation=["PASS"])
@@ -507,7 +533,8 @@ class TestRevalidate(FlowCase):
         names = [c[0] for c in fake.calls]
         self.assertEqual(names.count("validate_drop.py"), 2)
         self.assertEqual(names.count("phase1_validation_agent.py"), 1)
-        self.assertEqual(run2.state["rounds"]["rtl"], 3)
+        self.assertEqual(run2.state["rounds"]["rtl_total"], 3)
+        self.assertEqual(run2.state["rounds"]["rtl"], 0, "a pass resets the cap counter")
 
 
 class TestInteractive(FlowCase):
@@ -601,6 +628,29 @@ class TestInteractive(FlowCase):
 
 
 class TestResume(FlowCase):
+    def test_resume_of_a_phases_run_stays_partial(self):
+        # flow.main restores the saved request on --resume; the stage code
+        # reads args.phases, so a resumed Phase-1 run must validate --partial
+        self._agent(1)
+        fake0 = Fake(self.run_dir, validation=["FAIL"], feedback_rc=1)
+        fake0.agent_fixes = []                       # the agent fixed nothing: halt
+        rc, run = self.go(fake0, phases="1")
+        self.assertEqual(run.state["halt"]["stage"], "frontend_regeneration")
+        saved = run.state["request"]
+        a = self.args()                              # no --phases on the command line
+        for k in ("phases", "backend_mode"):
+            if getattr(a, k, None) is None and saved.get(k):
+                setattr(a, k, saved[k])
+        if saved.get("skip_backend") and not a.skip_backend:
+            a.skip_backend = True
+        self.assertEqual(a.phases, "1")
+        fake = Fake(self.run_dir, validation=["PASS"])
+        flow.sh = fake
+        run2 = flow.Run(self.run_dir)
+        rc = flow.run_flow(run2, a)
+        vd = [c for c in fake.calls if c[0] == "validate_drop.py"][0][1]
+        self.assertIn("--partial", vd)
+
     def test_resume_continues_after_the_halt_is_fixed(self):
         os.environ.pop("OLYMPUS_KEY", None)
         rc, run = self.go(Fake(self.run_dir))

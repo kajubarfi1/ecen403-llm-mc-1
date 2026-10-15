@@ -322,7 +322,22 @@ def main() -> int:
     sys.path.insert(0, os.path.join(ROOT, "Validation", "agents"))
     import predictor_agent as PA
     stale = []
+    with open(os.path.join(ROOT, "Validation", "txn", "generated", "schemas.json")) as f:
+        present_ifaces = set(json.load(f)["interfaces"])
     for scope, kind, mpath, prov in PA.accepted_models():
+        if absent:
+            # a phase-partial drop: a model whose streams are not all in this
+            # drop's schemas cannot be graded here (its stream set would read
+            # as wrong) and is never run here (its paths are blocked); grading
+            # it against partial schemas called wb_port stale on a Phase 1+2
+            # drop (2026-10-15). Leave it as accepted; the complete drop judges it.
+            with open(prov) as f:
+                pdoc = json.load(f)
+            needs = set(pdoc.get("input_ifaces") or []) | set(pdoc.get("output_ifaces") or [])
+            missing = sorted(needs - present_ifaces)
+            if missing:
+                print(f"    n/a   {scope:34} {kind:9} streams absent from this partial drop: {', '.join(missing)}")
+                continue
         failures, gate, _strategy = PA.regrade(scope, mpath)
         with open(prov) as f:
             pdoc = json.load(f)
@@ -497,6 +512,22 @@ def main() -> int:
               + (cov[0] if cov else "rollup output in the log"))
     else:
         banner(5, "coverage rollup: skipped")
+
+    # 5b. second opinions -------------------------------------------------------
+    # Every primary model's twin replays the same traces. A rule both models
+    # raise on a path is model-independent evidence: the emitter marks it
+    # `confirmed`, which is what lets the Frontend's agents patch it under
+    # --yes (an `observed` finding is reported and left for a person).
+    banner("5b", "second opinions on this run's traces")
+    agree_out = (os.path.join(ROOT, "Validation", "reports", "model_agreement.json")
+                 if report_dir == REPORTS else os.path.join(report_dir, "model_agreement.json"))
+    rc, out = sh(f"python3 Validation/agreement/model_agreement.py --reports {report_dir} "
+                 f"--out {agree_out}", log, check=False, timeout=1800)
+    for l in out.splitlines():
+        if l.strip() and not l.strip().startswith(("scope", "wrote")):
+            print("    " + l.strip()[:100])
+    if rc != 0:
+        print("    (agreement did not complete; findings stay at single-model confidence)")
 
     # 6. findings --------------------------------------------------------------
     banner(6, "findings v2 + retry instructions")

@@ -1,0 +1,97 @@
+{
+  "$schema": "validation-retry-instructions/1",
+  "status": "FAIL",
+  "pipeline": "validation",
+  "drop": "3da17346c442",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "spec_id": "f7c16e452e8d9d23",
+  "generated_utc": "2026-10-15T17:38:37.454790Z",
+  "failed_modules": [
+    "scheduler"
+  ],
+  "retry_instructions": {
+    "scheduler": {
+      "module": "scheduler",
+      "attempt": null,
+      "drop": "3da17346c442",
+      "failed_checks": [
+        {
+          "id": "PROTO_001",
+          "name": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+          "pass": false,
+          "expected": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+          "actual": "PRE b=1 at cycle 183, RD b=1 at cycle 184.",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "signal": "cmd_valid/cmd_type/cmd_bank"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+              "signal": "bank_rd_allowed"
+            }
+          ],
+          "owner_candidates": [
+            "scheduler"
+          ],
+          "occurrences": 1,
+          "paths": [
+            "formal:chain_formal"
+          ],
+          "repro": {
+            "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+            "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+            "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+          },
+          "introduced_in": null,
+          "repair": null,
+          "fix": null,
+          "finding_id": "formal/scheduler/PROTO_001"
+        },
+        {
+          "id": "TIMING_008",
+          "name": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+          "pass": false,
+          "expected": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+          "actual": "WR b=4 at cycle 173, PRE b=4 at cycle 174.",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+              "signal": "bank_pre_allowed / ctr_wr"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "signal": "precharge decision"
+            }
+          ],
+          "owner_candidates": [
+            "scheduler"
+          ],
+          "occurrences": 1,
+          "paths": [
+            "formal:chain_formal"
+          ],
+          "repro": {
+            "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+            "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+            "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+          },
+          "introduced_in": null,
+          "repair": null,
+          "fix": null,
+          "finding_id": "formal/scheduler/TIMING_008"
+        }
+      ],
+      "message": "2 check(s) failed on drop 3da17346c442; 2 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+    }
+  },
+  "resolved_since_previous_drop": [],
+  "requires_human_review": false,
+  "source": "Validation/findings/emit_findings.py -> retry_adapter.py"
+}

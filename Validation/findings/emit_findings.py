@@ -194,7 +194,7 @@ def rejudge(stage):
     return (r.stdout or "") + (r.stderr or "")
 
 
-def evidence_from_report(rep, rules, schemas, spec_regs=None):
+def evidence_from_report(rep, rules, schemas, spec_regs=None, reports_dir=None):
     """Yield raw evidence records (one per violation line / assertion) with
     enough to build a finding."""
     spec_regs = spec_regs or {}
@@ -218,16 +218,27 @@ def evidence_from_report(rep, rules, schemas, spec_regs=None):
                        "confidence": "confirmed", "line": ln.strip()}
                 continue
             m = CHECK_RE.match(ln)
-            if m and not ln.strip().startswith("scope="):
+            if m and not ln.strip().startswith(("scope=", "rules:")):
+                # "rules: A=n B=m" is the scoreboard's per-rule count line
+                # (2026-10-15), not a check; it read as DATA_001 'rules'
                 tid, rule, detail, txn = m.groups()
                 iface, kind = _iface_kind(txn)
                 owners = rules.owners(tid, block or "scheduler")
-                yield {"check_id": tid, "owner": owners[0],
-                       "owner_candidates": owners, "iface": iface, "kind": kind,
-                       "detector": f"invariant:{st['stage']}:{rule or tid}",
-                       "expected": rules.req.get(tid, ""), "actual": detail,
-                       "path": path, "confidence": "observed", "line": ln.strip(),
-                       "spec_ref": rules.spec_ref.get(tid)}
+                ev = {"check_id": tid, "owner": owners[0],
+                      "owner_candidates": owners, "iface": iface, "kind": kind,
+                      "detector": f"invariant:{st['stage']}:{rule or tid}",
+                      "expected": rules.req.get(tid, ""), "actual": detail,
+                      "path": path, "confidence": "observed", "line": ln.strip(),
+                      "spec_ref": rules.spec_ref.get(tid)}
+                yield ev
+                # the independently generated twin of this checker, replayed
+                # on this trace, raised the same rules (model_agreement.json
+                # for this run: disagree = 0 on every trace of the scope): a
+                # second model is evidence the first is not simply wrong
+                scope = _agreement_scope(st["stage"], path)
+                if _twin_agrees(reports_dir, scope):
+                    yield dict(ev, detector=f"twin:{scope}", confidence="confirmed",
+                               actual=f"the second-opinion checker for {scope} raises the same rule on this trace")
                 continue
             m = MISMATCH_RE.match(ln)
             if m:
@@ -245,7 +256,7 @@ def evidence_from_report(rep, rules, schemas, spec_regs=None):
                        "line": ln.strip(), "seq": None}
                 continue
             m = RULE_RE.match(ln)
-            if m and m.group(1) not in ("scope", "status"):
+            if m and m.group(1) not in ("scope", "status", "rules"):
                 rule, detail, txn = m.groups()
                 iface, kind = _iface_kind(txn)
                 yield {"check_id": _exact_taxonomy(block), "owner": block or "scheduler",
@@ -272,6 +283,34 @@ def evidence_from_report(rep, rules, schemas, spec_regs=None):
                    "expected": rules.req.get(tid, ""), "actual": f"fired {n}x; first: {first[name]}",
                    "path": path, "confidence": "confirmed", "count": n,
                    "line": first[name], "spec_ref": rules.spec_ref.get(tid)}
+
+
+def _agreement_scope(stage, path):
+    """The model scope a stage row belongs to: '(path-level)' is the path's
+    own checker, 'a+b' the composed stage checker a_b, else the block."""
+    if stage == "(path-level)":
+        return path
+    return stage.replace("+", "_")
+
+
+_AGREEMENT = {}
+
+
+def _twin_agrees(reports_dir, scope):
+    """True when this run's agreement record shows the scope's twin agreed
+    with the primary on every trace it ran (and ran at least one)."""
+    key = reports_dir or REPORTS
+    if key not in _AGREEMENT:
+        rows = {}
+        for cand in (os.path.join(key, "model_agreement.json"),
+                     os.path.join(ROOT, "Validation", "reports", "model_agreement.json")):
+            if os.path.exists(cand):
+                for r in load(cand, {}).get("rows", []):
+                    rows[r["scope"]] = r
+                break
+        _AGREEMENT[key] = rows
+    r = _AGREEMENT[key].get(scope)
+    return bool(r and r.get("traces", 0) > 0 and r.get("disagree", 0) == 0)
 
 
 def _iface_kind(txn):
@@ -408,7 +447,7 @@ def emit(reports_dir, out_dir=None, drop_status=None):
     findings = {}
     spec_regs = _register_names(spec)
     for rep in reps:
-        for ev in evidence_from_report(rep, rules, schemas, spec_regs):
+        for ev in evidence_from_report(rep, rules, schemas, spec_regs, reports_dir=reports_dir):
             key = (ev["owner"], ev["check_id"])
             f = findings.get(key)
             if f is None:
@@ -719,9 +758,22 @@ def formal_findings(spec_rev, head):
     # drop (reports/formal/jg_*_<head>.json) whose property is proven. Until
     # such a report exists the finding is carried open with a note, because a
     # simulation that does not reach the counterexample proves nothing.
+    # A proof holds for the DESIGN, so a report for another drop of the same
+    # design id counts (a regeneration with no logic change mints a new drop
+    # id and would otherwise reopen every formal finding: 2026-10-15).
     proven_now = set()
-    for rp in glob.glob(os.path.join(ROOT, "Validation", "reports", "formal", f"jg_*_{head}.json")):
-        for r in load(rp, {}).get("results", []):
+    try:
+        sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
+        import rtl_drop as RD
+        cur_design = RD.design_id()
+    except Exception:
+        cur_design = None
+    for rp in glob.glob(os.path.join(ROOT, "Validation", "reports", "formal", "jg_*.json")):
+        rep = load(rp, {})
+        same = rep.get("drop") == head or (cur_design and rep.get("design_id") == cur_design)
+        if not same:
+            continue
+        for r in rep.get("results", []):
             if r.get("status") == "proven":
                 proven_now.add(r.get("short", "").replace("a_", "", 1))
     for f in glob.glob(os.path.join(OUTBOX, spec_rev, "formal_*_findings.json")):

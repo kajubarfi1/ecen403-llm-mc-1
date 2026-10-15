@@ -11,6 +11,31 @@ import emit_findings as EF  # noqa: E402
 import retry_adapter as RA  # noqa: E402
 
 
+class TestTwinAgreement(unittest.TestCase):
+    """A rule the scope's second-opinion checker also raised on this run's
+    traces is model-independent evidence: the emitter adds a twin detector
+    and the finding is confirmed (2026-10-15)."""
+
+    def test_scope_of_a_stage(self):
+        self.assertEqual(EF._agreement_scope("(path-level)", "path_09_init_to_refresh"), "path_09_init_to_refresh")
+        self.assertEqual(EF._agreement_scope("cmd_queue+scheduler", "p"), "cmd_queue_scheduler")
+        self.assertEqual(EF._agreement_scope("scheduler", "p"), "scheduler")
+
+    def test_twin_agrees_only_when_it_ran_and_never_disagreed(self):
+        import json, tempfile
+        d = tempfile.mkdtemp()
+        with open(os.path.join(d, "model_agreement.json"), "w") as f:
+            json.dump({"rows": [{"scope": "path_09_init_to_refresh", "traces": 5, "agree": 5, "disagree": 0},
+                                {"scope": "scheduler", "traces": 5, "agree": 4, "disagree": 1},
+                                {"scope": "cmd_gen", "traces": 0, "agree": 0, "disagree": 0}]}, f)
+        EF._AGREEMENT.clear()
+        self.assertTrue(EF._twin_agrees(d, "path_09_init_to_refresh"))
+        self.assertFalse(EF._twin_agrees(d, "scheduler"), "a disagreement is not corroboration")
+        self.assertFalse(EF._twin_agrees(d, "cmd_gen"), "a twin that ran nothing says nothing")
+        self.assertFalse(EF._twin_agrees(d, "nope"))
+        EF._AGREEMENT.clear()
+
+
 class TestParsing(unittest.TestCase):
 
     def test_checker_line_with_rule_and_txn(self):

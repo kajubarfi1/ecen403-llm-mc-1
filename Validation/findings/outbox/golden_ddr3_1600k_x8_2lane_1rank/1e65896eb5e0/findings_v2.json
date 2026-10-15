@@ -1,0 +1,203 @@
+{
+  "schema": "validation-findings/2",
+  "drop": "1e65896eb5e0",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "spec_id": "f7c16e452e8d9d23",
+  "generated_utc": "2026-10-15T17:33:27.430508Z",
+  "reports": "Validation/reports/partial/1e65896eb5e0",
+  "finding_count": 1,
+  "findings": [
+    {
+      "schema": "validation-findings/2",
+      "id": "refresh_ctrl/REF_004",
+      "kind": "rtl_defect",
+      "check_id": "REF_004",
+      "taxonomy_id": "REF_004",
+      "detectors": [
+        "invariant:(path-level):REF_004",
+        "twin:path_09_init_to_refresh"
+      ],
+      "owner_module": "refresh_ctrl",
+      "owner_candidates": [
+        "refresh_ctrl"
+      ],
+      "severity": "major",
+      "confidence": "confirmed",
+      "title": "refresh_ctrl: REF_004",
+      "requirement": "After init_done at least one refresh request must be raised before the end of the trace; a controller that never requests refresh cannot honour tREFI.",
+      "spec_ref": null,
+      "expected": "After init_done at least one refresh request must be raised before the end of the trace; a controller that never requests refresh cannot honour tREFI.",
+      "actual": "No refresh request raised after init_done: controller cannot honour tREFI without requesting refresh",
+      "detector": "invariant:(path-level):REF_004",
+      "anchor": [
+        {
+          "file": "runs/phase12_loop/drop/PHASE2RTL/refresh_ctrl.sv",
+          "line": 77,
+          "signal": "ref_required",
+          "text": "assign ref_required    = (|postpone_cnt) & init_done;"
+        },
+        {
+          "file": "runs/phase12_loop/drop/PHASE2RTL/refresh_ctrl.sv",
+          "line": 78,
+          "signal": "ref_urgent",
+          "text": "assign ref_urgent      = ref_required"
+        },
+        {
+          "file": "runs/phase12_loop/drop/PHASE2RTL/refresh_ctrl.sv",
+          "line": 81,
+          "signal": "ref_pending_cnt",
+          "text": "assign ref_pending_cnt = postpone_cnt[3:0];"
+        },
+        {
+          "file": "runs/phase12_loop/drop/PHASE2RTL/refresh_ctrl.sv",
+          "line": 92,
+          "signal": "ref_starve_flag",
+          "text": "else        ref_starve_flag <= starve_detect;"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_09_init_to_refresh"
+      ],
+      "occurrences": 2,
+      "repro": {
+        "path": "path_09_init_to_refresh",
+        "command": "python3 Validation/tools/run_path.py --path path_09_init_to_refresh",
+        "sequence": null,
+        "work_dir": "Validation/sequences/generated/runs/path_09_init_to_refresh",
+        "log": "Validation/reports/partial/1e65896eb5e0/path_09_init_to_refresh_sim.log",
+        "trace": "Validation/reports/partial/1e65896eb5e0/path_09_init_to_refresh_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "REF_004: No refresh request raised after init_done: controller cannot honour tREFI without requesting refresh @ [init_status.done fail=0x0 state=0xe]"
+        }
+      },
+      "drop": {
+        "git_head": "1e65896eb5e0",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "runs/phase12_loop/drop/PHASE2RTL/refresh_ctrl.sv"
+      },
+      "introduced_in": "1e65896eb5e0",
+      "first_seen": "1e65896eb5e0",
+      "last_seen": "1e65896eb5e0",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": []
+    }
+  ],
+  "resolved": [],
+  "drop_status": {
+    "$schema": "validation-drop-status/1",
+    "drop": "1e65896eb5e0",
+    "partial": true,
+    "blocks_present": [
+      "addr_decoder",
+      "bank_tracker",
+      "calibration",
+      "config_regs",
+      "init_fsm",
+      "refresh_ctrl",
+      "wb_port"
+    ],
+    "blocks_absent": [
+      "cmd_gen",
+      "cmd_queue",
+      "data_path",
+      "scheduler"
+    ],
+    "inconsistent_edges": [],
+    "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "foreign_spec_blocks": {},
+    "paths_run": [
+      "path_08_init_to_cal",
+      "path_09_init_to_refresh",
+      "path_14_status_init",
+      "path_15_status_cal",
+      "path_16_status_refresh",
+      "path_17_full_boot",
+      "path_21_wb_port_standalone",
+      "path_22_csr_standalone"
+    ],
+    "paths_blocked": {
+      "path_01_write_cmd": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_02_read_cmd": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_03_read_return": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_04_scheduler_bank_loop": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_05_scheduler_refresh_loop": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_06_scheduler_dequeue": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_07_backpressure": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_10_csr_to_timing": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_12_csr_timing_to_scheduling": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_13_csr_refresh_to_scheduling": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_18_full_write": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_19_row_conflict": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_20_refresh_preempt": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ]
+    },
+    "note": "A blocked path is not a failure and not a pass: it waits for the drop that brings its blocks or fixes the edge it crosses. Nothing was substituted."
+  }
+}

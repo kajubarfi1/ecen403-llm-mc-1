@@ -479,8 +479,14 @@ def _copy_current(run, dest):
 def stage_rtl_validation(run, args, partial=False, tag=None):
     """Validation: the drop in run/drop/ against the spec it ships. Results
     land in run/validation/round_<n>[_<tag>]/ (a copy of outbox/current)."""
-    run.state["rounds"]["rtl"] += 0 if tag else 1
-    rnd = run.state["rounds"]["rtl"]
+    # rounds["rtl"] counts validation rounds since the last PASS (the cap);
+    # rounds["rtl_total"] names the package directories and never resets
+    # (a resumed run whose earlier rounds were infrastructure halts hit the
+    # cap before any agent ran: phase12_loop, 2026-10-15)
+    if not tag:
+        run.state["rounds"]["rtl"] += 1
+        run.state["rounds"]["rtl_total"] = run.state["rounds"].get("rtl_total", 0) + 1
+    rnd = run.state["rounds"].get("rtl_total", run.state["rounds"]["rtl"])
     dest = os.path.join(run.val_dir, f"round_{rnd}" + (f"_{tag}" if tag else ""))
     env = os.environ.copy()
     env["VALIDATION_RTL_DROP_ROOTS"] = run.drop
@@ -511,6 +517,20 @@ def stage_rtl_validation(run, args, partial=False, tag=None):
         with open(os.path.join(dest, "DROP_STATUS.json")) as f:
             ds = json.load(f)
     blocked = len(ds.get("paths_blocked", {}))
+    # a path that did not simulate (infrastructure: SSH, compile, timeout) is
+    # listed as blocked with a "run error" reason; that is not a verdict on
+    # the drop, so the run halts for a rerun instead of reading PASS past it
+    # (path_09 on the Phase 1+2 run, 2026-10-15)
+    not_run = {p: w for p, w in ds.get("paths_blocked", {}).items()
+               if any(str(x).startswith("run error") for x in (w if isinstance(w, list) else [w]))}
+    if not_run:
+        run.record("rtl_validation" + (f":{tag}" if tag else ""), "FAIL",
+                   f"{len(not_run)} path(s) did not simulate: " + ", ".join(sorted(not_run))
+                   + f"; package: {os.path.relpath(dest, ROOT)}", package=dest)
+        return run.halt("rtl_validation", f"{len(not_run)} path(s) did not simulate ("
+                        + "; ".join(f"{p}: {(w if isinstance(w, list) else [w])[0]}" for p, w in sorted(not_run.items()))
+                        + "). Not a verdict on the drop: resume with --revalidate to run them again",
+                        package=dest, not_run=sorted(not_run))
     # a block this run generated must have been judged: absent (unresolved,
     # ambiguous copies) or foreign means the drop is not what the run thinks
     only = sorted(int(x) for x in str(args.phases).split(",")) if getattr(args, "phases", None) else [1, 2, 3, 4]
@@ -532,6 +552,8 @@ def stage_rtl_validation(run, args, partial=False, tag=None):
     run.state["spec_id"] = h.get("spec_id")
     run.record(stage, h["status"], detail, drop_id=h["drop_id"], package=dest)
     if h["status"] == "PASS":
+        run.state["rounds"]["rtl"] = 0          # the cap counts rounds since the last pass
+        run.save()
         if blocked and not partial:
             return run.halt("rtl_validation", f"every path that could run passed, but {blocked} "
                             f"path(s) were blocked (DROP_STATUS.json says why: absent blocks, "
@@ -1008,9 +1030,14 @@ def main() -> int:
             return 2
         run = Run(run_dir)
         saved = run.state.get("request", {})
-        for k in ("request", "preset", "choices", "spec", "goal", "interactive"):
-            if getattr(args, k) is None and saved.get(k):
+        for k in ("request", "preset", "choices", "spec", "goal", "interactive", "phases", "backend_mode"):
+            if getattr(args, k, None) is None and saved.get(k):
                 setattr(args, k, saved[k])
+        # a resumed --phases run is still a phase-limited run: without this the
+        # resumed validation ran without --partial and stopped on the absent
+        # blocks (phase12_loop, 2026-10-15); same for a --skip-backend run
+        if saved.get("skip_backend") and not args.skip_backend:
+            args.skip_backend = True
         run.log(f"resuming {run.state['run_id']} (last: "
                 f"{run.state['stages'][-1]['stage'] + ' ' + run.state['stages'][-1]['status'] if run.state['stages'] else 'nothing yet'})")
     else:

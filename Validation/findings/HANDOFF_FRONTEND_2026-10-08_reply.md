@@ -364,6 +364,54 @@ rebuild from `dab971c2aab9` is asked for (his reply has the detail).
   unambiguous. Bump it when Dawson's `backend/env.template` can follow.
 - Age bound on `path_07`: agreed, not a check until the policy states one.
 
+## Addendum 5 (2026-10-15, afternoon): the Phase 2 loop closed; the all-phase loop stops in your Phase 3 agent
+
+Both loops ran today with your key funded (it was, after all; the 10/08
+"credit balance" was that day's state).
+
+**Phase 1+2 loop: complete, unattended.** `flow.py --phases 1,2` on the
+golden spec: 8 of 8 runnable paths pass, 13 blocked for Phases 3–4. We
+then planted M05 (`refi_tick` never raised) into the run's `refresh_ctrl`
+and resumed: validation FAIL with REF_004 on path_09, **confirmed** because
+the path's independently generated second-opinion checker raised the same
+rule (new this week: twin agreement is now computed in every run and marks
+findings `confirmed`, which is what lets `--yes` act); your Phase 2 agent
+read the package, named the planted line as the root cause ("sets
+`refi_tick <= 1'b0` instead of `1'b1` ... no refresh request is ever
+raised"), patched, re-verified lint and sim, regenerated; re-validation
+PASS 8 of 8, the finding resolved, no person involved
+(`runs/phase12_loop`, drops `954c3db9f301` → `1e65896eb5e0` →
+`dc811936c7f1`).
+
+**All-phase loop: validation and routing work; the Phase 3 agent returns
+no patch.** Clean run 19 of 19. We planted M17 (scheduler never selects
+REFRESH) into the run's scheduler and resumed: validation FAIL on
+path_05/13/20 with REF_001 and SCHED_003, both confirmed by twin checkers,
+routed to the Phase 3 agent. It exits after one attempt:
+
+```
+scheduler: fix attempt 1/3
+  asking Claude to diagnose + propose a fix...
+  ERROR: model's propose_fix call is missing required field(s):
+         corrected_generator_source, explanation, shift_left_recommendations,
+         confidence (stop_reason='tool_use')
+scheduler: unresolved
+```
+
+Twice in a row, same shape, and the "1/3" never becomes 2/3. Reading it
+from outside: the structured tool call has to carry the whole corrected
+`scheduler_gen.py` in one field, the response stops at the token limit
+mid-call, and the agent treats a truncated call as final rather than
+retrying with a larger `max_tokens` or asking for a diff. **ask 4:** either
+raise the output limit for the propose_fix call (the scheduler generator is
+the largest), accept a unified diff instead of the full source, or at
+least let attempts 2 and 3 run. We can re-run the experiment the moment
+you push; it is one `--resume`.
+
+Two things fixed on our side from these runs: a resumed `--phases` run now
+stays partial, and the RTL-round cap counts rounds since the last PASS
+(infrastructure halts no longer eat the budget before an agent runs).
+
 **Your three questions**, as they stand now: (1) the next drop we run is
 whatever the loop produces from `dab971c2aab9`; nothing else is needed in
 `OutputFolders/`. (2) Done, both glue entries deleted; the manifests were

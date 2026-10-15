@@ -133,10 +133,16 @@ def compare_chk(a, b):
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--scope")
+    ap.add_argument("--reports", help="trace directory to replay instead of the default globs "
+                                      "(a partial run's reports/partial/<head>)")
+    ap.add_argument("--out", default=OUT, help="where to write the agreement record")
     args = ap.parse_args()
     with open(SPEC) as f:
         spec = json.load(f)
-    traces = sorted({p for g in TRACE_GLOBS for p in glob.glob(os.path.join(ROOT, g))})
+    if args.reports:
+        traces = sorted(glob.glob(os.path.join(args.reports, "*_observed.jsonl")))
+    else:
+        traces = sorted({p for g in TRACE_GLOBS for p in glob.glob(os.path.join(ROOT, g))})
     loaded = {p: clean(load_trace(p)) for p in traces}
     rows = []
     for f2 in sorted(glob.glob(os.path.join(SECOND, "*.py"))):
@@ -185,11 +191,11 @@ def main() -> int:
                     print(f"      {x['id']}: primary only {x['primary_only']}, second only {x['second_only']}, both {x['both']}")
                     print(f"         primary: {(x['primary_example'] or '-')[:110]}")
                     print(f"         second : {(x['second_example'] or '-')[:110]}")
-    with open(OUT, "w") as f:
+    with open(args.out, "w") as f:
         json.dump({"$schema": "validation-model-agreement/1",
                    "generated_utc": datetime.utcnow().isoformat() + "Z",
                    "traces": len(traces), "rows": rows}, f, indent=2)
-    print(f"  wrote {os.path.relpath(OUT, ROOT)}")
+    print(f"  wrote {os.path.relpath(args.out, ROOT)}")
     return 0
 
 

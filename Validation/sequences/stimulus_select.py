@@ -76,6 +76,13 @@ def entry_block(pdef, blocks, catalog, schemas, imap, override=None):
     and none of its blocks can take it."""
     if override:
         return override
+    if pdef.get("window_cycles") and not (pdef.get("stimulus_kinds") or pdef.get("stimulus_generator")):
+        # an autonomous path: it runs from reset for its window and declares
+        # no stimulus. On a phase-partial drop a stream normally fed from
+        # inside the chain (refresh_ack from the absent scheduler) looks
+        # drivable and was picked as the entry, and the generator then
+        # failed on a kind it cannot drive (path_09, 2026-10-15)
+        return None
     sinks = internal_sinks(imap)
     for b in pdef["blocks"]:
         if drivable(b, catalog, schemas, sinks):
