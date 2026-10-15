@@ -3,7 +3,7 @@
   "path": "path_22_csr_standalone",
   "strategy": "exact",
   "verdict": "fail",
-  "timestamp": "2026-10-08T12:16:59.425380",
+  "timestamp": "2026-10-15T12:00:44.626919",
   "blocks": [
     "config_regs"
   ],
@@ -13,14 +13,15 @@
   "window_cycles": 64,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "40a3b7b76db2",
-    "drop_id": "40a3b7b76db2",
+    "git_head": "2666116acb16",
+    "drop_id": "2666116acb16",
+    "design_id": "fd00a6f4ef2d",
     "blocks_used": [
       "config_regs"
     ],
-    "validated_at": "608d29d",
+    "validated_at": "6b693b1",
     "frontend_commits": {
-      "config_regs": "9c21084cdda21e528b57299e638eef2b79fef2ec"
+      "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
     },
     "roots": [
       "Validation/faults/work/M07_config_regs_reset_value/Frontend2/OutputFolders"
@@ -49,7 +50,8 @@
       "detail": [
         "scope=config_regs  strategy=exact  status=fail  matched=130/131  WAIVED=2 field comparison(s)  value=1",
         "  csr_rsp[18] value: predicted [csr_rsp.read_data addr=0x8 data=0x271c0b0b err=0x0] but observed [csr_rsp.read_data addr=0x8 data=0x271c0b0a err=0x0]"
-      ]
+      ],
+      "rule_counts": {}
     }
   ],
   "log": "Validation/reports/faults/M07_config_regs_reset_value/path_22_csr_standalone_sim.log",

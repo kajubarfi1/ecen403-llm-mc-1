@@ -1,0 +1,41 @@
+  stimulus: status_poll on config_regs
+status_poll_config_regs: 271 step(s) (180 drive, 90 idle covering 180000 cycle(s)), targets ['VP_CSR_001', 'VP_CSR_003']
+  wrote Validation/sequences/generated/runs/netlist_config_regs/path_15_status_cal/seq_driver.sv
+wrote Validation/sequences/generated/runs/netlist_config_regs/path_15_status_cal/chain_harness.sv  (3 block(s): calibration, config_regs, init_fsm)
+
+Path    : path_15_status_cal  [composed]
+Blocks  : calibration, config_regs, init_fsm
+Window  : 64 cycles settle after driver
+Stages  : calibration(autonomous); config_regs(exact)
+
+Running: xrun ... -top chain_harness  (25 file(s))
+  log -> Validation/reports/netlists/config_regs/path_15_status_cal_sim.log
+380 transaction(s)
+    cal_status.done          1
+    cal_status.reset         1
+    cal_zqcs.request         1
+    cal_zqcs.reset           1
+    cfg_refresh.reset        1
+    cfg_timing.reset         1
+    csr.read                 180
+    csr.reset                1
+    csr_rsp.read_data        180
+    csr_rsp.reset            1
+    csr_sts.reset            1
+    csr_sts_level.reset      1
+    csr_sts_level.state      2
+    init_cmd.command         5
+    init_cmd.reset           1
+    init_status.done         1
+    init_status.reset        1
+  time span: 0 .. 891829000
+wrote 380 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/config_regs/path_15_status_cal_observed.jsonl
+
+==================================================================
+  calibration                  [autonomous]  SVA-OWNED
+  config_regs                  [exact     ]  PASS
+      scope=config_regs  strategy=exact  status=pass  matched=180/180  (180 output transaction(s) matched)
+==================================================================
+
+  path verdict : PASS
+  report -> Validation/reports/netlists/config_regs/path_15_status_cal_report.json

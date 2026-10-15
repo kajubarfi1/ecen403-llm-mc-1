@@ -486,7 +486,8 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
         except Exception as e:
             print(f"  ERROR: {e}")
             record["attempts"].append({"attempt": attempt, "status": "llm_error", "error": str(e)})
-            break
+            prev_feedback = f"the previous attempt's propose_fix call failed and was not applied: {e}"
+            continue
 
         new_source = proposal["corrected_generator_source"]
         try:

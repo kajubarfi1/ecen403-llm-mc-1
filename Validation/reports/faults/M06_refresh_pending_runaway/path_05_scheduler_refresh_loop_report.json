@@ -3,7 +3,7 @@
   "path": "path_05_scheduler_refresh_loop",
   "strategy": "invariant",
   "verdict": "fail",
-  "timestamp": "2026-10-08T12:16:56.893779",
+  "timestamp": "2026-10-15T12:00:44.731022",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,8 +21,9 @@
   "window_cycles": 6000,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "f2ac7d48e975",
-    "drop_id": "f2ac7d48e975",
+    "git_head": "78cbe3672937",
+    "drop_id": "78cbe3672937",
+    "design_id": "b800b9023d94",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -34,17 +35,17 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "608d29d",
+    "validated_at": "6b693b1",
     "frontend_commits": {
-      "addr_decoder": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "bank_tracker": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "cmd_gen": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "cmd_queue": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "config_regs": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "data_path": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "refresh_ctrl": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "scheduler": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "wb_port": "9c21084cdda21e528b57299e638eef2b79fef2ec"
+      "addr_decoder": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "bank_tracker": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "cmd_gen": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "cmd_queue": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "data_path": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "refresh_ctrl": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "scheduler": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "wb_port": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
     },
     "roots": [
       "Validation/faults/work/M06_refresh_pending_runaway/Frontend2/OutputFolders"
@@ -109,11 +110,24 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/scheduler_checker.py",
       "scope": "scheduler",
       "verdict": "fail",
-      "summary": "scope=scheduler  strategy=invariant  status=fail  violations=1",
+      "summary": "scope=scheduler  strategy=invariant  status=fail  violations=52",
       "detail": [
-        "scope=scheduler  strategy=invariant  status=fail  violations=1",
-        "  REF_002 (REFRESH issued while one or more banks are still active): REFRESH command issued with banks [2] still active (not precharged)"
-      ]
+        "  REF_001 (refresh_postpone_exceeded): pending count 14 exceeds max_postpone_count 8 @ [refresh_level.state pending=0xe required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 14 @ [refresh_level.state pending=0xe required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_postpone_exceeded): pending count 14 exceeds max_postpone_count 8 @ [refresh_level.state pending=0xe required=0x1 starve=0x0 urgent=0x1]",
+        "  REF_001 (refresh_postpone_exceeded): pending count 15 exceeds max_postpone_count 8 @ [refresh_level.state pending=0xf required=0x1 starve=0x0 urgent=0x1]",
+        "  REF_001 (refresh_postpone_exceeded): pending count 9 exceeds max_postpone_count 8 @ [refresh_level.state pending=0x9 required=0x1 starve=0x0 urgent=0x1]",
+        "  REF_001 (refresh_postpone_exceeded): pending count 10 exceeds max_postpone_count 8 @ [refresh_level.state pending=0xa required=0x1 starve=0x0 urgent=0x1]",
+        "  REF_001 (refresh_postpone_exceeded): pending count 11 exceeds max_postpone_count 8 @ [refresh_level.state pending=0xb required=0x1 starve=0x0 urgent=0x1]",
+        "  REF_001 (refresh_postpone_exceeded): pending count 11 exceeds max_postpone_count 8 @ [refresh_level.state pending=0xb required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 11 @ [refresh_level.state pending=0xb required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_postpone_exceeded): pending count 11 exceeds max_postpone_count 8 @ [refresh_level.state pending=0xb required=0x1 starve=0x0 urgent=0x1]",
+        "  REF_001 (refresh_postpone_exceeded): pending count 12 exceeds max_postpone_count 8 @ [refresh_level.state pending=0xc required=0x1 starve=0x0 urgent=0x1]",
+        "  rules: REF_001=52"
+      ],
+      "rule_counts": {
+        "REF_001": 52
+      }
     },
     {
       "stage": "refresh_ctrl",
@@ -124,39 +138,25 @@
       "note": "time-driven stage; pacing owned by SVA; no assertion fired"
     },
     {
-      "stage": "cmd_gen (support)",
-      "kind": "sva",
-      "scope": "cmd_gen",
-      "model": null,
-      "verdict": "fail",
-      "summary": "SVA fired: a_PROTO_002 x947, a_TIMING_004 x946, a_TIMING_005 x85, a_TIMING_011 x194",
-      "detail": [
-        "a_PROTO_002 fired 947x (assertion bound to cmd_gen, not a judged stage)",
-        "a_TIMING_004 fired 946x (assertion bound to cmd_gen, not a judged stage)",
-        "a_TIMING_005 fired 85x (assertion bound to cmd_gen, not a judged stage)",
-        "a_TIMING_011 fired 194x (assertion bound to cmd_gen, not a judged stage)"
-      ]
-    },
-    {
       "stage": "(path-level)",
       "kind": "invariant",
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_05_scheduler_refresh_loop_checker.py",
       "scope": "path_05_scheduler_refresh_loop",
       "verdict": "fail",
-      "summary": "scope=path_05_scheduler_refresh_loop  strategy=invariant  status=fail  violations=14",
+      "summary": "scope=path_05_scheduler_refresh_loop  strategy=invariant  status=fail  violations=52",
       "detail": [
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]"
+        "  REF_001 (refresh_postpone_exceeded): pending count 14 exceeds max_postpone_count 8 @ [refresh_level.state pending=0xe required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 14 @ [refresh_level.state pending=0xe required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_postpone_exceeded): pending count 14 exceeds max_postpone_count 8 @ [refresh_level.state pending=0xe required=0x1 starve=0x0 urgent=0x1]",
+        "  REF_001 (refresh_postpone_exceeded): pending count 15 exceeds max_postpone_count 8 @ [refresh_level.state pending=0xf required=0x1 starve=0x0 urgent=0x1]",
+        "  REF_001 (refresh_postpone_exceeded): pending count 9 exceeds max_postpone_count 8 @ [refresh_level.state pending=0x9 required=0x1 starve=0x0 urgent=0x1]",
+        "  REF_001 (refresh_postpone_exceeded): pending count 10 exceeds max_postpone_count 8 @ [refresh_level.state pending=0xa required=0x1 starve=0x0 urgent=0x1]",
+        "  REF_001 (refresh_postpone_exceeded): pending count 11 exceeds max_postpone_count 8 @ [refresh_level.state pending=0xb required=0x1 starve=0x0 urgent=0x1]",
+        "  REF_001 (refresh_postpone_exceeded): pending count 11 exceeds max_postpone_count 8 @ [refresh_level.state pending=0xb required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 11 @ [refresh_level.state pending=0xb required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_postpone_exceeded): pending count 11 exceeds max_postpone_count 8 @ [refresh_level.state pending=0xb required=0x1 starve=0x0 urgent=0x1]",
+        "  REF_001 (refresh_postpone_exceeded): pending count 12 exceeds max_postpone_count 8 @ [refresh_level.state pending=0xc required=0x1 starve=0x0 urgent=0x1]",
+        "  rules: REF_001=52"
       ]
     }
   ],

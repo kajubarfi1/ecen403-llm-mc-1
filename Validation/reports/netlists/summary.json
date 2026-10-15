@@ -1,0 +1,867 @@
+{
+  "$schema": "validation-netlists/1",
+  "generated_utc": "2026-10-15T16:34:26.336674+00:00",
+  "netlists": "backend/outputs/NETLISTS.json",
+  "netlists_built_from": {
+    "drop_id": "4b86c7cd3705",
+    "design_equivalent_drop": "a7cd3cb93546"
+  },
+  "judged_against": {
+    "drop_id": "dab971c2aab9",
+    "design_id": "3973ce99af71"
+  },
+  "path_rule": "every runnable path whose harness closure contains the block",
+  "blocks": {
+    "addr_decoder": {
+      "netlist": "backend/outputs/addr_decoder/6_final.v",
+      "verdict": "PASS",
+      "stale_netlist": true,
+      "paths": [
+        {
+          "path": "path_01_write_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_02_read_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_03_read_return",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_04_scheduler_bank_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_05_scheduler_refresh_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_07_backpressure",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_12_csr_timing_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_13_csr_refresh_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_18_full_write",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_19_row_conflict",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_20_refresh_preempt",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        }
+      ],
+      "backend": {
+        "fmax_mhz": null,
+        "wns_ns": null,
+        "sta": "N/A (no timing paths)",
+        "drc_violations": 0,
+        "lvs": "PASS"
+      }
+    },
+    "bank_tracker": {
+      "netlist": "backend/outputs/bank_tracker/6_final.v",
+      "verdict": "PASS",
+      "stale_netlist": true,
+      "paths": [
+        {
+          "path": "path_01_write_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_02_read_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_03_read_return",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_04_scheduler_bank_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_05_scheduler_refresh_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_07_backpressure",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_12_csr_timing_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_13_csr_refresh_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_18_full_write",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_19_row_conflict",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_20_refresh_preempt",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        }
+      ],
+      "backend": {
+        "fmax_mhz": 214.31,
+        "wns_ns": 0.333851,
+        "sta": "PASS",
+        "drc_violations": 0,
+        "lvs": "PASS"
+      }
+    },
+    "calibration": {
+      "netlist": "backend/outputs/calibration/6_final.v",
+      "verdict": "PASS",
+      "stale_netlist": true,
+      "paths": [
+        {
+          "path": "path_08_init_to_cal",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_15_status_cal",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_17_full_boot",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        }
+      ],
+      "backend": {
+        "fmax_mhz": 416.8,
+        "wns_ns": 2.60077,
+        "sta": "PASS",
+        "drc_violations": 0,
+        "lvs": "PASS"
+      }
+    },
+    "cmd_gen": {
+      "netlist": "backend/outputs/cmd_gen/6_final.v",
+      "verdict": "PASS",
+      "stale_netlist": true,
+      "paths": [
+        {
+          "path": "path_01_write_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_02_read_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_03_read_return",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_04_scheduler_bank_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_05_scheduler_refresh_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_07_backpressure",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_12_csr_timing_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_13_csr_refresh_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_18_full_write",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_19_row_conflict",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_20_refresh_preempt",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        }
+      ],
+      "backend": {
+        "fmax_mhz": 378.81,
+        "wns_ns": 2.36012,
+        "sta": "PASS",
+        "drc_violations": 0,
+        "lvs": "PASS"
+      }
+    },
+    "cmd_queue": {
+      "netlist": "backend/outputs/cmd_queue/6_final.v",
+      "verdict": "PASS",
+      "stale_netlist": true,
+      "paths": [
+        {
+          "path": "path_01_write_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_02_read_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_03_read_return",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_04_scheduler_bank_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_05_scheduler_refresh_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_07_backpressure",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_12_csr_timing_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_13_csr_refresh_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_18_full_write",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_19_row_conflict",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_20_refresh_preempt",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        }
+      ],
+      "backend": {
+        "fmax_mhz": 277.7,
+        "wns_ns": 1.39902,
+        "sta": "PASS",
+        "drc_violations": 0,
+        "lvs": "PASS"
+      }
+    },
+    "config_regs": {
+      "netlist": "backend/outputs/config_regs/6_final.v",
+      "verdict": "PASS",
+      "stale_netlist": true,
+      "paths": [
+        {
+          "path": "path_01_write_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_02_read_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_03_read_return",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_04_scheduler_bank_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_05_scheduler_refresh_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_07_backpressure",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_09_init_to_refresh",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_12_csr_timing_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_13_csr_refresh_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_14_status_init",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_15_status_cal",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_16_status_refresh",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_17_full_boot",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_18_full_write",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_19_row_conflict",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_20_refresh_preempt",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_22_csr_standalone",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        }
+      ],
+      "backend": {
+        "fmax_mhz": 280.83,
+        "wns_ns": 1.43916,
+        "sta": "PASS",
+        "drc_violations": 0,
+        "lvs": "PASS"
+      }
+    },
+    "data_path": {
+      "netlist": "backend/outputs/data_path/6_final.v",
+      "verdict": "PASS",
+      "stale_netlist": true,
+      "paths": [
+        {
+          "path": "path_01_write_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_02_read_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_03_read_return",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_04_scheduler_bank_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_05_scheduler_refresh_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_07_backpressure",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_12_csr_timing_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_13_csr_refresh_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_18_full_write",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_19_row_conflict",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_20_refresh_preempt",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        }
+      ],
+      "backend": {
+        "fmax_mhz": 224.07,
+        "wns_ns": 0.537044,
+        "sta": "PASS",
+        "drc_violations": 0,
+        "lvs": "PASS"
+      }
+    },
+    "init_fsm": {
+      "netlist": "backend/outputs/init_fsm/6_final.v",
+      "verdict": "PASS",
+      "stale_netlist": true,
+      "paths": [
+        {
+          "path": "path_08_init_to_cal",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_09_init_to_refresh",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_14_status_init",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_15_status_cal",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_17_full_boot",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        }
+      ],
+      "backend": {
+        "fmax_mhz": 317.1,
+        "wns_ns": 1.84643,
+        "sta": "PASS",
+        "drc_violations": 0,
+        "lvs": "PASS"
+      }
+    },
+    "refresh_ctrl": {
+      "netlist": "backend/outputs/refresh_ctrl/6_final.v",
+      "verdict": "PASS",
+      "stale_netlist": true,
+      "paths": [
+        {
+          "path": "path_01_write_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_02_read_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_03_read_return",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_04_scheduler_bank_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_05_scheduler_refresh_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_07_backpressure",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_09_init_to_refresh",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_12_csr_timing_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_13_csr_refresh_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_16_status_refresh",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_18_full_write",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_19_row_conflict",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_20_refresh_preempt",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        }
+      ],
+      "backend": {
+        "fmax_mhz": 265.39,
+        "wns_ns": 1.23194,
+        "sta": "PASS",
+        "drc_violations": 0,
+        "lvs": "PASS"
+      }
+    },
+    "scheduler": {
+      "netlist": "backend/outputs/scheduler/6_final.v",
+      "verdict": "FAIL",
+      "stale_netlist": true,
+      "paths": [
+        {
+          "path": "path_01_write_cmd",
+          "verdict": "FAIL",
+          "first_failure": "cmd_queue+scheduler: scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=23",
+          "fired": {}
+        },
+        {
+          "path": "path_02_read_cmd",
+          "verdict": "FAIL",
+          "first_failure": "cmd_queue+scheduler: scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=38",
+          "fired": {}
+        },
+        {
+          "path": "path_03_read_return",
+          "verdict": "FAIL",
+          "first_failure": "cmd_gen (support): SVA fired: a_PROTO_002 x38, a_TIMING_004 x38, a_TIMING_011 x1",
+          "fired": {}
+        },
+        {
+          "path": "path_04_scheduler_bank_loop",
+          "verdict": "FAIL",
+          "first_failure": "cmd_gen (support): SVA fired: a_PROTO_002 x23, a_TIMING_004 x23, a_TIMING_005 x5, a_TIMING_011 x1",
+          "fired": {}
+        },
+        {
+          "path": "path_05_scheduler_refresh_loop",
+          "verdict": "FAIL",
+          "first_failure": "scheduler: scope=scheduler  strategy=invariant  status=fail  violations=1",
+          "fired": {}
+        },
+        {
+          "path": "path_07_backpressure",
+          "verdict": "FAIL",
+          "first_failure": "cmd_queue+scheduler: scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=55",
+          "fired": {}
+        },
+        {
+          "path": "path_12_csr_timing_to_scheduling",
+          "verdict": "FAIL",
+          "first_failure": "cmd_gen (support): SVA fired: a_TIMING_011 x4",
+          "fired": {}
+        },
+        {
+          "path": "path_13_csr_refresh_to_scheduling",
+          "verdict": "FAIL",
+          "first_failure": "cmd_gen (support): SVA fired: a_TIMING_011 x4",
+          "fired": {}
+        },
+        {
+          "path": "path_18_full_write",
+          "verdict": "FAIL",
+          "first_failure": "cmd_queue+scheduler: scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=35",
+          "fired": {}
+        },
+        {
+          "path": "path_19_row_conflict",
+          "verdict": "FAIL",
+          "first_failure": "cmd_gen (support): SVA fired: a_PROTO_002 x23, a_TIMING_004 x23, a_TIMING_005 x5, a_TIMING_011 x1",
+          "fired": {}
+        },
+        {
+          "path": "path_20_refresh_preempt",
+          "verdict": "FAIL",
+          "first_failure": "cmd_queue+scheduler: scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=964",
+          "fired": {}
+        }
+      ],
+      "backend": {
+        "fmax_mhz": 169.06,
+        "wns_ns": -0.914878,
+        "sta": "FAIL",
+        "drc_violations": 0,
+        "lvs": "PASS"
+      }
+    },
+    "wb_port": {
+      "netlist": "backend/outputs/wb_port/6_final.v",
+      "verdict": "PASS",
+      "stale_netlist": true,
+      "paths": [
+        {
+          "path": "path_01_write_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_02_read_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_03_read_return",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_04_scheduler_bank_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_05_scheduler_refresh_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_07_backpressure",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_12_csr_timing_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_13_csr_refresh_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_18_full_write",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_19_row_conflict",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_20_refresh_preempt",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_21_wb_port_standalone",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        }
+      ],
+      "backend": {
+        "fmax_mhz": 248.97,
+        "wns_ns": 0.983423,
+        "sta": "PASS",
+        "drc_violations": 0,
+        "lvs": "PASS"
+      }
+    }
+  },
+  "provenance": "STALE: built from another drop and no design id matches"
+}

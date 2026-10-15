@@ -1,6 +1,6 @@
 {
   "$schema": "validation-model-agreement/1",
-  "generated_utc": "2026-10-08T18:05:37.098698Z",
+  "generated_utc": "2026-10-15T17:00:25.754612Z",
   "traces": 59,
   "rows": [
     {
@@ -79,9 +79,34 @@
       "traces": 53,
       "agree": 53,
       "disagree": 0,
-      "attribution_only": 0,
+      "attribution_only": 2,
       "disagreements": [],
-      "attribution": []
+      "attribution": [
+        {
+          "trace": "Validation/reports/paths/path_09_init_to_refresh_observed.jsonl",
+          "diffs": [
+            {
+              "id": "SCHED_003",
+              "attribution_differs": true,
+              "count": 1,
+              "primary_example": "SCHED_003 (refresh_never_serviced): refresh request was observed but no REFRESH command was ever issued",
+              "second_example": "SCHED_003 (refresh_never_serviced): refresh request seen but no REFRESH command was ever issued @ [refresh_req.request pending=0x1 starve=0x0 urgent=0x0]"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/paths/path_16_status_refresh_observed.jsonl",
+          "diffs": [
+            {
+              "id": "SCHED_003",
+              "attribution_differs": true,
+              "count": 1,
+              "primary_example": "SCHED_003 (refresh_never_serviced): refresh request was observed but no REFRESH command was ever issued",
+              "second_example": "SCHED_003 (refresh_never_serviced): refresh request seen but no REFRESH command was ever issued @ [refresh_req.request pending=0x1 starve=0x0 urgent=0x0]"
+            }
+          ]
+        }
+      ]
     },
     {
       "scope": "path_08_init_to_cal",
@@ -129,46 +154,9 @@
       "traces": 53,
       "agree": 53,
       "disagree": 0,
-      "attribution_only": 4,
+      "attribution_only": 0,
       "disagreements": [],
-      "attribution": [
-        {
-          "trace": "Validation/reports/paths/path_09_init_to_refresh_observed.jsonl",
-          "diffs": [
-            {
-              "id": "SCHED_003",
-              "attribution_differs": true,
-              "count": 1,
-              "primary_example": "SCHED_003 (Every refresh request must eventually be serviced with a REFRESH command): 1 refresh request(s) were never serviced with a REFRESH command",
-              "second_example": "SCHED_003 (refresh_request_not_serviced): 1 refresh request(s) not serviced with REFRESH command (observed: 1, serviced: 0) @ [refresh_req.request pending=0x1 starve=0x0 urgent=0x0]"
-            }
-          ]
-        },
-        {
-          "trace": "Validation/reports/paths/path_16_status_refresh_observed.jsonl",
-          "diffs": [
-            {
-              "id": "SCHED_003",
-              "attribution_differs": true,
-              "count": 1,
-              "primary_example": "SCHED_003 (Every refresh request must eventually be serviced with a REFRESH command): 1 refresh request(s) were never serviced with a REFRESH command",
-              "second_example": "SCHED_003 (refresh_request_not_serviced): 1 refresh request(s) not serviced with REFRESH command (observed: 1, serviced: 0) @ [refresh_req.request pending=0x1 starve=0x0 urgent=0x0]"
-            }
-          ]
-        },
-        {
-          "trace": "Validation/reports/repairs/baseline/path_05_scheduler_refresh_loop_observed.jsonl",
-          "diffs": [
-            {
-              "id": "REF_002",
-              "attribution_differs": true,
-              "count": 1,
-              "primary_example": "REF_002 (REFRESH issued while one or more banks are still active): REFRESH command issued with banks [2] still active (not precharged)",
-              "second_example": "REF_002 (refresh_during_active_bank): REFRESH issued while bank(s) [2] are still active (not precharged) @ [sched_cmd.command aux=0x0 bank=0x0 col=0x0 row=0x0 type=0x5 we=0x0]"
-            }
-          ]
-        }
-      ]
+      "attribution": []
     },
     {
       "scope": "wb_port",

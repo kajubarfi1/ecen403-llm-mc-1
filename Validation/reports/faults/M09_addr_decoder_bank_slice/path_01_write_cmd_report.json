@@ -3,7 +3,7 @@
   "path": "path_01_write_cmd",
   "strategy": "composed",
   "verdict": "fail",
-  "timestamp": "2026-10-08T12:17:06.890574",
+  "timestamp": "2026-10-15T12:00:45.171499",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,8 +21,9 @@
   "window_cycles": 400,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "43223a1aec94",
-    "drop_id": "43223a1aec94",
+    "git_head": "2ca79ed11dd6",
+    "drop_id": "2ca79ed11dd6",
+    "design_id": "dd87da2c3e05",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -34,17 +35,17 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "608d29d",
+    "validated_at": "6b693b1",
     "frontend_commits": {
-      "addr_decoder": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "bank_tracker": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "cmd_gen": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "cmd_queue": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "config_regs": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "data_path": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "refresh_ctrl": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "scheduler": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "wb_port": "9c21084cdda21e528b57299e638eef2b79fef2ec"
+      "addr_decoder": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "bank_tracker": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "cmd_gen": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "cmd_queue": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "data_path": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "refresh_ctrl": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "scheduler": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "wb_port": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
     },
     "roots": [
       "Validation/faults/work/M09_addr_decoder_bank_slice/Frontend2/OutputFolders"
@@ -110,7 +111,8 @@
       "scope": "wb_port",
       "verdict": "pass",
       "summary": "scope=wb_port  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)",
-      "detail": []
+      "detail": [],
+      "rule_counts": {}
     },
     {
       "stage": "addr_decoder",
@@ -132,43 +134,28 @@
         "  cq_enq[14] value: predicted [cq_enq.enqueue bank=0x2 col=0xe8 row=0x6d14 we=0x1] but observed [cq_enq.enqueue bank=0x4 col=0xe8 row=0x6d14 we=0x1]",
         "  cq_enq[16] value: predicted [cq_enq.enqueue bank=0x0 col=0x378 row=0x7549 we=0x1] but observed [cq_enq.enqueue bank=0x1 col=0x378 row=0x7549 we=0x1]",
         "  cq_enq[17] value: predicted [cq_enq.enqueue bank=0x6 col=0x380 row=0x2e47 we=0x1] but observed [cq_enq.enqueue bank=0x7 col=0x380 row=0x2e47 we=0x1]"
-      ]
+      ],
+      "rule_counts": {}
     },
     {
       "stage": "cmd_queue+scheduler",
       "kind": "invariant",
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
       "scope": "cmd_queue_scheduler",
-      "verdict": "fail",
-      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=29",
-      "detail": [
-        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has active row @ [sched_cmd.command aux=0x2 bank=0x6 col=0x2a0 row=0x154e type=0x1 we=0x1]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 3 which already has active row @ [sched_cmd.command aux=0x3 bank=0x3 col=0x230 row=0x5143 type=0x1 we=0x1]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 3 which already has active row @ [sched_cmd.command aux=0x3 bank=0x3 col=0x230 row=0x5143 type=0x1 we=0x1]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 0 which already has active row @ [sched_cmd.command aux=0x5 bank=0x0 col=0x118 row=0x38c0 type=0x1 we=0x1]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 0 which already has active row @ [sched_cmd.command aux=0x5 bank=0x0 col=0x118 row=0x38c0 type=0x1 we=0x1]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has active row @ [sched_cmd.command aux=0x4 bank=0x6 col=0x338 row=0x6196 type=0x1 we=0x1]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 2 which already has active row @ [sched_cmd.command aux=0x7 bank=0x2 col=0x98 row=0x1ef2 type=0x1 we=0x1]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 2 which already has active row @ [sched_cmd.command aux=0x7 bank=0x2 col=0x98 row=0x1ef2 type=0x1 we=0x1]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 1 which already has active row @ [sched_cmd.command aux=0x8 bank=0x1 col=0x1e0 row=0x4da9 type=0x1 we=0x1]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 1 which already has active row @ [sched_cmd.command aux=0x8 bank=0x1 col=0x1e0 row=0x4da9 type=0x1 we=0x1]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 0 which already has active row @ [sched_cmd.command aux=0x9 bank=0x0 col=0x368 row=0x6a10 type=0x1 we=0x1]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 0 which already has active row @ [sched_cmd.command aux=0x9 bank=0x0 col=0x368 row=0x6a10 type=0x1 we=0x1]"
-      ]
+      "verdict": "pass",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (350 transactions, no rule broken)",
+      "detail": [],
+      "rule_counts": {}
     },
     {
       "stage": "cmd_gen",
       "kind": "exact",
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
       "scope": "cmd_gen",
-      "verdict": "fail",
-      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=103/103  (103 output transaction(s) matched)  SVA fired: a_PROTO_002 x29, a_TIMING_004 x29, a_TIMING_005 x3, a_TIMING_011 x1",
-      "detail": [
-        "a_PROTO_002 fired 29x (assertion bound to cmd_gen)",
-        "a_TIMING_004 fired 29x (assertion bound to cmd_gen)",
-        "a_TIMING_005 fired 3x (assertion bound to cmd_gen)",
-        "a_TIMING_011 fired 1x (assertion bound to cmd_gen)"
-      ]
+      "verdict": "pass",
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=51/51  (51 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
     }
   ],
   "log": "Validation/reports/faults/M09_addr_decoder_bank_slice/path_01_write_cmd_sim.log",

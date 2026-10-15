@@ -3,7 +3,7 @@
   "path": "path_05_scheduler_refresh_loop",
   "strategy": "invariant",
   "verdict": "fail",
-  "timestamp": "2026-09-30T12:11:18.222533",
+  "timestamp": "2026-10-15T12:00:46.320566",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,48 +21,87 @@
   "window_cycles": 6000,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "5661e03",
+    "git_head": "4677f896c718",
+    "drop_id": "4677f896c718",
+    "design_id": "66a76881ed9e",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "6b693b1",
+    "frontend_commits": {
+      "addr_decoder": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "bank_tracker": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "cmd_gen": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "cmd_queue": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "data_path": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "refresh_ctrl": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "scheduler": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "wb_port": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
+    },
     "roots": [
       "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders"
     ],
     "blocks": {
       "addr_decoder": {
         "rtl": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE2RTL/addr_decoder.sv",
-        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE2RTL/addr_decoder_manifest.json"
+        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "bank_tracker": {
         "rtl": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
-        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE2RTL/bank_tracker_manifest.json"
+        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "cmd_gen": {
         "rtl": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE3RTL/cmd_gen.sv",
-        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json"
+        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "cmd_queue": {
         "rtl": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE3RTL/cmd_queue.sv",
-        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json"
+        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "config_regs": {
         "rtl": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
-        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json"
+        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "data_path": {
         "rtl": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json"
+        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "refresh_ctrl": {
         "rtl": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
-        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json"
+        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "scheduler": {
         "rtl": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
-        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json"
+        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "wb_port": {
         "rtl": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
-        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json"
+        "manifest": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       }
-    }
+    },
+    "shipped_spec": {
+      "path": "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
   },
   "stages": [
     {
@@ -71,11 +110,25 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/scheduler_checker.py",
       "scope": "scheduler",
       "verdict": "fail",
-      "summary": "scope=scheduler  strategy=invariant  status=fail  violations=1",
+      "summary": "scope=scheduler  strategy=invariant  status=fail  violations=14",
       "detail": [
-        "scope=scheduler  strategy=invariant  status=fail  violations=1",
-        "  SCHED_003 (Every refresh request must eventually be serviced with a REFRESH command): 1 refresh request(s) were never serviced with a REFRESH command"
-      ]
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  SCHED_003 (refresh_never_serviced): refresh request was seen but no REFRESH command was ever issued @ [refresh_req.request pending=0x1 starve=0x0 urgent=0x0]",
+        "  rules: REF_001=13 SCHED_003=1"
+      ],
+      "rule_counts": {
+        "REF_001": 13,
+        "SCHED_003": 1
+      }
     },
     {
       "stage": "refresh_ctrl",
@@ -83,7 +136,7 @@
       "model": null,
       "scope": "refresh_ctrl",
       "verdict": "sva",
-      "note": "time-driven stage; pacing owned by SVA"
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
     },
     {
       "stage": "(path-level)",
@@ -91,10 +144,20 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_05_scheduler_refresh_loop_checker.py",
       "scope": "path_05_scheduler_refresh_loop",
       "verdict": "fail",
-      "summary": "scope=path_05_scheduler_refresh_loop  strategy=invariant  status=fail  violations=1",
+      "summary": "scope=path_05_scheduler_refresh_loop  strategy=invariant  status=fail  violations=14",
       "detail": [
-        "scope=path_05_scheduler_refresh_loop  strategy=invariant  status=fail  violations=1",
-        "  SCHED_003: End of trace with 1 pending refresh request(s) not serviced @ [refresh_req.request pending=0x1 starve=0x0 urgent=0x0]"
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  SCHED_003 (refresh_never_serviced): refresh request was observed but no REFRESH command was ever issued",
+        "  rules: REF_001=13 SCHED_003=1"
       ]
     }
   ],

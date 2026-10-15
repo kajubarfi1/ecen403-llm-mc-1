@@ -10,6 +10,7 @@
 4. [Quick Start](#4-quick-start)
 5. [Recovering from a Halted Run](#5-recovering-from-a-halted-run)
 6. [Command Reference](#6-command-reference)
+7. [Validation Subsystem: Standalone Use](#7-validation-subsystem-standalone-use)
 
 ---
 
@@ -443,3 +444,174 @@ python3 flow.py [design input] [options]
 | `--revalidate` | With `--resume`, revalidate RTL that changed since the last validation |
 
 For the complete list of options, run `python3 flow.py --help`.
+
+---
+
+## 7. Validation Subsystem: Standalone Use
+
+`flow.py` runs validation for you. This section is for running it on its own:
+to judge an RTL drop without regenerating it, to re-judge after a checker
+changed, or to run the checks that validate the validation itself. Everything
+here runs from the repository root.
+
+### 7.1 What it does
+
+Validation never writes RTL. From the microarchitecture specification and the
+drop's manifests it generates the whole environment, then judges the drop:
+
+| Generated from the spec and manifests | Judged by |
+|---|---|
+| Transaction monitors on every block interface | A transaction scoreboard comparing the trace against reference models |
+| Timing and protocol assertions (SVA), functional coverage | Assertion results, coverage against the verification plan |
+| Reference models and legality checkers, written by an LLM and accepted only by gates that grade them against the spec | Two independent models per scope, which must agree |
+| Stimulus sequences per path (register walks, bursts, refresh stress, constrained random) | 22 end-to-end paths through the 11 blocks |
+
+Results are written as **findings**: each has an owner block, a confidence,
+source anchors, a reproduction command and a history across drops. The
+Frontend reads them from one place, `Validation/findings/outbox/current/`.
+
+### 7.2 Additional setup
+
+Validation uses the same Olympus account as Section 3.6. Its tools read the
+settings from your shell, or from `Validation/setup.env` when they are run
+on their own (the file is excluded from version control):
+
+```bash
+# Validation/setup.env
+OLYMPUS_USER=<your_tamu_netid>
+OLYMPUS_KEY=/Users/<you>/.ssh/id_ed25519_olympus2     # or OLYMPUS_PASSWORD=...
+ANTHROPIC_API_KEY=sk-ant-...                           # only to regenerate a model
+ANTHROPIC_MODEL=claude-opus-4-6                        # model for generated checkers
+```
+
+One extra dependency beyond Section 3.3, and one optional install:
+
+```bash
+python3 -m pip install python-dotenv
+python3 Validation/tools/install_sky130_models.py    # once; only for gate-level runs (Section 7.5)
+```
+
+Confirm the setup without simulating anything:
+
+```bash
+python3 Validation/tools/validate_drop.py --dry-run
+python3 -m unittest discover -s Validation/tests -p "test_*.py"     # about 290 tests, under a second
+```
+
+### 7.3 Validate the RTL drop
+
+The drop is whatever `Frontend2/OutputFolders/` holds (or the directory named
+by `VALIDATION_RTL_DROP_ROOTS`, which `flow.py` sets to the run's `drop/`).
+
+```bash
+python3 Validation/tools/validate_drop.py                 # full: simulate every path on Olympus (1 to 3 minutes)
+python3 Validation/tools/validate_drop.py --skip-sim      # re-judge the last traces (seconds; after a checker changed)
+python3 Validation/tools/validate_drop.py --partial       # a drop with blocks missing (a single Frontend phase)
+python3 Validation/tools/validate_drop.py --paths path_01_write_cmd path_22_csr_standalone
+```
+
+The nine steps print as they run: resolve the drop, review the spec, regenerate
+the environment, re-grade the models, simulate, roll up coverage, emit
+findings, compare with the previous drop, refresh the dashboard. The last line
+is the verdict:
+
+```
+  drop a7cd3cb93546: 19 pass / 0 fail / 0 error in 1.6 min; log Validation/reports/validate_drop/a7cd3cb93546.log
+```
+
+Where to look afterwards:
+
+| Path | Contents |
+|---|---|
+| `Validation/findings/outbox/current/HANDOFF.json` | drop id, design id, spec id, PASS or FAIL, failed modules |
+| `Validation/findings/outbox/current/retry_instructions.json` | per failed module: the checks, expected versus actual, anchors, a fix when a repair proved one |
+| `Validation/findings/outbox/current/findings_v2.json` | every finding in full |
+| `Validation/reports/paths/<path>_report.json` | the stage-by-stage verdict of one path |
+| `Validation/reports/dashboard.html` | the cockpit: paths, coverage, formal, faults, findings, drop history |
+
+A drop is identified by its content (`drop_id`), never by git. Two drops with
+the same `design_id` are the same design regenerated. The validator stops,
+rather than judging, when the drop is inconsistent: a block from another spec
+revision, a manifest naming a port that does not exist, or a model the spec
+no longer supports (it regenerates the model first; `--no-model-regen` stops
+instead).
+
+### 7.4 One path at a time
+
+For debugging, run a single path with a chosen stimulus and keep the work
+directory:
+
+```bash
+python3 Validation/tools/run_path.py --path path_19_row_conflict
+python3 Validation/tools/run_path.py --path path_01_write_cmd --stimulus random_v2 --seed 7 --drives 400
+python3 Validation/tools/run_path.py --path path_05_scheduler_refresh_loop --judge-only   # re-judge, no simulation
+python3 Validation/tools/run_path.py --path path_22_csr_standalone --probe "u_config_regs.reg_timing_0@0:2000"
+```
+
+The path list is `Validation/spec/path_definitions.json`; `--help` lists the
+stimulus generators.
+
+### 7.5 Gate-level: the backend's netlists through the same paths
+
+The backend's per-block netlists live at `backend/outputs/<block>/6_final.v`.
+A netlist is accepted when every path that instantiates the block passes with
+the netlist in the RTL's place, judged by the same models and assertions:
+
+```bash
+python3 Validation/tools/run_path.py --path path_21_wb_port_standalone --netlist wb_port=backend/outputs/wb_port/6_final.v
+```
+
+`flow.py` runs this for every block as its final stage.
+
+### 7.6 Validating the validation
+
+These are the checks that say whether the checkers themselves can be trusted.
+Run them after any change to a generator, a rule or a model:
+
+```bash
+# Seeded faults: 23 catalogued RTL mutations must each be caught, and blamed on the right block
+python3 Validation/faults/seed_faults.py --jobs 4                # simulates (10 to 20 minutes)
+python3 Validation/faults/seed_faults.py --judge-only            # re-judge after a checker changed
+
+# Two independent models per scope must agree on every recorded trace
+python3 Validation/agreement/model_agreement.py
+
+# A known-good open-source controller (UberDDR3) under our assertions: 0 failures expected
+python3 Validation/refdesigns/uberddr3/path_checkers_on_uberddr3.py --log <txn log>   # see its README for the Olympus run
+
+# Formal (JasperGold on Olympus): every generated assertion proven, bounded, or filed as a finding
+python3 Validation/tools/run_formal.py --path path_01_write_cmd
+```
+
+Results land in `Validation/reports/faults/fault_matrix.json`,
+`reports/model_agreement.json`, `reports/uberddr3/` and `reports/formal/`.
+
+### 7.7 Regenerating a model
+
+Reference models and checkers are generated by an LLM and accepted only when
+a spec-derived gate finds no fault in them. `validate_drop.py` does this
+automatically when a model no longer passes its gate under the drop's spec.
+To do it by hand, or to see the prompt a model is built from:
+
+```bash
+python3 Validation/agents/predictor_agent.py --scope config_regs --dry-run     # show the prompt, call nothing
+python3 Validation/agents/predictor_agent.py --scope config_regs               # generate, grade, accept or retry
+python3 Validation/agreement/second_opinion.py --scope config_regs            # its independent twin
+```
+
+Set `LLM_PROVIDER=tamu` to use the TAMU gateway instead of a personal Anthropic
+key. A model that the gate rejects after every retry is reported as a
+generation failure, never as a verdict on the design.
+
+### 7.8 Common issues
+
+| Symptom | Resolution |
+|---|---|
+| `no Olympus account` | Put `OLYMPUS_USER` and `OLYMPUS_KEY` (or `OLYMPUS_PASSWORD`) in `Validation/setup.env`, or export them |
+| `ssh connect attempt N failed`, then `TimeoutError` | Olympus is unreachable: connect to the TAMU VPN. Connection resets under load are retried automatically |
+| `STOP: the drop does not provide every block` | A partial drop: add `--partial`, or point `VALIDATION_RTL_DROP_ROOTS` at a complete one |
+| `FOREIGN spec rev` or `SPEC_MISMATCH` findings | A block was generated from another spec revision; regenerate the drop from one spec |
+| `STALE <scope> ... regenerating` | The spec changed under a model; the agent regenerates it. Needs an API key or `LLM_PROVIDER=tamu` |
+| `a generator refused the drop` | A manifest is inconsistent with the RTL (a `source` naming a missing port). The log names the port; it is a Frontend finding, not a simulation failure |
+| `path verdict : rc=2` for some paths | Those paths did not simulate (infrastructure). Their findings are carried as untested; rerun with `--paths` |
+

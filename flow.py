@@ -528,6 +528,8 @@ def stage_rtl_validation(run, args, partial=False, tag=None):
               + f"; package: {os.path.relpath(dest, ROOT)}")
     stage = "rtl_validation" + (f":{tag}" if tag else "")
     run.state["drop_id"] = h["drop_id"]
+    run.state["design_id"] = h.get("design_id")
+    run.state["spec_id"] = h.get("spec_id")
     run.record(stage, h["status"], detail, drop_id=h["drop_id"], package=dest)
     if h["status"] == "PASS":
         if blocked and not partial:
@@ -659,8 +661,17 @@ def stage_backend(run, args):
     cmd = [PY, BACKEND_PIPELINE, "--bundle_dir", bundle, "--out_root", run.backend_dir,
            "--drop_id", run.state.get("drop_id") or "", "--spec_revision", rev,
            "--mode", getattr(args, "backend_mode", None) or "build"]
+    if run.state.get("spec_id"):
+        cmd += ["--spec_id", run.state["spec_id"]]       # the content id (backend accepts it, 2026-10-09)
     if os.path.exists(env_file):
         cmd += ["--env_file", env_file]
+    # what these netlists are cut from: the drop as it stands now. The final
+    # stage refuses netlists whose drop is not the one it judges (a resumed
+    # run that regenerated RTL after the backend ran would otherwise judge
+    # stale netlists as current: the 2026-10-14 scheduler case, by design)
+    run.state["backend_built_from"] = {"drop_id": run.state.get("drop_id"),
+                                       "design_id": run.state.get("design_id"),
+                                       "round": run.state["rounds"]["backend"]}
     t_start = time.time()
     rc, txt = sh(cmd, cwd=BACKEND_AGENTS, log=run.log, timeout=12 * 3600)
     # Only a report this invocation wrote counts (one from an earlier round
@@ -784,8 +795,30 @@ def stage_final_validation(run, args):
                         "this stage runs through every path that instantiates the block. "
                         "A top-level netlist needs a top-level path, not built yet.",
                         netlists=nets)
+    # provenance: the netlists must be of the drop being judged (or the same
+    # design under a new drop id); otherwise a pass or a fail says nothing
+    # about this drop
+    built = run.state.get("backend_built_from") or {}
+    if built.get("drop_id") and built["drop_id"] != run.state.get("drop_id") \
+            and (built.get("design_id") or "x") != run.state.get("design_id"):
+        return run.halt("final_validation",
+                        f"stale netlists: the backend ran on drop {built['drop_id']} (design "
+                        f"{built.get('design_id')}), the drop to judge is {run.state.get('drop_id')} "
+                        f"(design {run.state.get('design_id')}). Rerun the backend on the current "
+                        f"drop (resume with --revalidate after the RTL changed)", built_from=built)
     with open(PATH_DEFS) as f:
         pdefs = [p for p in json.load(f)["paths"] if not p.get("judged_in")]
+    # every path whose simulated harness contains a netlisted block: the
+    # declared blocks plus the support closure (SIGNOFF §5c, 2026-10-15)
+    try:
+        sys.path.insert(0, os.path.join(VALIDATION, "structural"))
+        import chain_harness_gen as CHG
+        with open(os.path.join(VALIDATION, "structural", "integration_map.json")) as f:
+            imap = json.load(f)
+        closure = {p["id"]: set(CHG.block_closure(p["blocks"], imap, bool(p.get("standalone"))))
+                   for p in pdefs}
+    except Exception:
+        closure = {p["id"]: set(p["blocks"]) for p in pdefs}
     dest = os.path.join(run.val_dir, "gate")
     os.makedirs(dest, exist_ok=True)
     env = os.environ.copy()
@@ -793,7 +826,7 @@ def stage_final_validation(run, args):
     env["VALIDATION_SPEC"] = run.state["spec"]
     verdicts = {}
     for p in pdefs:
-        swap = [b for b in p["blocks"] if b in blocks]
+        swap = [b for b in blocks if b in closure[p["id"]]]
         if not swap:
             continue
         cmd = [PY, RUN_PATH, "--path", p["id"], "--report-dir", dest, "--timeout", "1500"]

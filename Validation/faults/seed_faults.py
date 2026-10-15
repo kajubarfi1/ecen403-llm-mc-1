@@ -163,11 +163,17 @@ def signature(report_dir, path):
         mv = VIOL_RE.search(st.get("summary", ""))
         if mv:
             sig[f"violations:{name}"] = int(mv.group(1))
-        for d in st.get("detail", []):
-            mm = ID_RE.match(d)
-            if mm and mm.group(1) not in ("scope",):
-                k = f"id:{mm.group(1)}"
-                sig[k] = sig.get(k, 0) + 1
+        if st.get("rule_counts"):
+            # the complete per-rule record (run_path keeps the scoreboard's
+            # `rules:` line); the detail lines below are only a window
+            for rid, n in st["rule_counts"].items():
+                sig[f"id:{rid}"] = sig.get(f"id:{rid}", 0) + int(n)
+        else:
+            for d in st.get("detail", []):
+                mm = ID_RE.match(d)
+                if mm and mm.group(1) not in ("scope", "rules"):
+                    k = f"id:{mm.group(1)}"
+                    sig[k] = sig.get(k, 0) + 1
     lp = os.path.join(report_dir, f"{path}_sim.log")
     if os.path.exists(lp):
         with open(lp, errors="replace") as f:

@@ -41,9 +41,22 @@ sys.path.insert(0, os.path.join(ROOT, "Validation", "agents"))
 from sim_runner import CadenceSSHAgent
 
 OUT_JSON = os.path.join(ROOT, "Validation", "reports", "coverage_code.json")
-DEFAULT_RUNS = ["/home/ugrads/j/jacobz/vmanager_session/*/cov_work/scope/*",
-                "/home/ugrads/j/jacobz/cadence_agent_work/cov_work/scope/*",
-                "/home/ugrads/j/jacobz/cadence_agent_work/runs/*/cov_work/scope/*"]
+# Remote paths are relative to the account's home on Olympus (resolved after
+# the agent connects: `~` -> the real $HOME), so nothing here names a person.
+DEFAULT_RUNS = ["~/vmanager_session/*/cov_work/scope/*",
+                "~/cadence_agent_work/cov_work/scope/*",
+                "~/cadence_agent_work/runs/*/cov_work/scope/*"]
+
+
+def _home(agent):
+    """The connected account's home on Olympus (the agent's work dir is
+    <home>/cadence_agent_work[/subdir])."""
+    wd = agent.work_dir or ""
+    return wd.split("/cadence_agent_work", 1)[0] if "/cadence_agent_work" in wd else "~"
+
+
+def _resolve(agent, path):
+    return path.replace("~", _home(agent), 1) if path.startswith("~") else path
 
 # Module-name patterns that are testbench, not design.
 TB_PATTERNS = [r"^chain_harness$", r"_txn_harness$", r"^seq_driver$",
@@ -84,8 +97,9 @@ def select_runs_since(agent, run_globs, since):
 
 def merge_and_report(agent, run_globs, label):
     """imc: merge -> load -> report_metrics; returns local tree.json path."""
-    remote_db = f"/home/ugrads/j/jacobz/cov_merged_{label}"
-    remote_rep = f"/home/ugrads/j/jacobz/cov_report_{label}"
+    remote_db = f"{_home(agent)}/cov_merged_{label}"
+    remote_rep = f"{_home(agent)}/cov_report_{label}"
+    run_globs = [_resolve(agent, g) for g in run_globs]
     tcl = (f"merge {' '.join(run_globs)} -out {remote_db} -overwrite "
            f"-initial_model union_all\n"
            f"load -run {remote_db}\n"

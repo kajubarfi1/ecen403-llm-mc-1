@@ -563,7 +563,7 @@
         "id": "REF_001",
         "name": "Refresh starvation",
         "severity": "critical",
-        "description": "Refresh postpone count exceeded max_postpone_count.",
+        "description": "Refresh postpone count reached cfg_max_postpone while a refresh was still owed (postpone_cnt saturates at cfg_max_postpone by construction, so it never exceeds it); the design's own signal is ref_starve_flag.",
         "scope": "refresh"
       },
       {

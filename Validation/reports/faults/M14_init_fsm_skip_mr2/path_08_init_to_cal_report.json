@@ -3,7 +3,7 @@
   "path": "path_08_init_to_cal",
   "strategy": "invariant",
   "verdict": "fail",
-  "timestamp": "2026-10-08T12:17:15.249338",
+  "timestamp": "2026-10-15T12:00:45.498075",
   "blocks": [
     "calibration",
     "init_fsm"
@@ -14,16 +14,17 @@
   "window_cycles": 180000,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "aea1d9e8ab81",
-    "drop_id": "aea1d9e8ab81",
+    "git_head": "7ac7634bc790",
+    "drop_id": "7ac7634bc790",
+    "design_id": "ed2df7a366a5",
     "blocks_used": [
       "calibration",
       "init_fsm"
     ],
-    "validated_at": "608d29d",
+    "validated_at": "6b693b1",
     "frontend_commits": {
-      "calibration": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "init_fsm": "9c21084cdda21e528b57299e638eef2b79fef2ec"
+      "calibration": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "init_fsm": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
     },
     "roots": [
       "Validation/faults/work/M14_init_fsm_skip_mr2/Frontend2/OutputFolders"
@@ -81,7 +82,8 @@
         "  INIT_001: MRS order violation: expected MR2, got MR0 @ [init_cmd.command addr=0x1d34 bank=0x0 cmd=0x0]",
         "  INIT_001: ZQCL issued before all MRS commands; missing MR[2, 3, 1, 0] @ [init_cmd.command addr=0x400 bank=0x0 cmd=0x6]",
         "  INIT_003: init_done raised before all MRS commands; missing MR[2, 3, 1, 0] @ [init_status.done fail=0x0 state=0xe]",
-        "  INIT_003: init_done raised before ZQCL issued @ [init_status.done fail=0x0 state=0xe]"
+        "  INIT_003: init_done raised before ZQCL issued @ [init_status.done fail=0x0 state=0xe]",
+        "  rules: INIT_001=4 INIT_003=2"
       ]
     }
   ],

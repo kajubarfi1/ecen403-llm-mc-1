@@ -3,7 +3,7 @@
   "path": "path_09_init_to_refresh",
   "strategy": "invariant",
   "verdict": "fail",
-  "timestamp": "2026-09-30T12:11:17.637570",
+  "timestamp": "2026-10-15T12:00:45.799043",
   "blocks": [
     "config_regs",
     "init_fsm",
@@ -15,24 +15,45 @@
   "window_cycles": 180000,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "5661e03",
+    "git_head": "e301d8ed2e1a",
+    "drop_id": "e301d8ed2e1a",
+    "design_id": "bd7a64f6678d",
+    "blocks_used": [
+      "config_regs",
+      "init_fsm",
+      "refresh_ctrl"
+    ],
+    "validated_at": "6b693b1",
+    "frontend_commits": {
+      "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "init_fsm": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "refresh_ctrl": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
+    },
     "roots": [
       "Validation/faults/work/M16_refresh_ctrl_before_init/Frontend2/OutputFolders"
     ],
     "blocks": {
       "config_regs": {
         "rtl": "Validation/faults/work/M16_refresh_ctrl_before_init/Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
-        "manifest": "Validation/faults/work/M16_refresh_ctrl_before_init/Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json"
+        "manifest": "Validation/faults/work/M16_refresh_ctrl_before_init/Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "init_fsm": {
         "rtl": "Validation/faults/work/M16_refresh_ctrl_before_init/Frontend2/OutputFolders/PHASE1RTL/init_fsm.sv",
-        "manifest": "Validation/faults/work/M16_refresh_ctrl_before_init/Frontend2/OutputFolders/PHASE1RTL/init_fsm_manifest.json"
+        "manifest": "Validation/faults/work/M16_refresh_ctrl_before_init/Frontend2/OutputFolders/PHASE1RTL/init_fsm_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "refresh_ctrl": {
         "rtl": "Validation/faults/work/M16_refresh_ctrl_before_init/Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
-        "manifest": "Validation/faults/work/M16_refresh_ctrl_before_init/Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json"
+        "manifest": "Validation/faults/work/M16_refresh_ctrl_before_init/Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       }
-    }
+    },
+    "shipped_spec": {
+      "path": "Validation/faults/work/M16_refresh_ctrl_before_init/Frontend2/OutputFolders/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
   },
   "stages": [
     {
@@ -41,7 +62,7 @@
       "model": null,
       "scope": "init_fsm",
       "verdict": "sva",
-      "note": "time-driven stage; pacing owned by SVA"
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
     },
     {
       "stage": "refresh_ctrl",
@@ -49,7 +70,7 @@
       "model": null,
       "scope": "refresh_ctrl",
       "verdict": "sva",
-      "note": "time-driven stage; pacing owned by SVA"
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
     },
     {
       "stage": "(path-level)",
@@ -61,7 +82,8 @@
       "detail": [
         "scope=path_09_init_to_refresh  strategy=invariant  status=fail  violations=2",
         "  REF_003: Refresh requested before init_done: refresh timer must be held until initialisation completes @ [refresh_req.request pending=0x1 starve=0x0 urgent=0x0]",
-        "  REF_004: No refresh request raised after init_done: controller cannot honour tREFI without requesting refresh @ [init_status.done fail=0x0 state=0xe]"
+        "  REF_004: No refresh request raised after init_done: controller cannot honour tREFI without requesting refresh @ [init_status.done fail=0x0 state=0xe]",
+        "  rules: REF_003=1 REF_004=1"
       ]
     }
   ],

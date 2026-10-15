@@ -4,7 +4,7 @@
 //
 // Interface : cal_status   (Calibration completion event)
 // Block     : calibration
-// Manifest  : Frontend2/OutputFolders/PHASE2RTL/calibration_manifest.json
+// Manifest  : runs/20261015-123308-llmmc_microarchitectures/drop/PHASE2RTL/calibration_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

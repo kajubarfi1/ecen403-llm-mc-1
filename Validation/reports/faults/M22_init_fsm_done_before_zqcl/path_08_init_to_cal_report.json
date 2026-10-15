@@ -3,7 +3,7 @@
   "path": "path_08_init_to_cal",
   "strategy": "invariant",
   "verdict": "fail",
-  "timestamp": "2026-09-30T15:25:08.458341",
+  "timestamp": "2026-10-15T12:00:46.594135",
   "blocks": [
     "calibration",
     "init_fsm"
@@ -14,20 +14,38 @@
   "window_cycles": 180000,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "5661e03",
+    "git_head": "4aa46726781f",
+    "drop_id": "4aa46726781f",
+    "design_id": "fc857a4b65e6",
+    "blocks_used": [
+      "calibration",
+      "init_fsm"
+    ],
+    "validated_at": "6b693b1",
+    "frontend_commits": {
+      "calibration": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "init_fsm": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
+    },
     "roots": [
       "Validation/faults/work/M22_init_fsm_done_before_zqcl/Frontend2/OutputFolders"
     ],
     "blocks": {
       "calibration": {
         "rtl": "Validation/faults/work/M22_init_fsm_done_before_zqcl/Frontend2/OutputFolders/PHASE2RTL/calibration.sv",
-        "manifest": "Validation/faults/work/M22_init_fsm_done_before_zqcl/Frontend2/OutputFolders/PHASE2RTL/calibration_manifest.json"
+        "manifest": "Validation/faults/work/M22_init_fsm_done_before_zqcl/Frontend2/OutputFolders/PHASE2RTL/calibration_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "init_fsm": {
         "rtl": "Validation/faults/work/M22_init_fsm_done_before_zqcl/Frontend2/OutputFolders/PHASE1RTL/init_fsm.sv",
-        "manifest": "Validation/faults/work/M22_init_fsm_done_before_zqcl/Frontend2/OutputFolders/PHASE1RTL/init_fsm_manifest.json"
+        "manifest": "Validation/faults/work/M22_init_fsm_done_before_zqcl/Frontend2/OutputFolders/PHASE1RTL/init_fsm_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       }
-    }
+    },
+    "shipped_spec": {
+      "path": "Validation/faults/work/M22_init_fsm_done_before_zqcl/Frontend2/OutputFolders/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
   },
   "stages": [
     {
@@ -35,16 +53,22 @@
       "kind": "autonomous",
       "model": null,
       "scope": "init_fsm",
-      "verdict": "sva",
-      "note": "time-driven stage; pacing owned by SVA"
+      "verdict": "fail",
+      "summary": "SVA fired: a_INIT_003_init_done x1",
+      "detail": [
+        "a_INIT_003_init_done fired 1x (see the sim log)"
+      ]
     },
     {
       "stage": "calibration",
       "kind": "autonomous",
       "model": null,
       "scope": "calibration",
-      "verdict": "sva",
-      "note": "time-driven stage; pacing owned by SVA"
+      "verdict": "fail",
+      "summary": "SVA fired: a_CAL_001 x1",
+      "detail": [
+        "a_CAL_001 fired 1x (see the sim log)"
+      ]
     },
     {
       "stage": "(path-level)",
@@ -60,7 +84,8 @@
         "  INIT_001: MRS to MR0 issued after init_done @ [init_cmd.command addr=0x1d34 bank=0x0 cmd=0x0] [init_status.done fail=0x0 state=0x7]",
         "  INIT_001: ZQCL issued after init_done @ [init_cmd.command addr=0x400 bank=0x0 cmd=0x6] [init_status.done fail=0x0 state=0x7]",
         "  INIT_003: init_done raised before all MRS commands; missing MR[0] @ [init_status.done fail=0x0 state=0xe]",
-        "  INIT_003: init_done raised before ZQCL issued @ [init_status.done fail=0x0 state=0xe]"
+        "  INIT_003: init_done raised before ZQCL issued @ [init_status.done fail=0x0 state=0xe]",
+        "  rules: INIT_001=2 INIT_003=4"
       ]
     }
   ],

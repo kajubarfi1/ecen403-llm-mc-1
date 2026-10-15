@@ -1,0 +1,32 @@
+{
+  "$schema": "validation-known-good/1",
+  "generated_utc": "2026-10-14T02:06:30.123196+00:00",
+  "validator": "cb2dc77",
+  "reference": "AngeloJacobo/UberDDR3 (fetched 2026-09-24), testbench/ddr3_dimm_micron_sim.sv, TWO_LANES_x8, den8192Mb sg125, 12ns/3ns, SPEED_BIN 3, MICRON_SIM=1",
+  "spec": "builds/uberddr3_ddr3-667_x16_2lane_1rank/microarch_spec.json",
+  "assertions": "Validation/refdesigns/uberddr3/generated/cmd_gen_sva_pins.sv, regenerated 2026-10-08 with sva_gen.py --clock ddr --suffix _pins ($sampled trackers, qualifier-ANDed command matches)",
+  "observation_point": "DRAM pins between ddr3_top and the Micron model, sampled on the DDR clock",
+  "simulator": "Xcelium on Olympus, with Validation/refdesigns/uberddr3/xcelium_compat.patch",
+  "uberddr3_self_check": {
+    "writes": 4608,
+    "reads": 4608,
+    "success": 4604,
+    "fails": 4
+  },
+  "micron_model_errors": 0,
+  "our_assertion_failures": 0,
+  "commands_observed": 15946,
+  "command_histogram_by_encoding": {
+    "0": 8,
+    "6": 1,
+    "2": 2569,
+    "5": 4878,
+    "1": 30,
+    "3": 2635,
+    "4": 5825
+  },
+  "txn_log_lines": 34379,
+  "sim_end": "Simulation stopped via $stop(1) at time 256652 NS (testbench end)",
+  "note": "Rerun after the 2026-10-08 generator changes (SVA trackers use $sampled; command matches qualifier-ANDed; CAS pairing rule restated). The SSH channel timed out at 1700 s while the Slurm job ran to completion; the log was read back from Olympus afterwards.",
+  "verdict": "pass"
+}

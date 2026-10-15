@@ -52,10 +52,11 @@ Functional coverage: **100 % of reachable bins** in the spec-derived covergroups
 (`sva/generated/*_fcov.sv`, `cmd_gen_coverage.sv`). A bin is "unreachable" only
 when listed in §4 with a reason; "not hit" is not "unreachable".
 
-Current measurement (drop 1fea117, baseline stimulus, before constrained-random
-v2): design 75.1 %; scheduler 71.4 %, cmd_queue 58.4 %, bank_tracker 78.5 %,
-wb_port 59.5 %, data_path 76.7 %; vplan 27/39 items fully covered. The gap to
-target is what the closure loop and constrained-random v2 exist to close.
+Current measurement (drop 3596e1ec698e, 2026-10-08, baseline stimulus, before
+constrained-random v2): design 69.9 %; scheduler 65.8 %, cmd_queue 49.5 %,
+bank_tracker 78.5 %, wb_port 56.5 %, data_path 68.6 %; vplan 27/39 items
+fully covered. The gap to target is what the closure loop and
+constrained-random v2 exist to close.
 
 ## 4. Exclusion rules
 
@@ -120,9 +121,34 @@ instantiates the block passes with the netlist in the RTL's place
 (`run_path.py --netlist`), judged by the same models, rules and assertions
 as the RTL, with the platform's functional cell models and zero delay. A
 netlist that passes RTL-equivalent behaviour but not timing is the
-backend's finding (STA), not this gate's. Current: wb_port and init_fsm
-netlists from `backend/outputs/` pass their paths; the other nine await
-per-block backend runs.
+backend's finding (STA), not this gate's. Synthesis flattens the RTL's
+unpacked-array ports into packed vectors with element 0 at the most
+significant end (measured with `--probe` on the cmd_queue netlist,
+2026-10-14); `run_path.py` wraps every netlist in a generated module with
+the RTL's port shapes so the harness, monitors and assertions bind
+unchanged. `tools/run_netlists.py` runs every block and writes
+`reports/netlists/summary.json`.
+
+Current (netlists built from drop 4b86c7cd3705, judged against
+dab971c2aab9, 2026-10-14):
+
+"Every path that instantiates the block" means every runnable path whose
+simulated harness closure contains the block (declared blocks plus the
+support the integration map adds): 116 block-path pairs, not the 60 the
+declared lists alone give (2026-10-15).
+
+| block | paths | result |
+|---|---|---|
+| addr_decoder 11, bank_tracker 11, calibration 3, cmd_gen 11, cmd_queue 11, config_regs 17, data_path 11, init_fsm 5, refresh_ctrl 13, wb_port 12 | 105/105 | PASS, no assertion fired |
+| scheduler | 0/11 | FAIL: PROTO_002, TIMING_004, TIMING_005, TIMING_011, the pre-fix scheduler's signature. Judged against the drop it was cut from (`reports/netlists_vs_4b86/`), the netlist fires exactly the assertion counts its RTL did on every path: the netlist equals its RTL, and the RTL is the design before the Frontend's feedback-latency hold (a7cd3cb93546). Rebuild from the current drop |
+
+Note on bank_tracker: its netlist is also pre-fix (per-bank tWTR gating
+PRECHARGE, the RTL's TIMING_007), yet it passes all 11 closure paths. The
+current scheduler's hold enforces the write-to-read turnaround itself, so
+the surrounding RTL masks the old bank_tracker's gap. A gate-level verdict
+is on the composed design, as the RTL verdict is; a masked defect in one
+block's netlist is not a false pass, but it is not evidence the block is
+right either, which is why the ask to rebuild it stands.
 
 ## 6. Formal
 
@@ -145,9 +171,10 @@ and counts; a counterexample under a cut may be spurious, is marked so in the
 report, is never filed as a finding, and the property falls back to the
 simulation bar (silent on the baseline, fired by at least one seeded fault).
 
-Current (5661e03):
-- command path (`path_01`): 4 proven, 8 CEX filed/attributed, 1 undetermined
-  (tREFI).
+Current (a7cd3cb93546, 2026-10-08):
+- command path (`path_01`): 12 proven at infinite bound, 0 counterexamples,
+  1 undetermined (tREFI, bound 201). On 5661e03 this was 4 proven / 8 CEX;
+  the Frontend's scheduler hold closed every counterexample.
 - boot path (`path_08`, init_fsm + calibration): CAL_001/CAL_002 proven
   concretely; with `u_init_fsm.wait_cnt` cut, INIT_001 (×2), INIT_002 and
   INIT_003 proven at infinite bound, covers 5/5; `a_INIT_002_init_done`
@@ -157,7 +184,9 @@ Current (5661e03):
 
 The checkers themselves are signed off against UberDDR3 (`refdesigns/uberddr3/`):
 0 assertion failures, 0 data-integrity mismatches, 0 host-to-pin address
-mismatches, with the Micron model as the independent cross-check. Any change
+mismatches, with the Micron model as the independent cross-check (last run
+2026-10-13, validator cb2dc77: `reports/uberddr3/known_good_cb2dc77.json`,
+path checkers 0 violations). Any change
 to a generator or rule must re-run that suite and keep it at zero; a sanity
 mutation must still fire.
 

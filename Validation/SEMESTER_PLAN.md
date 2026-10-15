@@ -522,6 +522,69 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   requests to its bank — legal without an age bound. Reply addendum 2 in
   `findings/HANDOFF_FRONTEND_2026-10-08_reply.md`.
 
+- *2026-10-09 — the checkers re-validated on the clean drop.* Seeded faults on
+  `a7cd3cb93546`: **23/23 killed, 0 masked, 0 survived** (M17 re-seeded to the
+  new `ref_ok` gate, M12 to the hold condition). Six rows are killed by other
+  evidence than the catalogue names: M04 (tRRD zero) no longer trips
+  TIMING_005 because the scheduler's hold spaces ACTs anyway; M06/M17 still
+  do not raise REF_001 (the refresh-level gap, next item); M14/M22 on
+  path_14 lose their INIT ids to the assertion rows. The catalogue's
+  `expect` lists are a record of how each fault was first caught, not a
+  promise — the kill is what is graded. Path checkers replayed on the
+  UberDDR3 known-good trace (9216 host requests, 14450 pin commands) after
+  today's regenerations: **0 violations**. Pin-level assertions regenerated
+  from the UberDDR3 spec with today's `sva_gen` (`$sampled` trackers) and
+  rerun on Olympus 2026-10-13 (`reports/uberddr3/known_good_cb2dc77.json`):
+  **0 assertion failures, 0 Micron errors, 15,946 commands**, self-check
+  4608/4608 with its 4 deliberate fails; path checkers on the fresh log
+  0 violations over 9,216 requests. The checker version that judged
+  `a7cd3cb93546` and `dab971c2aab9` clean has its false-positive floor.
+
+- *2026-10-14 — gate level: Dawson's eleven netlists through the paths.*
+  `tools/run_netlists.py` (every block, every path that instantiates it,
+  sky130 functional models). Two infrastructure gaps first: the cell
+  library covered 63 families from the August netlists and these need 90
+  (170 files mirrored from the open PDK, 204 models installed); and the
+  netlists flatten unpacked-array ports to packed vectors, so three blocks
+  did not elaborate (TYCMPAT). `run_path.py` now wraps every netlist in a
+  generated module with the RTL's port shapes; the element order (0 at the
+  MSB end) was measured with `--probe` on the cmd_queue netlist after the
+  assumed order produced phantom all-zero queue entries. Result: **10 of 11
+  blocks PASS, 50/50 paths, no assertion fired; scheduler 0/10** with the
+  pre-fix signature (PROTO_002/TIMING_004/005/011): the netlists were cut
+  from `4b86c7cd3705`, before the Frontend's hold, so the gate-level stage
+  caught a stale netlist, which is what it is for. Ask to Dawson: rebuild
+  scheduler, bank_tracker, refresh_ctrl from `dab971c2aab9`. Then (10-15)
+  the rule was widened to every path whose harness closure contains the
+  block: 116 pairs instead of 60, **105/105 pass, scheduler 0/11**. The
+  pre-fix bank_tracker netlist passes all 11 of its closure paths because
+  the current scheduler's hold enforces tWTR itself, so the composed
+  design is right while that block is not; recorded in SIGNOFF §5c.
+
+- *2026-10-15 — REF_001 observed at last, and what the refresh path was
+  really testing.* A change-qualified `refresh_level` stream (required,
+  urgent, pending, starve on every change) joins the scheduler and path_05
+  checkers; REF_001 is judged on it (pending > max_postpone_count, or the
+  design's own starve flag). Four regenerations accepted first attempt.
+  Then the clean drop failed path_05 with 52 REF_001s, and the chain of
+  causes was all ours: (1) the refresh-stress stimulus programmed
+  `max_postpone = 2` and left `urgent_threshold` at 6, so urgency could never
+  assert and the controller starved by configuration (observation sent to
+  Lehana: the design accepts a threshold above the budget); (2) with the
+  budget fixed, the stress tREFI of 4 x tRFC_nCK equalled bank_tracker's
+  enforced tRFC window (`timing_model.counter_clock.window_scale` = 4), so
+  the scheduler could issue exactly one REFRESH per tick and never drain —
+  the stimulus now stresses against the enforced window; (3) the scoreboard
+  printed 20 violations and the stage kept 12 lines, so a SCHED_003 raised
+  at end of trace as violation 71 was invisible to the fault suite — the
+  scoreboard now prints a complete `rules:` count line that the stage
+  record and the fault signature read; (4) the regenerated scheduler checker
+  counted level increments as unserviced requests, so a refresh pending at
+  the end of the window read as SCHED_003 — rule restated (requests on
+  refresh_req, service on REFRESH, pending-at-end legal) with a variant.
+  Result on the clean drop: 0 starve events, pending peaks at 6 of 8. M06
+  now raises REF_001 x63 as new evidence, M17 REF_001 x23 + SCHED_003.
+
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the
 schema generator's default root and `faults/fault_catalog.json` now point

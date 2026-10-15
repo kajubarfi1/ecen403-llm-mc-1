@@ -631,6 +631,15 @@ def main() -> int:
         print(f"  ... and {len(result.mismatches) - 20} more")
     for v in result.violations[:20]:
         print(f"  {v}")
+    if result.violations:
+        # every rule with its count, however many violations there are: the
+        # 20 lines above are examples, this line is the record (a SCHED_003
+        # raised at end of trace sat at position 71 and was invisible, 10-15)
+        counts = {}
+        for v in result.violations:
+            k = getattr(v, "taxonomy_id", None) or getattr(v, "rule", None) or "?"
+            counts[k] = counts.get(k, 0) + 1
+        print("  rules: " + " ".join(f"{k}={n}" for k, n in sorted(counts.items())))
 
     if args.findings:
         with open(args.findings, "w") as f:

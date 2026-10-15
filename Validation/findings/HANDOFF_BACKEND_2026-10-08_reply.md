@@ -122,3 +122,58 @@ rule). Validation on it: 19/19 paths pass, 0 open findings, every scheduler-
 and bank_tracker-family finding resolved by the Frontend's 10/08 fixes, and
 JasperGold proves 12/13 command-path assertions at infinite bound. Netlists
 built from `4b86c7cd3705` RTL are therefore netlists of the current design.
+
+## Addendum 2 (2026-10-14): your eleven netlists through the paths
+
+All eleven ran through every path that instantiates their block, with the
+sky130 functional models, judged by the same models and assertions as the
+RTL (`Validation/reports/netlists/summary.json`; SIGNOFF.md §5c has the
+table).
+
+| | |
+|---|---|
+| addr_decoder, calibration, cmd_gen, config_regs, data_path, init_fsm, refresh_ctrl, wb_port, bank_tracker, cmd_queue | **PASS**, 105 of 105 block-path pairs (every path whose harness contains the block), no assertion fired |
+| scheduler | **FAIL**, 0 of 11: PROTO_002 ×23, TIMING_004 ×23, TIMING_005, TIMING_011 on every path |
+
+**The scheduler result is the pre-fix design, not a synthesis defect.** We
+also judged the netlist against the `4b86c7cd3705` drop it was cut from:
+on every path it fires exactly the assertion counts that RTL fired
+(`Validation/reports/netlists_vs_4b86/`), so synthesis preserved the
+design. The signature is exactly what the `4b86c7cd3705` RTL produced before the
+Frontend's feedback-latency hold landed in `a7cd3cb93546` (commit 6e2d7ad
+changed `scheduler.sv` by 76 lines and `bank_tracker.sv` by 28; cmd_queue
+is byte-identical). So `NETLISTS.json`'s `design_equivalent_drop:
+a7cd3cb93546` is not right for those two blocks: the 4b86 → a7cd step was
+a design change, and only a7cd → dab971c2aab9 (tREFI in refresh_ctrl) is
+the one your note describes. Our `design_id` says the same: `dfaf3628f09a`
+for 4b86 against `3973ce99af71` now. **ask:** rebuild `scheduler`,
+`bank_tracker` and `refresh_ctrl` from `dab971c2aab9`; the other eight are
+current. Your STA on the scheduler (169 MHz, WNS −0.91 ns) is on the old
+design too, and the hold logic will move it.
+
+**Two things we fixed on our side to run them, for your information.**
+Our installed sky130 set had 63 cell families from the two August
+netlists; yours use 90 families and 201 size variants, now mirrored from
+the open PDK (204 models installed). And synthesis flattens the RTL's
+unpacked-array ports (`logic [W-1:0] p [D]`) into `[D*W-1:0]` with element
+0 at the **most significant** end; we measured it on the cmd_queue netlist
+rather than assume it, and `run_path.py` now wraps each netlist in a
+module with the RTL's port shapes. If you ever emit a port-order note in
+`NETLISTS.json`, that is the convention to state.
+
+**Provenance, so this is caught by a rule next time (done on our side,
+2026-10-15).** `run_netlists.py` now compares `NETLISTS.json`'s `drop_id`
+(and `design_id` when present) with the drop it judges and marks the whole
+set STALE when neither matches; `flow.py`'s final stage refuses netlists
+the backend built on a different drop than the one it judges. `flow.py`
+also passes `--spec_id` now, as you accept it. **ask:** record `design_id`
+in `NETLISTS.json` and in the per-design final report, taking the value
+from our `HANDOFF.json` of the drop you build from (or accept a
+`--design_id` and we pass it), and drop the `design_equivalent_drop`
+field: equivalence is what `design_id` states, by one definition.
+
+The bank_tracker netlist is pre-fix too (per-bank tWTR) and still passes
+all 11 paths whose harness contains it, because the current scheduler's
+hold enforces the write-to-read turnaround on its own. That is a pass of
+the composed design, not evidence the old bank_tracker is right, so the
+rebuild ask includes it.

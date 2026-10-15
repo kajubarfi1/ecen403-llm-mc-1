@@ -79,7 +79,7 @@ class Fake:
                     json.dump({"partial": True, "blocks_absent": self.absent, "paths_blocked": {"path_21_wb_port_standalone": ["wb_port"]},
                                "paths_run": []}, f)
             with open(os.path.join(flow.OUTBOX_CURRENT, "HANDOFF.json"), "w") as f:
-                json.dump({"drop_id": "abc123", "status": status,
+                json.dump({"drop_id": "abc123", "design_id": "d51g0", "spec_id": "5pec1d", "status": status,
                            "failed_modules": [] if status == "PASS" else self.failed}, f)
             with open(os.path.join(flow.OUTBOX_CURRENT, "retry_instructions.json"), "w") as f:
                 json.dump({"failed_modules": [] if status == "PASS" else self.failed}, f)
@@ -288,6 +288,41 @@ class TestHalts(FlowCase):
         self.assertEqual(be[be.index("--drop_id") + 1], "abc123")
         self.assertEqual(be[be.index("--spec_revision") + 1], "fake_rev")
         self.assertEqual(be[be.index("--mode") + 1], "contract")
+        self.assertEqual(be[be.index("--spec_id") + 1], "5pec1d")
+        self.assertEqual(run.state["backend_built_from"]["drop_id"], "abc123")
+
+    def test_final_stage_refuses_netlists_of_another_drop(self):
+        # the backend ran on one drop; the run then regenerated RTL (new
+        # drop id, new design id) and resumed: its netlists are stale and
+        # must not be judged as the current drop's (2026-10-14 scheduler case)
+        os.environ["USE_DOCKER"] = "1"
+        fake = Fake(self.run_dir, backend={"pipeline_status": "PASS", "artifacts": []})
+        orig = fake.__call__
+
+        def call(cmd, cwd=None, stdin=None, env=None, log=None, timeout=None):
+            name = os.path.basename(next((c for c in cmd if c.endswith(".py")), ""))
+            if name == "pipeline.py":
+                rc, out = orig(cmd, cwd, stdin, env, log, timeout)
+                out_root = cmd[cmd.index("--out_root") + 1]
+                os.makedirs(os.path.join(out_root, "runner", "wb_port"), exist_ok=True)
+                open(os.path.join(out_root, "runner", "wb_port", "6_final.v"), "w").close()
+                return rc, out
+            if name == "run_path.py":
+                return 0, "  path verdict : PASS\n"
+            return orig(cmd, cwd, stdin, env, log, timeout)
+        flow.sh = call
+        a = self.args()
+        run = flow.Run(self.run_dir, a)
+        rc = flow.run_flow(run, a)
+        self.assertEqual(run.state["status"], "complete")
+        # the drop moved under the run after the backend built its netlists
+        run.state["drop_id"], run.state["design_id"] = "fffff0000000", "0000000fffff"
+        run.state["stages"] = [s for s in run.state["stages"] if s["stage"] != "final_validation"]
+        run.save()
+        rc = flow.stage_final_validation(run, a)
+        self.assertEqual(run.state["halt"]["stage"], "final_validation")
+        self.assertIn("stale netlists", run.state["halt"]["why"])
+        self.assertIn("abc123", run.state["halt"]["why"])
 
     def test_backend_nonzero_exit_is_fail_even_with_a_stale_pass_report(self):
         # backend handoff 2026-10-08: a report from an earlier round has the

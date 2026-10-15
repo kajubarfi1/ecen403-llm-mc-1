@@ -1,0 +1,87 @@
+  stimulus: refresh_stress on wb_port
+refresh_stress_seed1: 746 step(s) (602 drive, 143 idle covering 271 cycle(s)), targets ['VP_FAIL_012', 'VP_TIME_006']
+  wrote Validation/sequences/generated/runs/netlist_scheduler/path_05_scheduler_refresh_loop/seq_driver.sv
+wrote Validation/sequences/generated/runs/netlist_scheduler/path_05_scheduler_refresh_loop/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
+
+Path    : path_05_scheduler_refresh_loop  [invariant]
+Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
+Window  : 6000 cycles settle after driver
+Stages  : scheduler(invariant); refresh_ctrl(autonomous)
+
+Running: xrun ... -top chain_harness  (50 file(s))
+  log -> Validation/reports/netlists_vs_4b86/scheduler/path_05_scheduler_refresh_loop_sim.log
+
+  EMBEDDED RTL ASSERTIONS FIRED (4924 total) — the design's own checks disagree with its behavior:
+    a_PROTO_002              947x
+    illegal bin: cp_trc_spacing 946x
+    illegal bin: cp_trrd_spacing 946x
+    illegal bin: cp_tfaw_spacing 946x
+    a_TIMING_004             946x
+    a_TIMING_005             85x
+    p_wr_no_overflow         82x
+    illegal bin: cp_trfc_spacing 13x
+    a_TIMING_011             13x
+17035 transaction(s)
+    cfg_refresh.reset        1
+    cfg_refresh.update       2
+    cfg_timing.reset         1
+    cq_deq.dequeue           600
+    cq_deq.reset             1
+    cq_enq.enqueue           600
+    cq_enq.reset             1
+    csr.reset                1
+    csr.write                2
+    csr_rsp.reset            1
+    csr_rsp.write_ack        2
+    csr_sts.event            5
+    csr_sts.reset            1
+    csr_sts_level.reset      1
+    csr_sts_level.state      28
+    ddr_cmd.command          3929
+    ddr_cmd.reset            1
+    ddr_rd_beat.reset        1
+    ddr_wr_beat.beat         1030
+    ddr_wr_beat.reset        1
+    dp_cmd.reset             1
+    dp_cmd.write             600
+    dp_rd_rsp.reset          1
+    dp_wr.reset              1
+    dp_wr.write              518
+    refresh_ack.ack          26
+    refresh_ack.reset        1
+    refresh_req.request      13
+    refresh_req.reset        1
+    req.request              600
+    req.reset                1
+    sched_cmd.command        3929
+    sched_cmd.reset          1
+    sched_deq.grant          600
+    sched_deq.reset          1
+    sched_in.command         3929
+    sched_in.reset           1
+    wb.reset                 1
+    wb.write                 600
+    wb_rsp.reset             1
+  time span: 0 .. 74854000
+wrote 17035 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists_vs_4b86/scheduler/path_05_scheduler_refresh_loop_observed.jsonl
+
+==================================================================
+  scheduler                    [invariant ]  FAIL
+      scope=scheduler  strategy=invariant  status=fail  violations=1
+      scope=scheduler  strategy=invariant  status=fail  violations=1
+        REF_002 (REFRESH issued while one or more banks are still active): REFRESH command issued with banks [2] still active (not precharged)
+  refresh_ctrl                 [autonomous]  SVA-OWNED
+  cmd_gen (support)            [sva       ]  FAIL
+      SVA fired: a_PROTO_002 x947, a_TIMING_004 x946, a_TIMING_005 x85, a_TIMING_011 x13
+      a_PROTO_002 fired 947x (assertion bound to cmd_gen, not a judged stage)
+      a_TIMING_004 fired 946x (assertion bound to cmd_gen, not a judged stage)
+      a_TIMING_005 fired 85x (assertion bound to cmd_gen, not a judged stage)
+      a_TIMING_011 fired 13x (assertion bound to cmd_gen, not a judged stage)
+  (path-level)                 [invariant ]  FAIL
+      scope=path_05_scheduler_refresh_loop  strategy=invariant  status=fail  violations=1
+      scope=path_05_scheduler_refresh_loop  strategy=invariant  status=fail  violations=1
+        REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]
+==================================================================
+
+  path verdict : FAIL
+  report -> Validation/reports/netlists_vs_4b86/scheduler/path_05_scheduler_refresh_loop_report.json

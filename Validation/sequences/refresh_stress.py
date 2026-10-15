@@ -38,7 +38,13 @@ sys.path.insert(0, HERE)
 from register_walk import SPEC, SCHEMAS, CATALOG, register_iface, to_int  # noqa: E402
 
 TREFI_MULT_OF_TRFC = 4        # stressed interval: a few refresh cycles long
-STRESS_POSTPONE = 2           # small budget so starvation is reachable
+# The budget stays the spec's: refresh_ctrl drops a tick that arrives while
+# saturated at the programmed budget and raises ref_starve_flag, so a budget
+# of 2 with a tREFI of a few tRFC starves by configuration whatever the
+# scheduler does (52 starve events on the clean drop, 2026-10-15). With the
+# spec budget, starvation needs the scheduler to lag max_postpone_count
+# ticks, which is the defect this path exists to catch.
+STRESS_POSTPONE = 8
 
 
 def field_bits(f):
@@ -90,11 +96,31 @@ def generate(spec, schemas, catalog, seed=1, drives=600, csr_block="config_regs"
     trefi_nck = math.ceil(float(tm["tREFI"]) / tck)
     budget = spec["controller_architecture"]["refresh_policy"]["max_postpone_count"]
 
-    stress_trefi = TREFI_MULT_OF_TRFC * trfc_nck
+    # The spec may declare that the design's timing counters tick in
+    # controller cycles while loading nCK values (counter_clock.window_scale):
+    # then the ENFORCED tRFC is window_scale x tRFC_nCK, and a tREFI shorter
+    # than that lets the scheduler issue at most one REFRESH per tick, so the
+    # postponed count can never drain and ticks are dropped by configuration
+    # (42 starve events on the clean drop, 2026-10-15). Stress against the
+    # enforced window, not the nominal one.
+    window_scale = int((tm.get("counter_clock") or spec.get("counter_clock") or {}).get("window_scale", 1))
+    stress_trefi = TREFI_MULT_OF_TRFC * window_scale * trfc_nck
     stress_postpone = min(STRESS_POSTPONE, budget)
 
     r_refi, f_refi = find_field(spec, "tREFI")
     r_post, f_post = find_field(spec, "max_postpone")
+    # The urgency threshold must not exceed the budget it escalates within:
+    # the reset value (spec 6) left beside a budget of 2 means urgency can
+    # never assert, the scheduler never preempts, and the controller starves
+    # by configuration rather than by any scheduling fault (REF_001 on the
+    # clean drop, 2026-10-15). Urgent when the budget is reached; starvation
+    # then needs a further tick the scheduler failed to serve.
+    r_urg, f_urg = find_field(spec, "urgent_threshold")
+    assert r_urg["name"] == r_post["name"], "max_postpone and urgent_threshold share a register"
+    spec_urgent = int(spec["controller_architecture"]["refresh_policy"].get("urgent_threshold", stress_postpone))
+    config_word = word_with(r_post, f_post, stress_postpone)
+    hi, lo = field_bits(f_urg)
+    config_word = (config_word & ~(((1 << (hi - lo + 1)) - 1) << lo)) | (min(spec_urgent, stress_postpone) << lo)
 
     steps = [{"op": "reset"}]
 
@@ -104,8 +130,7 @@ def generate(spec, schemas, catalog, seed=1, drives=600, csr_block="config_regs"
 
     drive(csr, "write", addr=to_int(r_refi["offset"]),
           data=word_with(r_refi, f_refi, stress_trefi))
-    drive(csr, "write", addr=to_int(r_post["offset"]),
-          data=word_with(r_post, f_post, stress_postpone))
+    drive(csr, "write", addr=to_int(r_post["offset"]), data=config_word)
     steps.append({"op": "idle", "cycles": 4})
 
     for _ in range(drives):

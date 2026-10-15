@@ -3,7 +3,7 @@
   "path": "path_09_init_to_refresh",
   "strategy": "invariant",
   "verdict": "fail",
-  "timestamp": "2026-10-08T12:16:57.349785",
+  "timestamp": "2026-10-15T12:00:44.399593",
   "blocks": [
     "config_regs",
     "init_fsm",
@@ -15,18 +15,19 @@
   "window_cycles": 180000,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "3a2ab36d9820",
-    "drop_id": "3a2ab36d9820",
+    "git_head": "a2dd16ffae86",
+    "drop_id": "a2dd16ffae86",
+    "design_id": "6adadc6c928b",
     "blocks_used": [
       "config_regs",
       "init_fsm",
       "refresh_ctrl"
     ],
-    "validated_at": "608d29d",
+    "validated_at": "6b693b1",
     "frontend_commits": {
-      "config_regs": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "init_fsm": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "refresh_ctrl": "9c21084cdda21e528b57299e638eef2b79fef2ec"
+      "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "init_fsm": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "refresh_ctrl": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
     },
     "roots": [
       "Validation/faults/work/M05_refresh_never_requested/Frontend2/OutputFolders"
@@ -80,7 +81,8 @@
       "summary": "scope=path_09_init_to_refresh  strategy=invariant  status=fail  violations=1",
       "detail": [
         "scope=path_09_init_to_refresh  strategy=invariant  status=fail  violations=1",
-        "  REF_004: No refresh request raised after init_done: controller cannot honour tREFI without requesting refresh @ [init_status.done fail=0x0 state=0xe]"
+        "  REF_004: No refresh request raised after init_done: controller cannot honour tREFI without requesting refresh @ [init_status.done fail=0x0 state=0xe]",
+        "  rules: REF_004=1"
       ]
     }
   ],

@@ -278,6 +278,38 @@ drop still raises the check or still carries the edited source text.
 **Housekeeping:** the `bank_tracker_gen.py` patch our run applied this
 afternoon is superseded by your commit 6e2d7ad and is discarded on our side.
 
+## Addendum 3 (2026-10-15): REF_001 is now observed, and one configuration observation
+
+The refresh controller's levels (`ref_required`, `ref_urgent`,
+`ref_pending_cnt`, `ref_starve_flag`) are now a change-qualified stream
+(`refresh_level`) our scheduler and path_05 checkers read, so REF_001 is
+judged on the count the design actually drives rather than on the request
+edge. Under our M06 mutant the count climbs to 15 and REF_001 fires; on the
+clean drop it is silent once the stimulus below is corrected.
+
+**Observation, not a defect filed:** `ref_starve_flag` is raised when a
+refresh tick arrives while `postpone_cnt` is saturated at
+`cfg_max_postpone`, and `ref_urgent` only when `postpone_cnt >=
+cfg_urgent_threshold`. With REFRESH_CONFIG programmed to `max_postpone = 2`
+and `urgent_threshold` left at its reset value 6, urgency can never assert,
+the `urgent_preempt` policy never preempts, and the controller starves
+refreshes by configuration under sustained writes. Our refresh-stress
+stimulus did exactly that and we have corrected it (threshold programmed
+alongside the budget). Whether the design should guard against it, by
+clamping the effective threshold to the budget or by the spec stating
+`urgent_threshold <= max_postpone_count`, is your call; today a host can
+program a combination under which the refresh policy cannot work.
+
+A second one in the same family, from your `counter_clock` note: because
+bank_tracker enforces tRFC for `window_scale` (4) times the nCK value, a
+host-programmed tREFI at or below 4 x tRFC lets the scheduler issue at
+most one REFRESH per tick, so the postponed count can never drain and
+ticks are dropped at the budget. Our stress stimulus did that too and now
+stresses against the enforced window. At the spec's tREFI (49 x tRFC) there
+is no issue; the point is that the 4x convention turns an aggressive but
+legal CSR value into refresh loss. Both observations argue for the counters
+ticking in the units they are loaded with.
+
 **Questions**
 
 1. `a7cd3cb93546` is the drop in our outbox now (`HANDOFF.json`, status
@@ -288,3 +320,55 @@ afternoon is superseded by your commit 6e2d7ad and is discarded on our side.
 2. Would you add `counter_clock` (or state in the spec that bank_tracker
    counts in controller cycles with nCK loads) so the timing checks can be
    exact rather than conservative?
+
+## Addendum 4 (2026-10-15): your sections 9 and 10
+
+**§10 `dab971c2aab9` is validated and is the drop in our outbox.** 19 of 19
+paths, 0 open findings, every scope agreeing with its second opinion,
+seeded faults 23/23, UberDDR3 known-good 0/0 on the same checkers. The
+tREFI fix is confirmed by measurement, not only by your testbench: on
+path_09 and path_16 (CSR at reset values) the new `refresh_level` stream
+shows seven refresh ticks spaced exactly **7.800 µs** apart. On the formal
+side `a_TIMING_012` is still *undetermined at bound 201*, as before; that
+is our limit, not the design's: a 1560-cycle interval is beyond the bounded
+engine, and it needs the same wait-counter abstraction we used for init
+(`run_formal.py --stopat`) before it can say proven. Queued on our side.
+Gate level: all 11 of Dawson's netlists ran through every path whose
+harness contains them, 105 of 116 pairs pass; the scheduler netlist fails
+with the pre-hold signature because it was cut from `4b86c7cd3705`, so his
+rebuild from `dab971c2aab9` is asked for (his reply has the detail).
+
+**§9, item by item.**
+
+- Asks 1 to 3 (failure fed into the next attempt, manifest `source` forms
+  rejected at the agent, no timestamps in RTL headers): received, thank
+  you. Identical RTL now gives one `drop_id` apart from the manifests'
+  `generated_utc` and `git_commit`, and `design_id` ignores those, so the
+  two ids now do the two jobs they were meant for.
+- The NameError in the Phase 3/4 agents: not what we hit. Our 10/08
+  afternoon run reached attempt 2 on the scheduler (attempt 1 was a patch
+  that was not valid Python, attempt 2 a patch that did not compile), so
+  the agents imported fine at that commit; the account ran out of credit
+  before attempt 3. Good catch regardless.
+- `counter_clock`: documented as asked, and we read it. Two consequences
+  are in addendum 3 above: our refresh-stress stimulus had to stress against
+  the *enforced* window (`window_scale` x tRFC), and a CSR-programmed tREFI
+  at or below that window loses refreshes, which the spec now lets a reader
+  predict. Your correction that tREFI was the one non-conservative case is
+  right, and section 10 fixed it; we did not need to be asked whether to
+  leave it, a maximum interval 4x long is a defect.
+- `SPEC_REVISION_REUSED`: filed again, as you expected; our ledger now holds
+  four content ids under `golden_ddr3_1600k_x8_2lane_1rank`. We judge the
+  spec the drop ships, so nothing is blocked by it, but every record that
+  names the revision still has to carry `spec_id` beside it to be
+  unambiguous. Bump it when Dawson's `backend/env.template` can follow.
+- Age bound on `path_07`: agreed, not a check until the policy states one.
+
+**Your three questions**, as they stand now: (1) the next drop we run is
+whatever the loop produces from `dab971c2aab9`; nothing else is needed in
+`OutputFolders/`. (2) Done, both glue entries deleted; the manifests were
+right. (3) The first real-model run happened on 10/08 (addendum 1): your
+Phase 2 agent fixed bank_tracker under `--yes` and the run halted on the
+scheduler and the API account. With 19/19 passing there is nothing for the
+fix agents to do on this drop; the next thing they will see is whatever the
+backend's rebuilt netlists or the next spec change produce.

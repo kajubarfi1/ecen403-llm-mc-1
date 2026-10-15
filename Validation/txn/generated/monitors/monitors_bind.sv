@@ -29,6 +29,7 @@ bind data_path dp_wr_monitor u_dp_wr_mon (.*);
 bind init_fsm init_cmd_monitor u_init_cmd_mon (.*);
 bind init_fsm init_status_monitor u_init_status_mon (.*);
 bind refresh_ctrl refresh_ack_monitor u_refresh_ack_mon (.*);
+bind refresh_ctrl refresh_level_monitor u_refresh_level_mon (.*);
 bind refresh_ctrl refresh_req_monitor u_refresh_req_mon (.*);
 bind wb_port req_monitor u_req_mon (.*);
 bind scheduler sched_cmd_monitor u_sched_cmd_mon (.*);
