@@ -610,6 +610,65 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   DATA_001 finding (excluded). `tools/seed_into_drop.py` plants a catalogue
   fault into a run's drop for these experiments.
 
+- *2026-10-15, evening — coverage closed; it found a Phase 4 read defect
+  and a stale piece of our own testbench.* The 13 partial vplan items were
+  not stimulus gaps. Back-pressure (VP_FLOW_001) had happened on every
+  burst run (queue at 16, host stalled 45 cycles per write) but the bin
+  measured `enq_valid && !enq_ready`, and wb_port gates valid on ready, so
+  it never sampled true: now `!enq_ready`. Refresh-with-open-bank
+  (VP_FAIL_013) measured the violation itself (REF issued while a bank is
+  active), which a correct design never produces: now the antecedent,
+  `ref_urgent && |bank_is_active` at the scheduler. The 11 timing items
+  are unreachable by the spec's own declaration: `counter_clock.window_scale
+  = 4` means the design enforces 4x every JEDEC window (ACT→CAS measured at
+  14 cycles against a 3-cycle tRCD, 600/600 occurrences), so the
+  `at_minimum` bin cannot occur; `coverage_gen.py` adds a
+  `within_enforced_window` bin and `coverage_rollup.py` reports such items
+  as `unreachable_by_spec` (per-bin detail now parsed from the imc report;
+  SIGNOFF §4 E-SPEC automatic). tWTR was the one true gap (0%): a read on a
+  bank written moments before never happened in random mixed traffic.
+  `sequences/write_read.py` (read-after-write pairs, no idle) on path_18
+  closed it — and failed: every read returns `{beat0, 0}` instead of the
+  written word. Two causes: our `dram_stub.sv` stored ONE word per burst
+  (both beats identical, an older drop's protocol) with a "+1 because the
+  data path registers the command a cycle later" fudge, and returned zeros
+  for unwritten locations, so the read paths had matched on zeros for a
+  month; and the design's data_path counts `(CL>>2)-1` and captures one
+  controller cycle before CL has elapsed, never reading `ddr_dqs_i`. Stub
+  rewritten (every beat stored, reply ceil(CL/ratio) after sampling RD,
+  address-pattern for unwritten, parameters from the spec via the
+  overrides' `params`); the finding `data_path/MISMATCH/dp_rd_rsp[data]`
+  is confirmed by the second predictor (twin confirmation now applies to
+  exact mismatches too) and routed as ask 5 (reply addendum 6; no Phase 4
+  agent exists, the flow halts at that edge). Rollup: 28 covered, 11
+  unreachable_by_spec, 0 partial; code coverage 77.2%. Also: a full
+  validate_drop now removes a stale partial-run DROP_STATUS.json.
+
+- *2026-10-15, late — Lehana's handoff: three infra bugs on our side, all
+  real.* (2a) every tool spawned `python3` by name, so a venv invoked by
+  absolute path lost its packages in every subprocess: ten files now route
+  through `sys.executable`. (2b) her one-line `run_path.py` fix (no password
+  prompt when a key is configured) kept. (2c) `DROP_STATUS.json` was built
+  only when something was absent, blocked or errored, so a clean run after
+  an errored attempt left "run error" on every path in `outbox/current` and
+  `flow.py` halted on it: written on every run now; `outbox/current` is the
+  latest run, never a ledger (USAGE). Her drop `4bf921ce1833` (refresh_ctrl
+  urgent-threshold clamp, our 10/15 starvation finding) also reopened two
+  September JasperGold counterexamples on the scheduler as "open, confirmed"
+  because the design changed: a proof is about the blocks in its formal top
+  (`blocks_design_id` recorded, compared over the same block list), and a
+  counterexample proven on an earlier design with no result on this one is
+  now `awaiting_formal` / `unverified`, not routed to an agent, closed by the
+  next `run_formal.py`. She also fixed her agents' `break`→`continue` (ask 4)
+  and corrected our max_tokens theory (a schema miss, not a budget cut:
+  accepted). Her spec text changed under the same revision (spec id
+  `279cbf6ca7b6f62b`): SPEC_REVISION_REUSED will file; revision bump asked
+  again. Reply: `findings/HANDOFF_FRONTEND_2026-10-15_reply.md`. Also from
+  her push: all four phase agents exist (CLAUDE.md corrected); Dawson rebuilt
+  the scheduler/bank_tracker/refresh_ctrl netlists against dab971c2aab9 and
+  files "scheduler does not close timing at 5.0 ns" (critical) — the
+  gate-level re-judge and that change request are next.
+
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the
 schema generator's default root and `faults/fault_catalog.json` now point

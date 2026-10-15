@@ -469,6 +469,10 @@ drop's manifests it generates the whole environment, then judges the drop:
 Results are written as **findings**: each has an owner block, a confidence,
 source anchors, a reproduction command and a history across drops. The
 Frontend reads them from one place, `Validation/findings/outbox/current/`.
+That directory is the latest run and nothing else, never a ledger: every
+file in it is rewritten by each complete run (history is
+`outbox/<revision>/<drop>/` and each finding's `first_seen` / `last_seen` /
+`resolved_in`).
 
 ### 7.2 Additional setup
 

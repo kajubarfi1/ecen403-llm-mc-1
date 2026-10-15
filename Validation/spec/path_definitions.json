@@ -1166,7 +1166,9 @@
         "write",
         "read"
       ],
-      "settle_cycles": 400,
+      "stimulus_generator": "write_read",
+      "$stimulus_note": "2026-10-15: read-after-write pairs (write_read.py) instead of independent random mixed traffic: a read on a bank written moments before is the only situation in which tWTR is enforced, and the random mix produced it 0 times in 19 drives (cp_twtr_spacing 0%). Settle raised to 2000: 24 back-to-back requests fill the queue and drain at ~45 cycles each.",
+      "settle_cycles": 2000,
       "$settle_note": "2026-09-24: 400 (was the 64-cycle default) so accepted requests and their read responses can drain before the trace ends. SCHED_001 counts outstanding requests as dropped and the data_path model reports undelivered responses as missing; both are only fair when the window exceeds the worst-case service time (measured on drop 5661e03: 7 phantom drops at 64 cycles, 0 at 400)."
     },
     {

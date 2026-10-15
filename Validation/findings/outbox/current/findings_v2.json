@@ -3,84 +3,125 @@
   "drop": "dab971c2aab9",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "spec_id": "f7c16e452e8d9d23",
-  "generated_utc": "2026-10-15T17:49:32.476807Z",
+  "generated_utc": "2026-10-15T18:29:10.634688Z",
   "reports": "Validation/reports/paths",
-  "finding_count": 0,
-  "findings": [],
-  "resolved": [
+  "finding_count": 1,
+  "findings": [
     {
       "schema": "validation-findings/2",
-      "id": "formal/scheduler/PROTO_001",
+      "id": "data_path/MISMATCH/dp_rd_rsp[data]",
       "kind": "rtl_defect",
-      "check_id": "PROTO_001",
-      "taxonomy_id": "PROTO_001",
-      "owner_module": "scheduler",
-      "severity": "critical",
-      "title": "READ issued to a bank one cycle after that bank was PRECHARGEd (no ACTIVATE between)",
-      "paths": [
-        "formal:chain_formal"
+      "check_id": "MISMATCH/dp_rd_rsp[data]",
+      "taxonomy_id": "DATA_001",
+      "detectors": [
+        "exact:data_path:value",
+        "twin:data_path"
       ],
-      "status": "resolved",
-      "resolved_in": "dab971c2aab9",
-      "last_seen": "a82f2070de32",
-      "first_seen": "1fea117",
-      "note": "open in drop a82f2070de32, not raised by drop dab971c2aab9"
-    },
-    {
-      "schema": "validation-findings/2",
-      "id": "scheduler/REF_001",
-      "kind": "rtl_defect",
-      "check_id": "REF_001",
-      "taxonomy_id": "REF_001",
-      "owner_module": "scheduler",
-      "severity": "critical",
-      "title": "scheduler: REF_001",
-      "paths": [
-        "path_05_scheduler_refresh_loop"
+      "owner_module": "data_path",
+      "owner_candidates": [
+        "data_path"
       ],
-      "status": "resolved",
-      "resolved_in": "dab971c2aab9",
-      "last_seen": "a82f2070de32",
-      "first_seen": "a82f2070de32",
-      "note": "open in drop a82f2070de32, not raised by drop dab971c2aab9"
-    },
-    {
-      "schema": "validation-findings/2",
-      "id": "scheduler/SCHED_003",
-      "kind": "rtl_defect",
-      "check_id": "SCHED_003",
-      "taxonomy_id": "SCHED_003",
-      "owner_module": "scheduler",
       "severity": "critical",
-      "title": "scheduler: SCHED_003",
-      "paths": [
-        "path_05_scheduler_refresh_loop",
-        "path_13_csr_refresh_to_scheduling",
-        "path_20_refresh_preempt"
+      "confidence": "confirmed",
+      "title": "data_path: MISMATCH/dp_rd_rsp[data]",
+      "requirement": "data_path must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "dp_rd_rsp.response aux=0x0 data=0x9dac7f67",
+      "actual": "dp_rd_rsp.response aux=0x0 data=0x7f670000",
+      "detector": "exact:data_path:value",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 300,
+          "signal": "rd_rsp_data",
+          "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 301,
+          "signal": "rd_rsp_aux",
+          "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
+        }
       ],
-      "status": "resolved",
-      "resolved_in": "dab971c2aab9",
-      "last_seen": "a82f2070de32",
-      "first_seen": "a82f2070de32",
-      "note": "open in drop a82f2070de32, not raised by drop dab971c2aab9"
-    },
-    {
-      "schema": "validation-findings/2",
-      "id": "formal/scheduler/TIMING_008",
-      "kind": "rtl_defect",
-      "check_id": "TIMING_008",
-      "taxonomy_id": "TIMING_008",
-      "owner_module": "scheduler",
-      "severity": "critical",
-      "title": "PRECHARGE issued one cycle after a WRITE to the same bank (tWR violated; write data lost)",
+      "mechanism": null,
       "paths": [
-        "formal:chain_formal"
+        "path_03_read_return",
+        "path_18_full_write"
       ],
-      "status": "resolved",
-      "resolved_in": "dab971c2aab9",
-      "last_seen": "a82f2070de32",
-      "first_seen": "1fea117",
-      "note": "open in drop a82f2070de32, not raised by drop dab971c2aab9"
+      "occurrences": 31,
+      "repro": {
+        "path": "path_03_read_return",
+        "command": "python3 Validation/tools/run_path.py --path path_03_read_return",
+        "sequence": "Validation/sequences/generated/path_03_read_return_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_03_read_return",
+        "log": "Validation/reports/paths/path_03_read_return_sim.log",
+        "trace": "Validation/reports/paths/path_03_read_return_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "dp_rd_rsp[0] value: predicted [dp_rd_rsp.response aux=0x0 data=0x9dac7f67] but observed [dp_rd_rsp.response aux=0x0 data=0x7f670000]"
+        }
+      },
+      "drop": {
+        "git_head": "dab971c2aab9",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "dab971c2aab9",
+      "last_seen": "dab971c2aab9",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_read_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_width_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
+      ]
     }
-  ]
+  ],
+  "resolved": [],
+  "drop_status": {
+    "$schema": "validation-drop-status/1",
+    "drop": "dab971c2aab9",
+    "partial": false,
+    "blocks_present": [
+      "addr_decoder",
+      "bank_tracker",
+      "calibration",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "init_fsm",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "blocks_absent": [],
+    "inconsistent_edges": [],
+    "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "foreign_spec_blocks": {},
+    "paths_run": [
+      "path_01_write_cmd",
+      "path_02_read_cmd",
+      "path_03_read_return",
+      "path_04_scheduler_bank_loop",
+      "path_05_scheduler_refresh_loop",
+      "path_07_backpressure",
+      "path_08_init_to_cal",
+      "path_09_init_to_refresh",
+      "path_12_csr_timing_to_scheduling",
+      "path_13_csr_refresh_to_scheduling",
+      "path_14_status_init",
+      "path_15_status_cal",
+      "path_16_status_refresh",
+      "path_17_full_boot",
+      "path_18_full_write",
+      "path_19_row_conflict",
+      "path_20_refresh_preempt",
+      "path_21_wb_port_standalone",
+      "path_22_csr_standalone"
+    ],
+    "paths_blocked": {},
+    "note": "Complete run: every runnable path simulated on this drop."
+  }
 }

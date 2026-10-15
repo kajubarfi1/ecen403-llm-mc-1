@@ -186,7 +186,7 @@ def rejudge(stage):
     last lines)."""
     if not stage.get("model") or not stage.get("trace"):
         return ""
-    r = subprocess.run(["python3", "Validation/txn/scoreboard.py",
+    r = subprocess.run([sys.executable, "Validation/txn/scoreboard.py",
                         "--scope", stage["scope"], "--strategy",
                         "invariant" if stage["kind"] == "invariant" else "exact",
                         "--trace", stage["trace"], "--model", stage["model"]],
@@ -246,14 +246,24 @@ def evidence_from_report(rep, rules, schemas, spec_regs=None, reports_dir=None):
                 po = PRED_OBS_RE.search(rest)
                 exp, act = (po.group(1), po.group(2)) if po else ("", rest)
                 kind = _iface_kind(exp or act)[1]
-                yield {"check_id": f"MISMATCH/{iface}{_mismatch_discriminator(exp, act, spec_regs)}",
-                       "owner": block,
-                       "taxonomy_hint": _exact_taxonomy(block),
-                       "iface": iface, "kind": kind,
-                       "detector": f"exact:{st['stage']}:{kind_}",
-                       "expected": exp or f"transaction predicted on {iface}",
-                       "actual": act, "path": path, "confidence": "observed",
-                       "line": ln.strip(), "seq": None}
+                ev = {"check_id": f"MISMATCH/{iface}{_mismatch_discriminator(exp, act, spec_regs)}",
+                      "owner": block,
+                      "taxonomy_hint": _exact_taxonomy(block),
+                      "iface": iface, "kind": kind,
+                      "detector": f"exact:{st['stage']}:{kind_}",
+                      "expected": exp or f"transaction predicted on {iface}",
+                      "actual": act, "path": path, "confidence": "observed",
+                      "line": ln.strip(), "seq": None}
+                yield ev
+                # the independently generated second predictor for this scope
+                # predicts the same stream on this run's traces (agree, never
+                # disagree), so it too says the design's value is wrong: the
+                # mismatch is not an artefact of one model (2026-10-15, the
+                # data_path read-capture finding)
+                scope = _agreement_scope(st["stage"], path)
+                if _twin_agrees(reports_dir, scope):
+                    yield dict(ev, detector=f"twin:{scope}", confidence="confirmed",
+                               actual=f"the second-opinion predictor for {scope} predicts the same value on this trace")
                 continue
             m = RULE_RE.match(ln)
             if m and m.group(1) not in ("scope", "status", "rules"):
@@ -490,7 +500,8 @@ def emit(reports_dir, out_dir=None, drop_status=None):
                     "related_manual_findings": manual_related(ev["owner"], tid),
                 }
                 findings[key] = f
-            f["occurrences"] += ev.get("count", 1)
+            if not ev["detector"].startswith("twin:"):
+                f["occurrences"] += ev.get("count", 1)   # a twin corroborates, it is not another occurrence
             if rep["path"] not in f["paths"]:
                 f["paths"].append(rep["path"])
             if ev["detector"] not in f["detectors"]:
@@ -750,6 +761,22 @@ def structural_findings(spec_rev, head):
     return out
 
 
+def formal_report_applies(rep, head, cur_design, block_design):
+    """Does this JasperGold report speak for the current drop? Yes when it was
+    run on this drop, on this design, or on these same blocks: a proof is
+    about the blocks in the formal top, so a drop that changed only other
+    blocks (refresh_ctrl, 4bf921ce1833, 2026-10-15) keeps path_01's scheduler
+    proofs instead of reopening every formal finding on them."""
+    if rep.get("drop") == head:
+        return True
+    if cur_design and rep.get("design_id") == cur_design:
+        return True
+    bid = rep.get("blocks_design_id")
+    if bid and rep.get("blocks"):
+        return bid == block_design(rep["blocks"])
+    return False
+
+
 def formal_findings(spec_rev, head):
     """v2 records for the formal-triage files of this spec revision whose
     `drop` is this drop (or unstated)."""
@@ -768,14 +795,21 @@ def formal_findings(spec_rev, head):
         cur_design = RD.design_id()
     except Exception:
         cur_design = None
+    def block_design(blocks):
+        try:
+            return RD.design_id(blocks)
+        except Exception:
+            return None
+    proven_before = set()       # proven on SOME design, not necessarily this one
     for rp in glob.glob(os.path.join(ROOT, "Validation", "reports", "formal", "jg_*.json")):
         rep = load(rp, {})
-        same = rep.get("drop") == head or (cur_design and rep.get("design_id") == cur_design)
-        if not same:
-            continue
+        applies = formal_report_applies(rep, head, cur_design, block_design)
         for r in rep.get("results", []):
             if r.get("status") == "proven":
-                proven_now.add(r.get("short", "").replace("a_", "", 1))
+                tid = r.get("short", "").replace("a_", "", 1)
+                proven_before.add(tid)
+                if applies:
+                    proven_now.add(tid)
     for f in glob.glob(os.path.join(OUTBOX, spec_rev, "formal_*_findings.json")):
         d = load(f, {})
         for x in d.get("findings", []):
@@ -786,6 +820,7 @@ def formal_findings(spec_rev, head):
                 continue                         # formal cleared it on this drop
             owner = x.get("scope", "unknown")
             awaiting = bool(x.get("drop")) and x["drop"] != head
+            status, confidence = formal_status(tid, proven_now, proven_before)
             out.append({
                 "schema": "validation-findings/2",
                 "id": x.get("id") or f"formal/{owner}/{tid}",
@@ -794,7 +829,7 @@ def formal_findings(spec_rev, head):
                 "detectors": [x.get("detector", "formal:jaspergold")],
                 "owner_module": owner, "owner_candidates": [owner],
                 "severity": x.get("severity", "major"),
-                "confidence": "confirmed",          # a counterexample is a witness, not a sample
+                "confidence": confidence,           # a counterexample is a witness, not a sample
                 "title": x.get("title", ""), "requirement": x.get("expected", ""),
                 "spec_ref": x.get("spec_ref"),
                 "expected": x.get("expected", ""), "actual": x.get("actual", ""),
@@ -806,10 +841,25 @@ def formal_findings(spec_rev, head):
                 "repro": x.get("repro", {}),
                 "drop": {"git_head": head, "spec_revision": spec_rev},
                 "introduced_in": None, "first_seen": x.get("drop") or head,
-                "last_seen": head, "resolved_in": None, "status": "open",
+                "last_seen": head, "resolved_in": None, "status": status,
                 "related_manual_findings": [os.path.relpath(f, ROOT)],
             })
     return out
+
+
+def formal_status(tid, proven_now, proven_before):
+    """(status, confidence) of a formal counterexample on the current drop.
+    Proven here: the caller drops it. Proven on an earlier design but with no
+    result yet on this one: `awaiting_formal`, unverified -- a changed design
+    needs its own JasperGold run, and until then there is no counterexample
+    on this drop for an agent to act on (two stale scheduler findings routed
+    to the Phase 3 agent on 4bf921ce1833, Frontend handoff 2026-10-15).
+    Never proven anywhere: the counterexample stands, open and confirmed."""
+    if tid in proven_now:
+        return "resolved", "confirmed"
+    if tid in proven_before:
+        return "awaiting_formal", "unverified"
+    return "open", "confirmed"
 
 def manual_related(owner, tid):
     out = []
@@ -835,7 +885,8 @@ def main() -> int:
             ds = json.load(f)
     doc, out_dir = emit(args.reports, args.out, ds)
     n_unt = sum(1 for f in doc["findings"] if f.get("status") == "untested")
-    print(f"  drop {doc['drop']}{' (partial)' if ds else ''}: {doc['finding_count']} finding(s), "
+    partial = bool(ds) and (ds.get("partial") or ds.get("paths_blocked"))
+    print(f"  drop {doc['drop']}{' (partial)' if partial else ''}: {doc['finding_count']} finding(s), "
           f"{len(doc['resolved'])} resolved since the previous drop"
           + (f", {n_unt} carried untested" if ds else ""))
     for f in doc["findings"]:

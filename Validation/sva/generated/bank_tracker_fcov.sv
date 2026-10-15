@@ -7,28 +7,14 @@
 // Coverpoint names are exactly those the vplan asks for.
 
 module bank_tracker_fcov (
-    input logic [7:0] bank_is_active,
     input logic clk,
     input logic cmd_act_valid,
     input logic cmd_rd_valid,
-    input logic cmd_ref_valid,
     input logic cmd_wr_valid,
     input logic rst_n
 );
 
 
-
-  covergroup cg_refresh;
-    option.per_instance = 1;
-
-    // cg_refresh.cp_ref_002_exercised — A REFRESH issued while at least one bank is active — the situation REF_002 forbids. Observed at bank_tracker, the one block that sees both the command and bank state.
-    cp_ref_002_exercised: coverpoint (cmd_ref_valid && (|bank_is_active)) iff (rst_n) {
-      bins occurred = {1'b1};
-    }
-
-  endgroup
-
-  cg_refresh cg_refresh_inst = new();
 
   covergroup cg_scheduler;
     option.per_instance = 1;
@@ -56,7 +42,6 @@ module bank_tracker_fcov (
   localparam SAMPLE_DELAY = 1;
   always @(posedge clk) begin
     #SAMPLE_DELAY;
-    cg_refresh_inst.sample();
     cg_scheduler_inst.sample();
 
   end

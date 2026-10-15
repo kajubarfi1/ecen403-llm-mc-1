@@ -107,6 +107,12 @@ The third form judges the drop against the spec it ships instead of
 
 ## 4. Where the Frontend reads the result
 
+`outbox/current/` is the latest complete run and nothing else, never a
+ledger: every file in it is rewritten by each run (2026-10-15; before that
+`DROP_STATUS.json` survived from an earlier errored attempt). History is
+`outbox/<revision>/<drop>/` plus each finding's `first_seen` / `last_seen`
+/ `resolved_in`.
+
 **`Validation/findings/outbox/current/`** — always the newest result:
 
 | file | what |
@@ -137,9 +143,17 @@ for that revision.
 ## 5. Meaning of a check's `confidence`
 
 - `confirmed` — model-free evidence (an assertion, a rule, a structural
-  check, a repair that silenced it). Fix it.
-- `observed` — a transaction predictor disagreed with the design. Real in
-  every case so far after validation's own fixes, but it is a model's word.
+  check, a repair that silenced it), or two independently generated models
+  that agree on this run's traces (a `twin:<scope>` detector beside the
+  first one; 2026-10-15). Fix it. `--yes` agents act on this level only.
+- `observed` — a single transaction predictor disagreed with the design.
+  Real in every case so far after validation's own fixes, but it is one
+  model's word.
+- `unverified` — only on `status: awaiting_formal`: a JasperGold
+  counterexample from an earlier drop, proven fixed on a later design, with
+  no formal result yet on this design. Not routed to an agent (there is no
+  counterexample on this drop to act on); the next `run_formal.py` on this
+  drop closes or reopens it.
 
 `untested_in_this_drop` are earlier findings this drop could not re-check
 (block absent or every path through it blocked). They are still open.

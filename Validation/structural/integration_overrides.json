@@ -58,7 +58,12 @@
       "instance": "u_dram",
       "source": "Validation/structural/dram_stub.sv",
       "when_block": "data_path",
-      "$why": "Something must sit on the far side of the DDR pins or every read returns the tied-off bus. A behavioral DRAM: ACT opens rows, WR stores the burst word, RD replies after CL. Testbench component \u2014 nothing judges the design against it.",
+      "$why": "Something must sit on the far side of the DDR pins or every read returns the tied-off bus. A behavioral DRAM: ACT opens rows, WR stores every beat of the burst, RD replies ceil(CL / clock ratio) controller cycles after it samples the command (JEDEC-derived, never tuned to the design's own capture window; 2026-10-15). Testbench component \u2014 nothing judges the design against it.",
+      "params": {
+        "DQ_W": "@spec:data_path_mapping.ddr_channel_width_bits",
+        "BURST_CTRL_CYC": "@spec:data_path_mapping.host_width_bits / data_path_mapping.ddr_channel_width_bits",
+        "CLK_RATIO": "@spec:clocking_model.clock_ratio_ddr_to_controller"
+      },
       "inputs": {
         "clk": "@clk",
         "rst_n": "@rst_n",

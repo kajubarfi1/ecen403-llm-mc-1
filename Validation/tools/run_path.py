@@ -30,6 +30,7 @@ import getpass
 import glob
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -37,6 +38,13 @@ from datetime import datetime
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+
+def _py(cmd):
+    """Run our own tools with THIS interpreter, never whatever `python3` is
+    first on PATH: a venv invoked by absolute path otherwise loses its
+    packages in every subprocess (Frontend handoff 2026-10-15, 2a)."""
+    return re.sub(r"^python3 ", sys.executable + " ", cmd) if isinstance(cmd, str) else cmd
+
 sys.path.insert(0, os.path.join(ROOT, "Validation", "agents"))
 sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
 sys.path.insert(0, HERE)                     # install_sky130_models (gate-level runs)
@@ -67,7 +75,7 @@ def load_password():
 
 
 def run_local(cmd):
-    r = subprocess.run(cmd, shell=True, capture_output=True, text=True,
+    r = subprocess.run(_py(cmd), shell=True, capture_output=True, text=True,
                        cwd=ROOT)
     return r.returncode, (r.stdout or "") + (r.stderr or "")
 
@@ -289,7 +297,7 @@ def main() -> int:
                          "path's settle_cycles / window_cycles")
     ap.add_argument("--stimulus", default=None,
                     choices=["random", "random_v2", "register_walk", "status_poll",
-                             "refresh_stress", "burst"],
+                             "refresh_stress", "burst", "write_read"],
                     help="override the path's stimulus_generator")
     ap.add_argument("--no-coverage", action="store_true")
     ap.add_argument("--prep-only", action="store_true")

@@ -143,7 +143,12 @@ module cmd_gen_coverage (
     // constraint without ever testing it.
     cp_trcd_spacing: coverpoint since_act[ddr_bank] iff (rst_n && (ddr_cmd == 4'b0101 || ddr_cmd == 4'b0100)) {
       bins at_minimum   = {3};
-      bins above_minimum = {[4:254]};
+      // timing_model.counter_clock.window_scale = 4: the design
+      // enforces 4 x tRCD = 11 cycle(s), so at_minimum and this
+      // bin are out of reach while that declaration stands. The rollup
+      // reports them as unreachable_by_spec, not as a stimulus gap.
+      bins within_enforced_window = {[4:10]};
+      bins at_or_above_enforced = {[11:254]};
       // Saturation means the source command never occurred, so this is an
       // artefact of counter initialisation rather than something stimulus
       // should aim at. Counting it would make 100% unreachable for any
@@ -158,7 +163,12 @@ module cmd_gen_coverage (
     // constraint without ever testing it.
     cp_trp_spacing: coverpoint since_pre[ddr_bank] iff (rst_n && (ddr_cmd == 4'b0011)) {
       bins at_minimum   = {3};
-      bins above_minimum = {[4:254]};
+      // timing_model.counter_clock.window_scale = 4: the design
+      // enforces 4 x tRP = 11 cycle(s), so at_minimum and this
+      // bin are out of reach while that declaration stands. The rollup
+      // reports them as unreachable_by_spec, not as a stimulus gap.
+      bins within_enforced_window = {[4:10]};
+      bins at_or_above_enforced = {[11:254]};
       // Saturation means the source command never occurred, so this is an
       // artefact of counter initialisation rather than something stimulus
       // should aim at. Counting it would make 100% unreachable for any
@@ -173,7 +183,12 @@ module cmd_gen_coverage (
     // constraint without ever testing it.
     cp_tras_spacing: coverpoint since_act[ddr_bank] iff (rst_n && (ddr_cmd == 4'b0010)) {
       bins at_minimum   = {7};
-      bins above_minimum = {[8:254]};
+      // timing_model.counter_clock.window_scale = 4: the design
+      // enforces 4 x tRAS = 28 cycle(s), so at_minimum and this
+      // bin are out of reach while that declaration stands. The rollup
+      // reports them as unreachable_by_spec, not as a stimulus gap.
+      bins within_enforced_window = {[8:27]};
+      bins at_or_above_enforced = {[28:254]};
       // Saturation means the source command never occurred, so this is an
       // artefact of counter initialisation rather than something stimulus
       // should aim at. Counting it would make 100% unreachable for any
@@ -188,7 +203,12 @@ module cmd_gen_coverage (
     // constraint without ever testing it.
     cp_trc_spacing: coverpoint since_act[ddr_bank] iff (rst_n && (ddr_cmd == 4'b0011)) {
       bins at_minimum   = {10};
-      bins above_minimum = {[11:254]};
+      // timing_model.counter_clock.window_scale = 4: the design
+      // enforces 4 x tRC = 39 cycle(s), so at_minimum and this
+      // bin are out of reach while that declaration stands. The rollup
+      // reports them as unreachable_by_spec, not as a stimulus gap.
+      bins within_enforced_window = {[11:38]};
+      bins at_or_above_enforced = {[39:254]};
       // Saturation means the source command never occurred, so this is an
       // artefact of counter initialisation rather than something stimulus
       // should aim at. Counting it would make 100% unreachable for any
@@ -203,7 +223,12 @@ module cmd_gen_coverage (
     // constraint without ever testing it.
     cp_trrd_spacing: coverpoint since_act[ddr_bank] iff (rst_n && (ddr_cmd == 4'b0011)) {
       bins at_minimum   = {2};
-      bins above_minimum = {[3:254]};
+      // timing_model.counter_clock.window_scale = 4: the design
+      // enforces 4 x tRRD = 6 cycle(s), so at_minimum and this
+      // bin are out of reach while that declaration stands. The rollup
+      // reports them as unreachable_by_spec, not as a stimulus gap.
+      bins within_enforced_window = {[3:5]};
+      bins at_or_above_enforced = {[6:254]};
       // Saturation means the source command never occurred, so this is an
       // artefact of counter initialisation rather than something stimulus
       // should aim at. Counting it would make 100% unreachable for any
@@ -218,7 +243,12 @@ module cmd_gen_coverage (
     // constraint without ever testing it.
     cp_twtr_spacing: coverpoint since_wr[ddr_bank] iff (rst_n && (ddr_cmd == 4'b0101)) {
       bins at_minimum   = {2};
-      bins above_minimum = {[3:254]};
+      // timing_model.counter_clock.window_scale = 4: the design
+      // enforces 4 x tWTR = 6 cycle(s), so at_minimum and this
+      // bin are out of reach while that declaration stands. The rollup
+      // reports them as unreachable_by_spec, not as a stimulus gap.
+      bins within_enforced_window = {[3:5]};
+      bins at_or_above_enforced = {[6:254]};
       // Saturation means the source command never occurred, so this is an
       // artefact of counter initialisation rather than something stimulus
       // should aim at. Counting it would make 100% unreachable for any
@@ -233,7 +263,12 @@ module cmd_gen_coverage (
     // constraint without ever testing it.
     cp_twr_spacing: coverpoint since_wr[ddr_bank] iff (rst_n && (ddr_cmd == 4'b0010)) {
       bins at_minimum   = {3};
-      bins above_minimum = {[4:254]};
+      // timing_model.counter_clock.window_scale = 4: the design
+      // enforces 4 x tWR = 12 cycle(s), so at_minimum and this
+      // bin are out of reach while that declaration stands. The rollup
+      // reports them as unreachable_by_spec, not as a stimulus gap.
+      bins within_enforced_window = {[4:11]};
+      bins at_or_above_enforced = {[12:254]};
       // Saturation means the source command never occurred, so this is an
       // artefact of counter initialisation rather than something stimulus
       // should aim at. Counting it would make 100% unreachable for any
@@ -248,7 +283,12 @@ module cmd_gen_coverage (
     // constraint without ever testing it.
     cp_trtp_spacing: coverpoint since_rd[ddr_bank] iff (rst_n && (ddr_cmd == 4'b0010)) {
       bins at_minimum   = {2};
-      bins above_minimum = {[3:254]};
+      // timing_model.counter_clock.window_scale = 4: the design
+      // enforces 4 x tRTP = 6 cycle(s), so at_minimum and this
+      // bin are out of reach while that declaration stands. The rollup
+      // reports them as unreachable_by_spec, not as a stimulus gap.
+      bins within_enforced_window = {[3:5]};
+      bins at_or_above_enforced = {[6:254]};
       // Saturation means the source command never occurred, so this is an
       // artefact of counter initialisation rather than something stimulus
       // should aim at. Counting it would make 100% unreachable for any
@@ -263,7 +303,12 @@ module cmd_gen_coverage (
     // constraint without ever testing it.
     cp_tccd_spacing: coverpoint since_rd_wr[ddr_bank] iff (rst_n && (ddr_cmd == 4'b0101 || ddr_cmd == 4'b0100)) {
       bins at_minimum   = {1};
-      bins above_minimum = {[2:254]};
+      // timing_model.counter_clock.window_scale = 4: the design
+      // enforces 4 x tCCD = 4 cycle(s), so at_minimum and this
+      // bin are out of reach while that declaration stands. The rollup
+      // reports them as unreachable_by_spec, not as a stimulus gap.
+      bins within_enforced_window = {[2:3]};
+      bins at_or_above_enforced = {[4:254]};
       // Saturation means the source command never occurred, so this is an
       // artefact of counter initialisation rather than something stimulus
       // should aim at. Counting it would make 100% unreachable for any
@@ -278,7 +323,12 @@ module cmd_gen_coverage (
     // constraint without ever testing it.
     cp_trfc_spacing: coverpoint since_ref[ddr_bank] iff (rst_n && (ddr_cmd == 4'b0011 || ddr_cmd == 4'b0101 || ddr_cmd == 4'b0100 || ddr_cmd == 4'b0010 || ddr_cmd == 4'b0001)) {
       bins at_minimum   = {32};
-      bins above_minimum = {[33:254]};
+      // timing_model.counter_clock.window_scale = 4: the design
+      // enforces 4 x tRFC = 128 cycle(s), so at_minimum and this
+      // bin are out of reach while that declaration stands. The rollup
+      // reports them as unreachable_by_spec, not as a stimulus gap.
+      bins within_enforced_window = {[33:127]};
+      bins at_or_above_enforced = {[128:254]};
       // Saturation means the source command never occurred, so this is an
       // artefact of counter initialisation rather than something stimulus
       // should aim at. Counting it would make 100% unreachable for any
@@ -293,7 +343,12 @@ module cmd_gen_coverage (
     // constraint without ever testing it.
     cp_tfaw_spacing: coverpoint since_act[ddr_bank] iff (rst_n && (ddr_cmd == 4'b0011)) {
       bins at_minimum   = {8};
-      bins above_minimum = {[9:254]};
+      // timing_model.counter_clock.window_scale = 4: the design
+      // enforces 4 x tFAW = 32 cycle(s), so at_minimum and this
+      // bin are out of reach while that declaration stands. The rollup
+      // reports them as unreachable_by_spec, not as a stimulus gap.
+      bins within_enforced_window = {[9:31]};
+      bins at_or_above_enforced = {[32:254]};
       // Saturation means the source command never occurred, so this is an
       // artefact of counter initialisation rather than something stimulus
       // should aim at. Counting it would make 100% unreachable for any

@@ -44,6 +44,13 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+
+def _py(cmd):
+    """Run our own tools with THIS interpreter, never whatever `python3` is
+    first on PATH: a venv invoked by absolute path otherwise loses its
+    packages in every subprocess (Frontend handoff 2026-10-15, 2a)."""
+    return re.sub(r"^python3 ", sys.executable + " ", cmd) if isinstance(cmd, str) else cmd
+
 V = os.path.join(ROOT, "Validation")
 SPEC_PATH = os.path.join(V, "spec", "llmmc_microarchitecturespec_filled.json")
 SPEC_PATH = os.environ.get("VALIDATION_SPEC", SPEC_PATH)   # the spec the drop was generated from, when it is not the default
@@ -69,7 +76,7 @@ HEADER_RE = re.compile(r"Spec revision|spec_revision|spec_source|generated_utc|d
 
 
 def sh(cmd, timeout=600):
-    r = subprocess.run(cmd, shell=True, cwd=ROOT, capture_output=True,
+    r = subprocess.run(_py(cmd), shell=True, cwd=ROOT, capture_output=True,
                        text=True, timeout=timeout)
     return r.returncode, (r.stdout or "") + (r.stderr or "")
 

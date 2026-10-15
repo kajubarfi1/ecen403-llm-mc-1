@@ -129,8 +129,9 @@ back to the microarch agent through the request text. Backend findings
 (`backend/findings/outbox`, our envelope) are routed back the same way, and
 the final stage runs the backend's per-block netlists through the paths
 (`run_path.py --netlist`, sky130 models via `tools/install_sky130_models.py`).
-Edges whose counterpart does not exist yet halt and say so: phases without a
-validation agent (3, 4) and a top-level-only netlist. `--phases 1` runs a Phase-1-only loop (partial validation, no top-level, no backend); `--revalidate` re-judges a drop changed under a resumed run; `--dry-run` prints the plan. Tests: `tests/test_flow.py`.
+Edges whose counterpart does not exist yet halt and say so (a phase whose
+`phase{N}_validation_agent.py` is missing, a top-level-only netlist); as of
+2026-10-15 all four phase agents exist. `--phases 1` runs a Phase-1-only loop (partial validation, no top-level, no backend); `--revalidate` re-judges a drop changed under a resumed run; `--dry-run` prints the plan. Tests: `tests/test_flow.py`.
 The Validation⇄Frontend contract is `Validation/findings/HANDOFF_CONTRACT.md`.
 A spec is identified by its content (`Validation/spec/spec_identity.py`), not
 only its `revision`: the golden spec has changed under one revision string, so

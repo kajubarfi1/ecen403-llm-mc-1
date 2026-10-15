@@ -9,7 +9,6 @@
 module cmd_queue_fcov (
     input logic clk,
     input logic enq_ready,
-    input logic enq_valid,
     input logic rst_n
 );
 
@@ -18,8 +17,8 @@ module cmd_queue_fcov (
   covergroup cg_cmd_queue;
     option.per_instance = 1;
 
-    // cg_cmd_queue.cp_backpressure_exercised — A request was presented while the queue could not accept it: the only cycle in which back-pressure (and the host stall it must cause) is tested. Without it path_07 passes vacuously.
-    cp_backpressure_exercised: coverpoint (enq_valid && !enq_ready) iff (rst_n) {
+    // cg_cmd_queue.cp_backpressure_exercised — The queue refused a request: the cycles in which back-pressure (and the host stall it must cause) is tested. Measured on the ready signal alone because a host port is free to gate valid on ready (this design's wb_port does: wb_beat = cyc & stb & ~stall, stall = !req_ready), in which case 'valid && !ready' never samples true even while the queue sits full and the host is stalled for 45 cycles per write (path_07, 2026-10-15). That no accepted request is lost under back-pressure is the scoreboard's check, not this bin's.
+    cp_backpressure_exercised: coverpoint (!enq_ready) iff (rst_n) {
       bins occurred = {1'b1};
     }
 

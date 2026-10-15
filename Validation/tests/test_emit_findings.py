@@ -36,6 +36,46 @@ class TestTwinAgreement(unittest.TestCase):
         EF._AGREEMENT.clear()
 
 
+    def test_mismatch_gets_a_twin_detector_when_the_second_predictor_agrees(self):
+        import json, tempfile
+        d = tempfile.mkdtemp()
+        with open(os.path.join(d, "model_agreement.json"), "w") as f:
+            json.dump({"rows": [{"scope": "data_path", "traces": 9, "agree": 9, "disagree": 0}]}, f)
+        EF._AGREEMENT.clear()
+        rep = {"path": "path_18_full_write", "stages": [{
+            "stage": "data_path", "verdict": "fail", "detail": [
+                "  dp_rd_rsp[0] value: predicted [dp_rd_rsp.response aux=0x1 data=0x1027c4d1] "
+                "but observed [dp_rd_rsp.response aux=0x1 data=0xc4d10000]"]}]}
+        ev = list(EF.evidence_from_report(rep, EF.Rules(), {}, reports_dir=d))
+        EF._AGREEMENT.clear()
+        self.assertEqual([e["detector"] for e in ev], ["exact:data_path:value", "twin:data_path"])
+        self.assertEqual([e["confidence"] for e in ev], ["observed", "confirmed"])
+        self.assertEqual(ev[1]["check_id"], ev[0]["check_id"])
+
+
+class TestFormalReportApplies(unittest.TestCase):
+    """A proof is about the blocks in its formal top (2026-10-15)."""
+
+    def test_same_drop_or_design_or_block_set(self):
+        bd = lambda blocks: "B" if blocks == ["scheduler", "cmd_gen"] else "other"
+        self.assertTrue(EF.formal_report_applies({"drop": "h"}, "h", "D", bd))
+        self.assertTrue(EF.formal_report_applies({"drop": "x", "design_id": "D"}, "h", "D", bd))
+        self.assertTrue(EF.formal_report_applies(
+            {"drop": "x", "design_id": "old", "blocks": ["scheduler", "cmd_gen"], "blocks_design_id": "B"}, "h", "D", bd))
+        self.assertFalse(EF.formal_report_applies(
+            {"drop": "x", "design_id": "old", "blocks": ["scheduler", "cmd_gen"], "blocks_design_id": "stale"}, "h", "D", bd))
+        self.assertFalse(EF.formal_report_applies({"drop": "x", "design_id": "old"}, "h", "D", bd),
+                         "a report without a block id speaks only for its own drop or design")
+
+
+class TestFormalStatus(unittest.TestCase):
+
+    def test_proven_elsewhere_waits_instead_of_reopening(self):
+        self.assertEqual(EF.formal_status("PROTO_001", {"PROTO_001"}, {"PROTO_001"}), ("resolved", "confirmed"))
+        self.assertEqual(EF.formal_status("PROTO_001", set(), {"PROTO_001"}), ("awaiting_formal", "unverified"))
+        self.assertEqual(EF.formal_status("PROTO_001", set(), set()), ("open", "confirmed"))
+
+
 class TestParsing(unittest.TestCase):
 
     def test_checker_line_with_rule_and_txn(self):

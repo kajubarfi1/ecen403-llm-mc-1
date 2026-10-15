@@ -3,15 +3,24 @@
 //
 // The chain harness needs something on the far side of the DDR pins, or
 // every read returns the tied-off bus. This is the smallest honest model of
-// the current drop's simplified pin protocol (controller-domain, one dq bus,
-// level dqs):
+// the drop's abstract pin protocol (controller-domain, one dq bus, level
+// dqs; spec phy_interface.mode = abstract):
 //
 //   ACT  opens a row per bank (ddr_addr carries the row)
-//   WR   after CWL controller cycles the data path drives dq for
-//        BURST_CTRL_CYC cycles with ONE word (both beats identical); the
-//        stub stores that word at {bank, open row, column}
-//   RD   after CL controller cycles the stub drives the stored word on
-//        dq_i and raises dqs_i for BURST_CTRL_CYC cycles
+//   WR   after CWL the data path drives dq for BURST_CTRL_CYC cycles, one
+//        beat per cycle (host_width / channel_width beats, low half first);
+//        the stub stores every beat at {bank, open row, column}
+//   RD   ceil(CL / CLK_RATIO) controller cycles after the cycle in which it
+//        samples the RD, the stub drives the stored beats back in order on
+//        dq_i, one per cycle, with dqs_i high for the burst
+//
+// The read timing is derived from JEDEC CL and the clock ratio, never from
+// the design's own counters: a stub tuned to the DUT's capture window hides
+// exactly the defect it should expose. (Until 2026-10-15 it was: "+1 because
+// the data path registers the rd command one cycle later" — a fudge from an
+// older drop — and it stored one word per burst with both beats identical,
+// so every read-after-write returned the low beat twice and the design's
+// one-cycle-early capture went unseen.)
 //
 // It is a testbench component, not a reference model: it never checks
 // anything, and nothing judges the design against it. State lives in plain
@@ -26,7 +35,8 @@ module dram_stub #(
     parameter DQ_W    = 32,
     parameter ADDR_W  = 15,
     parameter BANK_W  = 3,
-    parameter BURST_CTRL_CYC = 2,
+    parameter BURST_CTRL_CYC = 2,   // beats per burst (host_width / channel_width)
+    parameter CLK_RATIO = 4,        // DDR clocks per controller clock
     parameter DEPTH   = 16,
     parameter CMD_ACT = 4'b0011,
     parameter CMD_WR  = 4'b0100,
@@ -46,8 +56,21 @@ module dram_stub #(
 );
 
   typedef logic [BANK_W+ADDR_W+ADDR_W-1:0] key_t;
+  typedef logic [BURST_CTRL_CYC*DQ_W-1:0]  burst_t;   // beat k at [k*DQ_W +: DQ_W]
 
-  logic [DQ_W-1:0]   mem [key_t];                 // sparse storage
+  // What an unwritten location reads as. NOT zero: a read of zeros packs to
+  // zeros whatever the data path does with the beats, and every read-only
+  // path passed that way for a month (path_02/03, 2026-10-15). A pattern
+  // derived from the address, different in every beat, makes the assembly
+  // of beats into a host word visible on every read.
+  function automatic burst_t unwritten(input key_t k);
+    burst_t b;
+    for (int i = 0; i < BURST_CTRL_CYC; i++)
+      b[i*DQ_W +: DQ_W] = DQ_W'((k >> (i * 4)) ^ {DQ_W{1'b1}} ^ (i * 16'h5A5A));
+    return b;
+  endfunction
+
+  burst_t            mem [key_t];                 // sparse storage, one burst per column
   logic [ADDR_W-1:0] open_row [0:(1<<BANK_W)-1];
 
   int unsigned cyc;
@@ -57,11 +80,17 @@ module dram_stub #(
   key_t        wq [0:DEPTH-1];
   int unsigned wq_head, wq_tail;
 
-  // scheduled read replies: reply i drives the bus on cycles
+  // the write burst being captured: its key and the next beat index
+  key_t        wkey;
+  int unsigned widx;
+  logic        wcap;
+  burst_t      wtmp;
+
+  // scheduled read replies: reply i drives beat (cyc - rstart[i]) on cycles
   // [rstart[i], rstart[i]+BURST_CTRL_CYC)
   logic              rvalid [0:DEPTH-1];
   int unsigned       rstart [0:DEPTH-1];
-  logic [DQ_W-1:0]   rdata  [0:DEPTH-1];
+  burst_t            rdata  [0:DEPTH-1];
 
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
@@ -69,6 +98,8 @@ module dram_stub #(
       oe_q    = 1'b0;
       wq_head = 0;
       wq_tail = 0;
+      widx    = 0;
+      wcap    = 1'b0;
       for (int i = 0; i < DEPTH; i++) rvalid[i] = 1'b0;
     end else begin
       cyc = cyc + 1;
@@ -81,10 +112,23 @@ module dram_stub #(
         wq_tail = wq_tail + 1;
       end
 
-      // first cycle of a drive burst: capture the (single) burst word
-      if (ddr_dq_oe && !oe_q && wq_head != wq_tail) begin
-        mem[wq[wq_head % DEPTH]] = ddr_dq_o;
-        wq_head = wq_head + 1;
+      // a write burst: beat k is on dq during the k-th cycle of dq_oe.
+      // The burst belongs to the oldest WR whose data has not started.
+      if (ddr_dq_oe) begin
+        if (!oe_q) begin
+          widx = 0;
+          wcap = (wq_head != wq_tail);
+          if (wcap) begin
+            wkey    = wq[wq_head % DEPTH];
+            wq_head = wq_head + 1;
+          end
+        end
+        if (wcap && widx < BURST_CTRL_CYC) begin
+          wtmp = mem.exists(wkey) ? mem[wkey] : '0;
+          wtmp[widx*DQ_W +: DQ_W] = ddr_dq_o;
+          mem[wkey] = wtmp;
+          widx = widx + 1;
+        end
       end
       oe_q = ddr_dq_oe;
 
@@ -92,13 +136,13 @@ module dram_stub #(
         for (int i = 0; i < DEPTH; i++) begin
           if (!rvalid[i]) begin
             rvalid[i] = 1'b1;
-            // The data path registers the rd command one pin-cycle later and
-            // counts (CL>>2)-1 before its 2-cycle capture window; starting
-            // the reply at +CL_ctrl+1 and holding BURST_CTRL_CYC covers it.
-            rstart[i] = cyc + (cfg_CL_nCK >> 2) + 1;
+            // JEDEC: data CL nCK after the DRAM samples RD, i.e. the first
+            // controller cycle at which the whole of CL has elapsed. Not the
+            // design's counter (see the header).
+            rstart[i] = cyc + (int'(cfg_CL_nCK) + CLK_RATIO - 1) / CLK_RATIO;
             rdata[i]  = mem.exists({ddr_bank, open_row[ddr_bank], ddr_addr})
                         ? mem[{ddr_bank, open_row[ddr_bank], ddr_addr}]
-                        : '0;
+                        : unwritten({ddr_bank, open_row[ddr_bank], ddr_addr});
             break;
           end
         end
@@ -128,7 +172,7 @@ module dram_stub #(
       end
     end
     if (found) begin
-      ddr_dq_i  = rdata[best];
+      ddr_dq_i  = rdata[best][(cyc - rstart[best])*DQ_W +: DQ_W];
       ddr_dqs_i = 1'b1;
     end
   end

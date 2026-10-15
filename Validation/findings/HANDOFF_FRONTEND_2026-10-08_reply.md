@@ -412,6 +412,53 @@ Two things fixed on our side from these runs: a resumed `--phases` run now
 stays partial, and the RTL-round cap counts rounds since the last PASS
 (infrastructure halts no longer eat the budget before an agent runs).
 
+## Addendum 6 (2026-10-15, evening): a data_path read-capture defect, found by closing coverage
+
+Coverage closure turned up a Phase 4 defect that every earlier drop passed
+over, and it is ours to explain because our own DRAM model had been hiding
+it.
+
+**What we found.** Every host read returns the wrong word: the low 16 bits
+are zero and the high 16 bits hold the DRAM's *first* (low) beat. On
+drop `dab971c2aab9`, read-after-write of `0x1027c4d1` returns `0xc4d10000`;
+31 of 31 reads on path_03 and path_18, deterministic, confirmed by the
+independently generated second predictor (`data_path/MISMATCH/dp_rd_rsp[data]`,
+critical, in `outbox/current`).
+
+**Why.** `data_path.sv` captures read data by counting, not by the strobe:
+`rd_lat_ctr <= (cfg_CL_nCK >> 2) - 1` (line 225) and then two capture
+cycles (line 275). With CL = 11 that samples the bus 2 controller cycles
+after the RD is on the pins, i.e. 8 nCK, before CL has elapsed. The DRAM
+(JEDEC: data CL after it samples the command, so the first whole
+controller cycle is ceil(11/4) = 3) drives beat 0 one cycle later than the
+design looks for it. The first capture reads the idle bus (0 → low half),
+the second reads beat 0 (→ high half); beat 1 is never seen. The port
+`ddr_dqs_i` is declared (line 72) and never read.
+
+**ask 5 (Phase 4, data_path):** qualify read capture on `ddr_dqs_i`
+(capture a beat each cycle the strobe is high, assemble WORD_BEATS beats low
+half first) rather than counting CL/4 - 1. That is what the strobe is for,
+and it is robust to the half-cycle the 4:1 ratio leaves undefined. If you
+prefer to keep counting, the count from the registered command must be
+ceil(CL / CLK_RATIO), not (CL >> 2) - 1. The finding is confirmed, so
+`flow.py` hands it to your Phase 4 agent under `--yes` on the next round;
+this addendum is the explanation your agent will not have.
+
+**Why no earlier drop showed it, and what changed on our side.** Our
+behavioral DRAM stored one word per burst with both beats identical (a
+model of an older drop's pin protocol) and returned zeros for anything
+unwritten, so the read paths matched on all-zero data and the one stimulus
+that wrote then read (path_18, random mixed) never read a written location.
+Fixed today: the stub stores every beat, replies ceil(CL / ratio) cycles
+after it samples the RD (derived from the spec, never tuned to the
+design's counter), reads unwritten locations as an address pattern that
+differs per beat, and path_18 now drives read-after-write pairs. The same
+run closed the functional coverage plan: 28 of 39 items covered and the
+other 11 short only on the exact-minimum timing bins your spec's
+`timing_model.counter_clock.window_scale = 4` places out of reach (the
+design holds every window 4x the JEDEC value; the rollup now reports those
+as `unreachable_by_spec` rather than as a stimulus gap).
+
 **Your three questions**, as they stand now: (1) the next drop we run is
 whatever the loop produces from `dab971c2aab9`; nothing else is needed in
 `OutputFolders/`. (2) Done, both glue entries deleted; the manifests were

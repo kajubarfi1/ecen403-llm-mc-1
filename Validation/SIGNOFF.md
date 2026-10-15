@@ -52,11 +52,13 @@ Functional coverage: **100 % of reachable bins** in the spec-derived covergroups
 (`sva/generated/*_fcov.sv`, `cmd_gen_coverage.sv`). A bin is "unreachable" only
 when listed in §4 with a reason; "not hit" is not "unreachable".
 
-Current measurement (drop 3596e1ec698e, 2026-10-08, baseline stimulus, before
-constrained-random v2): design 69.9 %; scheduler 65.8 %, cmd_queue 49.5 %,
-bank_tracker 78.5 %, wb_port 56.5 %, data_path 68.6 %; vplan 27/39 items
-fully covered. The gap to target is what the closure loop and
-constrained-random v2 exist to close.
+Current measurement (drop dab971c2aab9, 2026-10-15, directed + random
+stimulus): design 77.2 %; scheduler 79.8 %, cmd_queue 66.0 %, bank_tracker
+80.8 %, wb_port 59.9 %, data_path 77.1 %; vplan 28/39 items fully covered
+and the other 11 `unreachable_by_spec` (the exact-minimum timing bins under
+`timing_model.counter_clock.window_scale = 4`, §4), 0 partial. The code
+coverage gap to target (scheduler, cmd_queue, wb_port) is what the closure
+loop and constrained-random v2 exist to close.
 
 ## 4. Exclusion rules
 
@@ -68,6 +70,7 @@ exclusion) with the item, the reason code and the approver:
 |---|---|---|
 | E-RESET | reachable only during reset or before initialisation completes, and covered by the init paths' assertions instead | default branch of a state machine |
 | E-SPEC | the spec forbids the input that would reach it | ECC error handling with `ecc_mode = 0` |
+| E-SPEC (automatic) | a timing-boundary bin the spec's own `timing_model.counter_clock.window_scale` places inside the design's enforced window: the exact-minimum spacing cannot occur while the design is declared to hold every command `window_scale` times longer than the JEDEC value. `coverage_rollup.py` reports these as `unreachable_by_spec`, citing the declaration; no entry in `exclusions.json` and no approver, because the spec is the approver, and they return to `partial` when the declaration goes | `cg_timing.cp_trcd_spacing.at_minimum` (3 cycles) on a design that issues ACT→CAS at 14 (2026-10-15) |
 | E-DEAD | provably unreachable (formal `unreachable` on the corresponding cover, or a constant-propagation argument cited in the entry) | a case arm under a fixed parameter |
 | E-TOOL | tool artefact (IMC counts an item that is not design logic) | |
 

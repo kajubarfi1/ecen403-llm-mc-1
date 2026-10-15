@@ -39,6 +39,13 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+
+def _py(cmd):
+    """Run our own tools with THIS interpreter, never whatever `python3` is
+    first on PATH: a venv invoked by absolute path otherwise loses its
+    packages in every subprocess (Frontend handoff 2026-10-15, 2a)."""
+    return re.sub(r"^python3 ", sys.executable + " ", cmd) if isinstance(cmd, str) else cmd
+
 sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
 
 PATH_DEFS = os.path.join(ROOT, "Validation", "spec", "path_definitions.json")
@@ -48,7 +55,7 @@ LOGS = os.path.join(ROOT, "Validation", "reports", "validate_drop")
 
 
 def sh(cmd, log=None, check=True, timeout=None):
-    r = subprocess.run(cmd, shell=True, cwd=ROOT, capture_output=True,
+    r = subprocess.run(_py(cmd), shell=True, cwd=ROOT, capture_output=True,
                        text=True, timeout=timeout)
     out = (r.stdout or "") + (r.stderr or "")
     if log:
@@ -495,6 +502,20 @@ def main() -> int:
             drop_status["paths_blocked"] = blocked
             drop_status["paths_run"] = [p for p in drop_status.get("paths_run", paths)
                                         if p not in errored]
+    if drop_status is None and not args.skip_sim:
+        # A complete run says so. Until 2026-10-15 the status was written only
+        # when something was absent, blocked or errored, so the outbox kept
+        # the status of an earlier errored attempt ("run error" on every
+        # path) after a clean run, and flow.py halted on it (Frontend handoff
+        # 2026-10-15, 2c). outbox/current is the latest run, never a ledger.
+        drop_status = {"$schema": "validation-drop-status/1", "drop": head,
+                       "partial": False, "blocks_present": present,
+                       "blocks_absent": sorted(absent),
+                       "inconsistent_edges": bad_edges,
+                       "validation_spec_revision": val_rev,
+                       "foreign_spec_blocks": foreign,
+                       "paths_run": list(paths), "paths_blocked": {},
+                       "note": "Complete run: every runnable path simulated on this drop."}
 
     # 5. rollup ----------------------------------------------------------------
     if not args.skip_rollup and not args.skip_sim and not nothing_runs:

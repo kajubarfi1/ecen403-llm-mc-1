@@ -91,7 +91,7 @@ def rule_ids_fired(stage, trace):
     if not trace or not os.path.exists(os.path.join(ROOT, trace)):
         text = "\n".join(stage.get("detail", []))
     else:
-        r = subprocess.run(["python3", "Validation/txn/scoreboard.py", "--scope", stage["scope"],
+        r = subprocess.run([sys.executable, "Validation/txn/scoreboard.py", "--scope", stage["scope"],
                             "--strategy", "invariant", "--trace", trace, "--model", stage["model"]],
                            cwd=ROOT, capture_output=True, text=True)
         text = r.stdout

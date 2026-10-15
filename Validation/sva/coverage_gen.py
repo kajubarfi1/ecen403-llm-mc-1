@@ -37,6 +37,7 @@ import argparse
 import json
 import math
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -55,6 +56,31 @@ VPLAN_PATH = os.path.join(ROOT, "Validation", "vplan", "vplan.json")
 DEFAULT_OUT = os.path.join(HERE, "generated")
 
 MAX_SPACING = 255          # counter saturation; wide enough for tRFC (32)
+
+
+def enforced_window(spec):
+    """(window_scale, params): the factor by which the spec says the design's
+    enforced timing windows exceed the JEDEC values, and the parameters that
+    applies to (None = every one). A spec that declares no
+    timing_model.counter_clock answers (1, None).
+
+    Under a window_scale above 1 the exact-minimum spacing bin cannot occur:
+    the design holds every command inside a window window_scale times longer
+    than the spec value (observed 2026-10-15: ACT->CAS at 14 controller
+    cycles against a 3-cycle tRCD, on every one of 600 occurrences). The
+    covergroup keeps the at_minimum bin, because it is still the boundary the
+    assertion guards, and adds a bin for the declared margin so the rollup
+    can tell a stimulus gap from a bin the spec itself places out of reach."""
+    cc = spec.get("timing_model", {}).get("counter_clock") or {}
+    try:
+        ws = int(cc.get("window_scale", 1) or 1)
+    except (TypeError, ValueError):
+        ws = 1
+    applies = cc.get("applies_to", [])
+    if isinstance(applies, str):
+        applies = [applies]
+    names = set(re.findall(r"\bt[A-Z]{2,4}\b", " ".join(str(x) for x in applies)))
+    return ws, (names or None)
 
 
 def vplan_expects(vplan_path):
@@ -102,6 +128,7 @@ def generate(spec, rules, catalog, schemas, want):
 
     # --- coverpoints --------------------------------------------------------
     points, generated, skipped = [], [], []
+    window_scale, scaled_params = enforced_window(spec)
 
     for r in seps + win:
         rid = r["id"]
@@ -135,13 +162,24 @@ def generate(spec, rules, catalog, schemas, want):
             trig = cmd_match(enc, [r["command"]], sig)
         else:
             trig = cmd_match(enc, r["to"], sig)
-        below = f"bins below_minimum = {{[0:{n - 1}]}};" if n >= 1 else ""
+        n_enf = n
+        if window_scale > 1 and (scaled_params is None or param in scaled_params):
+            n_enf = min(math.ceil(window_scale * float(ns) / float(period)), MAX_SPACING - 1)
+        if n_enf > n + 1:
+            upper = f"""      // timing_model.counter_clock.window_scale = {window_scale}: the design
+      // enforces {window_scale} x {param} = {n_enf} cycle(s), so at_minimum and this
+      // bin are out of reach while that declaration stands. The rollup
+      // reports them as unreachable_by_spec, not as a stimulus gap.
+      bins within_enforced_window = {{[{n + 1}:{n_enf - 1}]}};
+      bins at_or_above_enforced = {{[{n_enf}:{MAX_SPACING - 1}]}};"""
+        else:
+            upper = f"      bins above_minimum = {{[{n + 1}:{MAX_SPACING - 1}]}};"
         points.append(f"""    // {param} = {ns}ns = {n} cycle(s) at {period}ns. The at_minimum bin is
     // the one that matters: a suite that always leaves slack satisfies the
     // constraint without ever testing it.
     {pt}: coverpoint {ctr}[{bank}] iff (rst_n && {trig}) {{
       bins at_minimum   = {{{n}}};
-      bins above_minimum = {{[{n + 1}:{MAX_SPACING - 1}]}};
+{upper}
       // Saturation means the source command never occurred, so this is an
       // artefact of counter initialisation rather than something stimulus
       // should aim at. Counting it would make 100% unreachable for any

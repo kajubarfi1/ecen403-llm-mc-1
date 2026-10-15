@@ -11,7 +11,7 @@
     "method":        "assertion | directed | random | formal — how this requirement is proven.",
     "coverage_items":"List of coverage objects that measure whether this requirement was exercised.",
     "priority":      "critical | major | minor — inherited from failure_taxonomy severity where applicable.",
-    "status":        "not_started | in_progress | covered | waived",
+    "status":        "not_started | in_progress | partial | covered | unreachable_by_spec | waived (partial and unreachable_by_spec are written by coverage_rollup.py: short of goal, or short only on bins the spec's timing_model.counter_clock.window_scale places out of reach)",
     "waiver_reason": "Required when status == waived. Must name who approved it.",
     "tests":         "List of test/sequence names that target this item. Populated by the run flow, not by hand."
   },

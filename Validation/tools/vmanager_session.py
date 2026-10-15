@@ -36,12 +36,20 @@ Then on Olympus (needs X forwarding: ssh -X or -Y):
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+
+def _py(cmd):
+    """Run our own tools with THIS interpreter, never whatever `python3` is
+    first on PATH: a venv invoked by absolute path otherwise loses its
+    packages in every subprocess (Frontend handoff 2026-10-15, 2a)."""
+    return re.sub(r"^python3 ", sys.executable + " ", cmd) if isinstance(cmd, str) else cmd
+
 sys.path.insert(0, os.path.join(ROOT, "Validation", "agents"))
 sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
 
@@ -91,7 +99,7 @@ add_filter ('harness_timeout', 6,
 
 
 def run_local(cmd):
-    r = subprocess.run(cmd, shell=True, capture_output=True, text=True,
+    r = subprocess.run(_py(cmd), shell=True, capture_output=True, text=True,
                        cwd=ROOT)
     return r.returncode, (r.stdout or "") + (r.stderr or "")
 

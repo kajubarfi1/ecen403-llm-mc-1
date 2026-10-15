@@ -13,13 +13,22 @@ names the vplan already asks for. The names match by construction — the
 covergroups are generated from the same vplan — so there is no translation
 table to drift.
 
-Three statuses, and the distinctions are the point:
+Four statuses, and the distinctions are the point:
 
   covered       every coverage item the vplan named reached its goal
   partial       measured, but at least one item is short of goal
   not_measured  the run produced no data for this item at all. NOT the same
                 as 0% — 0% means the bin exists and was never hit, which is
                 information; not_measured means nobody looked.
+  unreachable_by_spec
+                the only bins short are ones the spec itself places out of
+                reach: a timing-spacing at_minimum (or within_enforced_window)
+                bin under a timing_model.counter_clock.window_scale above 1,
+                where the design is declared to enforce a longer window than
+                the JEDEC minimum. Stimulus cannot close these; they revert to
+                partial the moment the declaration goes. The reason names the
+                declaration so the reader can check it, and no approver is
+                involved, because the spec is the approver (SIGNOFF §4 E-SPEC).
 
 A vplan item whose assertion never fired AND whose exercised-coverpoint is 0%
 is reported as unproven regardless of the run passing, because an assertion
@@ -43,6 +52,20 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 VPLAN_PATH = os.path.join(ROOT, "Validation", "vplan", "vplan.json")
 OUT_PATH = os.path.join(ROOT, "Validation", "reports", "coverage_rollup.json")
+SPEC_PATH = os.environ.get("VALIDATION_SPEC", os.path.join(
+    ROOT, "Validation", "spec", "llmmc_microarchitecturespec_filled.json"))
+
+# Bins a window_scale declaration places out of reach (coverage_gen.py).
+SPEC_BOUND_BINS = {"at_minimum", "within_enforced_window"}
+
+
+def window_scale_of(spec):
+    """timing_model.counter_clock.window_scale, 1 when the spec declares none."""
+    cc = (spec or {}).get("timing_model", {}).get("counter_clock") or {}
+    try:
+        return int(cc.get("window_scale", 1) or 1)
+    except (TypeError, ValueError):
+        return 1
 
 COV_RE = re.compile(r"(\d+)\s*/\s*(\d+)\s*\(([\d.]+)%\)")
 
@@ -81,8 +104,16 @@ def parse_imc_report(report_dir):
                     # entry, which is what the type-level union means.
                     prev = results.get(title)
                     if prev is None or hit > prev["bins_hit"]:
+                        # per-bin detail, so the rollup can say WHICH bin is
+                        # short and whether the spec itself put it out of reach
+                        detail = {}
+                        for sub in o.get("subitems", []) or []:
+                            bt = sub.get("title") if isinstance(sub, dict) else None
+                            bm = COV_RE.search(str(sub.get("All Cov", ""))) if bt else None
+                            if bt and bm:
+                                detail[bt] = int(bm.group(1)) > 0
                         results[title] = {"bins_hit": hit, "bins_total": total,
-                                          "percent": pct}
+                                          "percent": pct, "bins_detail": detail}
             for v in o.values():
                 walk(v)
         elif isinstance(o, list):
@@ -101,7 +132,7 @@ def parse_imc_report(report_dir):
     return results
 
 
-def rollup(vplan, measured):
+def rollup(vplan, measured, window_scale=1):
     items = []
     for item in vplan["items"]:
         wanted = item.get("coverage_items", [])
@@ -109,7 +140,7 @@ def rollup(vplan, measured):
             items.append({**_base(item), "status": "no_coverage_declared",
                           "coverage": []})
             continue
-        rows, missing, short = [], [], []
+        rows, missing, short, unreachable = [], [], [], []
         for cov in wanted:
             point = cov["name"].split(".", 1)[-1]
             goal = cov.get("goal", 100)
@@ -120,21 +151,39 @@ def rollup(vplan, measured):
                              "measured": None, "state": "not_measured"})
                 continue
             state = "met" if got["percent"] >= goal else "short"
+            row = {"name": cov["name"], "goal": goal,
+                   "measured": got["percent"],
+                   "bins": f"{got['bins_hit']}/{got['bins_total']}",
+                   "state": state}
             if state == "short":
-                short.append(f"{cov['name']} {got['percent']}% of {goal}%")
-            rows.append({"name": cov["name"], "goal": goal,
-                         "measured": got["percent"],
-                         "bins": f"{got['bins_hit']}/{got['bins_total']}",
-                         "state": state})
+                unhit = {b for b, h in (got.get("bins_detail") or {}).items() if not h}
+                if (window_scale > 1 and point.endswith("_spacing")
+                        and unhit and unhit <= SPEC_BOUND_BINS):
+                    row["state"] = "unreachable_by_spec"
+                    row["unhit_bins"] = sorted(unhit)
+                    unreachable.append(f"{cov['name']} {sorted(unhit)}")
+                else:
+                    short.append(f"{cov['name']} {got['percent']}% of {goal}%")
+            rows.append(row)
 
         if missing and len(missing) == len(wanted):
             status = "not_measured"
         elif short or missing:
             status = "partial"
+        elif unreachable:
+            status = "unreachable_by_spec"
         else:
             status = "covered"
-        items.append({**_base(item), "status": status, "coverage": rows,
-                      "short_of_goal": short, "not_measured": missing})
+        entry = {**_base(item), "status": status, "coverage": rows,
+                 "short_of_goal": short, "not_measured": missing}
+        if unreachable:
+            entry["unreachable_by_spec"] = unreachable
+            entry["reason"] = (
+                f"timing_model.counter_clock.window_scale = {window_scale}: the spec "
+                f"declares the design enforces {window_scale} x this parameter, so the "
+                f"exact-minimum spacing cannot occur while that declaration stands; "
+                f"stimulus cannot close it. Reverts to partial when the declaration goes.")
+        items.append(entry)
     return items
 
 
@@ -149,12 +198,20 @@ def main() -> int:
     ap.add_argument("--report", required=True, help="imc report directory")
     ap.add_argument("--write-vplan", action="store_true",
                     help="update status fields in vplan.json")
+    ap.add_argument("--spec", default=SPEC_PATH,
+                    help="the spec the drop was judged against (its counter_clock "
+                         "declaration decides which bins are unreachable_by_spec)")
     args = ap.parse_args()
 
     with open(VPLAN_PATH) as f:
         vplan = json.load(f)
+    spec = {}
+    if os.path.exists(args.spec):
+        with open(args.spec) as f:
+            spec = json.load(f)
     measured = parse_imc_report(args.report)
-    items = rollup(vplan, measured)
+    ws = window_scale_of(spec)
+    items = rollup(vplan, measured, ws)
 
     from collections import Counter
     tally = Counter(i["status"] for i in items)
@@ -163,7 +220,7 @@ def main() -> int:
     print(f"  vplan items      : {total}")
     print(f"  coverpoints found in the report: {len(measured)}")
     print()
-    for st in ("covered", "partial", "not_measured", "no_coverage_declared"):
+    for st in ("covered", "unreachable_by_spec", "partial", "not_measured", "no_coverage_declared"):
         if tally.get(st):
             print(f"    {st:22} {tally[st]:3}")
     print()
@@ -171,6 +228,12 @@ def main() -> int:
     proven = tally.get("covered", 0)
     print(f"  {proven}/{total} vplan item(s) fully covered "
           f"({100.0 * proven / total:.1f}%)")
+    unr = [i for i in items if i["status"] == "unreachable_by_spec"]
+    if unr:
+        print(f"  {len(unr)} item(s) short only on bins the spec places out of reach "
+              f"(timing_model.counter_clock.window_scale = {ws}):")
+        for i in unr:
+            print(f"    {i['id']:14} {i['title'][:40]:42} {'; '.join(i['unreachable_by_spec'])[:60]}")
     print()
 
     shown = [i for i in items if i["status"] == "partial"][:8]
@@ -195,6 +258,7 @@ def main() -> int:
                "spec_revision": vplan.get("spec_revision"),
                "vplan_items": total,
                "coverpoints_measured": len(measured),
+               "window_scale": ws,
                "summary": dict(tally),
                "items": items}
     with open(OUT_PATH, "w") as f:

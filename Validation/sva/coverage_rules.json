@@ -95,9 +95,9 @@
         },
         "cp_ref_002_exercised": {
           "recipe": "occurred",
-          "block": "bank_tracker",
-          "expr": "cmd_ref_valid && (|bank_is_active)",
-          "why": "A REFRESH issued while at least one bank is active — the situation REF_002 forbids. Observed at bank_tracker, the one block that sees both the command and bank state."
+          "block": "scheduler",
+          "expr": "ref_urgent && (|bank_is_active)",
+          "why": "A refresh became urgent while at least one bank was still open: the situation under which REF_002 (never REFRESH with a bank active) is actually tested, because the scheduler must precharge before it may refresh. Measured at the scheduler, which sees both. The previous expression ('REF issued while a bank is active') was the violation itself, which a correct design never produces, so the bin read 0% on a design that handled 40+ urgent refreshes under traffic (path_20, 2026-10-15)."
         }
       }
     },
@@ -153,8 +153,8 @@
       "coverpoints": {
         "cp_backpressure_exercised": {
           "recipe": "occurred",
-          "expr": "enq_valid && !enq_ready",
-          "why": "A request was presented while the queue could not accept it: the only cycle in which back-pressure (and the host stall it must cause) is tested. Without it path_07 passes vacuously."
+          "expr": "!enq_ready",
+          "why": "The queue refused a request: the cycles in which back-pressure (and the host stall it must cause) is tested. Measured on the ready signal alone because a host port is free to gate valid on ready (this design's wb_port does: wb_beat = cyc & stb & ~stall, stall = !req_ready), in which case 'valid && !ready' never samples true even while the queue sits full and the host is stalled for 45 cycles per write (path_07, 2026-10-15). That no accepted request is lost under back-pressure is the scoreboard's check, not this bin's."
         }
       }
     }

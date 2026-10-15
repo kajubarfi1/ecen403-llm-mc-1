@@ -9,7 +9,7 @@
     "drop_head": "dab971c2aab9"
   },
   "strict": false,
-  "generated_utc": "2026-10-15T17:49:32.561599Z",
+  "generated_utc": "2026-10-15T18:28:47.906257Z",
   "rows": [
     {
       "path": "path_01_write_cmd",
@@ -51,16 +51,23 @@
     },
     {
       "path": "path_03_read_return",
-      "kind": "same",
-      "new": {},
+      "kind": "regression",
+      "new": {
+        "stage:data_path": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
+      "matched_down": {
+        "matched:data_path": [
+          19,
+          0
+        ]
+      },
       "matched_up": {},
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
@@ -272,21 +279,36 @@
     },
     {
       "path": "path_18_full_write",
-      "kind": "fixed",
-      "new": {},
+      "kind": "changed",
+      "new": {
+        "stage:data_path": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
+      "matched_down": {
+        "matched:data_path": [
+          29,
+          24
+        ]
+      },
       "matched_up": {
+        "matched:addr_decoder": [
+          19,
+          24
+        ],
         "matched:cmd_gen": [
           49,
           50
+        ],
+        "matched:wb_port": [
+          28,
+          36
         ]
       },
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {

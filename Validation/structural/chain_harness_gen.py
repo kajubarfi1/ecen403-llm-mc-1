@@ -146,6 +146,28 @@ def check_wiring(imap, blocks):
     return errs
 
 
+def stub_param_value(spec, value):
+    """A stub parameter: a literal, or "@spec:path[.path] [/ path]" looked up in
+    the spec (integer division when two paths are given)."""
+    if not (isinstance(value, str) and value.startswith("@spec:")):
+        return value
+    expr = value[len("@spec:"):]
+    parts = [x.strip() for x in expr.split("/")]
+    vals = []
+    for part in parts:
+        cur = spec
+        for key in part.split("."):
+            if not isinstance(cur, dict) or key not in cur:
+                raise WiringError(f"stub parameter {value!r}: spec has no {part!r}")
+            cur = cur[key]
+        vals.append(int(cur))
+    if len(vals) == 1:
+        return vals[0]
+    if len(vals) == 2 and vals[1]:
+        return vals[0] // vals[1]
+    raise WiringError(f"stub parameter {value!r}: expected one path or 'a / b'")
+
+
 def generate(path_id, seq, imap, settle=DEFAULT_SETTLE, formal=False):
     """formal=True emits a synthesizable top for JasperGold: same blocks and
     wiring, but clk/rst_n are ports, the host-facing inputs and the DRAM
@@ -351,6 +373,13 @@ def generate(path_id, seq, imap, settle=DEFAULT_SETTLE, formal=False):
         insts.append(f"  {b} u_{b} (\n    " + ",\n    ".join(conns) + "\n  );")
 
     for s in ([] if formal else active_stubs):
+        # parameters: a literal, or "@spec:a.b.c" (optionally "@spec:a.b / c.d",
+        # integer division) resolved from the spec the drop was generated from,
+        # so the stub's widths and ratios follow the spec, never a default
+        pvals = []
+        for pname, pv in (s.get("params") or {}).items():
+            pvals.append(f".{pname}({stub_param_value(spec, pv)})")
+        sparams = f" #(\n    {', '.join(pvals)}\n  )" if pvals else ""
         sconns = []
         for sport, src in s["inputs"].items():
             if src == "@clk":
@@ -365,7 +394,7 @@ def generate(path_id, seq, imap, settle=DEFAULT_SETTLE, formal=False):
             # declared already iff some block input consumes it
             sconns.append(f".{sport}({n})" if n in declared
                           else f".{sport}()")
-        insts.append(f"  {s['module']} {s['instance']} (\n    "
+        insts.append(f"  {s['module']}{sparams} {s['instance']} (\n    "
                      + ",\n    ".join(sconns) + "\n  );")
 
     # driver instance: outputs drive drv__ nets; inputs (handshake completes)
