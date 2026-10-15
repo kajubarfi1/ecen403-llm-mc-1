@@ -97,6 +97,8 @@ def main():
     ap.add_argument("--skip-done", action="store_true",
                     help="keep (block, path) results already in summary.json for this drop and "
                          "netlist set; run only the pairs it lacks")
+    ap.add_argument("--rescore", action="store_true",
+                    help="no runs: rebuild summary.json from the per-path reports on disk")
     args = ap.parse_args()
     OUT = os.path.abspath(args.out)
 
@@ -118,21 +120,57 @@ def main():
                "judged_against": judged,
                "path_rule": "every runnable path whose harness closure contains the block",
                "blocks": {}}
-    done = {}
+    done, kept = {}, {}
     sp = os.path.join(OUT, "summary.json")
-    if args.skip_done and os.path.exists(sp):
+    if os.path.exists(sp):
         with open(sp) as f:
             prev = json.load(f)
         if prev.get("judged_against") == judged and prev.get("netlists") == summary["netlists"]:
-            for b, s in prev.get("blocks", {}).items():
-                for r in s.get("paths", []):
-                    if r["verdict"] in ("PASS", "FAIL"):
-                        done[(b, r["path"])] = r
+            # blocks not in this run keep their record; a --blocks run must
+            # never shrink the summary to the blocks it ran (it did, 10-15)
+            kept = {b: s for b, s in prev.get("blocks", {}).items() if b not in blocks}
+            if args.skip_done:
+                for b, s in prev.get("blocks", {}).items():
+                    for r in s.get("paths", []):
+                        if r["verdict"] in ("PASS", "FAIL"):
+                            done[(b, r["path"])] = r
+    if args.rescore:
+        # read the reports already on disk instead of running anything
+        for b in blocks:
+            for p in paths_for(b, pdefs, imap):
+                rp = os.path.join(OUT, b, f"{p}_report.json")
+                if os.path.exists(rp):
+                    with open(rp) as f:
+                        rep = json.load(f)
+                    first = next((f"{s.get('stage')}: {str(s.get('summary', ''))[:160]}"
+                                  for s in rep.get("stages", []) if s.get("verdict") == "fail"), None)
+                    done[(b, p)] = {"path": p, "verdict": str(rep.get("verdict", "?")).upper(),
+                                    "first_failure": first, "fired": {}}
     jobs = [(b, os.path.join(ROOT, nl["blocks"][b]["netlist"]), p)
             for b in blocks for p in paths_for(b, pdefs, imap) if (b, p) not in done]
+    if args.rescore:
+        jobs = []
+    # Provenance: a netlist is evidence about the drop it was cut from. When
+    # the netlist set names another drop and no design id says the design
+    # is the same, every verdict below is about a stale netlist and is
+    # marked so (the scheduler netlist of 2026-10-14 reproduced the pre-fix
+    # RTL's defects; nothing in the record said it predated the fix).
+    built = nl.get("drop_id")
+    built_design = nl.get("design_id")
+    stale = bool(built) and built != judged["drop_id"] and built_design != judged["design_id"]
+    summary["provenance"] = ("same drop" if built == judged["drop_id"]
+                             else "same design" if built_design == judged["design_id"]
+                             else "STALE: built from another drop and no design id matches"
+                             if built else "unknown: the netlist set names no drop")
     print(f"{len(jobs)} netlist run(s) over {len(blocks)} block(s), {args.jobs} at a time"
           + (f"; {len(done)} already judged" if done else "")
           + f"; judging against drop {judged['drop_id']} (design {judged['design_id']})")
+    if stale:
+        print(f"  STALE NETLISTS: built from drop {built}"
+              + (f" (design {built_design})" if built_design else " (no design id recorded)")
+              + f", the drop under judgement is {judged['drop_id']} (design {judged['design_id']}). "
+              f"A pass below says the old design still passes; a fail may be the old design's. "
+              f"Rebuild from the current drop.")
     results = {b: [r for (bb, _p), r in done.items() if bb == b] for b in blocks}
     with concurrent.futures.ThreadPoolExecutor(args.jobs) as ex:
         futs = {ex.submit(run_one, b, n, p, args.timeout, args.judge_only): (b, p) for b, n, p in jobs}
@@ -144,19 +182,21 @@ def main():
                 res = {"path": p, "verdict": f"error: {type(e).__name__}", "first_failure": str(e)[:160], "fired": {}}
             results[b].append(res)
             print(f"  {b:13} {p:34} {res['verdict']:6} {res['first_failure'] or ''}"[:150])
+    summary["blocks"].update(kept)
     for b in blocks:
         rows = sorted(results[b], key=lambda r: r["path"])
         verdict = "PASS" if rows and all(r["verdict"] == "PASS" for r in rows) else "FAIL"
         summary["blocks"][b] = {"netlist": nl["blocks"][b]["netlist"], "verdict": verdict,
-                                "paths": rows,
+                                "stale_netlist": stale, "paths": rows,
                                 "backend": {k: nl["blocks"][b].get(k) for k in ("fmax_mhz", "wns_ns", "sta", "drc_violations", "lvs")}}
     with open(os.path.join(OUT, "summary.json"), "w") as f:
         json.dump(summary, f, indent=2)
-    print("\n  block         verdict  paths")
-    for b in blocks:
+    print("\n  block         verdict  paths" + ("   (STALE netlists, see above)" if stale else ""))
+    for b in sorted(summary["blocks"]):
         s = summary["blocks"][b]
         n_pass = sum(1 for r in s["paths"] if r["verdict"] == "PASS")
         print(f"  {b:13} {s['verdict']:7}  {n_pass}/{len(s['paths'])}")
+    print(f"  provenance: {summary['provenance']}")
     print(f"  wrote {os.path.relpath(os.path.join(OUT, 'summary.json'), ROOT)}")
     return 0 if all(s["verdict"] == "PASS" for s in summary["blocks"].values()) else 1
 

@@ -161,6 +161,17 @@ rather than assume it, and `run_path.py` now wraps each netlist in a
 module with the RTL's port shapes. If you ever emit a port-order note in
 `NETLISTS.json`, that is the convention to state.
 
+**Provenance, so this is caught by a rule next time (done on our side,
+2026-10-15).** `run_netlists.py` now compares `NETLISTS.json`'s `drop_id`
+(and `design_id` when present) with the drop it judges and marks the whole
+set STALE when neither matches; `flow.py`'s final stage refuses netlists
+the backend built on a different drop than the one it judges. `flow.py`
+also passes `--spec_id` now, as you accept it. **ask:** record `design_id`
+in `NETLISTS.json` and in the per-design final report, taking the value
+from our `HANDOFF.json` of the drop you build from (or accept a
+`--design_id` and we pass it), and drop the `design_equivalent_drop`
+field: equivalence is what `design_id` states, by one definition.
+
 The bank_tracker netlist is pre-fix too (per-bank tWTR) and still passes
 all 11 paths whose harness contains it, because the current scheduler's
 hold enforces the write-to-read turnaround on its own. That is a pass of
