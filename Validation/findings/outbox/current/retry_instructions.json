@@ -1,14 +1,189 @@
 {
   "$schema": "validation-retry-instructions/1",
-  "status": "PASS",
+  "status": "FAIL",
   "pipeline": "validation",
-  "drop": "dab971c2aab9",
+  "drop": "4bf921ce1833",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "spec_id": "f7c16e452e8d9d23",
-  "generated_utc": "2026-10-15T17:00:23.343911Z",
-  "failed_modules": [],
-  "retry_instructions": {},
+  "spec_id": "279cbf6ca7b6f62b",
+  "generated_utc": "2026-10-15T17:47:42.637908Z",
+  "failed_modules": [
+    "scheduler"
+  ],
+  "retry_instructions": {
+    "scheduler": {
+      "module": "scheduler",
+      "attempt": null,
+      "drop": "4bf921ce1833",
+      "failed_checks": [
+        {
+          "id": "PROTO_001",
+          "name": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+          "pass": false,
+          "expected": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+          "actual": "PRE b=1 at cycle 183, RD b=1 at cycle 184.",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "signal": "cmd_valid/cmd_type/cmd_bank"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+              "signal": "bank_rd_allowed"
+            }
+          ],
+          "owner_candidates": [
+            "scheduler"
+          ],
+          "occurrences": 1,
+          "paths": [
+            "formal:chain_formal"
+          ],
+          "repro": {
+            "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+            "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+            "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+          },
+          "introduced_in": null,
+          "repair": null,
+          "fix": null,
+          "finding_id": "formal/scheduler/PROTO_001"
+        },
+        {
+          "id": "TIMING_008",
+          "name": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+          "pass": false,
+          "expected": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+          "actual": "WR b=4 at cycle 173, PRE b=4 at cycle 174.",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+              "signal": "bank_pre_allowed / ctr_wr"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "signal": "precharge decision"
+            }
+          ],
+          "owner_candidates": [
+            "scheduler"
+          ],
+          "occurrences": 1,
+          "paths": [
+            "formal:chain_formal"
+          ],
+          "repro": {
+            "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+            "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+            "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+          },
+          "introduced_in": null,
+          "repair": null,
+          "fix": null,
+          "finding_id": "formal/scheduler/TIMING_008"
+        }
+      ],
+      "message": "2 check(s) failed on drop 4bf921ce1833; 2 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+    }
+  },
   "resolved_since_previous_drop": [],
   "requires_human_review": false,
-  "source": "Validation/findings/emit_findings.py -> retry_adapter.py"
+  "source": "Validation/findings/emit_findings.py -> retry_adapter.py",
+  "drop_status": {
+    "$schema": "validation-drop-status/1",
+    "drop": "4bf921ce1833",
+    "partial": false,
+    "blocks_present": [
+      "addr_decoder",
+      "bank_tracker",
+      "calibration",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "init_fsm",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "blocks_absent": [],
+    "inconsistent_edges": [],
+    "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "foreign_spec_blocks": {},
+    "paths_run": [],
+    "paths_blocked": {
+      "path_01_write_cmd": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_01_write_cmd.txt"
+      ],
+      "path_06_scheduler_dequeue": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_01_write_cmd.txt"
+      ],
+      "path_02_read_cmd": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_02_read_cmd.txt"
+      ],
+      "path_03_read_return": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_03_read_return.txt"
+      ],
+      "path_04_scheduler_bank_loop": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_04_scheduler_bank_loop.txt"
+      ],
+      "path_05_scheduler_refresh_loop": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_05_scheduler_refresh_loop.txt"
+      ],
+      "path_07_backpressure": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_07_backpressure.txt"
+      ],
+      "path_08_init_to_cal": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_08_init_to_cal.txt"
+      ],
+      "path_09_init_to_refresh": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_09_init_to_refresh.txt"
+      ],
+      "path_12_csr_timing_to_scheduling": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_12_csr_timing_to_scheduling.txt"
+      ],
+      "path_10_csr_to_timing": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_12_csr_timing_to_scheduling.txt"
+      ],
+      "path_13_csr_refresh_to_scheduling": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_13_csr_refresh_to_scheduling.txt"
+      ],
+      "path_11_csr_to_refresh": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_13_csr_refresh_to_scheduling.txt"
+      ],
+      "path_14_status_init": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_14_status_init.txt"
+      ],
+      "path_15_status_cal": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_15_status_cal.txt"
+      ],
+      "path_16_status_refresh": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_16_status_refresh.txt"
+      ],
+      "path_17_full_boot": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_17_full_boot.txt"
+      ],
+      "path_18_full_write": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_18_full_write.txt"
+      ],
+      "path_19_row_conflict": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_19_row_conflict.txt"
+      ],
+      "path_20_refresh_preempt": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_20_refresh_preempt.txt"
+      ],
+      "path_21_wb_port_standalone": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_21_wb_port_standalone.txt"
+      ],
+      "path_22_csr_standalone": [
+        "run error (rc=1): see Validation/reports/validate_drop/4bf921ce1833_path_22_csr_standalone.txt"
+      ]
+    },
+    "note": "Paths listed as blocked with a run error did not simulate on this drop (infrastructure, not design); nothing is known about them from this run."
+  }
 }

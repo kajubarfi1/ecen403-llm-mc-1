@@ -1,0 +1,184 @@
+<title>LLM-MC Test Plan Slide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: a fixed 16:9 frame (1920x1080 viewBox): the next round of testing as a planned timeline (one row per test,
+   grouped by hand-off), with owner and exit criterion at the right. Same visual system as test_results_slide.html.
+   Deliberately single-theme (light), since it is pasted onto slides. */
+:root {
+  --page: #e9e4e4; --slide: #ffffff; --fg: #1f1a1b; --muted: #6b5f61; --faint: #ece6e7;
+  --accent: #500000; --plan: #f3e9e9; --sect: #f6f0f0; --bad: #b3261e; --neutral: #5b6470;
+  --display: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+html, body { height: 100%; }
+body { background: var(--page); color: var(--fg); margin: 0; font-family: var(--display);
+        display: grid; place-items: center; padding-inline: 16px; padding-block: 16px; box-sizing: border-box; }
+.slide { width: min(100%, calc((100vh - 72px) * 16 / 9)); aspect-ratio: 16 / 9; max-width: 100%;
+          background: var(--slide); box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 8px 24px rgba(0,0,0,.08); }
+.slide svg { display: block; width: 100%; height: 100%; }
+.hint { color: var(--muted); font-size: 13px; margin-top: 10px; text-align: center; }
+.colh { font: 700 18px var(--display); fill: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+.tick { font: 600 18px var(--display); fill: var(--fg); }
+.tick.today { fill: var(--bad); }
+.dow { font: 600 15px var(--display); fill: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.dow.today, .tick.today { fill: var(--bad); }
+.deadl { font: 700 17px var(--display); fill: var(--accent); }
+.gridl { stroke: var(--faint); stroke-width: 1.5; }
+.todayl { stroke: var(--bad); stroke-width: 1.5; stroke-dasharray: 5 5; }
+.demol { stroke: var(--accent); stroke-width: 2.5; }
+.sect { fill: var(--sect); }
+.secth { font: 700 24px var(--display); fill: var(--accent); }
+.sectn { font: 17px var(--display); fill: var(--muted); }
+.name { font: 700 21px var(--display); fill: var(--fg); }
+.detail { font: 15px var(--display); fill: var(--muted); }
+.plan { fill: var(--plan); stroke: var(--accent); stroke-width: 1.8; }
+.decide { fill: #ffffff; stroke: var(--neutral); stroke-width: 1.5; stroke-dasharray: 6 4; }
+.decidet { font: 600 12px var(--display); fill: var(--neutral); }
+.target { fill: var(--accent); stroke: #ffffff; stroke-width: 2; }
+.owner { font: 600 18px var(--display); fill: var(--fg); }
+.done { font: 600 17px var(--display); fill: var(--fg); }
+.by { font: 15px var(--display); fill: var(--muted); }
+.leg { font: 17px var(--display); fill: var(--muted); }
+</style>
+<div>
+<div class="slide">
+<svg viewBox="0 0 1920 1080" role="img" aria-label="Phase 2 integration test plan from October 14 to the October 20 deadline. Frontend to Validation: tREFI fix validation, spec revision tracking, the interactive design session, agent repair of seeded faults, the preset matrix, ambiguous English requests, the assembled top-level controller, and coverage sign-off. Frontend to Backend: an 11-block rebuild, scheduler timing closure after a spec decision, gate-level netlists through the paths, full-controller timing at 200 MHz, and one English-to-GDSII run on the final day.">
+<rect width="1920" height="1080" fill="#ffffff"/>
+<text x="60" y="72" class="colh">Test</text>
+<text x="1330" y="72" class="colh">Owner</text>
+<text x="1500" y="72" class="colh">Done when</text>
+<text x="575.7" y="58" text-anchor="middle" class="dow today">Today</text>
+<text x="575.7" y="80" text-anchor="middle" class="tick today">10/14</text>
+<text x="687.1" y="58" text-anchor="middle" class="dow">Thu</text>
+<text x="687.1" y="80" text-anchor="middle" class="tick">10/15</text>
+<line x1="631.4" y1="88" x2="631.4" y2="966.0" class="gridl"/>
+<text x="798.6" y="58" text-anchor="middle" class="dow">Fri</text>
+<text x="798.6" y="80" text-anchor="middle" class="tick">10/16</text>
+<line x1="742.9" y1="88" x2="742.9" y2="966.0" class="gridl"/>
+<text x="910.0" y="58" text-anchor="middle" class="dow">Sat</text>
+<text x="910.0" y="80" text-anchor="middle" class="tick">10/17</text>
+<line x1="854.3" y1="88" x2="854.3" y2="966.0" class="gridl"/>
+<text x="1021.4" y="58" text-anchor="middle" class="dow">Sun</text>
+<text x="1021.4" y="80" text-anchor="middle" class="tick">10/18</text>
+<line x1="965.7" y1="88" x2="965.7" y2="966.0" class="gridl"/>
+<text x="1132.9" y="58" text-anchor="middle" class="dow">Mon</text>
+<text x="1132.9" y="80" text-anchor="middle" class="tick">10/19</text>
+<line x1="1077.1" y1="88" x2="1077.1" y2="966.0" class="gridl"/>
+<text x="1244.3" y="58" text-anchor="middle" class="dow">Tue</text>
+<text x="1244.3" y="80" text-anchor="middle" class="tick">10/20</text>
+<line x1="1188.6" y1="88" x2="1188.6" y2="966.0" class="gridl"/>
+<line x1="520.0" y1="88" x2="520.0" y2="966.0" class="todayl"/>
+<line x1="1300.0" y1="42" x2="1300.0" y2="966.0" class="demol"/>
+<text x="1292.0" y="958.0" text-anchor="end" class="deadl">Deadline 10/20</text>
+<rect x="48" y="88" width="1824" height="40" rx="6" class="sect"/>
+<text x="60" y="116" class="secth">Frontend → Validation</text>
+<text x="353" y="115" class="sectn">next drops, judged by simulation and formal proofs</text>
+<text x="60" y="164" class="name">tREFI fix validation</text>
+<text x="60" y="184" class="detail">drop dab971c2aab9 · refresh_ctrl</text>
+<rect x="523.0" y="149" width="216.9" height="18" rx="4" class="plan"><title>tREFI fix validation: Oct 14 to Oct 15, owner Jacob</title></rect>
+<path d="M739.9,146 l12,12 l-12,12 l-12,-12 z" class="target"/>
+<text x="1330" y="164" class="owner">Jacob</text>
+<text x="1500" y="164" class="done">19/19 paths; tREFI SVA proves 7.8 µs</text>
+<text x="1500" y="184" class="by">by Thu 10/15</text>
+<text x="60" y="224" class="name">Spec revision follows content</text>
+<text x="60" y="244" class="detail">compiler stamps a content hash</text>
+<rect x="523.0" y="209" width="216.9" height="18" rx="4" class="plan"><title>Spec revision follows content: Oct 14 to Oct 15, owner Lehana</title></rect>
+<path d="M739.9,206 l12,12 l-12,12 l-12,-12 z" class="target"/>
+<text x="1330" y="224" class="owner">Lehana</text>
+<text x="1500" y="224" class="done">no SPEC_REVISION_REUSED finding</text>
+<text x="1500" y="244" class="by">by Thu 10/15</text>
+<text x="60" y="284" class="name">Interactive design session</text>
+<text x="60" y="304" class="detail">python3 flow.py, live API</text>
+<rect x="523.0" y="269" width="328.3" height="18" rx="4" class="plan"><title>Interactive design session: Oct 14 to Oct 16, owner Lehana</title></rect>
+<path d="M851.3,266 l12,12 l-12,12 l-12,-12 z" class="target"/>
+<text x="1330" y="284" class="owner">Lehana</text>
+<text x="1500" y="284" class="done">accepted spec passes spec review</text>
+<text x="1500" y="304" class="by">by Fri 10/16</text>
+<text x="60" y="344" class="name">Agent repair of seeded faults</text>
+<text x="60" y="364" class="detail">Phase 1–4 agents on injected bugs</text>
+<rect x="634.4" y="329" width="439.7" height="18" rx="4" class="plan"><title>Agent repair of seeded faults: Oct 15 to Oct 18, owner Lehana · Jacob</title></rect>
+<path d="M1074.1,326 l12,12 l-12,12 l-12,-12 z" class="target"/>
+<text x="1330" y="344" class="owner">Lehana · Jacob</text>
+<text x="1500" y="344" class="done">every seeded fault fixed, re-passes</text>
+<text x="1500" y="364" class="by">by Sun 10/18</text>
+<text x="60" y="404" class="name">Preset matrix, end to end</text>
+<text x="60" y="424" class="detail">low-cost-embedded → server-grade</text>
+<rect x="634.4" y="389" width="439.7" height="18" rx="4" class="plan"><title>Preset matrix, end to end: Oct 15 to Oct 18, owner Lehana · Jacob</title></rect>
+<path d="M1074.1,386 l12,12 l-12,12 l-12,-12 z" class="target"/>
+<text x="1330" y="404" class="owner">Lehana · Jacob</text>
+<text x="1500" y="404" class="done">5 presets: review PASS, all paths</text>
+<text x="1500" y="424" class="by">by Sun 10/18</text>
+<text x="60" y="464" class="name">Ambiguous + adversarial English</text>
+<text x="60" y="484" class="detail">vague, conflicting, out-of-JEDEC asks</text>
+<rect x="745.9" y="449" width="328.3" height="18" rx="4" class="plan"><title>Ambiguous + adversarial English: Oct 16 to Oct 18, owner Lehana</title></rect>
+<path d="M1074.1,446 l12,12 l-12,12 l-12,-12 z" class="target"/>
+<text x="1330" y="464" class="owner">Lehana</text>
+<text x="1500" y="464" class="done">asks or rejects; never a bad spec</text>
+<text x="1500" y="484" class="by">by Sun 10/18</text>
+<text x="60" y="524" class="name">Assembled top-level controller</text>
+<text x="60" y="544" class="detail">full-chip paths on TOPRTL</text>
+<rect x="745.9" y="509" width="439.7" height="18" rx="4" class="plan"><title>Assembled top-level controller: Oct 16 to Oct 19, owner Jacob · Lehana</title></rect>
+<path d="M1185.6,506 l12,12 l-12,12 l-12,-12 z" class="target"/>
+<text x="1330" y="524" class="owner">Jacob · Lehana</text>
+<text x="1500" y="524" class="done">top-level paths pass on Olympus</text>
+<text x="1500" y="544" class="by">by Mon 10/19</text>
+<text x="60" y="584" class="name">Coverage + verification plan</text>
+<text x="60" y="604" class="detail">sign-off measurement</text>
+<rect x="968.7" y="569" width="328.3" height="18" rx="4" class="plan"><title>Coverage + verification plan: Oct 18 to Oct 20, owner Jacob</title></rect>
+<path d="M1297.0,566 l12,12 l-12,12 l-12,-12 z" class="target"/>
+<text x="1330" y="584" class="owner">Jacob</text>
+<text x="1500" y="584" class="done">vplan 100% measured, waivers decided</text>
+<text x="1500" y="604" class="by">by Tue 10/20</text>
+<rect x="48" y="622" width="1824" height="40" rx="6" class="sect"/>
+<text x="60" y="650" class="secth">Frontend → Backend</text>
+<text x="314" y="649" class="sectn">RTL → GDSII on sky130hd, 200 MHz target</text>
+<text x="60" y="698" class="name">11-block rebuild on new drop</text>
+<text x="60" y="718" class="detail">build mode, 5 ns period</text>
+<rect x="523.0" y="683" width="216.9" height="18" rx="4" class="plan"><title>11-block rebuild on new drop: Oct 14 to Oct 15, owner Dawson</title></rect>
+<path d="M739.9,680 l12,12 l-12,12 l-12,-12 z" class="target"/>
+<text x="1330" y="698" class="owner">Dawson</text>
+<text x="1500" y="698" class="done">11/11 DRC + LVS on dab971c2aab9</text>
+<text x="1500" y="718" class="by">by Thu 10/15</text>
+<text x="60" y="758" class="name">Scheduler timing closure</text>
+<text x="60" y="778" class="detail">pipeline stage = spec decision</text>
+<rect x="523.0" y="743" width="108.4" height="18" rx="4" class="decide"><title>Scheduler timing closure: decision needed by Oct 14</title></rect>
+<text x="577.2" y="757" text-anchor="middle" class="decidet">decide</text>
+<rect x="635.4" y="743" width="438.7" height="18" rx="4" class="plan"><title>Scheduler timing closure: Oct 14 to Oct 18, owner Lehana · Dawson</title></rect>
+<path d="M1074.1,740 l12,12 l-12,12 l-12,-12 z" class="target"/>
+<text x="1330" y="758" class="owner">Lehana · Dawson</text>
+<text x="1500" y="758" class="done">WNS ≥ 0 at 5 ns; paths still pass</text>
+<text x="1500" y="778" class="by">by Sun 10/18</text>
+<text x="60" y="818" class="name">Gate-level netlists through paths</text>
+<text x="60" y="838" class="detail">all 11 blocks (wb_port done)</text>
+<rect x="745.9" y="803" width="439.7" height="18" rx="4" class="plan"><title>Gate-level netlists through paths: Oct 16 to Oct 19, owner Jacob · Dawson</title></rect>
+<path d="M1185.6,800 l12,12 l-12,12 l-12,-12 z" class="target"/>
+<text x="1330" y="818" class="owner">Jacob · Dawson</text>
+<text x="1500" y="818" class="done">11/11 netlists pass their paths</text>
+<text x="1500" y="838" class="by">by Mon 10/19</text>
+<text x="60" y="878" class="name">Full-controller timing at 200 MHz</text>
+<text x="60" y="898" class="detail">clock tree + inter-block wiring</text>
+<rect x="857.3" y="863" width="328.3" height="18" rx="4" class="plan"><title>Full-controller timing at 200 MHz: Oct 17 to Oct 19, owner Dawson</title></rect>
+<path d="M1185.6,860 l12,12 l-12,12 l-12,-12 z" class="target"/>
+<text x="1330" y="878" class="owner">Dawson</text>
+<text x="1500" y="878" class="done">assembled top closes 200 MHz</text>
+<text x="1500" y="898" class="by">by Mon 10/19</text>
+<text x="60" y="938" class="name">English in → GDSII out</text>
+<text x="60" y="958" class="detail">one flow.py run, all stages</text>
+<rect x="1080.1" y="923" width="216.9" height="18" rx="4" class="plan"><title>English in → GDSII out: Oct 19 to Oct 20, owner All</title></rect>
+<path d="M1297.0,920 l12,12 l-12,12 l-12,-12 z" class="target"/>
+<text x="1330" y="938" class="owner">All</text>
+<text x="1500" y="938" class="done">COMPLETE with no manual step</text>
+<text x="1500" y="958" class="by">by Tue 10/20</text>
+<rect x="60" y="1032" width="44" height="16" rx="4" class="plan"/>
+<text x="114" y="1046" class="leg">planned testing window</text>
+<path d="M377.2,1028 l12,12 l-12,12 l-12,-12 z" class="target"/>
+<text x="397.2" y="1046" class="leg">pass target</text>
+<rect x="542.8" y="1032" width="44" height="16" rx="4" class="decide"/>
+<text x="596.8" y="1046" class="leg">waiting on a team decision</text>
+<text x="1860" y="1046" text-anchor="end" class="leg">planned dates · every test due by the 10/20 deadline</text>
+</svg>
+</div>
+<p class="hint">Screenshot the white frame (16:9) and paste it onto a slide. Hover a bar for its dates. Dates are a plan; edit build_test_plan_slide.py to change them.</p>
+</div>

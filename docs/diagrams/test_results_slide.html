@@ -1,0 +1,185 @@
+<title>LLM-MC Test Results Slide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: a fixed 16:9 frame (1920x1080 viewBox): a test-by-test timeline (Gantt) with one row per test,
+   grouped by hand-off, dates across the top, result at the right. Deliberately single-theme (light), since it is pasted onto slides. */
+:root {
+  --page: #e9e4e4; --slide: #ffffff; --fg: #1f1a1b; --muted: #6b5f61; --faint: #ece6e7;
+  --accent: #500000; --span: #c9a3a3; --sect: #f6f0f0;
+  --good: #1e7a3c; --bad: #b3261e; --bad-soft: #f3c7c3; --neutral: #5b6470;
+  --display: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+html, body { height: 100%; }
+body { background: var(--page); color: var(--fg); margin: 0; font-family: var(--display);
+        display: grid; place-items: center; padding-inline: 16px; padding-block: 16px; box-sizing: border-box; }
+.slide { width: min(100%, calc((100vh - 72px) * 16 / 9)); aspect-ratio: 16 / 9; max-width: 100%;
+          background: var(--slide); box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 8px 24px rgba(0,0,0,.08); }
+.slide svg { display: block; width: 100%; height: 100%; }
+.hint { color: var(--muted); font-size: 13px; margin-top: 10px; text-align: center; }
+.colh { font: 700 18px var(--display); fill: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+.tick { font: 600 19px var(--display); fill: var(--fg); }
+.tick.today { fill: var(--bad); }
+.gridl { stroke: var(--faint); stroke-width: 1.5; }
+.todayl { stroke: var(--bad); stroke-width: 1.5; stroke-dasharray: 5 5; }
+.sect { fill: var(--sect); }
+.secth { font: 700 24px var(--display); fill: var(--accent); }
+.sectn { font: 17px var(--display); fill: var(--muted); }
+.sep { stroke: var(--faint); stroke-width: 1.5; }
+.name { font: 700 21px var(--display); fill: var(--fg); }
+.detail { font: 15px var(--display); fill: var(--muted); }
+.span { fill: var(--span); }
+.openspan { fill: var(--bad-soft); stroke: var(--bad); stroke-width: 1.5; }
+.pendspan { fill: #ffffff; stroke: var(--neutral); stroke-width: 1.5; stroke-dasharray: 6 4; }
+.startdot { fill: var(--accent); }
+.startdot.bad { fill: var(--bad); }
+.okdot { fill: var(--good); stroke: #ffffff; stroke-width: 2; }
+.tick-mark { fill: none; stroke: #ffffff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.res { font: 700 19px var(--display); }
+.res.pass { fill: var(--good); }
+.res.fail { fill: var(--bad); }
+.res.pend { fill: var(--neutral); }
+.leg { font: 17px var(--display); fill: var(--muted); }
+</style>
+<div>
+<div class="slide">
+<svg viewBox="0 0 1920 1080" role="img" aria-label="Timeline of every test from the Frontend's handoffs. Frontend to Validation: host bus, CSR readback, command address and read data passed on October 1; write data, DRAM timing, protocol, formal proofs, single-spec, manifest connectivity and command queue tests passed on October 8, when all 19 integration paths passed; the tREFI fix is awaiting its run. Frontend to Backend: bundle intake passed September 24, DRC and LVS passed October 8, and timing at 200 MHz is still open with 10 of 11 blocks closing.">
+<rect width="1920" height="1080" fill="#ffffff"/>
+<text x="60" y="72" class="colh">Test</text>
+<text x="1630" y="72" class="colh">Result</text>
+<text x="560.0" y="72" text-anchor="middle" class="tick">Sep 18</text>
+<line x1="560.0" y1="84" x2="560.0" y2="998.0" class="gridl"/>
+<text x="795.4" y="72" text-anchor="middle" class="tick">Sep 24</text>
+<line x1="795.4" y1="84" x2="795.4" y2="998.0" class="gridl"/>
+<text x="1070.0" y="72" text-anchor="middle" class="tick">Oct 1</text>
+<line x1="1070.0" y1="84" x2="1070.0" y2="998.0" class="gridl"/>
+<text x="1344.6" y="72" text-anchor="middle" class="tick">Oct 8</text>
+<line x1="1344.6" y1="84" x2="1344.6" y2="998.0" class="gridl"/>
+<text x="1580.0" y="72" text-anchor="middle" class="tick today">Today</text>
+<line x1="1580.0" y1="84" x2="1580.0" y2="998.0" class="todayl"/>
+<rect x="48" y="90" width="1824" height="40" rx="6" class="sect"/>
+<text x="60" y="118" class="secth">Frontend → Validation</text>
+<text x="353" y="117" class="sectn">RTL drops, judged by simulation and formal proofs</text>
+<text x="60" y="166" class="name">Host bus transactions</text>
+<text x="60" y="186" class="detail">wb_port · 5 checks</text>
+<rect x="560.0" y="151" width="510.0" height="18" rx="4" class="span"><title>Host bus transactions: failing from Sep 18, passed Oct 1</title></rect>
+<circle cx="560.0" cy="160" r="6" class="startdot"/>
+<circle cx="1070.0" cy="160" r="13" class="okdot"/>
+<path d="M1064.0,160 l4,4.5 l8,-9" class="tick-mark"/>
+<text x="1630" y="166" class="res pass">Passed Oct 1</text>
+<text x="60" y="216" class="name">CSR register readback</text>
+<text x="60" y="236" class="detail">config_regs · 6 registers</text>
+<rect x="560.0" y="201" width="510.0" height="18" rx="4" class="span"><title>CSR register readback: failing from Sep 18, passed Oct 1</title></rect>
+<circle cx="560.0" cy="210" r="6" class="startdot"/>
+<circle cx="1070.0" cy="210" r="13" class="okdot"/>
+<path d="M1064.0,210 l4,4.5 l8,-9" class="tick-mark"/>
+<text x="1630" y="216" class="res pass">Passed Oct 1</text>
+<text x="60" y="266" class="name">DDR command address</text>
+<text x="60" y="286" class="detail">cmd_gen</text>
+<rect x="560.0" y="251" width="510.0" height="18" rx="4" class="span"><title>DDR command address: failing from Sep 18, passed Oct 1</title></rect>
+<circle cx="560.0" cy="260" r="6" class="startdot"/>
+<circle cx="1070.0" cy="260" r="13" class="okdot"/>
+<path d="M1064.0,260 l4,4.5 l8,-9" class="tick-mark"/>
+<text x="1630" y="266" class="res pass">Passed Oct 1</text>
+<text x="60" y="316" class="name">Read data return</text>
+<text x="60" y="336" class="detail">data_path · 2 checks</text>
+<rect x="560.0" y="301" width="510.0" height="18" rx="4" class="span"><title>Read data return: failing from Sep 18, passed Oct 1</title></rect>
+<circle cx="560.0" cy="310" r="6" class="startdot"/>
+<circle cx="1070.0" cy="310" r="13" class="okdot"/>
+<path d="M1064.0,310 l4,4.5 l8,-9" class="tick-mark"/>
+<text x="1630" y="316" class="res pass">Passed Oct 1</text>
+<text x="60" y="366" class="name">Write data beats</text>
+<text x="60" y="386" class="detail">data_path</text>
+<rect x="560.0" y="351" width="784.6" height="18" rx="4" class="span"><title>Write data beats: failing from Sep 18, passed Oct 8</title></rect>
+<circle cx="560.0" cy="360" r="6" class="startdot"/>
+<circle cx="1344.6" cy="360" r="13" class="okdot"/>
+<path d="M1338.6,360 l4,4.5 l8,-9" class="tick-mark"/>
+<text x="1630" y="366" class="res pass">Passed Oct 8</text>
+<text x="60" y="416" class="name">DRAM timing rules</text>
+<text x="60" y="436" class="detail">scheduler, bank_tracker · 7 checks</text>
+<rect x="560.0" y="401" width="784.6" height="18" rx="4" class="span"><title>DRAM timing rules: failing from Sep 18, passed Oct 8</title></rect>
+<circle cx="560.0" cy="410" r="6" class="startdot"/>
+<circle cx="1344.6" cy="410" r="13" class="okdot"/>
+<path d="M1338.6,410 l4,4.5 l8,-9" class="tick-mark"/>
+<text x="1630" y="416" class="res pass">Passed Oct 8</text>
+<text x="60" y="466" class="name">Command protocol + refresh</text>
+<text x="60" y="486" class="detail">scheduler · 3 checks</text>
+<rect x="560.0" y="451" width="784.6" height="18" rx="4" class="span"><title>Command protocol + refresh: failing from Sep 18, passed Oct 8</title></rect>
+<circle cx="560.0" cy="460" r="6" class="startdot"/>
+<circle cx="1344.6" cy="460" r="13" class="okdot"/>
+<path d="M1338.6,460 l4,4.5 l8,-9" class="tick-mark"/>
+<text x="1630" y="466" class="res pass">Passed Oct 8</text>
+<text x="60" y="516" class="name">Formal proofs (JasperGold)</text>
+<text x="60" y="536" class="detail">tRCD, tRP, tRAS, tFAW · 2 bugs</text>
+<rect x="795.4" y="501" width="549.2" height="18" rx="4" class="span"><title>Formal proofs (JasperGold): failing from Sep 24, passed Oct 8</title></rect>
+<circle cx="795.4" cy="510" r="6" class="startdot"/>
+<circle cx="1344.6" cy="510" r="13" class="okdot"/>
+<path d="M1338.6,510 l4,4.5 l8,-9" class="tick-mark"/>
+<text x="1630" y="516" class="res pass">Passed Oct 8</text>
+<text x="60" y="566" class="name">Single spec + address width</text>
+<text x="60" y="586" class="detail">3 blocks · 28- vs 29-bit seam</text>
+<rect x="1070.0" y="551" width="274.6" height="18" rx="4" class="span"><title>Single spec + address width: failing from Oct 1, passed Oct 8</title></rect>
+<circle cx="1070.0" cy="560" r="6" class="startdot"/>
+<circle cx="1344.6" cy="560" r="13" class="okdot"/>
+<path d="M1338.6,560 l4,4.5 l8,-9" class="tick-mark"/>
+<text x="1630" y="566" class="res pass">Passed Oct 8</text>
+<text x="60" y="616" class="name">Manifest connectivity</text>
+<text x="60" y="636" class="detail">bank_tracker, data_path · 5 ports</text>
+<rect x="1070.0" y="601" width="274.6" height="18" rx="4" class="span"><title>Manifest connectivity: failing from Oct 1, passed Oct 8</title></rect>
+<circle cx="1070.0" cy="610" r="6" class="startdot"/>
+<circle cx="1344.6" cy="610" r="13" class="okdot"/>
+<path d="M1338.6,610 l4,4.5 l8,-9" class="tick-mark"/>
+<text x="1630" y="616" class="res pass">Passed Oct 8</text>
+<text x="60" y="666" class="name">Command queue dequeue</text>
+<text x="60" y="686" class="detail">cmd_queue</text>
+<rect x="1070.0" y="651" width="274.6" height="18" rx="4" class="span"><title>Command queue dequeue: failing from Oct 1, passed Oct 8</title></rect>
+<circle cx="1070.0" cy="660" r="6" class="startdot"/>
+<circle cx="1344.6" cy="660" r="13" class="okdot"/>
+<path d="M1338.6,660 l4,4.5 l8,-9" class="tick-mark"/>
+<text x="1630" y="666" class="res pass">Passed Oct 8</text>
+<line x1="60" y1="691" x2="1860" y2="691" class="sep"/>
+<text x="60" y="716" class="name">All 19 integration paths</text>
+<text x="60" y="736" class="detail">full controller, Olympus</text>
+<rect x="560.0" y="701" width="784.6" height="18" rx="4" class="span"><title>All 19 integration paths: failing from Sep 18, passed Oct 8</title></rect>
+<circle cx="560.0" cy="710" r="6" class="startdot"/>
+<circle cx="1344.6" cy="710" r="13" class="okdot"/>
+<path d="M1338.6,710 l4,4.5 l8,-9" class="tick-mark"/>
+<text x="1630" y="716" class="res pass">19 / 19 Oct 8</text>
+<text x="60" y="766" class="name">Refresh interval (tREFI)</text>
+<text x="60" y="786" class="detail">refresh_ctrl · drop dab971c2aab9</text>
+<rect x="1344.6" y="751" width="235.4" height="18" rx="4" class="pendspan"><title>Refresh interval (tREFI): fix handed to Validation Oct 8, not yet run</title></rect>
+<text x="1630" y="766" class="res pend">Awaiting run</text>
+<rect x="48" y="794" width="1824" height="40" rx="6" class="sect"/>
+<text x="60" y="822" class="secth">Frontend → Backend</text>
+<text x="314" y="821" class="sectn">RTL → GDSII on sky130hd</text>
+<text x="60" y="870" class="name">Bundle intake</text>
+<text x="60" y="890" class="detail">11 manifests schema-valid</text>
+<circle cx="795.4" cy="864" r="13" class="okdot"/>
+<path d="M789.4,864 l4,4.5 l8,-9" class="tick-mark"/>
+<text x="1630" y="870" class="res pass">Passed Sep 24</text>
+<text x="60" y="920" class="name">DRC + LVS sign-off</text>
+<text x="60" y="940" class="detail">11 / 11 blocks, sky130hd</text>
+<circle cx="1344.6" cy="914" r="13" class="okdot"/>
+<path d="M1338.6,914 l4,4.5 l8,-9" class="tick-mark"/>
+<text x="1630" y="920" class="res pass">Passed Oct 8</text>
+<text x="60" y="970" class="name">Timing at 200 MHz</text>
+<text x="60" y="990" class="detail">10 / 11 close · scheduler 169 MHz</text>
+<rect x="1070.0" y="955" width="510.0" height="18" rx="4" class="openspan"><title>Timing at 200 MHz: failing since Oct 1, still open</title></rect>
+<circle cx="1070.0" cy="964" r="6" class="startdot bad"/>
+<text x="1630" y="970" class="res fail">Open · 10 / 11</text>
+<rect x="60" y="1026" width="44" height="16" rx="4" class="span"/>
+<text x="114" y="1040" class="leg">failing → fixed</text>
+<circle cx="311.0" cy="1034" r="13" class="okdot"/>
+<path d="M305.0,1034 l4,4.5 l8,-9" class="tick-mark"/>
+<text x="328.0" y="1040" class="leg">passed</text>
+<rect x="425.6" y="1026" width="44" height="16" rx="4" class="openspan"/>
+<text x="479.6" y="1040" class="leg">still open</text>
+<rect x="615.6" y="1026" width="44" height="16" rx="4" class="pendspan"/>
+<text x="669.6" y="1040" class="leg">fix sent, awaiting test</text>
+<text x="1860" y="1040" text-anchor="end" class="leg">dates = Validation drop dates · today = Oct 14</text>
+</svg>
+</div>
+<p class="hint">Screenshot the white frame (16:9) and paste it onto a slide. Hover a bar for its dates. Dates come from the archived Validation and Backend handoffs.</p>
+</div>
