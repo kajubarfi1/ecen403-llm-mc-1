@@ -3,7 +3,7 @@
   "path": "path_08_init_to_cal",
   "strategy": "invariant",
   "verdict": "fail",
-  "timestamp": "2026-10-08T13:44:35.299331",
+  "timestamp": "2026-10-15T12:00:46.063839",
   "blocks": [
     "calibration",
     "init_fsm"
@@ -14,17 +14,17 @@
   "window_cycles": 180000,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "7bdab3ebc3bf",
-    "drop_id": "7bdab3ebc3bf",
-    "design_id": "38789d7356b4",
+    "git_head": "140e3f651c99",
+    "drop_id": "140e3f651c99",
+    "design_id": "9b4c7182086a",
     "blocks_used": [
       "calibration",
       "init_fsm"
     ],
-    "validated_at": "986fdb0",
+    "validated_at": "6b693b1",
     "frontend_commits": {
-      "calibration": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "init_fsm": "9c21084cdda21e528b57299e638eef2b79fef2ec"
+      "calibration": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "init_fsm": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
     },
     "roots": [
       "Validation/faults/work/M18_calibration_zqcs_before_done/Frontend2/OutputFolders"
@@ -73,7 +73,8 @@
       "summary": "scope=path_08_init_to_cal  strategy=invariant  status=fail  violations=1",
       "detail": [
         "scope=path_08_init_to_cal  strategy=invariant  status=fail  violations=1",
-        "  CAL_002: ZQCS request raised before cal_done @ [cal_zqcs.request ]"
+        "  CAL_002: ZQCS request raised before cal_done @ [cal_zqcs.request ]",
+        "  rules: CAL_002=1"
       ]
     }
   ],

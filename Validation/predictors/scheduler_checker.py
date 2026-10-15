@@ -2,10 +2,10 @@ from txn_contract import LegalityChecker, Txn, Violation
 from typing import List
 
 
-class RefreshSchedulerChecker(LegalityChecker):
-    """Legality checker for refresh request handling and scheduler refresh commands."""
+class SchedulerLegalityChecker(LegalityChecker):
+    """Legality checker for scheduler refresh and bank state invariants."""
 
-    INPUT_IFACES = ('refresh_req',)
+    INPUT_IFACES = ('refresh_req', 'refresh_level')
     OUTPUT_IFACES = ('sched_cmd',)
     COVERS = ('SCHED_003', 'REF_001', 'REF_002')
 
@@ -17,112 +17,90 @@ class RefreshSchedulerChecker(LegalityChecker):
     CMD_REF = 5
 
     def __init__(self, spec: dict):
-        self.spec = spec
-        self.max_postpone_count = spec['controller_architecture']['refresh_policy']['max_postpone_count']
-        self.num_banks = 1 << spec['memory_geometry']['bank_bits']
+        self._spec = spec
+        self._max_postpone_count = spec['controller_architecture']['refresh_policy']['max_postpone_count']
+        self._num_banks = 1 << spec['memory_geometry']['bank_bits']
         self.reset()
 
     def reset(self) -> None:
         """Return all tracked state to power-on."""
-        self.bank_active = [False] * self.num_banks
-        self.bank_open_row = [None] * self.num_banks
-        self.pending_refresh_requests = 0
-        self.prev_pending_cnt = 0
-        self.prev_urgent = 0
-        self.refresh_requests_outstanding = 0
-        self.max_pending_seen = 0
+        self._refresh_request_seen = False
+        self._refresh_command_issued = False
+        self._refresh_request_txns = []
+        self._bank_active = [False] * self._num_banks
 
     def observe(self, txn: Txn) -> List[Violation]:
         """Consume one observed transaction and return any violations."""
         violations = []
 
         if txn.iface == 'refresh_req':
-            violations.extend(self._handle_refresh_req(txn))
+            if txn.kind == 'request':
+                self._refresh_request_seen = True
+                self._refresh_request_txns.append(txn)
+
+        elif txn.iface == 'refresh_level':
+            if txn.kind == 'state':
+                pending = txn.fields.get('pending', 0)
+                starve = txn.fields.get('starve', 0)
+
+                if pending > self._max_postpone_count:
+                    violations.append(Violation(
+                        rule='refresh_postpone_exceeded',
+                        detail=f'pending count {pending} exceeds max_postpone_count {self._max_postpone_count}',
+                        severity='critical',
+                        taxonomy_id='REF_001',
+                        txns=[txn]
+                    ))
+
+                if starve == 1:
+                    violations.append(Violation(
+                        rule='refresh_starve_flag',
+                        detail=f'starve flag asserted with pending count {pending}',
+                        severity='critical',
+                        taxonomy_id='REF_001',
+                        txns=[txn]
+                    ))
+
         elif txn.iface == 'sched_cmd':
-            violations.extend(self._handle_sched_cmd(txn))
+            if txn.kind == 'command':
+                cmd_type = txn.fields.get('type', self.CMD_NOP)
+                bank = txn.fields.get('bank', 0)
 
-        return violations
+                if cmd_type == self.CMD_ACT:
+                    self._bank_active[bank] = True
 
-    def _handle_refresh_req(self, txn: Txn) -> List[Violation]:
-        """Handle refresh request transactions."""
-        violations = []
+                elif cmd_type == self.CMD_PRE:
+                    self._bank_active[bank] = False
 
-        if txn.kind != 'request':
-            return violations
+                elif cmd_type == self.CMD_REF:
+                    self._refresh_command_issued = True
 
-        pending = txn.fields.get('pending', 0)
-        urgent = txn.fields.get('urgent', 0)
-        starve = txn.fields.get('starve', 0)
+                    active_banks = [i for i, active in enumerate(self._bank_active) if active]
+                    if active_banks:
+                        violations.append(Violation(
+                            rule='refresh_during_active_bank',
+                            detail=f'REFRESH issued while banks {active_banks} are active',
+                            severity='major',
+                            taxonomy_id='REF_002',
+                            txns=[txn]
+                        ))
 
-        if pending > self.prev_pending_cnt:
-            new_requests = pending - self.prev_pending_cnt
-            self.refresh_requests_outstanding += new_requests
-
-        if pending > self.max_pending_seen:
-            self.max_pending_seen = pending
-
-        if pending > self.max_postpone_count:
-            violations.append(Violation(
-                taxonomy_id='REF_001',
-                rule='Refresh postpone count exceeded max_postpone_count',
-                detail=f'Pending refresh count {pending} exceeds max_postpone_count {self.max_postpone_count}'
-            ))
-
-        self.prev_pending_cnt = pending
-        self.prev_urgent = urgent
-
-        return violations
-
-    def _handle_sched_cmd(self, txn: Txn) -> List[Violation]:
-        """Handle scheduler command transactions."""
-        violations = []
-
-        if txn.kind != 'command':
-            return violations
-
-        cmd_type = txn.fields.get('type', self.CMD_NOP)
-        bank = txn.fields.get('bank', 0)
-        row = txn.fields.get('row', 0)
-
-        if cmd_type == self.CMD_ACT:
-            self.bank_active[bank] = True
-            self.bank_open_row[bank] = row
-
-        elif cmd_type == self.CMD_PRE:
-            self.bank_active[bank] = False
-            self.bank_open_row[bank] = None
-
-        elif cmd_type == self.CMD_REF:
-            any_active = any(self.bank_active)
-            if any_active:
-                active_banks = [i for i, active in enumerate(self.bank_active) if active]
-                violations.append(Violation(
-                    taxonomy_id='REF_002',
-                    rule='REFRESH issued while one or more banks are still active',
-                    detail=f'REFRESH command issued with banks {active_banks} still active (not precharged)'
-                ))
-
-            if self.refresh_requests_outstanding > 0:
-                self.refresh_requests_outstanding -= 1
-
-            for i in range(self.num_banks):
-                self.bank_active[i] = False
-                self.bank_open_row[i] = None
-
-        elif cmd_type == self.CMD_RD or cmd_type == self.CMD_WR:
-            pass
+                    for i in range(self._num_banks):
+                        self._bank_active[i] = False
 
         return violations
 
     def final(self) -> List[Violation]:
-        """End-of-trace rules: check for unserviced refresh requests."""
+        """End-of-trace rules: check if refresh requests were serviced."""
         violations = []
 
-        if self.refresh_requests_outstanding > 0:
+        if self._refresh_request_seen and not self._refresh_command_issued:
             violations.append(Violation(
+                rule='refresh_never_serviced',
+                detail='refresh request was seen but no REFRESH command was ever issued',
+                severity='critical',
                 taxonomy_id='SCHED_003',
-                rule='Every refresh request must eventually be serviced with a REFRESH command',
-                detail=f'{self.refresh_requests_outstanding} refresh request(s) were never serviced with a REFRESH command'
+                txns=self._refresh_request_txns[:3]
             ))
 
         return violations

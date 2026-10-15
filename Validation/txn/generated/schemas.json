@@ -674,6 +674,35 @@
           }
         }
       }
+    },
+    "refresh_level": {
+      "block": "refresh_ctrl",
+      "manifest": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json",
+      "description": "The refresh controller's LEVELS: required, urgent, pending count, starve flag. refresh_req carries only the rising edge of ref_required, so a pending count that climbs while the request is outstanding was never observed (M06/M17: the 4-bit count reached 11 against max_postpone 8 on the CSR status level and no checker saw it, 2026-10-09). This stream is the same ports, emitted on every change, so REF_001 is judged on the level the design actually drives.",
+      "kinds": {
+        "state": {
+          "required": {
+            "port": "ref_required",
+            "width": 1,
+            "dir": "output"
+          },
+          "urgent": {
+            "port": "ref_urgent",
+            "width": 1,
+            "dir": "output"
+          },
+          "pending": {
+            "port": "ref_pending_cnt",
+            "width": 4,
+            "dir": "output"
+          },
+          "starve": {
+            "port": "ref_starve_flag",
+            "width": 1,
+            "dir": "output"
+          }
+        }
+      }
     }
   }
 }

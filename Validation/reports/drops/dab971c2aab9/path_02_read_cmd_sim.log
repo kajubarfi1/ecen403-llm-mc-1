@@ -1,19 +1,9 @@
-TOOL:	xrun	24.03-s013: Started on Oct 13, 2026 at 20:37:04 CDT
+TOOL:	xrun	24.03-s013: Started on Oct 15, 2026 at 11:55:22 CDT
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xrun: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
 xrun: 24.03-s013: (c) Copyright 1995-2025 Cadence Design Systems, Inc.
-*WARNING* file /home/ugrads/j/jacobz/CDS.log cls: Unable to connect to clsbd on host "n02-hera.olympus.ece.tamu.edu".
-Check if clsbd is running on the host. If the host is not valid remove
-the ".cdslck" lock file. The connect timeout length can be set using
-the CLS_CLSBD_CONNECT_TIMEOUT environment variable.
-
-*WARNING* file /home/ugrads/j/jacobz/CDS.log.1 cls: Unable to connect to clsbd on host "n02-hera.olympus.ece.tamu.edu".
-Check if clsbd is running on the host. If the host is not valid remove
-the ".cdslck" lock file. The connect timeout length can be set using
-the CLS_CLSBD_CONNECT_TIMEOUT environment variable.
-
-*WARNING* file /home/ugrads/j/jacobz/CDS.log.2 File is already locked by some other process.
+*WARNING* file /home/ugrads/j/jacobz/CDS.log File is already locked by some other process.
 *WARNING* X Window Display Initialization failure
 *WARNING* (DISPLAY "")
 xrun: *N,CLEAN: Removing existing directory ./xcelium.d.
@@ -387,6 +377,9 @@ file: dp_wr_monitor.sv
 file: refresh_ack_monitor.sv
 	module worklib.refresh_ack_monitor:sv
 		errors: 0, warnings: 0
+file: refresh_level_monitor.sv
+	module worklib.refresh_level_monitor:sv
+		errors: 0, warnings: 0
 file: refresh_req_monitor.sv
 	module worklib.refresh_req_monitor:sv
 		errors: 0, warnings: 0
@@ -586,7 +579,7 @@ xmelab: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment
 xmelab: *N,CGNSWA: (File: ./cov_conf.ccf, Line: 6): A covergroup is not (de)selected with the "-all" option of the (de)select_coverage command. Use the coverage metric "-covergroup" with the (de)select_coverage command to (de)select a covergroup.
 		Caching library 'worklib' ....... Done
 	Top level design units:
-		$unit_0x796a2231
+		$unit_0x7e92fa13
 		chain_harness
 
 	Extracting FSMs for coverage:
@@ -664,89 +657,91 @@ xmvlog_cg: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,1
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
-		worklib.dram_stub:sv <0x6d55da7f>
+		worklib.dram_stub:sv <0x69970ffa>
 			streams:   2, words:  4720
-		worklib.wb_rsp_monitor:sv <0x6eb95357>
+		worklib.wb_rsp_monitor:sv <0x4b832889>
 			streams:   2, words:  1788
-		worklib.wb_monitor:sv <0x3758d20a>
+		worklib.wb_monitor:sv <0x4b888a1a>
 			streams:   2, words:  2913
-		worklib.req_monitor:sv <0x7bc526e3>
+		worklib.req_monitor:sv <0x5b3a2b20>
 			streams:   2, words:  2235
-		worklib.sched_deq_monitor:sv <0x60cfc22b>
+		worklib.sched_deq_monitor:sv <0x5241e58b>
 			streams:   2, words:  1543
-		worklib.sched_cmd_monitor:sv <0x0efebf45>
+		worklib.sched_cmd_monitor:sv <0x64a0a772>
 			streams:   2, words:  2668
-		worklib.refresh_ctrl_fcov:sv <0x6049ed7c>
+		worklib.refresh_ctrl_fcov:sv <0x1dddfdfa>
 			streams:   4, words:  1993
-		worklib.refresh_req_monitor:sv <0x72502f07>
+		worklib.refresh_req_monitor:sv <0x636f9abb>
 			streams:   3, words:  2241
-		worklib.refresh_ack_monitor:sv <0x2e1daf41>
+		worklib.refresh_level_monitor:sv <0x61823e2c>
+			streams:   3, words:  2531
+		worklib.refresh_ack_monitor:sv <0x6ffd31d6>
 			streams:   2, words:  1543
-		worklib.data_path_fcov:sv <0x768fe60d>
+		worklib.data_path_fcov:sv <0x6f4519af>
 			streams:   4, words:  2329
-		worklib.dp_wr_monitor:sv <0x5696621a>
+		worklib.dp_wr_monitor:sv <0x1776fc8d>
 			streams:   2, words:  1785
-		worklib.dp_rd_rsp_monitor:sv <0x35cad097>
+		worklib.dp_rd_rsp_monitor:sv <0x612b2d28>
 			streams:   2, words:  1768
-		worklib.dp_cmd_monitor:sv <0x384963ed>
+		worklib.dp_cmd_monitor:sv <0x1495137a>
 			streams:   2, words:  2452
-		worklib.ddr_wr_beat_monitor:sv <0x056c47d2>
+		worklib.ddr_wr_beat_monitor:sv <0x0a5c9d6f>
 			streams:   2, words:  1768
-		worklib.ddr_rd_beat_monitor:sv <0x2803e4ad>
+		worklib.ddr_rd_beat_monitor:sv <0x69e37a3a>
 			streams:   2, words:  1543
-		worklib.config_regs_fcov:sv <0x1c8b0e22>
+		worklib.config_regs_fcov:sv <0x264dfc49>
 			streams:  10, words: 13585
-		worklib.csr_sts_level_monitor:sv <0x41230a29>
+		worklib.csr_sts_level_monitor:sv <0x43bf6c46>
 			streams:   3, words:  5328
-		worklib.csr_sts_monitor:sv <0x4b93a805>
+		worklib.csr_sts_monitor:sv <0x1f7255ba>
 			streams:   2, words:  2016
-		worklib.csr_rsp_monitor:sv <0x6a911be6>
+		worklib.csr_rsp_monitor:sv <0x7baeae5a>
 			streams:   2, words:  3103
-		worklib.csr_monitor:sv <0x526df3d7>
+		worklib.csr_monitor:sv <0x5d5d296a>
 			streams:   2, words:  2653
-		worklib.cfg_timing_monitor:sv <0x7b2b9e28>
+		worklib.cfg_timing_monitor:sv <0x1b0e896c>
 			streams:   3, words:  5065
-		worklib.cfg_refresh_monitor:sv <0x3fa02db0>
+		worklib.cfg_refresh_monitor:sv <0x4936e7fc>
 			streams:   3, words:  3291
-		worklib.cmd_queue_fcov:sv <0x39778dd3>
+		worklib.cmd_queue_fcov:sv <0x3e1aec02>
 			streams:   4, words:  1931
-		worklib.cq_enq_monitor:sv <0x24ba3bfe>
+		worklib.cq_enq_monitor:sv <0x250839b6>
 			streams:   2, words:  2235
-		worklib.cq_deq_monitor:sv <0x3f6b0662>
+		worklib.cq_deq_monitor:sv <0x59bde6c8>
 			streams:   2, words:  1543
-		worklib.cmd_gen_coverage:sv <0x4c58fa4d>
+		worklib.cmd_gen_coverage:sv <0x35cd9635>
 			streams:  25, words: 45125
-		worklib.sched_in_monitor:sv <0x13304dd3>
+		worklib.sched_in_monitor:sv <0x1f3ea0a9>
 			streams:   2, words:  2668
-		worklib.ddr_cmd_monitor:sv <0x44a5b5b5>
+		worklib.ddr_cmd_monitor:sv <0x1044480a>
 			streams:   2, words:  2037
-		worklib.bank_tracker_fcov:sv <0x64f1cbf1>
+		worklib.bank_tracker_fcov:sv <0x6bc1114c>
 			streams:   7, words:  4319
-		worklib.addr_decoder:sv <0x7497027a>
+		worklib.addr_decoder:sv <0x6c6dfb2c>
 			streams:   2, words:  1259
-		worklib.seq_driver:sv <0x56a20166>
+		worklib.seq_driver:sv <0x3645cf48>
 			streams:   5, words: 29378
-		worklib.chain_harness:sv <0x38844450>
+		worklib.chain_harness:sv <0x6250f0b9>
 			streams: 246, words: 66469
-		worklib.bank_tracker:sv <0x238e3280>
+		worklib.bank_tracker:sv <0x45277e2e>
 			streams:  38, words: 49503
-		worklib.config_regs:sv <0x3be6f803>
+		worklib.config_regs:sv <0x60b5c0b8>
 			streams:  64, words: 58855
-		worklib.cmd_queue:sv <0x2cec415d>
+		worklib.cmd_queue:sv <0x56b9f2b7>
 			streams:  21, words: 20719
-		worklib.cmd_gen:sv <0x7931f611>
+		worklib.cmd_gen:sv <0x16e631f7>
 			streams:  19, words: 19688
-		worklib.data_path:sv <0x3d0fa16a>
+		worklib.data_path:sv <0x428631d4>
 			streams:  60, words: 47462
-		worklib.refresh_ctrl:sv <0x386845be>
-			streams:  18, words: 11760
-		worklib.wb_port:sv <0x0f9b0f2e>
+		worklib.refresh_ctrl:sv <0x528f59da>
+			streams:  22, words: 12178
+		worklib.wb_port:sv <0x69e2c3b4>
 			streams:  58, words: 45842
-		worklib.scheduler:sv <0x055ce613>
+		worklib.scheduler:sv <0x7b3d89e5>
 			streams:  28, words: 45935
-		worklib.cmd_gen_sva:sv <0x5bad1cd4>
+		worklib.cmd_gen_sva:sv <0x2235287a>
 			streams: 333, words: 140663
-		worklib.\$unit_0x796a2231 :compilation_unit <0x18c95158>
+		worklib.\$unit_0x7e92fa13 :compilation_unit <0x0e08cc93>
 			streams:   0, words:     0
 xmelab: *W,COVNOEN: By default, toggle coverage is not supported for systemverilog static arrays of enumerated nets and variables. To enable toggle coverage of these objects, specify the 'set_toggle_scoring -sv_enum enable_mda' command in the coverage configuration file.
   int unsigned since_act [8];
@@ -757,21 +752,21 @@ xmelab: *W,CGPIDF: Covergroup "per_instance" option , by default, is set as 0.
 	Loading native compiled code:     .................... Done
 	Design hierarchy summary:
 		                     Instances  Unique
-		Modules:                    41      41
-		Registers:                 814     835
-		Scalar wires:              239       -
-		Vectored wires:            276       -
+		Modules:                    42      42
+		Registers:                 815     836
+		Scalar wires:              242       -
+		Vectored wires:            277       -
 		Named events:               21      21
-		Always blocks:             293     286
+		Always blocks:             295     288
 		Initial blocks:             69      69
 		Cont. assignments:          69      97
-		Pseudo assignments:        286       -
+		Pseudo assignments:        290       -
 		Assertions:                 36      36
 		Covergroup Instances:        0      10
 		Compilation units:           1       1
 		SV Class declarations:      21      21
 		SV Class specializations:   21      21
-		Process Clocks:            102      28
+		Process Clocks:            104      28
 		Simulation timescale:      1ps
 	Writing initial simulation snapshot: worklib.chain_harness:sv
 DEFINE std       ./STD
@@ -831,6 +826,7 @@ TXN req reset t=0
 TXN sched_deq reset t=0
 TXN sched_cmd reset t=0
 TXN refresh_req reset t=0
+TXN refresh_level reset t=0
 TXN refresh_ack reset t=0
 TXN dp_wr reset t=0
 TXN dp_rd_rsp reset t=0
@@ -848,12 +844,14 @@ TXN cq_deq reset t=0
 TXN sched_in reset t=0
 TXN ddr_cmd reset t=0
 TXN refresh_req request t=29000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=29000 pending=1 required=1 starve=0 urgent=0
 TXN csr_sts_level state t=33000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
 TXN sched_cmd command t=34000 aux=0 bank=0 col=0 row=0 type=5 we=0
 TXN refresh_ack ack t=34000 pending=1
 TXN sched_in command t=34000 aux=0 bank=0 col=0 row=0 type=5 we=0
 TXN wb read t=38000 addr=409f134
 TXN req request t=39000 addr=409f134 data=0 mask=0 we=0
+TXN refresh_level state t=39000 pending=0 required=0 starve=0 urgent=0
 TXN cq_enq enqueue t=39000 bank=6 col=98 row=1027 we=0
 TXN ddr_cmd command t=39000 addr=0 bank=0 cmd=1
 TXN csr_sts_level state t=43000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
@@ -1214,6 +1212,6 @@ coverage setup:
   Coverage database dumped with the set_code_fine_grained_merging command during elaboration.
 
 coverage files:
-  model(design data) :  ./cov_work/scope/icc_50220966_1282077d.ucm
-  data               :  ./cov_work/scope/path_02_read_cmd/icc_50220966_1282077d.ucd
-TOOL:	xrun	24.03-s013: Exiting on Oct 13, 2026 at 20:37:06 CDT  (total: 00:00:02)
+  model(design data) :  ./cov_work/scope/icc_20a651f2_4d6fb0fe.ucm (reused)
+  data               :  ./cov_work/scope/path_02_read_cmd/icc_20a651f2_4d6fb0fe.ucd
+TOOL:	xrun	24.03-s013: Exiting on Oct 15, 2026 at 11:55:24 CDT  (total: 00:00:02)

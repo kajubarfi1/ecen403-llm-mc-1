@@ -561,6 +561,30 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   the current scheduler's hold enforces tWTR itself, so the composed
   design is right while that block is not; recorded in SIGNOFF §5c.
 
+- *2026-10-15 — REF_001 observed at last, and what the refresh path was
+  really testing.* A change-qualified `refresh_level` stream (required,
+  urgent, pending, starve on every change) joins the scheduler and path_05
+  checkers; REF_001 is judged on it (pending > max_postpone_count, or the
+  design's own starve flag). Four regenerations accepted first attempt.
+  Then the clean drop failed path_05 with 52 REF_001s, and the chain of
+  causes was all ours: (1) the refresh-stress stimulus programmed
+  `max_postpone = 2` and left `urgent_threshold` at 6, so urgency could never
+  assert and the controller starved by configuration (observation sent to
+  Lehana: the design accepts a threshold above the budget); (2) with the
+  budget fixed, the stress tREFI of 4 x tRFC_nCK equalled bank_tracker's
+  enforced tRFC window (`timing_model.counter_clock.window_scale` = 4), so
+  the scheduler could issue exactly one REFRESH per tick and never drain —
+  the stimulus now stresses against the enforced window; (3) the scoreboard
+  printed 20 violations and the stage kept 12 lines, so a SCHED_003 raised
+  at end of trace as violation 71 was invisible to the fault suite — the
+  scoreboard now prints a complete `rules:` count line that the stage
+  record and the fault signature read; (4) the regenerated scheduler checker
+  counted level increments as unserviced requests, so a refresh pending at
+  the end of the window read as SCHED_003 — rule restated (requests on
+  refresh_req, service on REFRESH, pending-at-end legal) with a variant.
+  Result on the clean drop: 0 starve events, pending peaks at 6 of 8. M06
+  now raises REF_001 x63 as new evidence, M17 REF_001 x23 + SCHED_003.
+
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the
 schema generator's default root and `faults/fault_catalog.json` now point

@@ -1,5 +1,5 @@
 {
-  "$comment": "Which DUT ports form each interface's transactions, and WHEN a transaction has occurred. This is DATA, not code: widths and directions are NOT listed here — schema_gen.py resolves them from the frontend manifests at generation time and fails loudly on any mismatch. Swapping the spec/design means editing this file (or regenerating it), never editing infrastructure code. 'qualifier' is a SystemVerilog boolean expression over the block's own ports that is true exactly on the cycle a transaction completes; 'kind_select' picks which transaction kind occurred when an interface has more than one. A request/response bus is modelled as TWO interfaces (e.g. csr and csr_rsp) observed on the same pins: one carries what was asked, the other what was answered. Collapsing them into one interface makes the scoreboard's input/output partition ambiguous. 'role' says whether an interface is driven INTO the block (request) or produced BY it (response). It cannot be inferred from port directions: a response stream often carries the address that was requested, whose port is a DUT input. A predictor consumes requests and predicts responses.",
+  "$comment": "Which DUT ports form each interface's transactions, and WHEN a transaction has occurred. This is DATA, not code: widths and directions are NOT listed here \u2014 schema_gen.py resolves them from the frontend manifests at generation time and fails loudly on any mismatch. Swapping the spec/design means editing this file (or regenerating it), never editing infrastructure code. 'qualifier' is a SystemVerilog boolean expression over the block's own ports that is true exactly on the cycle a transaction completes; 'kind_select' picks which transaction kind occurred when an interface has more than one. A request/response bus is modelled as TWO interfaces (e.g. csr and csr_rsp) observed on the same pins: one carries what was asked, the other what was answered. Collapsing them into one interface makes the scoreboard's input/output partition ambiguous. 'role' says whether an interface is driven INTO the block (request) or produced BY it (response). It cannot be inferred from port directions: a response stream often carries the address that was requested, whose port is a DUT input. A predictor consumes requests and predicts responses.",
   "schema_version": "1.12",
   "interfaces": {
     "csr": {
@@ -168,7 +168,7 @@
         "DESL": "4'b1111"
       },
       "derives_from": {
-        "$note": "cmd_gen is a bridge like wb_port, with two additions a plain field map cannot express: the command VALUE is re-encoded between two different encodings, and the address field is selected by command type (a row for ACTIVATE, a column for a CAS). Both are declared here so the same bridge gate grades them — a design that encodes or muxes differently edits this block, not the gate.",
+        "$note": "cmd_gen is a bridge like wb_port, with two additions a plain field map cannot express: the command VALUE is re-encoded between two different encodings, and the address field is selected by command type (a row for ACTIVATE, a column for a CAS). Both are declared here so the same bridge gate grades them \u2014 a design that encodes or muxes differently edits this block, not the gate.",
         "interface": "sched_in",
         "cardinality": "one_per_source_transaction",
         "field_map": {
@@ -269,7 +269,7 @@
         "field_map": {
           "addr": "addr"
         },
-        "$note": "A read response echoes the requested address; its data comes from downstream and is not determined by the request, so it is deliberately not in field_map — gating it would assert a requirement the spec does not make of this block.",
+        "$note": "A read response echoes the requested address; its data comes from downstream and is not determined by the request, so it is deliberately not in field_map \u2014 gating it would assert a requirement the spec does not make of this block.",
         "model_guidance": "Emit exactly one wb_rsp.read_data per wb.read, in request order, with the request's addr. Its data is NOT known from the request: it is the data field of the dp_rd_rsp.response for that read (responses return in request order), which the model receives as an input transaction. Hold the response until that dp_rd_rsp arrives and emit it then; never derive read data from a memory image of earlier writes, and never emit nothing for a read.",
         "completes_on": {
           "interface": "dp_rd_rsp",
@@ -428,7 +428,7 @@
       "$producers_note": "The enqueue descriptor's row/col/bank are addr_decoder's decode of req_addr (conn_03); its we/aux come from wb_port. addr_decoder is the stage that PRODUCES this stream in a composed chain.",
       "$aux_note": "enq_aux is deliberately NOT a transaction field: it is an internal routing tag whose values the spec does not determine, so no spec-derived model can predict it and comparing it would fail every enqueue for a reason that is not a defect. If a future spec assigns it meaning, add it back with that meaning.",
       "derives_from": {
-        "$note": "The enqueue descriptor is addr_decoder's translation of the request stream: the byte address splits into row/bank/column per the spec's address_mapping, and we rides through. The split positions are NOT written here — the gate computes them from memory_geometry at grading time, so a different geometry grades correctly with no edit.",
+        "$note": "The enqueue descriptor is addr_decoder's translation of the request stream: the byte address splits into row/bank/column per the spec's address_mapping, and we rides through. The split positions are NOT written here \u2014 the gate computes them from memory_geometry at grading time, so a different geometry grades correctly with no edit.",
         "interface": "req",
         "cardinality": "one_per_source_transaction",
         "field_map": {
@@ -565,7 +565,7 @@
     "csr_sts": {
       "block": "config_regs",
       "role": "request",
-      "description": "Hardware status events latched into the CSR status registers. These are a genuine INPUT stream: they set RW1C flag fields that the bus can only clear, so a predictor that cannot see them cannot model those registers. Discovered when an agent-generated predictor disagreed with real silicon on ERROR_STATUS bits 16-18 — neither was wrong; the observation was incomplete.",
+      "description": "Hardware status events latched into the CSR status registers. These are a genuine INPUT stream: they set RW1C flag fields that the bus can only clear, so a predictor that cannot see them cannot model those registers. Discovered when an agent-generated predictor disagreed with real silicon on ERROR_STATUS bits 16-18 \u2014 neither was wrong; the observation was incomplete.",
       "clock": "clk",
       "reset": "rst_n",
       "reset_active_low": true,
@@ -765,11 +765,35 @@
           "polarity_key": "ddr_dm_polarity"
         }
       }
+    },
+    "refresh_level": {
+      "block": "refresh_ctrl",
+      "role": "response",
+      "description": "The refresh controller's LEVELS: required, urgent, pending count, starve flag. refresh_req carries only the rising edge of ref_required, so a pending count that climbs while the request is outstanding was never observed (M06/M17: the 4-bit count reached 11 against max_postpone 8 on the CSR status level and no checker saw it, 2026-10-09). This stream is the same ports, emitted on every change, so REF_001 is judged on the level the design actually drives.",
+      "clock": "clk",
+      "reset": "rst_n",
+      "reset_active_low": true,
+      "qualifier": "1'b1",
+      "qualifier_edge": "change",
+      "qualifier_note": "Level stream: emit only when any field changes, so the trace carries updates rather than every cycle.",
+      "kinds": {
+        "state": {
+          "required": "ref_required",
+          "urgent": "ref_urgent",
+          "pending": "ref_pending_cnt",
+          "starve": "ref_starve_flag"
+        }
+      },
+      "consumers": [
+        "scheduler"
+      ],
+      "autonomous": true,
+      "autonomous_note": "Observed, never driven: refresh_ctrl's own outputs. A checker reads it to judge REF_001 (pending > max_postpone_count, or starve set); it carries no request semantics, those stay on refresh_req."
     }
   },
   "$blocks_without_transaction_interfaces": {
     "addr_decoder": "Purely combinational: req_addr in, dec_row/bank/col/rank out, with no clock or valid to qualify a transaction. Checked instead by an SVA derived from memory_geometry asserting the row-bank-column slicing holds every cycle, which is a stronger claim than a sampled comparison.",
-    "bank_tracker": "Has no output transaction stream at all — every output (bank_is_active, bank_open_row, *_allowed) is continuously visible STATE, not an event. Verified via check_strategy 'invariant': input command events are monitored, and the state itself is checked by the TIMING_001-011 assertions that live in this block."
+    "bank_tracker": "Has no output transaction stream at all \u2014 every output (bank_is_active, bank_open_row, *_allowed) is continuously visible STATE, not an event. Verified via check_strategy 'invariant': input command events are monitored, and the state itself is checked by the TIMING_001-011 assertions that live in this block."
   },
   "version": "1.17"
 }

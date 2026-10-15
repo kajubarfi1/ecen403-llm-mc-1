@@ -224,12 +224,21 @@ def judge(trace, jobs, path_id, rep_dir, fired_by_block=None):
         verdict = ("pass" if "status=pass" in first
                    else "unknown" if "status=unknown" in first else "fail")
         detail = out.strip().splitlines()[-12:] if verdict == "fail" else []
+        # the scoreboard's per-rule count line, complete whatever the detail
+        # window shows; the fault suite and the emitter read it from here
+        rule_counts = {}
+        for l in out.splitlines():
+            if l.strip().startswith("rules: "):
+                for tok in l.strip()[len("rules: "):].split():
+                    k, _, n = tok.partition("=")
+                    if n.isdigit():
+                        rule_counts[k] = int(n)
         if fired:
             verdict = "fail"
             detail = [f"{a} fired {n}x (assertion bound to {blk})" for a, n in sorted(fired.items())] + detail
             first = (first.strip() + "  SVA fired: " + ", ".join(f"{a} x{n}" for a, n in sorted(fired.items()))).strip()
         results.append({**j, "verdict": verdict, "summary": first.strip(),
-                        "detail": detail})
+                        "detail": detail, "rule_counts": rule_counts})
     # An assertion that fired in a block the path instantiates but does not
     # judge as a stage (support closure: cmd_gen under a CSR path) still
     # fails the path -- the design violated the spec while this path ran.

@@ -1,18 +1,8 @@
-TOOL:	xrun	24.03-s013: Started on Oct 13, 2026 at 20:37:23 CDT
-*WARNING* file /home/ugrads/j/jacobz/CDS.log cls: Unable to connect to clsbd on host "n02-hera.olympus.ece.tamu.edu".
-Check if clsbd is running on the host. If the host is not valid remove
-the ".cdslck" lock file. The connect timeout length can be set using
-the CLS_CLSBD_CONNECT_TIMEOUT environment variable.
-
+TOOL:	xrun	24.03-s013: Started on Oct 15, 2026 at 11:55:31 CDT
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xrun: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
 xrun: 24.03-s013: (c) Copyright 1995-2025 Cadence Design Systems, Inc.
-*WARNING* file /home/ugrads/j/jacobz/CDS.log.1 cls: Unable to connect to clsbd on host "n02-hera.olympus.ece.tamu.edu".
-Check if clsbd is running on the host. If the host is not valid remove
-the ".cdslck" lock file. The connect timeout length can be set using
-the CLS_CLSBD_CONNECT_TIMEOUT environment variable.
-
 *WARNING* X Window Display Initialization failure
 *WARNING* (DISPLAY "")
 xrun: *N,CLEAN: Removing existing directory ./xcelium.d.
@@ -344,6 +334,9 @@ file: init_status_monitor.sv
 file: refresh_ack_monitor.sv
 	module worklib.refresh_ack_monitor:sv
 		errors: 0, warnings: 0
+file: refresh_level_monitor.sv
+	module worklib.refresh_level_monitor:sv
+		errors: 0, warnings: 0
 file: refresh_req_monitor.sv
 	module worklib.refresh_req_monitor:sv
 		errors: 0, warnings: 0
@@ -513,7 +506,7 @@ xmelab: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment
 xmelab: *N,CGNSWA: (File: ./cov_conf.ccf, Line: 6): A covergroup is not (de)selected with the "-all" option of the (de)select_coverage command. Use the coverage metric "-covergroup" with the (de)select_coverage command to (de)select a covergroup.
 		Caching library 'worklib' ....... Done
 	Top level design units:
-		$unit_0x042194bd
+		$unit_0x0ca3adc2
 		chain_harness
 
 	Extracting FSMs for coverage:
@@ -578,62 +571,64 @@ xmvlog_cg: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,1
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
-		worklib.refresh_ctrl_fcov:sv <0x4a313314>
+		worklib.refresh_ctrl_fcov:sv <0x28260c70>
 			streams:   4, words:  1993
-		worklib.refresh_req_monitor:sv <0x085058d7>
+		worklib.refresh_req_monitor:sv <0x2550deda>
 			streams:   3, words:  2241
-		worklib.refresh_ack_monitor:sv <0x4eef4994>
+		worklib.refresh_level_monitor:sv <0x3346e440>
+			streams:   3, words:  2531
+		worklib.refresh_ack_monitor:sv <0x65828366>
 			streams:   2, words:  1543
-		worklib.init_fsm_sva:sv <0x29d378da>
+		worklib.init_fsm_sva:sv <0x171b3e0a>
 			streams:  43, words: 28893
-		worklib.init_fsm_fcov:sv <0x557a596c>
+		worklib.init_fsm_fcov:sv <0x1c54785c>
 			streams:   4, words:  2295
-		worklib.init_status_monitor:sv <0x6135ddf5>
+		worklib.init_status_monitor:sv <0x183e2399>
 			streams:   3, words:  2016
-		worklib.init_cmd_monitor:sv <0x67026ff9>
+		worklib.init_cmd_monitor:sv <0x425fd438>
 			streams:   2, words:  1993
-		worklib.config_regs_fcov:sv <0x77d6b99c>
+		worklib.config_regs_fcov:sv <0x17256f49>
 			streams:  10, words: 13585
-		worklib.csr_sts_level_monitor:sv <0x1663c835>
+		worklib.csr_sts_level_monitor:sv <0x3af2104a>
 			streams:   3, words:  5328
-		worklib.csr_sts_monitor:sv <0x40109c69>
+		worklib.csr_sts_monitor:sv <0x50f68ecb>
 			streams:   2, words:  2016
-		worklib.csr_rsp_monitor:sv <0x10916c36>
+		worklib.csr_rsp_monitor:sv <0x3d91ea3b>
 			streams:   2, words:  3103
-		worklib.csr_monitor:sv <0x0783e420>
+		worklib.csr_monitor:sv <0x368e350c>
 			streams:   2, words:  2653
-		worklib.cfg_timing_monitor:sv <0x7ac9a886>
+		worklib.cfg_timing_monitor:sv <0x5ccd1be7>
 			streams:   3, words:  5065
-		worklib.cfg_refresh_monitor:sv <0x3c309547>
+		worklib.cfg_refresh_monitor:sv <0x4e750e81>
 			streams:   3, words:  3291
-		worklib.chain_harness:sv <0x0e431297>
+		worklib.chain_harness:sv <0x096b041f>
 			streams:  92, words: 26033
-		worklib.config_regs:sv <0x1917f63f>
+		worklib.config_regs:sv <0x62614f58>
 			streams:  64, words: 58855
-		worklib.init_fsm:sv <0x45396a9a>
+		worklib.init_fsm:sv <0x5eea0818>
 			streams:  21, words: 25643
-		worklib.refresh_ctrl:sv <0x5c716664>
-			streams:  18, words: 11760
-		worklib.\$unit_0x042194bd :compilation_unit <0x63271dd2>
+		worklib.refresh_ctrl:sv <0x215b1885>
+			streams:  22, words: 12178
+		worklib.\$unit_0x0ca3adc2 :compilation_unit <0x3d17029d>
 			streams:   0, words:     0
 	Building instance specific data structures.
 xmelab: *W,CGPIDF: Covergroup "per_instance" option , by default, is set as 0.
 	Loading native compiled code:     .................... Done
 	Design hierarchy summary:
 		                 Instances  Unique
-		Modules:                18      18
-		Registers:             222     222
-		Scalar wires:          109       -
-		Vectored wires:        115       -
+		Modules:                19      19
+		Registers:             223     223
+		Scalar wires:          112       -
+		Vectored wires:        116       -
 		Named events:            5       5
-		Always blocks:         101     101
+		Always blocks:         103     103
 		Initial blocks:         24      24
 		Cont. assignments:      39      62
-		Pseudo assignments:    113       -
+		Pseudo assignments:    117       -
 		Assertions:             10      10
 		Covergroup Instances:    0       4
 		Compilation units:       1       1
-		Process Clocks:         37      12
+		Process Clocks:         39      12
 		Simulation timescale:  1ps
 	Writing initial simulation snapshot: worklib.chain_harness:sv
 DEFINE std       ./STD
@@ -688,6 +683,7 @@ Loading snapshot worklib.chain_harness:sv .................... Done
 xcelium> source /opt/coe/cadence/XCELIUM240/tools/xcelium/files/xmsimrc
 xcelium> run
 TXN refresh_req reset t=0
+TXN refresh_level reset t=0
 TXN refresh_ack reset t=0
 TXN init_status reset t=0
 TXN init_cmd reset t=0
@@ -705,32 +701,76 @@ TXN init_cmd command t=700214000 addr=400 bank=0 cmd=6
 TXN init_status done t=700859000 fail=0 state=e
 TXN csr_sts_level state t=700863000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=0 self_refresh=0
 TXN refresh_req request t=700869000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=700869000 pending=1 required=1 starve=0 urgent=0
 TXN csr_sts_level state t=700873000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=1 self_refresh=0
+TXN refresh_level state t=708669000 pending=2 required=1 starve=0 urgent=0
 TXN csr_sts_level state t=708673000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=2 self_refresh=0
+TXN refresh_level state t=716469000 pending=3 required=1 starve=0 urgent=0
 TXN csr_sts_level state t=716473000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=3 self_refresh=0
+TXN refresh_level state t=724269000 pending=4 required=1 starve=0 urgent=0
 TXN csr_sts_level state t=724273000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=4 self_refresh=0
+TXN refresh_level state t=732069000 pending=5 required=1 starve=0 urgent=0
 TXN csr_sts_level state t=732073000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=5 self_refresh=0
+TXN refresh_level state t=739869000 pending=6 required=1 starve=0 urgent=1
 TXN csr_sts_level state t=739873000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=6 self_refresh=0
+TXN refresh_level state t=747669000 pending=7 required=1 starve=0 urgent=1
 TXN csr_sts_level state t=747673000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=7 self_refresh=0
+TXN refresh_level state t=755469000 pending=8 required=1 starve=0 urgent=1
 TXN csr_sts_level state t=755473000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=8 self_refresh=0
+TXN refresh_level state t=763269000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=763269000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=763274000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=771069000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=771069000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=771074000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=778869000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=778869000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=778874000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=786669000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=786669000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=786674000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=794469000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=794469000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=794474000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=802269000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=802269000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=802274000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=810069000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=810069000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=810074000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=817869000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=817869000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=817874000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=825669000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=825669000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=825674000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=833469000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=833469000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=833474000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=841269000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=841269000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=841274000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=849069000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=849069000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=849074000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=856869000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=856869000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=856874000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=864669000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=864669000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=864674000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=872469000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=872469000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=872474000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=880269000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=880269000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=880274000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=888069000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=888069000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=888074000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=895869000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=895869000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=895874000 pending=8 required=1 starve=0 urgent=1
 HARNESS_DONE
 Simulation complete via $finish(1) at time 900017500 PS + 0
 ./chain_harness.sv:194     $finish;
@@ -748,6 +788,6 @@ coverage setup:
   Coverage database dumped with the set_code_fine_grained_merging command during elaboration.
 
 coverage files:
-  model(design data) :  ./cov_work/scope/icc_5e7c73e0_5279c5c0.ucm
-  data               :  ./cov_work/scope/path_09_init_to_refresh/icc_5e7c73e0_5279c5c0.ucd
-TOOL:	xrun	24.03-s013: Exiting on Oct 13, 2026 at 20:37:25 CDT  (total: 00:00:02)
+  model(design data) :  ./cov_work/scope/icc_0ec3b08e_32eff682.ucm (reused)
+  data               :  ./cov_work/scope/path_09_init_to_refresh/icc_0ec3b08e_32eff682.ucd
+TOOL:	xrun	24.03-s013: Exiting on Oct 15, 2026 at 11:55:33 CDT  (total: 00:00:02)

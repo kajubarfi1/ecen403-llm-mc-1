@@ -3,7 +3,7 @@
   "path": "path_10_csr_to_timing",
   "strategy": "exact",
   "verdict": "fail",
-  "timestamp": "2026-10-08T13:43:39.662953",
+  "timestamp": "2026-10-15T12:00:44.689185",
   "blocks": [
     "config_regs",
     "bank_tracker"
@@ -25,15 +25,16 @@
       "detail": [
         "scope=config_regs  strategy=exact  status=fail  matched=130/131  WAIVED=2 field comparison(s)  value=1",
         "  csr_rsp[18] value: predicted [csr_rsp.read_data addr=0x8 data=0x271c0b0b err=0x0] but observed [csr_rsp.read_data addr=0x8 data=0x271c0b0a err=0x0]"
-      ]
+      ],
+      "rule_counts": {}
     }
   ],
   "log": "Validation/reports/faults/M07_config_regs_reset_value/path_12_csr_timing_to_scheduling_sim.log",
   "observed_trace": "Validation/reports/faults/M07_config_regs_reset_value/path_12_csr_timing_to_scheduling_observed.jsonl",
   "rtl_drop": {
-    "git_head": "540c17a9db4e",
-    "drop_id": "540c17a9db4e",
-    "design_id": "ad59440f96d6",
+    "git_head": "2666116acb16",
+    "drop_id": "2666116acb16",
+    "design_id": "fd00a6f4ef2d",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -45,17 +46,17 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "986fdb0",
+    "validated_at": "6b693b1",
     "frontend_commits": {
-      "addr_decoder": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "bank_tracker": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "cmd_gen": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "cmd_queue": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "config_regs": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "data_path": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "refresh_ctrl": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "scheduler": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "wb_port": "9c21084cdda21e528b57299e638eef2b79fef2ec"
+      "addr_decoder": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "bank_tracker": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "cmd_gen": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "cmd_queue": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "data_path": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "refresh_ctrl": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "scheduler": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "wb_port": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
     },
     "roots": [
       "Validation/faults/work/M07_config_regs_reset_value/Frontend2/OutputFolders"

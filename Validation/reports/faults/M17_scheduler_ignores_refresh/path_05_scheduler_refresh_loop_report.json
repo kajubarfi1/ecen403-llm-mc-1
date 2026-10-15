@@ -3,7 +3,7 @@
   "path": "path_05_scheduler_refresh_loop",
   "strategy": "invariant",
   "verdict": "fail",
-  "timestamp": "2026-10-08T13:44:36.084492",
+  "timestamp": "2026-10-15T12:00:46.320566",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,9 +21,9 @@
   "window_cycles": 6000,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "efc8f8f599ea",
-    "drop_id": "efc8f8f599ea",
-    "design_id": "469b71afc025",
+    "git_head": "4677f896c718",
+    "drop_id": "4677f896c718",
+    "design_id": "66a76881ed9e",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -35,17 +35,17 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "986fdb0",
+    "validated_at": "6b693b1",
     "frontend_commits": {
-      "addr_decoder": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "bank_tracker": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "cmd_gen": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "cmd_queue": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "config_regs": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "data_path": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "refresh_ctrl": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "scheduler": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "wb_port": "9c21084cdda21e528b57299e638eef2b79fef2ec"
+      "addr_decoder": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "bank_tracker": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "cmd_gen": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "cmd_queue": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "data_path": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "refresh_ctrl": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "scheduler": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "wb_port": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
     },
     "roots": [
       "Validation/faults/work/M17_scheduler_ignores_refresh/Frontend2/OutputFolders"
@@ -110,11 +110,25 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/scheduler_checker.py",
       "scope": "scheduler",
       "verdict": "fail",
-      "summary": "scope=scheduler  strategy=invariant  status=fail  violations=1",
+      "summary": "scope=scheduler  strategy=invariant  status=fail  violations=14",
       "detail": [
-        "scope=scheduler  strategy=invariant  status=fail  violations=1",
-        "  SCHED_003 (Every refresh request must eventually be serviced with a REFRESH command): 1 refresh request(s) were never serviced with a REFRESH command"
-      ]
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  SCHED_003 (refresh_never_serviced): refresh request was seen but no REFRESH command was ever issued @ [refresh_req.request pending=0x1 starve=0x0 urgent=0x0]",
+        "  rules: REF_001=13 SCHED_003=1"
+      ],
+      "rule_counts": {
+        "REF_001": 13,
+        "SCHED_003": 1
+      }
     },
     {
       "stage": "refresh_ctrl",
@@ -130,10 +144,20 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_05_scheduler_refresh_loop_checker.py",
       "scope": "path_05_scheduler_refresh_loop",
       "verdict": "fail",
-      "summary": "scope=path_05_scheduler_refresh_loop  strategy=invariant  status=fail  violations=1",
+      "summary": "scope=path_05_scheduler_refresh_loop  strategy=invariant  status=fail  violations=14",
       "detail": [
-        "scope=path_05_scheduler_refresh_loop  strategy=invariant  status=fail  violations=1",
-        "  SCHED_003: End of trace with 1 pending refresh request(s) not serviced @ [refresh_req.request pending=0x1 starve=0x0 urgent=0x0]"
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  REF_001 (refresh_starvation_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]",
+        "  SCHED_003 (refresh_never_serviced): refresh request was observed but no REFRESH command was ever issued",
+        "  rules: REF_001=13 SCHED_003=1"
       ]
     }
   ],

@@ -3,7 +3,7 @@
   "path": "path_08_init_to_cal",
   "strategy": "invariant",
   "verdict": "fail",
-  "timestamp": "2026-10-08T13:43:56.689991",
+  "timestamp": "2026-10-15T12:00:45.780338",
   "blocks": [
     "calibration",
     "init_fsm"
@@ -14,17 +14,17 @@
   "window_cycles": 180000,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "3384d853e0bf",
-    "drop_id": "3384d853e0bf",
-    "design_id": "2c4f39cb04e9",
+    "git_head": "fac8d2b52287",
+    "drop_id": "fac8d2b52287",
+    "design_id": "71e7d715f47b",
     "blocks_used": [
       "calibration",
       "init_fsm"
     ],
-    "validated_at": "986fdb0",
+    "validated_at": "6b693b1",
     "frontend_commits": {
-      "calibration": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "init_fsm": "9c21084cdda21e528b57299e638eef2b79fef2ec"
+      "calibration": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "init_fsm": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
     },
     "roots": [
       "Validation/faults/work/M15_calibration_early_done/Frontend2/OutputFolders"
@@ -76,7 +76,8 @@
       "summary": "scope=path_08_init_to_cal  strategy=invariant  status=fail  violations=1",
       "detail": [
         "scope=path_08_init_to_cal  strategy=invariant  status=fail  violations=1",
-        "  CAL_001: cal_done raised before init_done observed @ [cal_status.done fail=0x0]"
+        "  CAL_001: cal_done raised before init_done observed @ [cal_status.done fail=0x0]",
+        "  rules: CAL_001=1"
       ]
     }
   ],

@@ -1,6 +1,6 @@
 {
   "$schema": "validation-fault-matrix/1",
-  "generated_utc": "2026-10-08T18:44:52.572155Z",
+  "generated_utc": "2026-10-15T17:00:46.932271Z",
   "drop_root": "Frontend2/OutputFolders",
   "faults_total": 23,
   "faults_killed": 23,
@@ -102,7 +102,7 @@
         "stage:cmd_gen (support)": 1,
         "stage:(path-level)": 1,
         "violations:(path-level)": 16,
-        "id:SCHED_001": 12,
+        "id:SCHED_001": 11,
         "assert:a_TIMING_003": 221,
         "assert:p_stall_hold": 3,
         "log:DRIVER_STALL": 6
@@ -184,19 +184,28 @@
       ],
       "masked_by": null,
       "killed": true,
-      "expected_hit": [],
-      "expected_missed": [
+      "expected_hit": [
         "id:REF_001"
       ],
+      "expected_missed": [],
       "new": {
-        "assert:p_wr_no_overflow": 1
+        "stage:scheduler": 1,
+        "violations:scheduler": 52,
+        "id:REF_001": 63,
+        "stage:(path-level)": 1,
+        "violations:(path-level)": 52,
+        "assert:p_stall_hold": 3,
+        "log:DRIVER_STALL": 6
       },
       "grew": {},
       "fewer_matched": {},
-      "blamed_stages": [],
+      "blamed_stages": [
+        "(path-level)",
+        "scheduler"
+      ],
       "blame_names_block": true,
       "baseline_verdict": "pass",
-      "mutant_verdict": "pass"
+      "mutant_verdict": "fail"
     },
     {
       "fault": "M07_config_regs_reset_value",
@@ -442,7 +451,7 @@
       "new": {
         "stage:cmd_queue+scheduler": 1,
         "violations:cmd_queue+scheduler": 19,
-        "id:SCHED_004": 12
+        "id:SCHED_004": 19
       },
       "grew": {},
       "fewer_matched": {},
@@ -476,7 +485,7 @@
       "new": {
         "stage:(path-level)": 1,
         "violations:(path-level)": 12,
-        "id:SCHED_001": 12
+        "id:SCHED_001": 11
       },
       "grew": {},
       "fewer_matched": {},
@@ -664,17 +673,17 @@
       "masked_by": null,
       "killed": true,
       "expected_hit": [
-        "id:SCHED_003"
-      ],
-      "expected_missed": [
+        "id:SCHED_003",
         "id:REF_001"
       ],
+      "expected_missed": [],
       "new": {
         "stage:scheduler": 1,
-        "violations:scheduler": 1,
+        "violations:scheduler": 14,
+        "id:REF_001": 23,
         "id:SCHED_003": 2,
         "stage:(path-level)": 1,
-        "violations:(path-level)": 1
+        "violations:(path-level)": 14
       },
       "grew": {},
       "fewer_matched": {},
@@ -792,8 +801,8 @@
         "stage:cmd_gen (support)": 1,
         "stage:(path-level)": 1,
         "violations:(path-level)": 25,
-        "id:PROTO_001": 5,
         "id:SCHED_004": 7,
+        "id:PROTO_001": 4,
         "assert:a_PROTO_001": 10
       },
       "grew": {},
@@ -826,7 +835,7 @@
       "new": {
         "stage:cmd_queue+scheduler": 1,
         "violations:cmd_queue+scheduler": 15,
-        "id:PROTO_001": 7,
+        "id:PROTO_001": 10,
         "id:SCHED_004": 5,
         "stage:cmd_gen": 1,
         "assert:a_PROTO_001": 10

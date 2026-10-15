@@ -3,7 +3,7 @@
   "path": "path_06_scheduler_dequeue",
   "strategy": "exact",
   "verdict": "pass",
-  "timestamp": "2026-10-08T13:43:32.805283",
+  "timestamp": "2026-10-15T12:00:44.203664",
   "blocks": [
     "scheduler",
     "cmd_queue"
@@ -22,15 +22,16 @@
       "scope": "cmd_queue_scheduler",
       "verdict": "pass",
       "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (350 transactions, no rule broken)",
-      "detail": []
+      "detail": [],
+      "rule_counts": {}
     }
   ],
   "log": "Validation/reports/faults/M02_cmd_gen_act_encoded_as_pre/path_01_write_cmd_sim.log",
   "observed_trace": "Validation/reports/faults/M02_cmd_gen_act_encoded_as_pre/path_01_write_cmd_observed.jsonl",
   "rtl_drop": {
-    "git_head": "967c6a9f3ffd",
-    "drop_id": "967c6a9f3ffd",
-    "design_id": "ed1e0e41ef57",
+    "git_head": "77c9b8d3d611",
+    "drop_id": "77c9b8d3d611",
+    "design_id": "8c4a03a250a2",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -42,17 +43,17 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "986fdb0",
+    "validated_at": "6b693b1",
     "frontend_commits": {
-      "addr_decoder": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "bank_tracker": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "cmd_gen": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "cmd_queue": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "config_regs": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "data_path": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "refresh_ctrl": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "scheduler": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
-      "wb_port": "9c21084cdda21e528b57299e638eef2b79fef2ec"
+      "addr_decoder": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "bank_tracker": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "cmd_gen": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "cmd_queue": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "data_path": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "refresh_ctrl": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "scheduler": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "wb_port": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
     },
     "roots": [
       "Validation/faults/work/M02_cmd_gen_act_encoded_as_pre/Frontend2/OutputFolders"
