@@ -7,10 +7,12 @@ Path    : path_16_status_refresh  [composed]
 Blocks  : config_regs, refresh_ctrl
 Window  : 64 cycles settle after driver
 Stages  : refresh_ctrl(autonomous); config_regs(exact)
+    ssh connect attempt 1 failed (SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer); retrying in 8s
+    ssh connect attempt 2 failed (SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer); retrying in 13s
 
-Running: xrun ... -top chain_harness  (18 file(s))
+Running: xrun ... -top chain_harness  (19 file(s))
   log -> Validation/reports/netlists/config_regs/path_16_status_refresh_sim.log
-327 transaction(s)
+476 transaction(s)
     cfg_refresh.reset        1
     cfg_timing.reset         1
     csr.read                 120
@@ -22,10 +24,12 @@ Running: xrun ... -top chain_harness  (18 file(s))
     csr_sts_level.reset      1
     csr_sts_level.state      8
     refresh_ack.reset        1
+    refresh_level.reset      1
+    refresh_level.state      148
     refresh_req.request      1
     refresh_req.reset        1
-  time span: 0 .. 600629000
-wrote 327 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/config_regs/path_16_status_refresh_observed.jsonl
+  time span: 0 .. 600634000
+wrote 476 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/config_regs/path_16_status_refresh_observed.jsonl
 
 ==================================================================
   refresh_ctrl                 [autonomous]  SVA-OWNED
@@ -35,3 +39,41 @@ wrote 327 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/re
 
   path verdict : PASS
   report -> Validation/reports/netlists/config_regs/path_16_status_refresh_report.json
+Exception (client): Error reading SSH protocol banner[Errno 54] Connection reset by peer
+Traceback (most recent call last):
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2363, in _check_banner
+    buf = self.packetizer.readline(timeout)
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 395, in readline
+    buf += self._read_timeout(timeout)
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 663, in _read_timeout
+    x = self.__socket.recv(128)
+ConnectionResetError: [Errno 54] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2179, in run
+    self._check_banner()
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2367, in _check_banner
+    raise SSHException(
+paramiko.ssh_exception.SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer
+
+Exception (client): Error reading SSH protocol banner[Errno 54] Connection reset by peer
+Traceback (most recent call last):
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2363, in _check_banner
+    buf = self.packetizer.readline(timeout)
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 395, in readline
+    buf += self._read_timeout(timeout)
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 663, in _read_timeout
+    x = self.__socket.recv(128)
+ConnectionResetError: [Errno 54] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2179, in run
+    self._check_banner()
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2367, in _check_banner
+    raise SSHException(
+paramiko.ssh_exception.SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer
+

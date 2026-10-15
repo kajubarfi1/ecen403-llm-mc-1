@@ -9,20 +9,12 @@ Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path
 Window  : 400 cycles settle after driver
 Stages  : 
 
-Running: xrun ... -top chain_harness  (50 file(s))
+Running: xrun ... -top chain_harness  (53 file(s))
   log -> Validation/reports/netlists/scheduler/path_04_scheduler_bank_loop_sim.log
 
-  EMBEDDED RTL ASSERTIONS FIRED (123 total) — the design's own checks disagree with its behavior:
-    illegal bin: cp_trc_spacing 23x
-    illegal bin: cp_trrd_spacing 23x
-    illegal bin: cp_tfaw_spacing 23x
-    a_TIMING_004             23x
-    a_PROTO_002              23x
-    a_TIMING_005             5x
-    illegal bin: cp_trfc_spacing 1x
-    a_TIMING_011             1x
+  EMBEDDED RTL ASSERTIONS FIRED (1 total) — the design's own checks disagree with its behavior:
     p_sel_nonzero_write      1x
-482 transaction(s)
+353 transaction(s)
     cfg_refresh.reset        1
     cfg_timing.reset         1
     cq_deq.dequeue           19
@@ -34,50 +26,40 @@ Running: xrun ... -top chain_harness  (50 file(s))
     csr_sts.reset            1
     csr_sts_level.reset      1
     csr_sts_level.state      2
-    ddr_cmd.command          98
+    ddr_cmd.command          51
     ddr_cmd.reset            1
     ddr_rd_beat.reset        1
-    ddr_wr_beat.beat         28
+    ddr_wr_beat.beat         38
     ddr_wr_beat.reset        1
     dp_cmd.reset             1
     dp_cmd.write             19
     dp_rd_rsp.reset          1
     dp_wr.reset              1
     dp_wr.write              19
-    refresh_ack.ack          2
+    refresh_ack.ack          1
     refresh_ack.reset        1
+    refresh_level.reset      1
+    refresh_level.state      2
     refresh_req.request      1
     refresh_req.reset        1
     req.request              19
     req.reset                1
-    sched_cmd.command        98
+    sched_cmd.command        51
     sched_cmd.reset          1
     sched_deq.grant          19
     sched_deq.reset          1
-    sched_in.command         98
+    sched_in.command         51
     sched_in.reset           1
     wb.reset                 1
     wb.write                 19
     wb_rsp.reset             1
-  time span: 0 .. 2024000
-wrote 482 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/scheduler/path_04_scheduler_bank_loop_observed.jsonl
+  time span: 0 .. 1774000
+wrote 353 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/scheduler/path_04_scheduler_bank_loop_observed.jsonl
 
 ==================================================================
-  cmd_gen (support)            [sva       ]  FAIL
-      SVA fired: a_PROTO_002 x23, a_TIMING_004 x23, a_TIMING_005 x5, a_TIMING_011 x1
-      a_PROTO_002 fired 23x (assertion bound to cmd_gen, not a judged stage)
-      a_TIMING_004 fired 23x (assertion bound to cmd_gen, not a judged stage)
-      a_TIMING_005 fired 5x (assertion bound to cmd_gen, not a judged stage)
-      a_TIMING_011 fired 1x (assertion bound to cmd_gen, not a judged stage)
-  (path-level)                 [invariant ]  FAIL
-      scope=path_04_scheduler_bank_loop  strategy=invariant  status=fail  violations=23
-        PROTO_002: ACTIVATE to bank 5 which already has active row 7922 @ [ddr_cmd.command addr=0x1ef2 bank=0x5 cmd=0x3]
-        PROTO_002: ACTIVATE to bank 4 which already has active row 25546 @ [ddr_cmd.command addr=0x63ca bank=0x4 cmd=0x3]
-        PROTO_002: ACTIVATE to bank 6 which already has active row 5454 @ [ddr_cmd.command addr=0x154e bank=0x6 cmd=0x3]
-        PROTO_002: ACTIVATE to bank 6 which already has active row 5454 @ [ddr_cmd.command addr=0x154e bank=0x6 cmd=0x3]
-        PROTO_002: ACTIVATE to bank 5 which already has active row 5666 @ [ddr_cmd.command addr=0x1622 bank=0x5 cmd=0x3]
-        PROTO_002: ACTIVATE to bank 4 which already has active row 24982 @ [ddr_cmd.command addr=0x6196 bank=0x4 cmd=0x3]
+  (path-level)                 [invariant ]  PASS
+      scope=path_04_scheduler_bank_loop  strategy=invariant  status=pass  (353 transactions, no rule broken)
 ==================================================================
 
-  path verdict : FAIL
+  path verdict : PASS
   report -> Validation/reports/netlists/scheduler/path_04_scheduler_bank_loop_report.json

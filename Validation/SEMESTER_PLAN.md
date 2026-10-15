@@ -669,6 +669,26 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   files "scheduler does not close timing at 5.0 ns" (critical) — the
   gate-level re-judge and that change request are next.
 
+- *2026-10-15, night — merged; her drop and Dawson's rebuilt netlists
+  judged.* `main` merged into `integrate-validation` (generated files
+  taken ours, regenerated). Merged drop `efece348d04e` (refresh_ctrl
+  clamp; spec id `279cbf6ca7b6f62b` adopted, same revision): 17/19, the
+  data_path read-capture finding (confirmed) and the two formal
+  counterexamples now `awaiting_formal`; her clamp passes path_05/13/20.
+  Gate level: the three rebuilt netlists failed to elaborate on 23
+  `sky130_fd_sc_hd` cells our mirror lacked (fetched from the open PDK,
+  320 cells now); then every netlist passes every path the RTL passes.
+  Two attributions added to `run_netlists.py`: `RTL-FAIL` (a pair failing
+  on another block's stage exactly as the RTL-only run does is the RTL's,
+  so the netlists' only real FAIL is data_path reproducing its own RTL
+  defect) and per-block provenance (`rtl_drop.py --block-design-ids`,
+  `--built-from-rev`; refresh_ctrl's netlist is the one stale netlist).
+  Backend reply addendum 3 asks for a per-block `design_id` in
+  `NETLISTS.json` and a refresh_ctrl rebuild; Dawson's "scheduler does not
+  close timing at 5.0 ns" is a change request the flow carries to the
+  Frontend. Git: `git push origin integrate-validation:main` after a
+  stale-local-main push was rejected.
+
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the
 schema generator's default root and `faults/fault_catalog.json` now point

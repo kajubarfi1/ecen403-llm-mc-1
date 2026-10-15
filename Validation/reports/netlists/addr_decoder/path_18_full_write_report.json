@@ -2,8 +2,8 @@
   "$schema": "validation-path-run/1",
   "path": "path_18_full_write",
   "strategy": "composed",
-  "verdict": "pass",
-  "timestamp": "2026-10-15T11:16:52.072142",
+  "verdict": "fail",
+  "timestamp": "2026-10-15T13:35:28.207350",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -16,14 +16,14 @@
     "wb_port"
   ],
   "sequence": "Validation/sequences/generated/runs/netlist_addr_decoder/path_18_full_write/path_18_full_write_seed1.json",
-  "stimulus_generator": "random",
+  "stimulus_generator": "write_read",
   "autonomous": false,
-  "window_cycles": 400,
+  "window_cycles": 2000,
   "coverage_collected": true,
   "rtl_drop": {
-    "git_head": "dab971c2aab9",
-    "drop_id": "dab971c2aab9",
-    "design_id": "3973ce99af71",
+    "git_head": "efece348d04e",
+    "drop_id": "efece348d04e",
+    "design_id": "766dc69c37e9",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -35,7 +35,7 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "cb2dc77",
+    "validated_at": "d316eae",
     "frontend_commits": {
       "addr_decoder": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
       "bank_tracker": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
@@ -43,7 +43,7 @@
       "cmd_queue": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
       "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
       "data_path": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "refresh_ctrl": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "refresh_ctrl": "6f659675f03286f6d19f4946500c8ae93de09850",
       "scheduler": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
       "wb_port": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
     },
@@ -112,8 +112,9 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
       "scope": "wb_port",
       "verdict": "pass",
-      "summary": "scope=wb_port  strategy=exact  status=pass  matched=28/28  (28 output transaction(s) matched)",
-      "detail": []
+      "summary": "scope=wb_port  strategy=exact  status=pass  matched=36/36  (36 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
     },
     {
       "stage": "addr_decoder",
@@ -121,8 +122,9 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
       "scope": "addr_decoder",
       "verdict": "pass",
-      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)",
-      "detail": []
+      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=24/24  (24 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
     },
     {
       "stage": "cmd_queue+scheduler",
@@ -130,8 +132,9 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
       "scope": "cmd_queue_scheduler",
       "verdict": "pass",
-      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (356 transactions, no rule broken)",
-      "detail": []
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (413 transactions, no rule broken)",
+      "detail": [],
+      "rule_counts": {}
     },
     {
       "stage": "cmd_gen",
@@ -140,16 +143,31 @@
       "scope": "cmd_gen",
       "verdict": "pass",
       "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=50/50  (50 output transaction(s) matched)",
-      "detail": []
+      "detail": [],
+      "rule_counts": {}
     },
     {
       "stage": "data_path",
       "kind": "exact",
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/data_path_predictor.py",
       "scope": "data_path",
-      "verdict": "pass",
-      "summary": "scope=data_path  strategy=exact  status=pass  matched=29/29  (29 output transaction(s) matched)",
-      "detail": []
+      "verdict": "fail",
+      "summary": "scope=data_path  strategy=exact  status=fail  matched=24/36  value=12",
+      "detail": [
+        "  dp_rd_rsp[0] value: predicted [dp_rd_rsp.response aux=0x1 data=0x1027c4d1] but observed [dp_rd_rsp.response aux=0x1 data=0xc4d10000]",
+        "  dp_rd_rsp[1] value: predicted [dp_rd_rsp.response aux=0x3 data=0x7311d8a3] but observed [dp_rd_rsp.response aux=0x3 data=0xd8a30000]",
+        "  dp_rd_rsp[2] value: predicted [dp_rd_rsp.response aux=0x5 data=0xc9e9c616] but observed [dp_rd_rsp.response aux=0x5 data=0xc6160000]",
+        "  dp_rd_rsp[3] value: predicted [dp_rd_rsp.response aux=0x7 data=0x7ce42c82] but observed [dp_rd_rsp.response aux=0x7 data=0x2c820000]",
+        "  dp_rd_rsp[4] value: predicted [dp_rd_rsp.response aux=0x9 data=0x7204e52d] but observed [dp_rd_rsp.response aux=0x9 data=0xe52d0000]",
+        "  dp_rd_rsp[5] value: predicted [dp_rd_rsp.response aux=0xb data=0x51431193] but observed [dp_rd_rsp.response aux=0xb data=0x11930000]",
+        "  dp_rd_rsp[6] value: predicted [dp_rd_rsp.response aux=0xd data=0x8a9a021e] but observed [dp_rd_rsp.response aux=0xd data=0x21e0000]",
+        "  dp_rd_rsp[7] value: predicted [dp_rd_rsp.response aux=0xf data=0xafbd67f9] but observed [dp_rd_rsp.response aux=0xf data=0x67f90000]",
+        "  dp_rd_rsp[8] value: predicted [dp_rd_rsp.response aux=0x1 data=0xb9d179e0] but observed [dp_rd_rsp.response aux=0x1 data=0x79e00000]",
+        "  dp_rd_rsp[9] value: predicted [dp_rd_rsp.response aux=0x3 data=0xc381e88f] but observed [dp_rd_rsp.response aux=0x3 data=0xe88f0000]",
+        "  dp_rd_rsp[10] value: predicted [dp_rd_rsp.response aux=0x5 data=0x8d88348a] but observed [dp_rd_rsp.response aux=0x5 data=0x348a0000]",
+        "  dp_rd_rsp[11] value: predicted [dp_rd_rsp.response aux=0x7 data=0x5805975] but observed [dp_rd_rsp.response aux=0x7 data=0x59750000]"
+      ],
+      "rule_counts": {}
     }
   ],
   "log": "Validation/reports/netlists/addr_decoder/path_18_full_write_sim.log",

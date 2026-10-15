@@ -7,7 +7,8 @@ Path    : path_21_wb_port_standalone  [exact]
 Blocks  : wb_port
 Window  : 64 cycles settle after driver
 Stages  : wb_port(exact)
-    ssh connect attempt 1 failed (SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer); retrying in 11s
+    ssh connect attempt 1 failed (SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer); retrying in 6s
+    ssh connect attempt 2 failed (SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer); retrying in 11s
 
 Running: xrun ... -top chain_harness  (8 file(s))
   log -> Validation/reports/netlists/wb_port/path_21_wb_port_standalone_sim.log
@@ -30,6 +31,25 @@ wrote 41 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/rep
 
   path verdict : PASS
   report -> Validation/reports/netlists/wb_port/path_21_wb_port_standalone_report.json
+Exception (client): Error reading SSH protocol banner[Errno 54] Connection reset by peer
+Traceback (most recent call last):
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2363, in _check_banner
+    buf = self.packetizer.readline(timeout)
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 395, in readline
+    buf += self._read_timeout(timeout)
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 663, in _read_timeout
+    x = self.__socket.recv(128)
+ConnectionResetError: [Errno 54] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2179, in run
+    self._check_banner()
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2367, in _check_banner
+    raise SSHException(
+paramiko.ssh_exception.SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer
+
 Exception (client): Error reading SSH protocol banner[Errno 54] Connection reset by peer
 Traceback (most recent call last):
   File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2363, in _check_banner

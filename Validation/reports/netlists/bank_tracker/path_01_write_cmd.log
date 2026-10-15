@@ -8,12 +8,12 @@ Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path
 Window  : 400 cycles settle after driver
 Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant); cmd_gen(exact)
 
-Running: xrun ... -top chain_harness  (50 file(s))
+Running: xrun ... -top chain_harness  (53 file(s))
   log -> Validation/reports/netlists/bank_tracker/path_01_write_cmd_sim.log
 
   EMBEDDED RTL ASSERTIONS FIRED (1 total) — the design's own checks disagree with its behavior:
     p_sel_nonzero_write      1x
-350 transaction(s)
+353 transaction(s)
     cfg_refresh.reset        1
     cfg_timing.reset         1
     cq_deq.dequeue           19
@@ -37,6 +37,8 @@ Running: xrun ... -top chain_harness  (50 file(s))
     dp_wr.write              19
     refresh_ack.ack          1
     refresh_ack.reset        1
+    refresh_level.reset      1
+    refresh_level.state      2
     refresh_req.request      1
     refresh_req.reset        1
     req.request              19
@@ -51,7 +53,7 @@ Running: xrun ... -top chain_harness  (50 file(s))
     wb.write                 19
     wb_rsp.reset             1
   time span: 0 .. 1774000
-wrote 350 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/bank_tracker/path_01_write_cmd_observed.jsonl
+wrote 353 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/bank_tracker/path_01_write_cmd_observed.jsonl
 
 ==================================================================
   wb_port                      [exact     ]  PASS
@@ -59,7 +61,7 @@ wrote 350 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/re
   addr_decoder                 [exact     ]  PASS
       scope=addr_decoder  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)
   cmd_queue+scheduler          [invariant ]  PASS
-      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (350 transactions, no rule broken)
+      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (353 transactions, no rule broken)
   cmd_gen                      [exact     ]  PASS
       scope=cmd_gen  strategy=exact  status=pass  matched=51/51  (51 output transaction(s) matched)
 ==================================================================

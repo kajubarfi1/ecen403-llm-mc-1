@@ -4,53 +4,36 @@ Path    : path_09_init_to_refresh  [invariant, autonomous]
 Blocks  : config_regs, init_fsm, refresh_ctrl
 Window  : 180000 cycles (observation, no driver)
 Stages  : init_fsm(autonomous); refresh_ctrl(autonomous)
-    ssh connect attempt 1 failed (SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer); retrying in 8s
 
-Running: xrun ... -top chain_harness  (24 file(s))
+Running: xrun ... -top chain_harness  (25 file(s))
   log -> Validation/reports/netlists/refresh_ctrl/path_09_init_to_refresh_sim.log
-25 transaction(s)
+89 transaction(s)
     cfg_refresh.reset        1
     cfg_timing.reset         1
     csr.reset                1
     csr_rsp.reset            1
+    csr_sts.event            18
     csr_sts.reset            1
     csr_sts_level.reset      1
-    csr_sts_level.state      8
+    csr_sts_level.state      9
     init_cmd.command         5
     init_cmd.reset           1
     init_status.done         1
     init_status.reset        1
     refresh_ack.reset        1
+    refresh_level.reset      1
+    refresh_level.state      44
     refresh_req.request      1
     refresh_req.reset        1
-  time span: 0 .. 888103000
-wrote 25 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/refresh_ctrl/path_09_init_to_refresh_observed.jsonl
+  time span: 0 .. 895874000
+wrote 89 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/refresh_ctrl/path_09_init_to_refresh_observed.jsonl
 
 ==================================================================
   init_fsm                     [autonomous]  SVA-OWNED
   refresh_ctrl                 [autonomous]  SVA-OWNED
   (path-level)                 [invariant ]  PASS
-      scope=path_09_init_to_refresh  strategy=invariant  status=pass  (25 transactions, no rule broken)
+      scope=path_09_init_to_refresh  strategy=invariant  status=pass  (89 transactions, no rule broken)
 ==================================================================
 
   path verdict : PASS
   report -> Validation/reports/netlists/refresh_ctrl/path_09_init_to_refresh_report.json
-Exception (client): Error reading SSH protocol banner[Errno 54] Connection reset by peer
-Traceback (most recent call last):
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2363, in _check_banner
-    buf = self.packetizer.readline(timeout)
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 395, in readline
-    buf += self._read_timeout(timeout)
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 663, in _read_timeout
-    x = self.__socket.recv(128)
-ConnectionResetError: [Errno 54] Connection reset by peer
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2179, in run
-    self._check_banner()
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2367, in _check_banner
-    raise SSHException(
-paramiko.ssh_exception.SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer
-

@@ -8,18 +8,9 @@ Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path
 Window  : 400 cycles settle after driver
 Stages  : data_path(exact); wb_port(exact)
 
-Running: xrun ... -top chain_harness  (50 file(s))
+Running: xrun ... -top chain_harness  (53 file(s))
   log -> Validation/reports/netlists/scheduler/path_03_read_return_sim.log
-
-  EMBEDDED RTL ASSERTIONS FIRED (192 total) — the design's own checks disagree with its behavior:
-    illegal bin: cp_trc_spacing 38x
-    illegal bin: cp_trrd_spacing 38x
-    illegal bin: cp_tfaw_spacing 38x
-    a_TIMING_004             38x
-    a_PROTO_002              38x
-    illegal bin: cp_trfc_spacing 1x
-    a_TIMING_011             1x
-550 transaction(s)
+369 transaction(s)
     cfg_refresh.reset        1
     cfg_timing.reset         1
     cq_deq.dequeue           19
@@ -31,7 +22,7 @@ Running: xrun ... -top chain_harness  (50 file(s))
     csr_sts.reset            1
     csr_sts_level.reset      1
     csr_sts_level.state      2
-    ddr_cmd.command          111
+    ddr_cmd.command          50
     ddr_cmd.reset            1
     ddr_rd_beat.beat         38
     ddr_rd_beat.reset        1
@@ -41,35 +32,38 @@ Running: xrun ... -top chain_harness  (50 file(s))
     dp_rd_rsp.reset          1
     dp_rd_rsp.response       19
     dp_wr.reset              1
-    refresh_ack.ack          2
+    refresh_ack.ack          1
     refresh_ack.reset        1
+    refresh_level.reset      1
+    refresh_level.state      2
     refresh_req.request      1
     refresh_req.reset        1
     req.request              19
     req.reset                1
-    sched_cmd.command        111
+    sched_cmd.command        50
     sched_cmd.reset          1
     sched_deq.grant          19
     sched_deq.reset          1
-    sched_in.command         111
+    sched_in.command         50
     sched_in.reset           1
     wb.read                  19
     wb.reset                 1
     wb_rsp.read_data         19
     wb_rsp.reset             1
-  time span: 0 .. 4679000
-wrote 550 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/scheduler/path_03_read_return_observed.jsonl
+  time span: 0 .. 4374000
+wrote 369 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/scheduler/path_03_read_return_observed.jsonl
 
 ==================================================================
-  data_path                    [exact     ]  PASS
-      scope=data_path  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)
+  data_path                    [exact     ]  FAIL
+      scope=data_path  strategy=exact  status=fail  matched=0/19  value=19
+        dp_rd_rsp[7] value: predicted [dp_rd_rsp.response aux=0x7 data=0x15a8ff27] but observed [dp_rd_rsp.response aux=0x7 data=0xff270000]
+        dp_rd_rsp[8] value: predicted [dp_rd_rsp.response aux=0x8 data=0x1596fcc7] but observed [dp_rd_rsp.response aux=0x8 data=0xfcc70000]
+        dp_rd_rsp[9] value: predicted [dp_rd_rsp.response aux=0x9 data=0xdd8c7d67] but observed [dp_rd_rsp.response aux=0x9 data=0x7d670000]
+        dp_rd_rsp[10] value: predicted [dp_rd_rsp.response aux=0xa data=0xa5b4fee7] but observed [dp_rd_rsp.response aux=0xa data=0xfee70000]
+        dp_rd_rsp[11] value: predicted [dp_rd_rsp.response aux=0xb data=0xfdbd7e7f] but observed [dp_rd_rsp.response aux=0xb data=0x7e7f0000]
+        dp_rd_rsp[12] value: predicted [dp_rd_rsp.response aux=0xc data=0xb5b4feef] but observed [dp_rd_rsp.response aux=0xc data=0xfeef0000]
   wb_port                      [exact     ]  PASS
       scope=wb_port  strategy=exact  status=pass  matched=38/38  (38 output transaction(s) matched)
-  cmd_gen (support)            [sva       ]  FAIL
-      SVA fired: a_PROTO_002 x38, a_TIMING_004 x38, a_TIMING_011 x1
-      a_PROTO_002 fired 38x (assertion bound to cmd_gen, not a judged stage)
-      a_TIMING_004 fired 38x (assertion bound to cmd_gen, not a judged stage)
-      a_TIMING_011 fired 1x (assertion bound to cmd_gen, not a judged stage)
 ==================================================================
 
   path verdict : FAIL

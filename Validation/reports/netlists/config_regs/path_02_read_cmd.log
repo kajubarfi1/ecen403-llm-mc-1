@@ -7,11 +7,10 @@ Path    : path_02_read_cmd  [composed]
 Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
 Window  : 400 cycles settle after driver
 Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant); cmd_gen(exact)
-    ssh connect attempt 1 failed (SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer); retrying in 11s
 
-Running: xrun ... -top chain_harness  (50 file(s))
+Running: xrun ... -top chain_harness  (53 file(s))
   log -> Validation/reports/netlists/config_regs/path_02_read_cmd_sim.log
-366 transaction(s)
+369 transaction(s)
     cfg_refresh.reset        1
     cfg_timing.reset         1
     cq_deq.dequeue           19
@@ -35,6 +34,8 @@ Running: xrun ... -top chain_harness  (50 file(s))
     dp_wr.reset              1
     refresh_ack.ack          1
     refresh_ack.reset        1
+    refresh_level.reset      1
+    refresh_level.state      2
     refresh_req.request      1
     refresh_req.reset        1
     req.request              19
@@ -50,7 +51,7 @@ Running: xrun ... -top chain_harness  (50 file(s))
     wb_rsp.read_data         19
     wb_rsp.reset             1
   time span: 0 .. 4374000
-wrote 366 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/config_regs/path_02_read_cmd_observed.jsonl
+wrote 369 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/config_regs/path_02_read_cmd_observed.jsonl
 
 ==================================================================
   wb_port                      [exact     ]  PASS
@@ -58,29 +59,10 @@ wrote 366 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/re
   addr_decoder                 [exact     ]  PASS
       scope=addr_decoder  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)
   cmd_queue+scheduler          [invariant ]  PASS
-      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (366 transactions, no rule broken)
+      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (369 transactions, no rule broken)
   cmd_gen                      [exact     ]  PASS
       scope=cmd_gen  strategy=exact  status=pass  matched=50/50  (50 output transaction(s) matched)
 ==================================================================
 
   path verdict : PASS
   report -> Validation/reports/netlists/config_regs/path_02_read_cmd_report.json
-Exception (client): Error reading SSH protocol banner[Errno 54] Connection reset by peer
-Traceback (most recent call last):
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2363, in _check_banner
-    buf = self.packetizer.readline(timeout)
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 395, in readline
-    buf += self._read_timeout(timeout)
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 663, in _read_timeout
-    x = self.__socket.recv(128)
-ConnectionResetError: [Errno 54] Connection reset by peer
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2179, in run
-    self._check_banner()
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2367, in _check_banner
-    raise SSHException(
-paramiko.ssh_exception.SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer
-

@@ -4,7 +4,7 @@
 //
 // Interface : sched_in   (Scheduler decisions driven into cmd_gen. This is the stimulus surface for the timing scope: what a sequence drives in order to produce a DDR command stream on ddr_cmd, which the assertions and coverage then observe.)
 // Block     : cmd_gen
-// Manifest  : runs/20261015-123308-llmmc_microarchitectures/drop/PHASE3RTL/cmd_gen_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

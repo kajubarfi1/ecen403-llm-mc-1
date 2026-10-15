@@ -132,6 +132,19 @@ the RTL's port shapes so the harness, monitors and assertions bind
 unchanged. `tools/run_netlists.py` runs every block and writes
 `reports/netlists/summary.json`.
 
+Two attributions keep that verdict honest (2026-10-15). A pair that
+fails on a stage that is not the netlist's block, exactly as the RTL-only
+run of the same path fails, is `RTL-FAIL`: the RTL's defect carried into
+the harness, not evidence about the netlist, and it does not count
+against the block. And provenance is per block: a netlist is evidence
+about its own block's RTL, so it is `STALE` only when that block's design
+id differs from what it was cut from (`NETLISTS.json` per-block
+`design_id`, or `--built-from-rev` from git history), whatever the other
+blocks did. Current record (drop `efece348d04e`): all eleven netlists
+pass every path the RTL passes; data_path's netlist reproduces the RTL's
+read-capture defect (a correct netlist of defective RTL); refresh_ctrl's
+is stale (RTL changed after the build).
+
 Current (netlists built from drop 4b86c7cd3705, judged against
 dab971c2aab9, 2026-10-14):
 

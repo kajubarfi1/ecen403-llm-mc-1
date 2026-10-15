@@ -7,25 +7,15 @@ Path    : path_20_refresh_preempt  [invariant]
 Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
 Window  : 6000 cycles settle after driver
 Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant); refresh_ctrl(autonomous); cmd_gen(exact)
+    ssh connect attempt 1 failed (SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer); retrying in 8s
 
-Running: xrun ... -top chain_harness  (50 file(s))
+Running: xrun ... -top chain_harness  (53 file(s))
   log -> Validation/reports/netlists/scheduler/path_20_refresh_preempt_sim.log
-
-  EMBEDDED RTL ASSERTIONS FIRED (5059 total) — the design's own checks disagree with its behavior:
-    illegal bin: cp_trc_spacing 962x
-    illegal bin: cp_trrd_spacing 962x
-    illegal bin: cp_tfaw_spacing 962x
-    a_TIMING_004             962x
-    a_PROTO_002              962x
-    a_TIMING_005             79x
-    p_wr_no_overflow         76x
-    illegal bin: cp_trfc_spacing 47x
-    a_TIMING_011             47x
-17504 transaction(s)
+11069 transaction(s)
     cfg_refresh.reset        1
-    cfg_refresh.update       2
+    cfg_refresh.update       1
     cfg_timing.reset         1
-    cq_deq.dequeue           599
+    cq_deq.dequeue           600
     cq_deq.reset             1
     cq_enq.enqueue           600
     cq_enq.reset             1
@@ -33,64 +23,71 @@ Running: xrun ... -top chain_harness  (50 file(s))
     csr.write                2
     csr_rsp.reset            1
     csr_rsp.write_ack        2
-    csr_sts.event            63
     csr_sts.reset            1
     csr_sts_level.reset      1
-    csr_sts_level.state      96
-    ddr_cmd.command          4005
+    csr_sts_level.state      44
+    ddr_cmd.command          1840
     ddr_cmd.reset            1
     ddr_rd_beat.reset        1
-    ddr_wr_beat.beat         1040
+    ddr_wr_beat.beat         1200
     ddr_wr_beat.reset        1
     dp_cmd.reset             1
-    dp_cmd.write             599
+    dp_cmd.write             600
     dp_rd_rsp.reset          1
     dp_wr.reset              1
-    dp_wr.write              524
-    refresh_ack.ack          94
+    dp_wr.write              600
+    refresh_ack.ack          22
     refresh_ack.reset        1
-    refresh_req.request      47
+    refresh_level.reset      1
+    refresh_level.state      44
+    refresh_req.request      11
     refresh_req.reset        1
     req.request              600
     req.reset                1
-    sched_cmd.command        4005
+    sched_cmd.command        1840
     sched_cmd.reset          1
-    sched_deq.grant          599
+    sched_deq.grant          600
     sched_deq.reset          1
-    sched_in.command         4005
+    sched_in.command         1840
     sched_in.reset           1
     wb.reset                 1
     wb.write                 600
     wb_rsp.reset             1
-  time span: 0 .. 77604000
-wrote 17504 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/scheduler/path_20_refresh_preempt_observed.jsonl
+  time span: 0 .. 59043000
+wrote 11069 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/scheduler/path_20_refresh_preempt_observed.jsonl
 
 ==================================================================
   wb_port                      [exact     ]  PASS
       scope=wb_port  strategy=exact  status=pass  matched=600/600  (600 output transaction(s) matched)
   addr_decoder                 [exact     ]  PASS
       scope=addr_decoder  strategy=exact  status=pass  matched=600/600  (600 output transaction(s) matched)
-  cmd_queue+scheduler          [invariant ]  FAIL
-      scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=964
-        PROTO_002 (double_activate): ACTIVATE to bank 4 row 25546 while row 25546 already active @ [sched_cmd.command aux=0x3 bank=0x4 col=0x50 ro
-        PROTO_002 (double_activate): ACTIVATE to bank 4 row 25546 while row 25546 already active @ [sched_cmd.command aux=0x3 bank=0x4 col=0x50 ro
-        PROTO_002 (double_activate): ACTIVATE to bank 7 row 15215 while row 15215 already active @ [sched_cmd.command aux=0x2 bank=0x7 col=0xa0 ro
-        PROTO_002 (double_activate): ACTIVATE to bank 5 row 27159 while row 27159 already active @ [sched_cmd.command aux=0x6 bank=0x5 col=0x330 r
-        PROTO_002 (double_activate): ACTIVATE to bank 5 row 27159 while row 27159 already active @ [sched_cmd.command aux=0x6 bank=0x5 col=0x330 r
-        PROTO_002 (double_activate): ACTIVATE to bank 1 row 374 while row 374 already active @ [sched_cmd.command aux=0x3 bank=0x1 col=0xe8 row=0x
+  cmd_queue+scheduler          [invariant ]  PASS
+      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (11069 transactions, no rule broken)
   refresh_ctrl                 [autonomous]  SVA-OWNED
-  cmd_gen                      [exact     ]  FAIL
-      scope=cmd_gen  strategy=exact  status=pass  matched=4005/4005  (4005 output transaction(s) matched)  SVA fired: a_PROTO_
-      a_PROTO_002 fired 962x (assertion bound to cmd_gen)
-      a_TIMING_004 fired 962x (assertion bound to cmd_gen)
-      a_TIMING_005 fired 79x (assertion bound to cmd_gen)
-      a_TIMING_011 fired 47x (assertion bound to cmd_gen)
-  (path-level)                 [invariant ]  FAIL
-      scope=path_20_refresh_preempt  strategy=invariant  status=fail  violations=2
-      scope=path_20_refresh_preempt  strategy=invariant  status=fail  violations=2
-        REF_002: REFRESH issued while banks [6] are still active @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]
-        SCHED_001: 1 enqueued request(s) never issued as CAS commands @ [cq_enq.enqueue bank=0x6 col=0xe0 row=0x4a70 we=0x1]
+  cmd_gen                      [exact     ]  PASS
+      scope=cmd_gen  strategy=exact  status=pass  matched=1840/1840  (1840 output transaction(s) matched)
+  (path-level)                 [invariant ]  PASS
+      scope=path_20_refresh_preempt  strategy=invariant  status=pass  (11069 transactions, no rule broken)
 ==================================================================
 
-  path verdict : FAIL
+  path verdict : PASS
   report -> Validation/reports/netlists/scheduler/path_20_refresh_preempt_report.json
+Exception (client): Error reading SSH protocol banner[Errno 54] Connection reset by peer
+Traceback (most recent call last):
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2363, in _check_banner
+    buf = self.packetizer.readline(timeout)
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 395, in readline
+    buf += self._read_timeout(timeout)
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 663, in _read_timeout
+    x = self.__socket.recv(128)
+ConnectionResetError: [Errno 54] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2179, in run
+    self._check_banner()
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2367, in _check_banner
+    raise SSHException(
+paramiko.ssh_exception.SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer
+
