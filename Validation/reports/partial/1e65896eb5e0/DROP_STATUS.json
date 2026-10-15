@@ -1,0 +1,114 @@
+{
+  "$schema": "validation-drop-status/1",
+  "drop": "1e65896eb5e0",
+  "partial": true,
+  "blocks_present": [
+    "addr_decoder",
+    "bank_tracker",
+    "calibration",
+    "config_regs",
+    "init_fsm",
+    "refresh_ctrl",
+    "wb_port"
+  ],
+  "blocks_absent": [
+    "cmd_gen",
+    "cmd_queue",
+    "data_path",
+    "scheduler"
+  ],
+  "inconsistent_edges": [],
+  "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "foreign_spec_blocks": {},
+  "paths_run": [
+    "path_08_init_to_cal",
+    "path_09_init_to_refresh",
+    "path_14_status_init",
+    "path_15_status_cal",
+    "path_16_status_refresh",
+    "path_17_full_boot",
+    "path_21_wb_port_standalone",
+    "path_22_csr_standalone"
+  ],
+  "paths_blocked": {
+    "path_01_write_cmd": [
+      "cmd_gen",
+      "cmd_queue",
+      "data_path",
+      "scheduler"
+    ],
+    "path_02_read_cmd": [
+      "cmd_gen",
+      "cmd_queue",
+      "data_path",
+      "scheduler"
+    ],
+    "path_03_read_return": [
+      "cmd_gen",
+      "cmd_queue",
+      "data_path",
+      "scheduler"
+    ],
+    "path_04_scheduler_bank_loop": [
+      "cmd_gen",
+      "cmd_queue",
+      "data_path",
+      "scheduler"
+    ],
+    "path_05_scheduler_refresh_loop": [
+      "cmd_gen",
+      "cmd_queue",
+      "data_path",
+      "scheduler"
+    ],
+    "path_06_scheduler_dequeue": [
+      "cmd_gen",
+      "cmd_queue",
+      "data_path",
+      "scheduler"
+    ],
+    "path_07_backpressure": [
+      "cmd_gen",
+      "cmd_queue",
+      "data_path",
+      "scheduler"
+    ],
+    "path_10_csr_to_timing": [
+      "cmd_gen",
+      "cmd_queue",
+      "data_path",
+      "scheduler"
+    ],
+    "path_12_csr_timing_to_scheduling": [
+      "cmd_gen",
+      "cmd_queue",
+      "data_path",
+      "scheduler"
+    ],
+    "path_13_csr_refresh_to_scheduling": [
+      "cmd_gen",
+      "cmd_queue",
+      "data_path",
+      "scheduler"
+    ],
+    "path_18_full_write": [
+      "cmd_gen",
+      "cmd_queue",
+      "data_path",
+      "scheduler"
+    ],
+    "path_19_row_conflict": [
+      "cmd_gen",
+      "cmd_queue",
+      "data_path",
+      "scheduler"
+    ],
+    "path_20_refresh_preempt": [
+      "cmd_gen",
+      "cmd_queue",
+      "data_path",
+      "scheduler"
+    ]
+  },
+  "note": "A blocked path is not a failure and not a pass: it waits for the drop that brings its blocks or fixes the edge it crosses. Nothing was substituted."
+}

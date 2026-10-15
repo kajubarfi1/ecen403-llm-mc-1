@@ -1,0 +1,147 @@
+{
+  "$schema": "validation-retry-instructions/1",
+  "status": "PASS",
+  "pipeline": "validation",
+  "drop": "dc811936c7f1",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "spec_id": "f7c16e452e8d9d23",
+  "generated_utc": "2026-10-15T17:35:10.726740Z",
+  "failed_modules": [],
+  "retry_instructions": {},
+  "resolved_since_previous_drop": [
+    {
+      "schema": "validation-findings/2",
+      "id": "refresh_ctrl/REF_004",
+      "kind": "rtl_defect",
+      "check_id": "REF_004",
+      "taxonomy_id": "REF_004",
+      "owner_module": "refresh_ctrl",
+      "severity": "major",
+      "title": "refresh_ctrl: REF_004",
+      "paths": [
+        "path_09_init_to_refresh"
+      ],
+      "status": "resolved",
+      "resolved_in": "dc811936c7f1",
+      "last_seen": "1e65896eb5e0",
+      "first_seen": "1e65896eb5e0",
+      "note": "open in drop 1e65896eb5e0, not raised by drop dc811936c7f1"
+    }
+  ],
+  "requires_human_review": false,
+  "source": "Validation/findings/emit_findings.py -> retry_adapter.py",
+  "drop_status": {
+    "$schema": "validation-drop-status/1",
+    "drop": "dc811936c7f1",
+    "partial": true,
+    "blocks_present": [
+      "addr_decoder",
+      "bank_tracker",
+      "calibration",
+      "config_regs",
+      "init_fsm",
+      "refresh_ctrl",
+      "wb_port"
+    ],
+    "blocks_absent": [
+      "cmd_gen",
+      "cmd_queue",
+      "data_path",
+      "scheduler"
+    ],
+    "inconsistent_edges": [],
+    "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "foreign_spec_blocks": {},
+    "paths_run": [
+      "path_08_init_to_cal",
+      "path_09_init_to_refresh",
+      "path_14_status_init",
+      "path_15_status_cal",
+      "path_16_status_refresh",
+      "path_17_full_boot",
+      "path_21_wb_port_standalone",
+      "path_22_csr_standalone"
+    ],
+    "paths_blocked": {
+      "path_01_write_cmd": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_02_read_cmd": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_03_read_return": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_04_scheduler_bank_loop": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_05_scheduler_refresh_loop": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_06_scheduler_dequeue": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_07_backpressure": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_10_csr_to_timing": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_12_csr_timing_to_scheduling": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_13_csr_refresh_to_scheduling": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_18_full_write": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_19_row_conflict": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ],
+      "path_20_refresh_preempt": [
+        "cmd_gen",
+        "cmd_queue",
+        "data_path",
+        "scheduler"
+      ]
+    },
+    "note": "A blocked path is not a failure and not a pass: it waits for the drop that brings its blocks or fixes the edge it crosses. Nothing was substituted."
+  }
+}

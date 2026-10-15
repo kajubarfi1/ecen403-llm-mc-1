@@ -1,0 +1,289 @@
+{
+  "schema": "validation-findings/2",
+  "drop": "a82f2070de32",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "spec_id": "f7c16e452e8d9d23",
+  "generated_utc": "2026-10-15T17:42:32.612972Z",
+  "reports": "Validation/reports/paths",
+  "finding_count": 4,
+  "findings": [
+    {
+      "schema": "validation-findings/2",
+      "id": "formal/scheduler/PROTO_001",
+      "kind": "rtl_defect",
+      "check_id": "PROTO_001",
+      "taxonomy_id": "PROTO_001",
+      "detectors": [
+        "formal:jaspergold"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "READ issued to a bank one cycle after that bank was PRECHARGEd (no ACTIVATE between)",
+      "requirement": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+      "spec_ref": null,
+      "expected": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+      "actual": "PRE b=1 at cycle 183, RD b=1 at cycle 184.",
+      "detector": "formal:jaspergold",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "cmd_valid/cmd_type/cmd_bank"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "signal": "bank_rd_allowed"
+        }
+      ],
+      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 183 PRE bank 1 (A10=0), cycle 184 RD bank 1 col 0. The generated PROTO_001 tracker (row-open state from the observed ACT/PRE stream) shows bank 1 closed when the READ is issued. Never observed in simulation (no path stimulus reaches this interleaving); the scheduler or its bank_tracker gating lets a CAS follow its own precharge. Likely the same root as the open scheduler re-grant defect (commands are also held for 2-3 consecutive cycles in the trace, i.e. re-issued). [found on drop 1fea117; awaiting formal re-prove on a82f2070de32]",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+      },
+      "drop": {
+        "git_head": "a82f2070de32",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "1fea117",
+      "last_seen": "a82f2070de32",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/REF_001",
+      "kind": "rtl_defect",
+      "check_id": "REF_001",
+      "taxonomy_id": "REF_001",
+      "detectors": [
+        "invariant:scheduler:refresh_starve_flag",
+        "twin:scheduler",
+        "invariant:(path-level):refresh_starvation_flag",
+        "twin:path_05_scheduler_refresh_loop"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler",
+        "refresh_ctrl"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "scheduler: REF_001",
+      "requirement": "Refresh postpone count exceeded max_postpone_count (spec: controller_architecture.refresh_policy.max_postpone_count). Judged on refresh_level.state, the controller's own levels emitted on every change: a violation when pending > max_postpone_count, or when starve = 1. refresh_req carries only the rising edge of ref_required and its pending field is the count at that edge; it must NOT be used to judge this rule. A count equal to max_postpone_count is legal (the design saturates there).",
+      "spec_ref": "failure_taxonomy.categories[REF_001]",
+      "expected": "Refresh postpone count exceeded max_postpone_count (spec: controller_architecture.refresh_policy.max_postpone_count). Judged on refresh_level.state, the controller's own levels emitted on every change: a violation when pending > max_postpone_count, or when starve = 1. refresh_req carries only the rising edge of ref_required and its pending field is the count at that edge; it must NOT be used to judge this rule. A count equal to max_postpone_count is legal (the design saturates there).",
+      "actual": "starve flag asserted with pending count 8",
+      "detector": "invariant:scheduler:refresh_starve_flag",
+      "anchor": [
+        {
+          "file": "runs/allphase_loop/drop/PHASE3RTL/scheduler.sv",
+          "line": 264,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= CMD_NOP;"
+        },
+        {
+          "file": "runs/allphase_loop/drop/PHASE3RTL/scheduler.sv",
+          "line": 275,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= sel_type;"
+        },
+        {
+          "file": "runs/allphase_loop/drop/PHASE3RTL/scheduler.sv",
+          "line": 290,
+          "signal": "cmd_bank",
+          "text": "cmd_bank <= sel_bank;"
+        },
+        {
+          "file": "runs/allphase_loop/drop/PHASE3RTL/scheduler.sv",
+          "line": 296,
+          "signal": "cmd_row",
+          "text": "cmd_row  <= q_row[sel_idx];"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_05_scheduler_refresh_loop"
+      ],
+      "occurrences": 52,
+      "repro": {
+        "path": "path_05_scheduler_refresh_loop",
+        "command": "python3 Validation/tools/run_path.py --path path_05_scheduler_refresh_loop",
+        "sequence": "Validation/sequences/generated/path_05_scheduler_refresh_loop_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_05_scheduler_refresh_loop",
+        "log": "Validation/reports/paths/path_05_scheduler_refresh_loop_sim.log",
+        "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]"
+        }
+      },
+      "drop": {
+        "git_head": "a82f2070de32",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "runs/allphase_loop/drop/PHASE3RTL/scheduler.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "a82f2070de32",
+      "last_seen": "a82f2070de32",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/SCHED_003",
+      "kind": "rtl_defect",
+      "check_id": "SCHED_003",
+      "taxonomy_id": "SCHED_003",
+      "detectors": [
+        "invariant:scheduler:refresh_never_serviced",
+        "twin:scheduler",
+        "invariant:(path-level):refresh_never_serviced",
+        "twin:path_05_scheduler_refresh_loop",
+        "invariant:(path-level):SCHED_003",
+        "twin:path_20_refresh_preempt"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "scheduler: SCHED_003",
+      "requirement": "A refresh request must be serviced: once refresh_req.request has been seen, at least one REFRESH command must follow before the end of the trace. Judged at final(): a violation when a request was seen and NO REFRESH was ever issued. The level stream refresh_level.state (pending count) is NOT a request counter for this rule: the count rises on every tREFI tick and the trace may end with refreshes legitimately pending inside their postpone budget, so a non-zero pending count at the end of the trace is not a violation (REF_001 owns the budget). Count requests only on refresh_req.request; count service only on REFRESH commands.",
+      "spec_ref": "failure_taxonomy.categories[SCHED_003]",
+      "expected": "A refresh request must be serviced: once refresh_req.request has been seen, at least one REFRESH command must follow before the end of the trace. Judged at final(): a violation when a request was seen and NO REFRESH was ever issued. The level stream refresh_level.state (pending count) is NOT a request counter for this rule: the count rises on every tREFI tick and the trace may end with refreshes legitimately pending inside their postpone budget, so a non-zero pending count at the end of the trace is not a violation (REF_001 owns the budget). Count requests only on refresh_req.request; count service only on REFRESH commands.",
+      "actual": "refresh request was seen but no REFRESH command was ever issued",
+      "detector": "invariant:scheduler:refresh_never_serviced",
+      "anchor": [
+        {
+          "file": "runs/allphase_loop/drop/PHASE3RTL/scheduler.sv",
+          "line": 264,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= CMD_NOP;"
+        },
+        {
+          "file": "runs/allphase_loop/drop/PHASE3RTL/scheduler.sv",
+          "line": 275,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= sel_type;"
+        },
+        {
+          "file": "runs/allphase_loop/drop/PHASE3RTL/scheduler.sv",
+          "line": 290,
+          "signal": "cmd_bank",
+          "text": "cmd_bank <= sel_bank;"
+        },
+        {
+          "file": "runs/allphase_loop/drop/PHASE3RTL/scheduler.sv",
+          "line": 296,
+          "signal": "cmd_row",
+          "text": "cmd_row  <= q_row[sel_idx];"
+        }
+      ],
+      "mechanism": null,
+      "paths": [
+        "path_05_scheduler_refresh_loop",
+        "path_13_csr_refresh_to_scheduling",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 8,
+      "repro": {
+        "path": "path_05_scheduler_refresh_loop",
+        "command": "python3 Validation/tools/run_path.py --path path_05_scheduler_refresh_loop",
+        "sequence": "Validation/sequences/generated/path_05_scheduler_refresh_loop_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_05_scheduler_refresh_loop",
+        "log": "Validation/reports/paths/path_05_scheduler_refresh_loop_sim.log",
+        "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "SCHED_003 (refresh_never_serviced): refresh request was seen but no REFRESH command was ever issued @ [refresh_req.request pending=0x1 starve=0x0 urgent=0x0]"
+        }
+      },
+      "drop": {
+        "git_head": "a82f2070de32",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "runs/allphase_loop/drop/PHASE3RTL/scheduler.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "a82f2070de32",
+      "last_seen": "a82f2070de32",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "formal/scheduler/TIMING_008",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_008",
+      "taxonomy_id": "TIMING_008",
+      "detectors": [
+        "formal:jaspergold"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "PRECHARGE issued one cycle after a WRITE to the same bank (tWR violated; write data lost)",
+      "requirement": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+      "spec_ref": null,
+      "expected": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+      "actual": "WR b=4 at cycle 173, PRE b=4 at cycle 174.",
+      "detector": "formal:jaspergold",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "signal": "bank_pre_allowed / ctr_wr"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "precharge decision"
+        }
+      ],
+      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 173 WR bank 4, cycle 174 PRE bank 4. tWR = 15 ns = 3 controller cycles, so 2 cycles must separate the last write beat from the precharge. Not observed in simulation. bank_tracker's write-recovery timer (cfg_tWR_nCK) does not gate bank_pre_allowed for the cycle after a write, or the scheduler ignores it on the row-conflict path. [found on drop 1fea117; awaiting formal re-prove on a82f2070de32]",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+      },
+      "drop": {
+        "git_head": "a82f2070de32",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "1fea117",
+      "last_seen": "a82f2070de32",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
+      ]
+    }
+  ],
+  "resolved": []
+}

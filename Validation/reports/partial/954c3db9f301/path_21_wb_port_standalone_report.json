@@ -1,0 +1,56 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_21_wb_port_standalone",
+  "strategy": "exact",
+  "verdict": "pass",
+  "timestamp": "2026-10-15T12:28:35.930660",
+  "blocks": [
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_21_wb_port_standalone_seed1.json",
+  "stimulus_generator": "random",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "954c3db9f301",
+    "drop_id": "954c3db9f301",
+    "design_id": "2211c9a0da97",
+    "blocks_used": [
+      "wb_port"
+    ],
+    "validated_at": "6f65967",
+    "frontend_commits": {
+      "wb_port": "6f659675f03286f6d19f4946500c8ae93de09850"
+    },
+    "roots": [
+      "runs/phase12_loop/drop"
+    ],
+    "blocks": {
+      "wb_port": {
+        "rtl": "runs/phase12_loop/drop/PHASE1RTL/wb_port.sv",
+        "manifest": "runs/phase12_loop/drop/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/phase12_loop/drop/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "pass",
+      "summary": "scope=wb_port  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    }
+  ],
+  "log": "Validation/reports/partial/954c3db9f301/path_21_wb_port_standalone_sim.log",
+  "observed_trace": "Validation/reports/partial/954c3db9f301/path_21_wb_port_standalone_observed.jsonl"
+}

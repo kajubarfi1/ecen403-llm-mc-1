@@ -5,10 +5,85 @@
   "drop": "dab971c2aab9",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "spec_id": "f7c16e452e8d9d23",
-  "generated_utc": "2026-10-15T17:00:23.343911Z",
+  "generated_utc": "2026-10-15T17:49:32.504550Z",
   "failed_modules": [],
   "retry_instructions": {},
-  "resolved_since_previous_drop": [],
+  "resolved_since_previous_drop": [
+    {
+      "schema": "validation-findings/2",
+      "id": "formal/scheduler/PROTO_001",
+      "kind": "rtl_defect",
+      "check_id": "PROTO_001",
+      "taxonomy_id": "PROTO_001",
+      "owner_module": "scheduler",
+      "severity": "critical",
+      "title": "READ issued to a bank one cycle after that bank was PRECHARGEd (no ACTIVATE between)",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "status": "resolved",
+      "resolved_in": "dab971c2aab9",
+      "last_seen": "a82f2070de32",
+      "first_seen": "1fea117",
+      "note": "open in drop a82f2070de32, not raised by drop dab971c2aab9"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/REF_001",
+      "kind": "rtl_defect",
+      "check_id": "REF_001",
+      "taxonomy_id": "REF_001",
+      "owner_module": "scheduler",
+      "severity": "critical",
+      "title": "scheduler: REF_001",
+      "paths": [
+        "path_05_scheduler_refresh_loop"
+      ],
+      "status": "resolved",
+      "resolved_in": "dab971c2aab9",
+      "last_seen": "a82f2070de32",
+      "first_seen": "a82f2070de32",
+      "note": "open in drop a82f2070de32, not raised by drop dab971c2aab9"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/SCHED_003",
+      "kind": "rtl_defect",
+      "check_id": "SCHED_003",
+      "taxonomy_id": "SCHED_003",
+      "owner_module": "scheduler",
+      "severity": "critical",
+      "title": "scheduler: SCHED_003",
+      "paths": [
+        "path_05_scheduler_refresh_loop",
+        "path_13_csr_refresh_to_scheduling",
+        "path_20_refresh_preempt"
+      ],
+      "status": "resolved",
+      "resolved_in": "dab971c2aab9",
+      "last_seen": "a82f2070de32",
+      "first_seen": "a82f2070de32",
+      "note": "open in drop a82f2070de32, not raised by drop dab971c2aab9"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "formal/scheduler/TIMING_008",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_008",
+      "taxonomy_id": "TIMING_008",
+      "owner_module": "scheduler",
+      "severity": "critical",
+      "title": "PRECHARGE issued one cycle after a WRITE to the same bank (tWR violated; write data lost)",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "status": "resolved",
+      "resolved_in": "dab971c2aab9",
+      "last_seen": "a82f2070de32",
+      "first_seen": "1fea117",
+      "note": "open in drop a82f2070de32, not raised by drop dab971c2aab9"
+    }
+  ],
   "requires_human_review": false,
   "source": "Validation/findings/emit_findings.py -> retry_adapter.py"
 }

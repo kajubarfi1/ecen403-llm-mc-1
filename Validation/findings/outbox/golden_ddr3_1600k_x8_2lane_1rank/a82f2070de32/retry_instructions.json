@@ -1,0 +1,206 @@
+{
+  "$schema": "validation-retry-instructions/1",
+  "status": "FAIL",
+  "pipeline": "validation",
+  "drop": "a82f2070de32",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "spec_id": "f7c16e452e8d9d23",
+  "generated_utc": "2026-10-15T17:42:32.640817Z",
+  "failed_modules": [
+    "scheduler"
+  ],
+  "retry_instructions": {
+    "scheduler": {
+      "module": "scheduler",
+      "attempt": null,
+      "drop": "a82f2070de32",
+      "failed_checks": [
+        {
+          "id": "PROTO_001",
+          "name": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+          "pass": false,
+          "expected": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+          "actual": "PRE b=1 at cycle 183, RD b=1 at cycle 184.",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "signal": "cmd_valid/cmd_type/cmd_bank"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+              "signal": "bank_rd_allowed"
+            }
+          ],
+          "owner_candidates": [
+            "scheduler"
+          ],
+          "occurrences": 1,
+          "paths": [
+            "formal:chain_formal"
+          ],
+          "repro": {
+            "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+            "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+            "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+          },
+          "introduced_in": null,
+          "repair": null,
+          "fix": null,
+          "finding_id": "formal/scheduler/PROTO_001"
+        },
+        {
+          "id": "REF_001",
+          "name": "Refresh postpone count exceeded max_postpone_count (spec: controller_architecture.refresh_policy.max_postpone_count). Judged on refresh_level.state, the control",
+          "pass": false,
+          "expected": "Refresh postpone count exceeded max_postpone_count (spec: controller_architecture.refresh_policy.max_postpone_count). Judged on refresh_level.state, the controller's own levels emitted on every change: a violation when pending > max_postpone_count, or when starve = 1. refresh_req carries only the rising edge of ref_required and its pending field is the count at that edge; it must NOT be used to judge this rule. A count equal to max_postpone_count is legal (the design saturates there).",
+          "actual": "starve flag asserted with pending count 8",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": "failure_taxonomy.categories[REF_001]",
+          "anchor": [
+            {
+              "file": "runs/allphase_loop/drop/PHASE3RTL/scheduler.sv",
+              "line": 264,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= CMD_NOP;"
+            },
+            {
+              "file": "runs/allphase_loop/drop/PHASE3RTL/scheduler.sv",
+              "line": 275,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= sel_type;"
+            },
+            {
+              "file": "runs/allphase_loop/drop/PHASE3RTL/scheduler.sv",
+              "line": 290,
+              "signal": "cmd_bank",
+              "text": "cmd_bank <= sel_bank;"
+            }
+          ],
+          "owner_candidates": [
+            "scheduler",
+            "refresh_ctrl"
+          ],
+          "occurrences": 52,
+          "paths": [
+            "path_05_scheduler_refresh_loop"
+          ],
+          "repro": {
+            "path": "path_05_scheduler_refresh_loop",
+            "command": "python3 Validation/tools/run_path.py --path path_05_scheduler_refresh_loop",
+            "sequence": "Validation/sequences/generated/path_05_scheduler_refresh_loop_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_05_scheduler_refresh_loop",
+            "log": "Validation/reports/paths/path_05_scheduler_refresh_loop_sim.log",
+            "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "REF_001 (refresh_starve_flag): starve flag asserted with pending count 8 @ [refresh_level.state pending=0x8 required=0x1 starve=0x1 urgent=0x1]"
+            }
+          },
+          "introduced_in": null,
+          "repair": null,
+          "fix": null,
+          "finding_id": "scheduler/REF_001"
+        },
+        {
+          "id": "SCHED_003",
+          "name": "A refresh request must be serviced: once refresh_req.request has been seen, at least one REFRESH command must follow before the end of the trace. Judged at fina",
+          "pass": false,
+          "expected": "A refresh request must be serviced: once refresh_req.request has been seen, at least one REFRESH command must follow before the end of the trace. Judged at final(): a violation when a request was seen and NO REFRESH was ever issued. The level stream refresh_level.state (pending count) is NOT a request counter for this rule: the count rises on every tREFI tick and the trace may end with refreshes legitimately pending inside their postpone budget, so a non-zero pending count at the end of the trace is not a violation (REF_001 owns the budget). Count requests only on refresh_req.request; count service only on REFRESH commands.",
+          "actual": "refresh request was seen but no REFRESH command was ever issued",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": "failure_taxonomy.categories[SCHED_003]",
+          "anchor": [
+            {
+              "file": "runs/allphase_loop/drop/PHASE3RTL/scheduler.sv",
+              "line": 264,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= CMD_NOP;"
+            },
+            {
+              "file": "runs/allphase_loop/drop/PHASE3RTL/scheduler.sv",
+              "line": 275,
+              "signal": "cmd_type",
+              "text": "cmd_type  <= sel_type;"
+            },
+            {
+              "file": "runs/allphase_loop/drop/PHASE3RTL/scheduler.sv",
+              "line": 290,
+              "signal": "cmd_bank",
+              "text": "cmd_bank <= sel_bank;"
+            }
+          ],
+          "owner_candidates": [
+            "scheduler"
+          ],
+          "occurrences": 8,
+          "paths": [
+            "path_05_scheduler_refresh_loop",
+            "path_13_csr_refresh_to_scheduling",
+            "path_20_refresh_preempt"
+          ],
+          "repro": {
+            "path": "path_05_scheduler_refresh_loop",
+            "command": "python3 Validation/tools/run_path.py --path path_05_scheduler_refresh_loop",
+            "sequence": "Validation/sequences/generated/path_05_scheduler_refresh_loop_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_05_scheduler_refresh_loop",
+            "log": "Validation/reports/paths/path_05_scheduler_refresh_loop_sim.log",
+            "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "SCHED_003 (refresh_never_serviced): refresh request was seen but no REFRESH command was ever issued @ [refresh_req.request pending=0x1 starve=0x0 urgent=0x0]"
+            }
+          },
+          "introduced_in": null,
+          "repair": null,
+          "fix": null,
+          "finding_id": "scheduler/SCHED_003"
+        },
+        {
+          "id": "TIMING_008",
+          "name": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+          "pass": false,
+          "expected": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+          "actual": "WR b=4 at cycle 173, PRE b=4 at cycle 174.",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+              "signal": "bank_pre_allowed / ctr_wr"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+              "signal": "precharge decision"
+            }
+          ],
+          "owner_candidates": [
+            "scheduler"
+          ],
+          "occurrences": 1,
+          "paths": [
+            "formal:chain_formal"
+          ],
+          "repro": {
+            "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+            "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+            "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+          },
+          "introduced_in": null,
+          "repair": null,
+          "fix": null,
+          "finding_id": "formal/scheduler/TIMING_008"
+        }
+      ],
+      "message": "4 check(s) failed on drop a82f2070de32; 4 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+    }
+  },
+  "resolved_since_previous_drop": [],
+  "requires_human_review": false,
+  "source": "Validation/findings/emit_findings.py -> retry_adapter.py"
+}

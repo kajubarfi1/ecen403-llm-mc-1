@@ -1,0 +1,91 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_09_init_to_refresh",
+  "strategy": "invariant",
+  "verdict": "fail",
+  "timestamp": "2026-10-15T12:33:06.844418",
+  "blocks": [
+    "config_regs",
+    "init_fsm",
+    "refresh_ctrl"
+  ],
+  "sequence": null,
+  "stimulus_generator": null,
+  "autonomous": true,
+  "window_cycles": 180000,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "1e65896eb5e0",
+    "drop_id": "1e65896eb5e0",
+    "design_id": "4bebc8032a67",
+    "blocks_used": [
+      "config_regs",
+      "init_fsm",
+      "refresh_ctrl"
+    ],
+    "validated_at": "6f65967",
+    "frontend_commits": {
+      "config_regs": "6f659675f03286f6d19f4946500c8ae93de09850",
+      "init_fsm": "6f659675f03286f6d19f4946500c8ae93de09850",
+      "refresh_ctrl": "6f659675f03286f6d19f4946500c8ae93de09850"
+    },
+    "roots": [
+      "runs/phase12_loop/drop"
+    ],
+    "blocks": {
+      "config_regs": {
+        "rtl": "runs/phase12_loop/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/phase12_loop/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "init_fsm": {
+        "rtl": "runs/phase12_loop/drop/PHASE1RTL/init_fsm.sv",
+        "manifest": "runs/phase12_loop/drop/PHASE1RTL/init_fsm_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "refresh_ctrl": {
+        "rtl": "runs/phase12_loop/drop/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "runs/phase12_loop/drop/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/phase12_loop/drop/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "init_fsm",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "init_fsm",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
+    },
+    {
+      "stage": "refresh_ctrl",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "refresh_ctrl",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
+    },
+    {
+      "stage": "(path-level)",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_09_init_to_refresh_checker.py",
+      "scope": "path_09_init_to_refresh",
+      "verdict": "fail",
+      "summary": "scope=path_09_init_to_refresh  strategy=invariant  status=fail  violations=1",
+      "detail": [
+        "scope=path_09_init_to_refresh  strategy=invariant  status=fail  violations=1",
+        "  REF_004: No refresh request raised after init_done: controller cannot honour tREFI without requesting refresh @ [init_status.done fail=0x0 state=0xe]",
+        "  rules: REF_004=1"
+      ]
+    }
+  ],
+  "log": "Validation/reports/partial/1e65896eb5e0/path_09_init_to_refresh_sim.log",
+  "observed_trace": "Validation/reports/partial/1e65896eb5e0/path_09_init_to_refresh_observed.jsonl"
+}

@@ -158,7 +158,8 @@ def main() -> int:
     sva_files = [f for f in files if "_sva" in f]
     tag = "_abs" if args.stopat else ""
     rep = {"$schema": "validation-formal/1", "generated_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-           "tool": "JasperGold (Olympus)", "drop": head, "path": args.path, "blocks": blocks,
+           "tool": "JasperGold (Olympus)", "drop": head, "design_id": RD.design_id(),
+           "path": args.path, "blocks": blocks,
            "top": os.path.relpath(top, ROOT),
            "assertions_files": ["Validation/sva/generated/" + f for f in sva_files],
            "abstractions": [{"stopat": sig, "effect": "signal driven free; proofs remain sound, "

@@ -44,6 +44,15 @@ class TestStandaloneClosure(unittest.TestCase):
         full = CHG.block_closure(["wb_port"], imap)
         self.assertGreater(len(full), 1, "wb_port's ordinary closure pulls its neighbours")
 
+    def test_autonomous_path_takes_no_entry_even_when_a_stream_looks_drivable(self):
+        # path_09 on a Phase 1+2 drop: refresh_ack is fed by the absent
+        # scheduler, so it reads as an undriven request stream; the path
+        # declares a window and no stimulus, so it is autonomous regardless
+        import stimulus_select as SS
+        pdef = {"id": "p", "blocks": ["init_fsm", "refresh_ctrl"], "window_cycles": 1000}
+        self.assertIsNone(SS.entry_block(pdef, ["init_fsm", "refresh_ctrl"], {}, {}, {"connections": []}))
+        self.assertEqual(SS.entry_block(pdef, [], {}, {}, {"connections": []}, override="x"), "x")
+
     def test_every_cut_edge_of_the_standalone_paths_has_a_tie(self):
         imap = _map()
         ties = imap["standalone_ties"]
