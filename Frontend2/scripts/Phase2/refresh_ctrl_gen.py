@@ -155,9 +155,21 @@ module refresh_ctrl #(
     // ref_required/ref_urgent/ref_pending_cnt are combinational functions
     // of postpone_cnt -- urgent escalation compares against
     // cfg_urgent_threshold when the controller is in priority-preempt mode.
+    //
+    // eff_urgent_threshold clamps cfg_urgent_threshold to cfg_max_postpone.
+    // postpone_cnt saturates at cfg_max_postpone, so an unclamped threshold
+    // programmed above it can never be reached -- a host writing
+    // REFRESH_CONFIG with urgent_threshold > max_postpone would silently
+    // disable urgent-preempt even though cfg_ref_priority asks for it.
+    // Clamping keeps ref_urgent reachable under every CSR combination,
+    // legal or not. (Validation finding 2026-10-15: starvation-by-
+    // configuration under urgent_preempt.)
+    wire [3:0] eff_urgent_threshold = (cfg_urgent_threshold > cfg_max_postpone)
+                                     ? cfg_max_postpone : cfg_urgent_threshold;
+
     assign ref_required    = (|postpone_cnt) & init_done;
     assign ref_urgent      = ref_required
-                           & (postpone_cnt >= cfg_urgent_threshold)
+                           & (postpone_cnt >= eff_urgent_threshold)
                            & cfg_ref_priority;
     assign ref_pending_cnt = postpone_cnt[3:0];
 

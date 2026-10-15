@@ -1,0 +1,163 @@
+{
+  "schema": "validation-findings/2",
+  "drop": {
+    "drop_id": "dab971c2aab9",
+    "spec_id": null,
+    "git_head": null,
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+  },
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "generated_utc": "2026-10-15T17:49:29+00:00",
+  "producer": "backend",
+  "finding_count": 2,
+  "findings": [
+    {
+      "schema": "validation-findings/2",
+      "id": "ddr3_controller/TIMING/u_scheduler.cmd_row",
+      "kind": "timing_defect",
+      "check_id": "TIMING/u_scheduler.cmd_row",
+      "taxonomy_id": "TIMING_001",
+      "detectors": [
+        "sta:opensta:setup"
+      ],
+      "owner_module": "ddr3_controller",
+      "owner_candidates": [
+        "ddr3_controller"
+      ],
+      "severity": "critical",
+      "confidence": "observed",
+      "title": "ddr3_controller: does not close timing at 5.0 ns",
+      "requirement": "ddr3_controller must close timing at the clock period of 5.0 ns (200 MHz)",
+      "spec_ref": "clocking_model.controller_clock_period_ns",
+      "expected": "slack >= 0 ns at a 5.0 ns period",
+      "actual": "WNS -1.040 ns, TNS -26.240 ns, Fmax 165.56 MHz",
+      "detector": "sta:opensta:setup",
+      "anchor": [
+        {
+          "file": "bundles_top/ddr3_controller/ddr3_controller.sv",
+          "signal": "u_scheduler.cmd_row",
+          "bit": 4,
+          "role": "endpoint"
+        },
+        {
+          "file": "bundles_top/ddr3_controller/ddr3_controller.sv",
+          "signal": "u_cmd_queue.entry_bank",
+          "bit": 34,
+          "role": "startpoint"
+        }
+      ],
+      "mechanism": null,
+      "paths": [],
+      "occurrences": 1,
+      "suggested_fix": null,
+      "evidence": {
+        "worst_path": {
+          "startpoint": "u_cmd_queue.entry_bank[34]$_DFFE_PN0P_",
+          "startpoint_kind": "rising edge-triggered flip-flop clocked by core_clk",
+          "endpoint": "u_scheduler.cmd_row[4]$_DFFE_PN0P_",
+          "slack_ns": -1.04,
+          "logic_levels": 36,
+          "buffers": 36,
+          "arrival_ns": 6.92,
+          "required_ns": 5.87,
+          "path_group": "core_clk"
+        },
+        "wns_ns": -1.04,
+        "tns_ns": -26.24,
+        "failing_paths_reported": 1,
+        "spread": "many endpoints failing, not a single outlier"
+      },
+      "repro": {
+        "command": "pipeline_batch.py --bundle_dirs ..\\bundles_top\\ddr3_controller"
+      },
+      "drop": {
+        "drop_id": "dab971c2aab9",
+        "spec_id": null,
+        "git_head": null,
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "dab971c2aab9",
+      "last_seen": "dab971c2aab9",
+      "resolved_in": null,
+      "status": "open",
+      "generated_utc": "2026-10-15T17:19:14+00:00",
+      "related_manual_findings": []
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/TIMING/cmd_row",
+      "kind": "timing_defect",
+      "check_id": "TIMING/cmd_row",
+      "taxonomy_id": "TIMING_001",
+      "detectors": [
+        "sta:opensta:setup"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "observed",
+      "title": "scheduler: does not close timing at 5.0 ns",
+      "requirement": "scheduler must close timing at the clock period of 5.0 ns (200 MHz)",
+      "spec_ref": "clocking_model.controller_clock_period_ns",
+      "expected": "slack >= 0 ns at a 5.0 ns period",
+      "actual": "WNS -1.280 ns, TNS -36.770 ns, Fmax 159.24 MHz",
+      "detector": "sta:opensta:setup",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "cmd_row",
+          "bit": 10,
+          "role": "endpoint"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "bank_open_row",
+          "bit": 101,
+          "role": "startpoint"
+        }
+      ],
+      "mechanism": null,
+      "paths": [],
+      "occurrences": 2,
+      "suggested_fix": null,
+      "evidence": {
+        "observed_in": "scheduler",
+        "worst_path": {
+          "startpoint": "bank_open_row[101]",
+          "startpoint_kind": "input port clocked by core_clk",
+          "endpoint": "cmd_row[10]$_DFFE_PN0P_",
+          "slack_ns": -1.28,
+          "logic_levels": 34,
+          "buffers": 24,
+          "arrival_ns": 6.48,
+          "required_ns": 5.2,
+          "path_group": "core_clk"
+        },
+        "wns_ns": -1.28,
+        "tns_ns": -36.77,
+        "failing_paths_reported": 2,
+        "spread": "many endpoints failing, not a single outlier"
+      },
+      "repro": {
+        "command": "pipeline_batch.py --bundle_dirs ..\\bundles_frontend2\\scheduler"
+      },
+      "drop": {
+        "drop_id": "dab971c2aab9",
+        "spec_id": null,
+        "git_head": null,
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "dab971c2aab9",
+      "last_seen": "dab971c2aab9",
+      "resolved_in": null,
+      "status": "open",
+      "generated_utc": "2026-10-15T17:49:29+00:00",
+      "related_manual_findings": []
+    }
+  ],
+  "resolved": []
+}

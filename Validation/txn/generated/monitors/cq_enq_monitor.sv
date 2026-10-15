@@ -4,7 +4,7 @@
 //
 // Interface : cq_enq   (Request descriptors entering the command queue)
 // Block     : cmd_queue
-// Manifest  : Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json
+// Manifest  : runs/20261015-123308-llmmc_microarchitectures/drop/PHASE3RTL/cmd_queue_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

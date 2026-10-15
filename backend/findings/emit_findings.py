@@ -130,10 +130,19 @@ def split_signal(name: Optional[str]) -> Dict[str, Any]:
     if not name:
         return {}
     base = name.split("$")[0]
+    out: Dict[str, Any] = {}
+    # At full chip an endpoint is hierarchical (u_scheduler.cmd_row[4]): the instance
+    # says which block owns the logic, and only the tail is a signal in that block's
+    # RTL. Treating the whole string as a signal names something that exists nowhere.
+    if "." in base:
+        inst, base = base.rsplit(".", 1)
+        out["instance"] = inst
     m = re.match(r"^(.*?)\[(\d+)\]$", base)
     if m:
-        return {"signal": m.group(1), "bit": int(m.group(2))}
-    return {"signal": base}
+        out["signal"], out["bit"] = m.group(1), int(m.group(2))
+    else:
+        out["signal"] = base
+    return out
 
 
 def drop_key(drop: Dict[str, Any]) -> str:
@@ -147,24 +156,49 @@ def drop_key(drop: Dict[str, Any]) -> str:
     return drop.get("drop_id") or drop.get("git_head") or "nohead"
 
 
-def _anchor(rtl_path: Optional[str], end: Dict[str, Any],
-            start: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Validation's `anchor[]`: where in the drop to look. `role` is additive - a
-    consumer that ignores it still reads file and signal."""
-    if not rtl_path:
-        return []
-    out = [{"file": rtl_path}]
-    if end.get("signal"):
-        out[0] = {"file": rtl_path, **end, "role": "endpoint"}
-    if start.get("signal") and start.get("signal") != end.get("signal"):
-        out.append({"file": rtl_path, **start, "role": "startpoint"})
+def resolve_block(part: Dict[str, Any],
+                  block_paths: Optional[Dict[str, str]]) -> Optional[str]:
+    """The block an STA endpoint lives in, when it is hierarchical.
+
+    `u_scheduler` is the Frontend's instance convention, but a convention is a
+    hypothesis: we only accept the stripped name if the drop actually has a block by
+    that name, so a differently-named instance falls back rather than inventing an
+    owner that routes nowhere.
+    """
+    inst = part.get("instance")
+    if not inst or not block_paths:
+        return None
+    leaf = inst.rsplit(".", 1)[-1]
+    for cand in (leaf, leaf[2:] if leaf.startswith("u_") else leaf):
+        if cand in block_paths:
+            return cand
+    return None
+
+
+def _anchor2(end_file: Optional[str], end: Dict[str, Any],
+             start_file: Optional[str], start: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Validation's `anchor[]`: where in the drop to look.
+
+    The two ends can be in different files - at full chip the worst path routinely
+    crosses a block boundary - so each carries its own. `role`, `bit` and `instance`
+    are additive: a consumer reading only `file` and `signal` is unaffected.
+    """
+    out: List[Dict[str, Any]] = []
+    if end_file:
+        out.append({"file": end_file, **end, "role": "endpoint"} if end.get("signal")
+                   else {"file": end_file})
+    if start.get("signal") and (start.get("signal") != end.get("signal")
+                                or start_file != end_file):
+        if start_file:
+            out.append({"file": start_file, **start, "role": "startpoint"})
     return out
 
 
 def timing_finding(design: str, period_ns: float, parsed: Dict[str, Any],
                    rtl_path: Optional[str], repro: str, drop: Dict[str, Any],
                    mechanism: Optional[str] = None,
-                   suggested_fix: Optional[str] = None) -> Optional[Dict[str, Any]]:
+                   suggested_fix: Optional[str] = None,
+                   block_paths: Optional[Dict[str, str]] = None) -> Optional[Dict[str, Any]]:
     """One finding for a block that misses its clock target. None if it closed."""
     wns, paths = parsed.get("wns_ns"), parsed.get("paths") or []
     if wns is None or wns >= 0:
@@ -188,20 +222,31 @@ def timing_finding(design: str, period_ns: float, parsed: Dict[str, Any],
     end, start = split_signal(worst["endpoint"]) if worst else {},                  split_signal(worst["startpoint"]) if worst else {}
     signal = end.get("signal")
     check_id = f"TIMING/{signal}" if signal else "TIMING/unknown"
+
+    # At full chip the design is the top module, but the logic to change belongs to
+    # the block the endpoint sits in. Blaming the top names a module the Frontend's
+    # phase agents do not generate, so the finding routes nowhere. When the path
+    # crosses a boundary both ends are worth naming: the fix may be either side.
+    end_block = resolve_block(end, block_paths)
+    start_block = resolve_block(start, block_paths)
+    owner = end_block or design
+    candidates = [owner] + [b for b in (start_block,) if b and b != owner]
+    end_file = (block_paths or {}).get(end_block) or rtl_path
+    start_file = (block_paths or {}).get(start_block) or end_file
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     return {
         "schema": SCHEMA,
-        "id": f"{design}/{check_id}",
+        "id": f"{owner}/{check_id}",
         "kind": KIND_TIMING,                       # PENDING(1)
         "check_id": check_id,
         "taxonomy_id": "TIMING_001",
         "detectors": ["sta:opensta:setup"],
-        "owner_module": design,
-        "owner_candidates": [design],
+        "owner_module": owner,
+        "owner_candidates": candidates,
         "severity": SEVERITY_MISSED_TARGET,        # PENDING(2)
         "confidence": "observed",
-        "title": f"{design}: does not close timing at {period_ns} ns",
-        "requirement": f"{design} must close timing at the clock period of {period_ns} ns "
+        "title": f"{owner}: does not close timing at {period_ns} ns",
+        "requirement": f"{owner} must close timing at the clock period of {period_ns} ns "
                        f"({round(1000.0 / period_ns)} MHz)",
         "spec_ref": "clocking_model.controller_clock_period_ns",
         "expected": f"slack >= 0 ns at a {period_ns} ns period",
@@ -215,7 +260,7 @@ def timing_finding(design: str, period_ns: float, parsed: Dict[str, Any],
         # synthesis does not preserve one, and Validation does not expect it here.
         # Both ends of the critical path are given: the endpoint is the register that
         # misses, the startpoint is where its path begins, and a fix usually needs both.
-        "anchor": _anchor(rtl_path, end, start),
+        "anchor": _anchor2(end_file, end, start_file, start),
         "mechanism": mechanism,
         "paths": [],
         "occurrences": len(paths),
@@ -223,6 +268,7 @@ def timing_finding(design: str, period_ns: float, parsed: Dict[str, Any],
         # has one. Added here because it is the most actionable part of the record.
         "suggested_fix": suggested_fix,
         "evidence": {
+            "observed_in": design,
             "worst_path": worst,
             "wns_ns": wns, "tns_ns": tns,
             "failing_paths_reported": len(paths),

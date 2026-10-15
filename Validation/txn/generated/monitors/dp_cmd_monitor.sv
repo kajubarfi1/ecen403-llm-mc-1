@@ -4,7 +4,7 @@
 //
 // Interface : dp_cmd   (Data-movement commands driven into the data path: send a write burst or capture a read burst.)
 // Block     : data_path
-// Manifest  : Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json
+// Manifest  : runs/20261015-123308-llmmc_microarchitectures/drop/PHASE4RTL/data_path_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //
