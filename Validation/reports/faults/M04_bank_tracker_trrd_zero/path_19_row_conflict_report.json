@@ -2,8 +2,8 @@
   "$schema": "validation-path-run/1",
   "path": "path_19_row_conflict",
   "strategy": "invariant",
-  "verdict": "fail",
-  "timestamp": "2026-10-08T12:16:52.718908",
+  "verdict": "pass",
+  "timestamp": "2026-10-08T13:43:33.638180",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,8 +21,9 @@
   "window_cycles": 400,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "4ad4b5ad3f88",
-    "drop_id": "4ad4b5ad3f88",
+    "git_head": "37cdb7460477",
+    "drop_id": "37cdb7460477",
+    "design_id": "10eb4aced3dc",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -34,16 +35,16 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "608d29d",
+    "validated_at": "986fdb0",
     "frontend_commits": {
-      "addr_decoder": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "bank_tracker": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "cmd_gen": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "cmd_queue": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "addr_decoder": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "bank_tracker": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "cmd_gen": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "cmd_queue": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
       "config_regs": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "data_path": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "refresh_ctrl": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "scheduler": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "data_path": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "refresh_ctrl": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "scheduler": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
       "wb_port": "9c21084cdda21e528b57299e638eef2b79fef2ec"
     },
     "roots": [
@@ -104,41 +105,13 @@
   },
   "stages": [
     {
-      "stage": "cmd_gen (support)",
-      "kind": "sva",
-      "scope": "cmd_gen",
-      "model": null,
-      "verdict": "fail",
-      "summary": "SVA fired: a_PROTO_002 x38, a_TIMING_004 x38, a_TIMING_005 x9, a_TIMING_006 x18, a_TIMING_011 x1",
-      "detail": [
-        "a_PROTO_002 fired 38x (assertion bound to cmd_gen, not a judged stage)",
-        "a_TIMING_004 fired 38x (assertion bound to cmd_gen, not a judged stage)",
-        "a_TIMING_005 fired 9x (assertion bound to cmd_gen, not a judged stage)",
-        "a_TIMING_006 fired 18x (assertion bound to cmd_gen, not a judged stage)",
-        "a_TIMING_011 fired 1x (assertion bound to cmd_gen, not a judged stage)"
-      ]
-    },
-    {
       "stage": "(path-level)",
       "kind": "invariant",
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_19_row_conflict_checker.py",
       "scope": "path_19_row_conflict",
-      "verdict": "fail",
-      "summary": "scope=path_19_row_conflict  strategy=invariant  status=fail  violations=38",
-      "detail": [
-        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has row 5454 active @ [ddr_cmd.command addr=0x154e bank=0x6 cmd=0x3]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has row 5454 active @ [ddr_cmd.command addr=0x154e bank=0x6 cmd=0x3]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 5 which already has row 7922 active @ [ddr_cmd.command addr=0x1ef2 bank=0x5 cmd=0x3]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 5 which already has row 7922 active @ [ddr_cmd.command addr=0x1ef2 bank=0x5 cmd=0x3]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has row 25546 active @ [ddr_cmd.command addr=0x63ca bank=0x4 cmd=0x3]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has row 25546 active @ [ddr_cmd.command addr=0x63ca bank=0x4 cmd=0x3]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 3 which already has row 27152 active @ [ddr_cmd.command addr=0x6a10 bank=0x3 cmd=0x3]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 3 which already has row 27152 active @ [ddr_cmd.command addr=0x6a10 bank=0x3 cmd=0x3]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has row 11847 active @ [ddr_cmd.command addr=0x2e47 bank=0x6 cmd=0x3]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has row 11847 active @ [ddr_cmd.command addr=0x2e47 bank=0x6 cmd=0x3]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 5 which already has row 5666 active @ [ddr_cmd.command addr=0x1622 bank=0x5 cmd=0x3]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 5 which already has row 5666 active @ [ddr_cmd.command addr=0x1622 bank=0x5 cmd=0x3]"
-      ]
+      "verdict": "pass",
+      "summary": "scope=path_19_row_conflict  strategy=invariant  status=pass  (341 transactions, no rule broken)",
+      "detail": []
     }
   ],
   "log": "Validation/reports/faults/M04_bank_tracker_trrd_zero/path_19_row_conflict_sim.log",

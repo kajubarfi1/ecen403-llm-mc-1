@@ -3,7 +3,7 @@
   "path": "path_18_full_write",
   "strategy": "composed",
   "verdict": "fail",
-  "timestamp": "2026-10-08T12:17:14.088679",
+  "timestamp": "2026-10-08T13:43:51.164987",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,8 +21,9 @@
   "window_cycles": 400,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "78a3de87b2d2",
-    "drop_id": "78a3de87b2d2",
+    "git_head": "a9c9f7a31018",
+    "drop_id": "a9c9f7a31018",
+    "design_id": "c166c8c18f60",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -34,16 +35,16 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "608d29d",
+    "validated_at": "986fdb0",
     "frontend_commits": {
-      "addr_decoder": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "bank_tracker": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "cmd_gen": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "cmd_queue": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "addr_decoder": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "bank_tracker": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "cmd_gen": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "cmd_queue": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
       "config_regs": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "data_path": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "refresh_ctrl": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "scheduler": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "data_path": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "refresh_ctrl": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "scheduler": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
       "wb_port": "9c21084cdda21e528b57299e638eef2b79fef2ec"
     },
     "roots": [
@@ -126,36 +127,18 @@
       "kind": "invariant",
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
       "scope": "cmd_queue_scheduler",
-      "verdict": "fail",
-      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=35",
-      "detail": [
-        "  PROTO_002 (double_activate): ACTIVATE to bank 7 which already has active row @ [sched_cmd.command aux=0x4 bank=0x7 col=0xa0 row=0x7204 type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 7 which already has active row @ [sched_cmd.command aux=0x4 bank=0x7 col=0xa0 row=0x7204 type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has active row @ [sched_cmd.command aux=0x5 bank=0x4 col=0x1e0 row=0x1a2b type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has active row @ [sched_cmd.command aux=0x5 bank=0x4 col=0x1e0 row=0x1a2b type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 7 which already has active row @ [sched_cmd.command aux=0x6 bank=0x7 col=0xd8 row=0x5b6 type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 7 which already has active row @ [sched_cmd.command aux=0x6 bank=0x7 col=0xd8 row=0x5b6 type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has active row @ [sched_cmd.command aux=0x7 bank=0x4 col=0x338 row=0x6196 type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 4 which already has active row @ [sched_cmd.command aux=0x7 bank=0x4 col=0x338 row=0x6196 type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has active row @ [sched_cmd.command aux=0x8 bank=0x6 col=0x298 row=0x6c0f type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has active row @ [sched_cmd.command aux=0x8 bank=0x6 col=0x298 row=0x6c0f type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has active row @ [sched_cmd.command aux=0x9 bank=0x6 col=0x118 row=0x38c0 type=0x1 we=0x0]",
-        "  PROTO_002 (double_activate): ACTIVATE to bank 6 which already has active row @ [sched_cmd.command aux=0x9 bank=0x6 col=0x118 row=0x38c0 type=0x1 we=0x0]"
-      ]
+      "verdict": "pass",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (356 transactions, no rule broken)",
+      "detail": []
     },
     {
       "stage": "cmd_gen",
       "kind": "exact",
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
       "scope": "cmd_gen",
-      "verdict": "fail",
-      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=107/107  (107 output transaction(s) matched)  SVA fired: a_PROTO_002 x35, a_TIMING_004 x35, a_TIMING_005 x1, a_TIMING_011 x1",
-      "detail": [
-        "a_PROTO_002 fired 35x (assertion bound to cmd_gen)",
-        "a_TIMING_004 fired 35x (assertion bound to cmd_gen)",
-        "a_TIMING_005 fired 1x (assertion bound to cmd_gen)",
-        "a_TIMING_011 fired 1x (assertion bound to cmd_gen)"
-      ]
+      "verdict": "pass",
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=50/50  (50 output transaction(s) matched)",
+      "detail": []
     },
     {
       "stage": "data_path",
@@ -163,7 +146,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/data_path_predictor.py",
       "scope": "data_path",
       "verdict": "fail",
-      "summary": "scope=data_path  strategy=exact  status=fail  matched=9/29  missing=2 value=18",
+      "summary": "scope=data_path  strategy=exact  status=fail  matched=9/29  value=20",
       "detail": [
         "  ddr_wr_beat[8] value: predicted [ddr_wr_beat.beat data=0xaf57 mask=0x0] but observed [ddr_wr_beat.beat data=0xaf57 mask=0x3]",
         "  ddr_wr_beat[9] value: predicted [ddr_wr_beat.beat data=0x8d6 mask=0x2] but observed [ddr_wr_beat.beat data=0x8d6 mask=0x1]",
@@ -175,8 +158,8 @@
         "  ddr_wr_beat[15] value: predicted [ddr_wr_beat.beat data=0x792 mask=0x3] but observed [ddr_wr_beat.beat data=0x792 mask=0x0]",
         "  ddr_wr_beat[16] value: predicted [ddr_wr_beat.beat data=0xe8f8 mask=0x3] but observed [ddr_wr_beat.beat data=0xe8f8 mask=0x0]",
         "  ddr_wr_beat[17] value: predicted [ddr_wr_beat.beat data=0x8c5f mask=0x0] but observed [ddr_wr_beat.beat data=0x8c5f mask=0x3]",
-        "  ddr_wr_beat[18] missing: predicted [ddr_wr_beat.beat data=0x2741 mask=0x3] but the design produced nothing",
-        "  ddr_wr_beat[19] missing: predicted [ddr_wr_beat.beat data=0x176 mask=0x2] but the design produced nothing"
+        "  ddr_wr_beat[18] value: predicted [ddr_wr_beat.beat data=0x2741 mask=0x3] but observed [ddr_wr_beat.beat data=0x2741 mask=0x0]",
+        "  ddr_wr_beat[19] value: predicted [ddr_wr_beat.beat data=0x176 mask=0x2] but observed [ddr_wr_beat.beat data=0x176 mask=0x1]"
       ]
     }
   ],

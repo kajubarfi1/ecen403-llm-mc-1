@@ -1,0 +1,37 @@
+  stimulus: status_poll on config_regs
+status_poll_config_regs: 241 step(s) (160 drive, 80 idle covering 160000 cycle(s)), targets ['VP_CSR_001', 'VP_CSR_003']
+  wrote Validation/sequences/generated/runs/netlist_init_fsm/path_14_status_init/seq_driver.sv
+wrote Validation/sequences/generated/runs/netlist_init_fsm/path_14_status_init/chain_harness.sv  (2 block(s): config_regs, init_fsm)
+
+Path    : path_14_status_init  [composed]
+Blocks  : config_regs, init_fsm
+Window  : 64 cycles settle after driver
+Stages  : init_fsm(autonomous); config_regs(exact)
+
+Running: xrun ... -top chain_harness  (20 file(s))
+  log -> Validation/reports/netlists/init_fsm/path_14_status_init_sim.log
+335 transaction(s)
+    cfg_refresh.reset        1
+    cfg_timing.reset         1
+    csr.read                 160
+    csr.reset                1
+    csr_rsp.read_data        160
+    csr_rsp.reset            1
+    csr_sts.reset            1
+    csr_sts_level.reset      1
+    csr_sts_level.state      1
+    init_cmd.command         5
+    init_cmd.reset           1
+    init_status.done         1
+    init_status.reset        1
+  time span: 0 .. 791629000
+wrote 335 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/init_fsm/path_14_status_init_observed.jsonl
+
+==================================================================
+  init_fsm                     [autonomous]  SVA-OWNED
+  config_regs                  [exact     ]  PASS
+      scope=config_regs  strategy=exact  status=pass  matched=160/160  (160 output transaction(s) matched)
+==================================================================
+
+  path verdict : PASS
+  report -> Validation/reports/netlists/init_fsm/path_14_status_init_report.json

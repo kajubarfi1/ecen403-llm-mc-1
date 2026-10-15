@@ -1,0 +1,87 @@
+  stimulus: random on wb_port
+random_seed1: 39 step(s) (19 drive, 19 idle covering 135 cycle(s)), targets []
+  wrote Validation/sequences/generated/runs/netlist_scheduler/path_01_write_cmd/seq_driver.sv
+wrote Validation/sequences/generated/runs/netlist_scheduler/path_01_write_cmd/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
+
+Path    : path_01_write_cmd  [composed]
+Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
+Window  : 400 cycles settle after driver
+Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant); cmd_gen(exact)
+
+Running: xrun ... -top chain_harness  (50 file(s))
+  log -> Validation/reports/netlists/scheduler/path_01_write_cmd_sim.log
+
+  EMBEDDED RTL ASSERTIONS FIRED (123 total) — the design's own checks disagree with its behavior:
+    illegal bin: cp_trc_spacing 23x
+    illegal bin: cp_trrd_spacing 23x
+    illegal bin: cp_tfaw_spacing 23x
+    a_TIMING_004             23x
+    a_PROTO_002              23x
+    a_TIMING_005             5x
+    illegal bin: cp_trfc_spacing 1x
+    a_TIMING_011             1x
+    p_sel_nonzero_write      1x
+482 transaction(s)
+    cfg_refresh.reset        1
+    cfg_timing.reset         1
+    cq_deq.dequeue           19
+    cq_deq.reset             1
+    cq_enq.enqueue           19
+    cq_enq.reset             1
+    csr.reset                1
+    csr_rsp.reset            1
+    csr_sts.reset            1
+    csr_sts_level.reset      1
+    csr_sts_level.state      2
+    ddr_cmd.command          98
+    ddr_cmd.reset            1
+    ddr_rd_beat.reset        1
+    ddr_wr_beat.beat         28
+    ddr_wr_beat.reset        1
+    dp_cmd.reset             1
+    dp_cmd.write             19
+    dp_rd_rsp.reset          1
+    dp_wr.reset              1
+    dp_wr.write              19
+    refresh_ack.ack          2
+    refresh_ack.reset        1
+    refresh_req.request      1
+    refresh_req.reset        1
+    req.request              19
+    req.reset                1
+    sched_cmd.command        98
+    sched_cmd.reset          1
+    sched_deq.grant          19
+    sched_deq.reset          1
+    sched_in.command         98
+    sched_in.reset           1
+    wb.reset                 1
+    wb.write                 19
+    wb_rsp.reset             1
+  time span: 0 .. 2024000
+wrote 482 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/scheduler/path_01_write_cmd_observed.jsonl
+
+==================================================================
+  wb_port                      [exact     ]  PASS
+      scope=wb_port  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)
+  addr_decoder                 [exact     ]  PASS
+      scope=addr_decoder  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)
+  cmd_queue+scheduler          [invariant ]  FAIL
+      scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=23
+        PROTO_002 (double_activate): ACTIVATE to bank 5 row 7922 while row 7922 already active @ [sched_cmd.command aux=0x7 bank=0x5 col=0x98 row=
+        PROTO_002 (double_activate): ACTIVATE to bank 4 row 25546 while row 25546 already active @ [sched_cmd.command aux=0x2 bank=0x4 col=0x50 ro
+        PROTO_002 (double_activate): ACTIVATE to bank 6 row 5454 while row 5454 already active @ [sched_cmd.command aux=0x2 bank=0x6 col=0x2a0 row
+        PROTO_002 (double_activate): ACTIVATE to bank 6 row 5454 while row 5454 already active @ [sched_cmd.command aux=0x2 bank=0x6 col=0x2a0 row
+        PROTO_002 (double_activate): ACTIVATE to bank 5 row 5666 while row 5666 already active @ [sched_cmd.command aux=0xa bank=0x5 col=0x3a8 row
+        PROTO_002 (double_activate): ACTIVATE to bank 4 row 24982 while row 24982 already active @ [sched_cmd.command aux=0x4 bank=0x4 col=0x338 r
+  cmd_gen                      [exact     ]  FAIL
+      scope=cmd_gen  strategy=exact  status=pass  matched=98/98  (98 output transaction(s) matched)  SVA fired: a_PROTO_002 x2
+      a_PROTO_002 fired 23x (assertion bound to cmd_gen)
+      a_TIMING_004 fired 23x (assertion bound to cmd_gen)
+      a_TIMING_005 fired 5x (assertion bound to cmd_gen)
+      a_TIMING_011 fired 1x (assertion bound to cmd_gen)
+==================================================================
+
+  path verdict : FAIL
+  report -> Validation/reports/netlists/scheduler/path_01_write_cmd_report.json
+  derived path_06_scheduler_dequeue          FAIL  from stage cmd_queue+scheduler

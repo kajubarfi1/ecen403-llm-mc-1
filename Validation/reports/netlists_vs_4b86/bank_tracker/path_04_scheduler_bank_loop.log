@@ -1,0 +1,82 @@
+  stimulus: random on wb_port
+random_seed1: 39 step(s) (19 drive, 19 idle covering 135 cycle(s)), targets []
+  wrote Validation/sequences/generated/runs/netlist_bank_tracker/path_04_scheduler_bank_loop/seq_driver.sv
+wrote Validation/sequences/generated/runs/netlist_bank_tracker/path_04_scheduler_bank_loop/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
+  (no stage decomposition: trailing block(s) ['bank_tracker'] produce no stream — the chain has no way to observe what they did — the path-level checker carries this path)
+
+Path    : path_04_scheduler_bank_loop  [invariant]
+Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
+Window  : 400 cycles settle after driver
+Stages  : 
+
+Running: xrun ... -top chain_harness  (50 file(s))
+  log -> Validation/reports/netlists_vs_4b86/bank_tracker/path_04_scheduler_bank_loop_sim.log
+
+  EMBEDDED RTL ASSERTIONS FIRED (874 total) — the design's own checks disagree with its behavior:
+    illegal bin: cp_trc_spacing 163x
+    illegal bin: cp_trrd_spacing 163x
+    illegal bin: cp_tfaw_spacing 163x
+    a_TIMING_004             163x
+    a_PROTO_002              163x
+    a_TIMING_005             53x
+    p_stall_hold             3x
+    illegal bin: cp_trfc_spacing 1x
+    a_TIMING_011             1x
+    p_sel_nonzero_write      1x
+
+  DRIVER completion timeouts: 6 — see the log
+2335 transaction(s)
+    cfg_refresh.reset        1
+    cfg_timing.reset         1
+    cq_deq.reset             1
+    cq_enq.enqueue           16
+    cq_enq.reset             1
+    csr.reset                1
+    csr_rsp.reset            1
+    csr_sts.reset            1
+    csr_sts_level.reset      1
+    csr_sts_level.state      2
+    ddr_cmd.command          748
+    ddr_cmd.reset            1
+    ddr_rd_beat.reset        1
+    ddr_wr_beat.reset        1
+    dp_cmd.reset             1
+    dp_rd_rsp.reset          1
+    dp_wr.reset              1
+    dp_wr.write              16
+    refresh_ack.ack          2
+    refresh_ack.reset        1
+    refresh_req.request      1
+    refresh_req.reset        1
+    req.request              16
+    req.reset                1
+    sched_cmd.command        748
+    sched_cmd.reset          1
+    sched_deq.reset          1
+    sched_in.command         748
+    sched_in.reset           1
+    wb.reset                 1
+    wb.write                 16
+    wb_rsp.reset             1
+  time span: 0 .. 10569000
+wrote 2335 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists_vs_4b86/bank_tracker/path_04_scheduler_bank_loop_observed.jsonl
+
+==================================================================
+  cmd_gen (support)            [sva       ]  FAIL
+      SVA fired: a_PROTO_002 x163, a_TIMING_004 x163, a_TIMING_005 x53, a_TIMING_011 x1
+      a_PROTO_002 fired 163x (assertion bound to cmd_gen, not a judged stage)
+      a_TIMING_004 fired 163x (assertion bound to cmd_gen, not a judged stage)
+      a_TIMING_005 fired 53x (assertion bound to cmd_gen, not a judged stage)
+      a_TIMING_011 fired 1x (assertion bound to cmd_gen, not a judged stage)
+  (path-level)                 [invariant ]  FAIL
+      scope=path_04_scheduler_bank_loop  strategy=invariant  status=fail  violations=163
+        PROTO_002: ACTIVATE to bank 3 which already has active row 24878 @ [ddr_cmd.command addr=0x612e bank=0x3 cmd=0x3]
+        PROTO_002: ACTIVATE to bank 4 which already has active row 25546 @ [ddr_cmd.command addr=0x63ca bank=0x4 cmd=0x3]
+        PROTO_002: ACTIVATE to bank 6 which already has active row 4135 @ [ddr_cmd.command addr=0x1027 bank=0x6 cmd=0x3]
+        PROTO_002: ACTIVATE to bank 6 which already has active row 4135 @ [ddr_cmd.command addr=0x1027 bank=0x6 cmd=0x3]
+        PROTO_002: ACTIVATE to bank 3 which already has active row 24878 @ [ddr_cmd.command addr=0x612e bank=0x3 cmd=0x3]
+        PROTO_002: ACTIVATE to bank 4 which already has active row 25546 @ [ddr_cmd.command addr=0x63ca bank=0x4 cmd=0x3]
+==================================================================
+
+  path verdict : FAIL
+  report -> Validation/reports/netlists_vs_4b86/bank_tracker/path_04_scheduler_bank_loop_report.json

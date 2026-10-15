@@ -27,11 +27,33 @@ from datetime import datetime
 
 
 # CONFIGURATION
+def _from_setup_env(key):
+    """KEY from Validation/setup.env when it is not exported. The file is
+    written by hand as `KEY = "value"` (spaces, quotes), which a shell cannot
+    `source`, so tolerate that form here rather than require an export
+    nobody remembers to do."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "setup.env")
+    try:
+        with open(path) as f:
+            txt = f.read()
+    except OSError:
+        return None
+    m = re.search(r'^\s*' + key + r'\s*=\s*"?([^"\n]*?)"?\s*$', txt, re.M)
+    return m.group(1) if m and m.group(1) else None
+
+
+def _setting(key, default=None):
+    return os.environ.get(key) or _from_setup_env(key) or default
+
+
+# The Olympus account comes from the environment or Validation/setup.env
+# (OLYMPUS_USER, OLYMPUS_KEY for a passphrase-less key, else OLYMPUS_PASSWORD);
+# nothing about one person's account is written into the code.
 SSH_CONFIG = {
-    "hostname": "olympus.ece.tamu.edu",
+    "hostname": _setting("OLYMPUS_HOST", "olympus.ece.tamu.edu"),
     "port": 22,
-    "username": "jacobz",
-    "key_path": None,
+    "username": _setting("OLYMPUS_USER"),
+    "key_path": _setting("OLYMPUS_KEY"),
 }
 
 SLURM_CONFIG = {
@@ -88,18 +110,8 @@ CADENCE_ENV = (
 
 
 def _password_from_setup_env():
-    """OLYMPUS_PASSWORD from Validation/setup.env when it is not exported.
-    The file is written by hand as `KEY = "value"` (spaces, quotes), which a
-    shell cannot `source`, so tolerate that form here rather than require an
-    export nobody remembers to do."""
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "setup.env")
-    try:
-        with open(path) as f:
-            txt = f.read()
-    except OSError:
-        return None
-    m = re.search(r'^\s*OLYMPUS_PASSWORD\s*=\s*"?([^"\n]*?)"?\s*$', txt, re.M)
-    return m.group(1) if m and m.group(1) else None
+    return _from_setup_env("OLYMPUS_PASSWORD")
+
 
 class CadenceSSHAgent:
 
@@ -119,6 +131,10 @@ class CadenceSSHAgent:
     # --- Connection ---
 
     def connect(self, password=None):
+        if not self.ssh.get("username"):
+            raise RuntimeError("no Olympus account: export OLYMPUS_USER (your NetID) and "
+                               "OLYMPUS_KEY or OLYMPUS_PASSWORD, or put them in "
+                               "Validation/setup.env (see USAGE.md)")
         kwargs = {
             "hostname": self.ssh["hostname"],
             "port": self.ssh["port"],

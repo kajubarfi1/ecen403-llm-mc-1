@@ -1,6 +1,6 @@
 {
   "$schema": "validation-fault-matrix/1",
-  "generated_utc": "2026-10-08T17:17:17.612835Z",
+  "generated_utc": "2026-10-08T18:44:52.572155Z",
   "drop_root": "Frontend2/OutputFolders",
   "faults_total": 23,
   "faults_killed": 23,
@@ -20,32 +20,29 @@
       "masked_by": null,
       "killed": true,
       "expected_hit": [
+        "stage:cmd_gen",
         "assert:a_PROTO_001"
       ],
-      "expected_missed": [
-        "stage:cmd_gen"
-      ],
+      "expected_missed": [],
       "new": {
+        "stage:cmd_gen": 1,
+        "assert:a_TIMING_004": 15,
+        "assert:a_PROTO_002": 16,
         "assert:a_PROTO_001": 16,
         "assert:a_TIMING_003": 2
       },
-      "grew": {
-        "assert:a_PROTO_002": [
-          23,
-          39
-        ]
-      },
+      "grew": {},
       "fewer_matched": {
         "matched:cmd_gen": [
-          98,
-          59
+          51,
+          35
         ]
       },
       "blamed_stages": [
         "cmd_gen"
       ],
       "blame_names_block": true,
-      "baseline_verdict": "fail",
+      "baseline_verdict": "pass",
       "mutant_verdict": "fail"
     },
     {
@@ -61,26 +58,26 @@
       "masked_by": null,
       "killed": true,
       "expected_hit": [
+        "stage:cmd_gen",
         "assert:a_PROTO_001"
       ],
-      "expected_missed": [
-        "stage:cmd_gen"
-      ],
+      "expected_missed": [],
       "new": {
+        "stage:cmd_gen": 1,
         "assert:a_PROTO_001": 19
       },
       "grew": {},
       "fewer_matched": {
         "matched:cmd_gen": [
-          98,
-          56
+          51,
+          32
         ]
       },
       "blamed_stages": [
         "cmd_gen"
       ],
       "blame_names_block": true,
-      "baseline_verdict": "fail",
+      "baseline_verdict": "pass",
       "mutant_verdict": "fail"
     },
     {
@@ -102,28 +99,22 @@
         "illegal:cp_tras_spacing"
       ],
       "new": {
-        "assert:a_TIMING_003": 108,
+        "stage:cmd_gen (support)": 1,
+        "stage:(path-level)": 1,
+        "violations:(path-level)": 16,
+        "id:SCHED_001": 12,
+        "assert:a_TIMING_003": 221,
         "assert:p_stall_hold": 3,
         "log:DRIVER_STALL": 6
       },
-      "grew": {
-        "violations:(path-level)": [
-          23,
-          232
-        ],
-        "assert:a_TIMING_004": [
-          23,
-          216
-        ],
-        "assert:a_PROTO_002": [
-          23,
-          216
-        ]
-      },
+      "grew": {},
       "fewer_matched": {},
-      "blamed_stages": [],
+      "blamed_stages": [
+        "(path-level)",
+        "cmd_gen (support)"
+      ],
       "blame_names_block": true,
-      "baseline_verdict": "fail",
+      "baseline_verdict": "pass",
       "mutant_verdict": "fail"
     },
     {
@@ -144,27 +135,14 @@
         "illegal:cp_trrd_spacing"
       ],
       "new": {
-        "assert:a_TIMING_006": 18
+        "assert:p_wr_no_overflow": 1
       },
-      "grew": {
-        "violations:(path-level)": [
-          23,
-          38
-        ],
-        "assert:a_TIMING_004": [
-          23,
-          38
-        ],
-        "assert:a_PROTO_002": [
-          23,
-          38
-        ]
-      },
+      "grew": {},
       "fewer_matched": {},
       "blamed_stages": [],
       "blame_names_block": true,
-      "baseline_verdict": "fail",
-      "mutant_verdict": "fail"
+      "baseline_verdict": "pass",
+      "mutant_verdict": "pass"
     },
     {
       "fault": "M05_refresh_never_requested",
@@ -210,26 +188,15 @@
       "expected_missed": [
         "id:REF_001"
       ],
-      "new": {},
-      "grew": {
-        "id:REF_002": [
-          2,
-          13
-        ],
-        "violations:(path-level)": [
-          1,
-          14
-        ],
-        "assert:a_TIMING_011": [
-          13,
-          194
-        ]
+      "new": {
+        "assert:p_wr_no_overflow": 1
       },
+      "grew": {},
       "fewer_matched": {},
       "blamed_stages": [],
       "blame_names_block": true,
-      "baseline_verdict": "fail",
-      "mutant_verdict": "fail"
+      "baseline_verdict": "pass",
+      "mutant_verdict": "pass"
     },
     {
       "fault": "M07_config_regs_reset_value",
@@ -260,7 +227,7 @@
         "config_regs"
       ],
       "blame_names_block": true,
-      "baseline_verdict": "fail",
+      "baseline_verdict": "pass",
       "mutant_verdict": "fail"
     },
     {
@@ -324,7 +291,7 @@
         "config_regs"
       ],
       "blame_names_block": true,
-      "baseline_verdict": "fail",
+      "baseline_verdict": "pass",
       "mutant_verdict": "fail"
     },
     {
@@ -388,7 +355,7 @@
         "addr_decoder"
       ],
       "blame_names_block": true,
-      "baseline_verdict": "fail",
+      "baseline_verdict": "pass",
       "mutant_verdict": "fail"
     },
     {
@@ -408,8 +375,8 @@
       "expected_missed": [],
       "new": {
         "stage:wb_port": 1,
-        "assert:p_tag_no_overflow": 448,
-        "assert:p_tag": 13
+        "assert:p_tag_no_overflow": 135,
+        "assert:p_tag": 18
       },
       "grew": {},
       "fewer_matched": {
@@ -422,7 +389,7 @@
         "wb_port"
       ],
       "blame_names_block": true,
-      "baseline_verdict": "fail",
+      "baseline_verdict": "pass",
       "mutant_verdict": "fail"
     },
     {
@@ -473,18 +440,17 @@
       ],
       "expected_missed": [],
       "new": {
-        "id:SCHED_004": 6
+        "stage:cmd_queue+scheduler": 1,
+        "violations:cmd_queue+scheduler": 19,
+        "id:SCHED_004": 12
       },
-      "grew": {
-        "violations:cmd_queue+scheduler": [
-          23,
-          42
-        ]
-      },
+      "grew": {},
       "fewer_matched": {},
-      "blamed_stages": [],
+      "blamed_stages": [
+        "cmd_queue+scheduler"
+      ],
       "blame_names_block": true,
-      "baseline_verdict": "fail",
+      "baseline_verdict": "pass",
       "mutant_verdict": "fail"
     },
     {
@@ -508,13 +474,17 @@
         "log:HARNESS_TIMEOUT"
       ],
       "new": {
-        "id:SCHED_001": 6
+        "stage:(path-level)": 1,
+        "violations:(path-level)": 12,
+        "id:SCHED_001": 12
       },
       "grew": {},
       "fewer_matched": {},
-      "blamed_stages": [],
+      "blamed_stages": [
+        "(path-level)"
+      ],
       "blame_names_block": true,
-      "baseline_verdict": "fail",
+      "baseline_verdict": "pass",
       "mutant_verdict": "fail"
     },
     {
@@ -530,16 +500,17 @@
       "masked_by": null,
       "killed": true,
       "expected_hit": [
+        "stage:data_path",
         "matched:data_path"
       ],
-      "expected_missed": [
-        "stage:data_path"
-      ],
-      "new": {},
+      "expected_missed": [],
+      "new": {
+        "stage:data_path": 1
+      },
       "grew": {},
       "fewer_matched": {
         "matched:data_path": [
-          27,
+          29,
           9
         ]
       },
@@ -547,7 +518,7 @@
         "data_path"
       ],
       "blame_names_block": true,
-      "baseline_verdict": "fail",
+      "baseline_verdict": "pass",
       "mutant_verdict": "fail"
     },
     {
@@ -699,13 +670,20 @@
         "id:REF_001"
       ],
       "new": {
-        "id:SCHED_003": 2
+        "stage:scheduler": 1,
+        "violations:scheduler": 1,
+        "id:SCHED_003": 2,
+        "stage:(path-level)": 1,
+        "violations:(path-level)": 1
       },
       "grew": {},
       "fewer_matched": {},
-      "blamed_stages": [],
+      "blamed_stages": [
+        "(path-level)",
+        "scheduler"
+      ],
       "blame_names_block": true,
-      "baseline_verdict": "fail",
+      "baseline_verdict": "pass",
       "mutant_verdict": "fail"
     },
     {
@@ -753,14 +731,17 @@
       ],
       "expected_missed": [],
       "new": {
+        "stage:init_fsm": 1,
         "assert:a_INIT_002_init_done": 1
       },
       "grew": {},
       "fewer_matched": {},
-      "blamed_stages": [],
+      "blamed_stages": [
+        "init_fsm"
+      ],
       "blame_names_block": true,
       "baseline_verdict": "pass",
-      "mutant_verdict": "pass"
+      "mutant_verdict": "fail"
     },
     {
       "fault": "M19_init_fsm_tzqinit_short",
@@ -808,15 +789,21 @@
       ],
       "expected_missed": [],
       "new": {
+        "stage:cmd_gen (support)": 1,
+        "stage:(path-level)": 1,
+        "violations:(path-level)": 25,
         "id:PROTO_001": 5,
-        "id:SCHED_004": 5,
-        "assert:a_PROTO_001": 15
+        "id:SCHED_004": 7,
+        "assert:a_PROTO_001": 10
       },
       "grew": {},
       "fewer_matched": {},
-      "blamed_stages": [],
+      "blamed_stages": [
+        "(path-level)",
+        "cmd_gen (support)"
+      ],
       "blame_names_block": true,
-      "baseline_verdict": "fail",
+      "baseline_verdict": "pass",
       "mutant_verdict": "fail"
     },
     {
@@ -837,21 +824,26 @@
       ],
       "expected_missed": [],
       "new": {
-        "id:PROTO_001": 9,
-        "assert:a_PROTO_001": 15
+        "stage:cmd_queue+scheduler": 1,
+        "violations:cmd_queue+scheduler": 15,
+        "id:PROTO_001": 7,
+        "id:SCHED_004": 5,
+        "stage:cmd_gen": 1,
+        "assert:a_PROTO_001": 10
       },
       "grew": {},
       "fewer_matched": {
         "matched:cmd_gen": [
-          98,
-          30
+          51,
+          25
         ]
       },
       "blamed_stages": [
-        "cmd_gen"
+        "cmd_gen",
+        "cmd_queue+scheduler"
       ],
       "blame_names_block": true,
-      "baseline_verdict": "fail",
+      "baseline_verdict": "pass",
       "mutant_verdict": "fail"
     },
     {
@@ -872,6 +864,7 @@
       ],
       "expected_missed": [],
       "new": {
+        "stage:calibration": 1,
         "stage:(path-level)": 1,
         "violations:(path-level)": 2,
         "id:CAL_002": 2,
@@ -881,7 +874,8 @@
       "grew": {},
       "fewer_matched": {},
       "blamed_stages": [
-        "(path-level)"
+        "(path-level)",
+        "calibration"
       ],
       "blame_names_block": true,
       "baseline_verdict": "pass",
@@ -905,6 +899,8 @@
       ],
       "expected_missed": [],
       "new": {
+        "stage:init_fsm": 1,
+        "stage:calibration": 1,
         "stage:(path-level)": 1,
         "violations:(path-level)": 6,
         "id:INIT_003": 4,
@@ -915,7 +911,9 @@
       "grew": {},
       "fewer_matched": {},
       "blamed_stages": [
-        "(path-level)"
+        "(path-level)",
+        "calibration",
+        "init_fsm"
       ],
       "blame_names_block": true,
       "baseline_verdict": "pass",
@@ -970,6 +968,7 @@
       ],
       "expected_missed": [],
       "new": {
+        "stage:init_fsm": 1,
         "stage:(path-level)": 1,
         "violations:(path-level)": 2,
         "id:INIT_001": 1,
@@ -980,7 +979,8 @@
       "grew": {},
       "fewer_matched": {},
       "blamed_stages": [
-        "(path-level)"
+        "(path-level)",
+        "init_fsm"
       ],
       "blame_names_block": true,
       "baseline_verdict": "pass",

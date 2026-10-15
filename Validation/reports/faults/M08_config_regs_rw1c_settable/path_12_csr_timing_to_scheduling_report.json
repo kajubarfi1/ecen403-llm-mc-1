@@ -3,7 +3,7 @@
   "path": "path_12_csr_timing_to_scheduling",
   "strategy": "composed",
   "verdict": "fail",
-  "timestamp": "2026-10-08T12:17:05.798155",
+  "timestamp": "2026-10-08T13:43:43.122261",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,8 +21,9 @@
   "window_cycles": 400,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "6086b4aab832",
-    "drop_id": "6086b4aab832",
+    "git_head": "c4c0fd0ec404",
+    "drop_id": "c4c0fd0ec404",
+    "design_id": "4fdc02b75cc0",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -34,16 +35,16 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "608d29d",
+    "validated_at": "986fdb0",
     "frontend_commits": {
-      "addr_decoder": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "bank_tracker": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "cmd_gen": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "cmd_queue": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "addr_decoder": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "bank_tracker": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "cmd_gen": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "cmd_queue": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
       "config_regs": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "data_path": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "refresh_ctrl": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "scheduler": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "data_path": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "refresh_ctrl": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "scheduler": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
       "wb_port": "9c21084cdda21e528b57299e638eef2b79fef2ec"
     },
     "roots": [
@@ -124,19 +125,8 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/bank_tracker_scheduler_checker.py",
       "scope": "bank_tracker_scheduler",
       "verdict": "pass",
-      "summary": "scope=bank_tracker_scheduler  strategy=invariant  status=pass  (289 transactions, no rule broken)",
+      "summary": "scope=bank_tracker_scheduler  strategy=invariant  status=pass  (276 transactions, no rule broken)",
       "detail": []
-    },
-    {
-      "stage": "cmd_gen (support)",
-      "kind": "sva",
-      "scope": "cmd_gen",
-      "model": null,
-      "verdict": "fail",
-      "summary": "SVA fired: a_TIMING_011 x4",
-      "detail": [
-        "a_TIMING_011 fired 4x (assertion bound to cmd_gen, not a judged stage)"
-      ]
     }
   ],
   "log": "Validation/reports/faults/M08_config_regs_rw1c_settable/path_12_csr_timing_to_scheduling_sim.log",

@@ -269,8 +269,8 @@
       "description": "The scheduler never selects REFRESH: refresh requests are raised and never serviced, so the postpone budget is exhausted.",
       "edits": [
         {
-          "from": "        if (ref_urgent) begin\n            if (all_banks_idle) begin",
-          "to": "        if (1'b0) begin\n            if (all_banks_idle) begin"
+          "from": "        if (ref_urgent) begin\n            if (ref_ok) begin",
+          "to": "        if (1'b0) begin\n            if (ref_ok) begin"
         },
         {
           "from": "            if (!sel_valid && ref_required) begin",
@@ -283,7 +283,8 @@
       ],
       "paths": [
         "path_05_scheduler_refresh_loop"
-      ]
+      ],
+      "reseeded": "2026-10-08: scheduler regenerated with the feedback-latency hold (drop a7cd3cb93546); the REF gate is ref_ok now, not all_banks_idle"
     },
     {
       "id": "M18_calibration_zqcs_before_done",

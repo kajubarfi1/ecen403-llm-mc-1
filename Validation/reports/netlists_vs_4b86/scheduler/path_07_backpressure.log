@@ -1,0 +1,86 @@
+  stimulus: burst on wb_port
+burst_wb_port_seed1: 33 step(s) (32 drive, 0 idle covering 0 cycle(s)), targets ['VP_FLOW_001']
+  wrote Validation/sequences/generated/runs/netlist_scheduler/path_07_backpressure/seq_driver.sv
+wrote Validation/sequences/generated/runs/netlist_scheduler/path_07_backpressure/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
+
+Path    : path_07_backpressure  [composed]
+Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
+Window  : 3000 cycles settle after driver
+Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant)
+
+Running: xrun ... -top chain_harness  (50 file(s))
+  log -> Validation/reports/netlists_vs_4b86/scheduler/path_07_backpressure_sim.log
+
+  EMBEDDED RTL ASSERTIONS FIRED (281 total) — the design's own checks disagree with its behavior:
+    illegal bin: cp_trc_spacing 55x
+    illegal bin: cp_trrd_spacing 55x
+    illegal bin: cp_tfaw_spacing 55x
+    a_TIMING_004             55x
+    a_PROTO_002              55x
+    a_TIMING_005             3x
+    illegal bin: cp_trfc_spacing 1x
+    a_TIMING_011             1x
+    p_wr_no_overflow         1x
+884 transaction(s)
+    cfg_refresh.reset        1
+    cfg_timing.reset         1
+    cq_deq.dequeue           32
+    cq_deq.reset             1
+    cq_enq.enqueue           32
+    cq_enq.reset             1
+    csr.reset                1
+    csr_rsp.reset            1
+    csr_sts.reset            1
+    csr_sts_level.reset      1
+    csr_sts_level.state      2
+    ddr_cmd.command          192
+    ddr_cmd.reset            1
+    ddr_rd_beat.reset        1
+    ddr_wr_beat.beat         58
+    ddr_wr_beat.reset        1
+    dp_cmd.reset             1
+    dp_cmd.write             32
+    dp_rd_rsp.reset          1
+    dp_wr.reset              1
+    dp_wr.write              31
+    refresh_ack.ack          2
+    refresh_ack.reset        1
+    refresh_req.request      1
+    refresh_req.reset        1
+    req.request              32
+    req.reset                1
+    sched_cmd.command        192
+    sched_cmd.reset          1
+    sched_deq.grant          32
+    sched_deq.reset          1
+    sched_in.command         192
+    sched_in.reset           1
+    wb.reset                 1
+    wb.write                 32
+    wb_rsp.reset             1
+  time span: 0 .. 3389000
+wrote 884 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists_vs_4b86/scheduler/path_07_backpressure_observed.jsonl
+
+==================================================================
+  wb_port                      [exact     ]  PASS
+      scope=wb_port  strategy=exact  status=pass  matched=32/32  (32 output transaction(s) matched)
+  addr_decoder                 [exact     ]  PASS
+      scope=addr_decoder  strategy=exact  status=pass  matched=32/32  (32 output transaction(s) matched)
+  cmd_queue+scheduler          [invariant ]  FAIL
+      scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=55
+        PROTO_002 (double_activate): ACTIVATE to bank 5 row 5666 while row 5666 already active @ [sched_cmd.command aux=0x3 bank=0x5 col=0x3a8 row
+        PROTO_002 (double_activate): ACTIVATE to bank 5 row 5666 while row 5666 already active @ [sched_cmd.command aux=0x3 bank=0x5 col=0x3a8 row
+        PROTO_002 (double_activate): ACTIVATE to bank 3 row 24878 while row 24878 already active @ [sched_cmd.command aux=0x2 bank=0x3 col=0x2d0 r
+        PROTO_002 (double_activate): ACTIVATE to bank 3 row 24878 while row 24878 already active @ [sched_cmd.command aux=0x2 bank=0x3 col=0x2d0 r
+        PROTO_002 (double_activate): ACTIVATE to bank 1 row 11338 while row 11338 already active @ [sched_cmd.command aux=0x2 bank=0x1 col=0x2d0 r
+        PROTO_002 (double_activate): ACTIVATE to bank 1 row 11338 while row 11338 already active @ [sched_cmd.command aux=0x2 bank=0x1 col=0x2d0 r
+  cmd_gen (support)            [sva       ]  FAIL
+      SVA fired: a_PROTO_002 x55, a_TIMING_004 x55, a_TIMING_005 x3, a_TIMING_011 x1
+      a_PROTO_002 fired 55x (assertion bound to cmd_gen, not a judged stage)
+      a_TIMING_004 fired 55x (assertion bound to cmd_gen, not a judged stage)
+      a_TIMING_005 fired 3x (assertion bound to cmd_gen, not a judged stage)
+      a_TIMING_011 fired 1x (assertion bound to cmd_gen, not a judged stage)
+==================================================================
+
+  path verdict : FAIL
+  report -> Validation/reports/netlists_vs_4b86/scheduler/path_07_backpressure_report.json

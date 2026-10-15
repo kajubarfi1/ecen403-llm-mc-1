@@ -1,0 +1,69 @@
+  stimulus: random on wb_port
+random_seed1: 39 step(s) (19 drive, 19 idle covering 135 cycle(s)), targets []
+  wrote Validation/sequences/generated/runs/netlist_refresh_ctrl/path_01_write_cmd/seq_driver.sv
+wrote Validation/sequences/generated/runs/netlist_refresh_ctrl/path_01_write_cmd/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
+
+Path    : path_01_write_cmd  [composed]
+Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
+Window  : 400 cycles settle after driver
+Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant); cmd_gen(exact)
+
+Running: xrun ... -top chain_harness  (50 file(s))
+  log -> Validation/reports/netlists/refresh_ctrl/path_01_write_cmd_sim.log
+
+  EMBEDDED RTL ASSERTIONS FIRED (1 total) — the design's own checks disagree with its behavior:
+    p_sel_nonzero_write      1x
+350 transaction(s)
+    cfg_refresh.reset        1
+    cfg_timing.reset         1
+    cq_deq.dequeue           19
+    cq_deq.reset             1
+    cq_enq.enqueue           19
+    cq_enq.reset             1
+    csr.reset                1
+    csr_rsp.reset            1
+    csr_sts.reset            1
+    csr_sts_level.reset      1
+    csr_sts_level.state      2
+    ddr_cmd.command          51
+    ddr_cmd.reset            1
+    ddr_rd_beat.reset        1
+    ddr_wr_beat.beat         38
+    ddr_wr_beat.reset        1
+    dp_cmd.reset             1
+    dp_cmd.write             19
+    dp_rd_rsp.reset          1
+    dp_wr.reset              1
+    dp_wr.write              19
+    refresh_ack.ack          1
+    refresh_ack.reset        1
+    refresh_req.request      1
+    refresh_req.reset        1
+    req.request              19
+    req.reset                1
+    sched_cmd.command        51
+    sched_cmd.reset          1
+    sched_deq.grant          19
+    sched_deq.reset          1
+    sched_in.command         51
+    sched_in.reset           1
+    wb.reset                 1
+    wb.write                 19
+    wb_rsp.reset             1
+  time span: 0 .. 1774000
+wrote 350 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/refresh_ctrl/path_01_write_cmd_observed.jsonl
+
+==================================================================
+  wb_port                      [exact     ]  PASS
+      scope=wb_port  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)
+  addr_decoder                 [exact     ]  PASS
+      scope=addr_decoder  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)
+  cmd_queue+scheduler          [invariant ]  PASS
+      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (350 transactions, no rule broken)
+  cmd_gen                      [exact     ]  PASS
+      scope=cmd_gen  strategy=exact  status=pass  matched=51/51  (51 output transaction(s) matched)
+==================================================================
+
+  path verdict : PASS
+  report -> Validation/reports/netlists/refresh_ctrl/path_01_write_cmd_report.json
+  derived path_06_scheduler_dequeue          PASS  from stage cmd_queue+scheduler

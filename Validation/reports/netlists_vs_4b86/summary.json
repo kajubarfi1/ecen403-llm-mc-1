@@ -1,0 +1,131 @@
+{
+  "$schema": "validation-netlists/1",
+  "generated_utc": "2026-10-14T19:46:42.787509+00:00",
+  "netlists": "backend/outputs/NETLISTS.json",
+  "netlists_built_from": {
+    "drop_id": "4b86c7cd3705",
+    "design_equivalent_drop": "a7cd3cb93546"
+  },
+  "judged_against": {
+    "drop_id": "4b86c7cd3705",
+    "design_id": "dfaf3628f09a"
+  },
+  "blocks": {
+    "scheduler": {
+      "netlist": "backend/outputs/scheduler/6_final.v",
+      "verdict": "FAIL",
+      "paths": [
+        {
+          "path": "path_01_write_cmd",
+          "verdict": "FAIL",
+          "first_failure": "cmd_queue+scheduler: scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=23",
+          "fired": {
+            "a_PROTO_002": 23,
+            "a_TIMING_004": 23,
+            "a_TIMING_005": 5,
+            "a_TIMING_011": 1
+          }
+        },
+        {
+          "path": "path_02_read_cmd",
+          "verdict": "FAIL",
+          "first_failure": "cmd_queue+scheduler: scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=38",
+          "fired": {
+            "a_PROTO_002": 38,
+            "a_TIMING_004": 38,
+            "a_TIMING_011": 1
+          }
+        },
+        {
+          "path": "path_04_scheduler_bank_loop",
+          "verdict": "FAIL",
+          "first_failure": "cmd_gen (support): SVA fired: a_PROTO_002 x23, a_TIMING_004 x23, a_TIMING_005 x5, a_TIMING_011 x1",
+          "fired": {
+            "a_PROTO_002": 23,
+            "a_TIMING_004": 23,
+            "a_TIMING_005": 5,
+            "a_TIMING_011": 1
+          }
+        },
+        {
+          "path": "path_05_scheduler_refresh_loop",
+          "verdict": "FAIL",
+          "first_failure": "scheduler: scope=scheduler  strategy=invariant  status=fail  violations=1",
+          "fired": {
+            "a_PROTO_002": 947,
+            "a_TIMING_004": 946,
+            "a_TIMING_005": 85,
+            "a_TIMING_011": 13
+          }
+        },
+        {
+          "path": "path_07_backpressure",
+          "verdict": "FAIL",
+          "first_failure": "cmd_queue+scheduler: scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=55",
+          "fired": {
+            "a_PROTO_002": 55,
+            "a_TIMING_004": 55,
+            "a_TIMING_005": 3,
+            "a_TIMING_011": 1
+          }
+        },
+        {
+          "path": "path_12_csr_timing_to_scheduling",
+          "verdict": "FAIL",
+          "first_failure": "cmd_gen (support): SVA fired: a_TIMING_011 x4",
+          "fired": {
+            "a_TIMING_011": 4
+          }
+        },
+        {
+          "path": "path_13_csr_refresh_to_scheduling",
+          "verdict": "FAIL",
+          "first_failure": "cmd_gen (support): SVA fired: a_TIMING_011 x4",
+          "fired": {
+            "a_TIMING_011": 4
+          }
+        },
+        {
+          "path": "path_18_full_write",
+          "verdict": "FAIL",
+          "first_failure": "cmd_queue+scheduler: scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=35",
+          "fired": {
+            "a_PROTO_002": 35,
+            "a_TIMING_004": 35,
+            "a_TIMING_005": 1,
+            "a_TIMING_011": 1
+          }
+        },
+        {
+          "path": "path_19_row_conflict",
+          "verdict": "FAIL",
+          "first_failure": "cmd_gen (support): SVA fired: a_PROTO_002 x23, a_TIMING_004 x23, a_TIMING_005 x5, a_TIMING_011 x1",
+          "fired": {
+            "a_PROTO_002": 23,
+            "a_TIMING_004": 23,
+            "a_TIMING_005": 5,
+            "a_TIMING_011": 1
+          }
+        },
+        {
+          "path": "path_20_refresh_preempt",
+          "verdict": "FAIL",
+          "first_failure": "cmd_queue+scheduler: scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=947",
+          "fired": {
+            "a_PROTO_002": 947,
+            "a_TIMING_004": 946,
+            "a_TIMING_005": 85,
+            "a_TIMING_011": 13
+          }
+        }
+      ],
+      "backend": {
+        "fmax_mhz": 169.06,
+        "wns_ns": -0.914878,
+        "sta": "FAIL",
+        "drc_violations": 0,
+        "lvs": "PASS"
+      }
+    }
+  }
+}

@@ -1,0 +1,72 @@
+  stimulus: random on wb_port
+random_seed1: 39 step(s) (19 drive, 19 idle covering 144 cycle(s)), targets []
+  wrote Validation/sequences/generated/runs/netlist_bank_tracker/path_18_full_write/seq_driver.sv
+wrote Validation/sequences/generated/runs/netlist_bank_tracker/path_18_full_write/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
+
+Path    : path_18_full_write  [composed]
+Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
+Window  : 400 cycles settle after driver
+Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant); cmd_gen(exact); data_path(exact)
+
+Running: xrun ... -top chain_harness  (50 file(s))
+  log -> Validation/reports/netlists/bank_tracker/path_18_full_write_sim.log
+356 transaction(s)
+    cfg_refresh.reset        1
+    cfg_timing.reset         1
+    cq_deq.dequeue           19
+    cq_deq.reset             1
+    cq_enq.enqueue           19
+    cq_enq.reset             1
+    csr.reset                1
+    csr_rsp.reset            1
+    csr_sts.reset            1
+    csr_sts_level.reset      1
+    csr_sts_level.state      2
+    ddr_cmd.command          50
+    ddr_cmd.reset            1
+    ddr_rd_beat.beat         18
+    ddr_rd_beat.reset        1
+    ddr_wr_beat.beat         20
+    ddr_wr_beat.reset        1
+    dp_cmd.read              9
+    dp_cmd.reset             1
+    dp_cmd.write             10
+    dp_rd_rsp.reset          1
+    dp_rd_rsp.response       9
+    dp_wr.reset              1
+    dp_wr.write              10
+    refresh_ack.ack          1
+    refresh_ack.reset        1
+    refresh_req.request      1
+    refresh_req.reset        1
+    req.request              19
+    req.reset                1
+    sched_cmd.command        50
+    sched_cmd.reset          1
+    sched_deq.grant          19
+    sched_deq.reset          1
+    sched_in.command         50
+    sched_in.reset           1
+    wb.read                  9
+    wb.reset                 1
+    wb.write                 10
+    wb_rsp.read_data         9
+    wb_rsp.reset             1
+  time span: 0 .. 3129000
+wrote 356 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/bank_tracker/path_18_full_write_observed.jsonl
+
+==================================================================
+  wb_port                      [exact     ]  PASS
+      scope=wb_port  strategy=exact  status=pass  matched=28/28  (28 output transaction(s) matched)
+  addr_decoder                 [exact     ]  PASS
+      scope=addr_decoder  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)
+  cmd_queue+scheduler          [invariant ]  PASS
+      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (356 transactions, no rule broken)
+  cmd_gen                      [exact     ]  PASS
+      scope=cmd_gen  strategy=exact  status=pass  matched=50/50  (50 output transaction(s) matched)
+  data_path                    [exact     ]  PASS
+      scope=data_path  strategy=exact  status=pass  matched=29/29  (29 output transaction(s) matched)
+==================================================================
+
+  path verdict : PASS
+  report -> Validation/reports/netlists/bank_tracker/path_18_full_write_report.json

@@ -2,8 +2,8 @@
   "$schema": "validation-path-run/1",
   "path": "path_05_scheduler_refresh_loop",
   "strategy": "invariant",
-  "verdict": "fail",
-  "timestamp": "2026-10-08T12:16:56.893779",
+  "verdict": "pass",
+  "timestamp": "2026-10-08T13:43:40.012931",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,8 +21,9 @@
   "window_cycles": 6000,
   "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "f2ac7d48e975",
-    "drop_id": "f2ac7d48e975",
+    "git_head": "be45e17d5add",
+    "drop_id": "be45e17d5add",
+    "design_id": "3dd1320d055a",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -34,16 +35,16 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "608d29d",
+    "validated_at": "986fdb0",
     "frontend_commits": {
-      "addr_decoder": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "bank_tracker": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "cmd_gen": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "cmd_queue": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "addr_decoder": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "bank_tracker": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "cmd_gen": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "cmd_queue": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
       "config_regs": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "data_path": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "refresh_ctrl": "9c21084cdda21e528b57299e638eef2b79fef2ec",
-      "scheduler": "9c21084cdda21e528b57299e638eef2b79fef2ec",
+      "data_path": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "refresh_ctrl": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
+      "scheduler": "8d5770ec4f8069d14daf1f9749db6a13676c691e",
       "wb_port": "9c21084cdda21e528b57299e638eef2b79fef2ec"
     },
     "roots": [
@@ -108,12 +109,9 @@
       "kind": "invariant",
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/scheduler_checker.py",
       "scope": "scheduler",
-      "verdict": "fail",
-      "summary": "scope=scheduler  strategy=invariant  status=fail  violations=1",
-      "detail": [
-        "scope=scheduler  strategy=invariant  status=fail  violations=1",
-        "  REF_002 (REFRESH issued while one or more banks are still active): REFRESH command issued with banks [2] still active (not precharged)"
-      ]
+      "verdict": "pass",
+      "summary": "scope=scheduler  strategy=invariant  status=pass  (11049 transactions, no rule broken)",
+      "detail": []
     },
     {
       "stage": "refresh_ctrl",
@@ -124,40 +122,13 @@
       "note": "time-driven stage; pacing owned by SVA; no assertion fired"
     },
     {
-      "stage": "cmd_gen (support)",
-      "kind": "sva",
-      "scope": "cmd_gen",
-      "model": null,
-      "verdict": "fail",
-      "summary": "SVA fired: a_PROTO_002 x947, a_TIMING_004 x946, a_TIMING_005 x85, a_TIMING_011 x194",
-      "detail": [
-        "a_PROTO_002 fired 947x (assertion bound to cmd_gen, not a judged stage)",
-        "a_TIMING_004 fired 946x (assertion bound to cmd_gen, not a judged stage)",
-        "a_TIMING_005 fired 85x (assertion bound to cmd_gen, not a judged stage)",
-        "a_TIMING_011 fired 194x (assertion bound to cmd_gen, not a judged stage)"
-      ]
-    },
-    {
       "stage": "(path-level)",
       "kind": "invariant",
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_05_scheduler_refresh_loop_checker.py",
       "scope": "path_05_scheduler_refresh_loop",
-      "verdict": "fail",
-      "summary": "scope=path_05_scheduler_refresh_loop  strategy=invariant  status=fail  violations=14",
-      "detail": [
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]",
-        "  REF_002: REFRESH issued while banks [2] are still active (not precharged) @ [ddr_cmd.command addr=0x0 bank=0x0 cmd=0x1]"
-      ]
+      "verdict": "pass",
+      "summary": "scope=path_05_scheduler_refresh_loop  strategy=invariant  status=pass  (11049 transactions, no rule broken)",
+      "detail": []
     }
   ],
   "log": "Validation/reports/faults/M06_refresh_pending_runaway/path_05_scheduler_refresh_loop_sim.log",

@@ -1,0 +1,30 @@
+wrote Validation/sequences/generated/runs/netlist_calibration/path_08_init_to_cal/chain_harness.sv  (2 block(s): calibration, init_fsm)
+
+Path    : path_08_init_to_cal  [invariant, autonomous]
+Blocks  : calibration, init_fsm
+Window  : 180000 cycles (observation, no driver)
+Stages  : init_fsm(autonomous); calibration(autonomous)
+
+Running: xrun ... -top chain_harness  (15 file(s))
+  log -> Validation/reports/netlists/calibration/path_08_init_to_cal_sim.log
+12 transaction(s)
+    cal_status.done          1
+    cal_status.reset         1
+    cal_zqcs.request         1
+    cal_zqcs.reset           1
+    init_cmd.command         5
+    init_cmd.reset           1
+    init_status.done         1
+    init_status.reset        1
+  time span: 0 .. 700869000
+wrote 12 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/calibration/path_08_init_to_cal_observed.jsonl
+
+==================================================================
+  init_fsm                     [autonomous]  SVA-OWNED
+  calibration                  [autonomous]  SVA-OWNED
+  (path-level)                 [invariant ]  PASS
+      scope=path_08_init_to_cal  strategy=invariant  status=pass  (12 transactions, no rule broken)
+==================================================================
+
+  path verdict : PASS
+  report -> Validation/reports/netlists/calibration/path_08_init_to_cal_report.json

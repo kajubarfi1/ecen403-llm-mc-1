@@ -1,0 +1,67 @@
+  stimulus: register_walk on config_regs
+register_walk_config_regs: 207 step(s) (103 drive, 103 idle covering 206 cycle(s)), targets ['VP_FAIL_020', 'VP_CSR_001', 'VP_CSR_002', 'VP_CSR_003', 'VP_CSR_004', 'VP_CSR_005', 'VP_CSR_006']
+  wrote Validation/sequences/generated/runs/netlist_bank_tracker/path_12_csr_timing_to_scheduling/seq_driver.sv
+wrote Validation/sequences/generated/runs/netlist_bank_tracker/path_12_csr_timing_to_scheduling/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
+
+Path    : path_12_csr_timing_to_scheduling  [composed]
+Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
+Window  : 400 cycles settle after driver
+Stages  : config_regs(exact); bank_tracker+scheduler(invariant)
+
+Running: xrun ... -top chain_harness  (50 file(s))
+  log -> Validation/reports/netlists_vs_4b86/bank_tracker/path_12_csr_timing_to_scheduling_sim.log
+
+  EMBEDDED RTL ASSERTIONS FIRED (8 total) — the design's own checks disagree with its behavior:
+    illegal bin: cp_trfc_spacing 4x
+    a_TIMING_011             4x
+289 transaction(s)
+    cfg_refresh.reset        1
+    cfg_refresh.update       12
+    cfg_timing.reset         1
+    cfg_timing.update        16
+    cq_deq.reset             1
+    cq_enq.reset             1
+    csr.read                 57
+    csr.reset                1
+    csr.write                46
+    csr_rsp.read_data        57
+    csr_rsp.reset            1
+    csr_rsp.write_ack        46
+    csr_sts.reset            1
+    csr_sts_level.reset      1
+    csr_sts_level.state      6
+    ddr_cmd.command          6
+    ddr_cmd.reset            1
+    ddr_rd_beat.reset        1
+    ddr_wr_beat.reset        1
+    dp_cmd.reset             1
+    dp_rd_rsp.reset          1
+    dp_wr.reset              1
+    refresh_ack.ack          6
+    refresh_ack.reset        1
+    refresh_req.request      3
+    refresh_req.reset        1
+    req.reset                1
+    sched_cmd.command        6
+    sched_cmd.reset          1
+    sched_deq.reset          1
+    sched_in.command         6
+    sched_in.reset           1
+    wb.reset                 1
+    wb_rsp.reset             1
+  time span: 0 .. 2079000
+wrote 289 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists_vs_4b86/bank_tracker/path_12_csr_timing_to_scheduling_observed.jsonl
+
+==================================================================
+  config_regs                  [exact     ]  PASS
+      scope=config_regs  strategy=exact  status=pass  matched=131/131  WAIVED=2 field comparison(s)  (131 output transaction(s
+  bank_tracker+scheduler       [invariant ]  PASS
+      scope=bank_tracker_scheduler  strategy=invariant  status=pass  (289 transactions, no rule broken)
+  cmd_gen (support)            [sva       ]  FAIL
+      SVA fired: a_TIMING_011 x4
+      a_TIMING_011 fired 4x (assertion bound to cmd_gen, not a judged stage)
+==================================================================
+
+  path verdict : FAIL
+  report -> Validation/reports/netlists_vs_4b86/bank_tracker/path_12_csr_timing_to_scheduling_report.json
+  derived path_10_csr_to_timing              PASS  from stage config_regs
