@@ -1,0 +1,20 @@
+LVS negative control - config_regs, sky130hd (KLayout, ORFS container)
+Date: 2026-10-14
+Run: signoff_runner.py --design config_regs --platform sky130hd --mutate swap
+
+The layout is untouched. Only the REFERENCE netlist is corrupted, by swapping two
+pins on a single flip-flop, so a passing LVS here would mean the comparison is not
+actually reading connectivity.
+
+  mutation applied : MUT swap CLK<->D on Xack_r$_DFF_PN0_ (sky130_fd_sc_hd__dfrtp_1)
+
+  clean reference  : Match   1229 nets / 333 pins   status=PASS
+  mutated reference: NoMatch 1267 nets / 334 pins   status=FAIL
+                     KLayout reports the netlists do not match; top circuit status NoMatch
+
+  DRC on the same run: PASS, 0 violations
+  (expected - the GDS was not modified, so DRC must still pass. A DRC failure here
+  would mean the mutation leaked into the layout.)
+
+Verdict: the LVS deck fails on a two-pin swap in a 1229-net design, and the
+DRC deck is unaffected by a netlist-only change. Both checks discriminate.
