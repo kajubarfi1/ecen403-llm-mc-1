@@ -1,358 +1,125 @@
 {
   "$schema": "validation-drop-comparison/1",
   "a": {
-    "dir": "Validation/reports/drops/a82f2070de32",
-    "drop_head": "a82f2070de32"
+    "dir": "Validation/reports/drops/f058fc9",
+    "drop_head": null
   },
   "b": {
     "dir": "Validation/reports/paths",
-    "drop_head": "dab971c2aab9"
+    "drop_head": "4bf921ce1833"
   },
   "strict": false,
-  "generated_utc": "2026-10-15T17:49:32.561599Z",
+  "generated_utc": "2026-10-15T18:04:35.123140Z",
   "rows": [
     {
       "path": "path_01_write_cmd",
-      "kind": "fixed",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {
-        "matched:cmd_gen": [
-          50,
-          51
-        ]
-      },
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_02_read_cmd",
-      "kind": "fixed",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {
-        "matched:cmd_gen": [
-          49,
-          50
-        ]
-      },
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_03_read_return",
-      "kind": "same",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_04_scheduler_bank_loop",
-      "kind": "same",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_05_scheduler_refresh_loop",
-      "kind": "fixed",
-      "new": {},
-      "gone": {
-        "id:REF_001": 23,
-        "id:SCHED_003": 2,
-        "stage:(path-level)": 1,
-        "stage:scheduler": 1,
-        "violations:(path-level)": 14,
-        "violations:scheduler": 14
-      },
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "fail",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_06_scheduler_dequeue",
-      "kind": "same",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_07_backpressure",
-      "kind": "same",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_08_init_to_cal",
-      "kind": "same",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_09_init_to_refresh",
-      "kind": "same",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_10_csr_to_timing",
-      "kind": "same",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_11_csr_to_refresh",
-      "kind": "same",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_12_csr_timing_to_scheduling",
-      "kind": "same",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_13_csr_refresh_to_scheduling",
-      "kind": "fixed",
-      "new": {},
-      "gone": {
-        "id:SCHED_003": 1,
-        "stage:scheduler": 1,
-        "violations:scheduler": 1
-      },
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "fail",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_14_status_init",
-      "kind": "same",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_15_status_cal",
-      "kind": "same",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_16_status_refresh",
-      "kind": "same",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_17_full_boot",
-      "kind": "same",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_18_full_write",
-      "kind": "fixed",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {
-        "matched:cmd_gen": [
-          49,
-          50
-        ]
-      },
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_19_row_conflict",
-      "kind": "same",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_20_refresh_preempt",
-      "kind": "fixed",
-      "new": {},
-      "gone": {
-        "id:SCHED_003": 1,
-        "stage:(path-level)": 1,
-        "violations:(path-level)": 1
-      },
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {
-        "matched:cmd_gen": [
-          1792,
-          1840
-        ]
-      },
-      "verdict": [
-        "fail",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_21_wb_port_standalone",
-      "kind": "same",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     },
     {
       "path": "path_22_csr_standalone",
-      "kind": "same",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "pass"
-      ]
+      "kind": "missing",
+      "side": "a"
     }
   ]
 }

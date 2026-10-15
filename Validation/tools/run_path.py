@@ -514,7 +514,10 @@ def main() -> int:
     else:
         agent = CadenceSSHAgent(work_subdir=run_id)
         try:
-            agent.connect(password=load_password())
+            # load_password() blocks on an interactive getpass() prompt as a
+            # last resort; only pay for that when no key is configured, so a
+            # key-based setup (OLYMPUS_KEY) never hits it even transiently.
+            agent.connect(password=None if agent.ssh.get("key_path") else load_password())
             agent.clean_work_dir()
             uploads = (rtl + stub_files + driver_files
                        + [harness, bind_path] + mon_files + fcov_files)
