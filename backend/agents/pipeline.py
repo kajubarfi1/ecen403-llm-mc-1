@@ -444,13 +444,18 @@ def runner_node(state: PipelineState) -> PipelineState:
 
     run_started = time.time()
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=7200)
+        proc = subprocess.run(cmd, capture_output=True, text=True,
+                              timeout=RUNNER_TIMEOUT_S)
         combined_log = proc.stdout + ("\n" + proc.stderr if proc.stderr else "")
         write_text(log_path, combined_log)
         exit_code = proc.returncode
     except subprocess.TimeoutExpired:
         exit_code = -2
-        combined_log = "ERROR: OpenROAD run timed out after 3600s"
+        # Say the limit that actually applied. The previous message named 3600s
+        # while the cap was 7200, which misleads at exactly the moment someone is
+        # working out whether to raise it.
+        combined_log = (f"ERROR: OpenROAD run timed out after {RUNNER_TIMEOUT_S}s "
+                        f"(raise ORFS_RUN_TIMEOUT_S if this design needs longer)")
         write_text(log_path, combined_log)
     except Exception as e:
         exit_code = -3
@@ -1326,6 +1331,14 @@ SIGNOFF_ROOT      = BACKEND_ROOT / "signoff"
 FINDINGS_ROOT     = BACKEND_ROOT / "findings"
 SIGNOFF_TIMEOUT_S = 3 * 3600
 
+# A single ORFS build. The cap exists to kill a hung run, not to bound a slow one:
+# the full chip took ~50 min at 5 ns, and detailed routing is the stage that grows
+# when the constraint tightens or the design does. The old value was 2 hours, which
+# a full-chip build at an aggressive target can legitimately exceed - and losing a
+# two-hour run to its own watchdog costs more than letting a stuck one sit.
+# ORFS_RUN_TIMEOUT_S raises it for a sweep without editing code.
+RUNNER_TIMEOUT_S = int(os.environ.get("ORFS_RUN_TIMEOUT_S") or 4 * 3600)
+
 
 def _run_signoff(orfs_dir: str, platform: str, design_name: str, out_dir: Path) -> Dict[str, Any]:
     """
@@ -2075,6 +2088,25 @@ Log tail (last 6000 chars):
     fixable      = False
     fix_desc     = "Could not classify error — escalating to human."
     mk_changes: Dict[str, str] = {}
+
+    # A watchdog timeout is not a design defect and no config.mk change repairs it.
+    # Left to the classifier it reads as a timing problem - the log says "timed out"
+    # - and the repair agent relaxes CLOCK_PERIOD and rebuilds, so a run that was
+    # merely slow is attempted three times and takes three times as long to fail.
+    # Decide this from the exit code, which is unambiguous, before asking anything.
+    if (state.get("runner_result") or {}).get("exit_code") == -2:
+        msg = (f"[repair] runner timed out (exit -2); not a design error, so no repair "
+               f"is attempted. Raise ORFS_RUN_TIMEOUT_S if the build needs longer.")
+        print(msg)
+        return {
+            **state,
+            "repair_history": repair_history + [{
+                "error_class": "infrastructure_timeout", "fixable": False,
+                "fix_applied": None, "result": "escalated"}],
+            "current_node": "repair", "pipeline_status": "FAIL",
+            "error_message": "OpenROAD run timed out; not repairable by config change",
+            "messages": [msg],
+        }
 
     if api_key:
         try:
