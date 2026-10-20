@@ -805,7 +805,9 @@ def formal_findings(spec_rev, head):
         rep = load(rp, {})
         applies = formal_report_applies(rep, head, cur_design, block_design)
         for r in rep.get("results", []):
-            if r.get("status") == "proven":
+            # bounded_proven: no counterexample to a depth at or past the
+            # signoff bar (SIGNOFF §6), recorded by run_formal.py
+            if r.get("status") in ("proven", "bounded_proven"):
                 tid = r.get("short", "").replace("a_", "", 1)
                 proven_before.add(tid)
                 if applies:

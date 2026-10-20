@@ -225,3 +225,26 @@ envelope to them on the next flow round; nothing for us to translate.
 Note it names the pre-clamp drop; the scheduler RTL is unchanged in
 `efece348d04e`, so it still applies.
 
+## Addendum 4 (2026-10-20): per-block ids received; refresh_ctrl netlist judged
+
+Your `make_netlists_json.py` does exactly what addendum 3 asked, and
+using our `rtl_drop.py --block-design-ids` through the CLI rather than
+importing the module is the right call. Against drop `efece348d04e`
+every block's `design_id` matches the RTL it was cut from, so all eleven
+netlists are current and the git fallback is no longer needed.
+
+The rebuilt refresh_ctrl netlist: **PASS**, 11/13 paths, the other two
+RTL-FAIL (the data_path read-capture defect, the RTL's own, routed to the
+Frontend). It failed to elaborate on the first attempt for one cell
+(`sky130_fd_sc_hd__ha_4`) our mirror lacked, the same shape as the 23 on
+10-15; that is now automatic. `run_netlists.py` scans the netlists it is
+about to run, fetches any cell the library lacks from the open PDK and
+reinstalls on Olympus before the first simulation, and a unit test keeps
+the checked-in library covering the checked-in netlists. Use whatever
+drive strengths synthesis wants.
+
+Gate-level record now: ten of eleven netlists pass every path the RTL
+passes; data_path's netlist reproduces the RTL's defect (correct for a
+netlist). Nothing is stale. Your scheduler STA finding stands as the open
+change request to the Frontend.
+

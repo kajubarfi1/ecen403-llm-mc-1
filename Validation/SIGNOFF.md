@@ -180,17 +180,45 @@ timing/protocol assertion must be:
 
 An `undetermined` result is a signoff blocker until one of the above holds.
 
-Abstractions are allowed only as JasperGold `stopat` cuts named on the
-`run_formal.py` command line; the report records them under `abstractions`.
-A proof under a cut is sound (the cut design over-approximates the real one)
-and counts; a counterexample under a cut may be spurious, is marked so in the
-report, is never filed as a finding, and the property falls back to the
-simulation bar (silent on the baseline, fired by at least one seeded fault).
+Abstractions are allowed only as named on the `run_formal.py` command
+line, and the report records every one under `abstractions`:
 
-Current (a7cd3cb93546, 2026-10-08):
-- command path (`path_01`): 12 proven at infinite bound, 0 counterexamples,
-  1 undetermined (tREFI, bound 201). On 5661e03 this was 4 proven / 8 CEX;
-  the Frontend's scheduler hold closed every counterexample.
+- a JasperGold `stopat` cut. A proof under a cut is sound (the cut design
+  over-approximates the real one) and counts; a counterexample under a cut
+  may be spurious, is marked so in the report, is never filed as a finding,
+  and the property falls back to the simulation bar (silent on the
+  baseline, fired by at least one seeded fault).
+- an **assumed configuration** (`--stopat` on a configuration register plus
+  `--assume` fixing it, with `--sva-param` scaling the assertion's bound to
+  match; 2026-10-20). This is how a maximum-interval property such as
+  tREFI, whose bound no bounded engine can cross (14 040 cycles against a
+  reach of ~200), is proved: the interval is assumed shorter and the
+  assertion's bound shrinks with it. A proof holds for the assumed
+  configuration only and is recorded that way; it counts because the logic
+  under proof (counter, saturate, postpone, preempt) does not depend on the
+  constant, and the spec's real interval is measured in simulation (7.8 µs
+  on the clean drop). The assumed value must keep every other enforced
+  window satisfiable (tREFI above the enforced tRFC window), or the
+  counterexample is the configuration's, not the design's.
+
+A proof is about a design: `validate_drop.py` (step 4b) re-proves every
+path that has ever been proved and has no report that applies to the
+design under judgement, with the options of its last report, so a design
+change never leaves `awaiting_formal` findings for a person to remember.
+
+Current (efece348d04e, 2026-10-20):
+- command path (`path_01`), concrete: 12 proven at infinite bound, 0
+  counterexamples, 1 undetermined (tREFI at its 14 040-cycle bound). On
+  5661e03 this was 4 proven / 8 CEX; the Frontend's scheduler hold closed
+  every counterexample.
+- command path, assumed configuration (tREFI 516 nCK = 129 cycles, just
+  above the enforced tRFC window; max_postpone 1, urgent at 1; assertion
+  bound 258): 10 proven at infinite bound, tREFI **bounded-proven to depth
+  9 272** (bar 516), 0 counterexamples; the postponed-refresh cover
+  reached at 136 cycles. PROTO_001/002 are bounded to the same depth in
+  this run and proven at infinite bound in the concrete one. A proof under an assumption
+  holds for that configuration; the spec's interval is measured in
+  simulation.
 - boot path (`path_08`, init_fsm + calibration): CAL_001/CAL_002 proven
   concretely; with `u_init_fsm.wait_cnt` cut, INIT_001 (×2), INIT_002 and
   INIT_003 proven at infinite bound, covers 5/5; `a_INIT_002_init_done`

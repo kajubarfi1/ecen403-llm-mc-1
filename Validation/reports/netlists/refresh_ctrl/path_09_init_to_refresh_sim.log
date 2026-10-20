@@ -1,4 +1,4 @@
-TOOL:	xrun	24.03-s013: Started on Oct 15, 2026 at 13:45:04 CDT
+TOOL:	xrun	24.03-s013: Started on Oct 20, 2026 at 16:58:59 CDT
 *WARNING* X Window Display Initialization failure
 *WARNING* (DISPLAY "")
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
@@ -1925,6 +1925,21 @@ xmvlog: *W,NODNTW (/home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/ha/sky1
 		errors: 0, warnings: 4
 	module worklib.sky130_fd_sc_hd__ha_1:v
 		errors: 0, warnings: 0
+file: /home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/ha/sky130_fd_sc_hd__ha_4.v
+    output COUT;
+              |
+xmvlog: *W,NODNTW (/home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/ha/sky130_fd_sc_hd__ha_4.v,84|14): Implicit net port (COUT) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+    output SUM ;
+             |
+xmvlog: *W,NODNTW (/home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/ha/sky130_fd_sc_hd__ha_4.v,85|13): Implicit net port (SUM) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+    input  A   ;
+           |
+xmvlog: *W,NODNTW (/home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/ha/sky130_fd_sc_hd__ha_4.v,86|11): Implicit net port (A) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+    input  B   ;
+           |
+xmvlog: *W,NODNTW (/home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/ha/sky130_fd_sc_hd__ha_4.v,87|11): Implicit net port (B) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+	module worklib.sky130_fd_sc_hd__ha_4:v
+		errors: 0, warnings: 4
 file: /home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/inv/sky130_fd_sc_hd__inv_1.v
     output Y;
            |
@@ -4228,13 +4243,13 @@ xmelab: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment
 	Elaborating the design hierarchy:
 xmelab: *N,CGNSWA: (File: ./cov_conf.ccf, Line: 6): A covergroup is not (de)selected with the "-all" option of the (de)select_coverage command. Use the coverage metric "-covergroup" with the (de)select_coverage command to (de)select a covergroup.
 		Caching library 'worklib' ....... Done
- sky130_fd_sc_hd__clkinv_2 clkload0 (.A(clknet_1_0__leaf_clk));
+ sky130_fd_sc_hd__clkbuf_1 clkload0 (.A(clknet_1_0__leaf_clk));
                                   |
-xmelab: *W,CUVWSP (./refresh_ctrl_netlist.v,816|34): 1 output port was not connected:
-xmelab: (/home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/clkinv/sky130_fd_sc_hd__clkinv_2.v,72): Y
+xmelab: *W,CUVWSP (./refresh_ctrl_netlist.v,887|34): 1 output port was not connected:
+xmelab: (/home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/clkbuf/sky130_fd_sc_hd__clkbuf_1.v,72): X
 
 	Top level design units:
-		$unit_0x59dfa773
+		$unit_0x216a40d1
 		chain_harness
 
 	Extracting FSMs for coverage:
@@ -4300,56 +4315,56 @@ xmvlog_cg: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,1
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
-		worklib.refresh_ctrl_fcov:sv <0x5fed3b17>
+		worklib.refresh_ctrl_fcov:sv <0x4f237d49>
 			streams:   4, words:  2046
-		worklib.refresh_req_monitor:sv <0x73d9a282>
+		worklib.refresh_req_monitor:sv <0x7a794040>
 			streams:   3, words:  2241
-		worklib.refresh_level_monitor:sv <0x4cfffaa5>
+		worklib.refresh_level_monitor:sv <0x4e444db3>
 			streams:   3, words:  2531
-		worklib.refresh_ack_monitor:sv <0x04092a64>
+		worklib.refresh_ack_monitor:sv <0x1c20d6a9>
 			streams:   2, words:  1543
-		worklib.init_fsm_sva:sv <0x4e55ccda>
+		worklib.init_fsm_sva:sv <0x02cd1d66>
 			streams:  43, words: 28893
-		worklib.init_fsm_fcov:sv <0x74916774>
+		worklib.init_fsm_fcov:sv <0x453c10f0>
 			streams:   4, words:  2295
-		worklib.init_status_monitor:sv <0x17d96f2e>
+		worklib.init_status_monitor:sv <0x1b200b25>
 			streams:   3, words:  2016
-		worklib.init_cmd_monitor:sv <0x2d3dee6f>
+		worklib.init_cmd_monitor:sv <0x1557c5bb>
 			streams:   2, words:  1993
-		worklib.config_regs_fcov:sv <0x2c7f38e8>
+		worklib.config_regs_fcov:sv <0x087ff7dc>
 			streams:  10, words: 13585
-		worklib.csr_sts_level_monitor:sv <0x565d8216>
+		worklib.csr_sts_level_monitor:sv <0x42763193>
 			streams:   3, words:  5328
-		worklib.csr_sts_monitor:sv <0x4e9430e1>
+		worklib.csr_sts_monitor:sv <0x7d19b881>
 			streams:   2, words:  2016
-		worklib.csr_rsp_monitor:sv <0x6b189663>
+		worklib.csr_rsp_monitor:sv <0x62b874a1>
 			streams:   2, words:  3103
-		worklib.csr_monitor:sv <0x1b059d0a>
+		worklib.csr_monitor:sv <0x22a69493>
 			streams:   2, words:  2653
-		worklib.cfg_timing_monitor:sv <0x531cf1b7>
+		worklib.cfg_timing_monitor:sv <0x15540977>
 			streams:   3, words:  5065
-		worklib.cfg_refresh_monitor:sv <0x108f7b1f>
+		worklib.cfg_refresh_monitor:sv <0x108dbe24>
 			streams:   3, words:  3291
-		worklib.chain_harness:sv <0x652bde71>
+		worklib.chain_harness:sv <0x539f0de2>
 			streams:  92, words: 26318
-		worklib.config_regs:sv <0x532bd5fb>
+		worklib.config_regs:sv <0x395ea731>
 			streams:  64, words: 58855
-		worklib.init_fsm:sv <0x0e05d1a1>
+		worklib.init_fsm:sv <0x2d4fe2e5>
 			streams:  21, words: 25643
-		worklib.refresh_ctrl:sv <0x0b4f67b6>
+		worklib.refresh_ctrl:sv <0x4ccaaad2>
 			streams:  15, words:  3281
-		worklib.\$unit_0x59dfa773 :compilation_unit <0x0b37394a>
+		worklib.\$unit_0x216a40d1 :compilation_unit <0x4c9b32d9>
 			streams:   0, words:     0
 	Building instance specific data structures.
 xmelab: *W,CGPIDF: Covergroup "per_instance" option , by default, is set as 0.
 	Loading native compiled code:     .................... Done
 	Design hierarchy summary:
 		                   Instances  Unique
-		Modules:                 456     107
-		UDPs:                     22       2
-		Primitives:              517       8
+		Modules:                 490     111
+		UDPs:                     24       3
+		Primitives:              551       8
 		Registers:               219     220
-		Scalar wires:          1,003       -
+		Scalar wires:          1,071       -
 		Expanded wires:           36       4
 		Vectored wires:          110       -
 		Named events:              5       5
@@ -4520,6 +4535,6 @@ coverage setup:
   Coverage database dumped with the set_code_fine_grained_merging command during elaboration.
 
 coverage files:
-  model(design data) :  ./cov_work/scope/icc_4c6e119f_6fb13dc5.ucm
-  data               :  ./cov_work/scope/path_09_init_to_refresh/icc_4c6e119f_6fb13dc5.ucd
-TOOL:	xrun	24.03-s013: Exiting on Oct 15, 2026 at 13:45:07 CDT  (total: 00:00:03)
+  model(design data) :  ./cov_work/scope/icc_7c0c6eba_6fb13dc5.ucm
+  data               :  ./cov_work/scope/path_09_init_to_refresh/icc_7c0c6eba_6fb13dc5.ucd
+TOOL:	xrun	24.03-s013: Exiting on Oct 20, 2026 at 16:59:01 CDT  (total: 00:00:02)

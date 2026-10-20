@@ -37,11 +37,96 @@ SMOKE = os.path.join(ROOT, "backend", "outputs", "wb_port", "6_final.v")
 XRUN_NETLIST_ARGS = "+define+FUNCTIONAL +define+UNIT_DELAY= -F $HOME/{remote}/cells.f".format(remote=REMOTE)
 
 
+PDK_RAW = "https://raw.githubusercontent.com/google/skywater-pdk-libs-sky130_fd_sc_hd/main/"
+NETLIST_GLOB = os.path.join(ROOT, "backend", "outputs", "*", "6_final.v")
+
+
+def library_cells():
+    """Every sky130_fd_sc_hd module the mirrored library defines."""
+    import re
+    have = set()
+    for f in glob.glob(os.path.join(LIB, "**", "*.v"), recursive=True):
+        with open(f, errors="replace") as fh:
+            have |= set(re.findall(r"^\s*module\s+(sky130_fd_sc_hd__\w+)", fh.read(), re.M))
+    return have
+
+
+def cells_used(netlists):
+    import re
+    used = set()
+    for n in netlists:
+        with open(n, errors="replace") as fh:
+            used |= set(re.findall(r"^\s*(sky130_fd_sc_hd__\w+)\s+\S+\s*\(", fh.read(), re.M))
+    return used
+
+
+def fetch_missing(netlists=None, quiet=False):
+    """Mirror from the open PDK every cell the netlists instantiate that the
+    library lacks (a drive strength the last build did not use, usually:
+    23 on the 10-15 rebuild, ha_4 on the 10-20 one), with the base and
+    functional model of a new family and the UDP primitives those include.
+    Returns the cells fetched; raises if one cannot be fetched, because a
+    netlist that does not elaborate is not a verdict."""
+    import re
+    import shutil
+    import subprocess
+    netlists = netlists or sorted(glob.glob(NETLIST_GLOB))
+    have = library_cells()
+    missing = sorted(cells_used(netlists) - have)
+    if not missing:
+        return []
+    dl = tempfile.mkdtemp(prefix="sky130_dl_")
+
+    def fetch(rel):
+        dst = os.path.join(dl, rel)
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        r = subprocess.run(["curl", "-sf", "-o", dst, PDK_RAW + rel], capture_output=True)
+        return r.returncode == 0
+
+    want = []
+    for cell in missing:
+        fam = re.sub(r"_\d+$", "", cell[len("sky130_fd_sc_hd__"):])
+        want.append(f"cells/{fam}/{cell}.v")
+        if not os.path.isdir(os.path.join(LIB, "cells", fam)):
+            want += [f"cells/{fam}/sky130_fd_sc_hd__{fam}.v", f"cells/{fam}/sky130_fd_sc_hd__{fam}.functional.v"]
+    got, queue = [], list(dict.fromkeys(want))
+    while queue:
+        rel = queue.pop(0)
+        if rel in got:
+            continue
+        if not fetch(rel):
+            raise SystemExit(f"could not fetch {PDK_RAW}{rel} for the missing cell models {missing}")
+        got.append(rel)
+        with open(os.path.join(dl, rel), errors="replace") as fh:
+            incs = re.findall(r"`include\s+\"([^\"]+)\"", fh.read())
+        for inc in incs:
+            if inc.endswith((".pp.v", ".behavioral.v")):
+                continue            # only functional, no-power-pin models are compiled
+            if glob.glob(os.path.join(LIB, "**", inc), recursive=True) or any(g.endswith("/" + inc) for g in got):
+                continue
+            if "udp" in inc:
+                queue.append(f"models/{inc.replace('sky130_fd_sc_hd__', '').split('.')[0]}/{inc}")
+            else:
+                queue.append(f"cells/{os.path.basename(os.path.dirname(rel))}/{inc}")
+    for rel in got:
+        dst = os.path.join(LIB, rel)
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        shutil.copy(os.path.join(dl, rel), dst)
+    if not quiet:
+        print(f"  fetched {len(got)} file(s) from the open PDK for {len(missing)} missing cell(s): "
+              + ", ".join(c.replace("sky130_fd_sc_hd__", "") for c in missing))
+    return missing
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--no-smoke", action="store_true")
+    ap.add_argument("--no-fetch", action="store_true",
+                    help="do not mirror cells the backend's netlists use and the library lacks")
     args = ap.parse_args()
+    if not args.check and not args.no_fetch:
+        fetch_missing()
     from sim_runner import CadenceSSHAgent
     from run_path import load_password          # the same credential source every path run uses
     a = CadenceSSHAgent()

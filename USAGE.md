@@ -585,7 +585,23 @@ python3 Validation/refdesigns/uberddr3/path_checkers_on_uberddr3.py --log <txn l
 
 # Formal (JasperGold on Olympus): every generated assertion proven, bounded, or filed as a finding
 python3 Validation/tools/run_formal.py --path path_01_write_cmd
+# A maximum-interval property no bounded engine can cross (tREFI: 14 040 cycles) is
+# proved under an assumed, shorter configuration with the assertion bound scaled to
+# match; the report records every cut, assumption and parameter as an abstraction
+python3 Validation/tools/run_formal.py --path path_01_write_cmd --time 40m \
+    --stopat u_config_regs.reg_timing_3 --stopat u_config_regs.reg_refresh_config \
+    --assume "u_config_regs.reg_timing_3 == 32'h00020404" \
+    --assume "u_config_regs.reg_refresh_config == 32'h00000111" \
+    --sva-param TIMING_012_BOUND=258 --sva-param TIMING_012_INTERVAL=129
 ```
+
+A proof is about a design: `validate_drop.py` (step 4b) re-proves every
+path that has ever been proved and has no report that applies to the drop
+under judgement, with the same abstractions as its last report, so a
+regeneration never leaves proofs stale (`--skip-formal` to defer it,
+`--formal-time` for the per-path limit). Do not pass `--trace` unless you
+want a cap: JasperGold shuts the whole proof down when an engine reaches
+it, and every open property comes back `undetermined` at that bound.
 
 Results land in `Validation/reports/faults/fault_matrix.json`,
 `reports/model_agreement.json`, `reports/uberddr3/` and `reports/formal/`.

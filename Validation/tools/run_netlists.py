@@ -202,6 +202,17 @@ def main():
                                               "first_failure": first, "fired": {}}, b)
     jobs = [(b, os.path.join(ROOT, nl["blocks"][b]["netlist"]), p)
             for b in blocks for p in paths_for(b, pdefs, imap) if (b, p) not in done]
+    if jobs and not args.judge_only:
+        # a rebuilt netlist may use a cell the mirrored library lacks; fetch
+        # it and reinstall before any run, or every pair fails to elaborate
+        import install_sky130_models as ISM
+        fetched = ISM.fetch_missing([os.path.join(ROOT, nl["blocks"][b]["netlist"]) for b in blocks])
+        if fetched:
+            r = subprocess.run([sys.executable, os.path.join(ROOT, "Validation", "tools", "install_sky130_models.py"),
+                                "--no-fetch", "--no-smoke"], cwd=ROOT, capture_output=True, text=True)
+            print("  " + (r.stdout.strip().splitlines() or ["(install produced no output)"])[-1])
+            if r.returncode != 0:
+                raise SystemExit("cell model install failed:\n" + (r.stdout + r.stderr)[-800:])
     if args.rescore:
         jobs = []
     # Provenance: a netlist is evidence about the drop it was cut from. When

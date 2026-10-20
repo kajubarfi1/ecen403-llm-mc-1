@@ -1,4 +1,4 @@
-TOOL:	xrun	24.03-s013: Started on Oct 15, 2026 at 13:44:59 CDT
+TOOL:	xrun	24.03-s013: Started on Oct 20, 2026 at 16:58:40 CDT
 *WARNING* file /home/ugrads/j/jacobz/CDS.log File is already locked by some other process.
 *WARNING* X Window Display Initialization failure
 *WARNING* (DISPLAY "")
@@ -1926,6 +1926,21 @@ xmvlog: *W,NODNTW (/home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/ha/sky1
 		errors: 0, warnings: 4
 	module worklib.sky130_fd_sc_hd__ha_1:v
 		errors: 0, warnings: 0
+file: /home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/ha/sky130_fd_sc_hd__ha_4.v
+    output COUT;
+              |
+xmvlog: *W,NODNTW (/home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/ha/sky130_fd_sc_hd__ha_4.v,84|14): Implicit net port (COUT) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+    output SUM ;
+             |
+xmvlog: *W,NODNTW (/home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/ha/sky130_fd_sc_hd__ha_4.v,85|13): Implicit net port (SUM) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+    input  A   ;
+           |
+xmvlog: *W,NODNTW (/home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/ha/sky130_fd_sc_hd__ha_4.v,86|11): Implicit net port (A) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+    input  B   ;
+           |
+xmvlog: *W,NODNTW (/home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/ha/sky130_fd_sc_hd__ha_4.v,87|11): Implicit net port (B) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+	module worklib.sky130_fd_sc_hd__ha_4:v
+		errors: 0, warnings: 4
 file: /home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/inv/sky130_fd_sc_hd__inv_1.v
     output Y;
            |
@@ -4305,13 +4320,13 @@ xmelab: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment
 	Elaborating the design hierarchy:
 xmelab: *N,CGNSWA: (File: ./cov_conf.ccf, Line: 6): A covergroup is not (de)selected with the "-all" option of the (de)select_coverage command. Use the coverage metric "-covergroup" with the (de)select_coverage command to (de)select a covergroup.
 		Caching library 'worklib' ....... Done
- sky130_fd_sc_hd__clkinv_2 clkload0 (.A(clknet_1_0__leaf_clk));
+ sky130_fd_sc_hd__clkbuf_1 clkload0 (.A(clknet_1_0__leaf_clk));
                                   |
-xmelab: *W,CUVWSP (./refresh_ctrl_netlist.v,816|34): 1 output port was not connected:
-xmelab: (/home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/clkinv/sky130_fd_sc_hd__clkinv_2.v,72): Y
+xmelab: *W,CUVWSP (./refresh_ctrl_netlist.v,887|34): 1 output port was not connected:
+xmelab: (/home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/clkbuf/sky130_fd_sc_hd__clkbuf_1.v,72): X
 
 	Top level design units:
-		$unit_0x3809c9bc
+		$unit_0x1c93035f
 		chain_harness
 
 	Extracting FSMs for coverage:
@@ -4384,93 +4399,93 @@ xmvlog_cg: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,1
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
-		worklib.dram_stub:sv <0x2e446510>
+		worklib.dram_stub:sv <0x355f4057>
 			streams:   3, words:  7224
-		worklib.wb_rsp_monitor:sv <0x0d86a9e5>
+		worklib.wb_rsp_monitor:sv <0x51035b94>
 			streams:   2, words:  1788
-		worklib.wb_monitor:sv <0x5e4d6717>
+		worklib.wb_monitor:sv <0x771d6b40>
 			streams:   2, words:  2913
-		worklib.req_monitor:sv <0x06e27f07>
+		worklib.req_monitor:sv <0x58c772c0>
 			streams:   2, words:  2235
-		worklib.scheduler_fcov:sv <0x48249c02>
+		worklib.scheduler_fcov:sv <0x5a054c0b>
 			streams:   4, words:  1955
-		worklib.sched_deq_monitor:sv <0x23a40cb5>
+		worklib.sched_deq_monitor:sv <0x23b94c84>
 			streams:   2, words:  1543
-		worklib.sched_cmd_monitor:sv <0x2d498f97>
+		worklib.sched_cmd_monitor:sv <0x437e89f0>
 			streams:   2, words:  2668
-		worklib.refresh_ctrl_fcov:sv <0x0e0e4aa9>
+		worklib.refresh_ctrl_fcov:sv <0x5460faea>
 			streams:   4, words:  2046
-		worklib.refresh_req_monitor:sv <0x54cbf5a4>
+		worklib.refresh_req_monitor:sv <0x70acca87>
 			streams:   3, words:  2241
-		worklib.refresh_level_monitor:sv <0x286b16c9>
+		worklib.refresh_level_monitor:sv <0x465c10ae>
 			streams:   3, words:  2531
-		worklib.refresh_ack_monitor:sv <0x016f20da>
+		worklib.refresh_ack_monitor:sv <0x1a506d70>
 			streams:   2, words:  1543
-		worklib.data_path_fcov:sv <0x45f2d2e0>
+		worklib.data_path_fcov:sv <0x160bff43>
 			streams:   4, words:  2329
-		worklib.dp_wr_monitor:sv <0x79e4ed81>
+		worklib.dp_wr_monitor:sv <0x62dba02b>
 			streams:   2, words:  1785
-		worklib.dp_rd_rsp_monitor:sv <0x5f64ff10>
+		worklib.dp_rd_rsp_monitor:sv <0x574bfb32>
 			streams:   2, words:  1768
-		worklib.dp_cmd_monitor:sv <0x675a3a96>
+		worklib.dp_cmd_monitor:sv <0x26b02b00>
 			streams:   2, words:  2452
-		worklib.ddr_wr_beat_monitor:sv <0x5b10d1ac>
+		worklib.ddr_wr_beat_monitor:sv <0x16bb9d28>
 			streams:   2, words:  1768
-		worklib.ddr_rd_beat_monitor:sv <0x07716b36>
+		worklib.ddr_rd_beat_monitor:sv <0x1c4e269c>
 			streams:   2, words:  1543
-		worklib.config_regs_fcov:sv <0x51da0e9f>
+		worklib.config_regs_fcov:sv <0x5996cd85>
 			streams:  10, words: 13585
-		worklib.csr_sts_level_monitor:sv <0x21fa5589>
+		worklib.csr_sts_level_monitor:sv <0x1c236b05>
 			streams:   3, words:  5328
-		worklib.csr_sts_monitor:sv <0x213d8782>
+		worklib.csr_sts_monitor:sv <0x291283a0>
 			streams:   2, words:  2016
-		worklib.csr_rsp_monitor:sv <0x4c0ac145>
+		worklib.csr_rsp_monitor:sv <0x686dfe66>
 			streams:   2, words:  3103
-		worklib.csr_monitor:sv <0x0c1165a9>
+		worklib.csr_monitor:sv <0x41ba292d>
 			streams:   2, words:  2653
-		worklib.cfg_timing_monitor:sv <0x7f3367c1>
+		worklib.cfg_timing_monitor:sv <0x351f3cab>
 			streams:   3, words:  5065
-		worklib.cfg_refresh_monitor:sv <0x1e75f03f>
+		worklib.cfg_refresh_monitor:sv <0x0604af5c>
 			streams:   3, words:  3291
-		worklib.cmd_queue_fcov:sv <0x287cce68>
+		worklib.cmd_queue_fcov:sv <0x04f25204>
 			streams:   4, words:  1898
-		worklib.cq_enq_monitor:sv <0x180eca86>
+		worklib.cq_enq_monitor:sv <0x7005ffad>
 			streams:   2, words:  2235
-		worklib.cq_deq_monitor:sv <0x136d55c7>
+		worklib.cq_deq_monitor:sv <0x1b6706fb>
 			streams:   2, words:  1543
-		worklib.cmd_gen_coverage:sv <0x103e77ba>
+		worklib.cmd_gen_coverage:sv <0x72bea4e0>
 			streams:  25, words: 45158
-		worklib.sched_in_monitor:sv <0x15f18d3c>
+		worklib.sched_in_monitor:sv <0x4ba39da7>
 			streams:   2, words:  2668
-		worklib.ddr_cmd_monitor:sv <0x2e0b9a32>
+		worklib.ddr_cmd_monitor:sv <0x26249e10>
 			streams:   2, words:  2037
-		worklib.bank_tracker_fcov:sv <0x7fa71a9d>
+		worklib.bank_tracker_fcov:sv <0x25c9aade>
 			streams:   4, words:  2393
-		worklib.addr_decoder:sv <0x2c201031>
+		worklib.addr_decoder:sv <0x67e1feb2>
 			streams:   2, words:  1259
-		worklib.seq_driver:sv <0x57e2ffa5>
+		worklib.seq_driver:sv <0x559f6a99>
 			streams:   5, words: 29378
-		worklib.chain_harness:sv <0x7145f05f>
+		worklib.chain_harness:sv <0x0d5d5d9a>
 			streams: 246, words: 66750
-		worklib.bank_tracker:sv <0x61ec9dcf>
+		worklib.bank_tracker:sv <0x74a93aaf>
 			streams:  37, words: 49233
-		worklib.config_regs:sv <0x65c382a2>
+		worklib.config_regs:sv <0x54f7a938>
 			streams:  64, words: 58855
-		worklib.cmd_queue:sv <0x61899478>
+		worklib.cmd_queue:sv <0x6beee3b1>
 			streams:  21, words: 20719
-		worklib.cmd_gen:sv <0x105b1451>
+		worklib.cmd_gen:sv <0x1d3fcf4b>
 			streams:  19, words: 19688
-		worklib.data_path:sv <0x3da35fff>
+		worklib.data_path:sv <0x1f5201e1>
 			streams:  60, words: 47462
-		worklib.refresh_ctrl:sv <0x17cfd9b1>
+		worklib.refresh_ctrl:sv <0x107e59f0>
 			streams:  15, words:  3281
-		worklib.wb_port:sv <0x113ec6ea>
+		worklib.wb_port:sv <0x51dda399>
 			streams:  58, words: 45842
-		worklib.scheduler:sv <0x0c5bd8bf>
+		worklib.scheduler:sv <0x33b55235>
 			streams:  28, words: 45935
-		worklib.cmd_gen_sva:sv <0x1bc112ab>
+		worklib.cmd_gen_sva:sv <0x4fcac010>
 			streams: 333, words: 140663
-		worklib.\$unit_0x3809c9bc :compilation_unit <0x3b09fec4>
+		worklib.\$unit_0x1c93035f :compilation_unit <0x11c30c43>
 			streams:   0, words:     0
 xmelab: *W,COVNOEN: By default, toggle coverage is not supported for systemverilog static arrays of enumerated nets and variables. To enable toggle coverage of these objects, specify the 'set_toggle_scoring -sv_enum enable_mda' command in the coverage configuration file.
   int unsigned since_act [8];
@@ -4481,11 +4496,11 @@ xmelab: *W,CGPIDF: Covergroup "per_instance" option , by default, is set as 0.
 	Loading native compiled code:     .................... Done
 	Design hierarchy summary:
 		                       Instances  Unique
-		Modules:                     480     131
-		UDPs:                         22       2
-		Primitives:                  517       8
+		Modules:                     514     135
+		UDPs:                         24       3
+		Primitives:                  551       8
 		Registers:                   819     841
-		Scalar wires:              1,133       -
+		Scalar wires:              1,201       -
 		Expanded wires:               36       4
 		Vectored wires:              270       -
 		Named events:                 21      21
@@ -4944,6 +4959,6 @@ coverage setup:
   Coverage database dumped with the set_code_fine_grained_merging command during elaboration.
 
 coverage files:
-  model(design data) :  ./cov_work/scope/icc_0343bf09_6d92dba5.ucm
-  data               :  ./cov_work/scope/path_03_read_return/icc_0343bf09_6d92dba5.ucd
-TOOL:	xrun	24.03-s013: Exiting on Oct 15, 2026 at 13:45:02 CDT  (total: 00:00:03)
+  model(design data) :  ./cov_work/scope/icc_19ac9332_49d21eab.ucm
+  data               :  ./cov_work/scope/path_03_read_return/icc_19ac9332_49d21eab.ucd
+TOOL:	xrun	24.03-s013: Exiting on Oct 20, 2026 at 16:58:43 CDT  (total: 00:00:03)

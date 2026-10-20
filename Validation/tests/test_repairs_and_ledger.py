@@ -183,12 +183,15 @@ class TestFormalAbstraction(unittest.TestCase):
     def test_tcl_places_stopat_after_elaborate(self):
         sys.path.insert(0, os.path.join(V, "tools"))
         import run_formal as RF
-        tcl = RF.TCL.format(time="1m", trace=10, stopat="stopat u_init_fsm.wait_cnt\n")
+        tcl = RF.TCL.format(time="1m", trace_line="", stopat="stopat u_init_fsm.wait_cnt\n")
         lines = tcl.splitlines()
+        # after elaborate (the name must resolve) and after clock/reset (an
+        # assume beside it needs the clock; 2026-10-20), before the prove
         self.assertLess(lines.index("elaborate -top chain_formal"),
                         lines.index("stopat u_init_fsm.wait_cnt"))
-        self.assertLess(lines.index("stopat u_init_fsm.wait_cnt"), lines.index("clock clk"))
-        self.assertNotIn("stopat", RF.TCL.format(time="1m", trace=10, stopat=""))
+        self.assertLess(lines.index("reset -expression {!rst_n}"), lines.index("stopat u_init_fsm.wait_cnt"))
+        self.assertLess(lines.index("stopat u_init_fsm.wait_cnt"), lines.index("prove -all"))
+        self.assertNotIn("stopat", RF.TCL.format(time="1m", trace_line="", stopat=""))
 
     def test_ledger_reports_abstracted_proofs_not_abstracted_cex(self):
         led = json.load(open(os.path.join(V, "reports", "check_ledger.json")))

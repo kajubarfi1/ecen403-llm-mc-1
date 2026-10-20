@@ -689,6 +689,36 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   Frontend. Git: `git push origin integrate-validation:main` after a
   stale-local-main push was rejected.
 
+- *2026-10-20 — formal closes itself; tREFI proved under an assumed
+  configuration; netlists all current.* Path 01 re-proved on the merged
+  drop (12/13 at infinite bound; the two `awaiting_formal` scheduler
+  findings closed by it). `validate_drop.py` step 4b now re-proves every
+  path with formal history and no report for the design under judgement,
+  replaying the last report's abstractions (`formal_replays`, tests), so a
+  regeneration never leaves proofs stale. tREFI (`a_TIMING_012`, bound
+  14 040 cycles, undetermined at depth 201 on every run) is now proved
+  under an assumed configuration: `run_formal.py --stopat/--assume` on
+  `reg_timing_3` and `reg_refresh_config`, tREFI = 516 nCK (129 cycles,
+  above the 128-cycle enforced tRFC window), postpone budget 1, and
+  `--sva-param` scaling the generated assertion's bound (now a module
+  parameter) to 258: 10 proven, tREFI bounded to depth 9 272 with no
+  counterexample (SIGNOFF §6 bar: 2x the longest bound = 516), the
+  postponed-refresh cover reached at 136 cycles. Two tool lessons on the
+  way: JasperGold's `max_trace_length` shuts the WHOLE proof down when an
+  engine reaches it (300: 12 s, every property undetermined at 301; 2000:
+  2 min), so `--trace` is now opt-in and the time limit governs; and
+  `stopat` on an assigned output did not take, the register itself does.
+  Path 04's formal top is identical to path 01's (same nine-block closure,
+  same free inputs), so "extend to path 04" is already covered; the next
+  formal extension is refresh rules (REF_001/REF_002) as SVA, not another
+  path. Dawson delivered per-block `design_id` in `NETLISTS.json` (via our
+  CLI) and a refresh_ctrl rebuild: all eleven netlists current; the
+  rebuilt one needed one more cell (`ha_4`), so `run_netlists.py` now
+  fetches any cell a netlist uses that the mirror lacks and reinstalls
+  before running (`install_sky130_models.fetch_missing`, test). Gate
+  level: 10/11 pass every path the RTL passes; data_path's netlist
+  reproduces the RTL defect.
+
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the
 schema generator's default root and `faults/fault_catalog.json` now point
