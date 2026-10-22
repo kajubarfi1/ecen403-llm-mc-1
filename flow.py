@@ -120,6 +120,8 @@ PHASES = [(1, "Phase1", "phase1_pipeline.py", "PHASE1RTL", ["init_fsm", "config_
 VALIDATION = os.path.join(ROOT, "Validation")
 SPEC_STAGE = os.path.join(VALIDATION, "spec", "validate_spec_stage.py")
 VALIDATE_DROP = os.path.join(VALIDATION, "tools", "validate_drop.py")
+RUN_FORMAL = os.path.join(VALIDATION, "tools", "run_formal.py")
+FORMAL_REPORTS = os.path.join(VALIDATION, "reports", "formal")
 OUTBOX_CURRENT = os.path.join(VALIDATION, "findings", "outbox", "current")
 BACKEND_AGENTS = os.path.join(ROOT, "backend", "agents")
 BACKEND_PIPELINE = os.path.join(BACKEND_AGENTS, "pipeline.py")
@@ -563,6 +565,47 @@ def stage_rtl_validation(run, args, partial=False, tag=None):
     return 1            # FAIL -> the caller decides (regeneration edge)
 
 
+def stage_formal(run, args):
+    """Validation: JasperGold formal proof on one command path (default
+    path_01_write_cmd, run_formal.py's own default), gated behind --formal.
+
+    Opt-in and never halts the run: run_formal.py is a Slurm/JasperGold job
+    on Olympus (20 min prove-time budget by default) that Validation's own
+    handoff (2026-10-20) says is "not yet part of flow.py" and still
+    exploratory -- a flaky Olympus connection or an open (undetermined)
+    property at the time bound is not the same as a found counterexample,
+    so this records a result and moves on rather than gating the flow on a
+    check nothing else in the pipeline is gated on yet."""
+    path = getattr(args, "formal_path", None) or "path_01_write_cmd"
+    env = os.environ.copy()
+    env["VALIDATION_RTL_DROP_ROOTS"] = run.drop
+    env["VALIDATION_SPEC"] = run.state["spec"]
+    cmd = [PY, RUN_FORMAL, "--path", path]
+    if getattr(args, "formal_time", None):
+        cmd += ["--time", args.formal_time]
+    rc, txt = sh(cmd, cwd=ROOT, env=env, log=run.log, timeout=3600)
+    m = re.search(r"wrote (\S+report\.json|\S+\.json)", txt)
+    report_path = os.path.join(ROOT, m.group(1)) if m else None
+    dest_dir = os.path.join(run.dir, "formal")
+    os.makedirs(dest_dir, exist_ok=True)
+    if rc != 0 or not report_path or not os.path.exists(report_path):
+        run.record("formal", "ERROR", f"run_formal.py --path {path} exited {rc} "
+                   f"(harness generation or the Slurm/JasperGold job failed; see flow.log)")
+        return 0   # informational only -- never blocks the flow
+    shutil.copy(report_path, dest_dir)
+    with open(report_path) as f:
+        rep = json.load(f)
+    summ = rep.get("summary", {})
+    cex = summ.get("cex", 0)
+    undetermined = summ.get("undetermined", 0)
+    status = "FAIL" if cex else "PASS"
+    detail = (f"{path}: {summ.get('proven', 0)} proven, {summ.get('bounded_proven', 0)} bounded, "
+             f"{cex} cex, {undetermined} undetermined (bound {rep.get('bounded_bar_cycles')} cycles); "
+             f"report: {os.path.relpath(os.path.join(dest_dir, os.path.basename(report_path)), ROOT)}")
+    run.record("formal", status, detail, path=path, cex=cex, undetermined=undetermined)
+    return 0
+
+
 def stage_frontend_regeneration(run, args, package):
     """Frontend: repair the generators validation found wanting, through the
     Frontend's own phase validation agents. Our package is written as each
@@ -916,6 +959,9 @@ def run_flow(run, args):
         if rc:
             return rc
 
+    if getattr(args, "formal", False) and not run.done("formal"):
+        stage_formal(run, args)   # informational only; never halts or loops
+
     # backend <-> frontend loop
     while True:
         if run.done("backend") or any(s["stage"] == "backend" and s["status"] == "SKIPPED"
@@ -974,6 +1020,10 @@ def plan(args):
           + ("  [validate --partial after each phase]" if args.validate_per_phase else ""))
     print(f"  4 rtl_validation        Validation  validate_drop.py on <run>/drop against the shipped spec"
           f"  -> <run>/validation/round_N/  (cap {args.max_rtl_rounds} rounds)")
+    print(f"  4b formal (opt-in)      Validation  "
+          + (f"run_formal.py --path {getattr(args, 'formal_path', None) or 'path_01_write_cmd'}"
+             f" --time {getattr(args, 'formal_time', None) or '20m'}  (informational; never halts)"
+             if getattr(args, "formal", False) else "SKIPPED (pass --formal to enable)"))
     have = [n for n, *_ in PHASES if os.path.exists(phase_agent(n))]
     print(f"  5 frontend_regeneration Frontend  Phase{{N}}/phase{{N}}_validation_agent.py on our package "
           f"(agents present for phases {have}; others halt)")
@@ -1006,6 +1056,13 @@ def main() -> int:
                          "backend are skipped")
     ap.add_argument("--validate-per-phase", action="store_true",
                     help="run a partial validation after each Frontend phase, not only at the end")
+    ap.add_argument("--formal", action="store_true",
+                    help="after rtl_validation passes, run JasperGold formal proof (run_formal.py) "
+                         "on one command path (--formal-path, default path_01_write_cmd). Opt-in, "
+                         "informational: never halts or loops the flow, since this is still "
+                         "exploratory (not yet a Validation-side gate either)")
+    ap.add_argument("--formal-path", help="which path --formal proves (default: path_01_write_cmd)")
+    ap.add_argument("--formal-time", help="JasperGold prove-time budget for --formal (default: 20m)")
     ap.add_argument("--skip-backend", action="store_true")
     ap.add_argument("--backend-mode", choices=["contract", "synth", "build", "full"], default="build",
                     help="backend depth (passed through as its --mode): contract = seconds, no ORFS; "
@@ -1030,7 +1087,8 @@ def main() -> int:
             return 2
         run = Run(run_dir)
         saved = run.state.get("request", {})
-        for k in ("request", "preset", "choices", "spec", "goal", "interactive", "phases", "backend_mode"):
+        for k in ("request", "preset", "choices", "spec", "goal", "interactive", "phases", "backend_mode",
+                 "formal_path", "formal_time"):
             if getattr(args, k, None) is None and saved.get(k):
                 setattr(args, k, saved[k])
         # a resumed --phases run is still a phase-limited run: without this the
@@ -1038,6 +1096,8 @@ def main() -> int:
         # blocks (phase12_loop, 2026-10-15); same for a --skip-backend run
         if saved.get("skip_backend") and not args.skip_backend:
             args.skip_backend = True
+        if saved.get("formal") and not args.formal:
+            args.formal = True
         run.log(f"resuming {run.state['run_id']} (last: "
                 f"{run.state['stages'][-1]['stage'] + ' ' + run.state['stages'][-1]['status'] if run.state['stages'] else 'nothing yet'})")
     else:

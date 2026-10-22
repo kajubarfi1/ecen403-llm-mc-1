@@ -4,7 +4,7 @@
 //
 // Interface : cfg_timing   (Timing configuration broadcast from the CSR block to bank_tracker. A LEVEL stream: values persist and downstream reloads counters from them, so the transaction is the change, not the cycle.)
 // Block     : config_regs
-// Manifest  : Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json
+// Manifest  : runs/20261022-120433-interactive/drop/PHASE1RTL/config_regs_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

@@ -1,0 +1,56 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_22_csr_standalone",
+  "strategy": "exact",
+  "verdict": "pass",
+  "timestamp": "2026-10-22T12:06:49.809557",
+  "blocks": [
+    "config_regs"
+  ],
+  "sequence": "Validation/sequences/generated/path_22_csr_standalone_seed1.json",
+  "stimulus_generator": "register_walk",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "7d4d34874818",
+    "drop_id": "7d4d34874818",
+    "design_id": "f864bdc8e60f",
+    "blocks_used": [
+      "config_regs"
+    ],
+    "validated_at": "c95f8d3",
+    "frontend_commits": {
+      "config_regs": "c95f8d32875579e3716a63f2624722dce0e34640"
+    },
+    "roots": [
+      "runs/20261022-120433-interactive/drop"
+    ],
+    "blocks": {
+      "config_regs": {
+        "rtl": "runs/20261022-120433-interactive/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/20261022-120433-interactive/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_1lane_1rank_ba68bf50"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/20261022-120433-interactive/drop/generated_spec.json",
+      "revision": "compiled_ddr31600_x8_1lane_1rank_ba68bf50"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/lehanahome/Documents/ECEN404/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "pass",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=131/131  (131 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    }
+  ],
+  "log": "Validation/reports/partial/7d4d34874818/path_22_csr_standalone_sim.log",
+  "observed_trace": "Validation/reports/partial/7d4d34874818/path_22_csr_standalone_observed.jsonl"
+}

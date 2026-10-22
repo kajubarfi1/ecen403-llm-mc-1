@@ -580,8 +580,6 @@ if __name__ == "__main__":
     print("+========================================================+")
     print("|   DDR3 Controller -- Phase 2 Pipeline (Frontend2)       |")
     print("|                                                         |")
-    print("|   5 deterministic scripts -> Lint Gate -> Sim Gate      |")
-    print("|   No LLM calls. No retry loop.                          |")
     print("+========================================================+\n")
 
     spec = input("Spec JSON path: ").strip()

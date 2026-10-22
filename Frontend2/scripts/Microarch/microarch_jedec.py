@@ -53,11 +53,17 @@ SPEED_GRADES: dict[str, dict] = {
     },
 }
 
-# Refresh cycle time by device density (ns) -- JEDEC JESD79-3, normal temp.
+# Refresh cycle time by device density (ns) -- JEDEC JESD79-3F floor (the
+# worst case any compliant part must support). 260ns shows up in some
+# vendor 4Gb datasheets (Samsung Q-die, Micron) as a tighter, part-specific
+# bin that beats this floor -- real, but not safe to assume for a generator
+# that targets "any compliant 4Gb device", which is why Validation's own
+# JEDEC table (Validation/jedec/spec_conformance.py, J-TIM-009) uses 300.0
+# and flagged this one as wrong (2026-10-22).
 TRFC_NS_BY_DENSITY: dict[str, float] = {
     "1Gb": 110.0,
     "2Gb": 160.0,
-    "4Gb": 260.0,
+    "4Gb": 300.0,
     "8Gb": 350.0,
 }
 

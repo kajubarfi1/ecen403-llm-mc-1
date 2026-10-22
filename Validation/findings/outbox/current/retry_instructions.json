@@ -1,79 +1,20 @@
 {
   "$schema": "validation-retry-instructions/1",
-  "status": "FAIL",
+  "status": "PASS",
   "pipeline": "validation",
-  "drop": "efece348d04e",
-  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "spec_id": "279cbf6ca7b6f62b",
-  "generated_utc": "2026-10-20T21:47:43.062095Z",
-  "failed_modules": [
-    "data_path"
-  ],
-  "retry_instructions": {
-    "data_path": {
-      "module": "data_path",
-      "attempt": null,
-      "drop": "efece348d04e",
-      "failed_checks": [
-        {
-          "id": "MISMATCH/dp_rd_rsp[data]",
-          "name": "data_path must produce the transactions the spec-derived model predicts",
-          "pass": false,
-          "expected": "dp_rd_rsp.response aux=0x0 data=0x9dac7f67",
-          "actual": "dp_rd_rsp.response aux=0x0 data=0x7f670000",
-          "severity": "critical",
-          "confidence": "confirmed",
-          "spec_ref": null,
-          "anchor": [
-            {
-              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-              "line": 300,
-              "signal": "rd_rsp_data",
-              "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
-            },
-            {
-              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-              "line": 301,
-              "signal": "rd_rsp_aux",
-              "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
-            }
-          ],
-          "owner_candidates": [
-            "data_path"
-          ],
-          "occurrences": 31,
-          "paths": [
-            "path_03_read_return",
-            "path_18_full_write"
-          ],
-          "repro": {
-            "path": "path_03_read_return",
-            "command": "python3 Validation/tools/run_path.py --path path_03_read_return",
-            "sequence": "Validation/sequences/generated/path_03_read_return_seed1.json",
-            "work_dir": "Validation/sequences/generated/runs/path_03_read_return",
-            "log": "Validation/reports/paths/path_03_read_return_sim.log",
-            "trace": "Validation/reports/paths/path_03_read_return_observed.jsonl",
-            "first_failure": {
-              "seq": null,
-              "line": "dp_rd_rsp[0] value: predicted [dp_rd_rsp.response aux=0x0 data=0x9dac7f67] but observed [dp_rd_rsp.response aux=0x0 data=0x7f670000]"
-            }
-          },
-          "introduced_in": null,
-          "repair": null,
-          "fix": null,
-          "finding_id": "data_path/MISMATCH/dp_rd_rsp[data]"
-        }
-      ],
-      "message": "1 check(s) failed on drop efece348d04e; 1 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
-    }
-  },
+  "drop": "7d4d34874818",
+  "spec_revision": "compiled_ddr31600_x8_1lane_1rank_ba68bf50",
+  "spec_id": "4a6c4569d412d5c8",
+  "generated_utc": "2026-10-22T17:06:54.163637Z",
+  "failed_modules": [],
+  "retry_instructions": {},
   "resolved_since_previous_drop": [],
   "requires_human_review": false,
   "source": "Validation/findings/emit_findings.py -> retry_adapter.py",
   "drop_status": {
     "$schema": "validation-drop-status/1",
-    "drop": "efece348d04e",
-    "partial": false,
+    "drop": "7d4d34874818",
+    "partial": true,
     "blocks_present": [
       "addr_decoder",
       "bank_tracker",
@@ -81,38 +22,68 @@
       "cmd_gen",
       "cmd_queue",
       "config_regs",
-      "data_path",
       "init_fsm",
       "refresh_ctrl",
       "scheduler",
       "wb_port"
     ],
-    "blocks_absent": [],
+    "blocks_absent": [
+      "data_path"
+    ],
     "inconsistent_edges": [],
-    "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "validation_spec_revision": "compiled_ddr31600_x8_1lane_1rank_ba68bf50",
     "foreign_spec_blocks": {},
     "paths_run": [
-      "path_01_write_cmd",
-      "path_02_read_cmd",
-      "path_03_read_return",
-      "path_04_scheduler_bank_loop",
-      "path_05_scheduler_refresh_loop",
-      "path_07_backpressure",
       "path_08_init_to_cal",
       "path_09_init_to_refresh",
-      "path_12_csr_timing_to_scheduling",
-      "path_13_csr_refresh_to_scheduling",
       "path_14_status_init",
       "path_15_status_cal",
       "path_16_status_refresh",
       "path_17_full_boot",
-      "path_18_full_write",
-      "path_19_row_conflict",
-      "path_20_refresh_preempt",
       "path_21_wb_port_standalone",
       "path_22_csr_standalone"
     ],
-    "paths_blocked": {},
-    "note": "Complete run: every runnable path simulated on this drop."
+    "paths_blocked": {
+      "path_01_write_cmd": [
+        "data_path"
+      ],
+      "path_02_read_cmd": [
+        "data_path"
+      ],
+      "path_03_read_return": [
+        "data_path"
+      ],
+      "path_04_scheduler_bank_loop": [
+        "data_path"
+      ],
+      "path_05_scheduler_refresh_loop": [
+        "data_path"
+      ],
+      "path_06_scheduler_dequeue": [
+        "data_path"
+      ],
+      "path_07_backpressure": [
+        "data_path"
+      ],
+      "path_10_csr_to_timing": [
+        "data_path"
+      ],
+      "path_12_csr_timing_to_scheduling": [
+        "data_path"
+      ],
+      "path_13_csr_refresh_to_scheduling": [
+        "data_path"
+      ],
+      "path_18_full_write": [
+        "data_path"
+      ],
+      "path_19_row_conflict": [
+        "data_path"
+      ],
+      "path_20_refresh_preempt": [
+        "data_path"
+      ]
+    },
+    "note": "A blocked path is not a failure and not a pass: it waits for the drop that brings its blocks or fixes the edge it crosses. Nothing was substituted."
   }
 }

@@ -1,0 +1,56 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_21_wb_port_standalone",
+  "strategy": "exact",
+  "verdict": "pass",
+  "timestamp": "2026-10-22T11:58:25.604214",
+  "blocks": [
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_21_wb_port_standalone_seed1.json",
+  "stimulus_generator": "random",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "c96f5d155221",
+    "drop_id": "c96f5d155221",
+    "design_id": "6e331a88b5dd",
+    "blocks_used": [
+      "wb_port"
+    ],
+    "validated_at": "c95f8d3",
+    "frontend_commits": {
+      "wb_port": "c95f8d32875579e3716a63f2624722dce0e34640"
+    },
+    "roots": [
+      "runs/20261022-115707-generated_spec_json/drop"
+    ],
+    "blocks": {
+      "wb_port": {
+        "rtl": "runs/20261022-115707-generated_spec_json/drop/PHASE1RTL/wb_port.sv",
+        "manifest": "runs/20261022-115707-generated_spec_json/drop/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "compiled_ddr3800_x8_1lane_1rank_4241f876"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/20261022-115707-generated_spec_json/drop/generated_spec.json",
+      "revision": "compiled_ddr3800_x8_1lane_1rank_4241f876"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/lehanahome/Documents/ECEN404/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "pass",
+      "summary": "scope=wb_port  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    }
+  ],
+  "log": "Validation/reports/partial/c96f5d155221/path_21_wb_port_standalone_sim.log",
+  "observed_trace": "Validation/reports/partial/c96f5d155221/path_21_wb_port_standalone_observed.jsonl"
+}

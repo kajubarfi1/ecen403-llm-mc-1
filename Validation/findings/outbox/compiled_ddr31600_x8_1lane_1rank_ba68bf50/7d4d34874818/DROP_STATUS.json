@@ -1,0 +1,75 @@
+{
+  "$schema": "validation-drop-status/1",
+  "drop": "7d4d34874818",
+  "partial": true,
+  "blocks_present": [
+    "addr_decoder",
+    "bank_tracker",
+    "calibration",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "init_fsm",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "blocks_absent": [
+    "data_path"
+  ],
+  "inconsistent_edges": [],
+  "validation_spec_revision": "compiled_ddr31600_x8_1lane_1rank_ba68bf50",
+  "foreign_spec_blocks": {},
+  "paths_run": [
+    "path_08_init_to_cal",
+    "path_09_init_to_refresh",
+    "path_14_status_init",
+    "path_15_status_cal",
+    "path_16_status_refresh",
+    "path_17_full_boot",
+    "path_21_wb_port_standalone",
+    "path_22_csr_standalone"
+  ],
+  "paths_blocked": {
+    "path_01_write_cmd": [
+      "data_path"
+    ],
+    "path_02_read_cmd": [
+      "data_path"
+    ],
+    "path_03_read_return": [
+      "data_path"
+    ],
+    "path_04_scheduler_bank_loop": [
+      "data_path"
+    ],
+    "path_05_scheduler_refresh_loop": [
+      "data_path"
+    ],
+    "path_06_scheduler_dequeue": [
+      "data_path"
+    ],
+    "path_07_backpressure": [
+      "data_path"
+    ],
+    "path_10_csr_to_timing": [
+      "data_path"
+    ],
+    "path_12_csr_timing_to_scheduling": [
+      "data_path"
+    ],
+    "path_13_csr_refresh_to_scheduling": [
+      "data_path"
+    ],
+    "path_18_full_write": [
+      "data_path"
+    ],
+    "path_19_row_conflict": [
+      "data_path"
+    ],
+    "path_20_refresh_preempt": [
+      "data_path"
+    ]
+  },
+  "note": "A blocked path is not a failure and not a pass: it waits for the drop that brings its blocks or fixes the edge it crosses. Nothing was substituted."
+}

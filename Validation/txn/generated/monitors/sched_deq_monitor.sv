@@ -4,7 +4,7 @@
 //
 // Interface : sched_deq   (Queue-slot grants issued by the scheduler)
 // Block     : scheduler
-// Manifest  : Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json
+// Manifest  : runs/20261022-120433-interactive/drop/PHASE3RTL/scheduler_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //
@@ -20,7 +20,7 @@ module sched_deq_monitor #(
     input  logic clk,
     input  logic rst_n,
     input  logic deq_grant,
-    input  logic [3:0] deq_idx
+    input  logic [1:0] deq_idx
 );
 
   // A reset is a real event a stateful predictor must see. Without it the
