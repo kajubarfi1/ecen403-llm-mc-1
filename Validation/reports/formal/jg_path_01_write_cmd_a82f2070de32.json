@@ -1,0 +1,249 @@
+{
+  "$schema": "validation-formal/1",
+  "generated_utc": "2026-10-20T22:52:16.895395+00:00",
+  "tool": "JasperGold (Olympus)",
+  "drop": "a82f2070de32",
+  "design_id": "66a76881ed9e",
+  "blocks_design_id": "f558d3fad076",
+  "path": "path_01_write_cmd",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "top": "Validation/formal/chain_formal.sv",
+  "assertions_files": [
+    "Validation/sva/generated/cmd_gen_sva.sv",
+    "Validation/sva/generated/cmd_gen_sva_bind.sv"
+  ],
+  "abstractions": [],
+  "prove_time_limit": "20m",
+  "max_trace_length": null,
+  "bounded_bar_cycles": 28080,
+  "summary": {
+    "assertions": 13,
+    "proven": 13,
+    "cex": 0,
+    "undetermined": 0,
+    "bounded_proven": 0,
+    "covers": 13,
+    "covered": 11
+  },
+  "results": [
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_001",
+      "short": "a_TIMING_001",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "39.997 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_002",
+      "short": "a_TIMING_002",
+      "status": "proven",
+      "engine": "AM",
+      "bound": "Infinite",
+      "time": "8.753 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_003",
+      "short": "a_TIMING_003",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "126.977 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004",
+      "short": "a_TIMING_004",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "172.074 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005",
+      "short": "a_TIMING_005",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "7.389 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_007",
+      "short": "a_TIMING_007",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "7.389 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_008",
+      "short": "a_TIMING_008",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "39.997 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_009",
+      "short": "a_TIMING_009",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "14.210 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011",
+      "short": "a_TIMING_011",
+      "status": "proven",
+      "engine": "N",
+      "bound": "Infinite",
+      "time": "0.268 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_006",
+      "short": "a_TIMING_006",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "44.416 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_012",
+      "short": "a_TIMING_012",
+      "status": "proven",
+      "engine": "D",
+      "bound": "Infinite",
+      "time": "0.724 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_001",
+      "short": "a_PROTO_001",
+      "status": "proven",
+      "engine": "Tri",
+      "bound": "Infinite",
+      "time": "59.209 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_002",
+      "short": "a_PROTO_002",
+      "status": "proven",
+      "engine": "M",
+      "bound": "Infinite",
+      "time": "12.703 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_001",
+      "short": "c_TIMING_001",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "7",
+      "time": "0.375 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_002",
+      "short": "c_TIMING_002",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "38",
+      "time": "286.895 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_003",
+      "short": "c_TIMING_003",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "11",
+      "time": "0.524 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_004",
+      "short": "c_TIMING_004",
+      "status": "covered",
+      "engine": "Bm",
+      "bound": "14",
+      "time": "5.725 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_005",
+      "short": "c_TIMING_005",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "6",
+      "time": "0.321 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_007",
+      "short": "c_TIMING_007",
+      "status": "covered",
+      "engine": "L",
+      "bound": "15 - 20",
+      "time": "4.604 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_008",
+      "short": "c_TIMING_008",
+      "status": "covered",
+      "engine": "Bm",
+      "bound": "21",
+      "time": "46.777 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_009",
+      "short": "c_TIMING_009",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "20",
+      "time": "35.099 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_011",
+      "short": "c_TIMING_011",
+      "status": "unreachable",
+      "engine": "N",
+      "bound": "Infinite",
+      "time": "0.000 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_006",
+      "short": "c_TIMING_006",
+      "status": "covered",
+      "engine": "Bm",
+      "bound": "5",
+      "time": "0.153 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_012",
+      "short": "c_TIMING_012",
+      "status": "unreachable",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "3.646 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_001",
+      "short": "c_PROTO_001",
+      "status": "covered",
+      "engine": "L",
+      "bound": "14 - 19",
+      "time": "4.281 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_002",
+      "short": "c_PROTO_002",
+      "status": "covered",
+      "engine": "Bm",
+      "bound": "5",
+      "time": "0.153 s"
+    }
+  ],
+  "raw_report": "Validation/reports/formal/jg_path_01_write_cmd_a82f2070de32_report.txt"
+}

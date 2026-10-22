@@ -574,7 +574,12 @@ def main() -> int:
     # id, or same blocks) is re-proved here with the options its last report
     # used, so a design change never leaves `awaiting_formal` findings for a
     # person to remember (two on 4bf921ce1833, Frontend handoff 2026-10-15).
-    if not args.skip_formal and not args.skip_sim and not nothing_runs and not args.partial:
+    sim_failed = any(v != "PASS" for v in verdicts.values()) if not args.skip_sim else False
+    if not args.skip_formal and not args.skip_sim and not nothing_runs and not args.partial and sim_failed:
+        banner("4b", "formal: deferred")
+        print("    this drop fails simulation; proofs wait for a drop that passes it (an hour of "
+              "JasperGold per failing loop round proves nothing the next round keeps: 2026-10-21)")
+    if not args.skip_formal and not args.skip_sim and not nothing_runs and not args.partial and not sim_failed:
         banner("4b", "formal: re-prove paths whose proofs predate this design")
         todo = formal_replays(head)
         if not todo:

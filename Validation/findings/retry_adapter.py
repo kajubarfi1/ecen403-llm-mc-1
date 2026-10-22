@@ -76,6 +76,9 @@ def adapt(doc):
             "confidence": f.get("confidence", "observed"),
             "spec_ref": f.get("spec_ref"),
             "anchor": f.get("anchor", [])[:3],
+            # what the block was given when it produced the wrong value
+            # (emit_findings._mismatch_context, 2026-10-21)
+            "context": f.get("context"),
             "owner_candidates": f.get("owner_candidates", []),
             "occurrences": f.get("occurrences", 1),
             "paths": f.get("paths", []),

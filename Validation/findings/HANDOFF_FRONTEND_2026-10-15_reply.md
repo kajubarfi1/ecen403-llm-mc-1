@@ -85,3 +85,57 @@ your agent will not have.
    the stub fix, the data_path finding and the coverage work (109 files);
    a resume before it would halt on 2c again. We will say when it is in
    `main`. Nothing else to hold.
+
+## Addendum (2026-10-21): we ran the resume; Phase 3 is passed off, Phase 4 is not yet
+
+We resumed `runs/allphase_loop` ourselves on 10-20 (everything was in
+`main`). Four rounds, unattended.
+
+**Phase 3: closed.** Round 3 validation: FAIL on the planted scheduler
+fault (REF_001, SCHED_003, both twin-confirmed) and, new since the stub
+fix, the data_path read-capture defect. Your Phase 3 agent, attempt 1:
+root cause "both refresh-selection branches gated by `if (1'b0)`", which
+is exactly the planted line, regenerated, and round 4 has every scheduler
+finding resolved. Your `break`→`continue` fix is confirmed in the same
+run (below). That is the Phase 3 loop end to end: validation finds it,
+routes it, your agent names it, the fix lands, validation confirms.
+
+**Phase 4: your agent reached it, the retry fix worked, the patch did
+not.** Attempts 1 and 2 were the schema miss again (`missing required
+field(s): explanation`, `stop_reason='tool_use'`), and this time the loop
+carried on to attempt 3, which applied a patch: it rewrote the read-word
+assembly (`rd_word_assembled` as a per-beat slice write) on the theory
+that the beats were swapped. Re-validation: identical wrong value
+(`0x7f670000` for `0x9dac7f67`), 31/31 reads, round cap reached, halted.
+The patch is in `Frontend2/scripts/Phase4/data_path_gen.py` in Jacob's
+working tree and will not be kept. The real cause is in addendum 6 of
+the 10-08 reply: capture starts one controller cycle before the DRAM
+drives beat 0 (`rd_lat_ctr <= (cfg_CL_nCK >> 2) - 1`), and `ddr_dqs_i`
+is never read; the assembly was never wrong.
+
+Two asks from that:
+
+**ask 6: give the agent the block's inputs.** It could not have seen
+the timing from expected vs actual and a FIFO anchor. Every mismatch
+check now carries a `context` field: the transactions on the block's
+other interfaces just before the first wrong value, then the wrong value
+(`retry_instructions.json`, `failed_checks[].context`). For this finding
+it reads: `dp_cmd.read`, then `ddr_rd_beat data=0x7f67`, then
+`ddr_rd_beat data=0x9dac` in the same cycle as the response
+`data=0x7f670000`. Beat 0 in the high half, nothing in the low half,
+beat 1 never seen: the capture is a cycle early. Please put `context`
+into the line your prompt builds from each check (beside `anchors` and
+`fix`); it is a list of short strings.
+
+**ask 7: the schema miss is not rare.** Two of three Phase 4 attempts
+and one of one Phase 3 attempt on 10-15 lost a required field. The retry
+now rescues it, at the cost of an attempt each time. If the tool schema
+has a field the model keeps dropping, consider making it optional with a
+default, or asking for it in a second, smaller call.
+
+Also in that run: Olympus dropped off the network overnight during
+round 4's formal step, which turned a 20-minute step into seven hours of
+reconnect timeouts before the round could finish. The verdict was
+already in (simulation had completed), and formal now waits for a round
+that passes simulation, so a failing loop round no longer pays for
+proofs it will not keep.

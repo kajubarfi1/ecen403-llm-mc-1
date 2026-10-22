@@ -76,6 +76,35 @@ class TestFormalStatus(unittest.TestCase):
         self.assertEqual(EF.formal_status("PROTO_001", set(), set()), ("open", "confirmed"))
 
 
+class TestMismatchContext(unittest.TestCase):
+    """A mismatch carries the block's other traffic just before it (2026-10-21)."""
+
+    def test_events_before_the_wrong_value(self):
+        import json, tempfile
+        d = tempfile.mkdtemp()
+        tp = os.path.join(d, "observed.jsonl")
+        evs = [{"iface": "dp_cmd", "kind": "reset", "fields": {}, "seq": 0, "time_ns": 0},
+               {"iface": "dp_cmd", "kind": "read", "fields": {"aux": 1}, "seq": 1, "time_ns": 100},
+               {"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 0x7f67}, "seq": 2, "time_ns": 120},
+               {"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 0x9dac}, "seq": 3, "time_ns": 125},
+               {"iface": "wb", "kind": "read", "fields": {"addr": 5}, "seq": 4, "time_ns": 126},
+               {"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 1, "data": 0x7f670000}, "seq": 5, "time_ns": 125},
+               {"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 0x1}, "seq": 6, "time_ns": 200}]
+        with open(tp, "w") as f:
+            f.write("\n".join(json.dumps(e) for e in evs) + "\n")
+        schemas = {"dp_cmd": {"block": "data_path"}, "ddr_rd_beat": {"block": "data_path"},
+                   "dp_rd_rsp": {"block": "data_path"}, "wb": {"block": "wb_port"}}
+        EF._TRACES.clear()
+        ctx = EF._mismatch_context(tp, "dp_rd_rsp", 0, "data_path", schemas)
+        self.assertEqual(ctx["events"], ["t-25 dp_cmd.read aux=0x1",
+                                         "t-5 ddr_rd_beat.beat data=0x7f67",
+                                         "t+0 ddr_rd_beat.beat data=0x9dac",
+                                         "t+0 dp_rd_rsp.response (observed, wrong) aux=0x1 data=0x7f670000"])
+        self.assertIsNone(EF._mismatch_context(tp, "dp_rd_rsp", 7, "data_path", schemas))
+        self.assertIsNone(EF._mismatch_context(None, "dp_rd_rsp", 0, "data_path", schemas))
+        EF._TRACES.clear()
+
+
 class TestParsing(unittest.TestCase):
 
     def test_checker_line_with_rule_and_txn(self):

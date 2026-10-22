@@ -719,6 +719,28 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   level: 10/11 pass every path the RTL passes; data_path's netlist
   reproduces the RTL defect.
 
+- *2026-10-21 — Phase 3 passed off; Phase 4 reached and not yet closed.*
+  Resumed `runs/allphase_loop` (M17 planted in the scheduler, four
+  confirmed findings waiting since 10-15). Round 3: FAIL on the scheduler
+  fault plus the data_path read-capture defect (new since the stub fix);
+  her Phase 3 agent, attempt 1, named the planted `if (1'b0)` and
+  regenerated; round 4: every scheduler finding resolved — the Phase 3
+  loop closed end to end, and her `break`→`continue` fix is confirmed in
+  the same run. Her Phase 4 agent: two schema-miss attempts (the retry
+  now carries on), then a patch that rewrote the read-word assembly on a
+  beat-order theory; identical wrong value on re-validation, round cap,
+  halt. The patch stays out of her tree. Two things on our side from
+  that: (1) a mismatch finding now carries `context`, the block's other
+  interfaces just before the first wrong value (`_mismatch_context`,
+  test; `failed_checks[].context`), which for this finding shows beat 0
+  in the high half and beat 1 never seen; ask 6 to Lehana to put it in
+  her prompt line, ask 7 on the recurring schema miss; (2) formal re-prove
+  (step 4b) now runs only on a round that passes simulation: round 4's
+  formal step coincided with Olympus dropping off the network overnight
+  and seven hours of reconnect timeouts, after the verdict was already
+  in. Olympus still unreachable this morning; the repo drop's package
+  will be re-run when it is back.
+
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the
 schema generator's default root and `faults/fault_catalog.json` now point

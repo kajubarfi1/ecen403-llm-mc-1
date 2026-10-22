@@ -1,0 +1,132 @@
+{
+  "$schema": "validation-formal/1",
+  "generated_utc": "2026-10-20T23:09:26.117120+00:00",
+  "tool": "JasperGold (Olympus)",
+  "drop": "a82f2070de32",
+  "design_id": "66a76881ed9e",
+  "blocks_design_id": "ea1b53a9b19e",
+  "path": "path_08_init_to_cal",
+  "blocks": [
+    "calibration",
+    "init_fsm"
+  ],
+  "top": "Validation/formal/chain_formal.sv",
+  "assertions_files": [
+    "Validation/sva/generated/calibration_order_sva.sv",
+    "Validation/sva/generated/calibration_order_sva_bind.sv",
+    "Validation/sva/generated/init_fsm_sva.sv",
+    "Validation/sva/generated/init_fsm_sva_bind.sv"
+  ],
+  "abstractions": [],
+  "prove_time_limit": "20m",
+  "max_trace_length": null,
+  "bounded_bar_cycles": 28080,
+  "summary": {
+    "assertions": 7,
+    "proven": 7,
+    "cex": 0,
+    "undetermined": 0,
+    "bounded_proven": 0,
+    "covers": 5,
+    "covered": 5
+  },
+  "results": [
+    {
+      "property": "chain_formal.u_calibration.u_calibration_order_sva.a_CAL_001",
+      "short": "a_CAL_001",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "0.001 s"
+    },
+    {
+      "property": "chain_formal.u_calibration.u_calibration_order_sva.a_CAL_002",
+      "short": "a_CAL_002",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "0.001 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_002",
+      "short": "a_INIT_002",
+      "status": "proven",
+      "engine": "Tricustom14",
+      "bound": "Infinite",
+      "time": "18.483 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_002_init_done",
+      "short": "a_INIT_002_init_done",
+      "status": "proven",
+      "engine": "Tricustom14",
+      "bound": "Infinite",
+      "time": "13.573 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_001",
+      "short": "a_INIT_001",
+      "status": "proven",
+      "engine": "Tri",
+      "bound": "Infinite",
+      "time": "13.446 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_001_then",
+      "short": "a_INIT_001_then",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "90.847 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_003_init_done",
+      "short": "a_INIT_003_init_done",
+      "status": "proven",
+      "engine": "D",
+      "bound": "Infinite",
+      "time": "4.807 s"
+    },
+    {
+      "property": "chain_formal.u_calibration.u_calibration_order_sva.c_CAL_001",
+      "short": "c_CAL_001",
+      "status": "covered",
+      "engine": "J",
+      "bound": "76002 - 140170",
+      "time": "32.790 s"
+    },
+    {
+      "property": "chain_formal.u_calibration.u_calibration_order_sva.c_CAL_002",
+      "short": "c_CAL_002",
+      "status": "covered",
+      "engine": "J",
+      "bound": "77255 - 140171",
+      "time": "36.584 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_002",
+      "short": "c_INIT_002",
+      "status": "covered",
+      "engine": "J",
+      "bound": "73508 - 140167",
+      "time": "25.430 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_002_init_done",
+      "short": "c_INIT_002_init_done",
+      "status": "covered",
+      "engine": "J",
+      "bound": "74655 - 140169",
+      "time": "29.199 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_001",
+      "short": "c_INIT_001",
+      "status": "covered",
+      "engine": "J",
+      "bound": "72175 - 140040",
+      "time": "22.145 s"
+    }
+  ],
+  "raw_report": "Validation/reports/formal/jg_path_08_init_to_cal_a82f2070de32_report.txt"
+}
