@@ -219,9 +219,12 @@ def _load_external_findings(path: str) -> dict:
                 lines.append(str(c))
                 continue
             anchors = "; ".join(f"{a.get('file')}:{a.get('line')}" for a in c.get("anchor", [])[:3])
+            ctx = c.get("context")
+            ctx_events = "; ".join(ctx.get("events", [])) if isinstance(ctx, dict) else ""
             lines.append(f"[{c.get('severity', '?')}/{c.get('confidence', '?')}] {c.get('id')}: {c.get('name', '')} | "
                          f"expected={c.get('expected')} actual={c.get('actual')}"
                          + (f" | anchors: {anchors}" if anchors else "")
+                         + (f" | context ({ctx.get('note', '')}): {ctx_events}" if ctx_events else "")
                          + (f" | Validation's proven repair hint: {c['fix']}" if c.get("fix") else ""))
         out[module] = {"external_findings": lines,
                        "confirmed": any(isinstance(c, dict) and c.get("confidence") == "confirmed"

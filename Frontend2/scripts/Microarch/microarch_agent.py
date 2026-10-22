@@ -66,7 +66,11 @@ def _load_dotenv() -> None:
 _load_dotenv()
 
 MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-5")
-TEMPERATURE = 0.2
+# anthropic>=2.0 dropped per-request temperature/top_p/top_k from Messages.create
+# entirely (replaced by `speed`, which controls inference throughput, not
+# sampling) -- there is no direct equivalent any more. Low-variance behavior
+# here instead comes from the tiny enumerated choice space PROPOSE_TOOL
+# constrains the model to, not from a temperature setting.
 MAX_ROUNDS = 4          # LLM-only clarify/revise rounds (unattended risk -- kept tight)
 MAX_CONFIRM_ROUNDS = 12  # recommendation<->feedback rounds (human-paced, generous)
 
@@ -249,7 +253,6 @@ def _resolve(client, messages: list) -> dict:
     resp = client.messages.create(
         model=MODEL,
         max_tokens=2048,
-        temperature=TEMPERATURE,
         system=SYSTEM_PROMPT,
         tools=[PROPOSE_TOOL],
         tool_choice={"type": "tool", "name": "propose_configuration"},
