@@ -2,8 +2,8 @@
   "$schema": "validation-path-run/1",
   "path": "path_03_read_return",
   "strategy": "composed",
-  "verdict": "pass",
-  "timestamp": "2026-10-15T13:04:15.081133",
+  "verdict": "fail",
+  "timestamp": "2026-10-15T13:37:58.822278",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -35,7 +35,7 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "f058fc9",
+    "validated_at": "d316eae",
     "frontend_commits": {
       "addr_decoder": "6f659675f03286f6d19f4946500c8ae93de09850",
       "bank_tracker": "6f659675f03286f6d19f4946500c8ae93de09850",
@@ -109,9 +109,22 @@
       "kind": "exact",
       "model": "/Users/lehanahome/Documents/ECEN404/ecen403-llm-mc-1/Validation/predictors/data_path_predictor.py",
       "scope": "data_path",
-      "verdict": "pass",
-      "summary": "scope=data_path  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)",
-      "detail": [],
+      "verdict": "fail",
+      "summary": "scope=data_path  strategy=exact  status=fail  matched=0/19  value=19",
+      "detail": [
+        "  dp_rd_rsp[7] value: predicted [dp_rd_rsp.response aux=0x7 data=0x15a8ff27] but observed [dp_rd_rsp.response aux=0x7 data=0xff270000]",
+        "  dp_rd_rsp[8] value: predicted [dp_rd_rsp.response aux=0x8 data=0x1596fcc7] but observed [dp_rd_rsp.response aux=0x8 data=0xfcc70000]",
+        "  dp_rd_rsp[9] value: predicted [dp_rd_rsp.response aux=0x9 data=0xdd8c7d67] but observed [dp_rd_rsp.response aux=0x9 data=0x7d670000]",
+        "  dp_rd_rsp[10] value: predicted [dp_rd_rsp.response aux=0xa data=0xa5b4fee7] but observed [dp_rd_rsp.response aux=0xa data=0xfee70000]",
+        "  dp_rd_rsp[11] value: predicted [dp_rd_rsp.response aux=0xb data=0xfdbd7e7f] but observed [dp_rd_rsp.response aux=0xb data=0x7e7f0000]",
+        "  dp_rd_rsp[12] value: predicted [dp_rd_rsp.response aux=0xc data=0xb5b4feef] but observed [dp_rd_rsp.response aux=0xc data=0xfeef0000]",
+        "  dp_rd_rsp[13] value: predicted [dp_rd_rsp.response aux=0xd data=0xa597fcd7] but observed [dp_rd_rsp.response aux=0xd data=0xfcd70000]",
+        "  dp_rd_rsp[14] value: predicted [dp_rd_rsp.response aux=0xe data=0x1dbe7e4f] but observed [dp_rd_rsp.response aux=0xe data=0x7e4f0000]",
+        "  dp_rd_rsp[15] value: predicted [dp_rd_rsp.response aux=0xf data=0x35acff67] but observed [dp_rd_rsp.response aux=0xf data=0xff670000]",
+        "  dp_rd_rsp[16] value: predicted [dp_rd_rsp.response aux=0x0 data=0xdd8d7d77] but observed [dp_rd_rsp.response aux=0x0 data=0x7d770000]",
+        "  dp_rd_rsp[17] value: predicted [dp_rd_rsp.response aux=0x1 data=0xedbb7e1f] but observed [dp_rd_rsp.response aux=0x1 data=0x7e1f0000]",
+        "  dp_rd_rsp[18] value: predicted [dp_rd_rsp.response aux=0x2 data=0x3580fdaf] but observed [dp_rd_rsp.response aux=0x2 data=0xfdaf0000]"
+      ],
       "rule_counts": {}
     },
     {

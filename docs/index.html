@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM MC #1 — LLM Memory Controller</title>
+<meta name="description" content="A DDR3 memory controller, from a plain-English description to a signed-off GDSII layout, in one command. An agentic hardware design flow built for ECEN 404 at Texas A&amp;M University.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site">
+  <nav class="wrap">
+    <a class="brand" href="#top"><span class="dot"></span> LLM MC #1</a>
+    <button class="navToggle" aria-label="Toggle navigation">&#9776;</button>
+    <div class="navlinks">
+      <a href="#how-it-works">How it works</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#results">Results</a>
+      <a href="#team">Team</a>
+      <button id="themeToggle" title="Toggle theme">&#9789;</button>
+      <a class="cta" href="https://github.com/kajubarfi1/ecen403-llm-mc-1" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <p class="eyebrow">ECEN 404 &middot; Texas A&amp;M University, Dwight Look College of Engineering</p>
+      <h1>A DDR3 memory controller, built by <span class="accent">agents</span>, from a sentence to a signed-off layout.</h1>
+      <p class="lede">
+        Describe the controller you need in plain English. The tool asks follow-up
+        questions until it has a complete microarchitecture specification, then
+        carries that design — unattended — through RTL generation, validation, and
+        physical design to a DRC-clean, LVS-matched GDSII layout. One command,
+        self-verified at every stage.
+      </p>
+      <div class="ctaRow">
+        <a class="btn primary" href="https://github.com/kajubarfi1/ecen403-llm-mc-1" target="_blank" rel="noopener">View the code</a>
+        <a class="btn ghost" href="https://github.com/kajubarfi1/ecen403-llm-mc-1/blob/main/USAGE.md" target="_blank" rel="noopener">Read the full guide</a>
+        <a class="btn ghost" href="#results">See the signed-off chip</a>
+      </div>
+      <p class="stackstrip">Built with Python, Claude, LangGraph, SystemVerilog, Cadence Xcelium, OpenROAD, sky130</p>
+
+      <figure class="hero-visual reveal">
+        <img src="assets/ddr3_controller.png" alt="Signed-off GDSII layout of the integrated ddr3_controller chip, routed on the sky130hd process">
+        <figcaption>ddr3_controller &mdash; integrated full-chip layout, sky130hd</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ===================== HOW IT WORKS ===================== -->
+  <section id="how-it-works">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="kicker">How it works</p>
+        <h2>Seven stages, one command</h2>
+        <p class="section-sub">
+          <code>python3 flow.py</code> opens an interactive session: choose a primary
+          goal (performance, power, cost, or balanced), describe anything specific in
+          plain English, answer any clarifying questions, and accept the proposed
+          specification. Everything after that runs on its own, in this order:
+        </p>
+      </div>
+
+      <ol class="stage-list">
+        <li>
+          <h3>Requirements</h3>
+          <p>A short interactive session in plain English, with goal-driven recommendations and follow-up questions to resolve anything ambiguous.</p>
+        </li>
+        <li>
+          <h3>Microarchitecture Spec</h3>
+          <p>Your requirements resolve to a complete, JEDEC-consistent specification — register map, timing model, controller architecture — checked for internal consistency before anything downstream sees it.</p>
+        </li>
+        <li>
+          <h3>Spec Review</h3>
+          <p>The Validation subsystem reviews the proposed spec before a single line of RTL is written.</p>
+        </li>
+        <li>
+          <h3>RTL Generation</h3>
+          <p>A phased pipeline generates all 11 controller modules as synthesizable SystemVerilog, deterministically, from the accepted spec.</p>
+        </li>
+        <li>
+          <h3>RTL Validation</h3>
+          <p>Reference models and real Cadence Xcelium simulation on TAMU Olympus check every module and the full chip against JEDEC DDR3 timing rules.</p>
+        </li>
+        <li>
+          <h3>Physical Design</h3>
+          <p>RTL to signed-off GDSII on OpenROAD-flow-scripts (sky130hd): synthesis, place &amp; route, DRC, LVS, a pin audit, static timing.</p>
+        </li>
+        <li>
+          <h3>Final Netlist Validation</h3>
+          <p>The physical-design output is validated one more time before the run is called complete.</p>
+        </li>
+      </ol>
+
+      <p class="verify-note">
+        <strong>The tool verifies its own output at every stage.</strong> When a check
+        fails, it attempts a bounded number of automatic corrections — findings route
+        straight back to the specific generator responsible. If it can't resolve
+        automatically, the run halts and records exactly where, so you can fix it and
+        resume rather than start over.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===================== ARCHITECTURE ===================== -->
+  <section id="architecture">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="kicker">Architecture</p>
+        <h2>Three subsystems</h2>
+        <p class="section-sub">
+          Frontend, Validation, and Backend each own a stage of the flow and hand off
+          through a shared specification and a structured findings format — not ad hoc
+          files or Slack messages.
+        </p>
+      </div>
+      <div class="subsystems">
+        <div class="subsystem reveal">
+          <span class="tag">Frontend &middot; RTL generation</span>
+          <h3>Spec &rarr; synthesizable SystemVerilog</h3>
+          <p>
+            Generates all 11 controller modules across a phased pipeline. The original
+            version used an LLM for 4 of those modules — but each of those prompts
+            already contained a complete "hard naming contract" (every port, parameter,
+            and often whole code blocks, computed in Python and marked "copy verbatim").
+            There was no real design decision left for the model to make. The current
+            pipeline converts every module to a deterministic generator instead: the
+            same spec produces byte-identical RTL every time.
+          </p>
+          <a class="more" href="https://github.com/kajubarfi1/ecen403-llm-mc-1/blob/main/Frontend2/README.md" target="_blank" rel="noopener">Read the rationale &rarr;</a>
+          <div class="owner">Owner: Lehana Ramkumar</div>
+        </div>
+        <div class="subsystem reveal">
+          <span class="tag">Validation &middot; correctness</span>
+          <h3>Reference models &amp; real simulation</h3>
+          <p>
+            Builds deterministic test vectors and reference models from the spec,
+            reviews every microarchitecture before generation starts, and runs real
+            Cadence Xcelium simulation against every generated module and the full
+            chip. Findings are routed back to Frontend through a structured handoff
+            contract, not a free-text report.
+          </p>
+          <a class="more" href="https://github.com/kajubarfi1/ecen403-llm-mc-1/blob/main/Validation/findings/HANDOFF_CONTRACT.md" target="_blank" rel="noopener">Read the handoff contract &rarr;</a>
+          <div class="owner">Owner: Jacob Zatopek</div>
+        </div>
+        <div class="subsystem reveal">
+          <span class="tag">Backend &middot; RTL to GDSII</span>
+          <h3>Synthesis through sign-off</h3>
+          <p>
+            Takes the RTL bundle from Frontend and runs it through OpenROAD-flow-scripts
+            (sky130hd): synthesis, place &amp; route, DRC, LVS, a pin audit, and static
+            timing. A check that can't run halts the pipeline instead of silently
+            reporting a pass.
+          </p>
+          <a class="more" href="https://github.com/kajubarfi1/ecen403-llm-mc-1/blob/main/backend/README.md" target="_blank" rel="noopener">Read the backend README &rarr;</a>
+          <div class="owner">Owner: Dawson Carpenter</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RESULTS ===================== -->
+  <section id="results">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="kicker">Results</p>
+        <h2>Full-chip signoff</h2>
+        <p class="section-sub">
+          Every generated block, and the integrated full chip, passes DRC, LVS, a
+          complete pin audit, and static timing on the open-source sky130 PDK.
+        </p>
+      </div>
+
+      <div class="results-grid">
+        <figure class="results-figure reveal">
+          <img src="assets/ddr3_controller.png" alt="Signed-off GDSII layout of the integrated ddr3_controller chip, routed on the sky130hd process">
+          <figcaption>ddr3_controller — integrated full-chip layout, sky130hd</figcaption>
+        </figure>
+
+        <div class="reveal">
+          <dl class="spec-list">
+            <div><dt>Die area</dt><dd>0.90 &times; 0.90&nbsp;mm</dd></div>
+            <div><dt>Cells placed</dt><dd>23,587</dd></div>
+            <div><dt>Fmax</dt><dd>120.5&nbsp;MHz, worst slack +0.89&nbsp;ns</dd></div>
+            <div><dt>Power</dt><dd>50.7&nbsp;mW</dd></div>
+          </dl>
+          <ul class="check-list">
+            <li><span class="ok">&#10003;</span> 11/11 blocks — 0 DRC violations, LVS match, full pin audit, STA pass</li>
+            <li><span class="ok">&#10003;</span> Full-chip integration — 0 routing violations, 13,528 nets / 556 pins, LVS match</li>
+            <li><span class="ok">&#10003;</span> 601/601 pins accounted for</li>
+          </ul>
+          <p class="caveat">
+            <strong>Known limitation:</strong> the integration build above is a scaffold —
+            it wires the connections Frontend has declared so far and promotes the rest
+            to chip pins, so it builds and signs off as a real chip, but two modules
+            (<code>calibration</code>, <code>data_path</code>) don't yet drive signals
+            internally. It's tracked for completion as Frontend backfills the remaining
+            connectivity.
+          </p>
+          <p class="asof">As of the latest recorded full-chip signoff, 2026-09-17.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TEAM ===================== -->
+  <section id="team">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="kicker">Team</p>
+        <h2>Who built it</h2>
+      </div>
+      <ul class="team-list">
+        <li class="reveal">
+          <span class="who"><strong>Lehana Ramkumar</strong> &mdash; Frontend</span>
+          <span class="what">RTL generation pipeline — spec synthesis through SystemVerilog.</span>
+        </li>
+        <li class="reveal">
+          <span class="who"><strong>Dawson Carpenter</strong> &mdash; Backend</span>
+          <span class="what">RTL to GDSII — synthesis, place &amp; route, sign-off.</span>
+        </li>
+        <li class="reveal">
+          <span class="who"><strong>Jacob Zatopek</strong> &mdash; Validation</span>
+          <span class="what">Reference models, simulation, and cross-subsystem findings.</span>
+        </li>
+      </ul>
+      <p class="advisors">
+        <strong>TA:</strong> Fahrettin Ay &nbsp;&middot;&nbsp; <strong>Sponsor:</strong> Stavros Kalafatis
+      </p>
+    </div>
+  </section>
+
+  <!-- ===================== GET STARTED ===================== -->
+  <section id="get-started">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="kicker">Get started</p>
+        <h2>Run it yourself</h2>
+        <p class="section-sub">
+          Needs Python 3.10+, an Anthropic API key, Docker, and OpenROAD-flow-scripts.
+          TAMU Olympus access is required for RTL lint/simulation. Full setup in the guide.
+        </p>
+      </div>
+      <div class="terminal reveal">
+        <div class="bar"><span></span><span></span><span></span></div>
+        <div class="body" id="quickstartCmd">
+          <div class="cmt"># clone and enter the repo</div>
+          <div class="cmd">git clone https://github.com/kajubarfi1/ecen403-llm-mc-1.git</div>
+          <div class="cmd">cd ecen403-llm-mc-1</div>
+          <div class="cmt"># run the whole flow — English in, GDSII out</div>
+          <div class="cmd">python3 flow.py</div>
+        </div>
+      </div>
+      <button class="copy" data-copy-target="quickstartCmd">copy</button>
+
+      <div class="get-started-links">
+        <a class="btn ghost" href="https://github.com/kajubarfi1/ecen403-llm-mc-1/blob/main/USAGE.md" target="_blank" rel="noopener">Full setup guide</a>
+        <a class="btn ghost" href="diagrams/user_flow_slide.html" target="_blank" rel="noopener">Detailed flow diagram</a>
+        <a class="btn ghost" href="diagrams/system_diagram.html" target="_blank" rel="noopener">System diagram</a>
+        <a class="btn ghost" href="diagrams/outputs_slide.html" target="_blank" rel="noopener">Sample outputs</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <span>LLM MC #1 &middot; ECEN 404 &middot; Texas A&amp;M University</span>
+    <div class="footlinks">
+      <a href="https://github.com/kajubarfi1/ecen403-llm-mc-1" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/kajubarfi1/ecen403-llm-mc-1/blob/main/USAGE.md" target="_blank" rel="noopener">Guide</a>
+      <a href="#top">Back to top</a>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

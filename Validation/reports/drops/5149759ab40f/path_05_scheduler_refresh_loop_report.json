@@ -1,0 +1,137 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_05_scheduler_refresh_loop",
+  "strategy": "invariant",
+  "verdict": "pass",
+  "timestamp": "2026-10-15T13:41:05.509232",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_05_scheduler_refresh_loop_seed1.json",
+  "stimulus_generator": "refresh_stress",
+  "autonomous": false,
+  "window_cycles": 6000,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "5149759ab40f",
+    "drop_id": "5149759ab40f",
+    "design_id": "6ec5a62314b2",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "d316eae",
+    "frontend_commits": {
+      "addr_decoder": "6f659675f03286f6d19f4946500c8ae93de09850",
+      "bank_tracker": "6f659675f03286f6d19f4946500c8ae93de09850",
+      "cmd_gen": "6f659675f03286f6d19f4946500c8ae93de09850",
+      "cmd_queue": "6f659675f03286f6d19f4946500c8ae93de09850",
+      "config_regs": "6f659675f03286f6d19f4946500c8ae93de09850",
+      "data_path": "d316eae27e763b4fa7a942a2d8ef417bb115567f",
+      "refresh_ctrl": "6f659675f03286f6d19f4946500c8ae93de09850",
+      "scheduler": "6f659675f03286f6d19f4946500c8ae93de09850",
+      "wb_port": "6f659675f03286f6d19f4946500c8ae93de09850"
+    },
+    "roots": [
+      "runs/20261015-123308-llmmc_microarchitectures/drop"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE2RTL/addr_decoder.sv",
+        "manifest": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "bank_tracker": {
+        "rtl": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE2RTL/bank_tracker.sv",
+        "manifest": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_gen": {
+        "rtl": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE3RTL/cmd_gen.sv",
+        "manifest": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_queue": {
+        "rtl": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE3RTL/cmd_queue.sv",
+        "manifest": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "config_regs": {
+        "rtl": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "data_path": {
+        "rtl": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE4RTL/data_path.sv",
+        "manifest": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "refresh_ctrl": {
+        "rtl": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "scheduler": {
+        "rtl": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE3RTL/scheduler.sv",
+        "manifest": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "wb_port": {
+        "rtl": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE1RTL/wb_port.sv",
+        "manifest": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/20261015-123308-llmmc_microarchitectures/drop/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "scheduler",
+      "kind": "invariant",
+      "model": "/Users/lehanahome/Documents/ECEN404/ecen403-llm-mc-1/Validation/predictors/scheduler_checker.py",
+      "scope": "scheduler",
+      "verdict": "pass",
+      "summary": "scope=scheduler  strategy=invariant  status=pass  (11069 transactions, no rule broken)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "refresh_ctrl",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "refresh_ctrl",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
+    },
+    {
+      "stage": "(path-level)",
+      "kind": "invariant",
+      "model": "/Users/lehanahome/Documents/ECEN404/ecen403-llm-mc-1/Validation/predictors/path_05_scheduler_refresh_loop_checker.py",
+      "scope": "path_05_scheduler_refresh_loop",
+      "verdict": "pass",
+      "summary": "scope=path_05_scheduler_refresh_loop  strategy=invariant  status=pass  (11069 transactions, no rule broken)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/paths/path_05_scheduler_refresh_loop_sim.log",
+  "observed_trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl"
+}
