@@ -2,10 +2,10 @@
   "$schema": "validation-retry-instructions/1",
   "status": "FAIL",
   "pipeline": "validation",
-  "drop": "dab971c2aab9",
+  "drop": "9ebabfaa4db2",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "spec_id": "f7c16e452e8d9d23",
-  "generated_utc": "2026-10-15T18:29:10.662500Z",
+  "spec_id": "279cbf6ca7b6f62b",
+  "generated_utc": "2026-10-15T18:46:00.364300Z",
   "failed_modules": [
     "data_path"
   ],
@@ -13,7 +13,7 @@
     "data_path": {
       "module": "data_path",
       "attempt": null,
-      "drop": "dab971c2aab9",
+      "drop": "9ebabfaa4db2",
       "failed_checks": [
         {
           "id": "MISMATCH/dp_rd_rsp[data]",
@@ -26,14 +26,14 @@
           "spec_ref": null,
           "anchor": [
             {
-              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-              "line": 300,
+              "file": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE4RTL/data_path.sv",
+              "line": 321,
               "signal": "rd_rsp_data",
               "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
             },
             {
-              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-              "line": 301,
+              "file": "runs/20261015-123308-llmmc_microarchitectures/drop/PHASE4RTL/data_path.sv",
+              "line": 322,
               "signal": "rd_rsp_aux",
               "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
             }
@@ -64,7 +64,7 @@
           "finding_id": "data_path/MISMATCH/dp_rd_rsp[data]"
         }
       ],
-      "message": "1 check(s) failed on drop dab971c2aab9; 1 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+      "message": "1 check(s) failed on drop 9ebabfaa4db2; 1 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
     }
   },
   "resolved_since_previous_drop": [],
@@ -72,7 +72,7 @@
   "source": "Validation/findings/emit_findings.py -> retry_adapter.py",
   "drop_status": {
     "$schema": "validation-drop-status/1",
-    "drop": "dab971c2aab9",
+    "drop": "9ebabfaa4db2",
     "partial": false,
     "blocks_present": [
       "addr_decoder",

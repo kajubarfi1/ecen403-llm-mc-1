@@ -1,30 +1,25 @@
 {
   "$schema": "validation-drop-comparison/1",
   "a": {
-    "dir": "Validation/reports/drops/a82f2070de32",
-    "drop_head": "a82f2070de32"
+    "dir": "Validation/reports/drops/5149759ab40f",
+    "drop_head": "5149759ab40f"
   },
   "b": {
     "dir": "Validation/reports/paths",
-    "drop_head": "dab971c2aab9"
+    "drop_head": "9ebabfaa4db2"
   },
   "strict": false,
-  "generated_utc": "2026-10-15T18:28:47.906257Z",
+  "generated_utc": "2026-10-15T18:46:00.411934Z",
   "rows": [
     {
       "path": "path_01_write_cmd",
-      "kind": "fixed",
+      "kind": "same",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {
-        "matched:cmd_gen": [
-          50,
-          51
-        ]
-      },
+      "matched_up": {},
       "verdict": [
         "pass",
         "pass"
@@ -32,18 +27,13 @@
     },
     {
       "path": "path_02_read_cmd",
-      "kind": "fixed",
+      "kind": "same",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {
-        "matched:cmd_gen": [
-          49,
-          50
-        ]
-      },
+      "matched_up": {},
       "verdict": [
         "pass",
         "pass"
@@ -51,22 +41,15 @@
     },
     {
       "path": "path_03_read_return",
-      "kind": "regression",
-      "new": {
-        "stage:data_path": 1
-      },
+      "kind": "same",
+      "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {
-        "matched:data_path": [
-          19,
-          0
-        ]
-      },
+      "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "pass",
+        "fail",
         "fail"
       ]
     },
@@ -86,22 +69,15 @@
     },
     {
       "path": "path_05_scheduler_refresh_loop",
-      "kind": "fixed",
+      "kind": "same",
       "new": {},
-      "gone": {
-        "id:REF_001": 23,
-        "id:SCHED_003": 2,
-        "stage:(path-level)": 1,
-        "stage:scheduler": 1,
-        "violations:(path-level)": 14,
-        "violations:scheduler": 14
-      },
+      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "fail",
+        "pass",
         "pass"
       ]
     },
@@ -205,19 +181,15 @@
     },
     {
       "path": "path_13_csr_refresh_to_scheduling",
-      "kind": "fixed",
+      "kind": "same",
       "new": {},
-      "gone": {
-        "id:SCHED_003": 1,
-        "stage:scheduler": 1,
-        "violations:scheduler": 1
-      },
+      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "fail",
+        "pass",
         "pass"
       ]
     },
@@ -279,35 +251,15 @@
     },
     {
       "path": "path_18_full_write",
-      "kind": "changed",
-      "new": {
-        "stage:data_path": 1
-      },
+      "kind": "same",
+      "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {
-        "matched:data_path": [
-          29,
-          24
-        ]
-      },
-      "matched_up": {
-        "matched:addr_decoder": [
-          19,
-          24
-        ],
-        "matched:cmd_gen": [
-          49,
-          50
-        ],
-        "matched:wb_port": [
-          28,
-          36
-        ]
-      },
+      "matched_down": {},
+      "matched_up": {},
       "verdict": [
-        "pass",
+        "fail",
         "fail"
       ]
     },
@@ -327,24 +279,15 @@
     },
     {
       "path": "path_20_refresh_preempt",
-      "kind": "fixed",
+      "kind": "same",
       "new": {},
-      "gone": {
-        "id:SCHED_003": 1,
-        "stage:(path-level)": 1,
-        "violations:(path-level)": 1
-      },
+      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {
-        "matched:cmd_gen": [
-          1792,
-          1840
-        ]
-      },
+      "matched_up": {},
       "verdict": [
-        "fail",
+        "pass",
         "pass"
       ]
     },

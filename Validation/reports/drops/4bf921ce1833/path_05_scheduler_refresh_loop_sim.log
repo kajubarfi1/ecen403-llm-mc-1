@@ -1,4 +1,5 @@
-TOOL:	xrun	24.03-s013: Started on Oct 15, 2026 at 13:04:18 CDT
+TOOL:	xrun	24.03-s013: Started on Oct 15, 2026 at 13:38:04 CDT
+*WARNING* file /home/ugrads/l/lehanar57/CDS.log File is already locked by some other process.
 *WARNING* X Window Display Initialization failure
 *WARNING* (DISPLAY "")
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
@@ -428,6 +429,10 @@ file: refresh_ctrl_fcov.sv
 	module worklib.refresh_ctrl_fcov:sv
 		errors: 0, warnings: 0
 file: refresh_ctrl_fcov_bind.sv
+file: scheduler_fcov.sv
+	module worklib.scheduler_fcov:sv
+		errors: 0, warnings: 0
+file: scheduler_fcov_bind.sv
 	Total errors/warnings found outside modules and primitives:
 		errors: 0, warnings: 16
 DEFINE std       ./STD
@@ -578,7 +583,7 @@ xmelab: *W,DLCVAR (/home/ugrads/l/lehanar57/cds.lib,1): cds.lib Invalid environm
 xmelab: *N,CGNSWA: (File: ./cov_conf.ccf, Line: 6): A covergroup is not (de)selected with the "-all" option of the (de)select_coverage command. Use the coverage metric "-covergroup" with the (de)select_coverage command to (de)select a covergroup.
 		Caching library 'worklib' ....... Done
 	Top level design units:
-		$unit_0x7e92fa13
+		$unit_0x3a0d0f3e
 		chain_harness
 
 	Extracting FSMs for coverage:
@@ -596,12 +601,6 @@ xmelab: *N,CGNSWA: (File: ./cov_conf.ccf, Line: 6): A covergroup is not (de)sele
 		worklib.scheduler
 		worklib.wb_port
 	Total FSMs extracted = 2
-    .ddr_dq_o(data_path__ddr_dq_o),
-                                |
-xmelab: *W,CUVMPW (./chain_harness.sv,439|32): port sizes differ in port connection(16/32) for the instance(chain_harness) .
-    .ddr_dq_i(stub__u_dram__ddr_dq_i),
-                                   |
-xmelab: *W,CUVMPW (./chain_harness.sv,443|35): port sizes differ in port connection(16/32) for the instance(chain_harness) .
 xmelab: *W,ICFNFR: Module "*_txn_harness", specified on line 17 of file "./cov_conf.ccf", not found in the design.
 xmelab: *W,ICFNFR: Module "*_tb", specified on line 21 of file "./cov_conf.ccf", not found in the design.
 xmelab: *W,COVSCE: Expression coverage is supported for expressions with static cast as a default configuration. To continue merging older databases, use the "set_backward_compat -disable_static_cast" backward compatibility command in the coverage configuration file. This command disables the support of expression coverage with static cast.
@@ -656,91 +655,93 @@ xmvlog_cg: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,1
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xmvlog_cg: *W,DLCVAR (/home/ugrads/l/lehanar57/cds.lib,1): cds.lib Invalid environment variable ''.
-		worklib.dram_stub:sv <0x72255148>
-			streams:   2, words:  4720
-		worklib.wb_rsp_monitor:sv <0x504e4382>
+		worklib.dram_stub:sv <0x091743b9>
+			streams:   3, words:  7224
+		worklib.wb_rsp_monitor:sv <0x6830c74f>
 			streams:   2, words:  1788
-		worklib.wb_monitor:sv <0x18901174>
+		worklib.wb_monitor:sv <0x699195e2>
 			streams:   2, words:  2913
-		worklib.req_monitor:sv <0x06618a11>
+		worklib.req_monitor:sv <0x6d38e9b9>
 			streams:   2, words:  2235
-		worklib.sched_deq_monitor:sv <0x04fe8c36>
+		worklib.scheduler_fcov:sv <0x0da01ec0>
+			streams:   4, words:  1955
+		worklib.sched_deq_monitor:sv <0x5fb28258>
 			streams:   2, words:  1543
-		worklib.sched_cmd_monitor:sv <0x6fd42796>
+		worklib.sched_cmd_monitor:sv <0x62d37777>
 			streams:   2, words:  2668
-		worklib.refresh_ctrl_fcov:sv <0x6543cf5c>
+		worklib.refresh_ctrl_fcov:sv <0x4eb849fa>
 			streams:   4, words:  1993
-		worklib.refresh_req_monitor:sv <0x6533fc7b>
+		worklib.refresh_req_monitor:sv <0x6ec68b07>
 			streams:   3, words:  2241
-		worklib.refresh_level_monitor:sv <0x6af6bec8>
+		worklib.refresh_level_monitor:sv <0x67f1ee29>
 			streams:   3, words:  2531
-		worklib.refresh_ack_monitor:sv <0x7ae8223a>
+		worklib.refresh_ack_monitor:sv <0x57a434c7>
 			streams:   2, words:  1543
-		worklib.data_path_fcov:sv <0x0b0c9339>
+		worklib.data_path_fcov:sv <0x7e00e061>
 			streams:   4, words:  2329
-		worklib.dp_wr_monitor:sv <0x0263ef61>
+		worklib.dp_wr_monitor:sv <0x2f2ff99c>
 			streams:   2, words:  1785
-		worklib.dp_rd_rsp_monitor:sv <0x398acc7e>
+		worklib.dp_rd_rsp_monitor:sv <0x4c3e81ba>
 			streams:   2, words:  1768
-		worklib.dp_cmd_monitor:sv <0x2f79e3e7>
+		worklib.dp_cmd_monitor:sv <0x0882b934>
 			streams:   2, words:  2452
-		worklib.ddr_wr_beat_monitor:sv <0x1eb623e8>
+		worklib.ddr_wr_beat_monitor:sv <0x3f1daa25>
 			streams:   2, words:  1768
-		worklib.ddr_rd_beat_monitor:sv <0x7cf669d6>
+		worklib.ddr_rd_beat_monitor:sv <0x51ba7f2b>
 			streams:   2, words:  1543
-		worklib.config_regs_fcov:sv <0x36c78751>
+		worklib.config_regs_fcov:sv <0x4675e30e>
 			streams:  10, words: 13585
-		worklib.csr_sts_level_monitor:sv <0x5bec4ec6>
+		worklib.csr_sts_level_monitor:sv <0x6706932d>
 			streams:   3, words:  5328
-		worklib.csr_sts_monitor:sv <0x47d3b4ec>
+		worklib.csr_sts_monitor:sv <0x3267f928>
 			streams:   2, words:  2016
-		worklib.csr_rsp_monitor:sv <0x7df2c89a>
+		worklib.csr_rsp_monitor:sv <0x7607bfe6>
 			streams:   2, words:  3103
-		worklib.csr_monitor:sv <0x49b797ed>
+		worklib.csr_monitor:sv <0x681c1e20>
 			streams:   2, words:  2653
-		worklib.cfg_timing_monitor:sv <0x2163d3a9>
+		worklib.cfg_timing_monitor:sv <0x64b52983>
 			streams:   3, words:  5065
-		worklib.cfg_refresh_monitor:sv <0x71c17cdb>
+		worklib.cfg_refresh_monitor:sv <0x1e10adfe>
 			streams:   3, words:  3291
-		worklib.cmd_queue_fcov:sv <0x42ee12cd>
-			streams:   4, words:  1931
-		worklib.cq_enq_monitor:sv <0x5f016ed8>
+		worklib.cmd_queue_fcov:sv <0x194d3cde>
+			streams:   4, words:  1898
+		worklib.cq_enq_monitor:sv <0x6be3170f>
 			streams:   2, words:  2235
-		worklib.cq_deq_monitor:sv <0x377645d0>
+		worklib.cq_deq_monitor:sv <0x2074507d>
 			streams:   2, words:  1543
-		worklib.cmd_gen_coverage:sv <0x384189ed>
-			streams:  25, words: 45125
-		worklib.sched_in_monitor:sv <0x1df2f058>
+		worklib.cmd_gen_coverage:sv <0x50ecfbde>
+			streams:  25, words: 45158
+		worklib.sched_in_monitor:sv <0x170d0849>
 			streams:   2, words:  2668
-		worklib.ddr_cmd_monitor:sv <0x48e5a95c>
+		worklib.ddr_cmd_monitor:sv <0x3d51e498>
 			streams:   2, words:  2037
-		worklib.bank_tracker_fcov:sv <0x7f2bafcb>
-			streams:   7, words:  4319
-		worklib.addr_decoder:sv <0x62ba0e03>
+		worklib.bank_tracker_fcov:sv <0x7ded08a9>
+			streams:   4, words:  2393
+		worklib.addr_decoder:sv <0x55628003>
 			streams:   2, words:  1259
-		worklib.seq_driver:sv <0x78e3991d>
+		worklib.seq_driver:sv <0x52180bb7>
 			streams:   6, words: 38014
-		worklib.chain_harness:sv <0x3ff56450>
-			streams: 247, words: 66545
-		worklib.bank_tracker:sv <0x0762d5af>
-			streams:  38, words: 49503
-		worklib.config_regs:sv <0x6d53eb57>
+		worklib.chain_harness:sv <0x30f6b812>
+			streams: 247, words: 66541
+		worklib.bank_tracker:sv <0x11835f36>
+			streams:  37, words: 49233
+		worklib.config_regs:sv <0x7e5dc01d>
 			streams:  64, words: 58855
-		worklib.cmd_queue:sv <0x17a29d8d>
+		worklib.cmd_queue:sv <0x315a7d28>
 			streams:  21, words: 20719
-		worklib.cmd_gen:sv <0x31eb51a0>
+		worklib.cmd_gen:sv <0x15d8ee56>
 			streams:  19, words: 19688
-		worklib.data_path:sv <0x4f67e9f1>
+		worklib.data_path:sv <0x48750243>
 			streams:  60, words: 47462
-		worklib.refresh_ctrl:sv <0x5c742875>
+		worklib.refresh_ctrl:sv <0x5701a735>
 			streams:  23, words: 12929
-		worklib.wb_port:sv <0x0a4c89c3>
+		worklib.wb_port:sv <0x7d350f75>
 			streams:  58, words: 45842
-		worklib.scheduler:sv <0x2ec08733>
+		worklib.scheduler:sv <0x42a82204>
 			streams:  28, words: 45935
-		worklib.cmd_gen_sva:sv <0x20414d26>
+		worklib.cmd_gen_sva:sv <0x3da5f8fa>
 			streams: 333, words: 140663
-		worklib.\$unit_0x7e92fa13 :compilation_unit <0x5bdf0b9f>
+		worklib.\$unit_0x3a0d0f3e :compilation_unit <0x02c7fa9c>
 			streams:   0, words:     0
 xmelab: *W,COVNOEN: By default, toggle coverage is not supported for systemverilog static arrays of enumerated nets and variables. To enable toggle coverage of these objects, specify the 'set_toggle_scoring -sv_enum enable_mda' command in the coverage configuration file.
   int unsigned since_act [8];
@@ -751,21 +752,21 @@ xmelab: *W,CGPIDF: Covergroup "per_instance" option , by default, is set as 0.
 	Loading native compiled code:     .................... Done
 	Design hierarchy summary:
 		                     Instances  Unique
-		Modules:                    42      42
-		Registers:                 822     843
+		Modules:                    43      43
+		Registers:                 830     851
 		Scalar wires:              246       -
-		Vectored wires:            281       -
+		Vectored wires:            280       -
 		Named events:               21      21
-		Always blocks:             295     288
+		Always blocks:             296     289
 		Initial blocks:             69      69
 		Cont. assignments:          64      92
-		Pseudo assignments:        297       -
+		Pseudo assignments:        296       -
 		Assertions:                 36      36
 		Covergroup Instances:        0      10
 		Compilation units:           1       1
 		SV Class declarations:      21      21
 		SV Class specializations:   21      21
-		Process Clocks:            104      28
+		Process Clocks:            105      28
 		Simulation timescale:      1ps
 	Writing initial simulation snapshot: worklib.chain_harness:sv
 DEFINE std       ./STD
@@ -11890,17 +11891,17 @@ TXN ddr_cmd command t=59039000 addr=0 bank=0 cmd=1
 TXN csr_sts_level state t=59043000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
 HARNESS_DONE
 Simulation complete via $finish(1) at time 60877500 PS + 0
-./chain_harness.sv:451     $finish;
+./chain_harness.sv:453     $finish;
 xcelium> exit
-xmsim: *W,CGDEFN: Default name "bank_tracker_fcov#(32'h00000001).cg_refresh_inst" will be generated for covergroup instance "chain_harness.u_bank_tracker.u_bank_tracker_fcov.cg_refresh_inst@2_1" as the name of the covergroup instance is not specified explicitly: ./bank_tracker_fcov.sv, 31.
-xmsim: *W,CGDEFN: Default name "bank_tracker_fcov#(32'h00000001).cg_scheduler_inst" will be generated for covergroup instance "chain_harness.u_bank_tracker.u_bank_tracker_fcov.cg_scheduler_inst@3_1" as the name of the covergroup instance is not specified explicitly: ./bank_tracker_fcov.sv, 48.
-xmsim: *W,CGDEFN: Default name "cmd_gen_coverage.cg_timing_inst" will be generated for covergroup instance "chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1" as the name of the covergroup instance is not specified explicitly: ./cmd_gen_coverage.sv, 317.
-xmsim: *W,CGDEFN: Default name "cmd_queue_fcov#(32'h00000001).cg_cmd_queue_inst" will be generated for covergroup instance "chain_harness.u_cmd_queue.u_cmd_queue_fcov.cg_cmd_queue_inst@5_1" as the name of the covergroup instance is not specified explicitly: ./cmd_queue_fcov.sv, 28.
-xmsim: *W,CGDEFN: Default name "config_regs_fcov#(32'h00000001).cg_csr_access_inst" will be generated for covergroup instance "chain_harness.u_config_regs.u_config_regs_fcov.cg_csr_access_inst@6_1" as the name of the covergroup instance is not specified explicitly: ./config_regs_fcov.sv, 120.
-xmsim: *W,CGDEFN: Default name "config_regs_fcov#(32'h00000001).cg_config_regs_inst" will be generated for covergroup instance "chain_harness.u_config_regs.u_config_regs_fcov.cg_config_regs_inst@7_1" as the name of the covergroup instance is not specified explicitly: ./config_regs_fcov.sv, 132.
-xmsim: *W,CGDEFN: Default name "data_path#(32'h00000020,32'h00000010,32'h00000002,32'h00000004,32'h00000004,32'h00000008,32'h00000004,32'h00000002,32'h00000002,32'h00000010,32'h00000004,32'h00000003,32'h00000002,2).cg_inst" will be generated for covergroup instance "chain_harness.u_data_path.cg_inst@8_1" as the name of the covergroup instance is not specified explicitly: ./data_path.sv, 341.
-xmsim: *W,CGDEFN: Default name "data_path_fcov#(32'h00000001).cg_data_path_inst" will be generated for covergroup instance "chain_harness.u_data_path.u_data_path_fcov.cg_data_path_inst@9_1" as the name of the covergroup instance is not specified explicitly: ./data_path_fcov.sv, 34.
-xmsim: *W,CGDEFN: Default name "refresh_ctrl_fcov#(32'h00000001).cg_refresh_inst" will be generated for covergroup instance "chain_harness.u_refresh_ctrl.u_refresh_ctrl_fcov.cg_refresh_inst@10_1" as the name of the covergroup instance is not specified explicitly: ./refresh_ctrl_fcov.sv, 29.
+xmsim: *W,CGDEFN: Default name "bank_tracker_fcov#(32'h00000001).cg_scheduler_inst" will be generated for covergroup instance "chain_harness.u_bank_tracker.u_bank_tracker_fcov.cg_scheduler_inst@2_1" as the name of the covergroup instance is not specified explicitly: ./bank_tracker_fcov.sv, 34.
+xmsim: *W,CGDEFN: Default name "cmd_gen_coverage.cg_timing_inst" will be generated for covergroup instance "chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@3_1" as the name of the covergroup instance is not specified explicitly: ./cmd_gen_coverage.sv, 372.
+xmsim: *W,CGDEFN: Default name "cmd_queue_fcov#(32'h00000001).cg_cmd_queue_inst" will be generated for covergroup instance "chain_harness.u_cmd_queue.u_cmd_queue_fcov.cg_cmd_queue_inst@4_1" as the name of the covergroup instance is not specified explicitly: ./cmd_queue_fcov.sv, 27.
+xmsim: *W,CGDEFN: Default name "config_regs_fcov#(32'h00000001).cg_csr_access_inst" will be generated for covergroup instance "chain_harness.u_config_regs.u_config_regs_fcov.cg_csr_access_inst@5_1" as the name of the covergroup instance is not specified explicitly: ./config_regs_fcov.sv, 120.
+xmsim: *W,CGDEFN: Default name "config_regs_fcov#(32'h00000001).cg_config_regs_inst" will be generated for covergroup instance "chain_harness.u_config_regs.u_config_regs_fcov.cg_config_regs_inst@6_1" as the name of the covergroup instance is not specified explicitly: ./config_regs_fcov.sv, 132.
+xmsim: *W,CGDEFN: Default name "data_path#(32'h00000020,32'h00000010,32'h00000002,32'h00000004,32'h00000004,32'h00000008,32'h00000004,32'h00000002,32'h00000002,32'h00000010,32'h00000004,32'h00000003,32'h00000002,2).cg_inst" will be generated for covergroup instance "chain_harness.u_data_path.cg_inst@7_1" as the name of the covergroup instance is not specified explicitly: ./data_path.sv, 341.
+xmsim: *W,CGDEFN: Default name "data_path_fcov#(32'h00000001).cg_data_path_inst" will be generated for covergroup instance "chain_harness.u_data_path.u_data_path_fcov.cg_data_path_inst@8_1" as the name of the covergroup instance is not specified explicitly: ./data_path_fcov.sv, 34.
+xmsim: *W,CGDEFN: Default name "refresh_ctrl_fcov#(32'h00000001).cg_refresh_inst" will be generated for covergroup instance "chain_harness.u_refresh_ctrl.u_refresh_ctrl_fcov.cg_refresh_inst@9_1" as the name of the covergroup instance is not specified explicitly: ./refresh_ctrl_fcov.sv, 29.
+xmsim: *W,CGDEFN: Default name "scheduler_fcov#(32'h00000001).cg_refresh_inst" will be generated for covergroup instance "chain_harness.u_scheduler.u_scheduler_fcov.cg_refresh_inst@10_1" as the name of the covergroup instance is not specified explicitly: ./scheduler_fcov.sv, 28.
 xmsim: *W,CGDEFN: Default name "wb_port#(32'h00000020,32'h0000001d,32'h00000004,32'h00000004,32'h00000008,32'h00000010,32'h00000004,32'h00000010,32'h00000004,3'h0,3'h1,3'h2,3'h7,2'h0,4).cg_inst" will be generated for covergroup instance "chain_harness.u_wb_port.cg_inst@11_1" as the name of the covergroup instance is not specified explicitly: ./wb_port.sv, 226.
 
 coverage setup:
@@ -11911,6 +11912,6 @@ coverage setup:
   Coverage database dumped with the set_code_fine_grained_merging command during elaboration.
 
 coverage files:
-  model(design data) :  ./cov_work/scope/icc_57faf770_4d6fb0fe.ucm
-  data               :  ./cov_work/scope/path_05_scheduler_refresh_loop/icc_57faf770_4d6fb0fe.ucd
-TOOL:	xrun	24.03-s013: Exiting on Oct 15, 2026 at 13:04:21 CDT  (total: 00:00:03)
+  model(design data) :  ./cov_work/scope/icc_46c2a7c5_12022b0c.ucm (reused)
+  data               :  ./cov_work/scope/path_05_scheduler_refresh_loop/icc_46c2a7c5_12022b0c.ucd
+TOOL:	xrun	24.03-s013: Exiting on Oct 15, 2026 at 13:38:06 CDT  (total: 00:00:02)
