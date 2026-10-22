@@ -1,7 +1,7 @@
 {
   "$schema": "validation-drop-status/1",
-  "drop": "7d4d34874818",
-  "partial": true,
+  "drop": "efece348d04e",
+  "partial": false,
   "blocks_present": [
     "addr_decoder",
     "bank_tracker",
@@ -9,67 +9,37 @@
     "cmd_gen",
     "cmd_queue",
     "config_regs",
+    "data_path",
     "init_fsm",
     "refresh_ctrl",
     "scheduler",
     "wb_port"
   ],
-  "blocks_absent": [
-    "data_path"
-  ],
+  "blocks_absent": [],
   "inconsistent_edges": [],
-  "validation_spec_revision": "compiled_ddr31600_x8_1lane_1rank_ba68bf50",
+  "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "foreign_spec_blocks": {},
   "paths_run": [
+    "path_01_write_cmd",
+    "path_02_read_cmd",
+    "path_03_read_return",
+    "path_04_scheduler_bank_loop",
+    "path_05_scheduler_refresh_loop",
+    "path_07_backpressure",
     "path_08_init_to_cal",
     "path_09_init_to_refresh",
+    "path_12_csr_timing_to_scheduling",
+    "path_13_csr_refresh_to_scheduling",
     "path_14_status_init",
     "path_15_status_cal",
     "path_16_status_refresh",
     "path_17_full_boot",
+    "path_18_full_write",
+    "path_19_row_conflict",
+    "path_20_refresh_preempt",
     "path_21_wb_port_standalone",
     "path_22_csr_standalone"
   ],
-  "paths_blocked": {
-    "path_01_write_cmd": [
-      "data_path"
-    ],
-    "path_02_read_cmd": [
-      "data_path"
-    ],
-    "path_03_read_return": [
-      "data_path"
-    ],
-    "path_04_scheduler_bank_loop": [
-      "data_path"
-    ],
-    "path_05_scheduler_refresh_loop": [
-      "data_path"
-    ],
-    "path_06_scheduler_dequeue": [
-      "data_path"
-    ],
-    "path_07_backpressure": [
-      "data_path"
-    ],
-    "path_10_csr_to_timing": [
-      "data_path"
-    ],
-    "path_12_csr_timing_to_scheduling": [
-      "data_path"
-    ],
-    "path_13_csr_refresh_to_scheduling": [
-      "data_path"
-    ],
-    "path_18_full_write": [
-      "data_path"
-    ],
-    "path_19_row_conflict": [
-      "data_path"
-    ],
-    "path_20_refresh_preempt": [
-      "data_path"
-    ]
-  },
-  "note": "A blocked path is not a failure and not a pass: it waits for the drop that brings its blocks or fixes the edge it crosses. Nothing was substituted."
+  "paths_blocked": {},
+  "note": "Complete run: every runnable path simulated on this drop."
 }

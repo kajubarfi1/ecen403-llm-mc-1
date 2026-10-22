@@ -65,6 +65,7 @@ Options: --max-spec-rounds 1 --max-rtl-rounds 4 --max-backend-rounds 2
 """
 
 import argparse
+import glob
 import json
 import os
 import re
@@ -565,6 +566,49 @@ def stage_rtl_validation(run, args, partial=False, tag=None):
     return 1            # FAIL -> the caller decides (regeneration edge)
 
 
+def applicable_formal_report(run, path):
+    """A JasperGold report for `path` that speaks for this run's drop (same
+    drop, same design, or same blocks: emit_findings.formal_report_applies),
+    newest first, or None."""
+    sys.path.insert(0, os.path.join(VALIDATION, "findings"))
+    sys.path.insert(0, os.path.join(VALIDATION, "structural"))
+    try:
+        import emit_findings as EF
+    except Exception:
+        return None
+    env_root = os.environ.get("VALIDATION_RTL_DROP_ROOTS")
+    os.environ["VALIDATION_RTL_DROP_ROOTS"] = run.drop
+    try:
+        import rtl_drop as RD
+        cur_design = RD.design_id()
+
+        def block_design(blocks):
+            try:
+                return RD.design_id(blocks)
+            except Exception:
+                return None
+        head = run.state.get("drop_id") or RD.drop_id()
+        cands = sorted(glob.glob(os.path.join(FORMAL_REPORTS, f"jg_{path}_*.json")), key=os.path.getmtime, reverse=True)
+        for rp in cands:
+            try:
+                with open(rp) as f:
+                    rep = json.load(f)
+            except ValueError:
+                continue
+            if rep.get("abstractions"):
+                continue                      # the concrete proof is the one to reuse
+            if EF.formal_report_applies(rep, head, cur_design, block_design):
+                return rp
+    except Exception:
+        return None
+    finally:
+        if env_root is None:
+            os.environ.pop("VALIDATION_RTL_DROP_ROOTS", None)
+        else:
+            os.environ["VALIDATION_RTL_DROP_ROOTS"] = env_root
+    return None
+
+
 def stage_formal(run, args):
     """Validation: JasperGold formal proof on one command path (default
     path_01_write_cmd, run_formal.py's own default), gated behind --formal.
@@ -577,6 +621,24 @@ def stage_formal(run, args):
     so this records a result and moves on rather than gating the flow on a
     check nothing else in the pipeline is gated on yet."""
     path = getattr(args, "formal_path", None) or "path_01_write_cmd"
+    # validate_drop.py's own step 4b already re-proves every path with
+    # formal history when the round passes simulation and no report applies
+    # to this design (2026-10-20); when it did, reuse that report instead of
+    # a second JasperGold run on the same design
+    existing = applicable_formal_report(run, path)
+    if existing:
+        dest_dir = os.path.join(run.dir, "formal")
+        os.makedirs(dest_dir, exist_ok=True)
+        shutil.copy(existing, dest_dir)
+        with open(existing) as f:
+            rep = json.load(f)
+        summ = rep.get("summary", {})
+        run.record("formal", "FAIL" if summ.get("cex") else "PASS",
+                   f"{path}: reused {os.path.relpath(existing, ROOT)} (validate_drop step 4b proved this "
+                   f"design): {summ.get('proven', 0)} proven, {summ.get('bounded_proven', 0)} bounded, "
+                   f"{summ.get('cex', 0)} cex, {summ.get('undetermined', 0)} undetermined",
+                   path=path, cex=summ.get("cex", 0), undetermined=summ.get("undetermined", 0))
+        return 0
     env = os.environ.copy()
     env["VALIDATION_RTL_DROP_ROOTS"] = run.drop
     env["VALIDATION_SPEC"] = run.state["spec"]

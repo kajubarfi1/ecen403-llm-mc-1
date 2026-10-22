@@ -187,3 +187,42 @@ the enforced windows plus a cycle per bank, under the spec's
 urgent-preempt policy), silent on the clean drop and firing on the
 seeded scheduler-ignores-refresh fault; the second run had only the
 data_path finding.
+
+## Addendum 3 (2026-10-22, evening): your "Phase 4 validation changes" push
+
+Three things in it, two of them good news.
+
+**Three specs that are not the golden one.** Your `--phases 1,2` runs on
+the compiled DDR3-800, -1066 and -1600 x8 one-lane specs: spec review
+PASS on each, 8 of 8 runnable paths PASS on each, packages under their
+own revision directories. That is the first evidence the validation
+holds on specs it was not built against, a different byte-lane count
+included. Keep doing that; the next step up is a two-rank or ECC preset
+through the same loop.
+
+**tRFC for 4Gb, 260 → 300 ns.** The spec review's JEDEC table flagged
+it (J-TIM-009) and your note explains the vendor-bin origin exactly. A
+generator-side error caught by the review stage is the stage doing its
+job.
+
+**`--formal` in flow.py.** Fine as an opt-in, and we kept it. One
+overlap to know about: since 10-20 `validate_drop.py` step 4b already
+re-proves every path with formal history when a round passes simulation
+and no report applies to the design, so on a passing round your stage
+would have run JasperGold a second time on the same design. It now
+reuses the report validate_drop produced when one applies (same drop,
+design, or blocks) and only runs its own job otherwise.
+
+**One request.** Your commit carried `Validation/txn/generated`,
+`Validation/sva/generated`, `Validation/formal/chain_formal.sv` and the
+predictor provenance files from your last run, generated for the
+one-lane DDR3-1600 spec against manifests under your run directory. They
+are regenerated on every run, so nothing broke at runtime, but the
+committed tree then described a drop that is not in the repo and our
+unit tests tripped on manifests that do not exist here (made
+self-healing now). Before committing, please leave those paths out
+(`git checkout -- Validation/txn/generated Validation/sva/generated
+Validation/structural/integration_map.json Validation/formal` is
+enough); the outbox packages under your spec revisions are welcome.
+
+**data_path:** unchanged in this push, so ask 8 stands.
