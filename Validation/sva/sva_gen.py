@@ -536,12 +536,112 @@ module {block}_sva{MODULE_SUFFIX} #(
     return f"{block}_sva{MODULE_SUFFIX}", header + body + "endmodule\n", block, ids
 
 
-def generate_signal_group(spec, grp):
+_CMD_MACRO = re.compile(r"@cmd\(\s*(\w+)\s*,\s*(\w+)\s*\)")
+_IDENT = re.compile(r"(?<![\w'.@$])[A-Za-z_]\w*(?![\w(])")
+_SV_KEYWORDS = {"posedge", "negedge", "disable", "iff"}
+
+
+def _stream_encoding(iface, catalog):
+    """command_encoding for a stream, from its own entry or from an entry
+    that declares itself the same stream (scheduler.cmd_* and cmd_gen's
+    sched_* are one stream under two catalog names)."""
+    cat = catalog.get(iface, {})
+    if cat.get("command_encoding"):
+        return cat["command_encoding"]
+    for other, d in catalog.items():
+        if (d.get("same_stream_as") == iface or cat.get("same_stream_as") == other) \
+                and d.get("command_encoding"):
+            return d["command_encoding"]
+    raise SvaGenError(f"@cmd({iface}, ...): no command_encoding on {iface} or on a "
+                      f"stream it shares (same_stream_as) in the interface catalog")
+
+
+def expand_expr(expr, block, catalog, schemas):
+    """Resolve `@cmd(iface, COMMAND)` through the catalog and return the
+    SystemVerilog expression plus the block ports it reads."""
+    ports = set()
+
+    def cmd(m):
+        iface, name = m.group(1), m.group(2)
+        cat = catalog.get(iface)
+        if not cat or cat.get("block") != block:
+            raise SvaGenError(f"@cmd({iface}, {name}): {iface!r} is not a stream of {block}")
+        enc = {k: v for k, v in _stream_encoding(iface, catalog).items() if not k.startswith("$")}
+        if name not in enc:
+            raise SvaGenError(f"@cmd({iface}, {name}): {name!r} is not in the stream's command_encoding {sorted(enc)}")
+        kind = next(iter(schemas[iface]["kinds"]))
+        fields = schemas[iface]["kinds"][kind]
+        tf = "type" if "type" in fields else "cmd"
+        port, width = fields[tf]["port"], fields[tf]["width"]
+        qual = cat["qualifier"]
+        ports.update(x for x in _IDENT.findall(qual) if x not in _SV_KEYWORDS)
+        ports.add(port)
+        val = enc[name]
+        lit = f"{width}'d{int(val)}" if isinstance(val, int) or str(val).isdigit() else str(val)
+        return f"(({qual}) && ({port} == {lit}))"
+    out = _CMD_MACRO.sub(cmd, expr)
+    ports.update(x for x in _IDENT.findall(_CMD_MACRO.sub("1", expr)) if x not in _SV_KEYWORDS)
+    return out, ports
+
+
+def liveness_bound(spec, b):
+    """Cycles an obligation gets: the named timing parameters in cycles of
+    the selected clock (times timing_model.counter_clock.window_scale when
+    `enforced_window`, because the design holds every window that much
+    longer than the spec value), plus one per bank when `plus_banks`, plus
+    `slack`."""
+    total = 0
+    for prm in b.get("params", []):
+        total += cycles_for(spec, prm)[0]
+    if b.get("enforced_window"):
+        cc = spec.get("timing_model", {}).get("counter_clock") or {}
+        try:
+            total *= int(cc.get("window_scale", 1) or 1)
+        except (TypeError, ValueError):
+            pass
+    if b.get("plus_banks"):
+        total += 1 << int(spec["memory_geometry"]["bank_bits"])
+    return total + int(b.get("slack", 0))
+
+
+def describe_bound(spec, b):
+    cc = spec.get("timing_model", {}).get("counter_clock") or {}
+    ws = cc.get("window_scale", 1) if b.get("enforced_window") else 1
+    parts = [f"{prm} {cycles_for(spec, prm)[0]}" for prm in b.get("params", [])]
+    s = "(" + " + ".join(parts) + f") x {ws}"
+    if b.get("plus_banks"):
+        s += f" + {1 << int(spec['memory_geometry']['bank_bits'])} banks"
+    if b.get("slack"):
+        s += f" + {b['slack']} slack"
+    return s
+
+
+def generate_signal_group(spec, grp, catalog=None, schemas=None):
     """Assertions for a block that has no command stream: ordering between
     its own signals (calibration: cal_done needs init_done first; a ZQCS
-    request needs cal_done first). Ports are the signals named."""
+    request needs cal_done first), and invariants over its ports
+    (`invariant_rules`: `never` an expression that must not hold, `cover`
+    the situation that makes the rule non-vacuous; 2026-10-22, refresh).
+    Ports are the signals named, checked against the block's manifest."""
     block = grp["block"]
     body, ids, sigs = "", [], set()
+    for r in grp.get("invariant_rules", []):
+        never, p1 = expand_expr(r["never"], block, catalog or {}, schemas or {})
+        cover, p2 = expand_expr(r["cover"], block, catalog or {}, schemas or {})
+        sigs |= p1 | p2
+        ids.append(r["id"])
+        body += f"""  // ---- {r['id']} -------------------------------------------------------
+  // {r['requirement']}
+  property p_{r['id']};
+    @(posedge clk) disable iff (!rst_n)
+    !({never});
+  endproperty
+  a_{r['id']}: assert property (p_{r['id']})
+    else $error("[{r['id']}] {r['requirement'].split('.')[0]}");
+  // the situation the rule is tested under; an assertion that never sees it proved nothing
+  c_{r['id']}: cover property (@(posedge clk) disable iff (!rst_n) {cover});
+
+"""
     for r in grp.get("event_order_rules", []):
         ev, req = r["event"], r["requires"]
         sigs |= {ev, req}
@@ -557,14 +657,52 @@ def generate_signal_group(spec, grp):
   c_{r['id']}: cover property (@(posedge clk) disable iff (!rst_n) $rose({ev}) && {req});
 
 """
-    ports = "".join(f",\n    input logic {x}" for x in sorted(sigs))
+    sigs -= {"clk", "rst_n"}
+    widths = {}
+    try:
+        sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
+        import rtl_drop as RD
+        widths = {n: p["width"] for n, p in RD.manifest_ports(block).items()}
+    except Exception:
+        widths = {}
+    if widths:
+        missing = sorted(x for x in sigs if x not in widths)
+        if missing:
+            raise SvaGenError(f"signal group {grp['name']}: {block}'s manifest has no port(s) {missing}")
+    params = ""
+    for r in grp.get("liveness_rules", []):
+        w = r.get("when")
+        if w and str(spec_value(spec, w["spec_path"])) != str(w["equals"]):
+            continue                      # the policy this obligation belongs to is not the spec's
+        trig, p1 = expand_expr(r["trigger"], block, catalog or {}, schemas or {})
+        resp, p2 = expand_expr(r["response"], block, catalog or {}, schemas or {})
+        sigs |= p1 | p2
+        bound = liveness_bound(spec, r["bound"])
+        ids.append(r["id"])
+        params += f",\n    parameter int {r['id']}_BOUND = {bound}"
+        body += f"""  // ---- {r['id']} -------------------------------------------------------
+  // {r['requirement']}
+  // Bound: {bound} cycle(s) = {describe_bound(spec, r['bound'])}; a module
+  // parameter so a formal run can scale it with an assumed configuration.
+  property p_{r['id']};
+    @(posedge clk) disable iff (!rst_n)
+    {trig} |-> ##[1:{r['id']}_BOUND] {resp};
+  endproperty
+  a_{r['id']}: assert property (p_{r['id']})
+    else $error("[{r['id']}] {r['requirement'].split(':')[0]}: no {r['response']} within {r['id']}_BOUND cycles of {r['trigger']}");
+  c_{r['id']}: cover property (@(posedge clk) disable iff (!rst_n) {trig});
+
+"""
+    sigs = {x for x in sigs if not x.startswith("$")}
+    ports = "".join(f",\n    input logic {'[' + str(int(widths[x]) - 1) + ':0] ' if str(widths.get(x, 1)).isdigit() and int(widths.get(x, 1)) > 1 else ''}{x}"
+                    for x in sorted(sigs))
     mod = f"{block}_order_sva{MODULE_SUFFIX}"
     src = f"""`timescale 1ns/1ps
 // GENERATED by Validation/sva/sva_gen.py — DO NOT EDIT BY HAND.
 // Ordering assertions for {block}, from Validation/sva/sva_rules.json
 // signal_groups. Spec revision: {spec.get('revision')}. Covers: {', '.join(ids)}.
 
-module {mod} (
+module {mod}{(" #(" + params.lstrip(",") + chr(10) + ") ") if params else " "}(
     input logic clk,
     input logic rst_n{ports}
 );
@@ -638,7 +776,11 @@ bind {block} {mod} u_{block}_sva (.*);
             print(f"    not generated (no separation required at this clock): "
                   f"{', '.join(skipped)}")
     for grp in rules.get("signal_groups", []):
-        mod, src, block, ids = generate_signal_group(spec, grp)
+        try:
+            mod, src, block, ids = generate_signal_group(spec, grp, catalog, schemas)
+        except SvaGenError as e:
+            print(f"SVA generation failed (signal group {grp['name']}): {e}", file=sys.stderr)
+            return 1
         path = os.path.join(args.outdir, f"{mod}.sv")
         with open(path, "w") as f:
             f.write(src)

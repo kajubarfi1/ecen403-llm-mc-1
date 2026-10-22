@@ -246,7 +246,7 @@ def evidence_from_report(rep, rules, schemas, spec_regs=None, reports_dir=None):
                 po = PRED_OBS_RE.search(rest)
                 exp, act = (po.group(1), po.group(2)) if po else ("", rest)
                 kind = _iface_kind(exp or act)[1]
-                ctx = _mismatch_context(st.get("trace"), iface, idx, block, schemas)
+                ctx = _mismatch_context(st.get("trace"), iface, idx, block, schemas, expected=exp)
                 ev = {"check_id": f"MISMATCH/{iface}{_mismatch_discriminator(exp, act, spec_regs)}",
                       "context": ctx,
                       "owner": block,
@@ -328,7 +328,7 @@ def _twin_agrees(reports_dir, scope):
 _TRACES = {}
 
 
-def _mismatch_context(trace_path, iface, idx, block, schemas, n_before=12):
+def _mismatch_context(trace_path, iface, idx, block, schemas, n_before=12, expected=None):
     """What the block was given when it produced its first wrong value: the
     transactions on its OTHER interfaces (inputs and sibling outputs) that
     precede the idx-th event of `iface` in the observed trace, oldest first,
@@ -368,9 +368,64 @@ def _mismatch_context(trace_path, iface, idx, block, schemas, n_before=12):
         fields = " ".join(f"{k}={v:#x}" if isinstance(v, int) else f"{k}={v}"
                           for k, v in (e.get("fields") or {}).items())
         return f"t{e.get('time_ns', 0) - t:+d} {e.get('iface')}.{e.get('kind')}{tag} {fields}".rstrip()
-    return {"note": (f"the block's other interfaces in the window before the first wrong value "
-                     f"(times relative to it, in the trace's units; oldest first)"),
-            "events": [fmt(e) for e in before] + [fmt(tgt, " (observed, wrong)")]}
+    out = {"note": (f"the block's other interfaces in the window before the first wrong value "
+                    f"(times relative to it, in the trace's units; oldest first)"),
+           "events": [fmt(e) for e in before] + [fmt(tgt, " (observed, wrong)")]}
+    prov = _value_provenance(tgt, before, expected, schemas, t)
+    if prov:
+        out["value_provenance"] = prov
+    return out
+
+
+def _value_provenance(tgt, before, expected, schemas, t):
+    """Where each slice of the wrong value came from. A block that packs or
+    unpacks (host word <-> channel beats) produces values whose slices are
+    its inputs; naming which input landed in which slice, for the observed
+    value and for the expected one, states the defect in one line (the
+    data_path read: observed[31:16] is input beat 1 and observed[15:0] is
+    nothing, where beat 2 and beat 1 belong: the capture is one beat early;
+    2026-10-22, after an agent given the raw events still reasoned about
+    word order). Widths come from the schemas; only slices that match an
+    input exactly are named."""
+    if not expected:
+        return None
+    exp_fields = dict(re.findall(r"(\w+)=(0x[0-9a-fA-F]+|\d+)", expected))
+    lines = []
+    for fname, obs in (tgt.get("fields") or {}).items():
+        if not isinstance(obs, int):
+            continue
+        try:
+            wv = int(schemas[tgt["iface"]]["kinds"][tgt["kind"]][fname]["width"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        exp = exp_fields.get(fname)
+        exp = int(exp, 0) if exp is not None else None
+        # candidate input values: integer fields of the preceding events, numbered per interface
+        cands = []
+        counters = {}
+        for e in before:
+            n = counters[e["iface"]] = counters.get(e["iface"], 0) + 1
+            for k, v in (e.get("fields") or {}).items():
+                if isinstance(v, int) and v:
+                    try:
+                        w = int(schemas[e["iface"]]["kinds"][e["kind"]][k]["width"])
+                    except (KeyError, TypeError, ValueError):
+                        continue
+                    cands.append((w, v, f"{e['iface']}#{n}.{k} (t{e.get('time_ns', 0) - t:+d})"))
+        widths = sorted({w for w, _v, _n in cands if w < wv and wv % w == 0}, reverse=True)
+        for w in widths:
+            def slices(val):
+                parts = []
+                for i in range(wv // w - 1, -1, -1):
+                    sl = (val >> (i * w)) & ((1 << w) - 1)
+                    names = [nm for ww, vv, nm in cands if ww == w and vv == sl]
+                    parts.append(f"[{(i + 1) * w - 1}:{i * w}]=" + (names[-1] if names else ("0" if sl == 0 else f"{sl:#x} (no input matches)")))
+                return ", ".join(parts)
+            lines.append(f"{fname}: observed {slices(obs)}")
+            if exp is not None:
+                lines.append(f"{fname}: expected {slices(exp)}")
+            break
+    return lines or None
 
 
 def _iface_kind(txn):

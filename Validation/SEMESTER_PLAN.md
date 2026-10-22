@@ -741,6 +741,45 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   in. Olympus still unreachable this morning; the repo drop's package
   will be re-run when it is back.
 
+- *2026-10-22 — refresh rules in formal; two Phase 4 runs on Lehana's
+  push; value provenance.* Her push: all four agents read `context` (ask
+  6 done), a hand edit to `data_path_gen.py` (word assembly again, not the
+  capture), and a merge accident that deleted addenda 5–6 from our 10-08
+  reply (restored). REF_002 (never REFRESH with a bank open) and REF_001
+  (starvation) are now generated SVA from `sva_rules.json` signal groups:
+  `invariant_rules` (`never`/`cover`, with `@cmd(iface, COMMAND)` resolved
+  through the catalog, every identifier a manifest port) and
+  `liveness_rules` (`trigger |-> ##[1:<ID>_BOUND] response`, the bound a
+  module parameter derived from the spec: tRAS + tRP + tRFC in the enforced
+  windows plus one per bank plus slack = 184 cycles, only under
+  `refresh_priority = urgent_preempt`). First form of REF_001 was "never
+  `ref_starve_flag`" on refresh_ctrl and fired on every path whose harness
+  has no scheduler (nothing can acknowledge; the loop run routed it to her
+  Phase 3 agent, which said "not this module", rightly): a liveness
+  obligation belongs to the block obliged to act. New fault M24 (REF gate
+  ignores idle banks) for REF_002; faults 24/24; a_REF_001 fires on M17,
+  a_REF_002 on M24, both silent on the clean drop. JasperGold on path 01:
+  REF_002 proven at infinite bound, REF_001 bounded to depth 2 948 against
+  its own bar of 368 (bars are per property now; the global tREFI bar was
+  the wrong yardstick), covers 15/15. Two Phase 4 loop runs on her
+  generators (`runs/phase4_loop`, `_2`): the read is unchanged by her edit
+  and by her agent's patches, which rework assembly; in the second run all
+  three agent attempts lost required tool-call fields. Each mismatch now
+  carries `value_provenance` (which input landed in which slice of the
+  wrong value and which should have: "beat 1 where beat 2 belongs, nothing
+  where beat 1 belongs"); reply addendum 2 (10-15 file) asks her to apply
+  the capture fix by hand and to treat the schema miss as a blocker. Repo
+  drop re-validated after the runs (17/19, data_path only; formal deferred
+  on a failing round). Dawson's handoff of the same day: a backend STA
+  failure (`sta_status: FAIL`, `failed_stage: null`) fell through
+  `flow.py`'s backend branch to a halt instead of the backend→frontend
+  edge, which only a synth failure reached. Now routed on whether the
+  backend emitted a finding naming a module for this run's drop (his
+  second shape), with a stale-drop guard; DRC/LVS without a finding still
+  halt as the backend's own. Three flow tests; backend reply addendum 5.
+  His scheduler timing finding (WNS −1.044 ns, `u_cmd_queue.entry_bank →
+  u_scheduler.cmd_row`) is the first change request the edge will carry.
+
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the
 schema generator's default root and `faults/fault_catalog.json` now point

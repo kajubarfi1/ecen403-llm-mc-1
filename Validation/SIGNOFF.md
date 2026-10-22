@@ -207,10 +207,15 @@ design under judgement, with the options of its last report, so a design
 change never leaves `awaiting_formal` findings for a person to remember.
 
 Current (efece348d04e, 2026-10-20):
-- command path (`path_01`), concrete: 12 proven at infinite bound, 0
-  counterexamples, 1 undetermined (tREFI at its 14 040-cycle bound). On
-  5661e03 this was 4 proven / 8 CEX; the Frontend's scheduler hold closed
-  every counterexample.
+- command path (`path_01`), concrete: 13 proven at infinite bound
+  (the 12 timing/protocol properties and, since 2026-10-22, REF_002: never
+  REFRESH with a bank open), REF_001 (an urgent refresh acknowledged
+  within its spec-derived 184-cycle obligation) bounded-proven to depth
+  2 948 against its own bar of 368, 0 counterexamples, 1 undetermined
+  (tREFI at its 14 040-cycle bound), covers 15/15. The bounded bar is per
+  property: twice that property's own bound, not twice the longest in the
+  module. On 5661e03 this was 4 proven / 8 CEX; the Frontend's scheduler
+  hold closed every counterexample.
 - command path, assumed configuration (tREFI 516 nCK = 129 cycles, just
   above the enforced tRFC window; max_postpone 1, urgent at 1; assertion
   bound 258): 10 proven at infinite bound, tREFI **bounded-proven to depth

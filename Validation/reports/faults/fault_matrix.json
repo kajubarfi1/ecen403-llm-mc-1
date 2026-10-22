@@ -1,9 +1,9 @@
 {
   "$schema": "validation-fault-matrix/1",
-  "generated_utc": "2026-10-15T17:00:46.932271Z",
+  "generated_utc": "2026-10-22T17:02:16.041673Z",
   "drop_root": "Frontend2/OutputFolders",
-  "faults_total": 23,
-  "faults_killed": 23,
+  "faults_total": 24,
+  "faults_killed": 24,
   "faults_masked": [],
   "faults_survived": [],
   "rows": [
@@ -509,25 +509,34 @@
       "masked_by": null,
       "killed": true,
       "expected_hit": [
-        "stage:data_path",
         "matched:data_path"
       ],
-      "expected_missed": [],
-      "new": {
-        "stage:data_path": 1
-      },
+      "expected_missed": [
+        "stage:data_path"
+      ],
+      "new": {},
       "grew": {},
       "fewer_matched": {
+        "matched:wb_port": [
+          36,
+          28
+        ],
+        "matched:addr_decoder": [
+          24,
+          19
+        ],
         "matched:data_path": [
-          29,
+          24,
           9
         ]
       },
       "blamed_stages": [
-        "data_path"
+        "addr_decoder",
+        "data_path",
+        "wb_port"
       ],
       "blame_names_block": true,
-      "baseline_verdict": "pass",
+      "baseline_verdict": "fail",
       "mutant_verdict": "fail"
     },
     {
@@ -683,7 +692,8 @@
         "id:REF_001": 23,
         "id:SCHED_003": 2,
         "stage:(path-level)": 1,
-        "violations:(path-level)": 14
+        "violations:(path-level)": 14,
+        "assert:a_REF_001": 1
       },
       "grew": {},
       "fewer_matched": {},
@@ -1021,6 +1031,51 @@
       "fewer_matched": {},
       "blamed_stages": [
         "init_fsm"
+      ],
+      "blame_names_block": true,
+      "baseline_verdict": "pass",
+      "mutant_verdict": "fail"
+    },
+    {
+      "fault": "M24_scheduler_ref_with_open_bank",
+      "block": "scheduler",
+      "path": "path_20_refresh_preempt",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "description": "REFRESH is issued without precharging first: the REF gate no longer requires every bank idle, so a refresh lands on open rows (REF_002). Added 2026-10-22 beside the generated REF_002 assertion, which had no fault to fire it.",
+      "expect": [
+        "id:REF_002",
+        "assert:a_REF_002"
+      ],
+      "masked_by": null,
+      "killed": true,
+      "expected_hit": [
+        "id:REF_002",
+        "assert:a_REF_002"
+      ],
+      "expected_missed": [],
+      "new": {
+        "stage:cmd_queue+scheduler": 1,
+        "violations:cmd_queue+scheduler": 12,
+        "id:REF_002": 23,
+        "stage:cmd_gen": 1,
+        "stage:scheduler (support)": 1,
+        "stage:(path-level)": 1,
+        "violations:(path-level)": 12,
+        "assert:a_REF_002": 12,
+        "assert:a_PROTO_002": 42
+      },
+      "grew": {},
+      "fewer_matched": {
+        "matched:cmd_gen": [
+          1840,
+          1810
+        ]
+      },
+      "blamed_stages": [
+        "(path-level)",
+        "cmd_gen",
+        "cmd_queue+scheduler",
+        "scheduler (support)"
       ],
       "blame_names_block": true,
       "baseline_verdict": "pass",

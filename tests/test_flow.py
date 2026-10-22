@@ -379,6 +379,54 @@ class TestHalts(FlowCase):
         self.assertEqual(ri["retry_instructions"]["wb_port"]["failed_checks"][0]["fix"], "shorten the path")
         self.assertEqual(names.count("validate_drop.py"), 2, "the regenerated drop is validated again")
 
+    def _backend_outbox(self, drop_id=None, module="wb_port"):
+        flow.BACKEND_OUTBOX = os.path.join(self.tmp, "backend_outbox")
+        d = os.path.join(flow.BACKEND_OUTBOX, "fake_rev", "h1")
+        os.makedirs(d, exist_ok=True)
+        with open(os.path.join(d, "findings_v2.json"), "w") as f:
+            json.dump({"drop": {"git_head": "h1", **({"drop_id": drop_id} if drop_id else {})},
+                       "spec_revision": "fake_rev", "findings": [
+                {"id": f"{module}/TIMING/x", "kind": "timing_defect", "check_id": "TIMING/x",
+                 "owner_module": module, "severity": "critical", "confidence": "observed",
+                 "title": "t", "expected": "slack >= 0", "actual": "WNS -1.044", "status": "open",
+                 "suggested_fix": "pipeline it", "repro": {"command": "x"}}]}, f)
+        with open(os.path.join(flow.BACKEND_OUTBOX, "fake_rev", "latest"), "w") as f:
+            f.write("h1\n")
+
+    def test_sta_failure_with_a_backend_finding_routes_to_the_frontend(self):
+        # backend handoff 2026-10-22: sta_status FAIL, failed_stage null fell
+        # through to the halt; the question is whether the backend emitted a
+        # finding naming a module, not which stage failed
+        os.environ["USE_DOCKER"] = "1"
+        self._agent(1)
+        self._backend_outbox()
+        fake = Fake(self.run_dir, validation=["PASS", "PASS"],
+                    backend={"pipeline_status": "FAIL", "failed_stage": None, "sta_status": "FAIL",
+                             "drc_violations": 0, "lvs_status": "PASS",
+                             "error_message": "STA soft fail: WNS -1.044 ns"})
+        rc, run = self.go(fake, max_backend_rounds=2)
+        self.assertIn(("backend_to_frontend", "ROUTED"), self.stages(run))
+        self.assertIn("phase1_validation_agent.py", [c[0] for c in fake.calls])
+
+    def test_drc_failure_without_a_finding_stays_the_backends(self):
+        os.environ["USE_DOCKER"] = "1"
+        fake = Fake(self.run_dir, backend={"pipeline_status": "FAIL", "failed_stage": None,
+                                           "sta_status": "PASS", "drc_violations": 7, "lvs_status": "PASS",
+                                           "error_message": "DRC: 7 violations"})
+        rc, run = self.go(fake)
+        self.assertEqual(run.state["halt"]["stage"], "backend")
+        self.assertIn("no backend finding to route", run.state["halt"]["why"])
+
+    def test_a_finding_for_another_drop_is_not_this_runs_change_request(self):
+        os.environ["USE_DOCKER"] = "1"
+        self._agent(1)
+        self._backend_outbox(drop_id="someoldrop")
+        fake = Fake(self.run_dir, backend={"pipeline_status": "FAIL", "failed_stage": None,
+                                           "sta_status": "FAIL", "error_message": "STA soft fail"})
+        rc, run = self.go(fake)
+        self.assertEqual(run.state["halt"]["stage"], "backend")
+        self.assertIn("for drop someoldrop", run.state["halt"]["why"])
+
     def test_final_stage_runs_each_netlist_through_its_paths(self):
         os.environ["USE_DOCKER"] = "1"
         self.run_paths = []

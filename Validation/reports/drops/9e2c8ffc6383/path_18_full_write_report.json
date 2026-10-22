@@ -1,0 +1,173 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_18_full_write",
+  "strategy": "composed",
+  "verdict": "fail",
+  "timestamp": "2026-10-22T12:06:17.364713",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
+  "stimulus_generator": "write_read",
+  "autonomous": false,
+  "window_cycles": 2000,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "9e2c8ffc6383",
+    "drop_id": "9e2c8ffc6383",
+    "design_id": "7934580abd50",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "c95f8d3",
+    "frontend_commits": {
+      "addr_decoder": "c95f8d32875579e3716a63f2624722dce0e34640",
+      "bank_tracker": "c95f8d32875579e3716a63f2624722dce0e34640",
+      "cmd_gen": "c95f8d32875579e3716a63f2624722dce0e34640",
+      "cmd_queue": "c95f8d32875579e3716a63f2624722dce0e34640",
+      "config_regs": "c95f8d32875579e3716a63f2624722dce0e34640",
+      "data_path": "c95f8d32875579e3716a63f2624722dce0e34640",
+      "refresh_ctrl": "c95f8d32875579e3716a63f2624722dce0e34640",
+      "scheduler": "c95f8d32875579e3716a63f2624722dce0e34640",
+      "wb_port": "c95f8d32875579e3716a63f2624722dce0e34640"
+    },
+    "roots": [
+      "runs/phase4_loop_2/drop"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "runs/phase4_loop_2/drop/PHASE2RTL/addr_decoder.sv",
+        "manifest": "runs/phase4_loop_2/drop/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "bank_tracker": {
+        "rtl": "runs/phase4_loop_2/drop/PHASE2RTL/bank_tracker.sv",
+        "manifest": "runs/phase4_loop_2/drop/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_gen": {
+        "rtl": "runs/phase4_loop_2/drop/PHASE3RTL/cmd_gen.sv",
+        "manifest": "runs/phase4_loop_2/drop/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_queue": {
+        "rtl": "runs/phase4_loop_2/drop/PHASE3RTL/cmd_queue.sv",
+        "manifest": "runs/phase4_loop_2/drop/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "config_regs": {
+        "rtl": "runs/phase4_loop_2/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/phase4_loop_2/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "data_path": {
+        "rtl": "runs/phase4_loop_2/drop/PHASE4RTL/data_path.sv",
+        "manifest": "runs/phase4_loop_2/drop/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "refresh_ctrl": {
+        "rtl": "runs/phase4_loop_2/drop/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "runs/phase4_loop_2/drop/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "scheduler": {
+        "rtl": "runs/phase4_loop_2/drop/PHASE3RTL/scheduler.sv",
+        "manifest": "runs/phase4_loop_2/drop/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "wb_port": {
+        "rtl": "runs/phase4_loop_2/drop/PHASE1RTL/wb_port.sv",
+        "manifest": "runs/phase4_loop_2/drop/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/phase4_loop_2/drop/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "pass",
+      "summary": "scope=wb_port  strategy=exact  status=pass  matched=36/36  (36 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "addr_decoder",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
+      "scope": "addr_decoder",
+      "verdict": "pass",
+      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=24/24  (24 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "cmd_queue+scheduler",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
+      "scope": "cmd_queue_scheduler",
+      "verdict": "pass",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (413 transactions, no rule broken)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "cmd_gen",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
+      "scope": "cmd_gen",
+      "verdict": "pass",
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=50/50  (50 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "data_path",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/data_path_predictor.py",
+      "scope": "data_path",
+      "verdict": "fail",
+      "summary": "scope=data_path  strategy=exact  status=fail  matched=24/36  value=12",
+      "detail": [
+        "  dp_rd_rsp[0] value: predicted [dp_rd_rsp.response aux=0x1 data=0x1027c4d1] but observed [dp_rd_rsp.response aux=0x1 data=0xc4d10000]",
+        "  dp_rd_rsp[1] value: predicted [dp_rd_rsp.response aux=0x3 data=0x7311d8a3] but observed [dp_rd_rsp.response aux=0x3 data=0xd8a30000]",
+        "  dp_rd_rsp[2] value: predicted [dp_rd_rsp.response aux=0x5 data=0xc9e9c616] but observed [dp_rd_rsp.response aux=0x5 data=0xc6160000]",
+        "  dp_rd_rsp[3] value: predicted [dp_rd_rsp.response aux=0x7 data=0x7ce42c82] but observed [dp_rd_rsp.response aux=0x7 data=0x2c820000]",
+        "  dp_rd_rsp[4] value: predicted [dp_rd_rsp.response aux=0x9 data=0x7204e52d] but observed [dp_rd_rsp.response aux=0x9 data=0xe52d0000]",
+        "  dp_rd_rsp[5] value: predicted [dp_rd_rsp.response aux=0xb data=0x51431193] but observed [dp_rd_rsp.response aux=0xb data=0x11930000]",
+        "  dp_rd_rsp[6] value: predicted [dp_rd_rsp.response aux=0xd data=0x8a9a021e] but observed [dp_rd_rsp.response aux=0xd data=0x21e0000]",
+        "  dp_rd_rsp[7] value: predicted [dp_rd_rsp.response aux=0xf data=0xafbd67f9] but observed [dp_rd_rsp.response aux=0xf data=0x67f90000]",
+        "  dp_rd_rsp[8] value: predicted [dp_rd_rsp.response aux=0x1 data=0xb9d179e0] but observed [dp_rd_rsp.response aux=0x1 data=0x79e00000]",
+        "  dp_rd_rsp[9] value: predicted [dp_rd_rsp.response aux=0x3 data=0xc381e88f] but observed [dp_rd_rsp.response aux=0x3 data=0xe88f0000]",
+        "  dp_rd_rsp[10] value: predicted [dp_rd_rsp.response aux=0x5 data=0x8d88348a] but observed [dp_rd_rsp.response aux=0x5 data=0x348a0000]",
+        "  dp_rd_rsp[11] value: predicted [dp_rd_rsp.response aux=0x7 data=0x5805975] but observed [dp_rd_rsp.response aux=0x7 data=0x59750000]"
+      ],
+      "rule_counts": {}
+    }
+  ],
+  "log": "Validation/reports/paths/path_18_full_write_sim.log",
+  "observed_trace": "Validation/reports/paths/path_18_full_write_observed.jsonl"
+}

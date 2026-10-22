@@ -82,37 +82,56 @@ def sh(cmd):
     return r.returncode, (r.stdout or "") + (r.stderr or "")
 
 
-def signoff_bar(spec, params):
-    """The bounded-proof bar of SIGNOFF §6: twice the longest timing bound
-    the assertions under proof use, in cycles. Maximum-interval bounds
-    (tREFI) dominate; a --sva-param override (a scaled run) replaces the
-    spec's value for that rule."""
+def signoff_bars(spec, params):
+    """The bounded-proof bar of SIGNOFF §6, per property: twice the bound
+    that property's own assertion uses, in cycles (a --sva-param override,
+    as in a scaled run, replaces the spec's value for that rule). Returns
+    {rule_id: bar} plus "*": twice the longest of them, for properties
+    whose bound is not derived here. A single bar from the longest bound
+    (tREFI's 14 040) was the wrong yardstick for an obligation bounded at
+    184 cycles explored to 2 948 (REF_001, 2026-10-22)."""
     sys.path.insert(0, os.path.join(ROOT, "Validation", "sva"))
     import sva_gen as SG
     with open(os.path.join(ROOT, "Validation", "sva", "sva_rules.json")) as f:
         rules = json.load(f)
-    longest = 0
+    bars = {}
     for r in rules.get("max_interval_rules", []):
         try:
             _n, _ns, _p, _m, bound = SG.interval_bound(spec, r)
         except SG.SvaGenError:
             continue
-        bound = int(params.get(f"{r['id']}_BOUND", bound))
-        longest = max(longest, bound)
+        bars[r["id"]] = 2 * int(params.get(f"{r['id']}_BOUND", bound))
     for r in rules.get("min_separation_rules", []) + rules.get("window_rules", []):
         try:
             n, _ns, _p = SG.cycles_for(spec, r["param"])
         except SG.SvaGenError:
             continue
-        longest = max(longest, n)
-    return 2 * longest
+        bars[r["id"]] = 2 * n
+    for grp in rules.get("signal_groups", []):
+        for r in grp.get("liveness_rules", []):
+            try:
+                bound = SG.liveness_bound(spec, r["bound"])
+            except (SG.SvaGenError, KeyError):
+                continue
+            bars[r["id"]] = 2 * int(params.get(f"{r['id']}_BOUND", bound))
+    bars["*"] = max(bars.values()) if bars else 0
+    return bars
 
 
-def classify_bounded(asserts, bar):
-    """An `undetermined` result whose explored bound meets the signoff bar is
-    recorded as bounded_proven at that bound (SIGNOFF §6: bounded to at
-    least twice the longest timing parameter). JasperGold itself only says
-    undetermined; the bar is ours and is written into the row."""
+def signoff_bar(spec, params):
+    """The global bar (twice the longest bound); kept for callers that want one number."""
+    return signoff_bars(spec, params)["*"]
+
+
+def classify_bounded(asserts, bars):
+    """An `undetermined` result whose explored bound meets the signoff bar
+    for THAT property is recorded as bounded_proven at that bound (SIGNOFF
+    §6: bounded to at least twice the property's own timing bound).
+    JasperGold itself only says undetermined; the bar is ours and is
+    written into the row. `bars` is {rule_id: bar, "*": global}; an int is
+    taken as the global bar."""
+    if isinstance(bars, int):
+        bars = {"*": bars}
     for r in asserts:
         if r.get("status") != "undetermined":
             continue
@@ -120,11 +139,13 @@ def classify_bounded(asserts, bar):
             depth = int(str(r.get("bound", "")).split()[0])
         except ValueError:
             continue
+        rid = r.get("short", "").replace("a_", "", 1)
+        bar = bars.get(rid, bars.get("*", 0))
         if bar and depth >= bar:
             r["status"] = "bounded_proven"
             r["bounded_bar"] = bar
             r["note"] = (r.get("note", "") + f" bounded proof: no counterexample to depth {depth}, "
-                         f"signoff bar {bar} (2 x the longest bound under these parameters)").strip()
+                         f"signoff bar {bar} (2 x this property's bound under these parameters)").strip()
     return asserts
 
 
@@ -248,8 +269,9 @@ def main() -> int:
     covers = [r for r in rows if r["short"].startswith("c_")]
     with open(os.environ.get("VALIDATION_SPEC", os.path.join(ROOT, "Validation", "spec",
                              "llmmc_microarchitecturespec_filled.json"))) as f:
-        bar = signoff_bar(json.load(f), params)
-    classify_bounded(asserts, bar)
+        bars = signoff_bars(json.load(f), params)
+    bar = bars["*"]
+    classify_bounded(asserts, bars)
     summ = {s: sum(1 for r in asserts if r["status"] == s) for s in ("proven", "cex", "undetermined", "bounded_proven")}
     abstracted = bool(args.stopat or args.assume or args.sva_param)
     if abstracted:
@@ -276,7 +298,7 @@ def main() -> int:
                             + [{"sva_param": kv, "effect": "assertion bound scaled to match the "
                                 "assumed configuration"} for kv in args.sva_param]),
            "prove_time_limit": args.time, "max_trace_length": args.trace,
-           "bounded_bar_cycles": bar,
+           "bounded_bar_cycles": bar, "bounded_bars": bars,
            "summary": {"assertions": len(asserts), **summ, "covers": len(covers),
                        "covered": sum(1 for r in covers if r["status"] == "covered")},
            "results": asserts + covers, "raw_report": os.path.relpath(raw, ROOT)}
@@ -285,7 +307,7 @@ def main() -> int:
         json.dump(rep, f, indent=2)
     print(f"  assertions: {len(asserts)}  proven={summ['proven']} bounded={summ['bounded_proven']} "
           f"cex={summ['cex']} undetermined={summ['undetermined']}  | covers {rep['summary']['covered']}/{len(covers)}"
-          f"  (bounded bar {bar} cycles)")
+          f"  (bounded bars: per property, longest {bar} cycles)")
     for r in asserts:
         print(f"    {r['short']:22} {r['status']:12} bound={r['bound']}"
               + ("   (may be spurious under stopat)" if r.get("note") else ""))

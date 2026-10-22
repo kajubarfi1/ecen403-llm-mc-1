@@ -723,8 +723,18 @@ def stage_backend(run, args):
         return 0
     if rep.get("failed_stage") == "synth" or "synth" in str(rep.get("error_message", "")).lower():
         return 1            # the RTL itself: backend -> frontend edge
+    # Not which stage failed but who can act on it: a backend finding that
+    # names a module (an STA miss on a block, say) is a change request for
+    # the Frontend whatever stage produced it; a DRC or LVS failure with no
+    # finding is the backend's own and halts here (backend handoff 2026-10-22:
+    # sta_status FAIL with failed_stage null fell through to the halt).
+    with open(run.state["spec"]) as f:
+        rev = json.load(f).get("revision")
+    src, why = backend_findings_for(run, rev)
+    if src:
+        return 1
     return run.halt("backend", f"backend FAILED at {rep.get('failed_stage') or 'unknown'} "
-                    f"({rep.get('error_message', '')[:160]}); report: "
+                    f"({rep.get('error_message', '')[:160]}); no backend finding to route ({why}); report: "
                     f"{os.path.relpath(reports[0], ROOT) if reports else 'none'}")
 
 
@@ -743,6 +753,27 @@ def backend_findings(spec_rev):
     return p if os.path.exists(p) else None
 
 
+def backend_findings_for(run, spec_rev):
+    """(path, reason): the backend's findings for THIS run's drop that name
+    a module, or (None, why not). The outbox's `latest` may be an earlier
+    drop's (the backend emits only on failure, so a passing drop leaves the
+    previous failure in place); a finding for another drop is not a change
+    request for this one."""
+    src = backend_findings(spec_rev)
+    if not src:
+        return None, f"no findings for spec revision {spec_rev} in backend/findings/outbox"
+    with open(src) as f:
+        doc = json.load(f)
+    theirs = (doc.get("drop") or {}).get("drop_id")
+    ours = run.state.get("drop_id")
+    if theirs and ours and theirs != ours:
+        return None, f"the backend's latest findings are for drop {theirs}, this run's drop is {ours}"
+    named = [x for x in doc.get("findings", []) if x.get("status", "open") == "open" and x.get("owner_module")]
+    if not named:
+        return None, f"{os.path.relpath(src, ROOT)} names no module"
+    return src, "ok"
+
+
 def stage_backend_to_frontend(run, args, report):
     """Backend asked for an RTL change. Its findings (our envelope, written
     by backend/findings/emit_findings.py) become a retry package through
@@ -755,11 +786,11 @@ def stage_backend_to_frontend(run, args, report):
                         f"(cap {args.max_backend_rounds})")
     with open(run.state["spec"]) as f:
         rev = json.load(f).get("revision")
-    src = backend_findings(rev)
+    src, why = backend_findings_for(run, rev)
     if not src:
         return run.halt("backend_to_frontend",
                         "the backend's failure names the RTL but it emitted no findings for "
-                        f"spec revision {rev} (backend/findings/outbox/<rev>/latest). Backend "
+                        f"this drop ({why}; backend/findings/outbox/<rev>/latest). Backend "
                         f"report: {os.path.relpath(report, ROOT) if report else 'none'}.", report=report)
     sys.path.insert(0, os.path.join(VALIDATION, "findings"))
     import retry_adapter as RA

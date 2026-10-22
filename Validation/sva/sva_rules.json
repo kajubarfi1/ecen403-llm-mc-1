@@ -1,5 +1,5 @@
 {
-  "$comment": "How each spec failure_taxonomy category becomes a SystemVerilog assertion. This file is the reviewable CATALOG: which command pair a rule constrains, which spec timing parameter bounds it, and whether the bank must match. The cycle counts are NOT here — they are computed at generation time from the spec's nanosecond values and the controller clock period, so a spec change changes the assertions without editing this file.",
+  "$comment": "How each spec failure_taxonomy category becomes a SystemVerilog assertion. This file is the reviewable CATALOG: which command pair a rule constrains, which spec timing parameter bounds it, and whether the bank must match. The cycle counts are NOT here \u2014 they are computed at generation time from the spec's nanosecond values and the controller clock period, so a spec change changes the assertions without editing this file.",
   "$unit_note": "Cycle counts are derived as ceil(param_ns / controller_clock_period_ns). The spec's $derived_cycles are expressed in nCK (DDR clocks, tCK=1.25ns) while commands are issued on the controller clock (5.0ns); deriving from nanoseconds avoids that unit mismatch entirely and states the physical requirement the standard actually imposes.",
   "$independence_note": "These assertions count elapsed cycles from the OBSERVED command stream. They deliberately do not reference the design's own timing counters or permission signals. bank_tracker.sv already contains assertions of the form 'cmd_rd_valid |-> (ctr_rcd[bank] == 0)', which check the design against its own counter: if the counter is loaded wrongly, the assertion agrees with the bug. An independent check must recompute the requirement from the spec.",
   "command_signals": {
@@ -9,7 +9,7 @@
     "encoding_source": "interface_catalog.json -> ddr_cmd.command_encoding",
     "addr_field": "addr",
     "precharge_all_bit": 10,
-    "$precharge_all_note": "JESD79-3: a PRECHARGE with A10 high precharges every bank, not just the addressed one. Bank-state tracking that ignores this leaves banks marked open after they were closed, and the protocol assertions then fire on correct behaviour — the exact failure mode that teaches people to ignore assertions."
+    "$precharge_all_note": "JESD79-3: a PRECHARGE with A10 high precharges every bank, not just the addressed one. Bank-state tracking that ignores this leaves banks marked open after they were closed, and the protocol assertions then fire on correct behaviour \u2014 the exact failure mode that teaches people to ignore assertions."
   },
   "min_separation_rules": [
     {
@@ -183,7 +183,7 @@
   "command_groups": [
     {
       "name": "init",
-      "$why": "The init FSM issues its own command stream (init_cmd) before cmd_gen owns the pins. Its inter-step delays are INIT_002; the spec states tZQinit (initialization_sequence.tZQinit_ns) — tMRD and tMOD are NOT in the spec, so MRS-to-MRS spacing cannot be asserted (intake rule INIT_TMRD/INIT_TMOD).",
+      "$why": "The init FSM issues its own command stream (init_cmd) before cmd_gen owns the pins. Its inter-step delays are INIT_002; the spec states tZQinit (initialization_sequence.tZQinit_ns) \u2014 tMRD and tMOD are NOT in the spec, so MRS-to-MRS spacing cannot be asserted (intake rule INIT_TMRD/INIT_TMOD).",
       "command_signals": {
         "interface": "init_cmd",
         "cmd_field": "cmd",
@@ -277,6 +277,43 @@
           "event": "zqcs_req",
           "requires": "cal_done",
           "requirement": "A periodic ZQCS request must not be raised before calibration completed."
+        }
+      ]
+    },
+    {
+      "name": "refresh_scheduler",
+      "block": "scheduler",
+      "$note": "Refresh rules at the scheduler, where the command and the bank state meet. `@cmd(iface, COMMAND)` expands through the catalog (qualifier, type port, command_encoding, following same_stream_as). Every other identifier is a port of the block, checked against its manifest. (2026-10-22) liveness_rules: `trigger |-> ##[1:<ID>_BOUND] response`, the bound a module parameter derived from the spec (cycles of the named timing parameters, times timing_model.counter_clock.window_scale when enforced_window, plus one per bank and a slack), skipped when `when` does not hold for this spec.",
+      "invariant_rules": [
+        {
+          "id": "REF_002",
+          "never": "@cmd(sched_cmd, REF) && (|bank_is_active)",
+          "cover": "ref_urgent && (|bank_is_active)",
+          "requirement": "REFRESH issued while one or more banks are still active (not precharged). The scheduler must precharge every open bank before it may refresh.",
+          "spec_ref": "failure_taxonomy.categories[REF_002]"
+        }
+      ],
+      "liveness_rules": [
+        {
+          "id": "REF_001",
+          "when": {
+            "spec_path": "controller_architecture.refresh_policy.refresh_priority",
+            "equals": "urgent_preempt"
+          },
+          "trigger": "$rose(ref_urgent)",
+          "response": "ref_ack",
+          "bound": {
+            "params": [
+              "tRAS",
+              "tRP",
+              "tRFC"
+            ],
+            "enforced_window": true,
+            "plus_banks": true,
+            "slack": 8
+          },
+          "requirement": "Refresh starvation: under refresh_priority = urgent_preempt an urgent refresh must be acknowledged within the time to precharge every open bank and refresh (tRAS + tRP + tRFC in the design's enforced windows, one cycle per bank, a few cycles of pipeline), or the postpone budget is exhausted and ticks are dropped. Bound to the scheduler, the block obliged to act: on a path without a scheduler nothing can acknowledge, and the obligation does not exist (the refresh_ctrl-side 'never ref_starve_flag' form fired on every such path, 2026-10-22).",
+          "spec_ref": "failure_taxonomy.categories[REF_001]"
         }
       ]
     }

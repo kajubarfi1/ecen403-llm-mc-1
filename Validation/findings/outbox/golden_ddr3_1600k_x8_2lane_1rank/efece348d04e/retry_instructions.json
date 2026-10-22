@@ -5,7 +5,7 @@
   "drop": "efece348d04e",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "spec_id": "279cbf6ca7b6f62b",
-  "generated_utc": "2026-10-20T21:47:43.062095Z",
+  "generated_utc": "2026-10-22T17:19:45.186555Z",
   "failed_modules": [
     "data_path"
   ],
@@ -38,6 +38,19 @@
               "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
             }
           ],
+          "context": {
+            "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
+            "events": [
+              "t-25000 dp_cmd.read aux=0x0",
+              "t-5000 ddr_rd_beat.beat data=0x7f67",
+              "t+0 ddr_rd_beat.beat data=0x9dac",
+              "t+0 dp_rd_rsp.response (observed, wrong) aux=0x0 data=0x7f670000"
+            ],
+            "value_provenance": [
+              "data: observed [31:16]=ddr_rd_beat#1.data (t-5000), [15:0]=0",
+              "data: expected [31:16]=ddr_rd_beat#2.data (t+0), [15:0]=ddr_rd_beat#1.data (t-5000)"
+            ]
+          },
           "owner_candidates": [
             "data_path"
           ],

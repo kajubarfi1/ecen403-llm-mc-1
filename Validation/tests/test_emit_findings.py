@@ -100,6 +100,17 @@ class TestMismatchContext(unittest.TestCase):
                                          "t-5 ddr_rd_beat.beat data=0x7f67",
                                          "t+0 ddr_rd_beat.beat data=0x9dac",
                                          "t+0 dp_rd_rsp.response (observed, wrong) aux=0x1 data=0x7f670000"])
+        # which input landed in which slice of the wrong word, and which should have
+        schemas_w = {"dp_cmd": {"block": "data_path", "kinds": {"read": {"aux": {"width": 4}}}},
+                     "ddr_rd_beat": {"block": "data_path", "kinds": {"beat": {"data": {"width": 16}}}},
+                     "dp_rd_rsp": {"block": "data_path", "kinds": {"response": {"aux": {"width": 4}, "data": {"width": 32}}}},
+                     "wb": {"block": "wb_port"}}
+        EF._TRACES.clear()
+        ctx = EF._mismatch_context(tp, "dp_rd_rsp", 0, "data_path", schemas_w,
+                                   expected="dp_rd_rsp.response aux=0x1 data=0x9dac7f67")
+        self.assertEqual(ctx["value_provenance"], [
+            "data: observed [31:16]=ddr_rd_beat#1.data (t-5), [15:0]=0",
+            "data: expected [31:16]=ddr_rd_beat#2.data (t+0), [15:0]=ddr_rd_beat#1.data (t-5)"])
         self.assertIsNone(EF._mismatch_context(tp, "dp_rd_rsp", 7, "data_path", schemas))
         self.assertIsNone(EF._mismatch_context(None, "dp_rd_rsp", 0, "data_path", schemas))
         EF._TRACES.clear()
