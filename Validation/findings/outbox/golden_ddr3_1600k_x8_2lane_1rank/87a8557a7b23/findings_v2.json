@@ -1,0 +1,326 @@
+{
+  "schema": "validation-findings/2",
+  "drop": "87a8557a7b23",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "spec_id": "279cbf6ca7b6f62b",
+  "generated_utc": "2026-10-22T16:43:23.812161Z",
+  "reports": "Validation/reports/paths",
+  "finding_count": 4,
+  "findings": [
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/MISMATCH/dp_rd_rsp[data]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/dp_rd_rsp[data]",
+      "taxonomy_id": "DATA_001",
+      "detectors": [
+        "exact:data_path:value",
+        "twin:data_path"
+      ],
+      "owner_module": "data_path",
+      "owner_candidates": [
+        "data_path"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "data_path: MISMATCH/dp_rd_rsp[data]",
+      "requirement": "data_path must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "dp_rd_rsp.response aux=0x0 data=0x9dac7f67",
+      "actual": "dp_rd_rsp.response aux=0x0 data=0x7f670000",
+      "detector": "exact:data_path:value",
+      "anchor": [
+        {
+          "file": "runs/phase4_loop/drop/PHASE4RTL/data_path.sv",
+          "line": 321,
+          "signal": "rd_rsp_data",
+          "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
+        },
+        {
+          "file": "runs/phase4_loop/drop/PHASE4RTL/data_path.sv",
+          "line": 322,
+          "signal": "rd_rsp_aux",
+          "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
+        }
+      ],
+      "context": {
+        "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
+        "events": [
+          "t-30000 dp_cmd.read aux=0x0",
+          "t-10000 ddr_rd_beat.beat data=0x7f67",
+          "t-5000 ddr_rd_beat.beat data=0x9dac",
+          "t+0 dp_rd_rsp.response (observed, wrong) aux=0x0 data=0x7f670000"
+        ]
+      },
+      "mechanism": null,
+      "paths": [
+        "path_03_read_return",
+        "path_18_full_write"
+      ],
+      "occurrences": 31,
+      "repro": {
+        "path": "path_03_read_return",
+        "command": "python3 Validation/tools/run_path.py --path path_03_read_return",
+        "sequence": "Validation/sequences/generated/path_03_read_return_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_03_read_return",
+        "log": "Validation/reports/paths/path_03_read_return_sim.log",
+        "trace": "Validation/reports/paths/path_03_read_return_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "dp_rd_rsp[0] value: predicted [dp_rd_rsp.response aux=0x0 data=0x9dac7f67] but observed [dp_rd_rsp.response aux=0x0 data=0x7f670000]"
+        }
+      },
+      "drop": {
+        "git_head": "87a8557a7b23",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "runs/phase4_loop/drop/PHASE4RTL/data_path.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "87a8557a7b23",
+      "last_seen": "87a8557a7b23",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_read_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_width_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "formal/scheduler/PROTO_001",
+      "kind": "rtl_defect",
+      "check_id": "PROTO_001",
+      "taxonomy_id": "PROTO_001",
+      "detectors": [
+        "formal:jaspergold"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "unverified",
+      "title": "READ issued to a bank one cycle after that bank was PRECHARGEd (no ACTIVATE between)",
+      "requirement": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+      "spec_ref": null,
+      "expected": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+      "actual": "PRE b=1 at cycle 183, RD b=1 at cycle 184.",
+      "detector": "formal:jaspergold",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "cmd_valid/cmd_type/cmd_bank"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "signal": "bank_rd_allowed"
+        }
+      ],
+      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 183 PRE bank 1 (A10=0), cycle 184 RD bank 1 col 0. The generated PROTO_001 tracker (row-open state from the observed ACT/PRE stream) shows bank 1 closed when the READ is issued. Never observed in simulation (no path stimulus reaches this interleaving); the scheduler or its bank_tracker gating lets a CAS follow its own precharge. Likely the same root as the open scheduler re-grant defect (commands are also held for 2-3 consecutive cycles in the trace, i.e. re-issued). [found on drop 1fea117; awaiting formal re-prove on 87a8557a7b23]",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+      },
+      "drop": {
+        "git_head": "87a8557a7b23",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "1fea117",
+      "last_seen": "87a8557a7b23",
+      "resolved_in": null,
+      "status": "awaiting_formal",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/REF_001",
+      "kind": "rtl_defect",
+      "check_id": "REF_001",
+      "taxonomy_id": "REF_001",
+      "detectors": [
+        "assertion:a_REF_001"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler",
+        "refresh_ctrl"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "scheduler: REF_001",
+      "requirement": "Refresh postpone count exceeded max_postpone_count (spec: controller_architecture.refresh_policy.max_postpone_count). Judged on refresh_level.state, the controller's own levels emitted on every change: a violation when pending > max_postpone_count, or when starve = 1. refresh_req carries only the rising edge of ref_required and its pending field is the count at that edge; it must NOT be used to judge this rule. A count equal to max_postpone_count is legal (the design saturates there).",
+      "spec_ref": "failure_taxonomy.categories[REF_001]",
+      "expected": "Refresh postpone count exceeded max_postpone_count (spec: controller_architecture.refresh_policy.max_postpone_count). Judged on refresh_level.state, the controller's own levels emitted on every change: a violation when pending > max_postpone_count, or when starve = 1. refresh_req carries only the rising edge of ref_required and its pending field is the count at that edge; it must NOT be used to judge this rule. A count equal to max_postpone_count is legal (the design saturates there).",
+      "actual": "fired 18x; first: xmsim: *E,ASRTST (./refresh_ctrl_order_sva.sv,20): (time 763272500 PS) Assertion chain_harness.u_refresh_ctrl.u_refresh_ctrl_order_sva.a_REF_001 has failed",
+      "detector": "assertion:a_REF_001",
+      "anchor": [
+        {
+          "file": "runs/phase4_loop/drop/PHASE3RTL/scheduler.sv",
+          "line": 264,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= CMD_NOP;"
+        },
+        {
+          "file": "runs/phase4_loop/drop/PHASE3RTL/scheduler.sv",
+          "line": 275,
+          "signal": "cmd_type",
+          "text": "cmd_type  <= sel_type;"
+        },
+        {
+          "file": "runs/phase4_loop/drop/PHASE3RTL/scheduler.sv",
+          "line": 290,
+          "signal": "cmd_bank",
+          "text": "cmd_bank <= sel_bank;"
+        },
+        {
+          "file": "runs/phase4_loop/drop/PHASE3RTL/scheduler.sv",
+          "line": 296,
+          "signal": "cmd_row",
+          "text": "cmd_row  <= q_row[sel_idx];"
+        }
+      ],
+      "context": null,
+      "mechanism": null,
+      "paths": [
+        "path_09_init_to_refresh",
+        "path_16_status_refresh"
+      ],
+      "occurrences": 88,
+      "repro": {
+        "path": "path_09_init_to_refresh",
+        "command": "python3 Validation/tools/run_path.py --path path_09_init_to_refresh",
+        "sequence": null,
+        "work_dir": "Validation/sequences/generated/runs/path_09_init_to_refresh",
+        "log": "Validation/reports/paths/path_09_init_to_refresh_sim.log",
+        "trace": "Validation/reports/paths/path_09_init_to_refresh_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "xmsim: *E,ASRTST (./refresh_ctrl_order_sva.sv,20): (time 763272500 PS) Assertion chain_harness.u_refresh_ctrl.u_refresh_ctrl_order_sva.a_REF_001 has failed"
+        }
+      },
+      "drop": {
+        "git_head": "87a8557a7b23",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": null
+      },
+      "introduced_in": "a82f2070de32",
+      "first_seen": "a82f2070de32",
+      "last_seen": "87a8557a7b23",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/refresh_open_banks_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "formal/scheduler/TIMING_008",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_008",
+      "taxonomy_id": "TIMING_008",
+      "detectors": [
+        "formal:jaspergold"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "unverified",
+      "title": "PRECHARGE issued one cycle after a WRITE to the same bank (tWR violated; write data lost)",
+      "requirement": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+      "spec_ref": null,
+      "expected": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+      "actual": "WR b=4 at cycle 173, PRE b=4 at cycle 174.",
+      "detector": "formal:jaspergold",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "signal": "bank_pre_allowed / ctr_wr"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "precharge decision"
+        }
+      ],
+      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 173 WR bank 4, cycle 174 PRE bank 4. tWR = 15 ns = 3 controller cycles, so 2 cycles must separate the last write beat from the precharge. Not observed in simulation. bank_tracker's write-recovery timer (cfg_tWR_nCK) does not gate bank_pre_allowed for the cycle after a write, or the scheduler ignores it on the row-conflict path. [found on drop 1fea117; awaiting formal re-prove on 87a8557a7b23]",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+      },
+      "drop": {
+        "git_head": "87a8557a7b23",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "1fea117",
+      "last_seen": "87a8557a7b23",
+      "resolved_in": null,
+      "status": "awaiting_formal",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
+      ]
+    }
+  ],
+  "resolved": [],
+  "drop_status": {
+    "$schema": "validation-drop-status/1",
+    "drop": "87a8557a7b23",
+    "partial": false,
+    "blocks_present": [
+      "addr_decoder",
+      "bank_tracker",
+      "calibration",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "init_fsm",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "blocks_absent": [],
+    "inconsistent_edges": [],
+    "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "foreign_spec_blocks": {},
+    "paths_run": [
+      "path_01_write_cmd",
+      "path_02_read_cmd",
+      "path_03_read_return",
+      "path_04_scheduler_bank_loop",
+      "path_05_scheduler_refresh_loop",
+      "path_07_backpressure",
+      "path_08_init_to_cal",
+      "path_09_init_to_refresh",
+      "path_12_csr_timing_to_scheduling",
+      "path_13_csr_refresh_to_scheduling",
+      "path_14_status_init",
+      "path_15_status_cal",
+      "path_16_status_refresh",
+      "path_17_full_boot",
+      "path_18_full_write",
+      "path_19_row_conflict",
+      "path_20_refresh_preempt",
+      "path_21_wb_port_standalone",
+      "path_22_csr_standalone"
+    ],
+    "paths_blocked": {},
+    "note": "Complete run: every runnable path simulated on this drop."
+  }
+}

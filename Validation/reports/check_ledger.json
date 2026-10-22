@@ -1,6 +1,6 @@
 {
   "$schema": "validation-check-ledger/1",
-  "generated_utc": "2026-10-08T16:32:11.637345Z",
+  "generated_utc": "2026-10-22T17:23:02.399817Z",
   "repair_stack": [
     "R01_scheduler_feedback_hold",
     "R02_scheduler_refresh_trfc_gate",
@@ -8,20 +8,37 @@
   ],
   "tally": {
     "fires only": 1,
-    "silent only": 6,
-    "closed": 50
+    "silent only": 9,
+    "closed": 49
   },
   "rows": [
     {
-      "kind": "assertion",
-      "model": "init_fsm_sva",
-      "check": "a_INIT_002_init_done",
+      "kind": "predictor",
+      "model": "data_path_predictor",
+      "check": "exact prediction",
       "fired": [
-        "seeded: M19_init_fsm_tzqinit_short"
+        "gate",
+        "seeded: M13_data_path_dm_polarity"
       ],
-      "silent": [],
+      "silent": [
+        "gate",
+        "agreement: second model, 9/9 traces"
+      ],
       "false_positive": null,
       "status": "fires only",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
+      "check": "a_TIMING_001",
+      "fired": [],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands",
+        "proven"
+      ],
+      "false_positive": null,
+      "status": "silent only",
       "note": ""
     },
     {
@@ -40,10 +57,63 @@
     {
       "kind": "assertion",
       "model": "cmd_gen_sva",
+      "check": "a_TIMING_006",
+      "fired": [],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands",
+        "proven"
+      ],
+      "false_positive": null,
+      "status": "silent only",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
+      "check": "a_TIMING_007",
+      "fired": [],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands",
+        "proven"
+      ],
+      "false_positive": null,
+      "status": "silent only",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
+      "check": "a_TIMING_008",
+      "fired": [],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands",
+        "proven"
+      ],
+      "false_positive": null,
+      "status": "silent only",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
+      "check": "a_TIMING_009",
+      "fired": [],
+      "silent": [
+        "known-good: UberDDR3, 15946 commands",
+        "proven"
+      ],
+      "false_positive": null,
+      "status": "silent only",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "cmd_gen_sva",
       "check": "a_TIMING_012",
       "fired": [],
       "silent": [
-        "known-good: UberDDR3, 15946 commands"
+        "known-good: UberDDR3, 15946 commands",
+        "proven"
       ],
       "false_positive": null,
       "status": "silent only",
@@ -58,26 +128,9 @@
       ],
       "silent": [
         "gate",
-        "agreement: second model, 53/53 traces",
+        "agreement: second model, 13/13 traces",
         "repaired: 5 path(s)",
         "passing: 5 path(s)"
-      ],
-      "false_positive": null,
-      "status": "silent only",
-      "note": ""
-    },
-    {
-      "kind": "rule",
-      "model": "path_05_scheduler_refresh_loop_checker",
-      "check": "REF_001",
-      "fired": [
-        "gate"
-      ],
-      "silent": [
-        "gate",
-        "agreement: second model, 53/53 traces",
-        "repaired: 1 path(s)",
-        "passing: 1 path(s)"
       ],
       "false_positive": null,
       "status": "silent only",
@@ -92,27 +145,10 @@
       ],
       "silent": [
         "gate",
-        "agreement: second model, 41/41 traces",
+        "agreement: second model, 9/9 traces",
         "known-good: UberDDR3, 9216 requests",
         "repaired: 1 path(s)",
         "passing: 1 path(s)"
-      ],
-      "false_positive": null,
-      "status": "silent only",
-      "note": ""
-    },
-    {
-      "kind": "rule",
-      "model": "scheduler_checker",
-      "check": "REF_001",
-      "fired": [
-        "gate"
-      ],
-      "silent": [
-        "gate",
-        "agreement: second model, 53/53 traces",
-        "repaired: 2 path(s)",
-        "passing: 2 path(s)"
       ],
       "false_positive": null,
       "status": "silent only",
@@ -151,11 +187,11 @@
       "model": "cmd_gen_sva",
       "check": "a_PROTO_001",
       "fired": [
-        "seeded: M01_cmd_gen_bank_stuck, M02_cmd_gen_act_encoded_as_pre",
-        "formal-cex"
+        "seeded: M01_cmd_gen_bank_stuck, M02_cmd_gen_act_encoded_as_pre"
       ],
       "silent": [
-        "known-good: UberDDR3, 15946 commands"
+        "known-good: UberDDR3, 15946 commands",
+        "proven"
       ],
       "false_positive": null,
       "status": "closed",
@@ -166,23 +202,8 @@
       "model": "cmd_gen_sva",
       "check": "a_PROTO_002",
       "fired": [
-        "seeded: M01_cmd_gen_bank_stuck, M03_bank_tracker_tras_short",
-        "repaired: R01_scheduler_feedback_hold",
-        "formal-cex"
-      ],
-      "silent": [
-        "known-good: UberDDR3, 15946 commands"
-      ],
-      "false_positive": null,
-      "status": "closed",
-      "note": ""
-    },
-    {
-      "kind": "assertion",
-      "model": "cmd_gen_sva",
-      "check": "a_TIMING_001",
-      "fired": [
-        "seeded: UberDDR3 spec mutation"
+        "seeded: M01_cmd_gen_bank_stuck, M24_scheduler_ref_with_open_bank",
+        "repaired: R01_scheduler_feedback_hold"
       ],
       "silent": [
         "known-good: UberDDR3, 15946 commands",
@@ -212,38 +233,8 @@
       "model": "cmd_gen_sva",
       "check": "a_TIMING_004",
       "fired": [
-        "seeded: M03_bank_tracker_tras_short, M04_bank_tracker_trrd_zero",
-        "repaired: R01_scheduler_feedback_hold",
-        "formal-cex"
-      ],
-      "silent": [
-        "known-good: UberDDR3, 15946 commands"
-      ],
-      "false_positive": null,
-      "status": "closed",
-      "note": ""
-    },
-    {
-      "kind": "assertion",
-      "model": "cmd_gen_sva",
-      "check": "a_TIMING_005",
-      "fired": [
-        "repaired: R01_scheduler_feedback_hold",
-        "formal-cex"
-      ],
-      "silent": [
-        "known-good: UberDDR3, 15946 commands"
-      ],
-      "false_positive": null,
-      "status": "closed",
-      "note": ""
-    },
-    {
-      "kind": "assertion",
-      "model": "cmd_gen_sva",
-      "check": "a_TIMING_006",
-      "fired": [
-        "seeded: M04_bank_tracker_trrd_zero"
+        "seeded: M01_cmd_gen_bank_stuck",
+        "repaired: R01_scheduler_feedback_hold"
       ],
       "silent": [
         "known-good: UberDDR3, 15946 commands",
@@ -256,40 +247,13 @@
     {
       "kind": "assertion",
       "model": "cmd_gen_sva",
-      "check": "a_TIMING_007",
+      "check": "a_TIMING_005",
       "fired": [
-        "formal-cex"
+        "repaired: R01_scheduler_feedback_hold"
       ],
       "silent": [
-        "known-good: UberDDR3, 15946 commands"
-      ],
-      "false_positive": null,
-      "status": "closed",
-      "note": ""
-    },
-    {
-      "kind": "assertion",
-      "model": "cmd_gen_sva",
-      "check": "a_TIMING_008",
-      "fired": [
-        "formal-cex"
-      ],
-      "silent": [
-        "known-good: UberDDR3, 15946 commands"
-      ],
-      "false_positive": null,
-      "status": "closed",
-      "note": ""
-    },
-    {
-      "kind": "assertion",
-      "model": "cmd_gen_sva",
-      "check": "a_TIMING_009",
-      "fired": [
-        "formal-cex"
-      ],
-      "silent": [
-        "known-good: UberDDR3, 15946 commands"
+        "known-good: UberDDR3, 15946 commands",
+        "proven"
       ],
       "false_positive": null,
       "status": "closed",
@@ -300,12 +264,11 @@
       "model": "cmd_gen_sva",
       "check": "a_TIMING_011",
       "fired": [
-        "seeded: M06_refresh_pending_runaway",
-        "repaired: R01_scheduler_feedback_hold, R02_scheduler_refresh_trfc_gate",
-        "formal-cex"
+        "repaired: R01_scheduler_feedback_hold, R02_scheduler_refresh_trfc_gate"
       ],
       "silent": [
-        "known-good: UberDDR3, 15946 commands"
+        "known-good: UberDDR3, 15946 commands",
+        "proven"
       ],
       "false_positive": null,
       "status": "closed",
@@ -356,12 +319,54 @@
     {
       "kind": "assertion",
       "model": "init_fsm_sva",
+      "check": "a_INIT_002_init_done",
+      "fired": [
+        "seeded: M19_init_fsm_tzqinit_short"
+      ],
+      "silent": [
+        "proven"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "init_fsm_sva",
       "check": "a_INIT_003_init_done",
       "fired": [
         "seeded: M22_init_fsm_done_before_zqcl"
       ],
       "silent": [
         "proven (u_init_fsm.wait_cnt cut)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "scheduler_order_sva",
+      "check": "a_REF_001",
+      "fired": [
+        "seeded: M17_scheduler_ignores_refresh"
+      ],
+      "silent": [
+        "bounded proven"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "assertion",
+      "model": "scheduler_order_sva",
+      "check": "a_REF_002",
+      "fired": [
+        "seeded: M24_scheduler_ref_with_open_bank"
+      ],
+      "silent": [
+        "proven"
       ],
       "false_positive": null,
       "status": "closed",
@@ -377,7 +382,7 @@
       ],
       "silent": [
         "gate",
-        "agreement: second model, 42/42 traces",
+        "agreement: second model, 10/10 traces",
         "repaired: 5 path(s), e.g. matched=19/19",
         "passing: 5 path(s), e.g. matched=19/19"
       ],
@@ -395,8 +400,8 @@
       ],
       "silent": [
         "gate",
-        "agreement: second model, 51/51 traces",
-        "passing: 4 path(s), e.g. matched=98/98"
+        "agreement: second model, 11/11 traces",
+        "passing: 4 path(s), e.g. matched=51/51"
       ],
       "false_positive": null,
       "status": "closed",
@@ -412,7 +417,7 @@
       ],
       "silent": [
         "gate",
-        "agreement: second model, 57/57 traces",
+        "agreement: second model, 17/17 traces",
         "passing: 7 path(s), e.g. matched=131/131"
       ],
       "false_positive": null,
@@ -421,31 +426,15 @@
     },
     {
       "kind": "predictor",
-      "model": "data_path_predictor",
-      "check": "exact prediction",
-      "fired": [
-        "gate",
-        "seeded: M13_data_path_dm_polarity"
-      ],
-      "silent": [
-        "gate",
-        "passing: 1 path(s), e.g. matched=19/19"
-      ],
-      "false_positive": null,
-      "status": "closed",
-      "note": "second model DISAGREES on 35/41 traces"
-    },
-    {
-      "kind": "predictor",
       "model": "wb_port_predictor",
       "check": "exact prediction",
       "fired": [
         "gate",
-        "seeded: M10_wb_port_we_inverted, M13_data_path_dm_polarity"
+        "seeded: M10_wb_port_we_inverted"
       ],
       "silent": [
         "gate",
-        "agreement: second model, 42/42 traces",
+        "agreement: second model, 10/10 traces",
         "repaired: 3 path(s), e.g. matched=19/19",
         "passing: 7 path(s), e.g. matched=19/19"
       ],
@@ -463,7 +452,7 @@
       ],
       "silent": [
         "gate",
-        "agreement: second model, 54/54 traces",
+        "agreement: second model, 14/14 traces",
         "repaired: 1 path(s)",
         "passing: 1 path(s)"
       ],
@@ -481,7 +470,7 @@
       ],
       "silent": [
         "gate",
-        "agreement: second model, 54/54 traces",
+        "agreement: second model, 14/14 traces",
         "repaired: 1 path(s)",
         "passing: 1 path(s)"
       ],
@@ -495,12 +484,12 @@
       "check": "REF_002",
       "fired": [
         "gate",
-        "seeded: M06_refresh_pending_runaway",
+        "seeded: M24_scheduler_ref_with_open_bank",
         "repaired: R01_scheduler_feedback_hold"
       ],
       "silent": [
         "gate",
-        "agreement: second model, 54/54 traces",
+        "agreement: second model, 14/14 traces",
         "repaired: 1 path(s)",
         "passing: 1 path(s)"
       ],
@@ -518,7 +507,7 @@
       ],
       "silent": [
         "gate",
-        "agreement: second model, 53/53 traces",
+        "agreement: second model, 13/13 traces",
         "repaired: 5 path(s)",
         "passing: 5 path(s)"
       ],
@@ -536,8 +525,9 @@
       ],
       "silent": [
         "gate",
-        "agreement: second model, 53/53 traces",
-        "repaired: 5 path(s)"
+        "agreement: second model, 13/13 traces",
+        "repaired: 5 path(s)",
+        "passing: 5 path(s)"
       ],
       "false_positive": null,
       "status": "closed",
@@ -549,12 +539,12 @@
       "check": "REF_002",
       "fired": [
         "gate",
-        "seeded: M06_refresh_pending_runaway",
+        "seeded: M24_scheduler_ref_with_open_bank",
         "repaired: R01_scheduler_feedback_hold"
       ],
       "silent": [
         "gate",
-        "agreement: second model, 53/53 traces",
+        "agreement: second model, 13/13 traces",
         "repaired: 5 path(s)",
         "passing: 5 path(s)"
       ],
@@ -568,11 +558,11 @@
       "check": "SCHED_001",
       "fired": [
         "gate",
-        "seeded: M12_scheduler_no_precharge"
+        "seeded: M03_bank_tracker_tras_short, M12_scheduler_no_precharge"
       ],
       "silent": [
         "gate",
-        "agreement: second model, 53/53 traces",
+        "agreement: second model, 13/13 traces",
         "repaired: 5 path(s)",
         "passing: 5 path(s)"
       ],
@@ -590,9 +580,9 @@
       ],
       "silent": [
         "gate",
-        "agreement: second model, 53/53 traces",
+        "agreement: second model, 13/13 traces",
         "repaired: 5 path(s)",
-        "passing: 3 path(s)"
+        "passing: 5 path(s)"
       ],
       "false_positive": null,
       "status": "closed",
@@ -625,7 +615,8 @@
       ],
       "silent": [
         "gate",
-        "repaired: 1 path(s)"
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
       ],
       "false_positive": null,
       "status": "closed",
@@ -637,7 +628,7 @@
       "check": "REF_002",
       "fired": [
         "gate",
-        "seeded: M06_refresh_pending_runaway",
+        "seeded: M24_scheduler_ref_with_open_bank",
         "repaired: R01_scheduler_feedback_hold"
       ],
       "silent": [
@@ -652,16 +643,35 @@
     {
       "kind": "rule",
       "model": "path_05_scheduler_refresh_loop_checker",
+      "check": "REF_001",
+      "fired": [
+        "gate",
+        "seeded: M06_refresh_pending_runaway, M17_scheduler_ignores_refresh"
+      ],
+      "silent": [
+        "gate",
+        "agreement: second model, 13/13 traces",
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "path_05_scheduler_refresh_loop_checker",
       "check": "REF_002",
       "fired": [
         "gate",
-        "seeded: M06_refresh_pending_runaway",
+        "seeded: M24_scheduler_ref_with_open_bank",
         "repaired: R01_scheduler_feedback_hold"
       ],
       "silent": [
         "gate",
-        "agreement: second model, 53/53 traces",
-        "repaired: 1 path(s)"
+        "agreement: second model, 13/13 traces",
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
       ],
       "false_positive": null,
       "status": "closed",
@@ -677,7 +687,7 @@
       ],
       "silent": [
         "gate",
-        "agreement: second model, 53/53 traces",
+        "agreement: second model, 13/13 traces",
         "repaired: 1 path(s)",
         "passing: 1 path(s)"
       ],
@@ -797,7 +807,7 @@
       ],
       "silent": [
         "gate",
-        "agreement: second model, 41/41 traces",
+        "agreement: second model, 9/9 traces",
         "known-good: UberDDR3, 9216 requests",
         "repaired: 1 path(s)",
         "passing: 1 path(s)"
@@ -816,9 +826,10 @@
       ],
       "silent": [
         "gate",
-        "agreement: second model, 41/41 traces",
+        "agreement: second model, 9/9 traces",
         "known-good: UberDDR3, 9216 requests",
-        "repaired: 1 path(s)"
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
       ],
       "false_positive": null,
       "status": "closed",
@@ -830,11 +841,11 @@
       "check": "SCHED_001",
       "fired": [
         "gate",
-        "seeded: M12_scheduler_no_precharge"
+        "seeded: M03_bank_tracker_tras_short, M12_scheduler_no_precharge"
       ],
       "silent": [
         "gate",
-        "agreement: second model, 41/41 traces",
+        "agreement: second model, 9/9 traces",
         "known-good: UberDDR3, 9216 requests",
         "repaired: 1 path(s)",
         "passing: 1 path(s)"
@@ -853,7 +864,7 @@
       ],
       "silent": [
         "gate",
-        "agreement: second model, 41/41 traces",
+        "agreement: second model, 9/9 traces",
         "known-good: UberDDR3, 9216 requests",
         "repaired: 1 path(s)",
         "passing: 1 path(s)"
@@ -868,14 +879,15 @@
       "check": "REF_002",
       "fired": [
         "gate",
-        "seeded: M06_refresh_pending_runaway",
+        "seeded: M24_scheduler_ref_with_open_bank",
         "repaired: R01_scheduler_feedback_hold"
       ],
       "silent": [
         "gate",
-        "agreement: second model, 53/53 traces",
+        "agreement: second model, 13/13 traces",
         "known-good: UberDDR3, 9216 requests",
-        "repaired: 1 path(s)"
+        "repaired: 1 path(s)",
+        "passing: 1 path(s)"
       ],
       "false_positive": null,
       "status": "closed",
@@ -887,11 +899,11 @@
       "check": "SCHED_001",
       "fired": [
         "gate",
-        "seeded: M12_scheduler_no_precharge"
+        "seeded: M03_bank_tracker_tras_short, M12_scheduler_no_precharge"
       ],
       "silent": [
         "gate",
-        "agreement: second model, 53/53 traces",
+        "agreement: second model, 13/13 traces",
         "known-good: UberDDR3, 9216 requests",
         "repaired: 1 path(s)",
         "passing: 1 path(s)"
@@ -910,7 +922,7 @@
       ],
       "silent": [
         "gate",
-        "agreement: second model, 53/53 traces",
+        "agreement: second model, 13/13 traces",
         "known-good: UberDDR3, 9216 requests",
         "repaired: 1 path(s)",
         "passing: 1 path(s)"
@@ -922,17 +934,35 @@
     {
       "kind": "rule",
       "model": "scheduler_checker",
+      "check": "REF_001",
+      "fired": [
+        "gate",
+        "seeded: M06_refresh_pending_runaway, M17_scheduler_ignores_refresh"
+      ],
+      "silent": [
+        "gate",
+        "agreement: second model, 13/13 traces",
+        "repaired: 2 path(s)",
+        "passing: 2 path(s)"
+      ],
+      "false_positive": null,
+      "status": "closed",
+      "note": ""
+    },
+    {
+      "kind": "rule",
+      "model": "scheduler_checker",
       "check": "REF_002",
       "fired": [
         "gate",
-        "seeded: M06_refresh_pending_runaway",
+        "seeded: M24_scheduler_ref_with_open_bank",
         "repaired: R01_scheduler_feedback_hold"
       ],
       "silent": [
         "gate",
-        "agreement: second model, 53/53 traces",
+        "agreement: second model, 13/13 traces",
         "repaired: 2 path(s)",
-        "passing: 1 path(s)"
+        "passing: 2 path(s)"
       ],
       "false_positive": null,
       "status": "closed",
@@ -948,7 +978,7 @@
       ],
       "silent": [
         "gate",
-        "agreement: second model, 53/53 traces",
+        "agreement: second model, 13/13 traces",
         "repaired: 2 path(s)",
         "passing: 2 path(s)"
       ],

@@ -417,6 +417,25 @@
         "path_08_init_to_cal",
         "path_14_status_init"
       ]
+    },
+    {
+      "id": "M24_scheduler_ref_with_open_bank",
+      "block": "scheduler",
+      "file": "PHASE3RTL/scheduler.sv",
+      "description": "REFRESH is issued without precharging first: the REF gate no longer requires every bank idle, so a refresh lands on open rows (REF_002). Added 2026-10-22 beside the generated REF_002 assertion, which had no fault to fire it.",
+      "edits": [
+        {
+          "from": "    wire ref_ok = all_banks_idle && (&bank_act_allowed) && !inflight_act && !inflight_ref;",
+          "to": "    wire ref_ok = !inflight_act && !inflight_ref;"
+        }
+      ],
+      "expect": [
+        "id:REF_002",
+        "assert:a_REF_002"
+      ],
+      "paths": [
+        "path_20_refresh_preempt"
+      ]
     }
   ],
   "$equivalent_note": "Three first-draft faults were 'equivalent mutants' \u2014 unobservable by construction, not missed by a check: tRCD/tRP timer bugs cannot violate a 3-cycle bound the command pipeline already exceeds, and the refresh-starvation latch never fires because the event is unreachable in this RTL. They were replaced; the reasoning is kept in each replacement's description.",

@@ -139,3 +139,51 @@ reconnect timeouts before the round could finish. The verdict was
 already in (simulation had completed), and formal now waits for a round
 that passes simulation, so a failing loop round no longer pays for
 proofs it will not keep.
+
+## Addendum 2 (2026-10-22): your push, and two more Phase 4 runs
+
+Thank you for ask 6: all four agents now carry `context`. We ran the
+loop twice on your pushed generators (`runs/phase4_loop`,
+`runs/phase4_loop_2`), fresh from the golden spec each time.
+
+**What still fails, and why it is now yours.** The data_path read is
+unchanged by your hand edit to `data_path_gen.py` (slot-per-beat plus a
+delayed push) and by both patches your agent applied: the response is
+`0x7f670000` for `0x9dac7f67` every time, 31 of 31 reads. All three
+changes rework the word assembly; none moves the capture window, which
+starts one controller cycle before the DRAM drives beat 0 and never
+reads `ddr_dqs_i` (addendum 6 of the 10-08 reply, restored after your
+"blah" commit accidentally deleted addenda 5 and 6 from that file). In
+the second run your agent's three attempts all lost required tool-call
+fields (`explanation`; then all four; then
+`corrected_generator_source`) and the module went unresolved with no
+patch at all. **ask 8:** apply the capture fix by hand from addendum 6
+(count ceil(CL / CLK_RATIO) from the registered command, or capture on
+`ddr_dqs_i`), and treat the schema miss as a blocker: three of three
+attempts is not a rare event.
+
+**One thing on our side.** The context events were in the prompt and
+the agent still reasoned about word order, so each mismatch now also
+carries `value_provenance`: which input landed in which slice of the
+wrong value, and which should have. For this finding it reads
+
+```
+data: observed [31:16]=ddr_rd_beat#1.data (t-10000), [15:0]=0
+data: expected [31:16]=ddr_rd_beat#2.data (t-5000), [15:0]=ddr_rd_beat#1.data (t-10000)
+```
+
+beat 1 where beat 2 belongs, nothing where beat 1 belongs: the capture
+is one beat early. It is a list of strings under
+`failed_checks[].context.value_provenance`; please add it to the prompt
+line beside the events.
+
+**Our false positive, fixed.** The first run also raised REF_001 on the
+scheduler from a new starvation assertion we had bound to refresh_ctrl;
+on paths whose harness has no scheduler nothing can acknowledge a
+refresh, so it fired by construction. Your Phase 3 agent said "not this
+module" and was right. REF_001 is now a bounded obligation at the
+scheduler (an urgent refresh acknowledged within tRAS + tRP + tRFC in
+the enforced windows plus a cycle per bank, under the spec's
+urgent-preempt policy), silent on the clean drop and firing on the
+seeded scheduler-ignores-refresh fault; the second run had only the
+data_path finding.

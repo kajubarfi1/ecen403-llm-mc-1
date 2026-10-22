@@ -1,4 +1,4 @@
-op# Reply to Frontend — 2026-10-08
+# Reply to Frontend — 2026-10-08
 
 From Validation (Jacob), answering `Frontend2/HANDOFF_VALIDATION_2026-10-08.md`
 (sections 1–7 and the three questions). What changed on our side is marked
@@ -363,6 +363,101 @@ rebuild from `dab971c2aab9` is asked for (his reply has the detail).
   names the revision still has to carry `spec_id` beside it to be
   unambiguous. Bump it when Dawson's `backend/env.template` can follow.
 - Age bound on `path_07`: agreed, not a check until the policy states one.
+
+## Addendum 5 (2026-10-15, afternoon): the Phase 2 loop closed; the all-phase loop stops in your Phase 3 agent
+
+Both loops ran today with your key funded (it was, after all; the 10/08
+"credit balance" was that day's state).
+
+**Phase 1+2 loop: complete, unattended.** `flow.py --phases 1,2` on the
+golden spec: 8 of 8 runnable paths pass, 13 blocked for Phases 3–4. We
+then planted M05 (`refi_tick` never raised) into the run's `refresh_ctrl`
+and resumed: validation FAIL with REF_004 on path_09, **confirmed** because
+the path's independently generated second-opinion checker raised the same
+rule (new this week: twin agreement is now computed in every run and marks
+findings `confirmed`, which is what lets `--yes` act); your Phase 2 agent
+read the package, named the planted line as the root cause ("sets
+`refi_tick <= 1'b0` instead of `1'b1` ... no refresh request is ever
+raised"), patched, re-verified lint and sim, regenerated; re-validation
+PASS 8 of 8, the finding resolved, no person involved
+(`runs/phase12_loop`, drops `954c3db9f301` → `1e65896eb5e0` →
+`dc811936c7f1`).
+
+**All-phase loop: validation and routing work; the Phase 3 agent returns
+no patch.** Clean run 19 of 19. We planted M17 (scheduler never selects
+REFRESH) into the run's scheduler and resumed: validation FAIL on
+path_05/13/20 with REF_001 and SCHED_003, both confirmed by twin checkers,
+routed to the Phase 3 agent. It exits after one attempt:
+
+```
+scheduler: fix attempt 1/3
+  asking Claude to diagnose + propose a fix...
+  ERROR: model's propose_fix call is missing required field(s):
+         corrected_generator_source, explanation, shift_left_recommendations,
+         confidence (stop_reason='tool_use')
+scheduler: unresolved
+```
+
+Twice in a row, same shape, and the "1/3" never becomes 2/3. Reading it
+from outside: the structured tool call has to carry the whole corrected
+`scheduler_gen.py` in one field, the response stops at the token limit
+mid-call, and the agent treats a truncated call as final rather than
+retrying with a larger `max_tokens` or asking for a diff. **ask 4:** either
+raise the output limit for the propose_fix call (the scheduler generator is
+the largest), accept a unified diff instead of the full source, or at
+least let attempts 2 and 3 run. We can re-run the experiment the moment
+you push; it is one `--resume`.
+
+Two things fixed on our side from these runs: a resumed `--phases` run now
+stays partial, and the RTL-round cap counts rounds since the last PASS
+(infrastructure halts no longer eat the budget before an agent runs).
+
+## Addendum 6 (2026-10-15, evening): a data_path read-capture defect, found by closing coverage
+
+Coverage closure turned up a Phase 4 defect that every earlier drop passed
+over, and it is ours to explain because our own DRAM model had been hiding
+it.
+
+**What we found.** Every host read returns the wrong word: the low 16 bits
+are zero and the high 16 bits hold the DRAM's *first* (low) beat. On
+drop `dab971c2aab9`, read-after-write of `0x1027c4d1` returns `0xc4d10000`;
+31 of 31 reads on path_03 and path_18, deterministic, confirmed by the
+independently generated second predictor (`data_path/MISMATCH/dp_rd_rsp[data]`,
+critical, in `outbox/current`).
+
+**Why.** `data_path.sv` captures read data by counting, not by the strobe:
+`rd_lat_ctr <= (cfg_CL_nCK >> 2) - 1` (line 225) and then two capture
+cycles (line 275). With CL = 11 that samples the bus 2 controller cycles
+after the RD is on the pins, i.e. 8 nCK, before CL has elapsed. The DRAM
+(JEDEC: data CL after it samples the command, so the first whole
+controller cycle is ceil(11/4) = 3) drives beat 0 one cycle later than the
+design looks for it. The first capture reads the idle bus (0 → low half),
+the second reads beat 0 (→ high half); beat 1 is never seen. The port
+`ddr_dqs_i` is declared (line 72) and never read.
+
+**ask 5 (Phase 4, data_path):** qualify read capture on `ddr_dqs_i`
+(capture a beat each cycle the strobe is high, assemble WORD_BEATS beats low
+half first) rather than counting CL/4 - 1. That is what the strobe is for,
+and it is robust to the half-cycle the 4:1 ratio leaves undefined. If you
+prefer to keep counting, the count from the registered command must be
+ceil(CL / CLK_RATIO), not (CL >> 2) - 1. The finding is confirmed, so
+`flow.py` hands it to your Phase 4 agent under `--yes` on the next round;
+this addendum is the explanation your agent will not have.
+
+**Why no earlier drop showed it, and what changed on our side.** Our
+behavioral DRAM stored one word per burst with both beats identical (a
+model of an older drop's pin protocol) and returned zeros for anything
+unwritten, so the read paths matched on all-zero data and the one stimulus
+that wrote then read (path_18, random mixed) never read a written location.
+Fixed today: the stub stores every beat, replies ceil(CL / ratio) cycles
+after it samples the RD (derived from the spec, never tuned to the
+design's counter), reads unwritten locations as an address pattern that
+differs per beat, and path_18 now drives read-after-write pairs. The same
+run closed the functional coverage plan: 28 of 39 items covered and the
+other 11 short only on the exact-minimum timing bins your spec's
+`timing_model.counter_clock.window_scale = 4` places out of reach (the
+design holds every window 4x the JEDEC value; the rollup now reports those
+as `unreachable_by_spec` rather than as a stimulus gap).
 
 **Your three questions**, as they stand now: (1) the next drop we run is
 whatever the loop produces from `dab971c2aab9`; nothing else is needed in

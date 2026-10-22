@@ -1,0 +1,143 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_03_read_return",
+  "strategy": "composed",
+  "verdict": "fail",
+  "timestamp": "2026-10-22T11:42:33.050177",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_03_read_return_seed1.json",
+  "stimulus_generator": "random",
+  "autonomous": false,
+  "window_cycles": 400,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "87a8557a7b23",
+    "drop_id": "87a8557a7b23",
+    "design_id": "7934580abd50",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "c95f8d3",
+    "frontend_commits": {
+      "addr_decoder": "c95f8d32875579e3716a63f2624722dce0e34640",
+      "bank_tracker": "c95f8d32875579e3716a63f2624722dce0e34640",
+      "cmd_gen": "c95f8d32875579e3716a63f2624722dce0e34640",
+      "cmd_queue": "c95f8d32875579e3716a63f2624722dce0e34640",
+      "config_regs": "c95f8d32875579e3716a63f2624722dce0e34640",
+      "data_path": "c95f8d32875579e3716a63f2624722dce0e34640",
+      "refresh_ctrl": "c95f8d32875579e3716a63f2624722dce0e34640",
+      "scheduler": "c95f8d32875579e3716a63f2624722dce0e34640",
+      "wb_port": "c95f8d32875579e3716a63f2624722dce0e34640"
+    },
+    "roots": [
+      "runs/phase4_loop/drop"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "runs/phase4_loop/drop/PHASE2RTL/addr_decoder.sv",
+        "manifest": "runs/phase4_loop/drop/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "bank_tracker": {
+        "rtl": "runs/phase4_loop/drop/PHASE2RTL/bank_tracker.sv",
+        "manifest": "runs/phase4_loop/drop/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_gen": {
+        "rtl": "runs/phase4_loop/drop/PHASE3RTL/cmd_gen.sv",
+        "manifest": "runs/phase4_loop/drop/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_queue": {
+        "rtl": "runs/phase4_loop/drop/PHASE3RTL/cmd_queue.sv",
+        "manifest": "runs/phase4_loop/drop/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "config_regs": {
+        "rtl": "runs/phase4_loop/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/phase4_loop/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "data_path": {
+        "rtl": "runs/phase4_loop/drop/PHASE4RTL/data_path.sv",
+        "manifest": "runs/phase4_loop/drop/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "refresh_ctrl": {
+        "rtl": "runs/phase4_loop/drop/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "runs/phase4_loop/drop/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "scheduler": {
+        "rtl": "runs/phase4_loop/drop/PHASE3RTL/scheduler.sv",
+        "manifest": "runs/phase4_loop/drop/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "wb_port": {
+        "rtl": "runs/phase4_loop/drop/PHASE1RTL/wb_port.sv",
+        "manifest": "runs/phase4_loop/drop/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/phase4_loop/drop/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "data_path",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/data_path_predictor.py",
+      "scope": "data_path",
+      "verdict": "fail",
+      "summary": "scope=data_path  strategy=exact  status=fail  matched=0/19  value=19",
+      "detail": [
+        "  dp_rd_rsp[7] value: predicted [dp_rd_rsp.response aux=0x7 data=0x15a8ff27] but observed [dp_rd_rsp.response aux=0x7 data=0xff270000]",
+        "  dp_rd_rsp[8] value: predicted [dp_rd_rsp.response aux=0x8 data=0x1596fcc7] but observed [dp_rd_rsp.response aux=0x8 data=0xfcc70000]",
+        "  dp_rd_rsp[9] value: predicted [dp_rd_rsp.response aux=0x9 data=0xdd8c7d67] but observed [dp_rd_rsp.response aux=0x9 data=0x7d670000]",
+        "  dp_rd_rsp[10] value: predicted [dp_rd_rsp.response aux=0xa data=0xa5b4fee7] but observed [dp_rd_rsp.response aux=0xa data=0xfee70000]",
+        "  dp_rd_rsp[11] value: predicted [dp_rd_rsp.response aux=0xb data=0xfdbd7e7f] but observed [dp_rd_rsp.response aux=0xb data=0x7e7f0000]",
+        "  dp_rd_rsp[12] value: predicted [dp_rd_rsp.response aux=0xc data=0xb5b4feef] but observed [dp_rd_rsp.response aux=0xc data=0xfeef0000]",
+        "  dp_rd_rsp[13] value: predicted [dp_rd_rsp.response aux=0xd data=0xa597fcd7] but observed [dp_rd_rsp.response aux=0xd data=0xfcd70000]",
+        "  dp_rd_rsp[14] value: predicted [dp_rd_rsp.response aux=0xe data=0x1dbe7e4f] but observed [dp_rd_rsp.response aux=0xe data=0x7e4f0000]",
+        "  dp_rd_rsp[15] value: predicted [dp_rd_rsp.response aux=0xf data=0x35acff67] but observed [dp_rd_rsp.response aux=0xf data=0xff670000]",
+        "  dp_rd_rsp[16] value: predicted [dp_rd_rsp.response aux=0x0 data=0xdd8d7d77] but observed [dp_rd_rsp.response aux=0x0 data=0x7d770000]",
+        "  dp_rd_rsp[17] value: predicted [dp_rd_rsp.response aux=0x1 data=0xedbb7e1f] but observed [dp_rd_rsp.response aux=0x1 data=0x7e1f0000]",
+        "  dp_rd_rsp[18] value: predicted [dp_rd_rsp.response aux=0x2 data=0x3580fdaf] but observed [dp_rd_rsp.response aux=0x2 data=0xfdaf0000]"
+      ],
+      "rule_counts": {}
+    },
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "pass",
+      "summary": "scope=wb_port  strategy=exact  status=pass  matched=38/38  (38 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    }
+  ],
+  "log": "Validation/reports/paths/path_03_read_return_sim.log",
+  "observed_trace": "Validation/reports/paths/path_03_read_return_observed.jsonl"
+}

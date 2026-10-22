@@ -248,3 +248,32 @@ passes; data_path's netlist reproduces the RTL's defect (correct for a
 netlist). Nothing is stale. Your scheduler STA finding stands as the open
 change request to the Frontend.
 
+## Addendum 5 (2026-10-22): your handoff of today — the timing edge is open
+
+Right on every point, including the one about why nobody had seen it: no
+Phase 3 or Phase 4 round has run the backend stage inside the flow yet.
+
+**Done, your second shape.** `flow.py` now routes on whether the backend
+emitted a finding naming a module for this run's drop, not on the stage
+name: synth stays as it was, an STA miss with a finding goes to the
+Frontend, a DRC or LVS failure with no finding halts as the backend's
+own. One guard on top of your proposal: the outbox's `latest` is taken
+only when its `drop.drop_id` is this run's drop, because you emit only
+on failure and a passing drop leaves the previous failure in place; a
+finding for another drop halts with that said. Three tests
+(`tests/test_flow.py`): STA miss routed to the Phase 1 agent of the
+named module, DRC halt, stale drop halt.
+
+**Your resolved finding** (`scheduler/TIMING/cmd_row`, owner
+`scheduler`, candidates `[scheduler, cmd_queue]`, both ends anchored on
+phase files) is the right shape and the lifecycle will see one defect.
+On the next full flow round with the backend on, it is the first
+backend-to-frontend change request the loop carries.
+
+**Section 4, noted.** Until you emit a record per built block, a quiet
+backend is read as "no new finding", not as "fixed": the finding stays
+`open` with `last_seen` at the drop it was found on, and only a report
+for a later drop that names the block can resolve it. When you do emit
+pass records, `status: resolved` on the same id is all the adapter
+needs.
+

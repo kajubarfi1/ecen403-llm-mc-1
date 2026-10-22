@@ -1,10 +1,11 @@
-TOOL:	xrun	24.03-s013: Started on Oct 15, 2026 at 13:32:26 CDT
-*WARNING* X Window Display Initialization failure
-*WARNING* (DISPLAY "")
+TOOL:	xrun	24.03-s013: Started on Oct 22, 2026 at 12:18:30 CDT
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xrun: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
 xrun: 24.03-s013: (c) Copyright 1995-2025 Cadence Design Systems, Inc.
+*WARNING* file /home/ugrads/j/jacobz/CDS.log File is already locked by some other process.
+*WARNING* X Window Display Initialization failure
+*WARNING* (DISPLAY "")
 xrun: *N,CLEAN: Removing existing directory ./xcelium.d.
 DEFINE std       ./STD
 |
@@ -432,6 +433,10 @@ file: scheduler_fcov.sv
 	module worklib.scheduler_fcov:sv
 		errors: 0, warnings: 0
 file: scheduler_fcov_bind.sv
+file: scheduler_order_sva.sv
+	module worklib.scheduler_order_sva:sv
+		errors: 0, warnings: 0
+file: scheduler_order_sva_bind.sv
 	Total errors/warnings found outside modules and primitives:
 		errors: 0, warnings: 16
 DEFINE std       ./STD
@@ -582,7 +587,7 @@ xmelab: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment
 xmelab: *N,CGNSWA: (File: ./cov_conf.ccf, Line: 6): A covergroup is not (de)selected with the "-all" option of the (de)select_coverage command. Use the coverage metric "-covergroup" with the (de)select_coverage command to (de)select a covergroup.
 		Caching library 'worklib' ....... Done
 	Top level design units:
-		$unit_0x3a0d0f3e
+		$unit_0x0e6a150a
 		chain_harness
 
 	Extracting FSMs for coverage:
@@ -597,6 +602,7 @@ xmelab: *N,CGNSWA: (File: ./cov_conf.ccf, Line: 6): A covergroup is not (de)sele
 			FSM extracted for state register wr_state
 			FSM extracted for state register rd_state
 		worklib.refresh_ctrl
+		worklib.scheduler_order_sva
 		worklib.scheduler
 		worklib.wb_port
 	Total FSMs extracted = 2
@@ -654,93 +660,95 @@ xmvlog_cg: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,1
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
-		worklib.dram_stub:sv <0x5695d8bc>
+		worklib.dram_stub:sv <0x3cc47ea6>
 			streams:   3, words:  7224
-		worklib.wb_rsp_monitor:sv <0x18032940>
+		worklib.wb_rsp_monitor:sv <0x4210ccdf>
 			streams:   2, words:  1788
-		worklib.wb_monitor:sv <0x0506104b>
+		worklib.wb_monitor:sv <0x01a7e61f>
 			streams:   2, words:  2913
-		worklib.req_monitor:sv <0x1ba230b5>
+		worklib.req_monitor:sv <0x2e32a744>
 			streams:   2, words:  2235
-		worklib.scheduler_fcov:sv <0x12ec7396>
+		worklib.scheduler_order_sva:sv <0x73e7ffc6>
+			streams:  18, words:  9906
+		worklib.scheduler_fcov:sv <0x39923c1c>
 			streams:   4, words:  1955
-		worklib.sched_deq_monitor:sv <0x54500dd2>
+		worklib.sched_deq_monitor:sv <0x20ef933f>
 			streams:   2, words:  1543
-		worklib.sched_cmd_monitor:sv <0x7d5ee665>
+		worklib.sched_cmd_monitor:sv <0x5de99ac7>
 			streams:   2, words:  2668
-		worklib.refresh_ctrl_fcov:sv <0x2263543c>
+		worklib.refresh_ctrl_fcov:sv <0x3440b3ab>
 			streams:   4, words:  1993
-		worklib.refresh_req_monitor:sv <0x25319cba>
+		worklib.refresh_req_monitor:sv <0x0b093dba>
 			streams:   3, words:  2241
-		worklib.refresh_level_monitor:sv <0x787c7f3b>
+		worklib.refresh_level_monitor:sv <0x58cb0399>
 			streams:   3, words:  2531
-		worklib.refresh_ack_monitor:sv <0x44b376c3>
+		worklib.refresh_ack_monitor:sv <0x7f404e3c>
 			streams:   2, words:  1543
-		worklib.data_path_fcov:sv <0x5df3d622>
+		worklib.data_path_fcov:sv <0x658fd40a>
 			streams:   4, words:  2329
-		worklib.dp_wr_monitor:sv <0x3c38bb98>
+		worklib.dp_wr_monitor:sv <0x07cb8367>
 			streams:   2, words:  1785
-		worklib.dp_rd_rsp_monitor:sv <0x6d21b9b9>
+		worklib.dp_rd_rsp_monitor:sv <0x4b986388>
 			streams:   2, words:  1768
-		worklib.dp_cmd_monitor:sv <0x0bad7376>
+		worklib.dp_cmd_monitor:sv <0x2bf669b7>
 			streams:   2, words:  2452
-		worklib.ddr_wr_beat_monitor:sv <0x06e3af23>
+		worklib.ddr_wr_beat_monitor:sv <0x2960100d>
 			streams:   2, words:  1768
-		worklib.ddr_rd_beat_monitor:sv <0x42ad3d2f>
+		worklib.ddr_rd_beat_monitor:sv <0x795e05d0>
 			streams:   2, words:  1543
-		worklib.config_regs_fcov:sv <0x25063cc2>
+		worklib.config_regs_fcov:sv <0x5856ad9a>
 			streams:  10, words: 13585
-		worklib.csr_sts_level_monitor:sv <0x6bd382de>
+		worklib.csr_sts_level_monitor:sv <0x44192011>
 			streams:   3, words:  5328
-		worklib.csr_sts_monitor:sv <0x1378c12b>
+		worklib.csr_sts_monitor:sv <0x35c11b1a>
 			streams:   2, words:  2016
-		worklib.csr_rsp_monitor:sv <0x3df0a85b>
+		worklib.csr_rsp_monitor:sv <0x13c8095b>
 			streams:   2, words:  3103
-		worklib.csr_monitor:sv <0x51e21b26>
+		worklib.csr_monitor:sv <0x7e61a408>
 			streams:   2, words:  2653
-		worklib.cfg_timing_monitor:sv <0x4090d907>
+		worklib.cfg_timing_monitor:sv <0x26040154>
 			streams:   3, words:  5065
-		worklib.cfg_refresh_monitor:sv <0x1bf40bde>
+		worklib.cfg_refresh_monitor:sv <0x319753d3>
 			streams:   3, words:  3291
-		worklib.cmd_queue_fcov:sv <0x06002fc6>
+		worklib.cmd_queue_fcov:sv <0x7b267dd0>
 			streams:   4, words:  1898
-		worklib.cq_enq_monitor:sv <0x1edead2c>
+		worklib.cq_enq_monitor:sv <0x3cd65a4f>
 			streams:   2, words:  2235
-		worklib.cq_deq_monitor:sv <0x387f9c16>
+		worklib.cq_deq_monitor:sv <0x298f1de2>
 			streams:   2, words:  1543
-		worklib.cmd_gen_coverage:sv <0x3740ee94>
+		worklib.cmd_gen_coverage:sv <0x625d934f>
 			streams:  25, words: 45158
-		worklib.sched_in_monitor:sv <0x6dc4fe3d>
+		worklib.sched_in_monitor:sv <0x4eec02cd>
 			streams:   2, words:  2668
-		worklib.ddr_cmd_monitor:sv <0x1c4edc9b>
+		worklib.ddr_cmd_monitor:sv <0x3af706aa>
 			streams:   2, words:  2037
-		worklib.bank_tracker_fcov:sv <0x1136156f>
+		worklib.bank_tracker_fcov:sv <0x0715f2f8>
 			streams:   4, words:  2393
-		worklib.addr_decoder:sv <0x0965b348>
+		worklib.addr_decoder:sv <0x4a55c5a1>
 			streams:   2, words:  1259
-		worklib.seq_driver:sv <0x7ca6e75e>
+		worklib.seq_driver:sv <0x6dadea09>
 			streams:   5, words: 29378
-		worklib.chain_harness:sv <0x1511e7b9>
+		worklib.chain_harness:sv <0x426c0b00>
 			streams: 246, words: 66465
-		worklib.bank_tracker:sv <0x2bc9e945>
+		worklib.bank_tracker:sv <0x3ba202e9>
 			streams:  37, words: 49233
-		worklib.config_regs:sv <0x06eca155>
+		worklib.config_regs:sv <0x37221e30>
 			streams:  64, words: 58855
-		worklib.cmd_queue:sv <0x3c3974c8>
+		worklib.cmd_queue:sv <0x124bf535>
 			streams:  21, words: 20719
-		worklib.cmd_gen:sv <0x37ce9375>
+		worklib.cmd_gen:sv <0x1068df5e>
 			streams:  19, words: 19688
-		worklib.data_path:sv <0x2b193c74>
+		worklib.data_path:sv <0x3a3f9567>
 			streams:  60, words: 47462
-		worklib.refresh_ctrl:sv <0x7f49e885>
+		worklib.refresh_ctrl:sv <0x533392d3>
 			streams:  23, words: 12929
-		worklib.wb_port:sv <0x4626d04b>
+		worklib.wb_port:sv <0x0e4de081>
 			streams:  58, words: 45842
-		worklib.scheduler:sv <0x6c752a90>
-			streams:  28, words: 45935
-		worklib.cmd_gen_sva:sv <0x48d3a198>
+		worklib.scheduler:sv <0x5d78e7bb>
+			streams:  31, words: 46489
+		worklib.cmd_gen_sva:sv <0x003c0987>
 			streams: 333, words: 140663
-		worklib.\$unit_0x3a0d0f3e :compilation_unit <0x4ff65f26>
+		worklib.\$unit_0x0e6a150a :compilation_unit <0x146d7138>
 			streams:   0, words:     0
 xmelab: *W,COVNOEN: By default, toggle coverage is not supported for systemverilog static arrays of enumerated nets and variables. To enable toggle coverage of these objects, specify the 'set_toggle_scoring -sv_enum enable_mda' command in the coverage configuration file.
   int unsigned since_act [8];
@@ -751,21 +759,21 @@ xmelab: *W,CGPIDF: Covergroup "per_instance" option , by default, is set as 0.
 	Loading native compiled code:     .................... Done
 	Design hierarchy summary:
 		                     Instances  Unique
-		Modules:                    43      43
-		Registers:                 823     844
-		Scalar wires:              242       -
-		Vectored wires:            277       -
-		Named events:               21      21
-		Always blocks:             296     289
-		Initial blocks:             69      69
+		Modules:                    44      44
+		Registers:                 853     874
+		Scalar wires:              244       -
+		Vectored wires:            278       -
+		Named events:               23      23
+		Always blocks:             316     309
+		Initial blocks:             75      75
 		Cont. assignments:          70      98
-		Pseudo assignments:        289       -
-		Assertions:                 36      36
+		Pseudo assignments:        292       -
+		Assertions:                 40      40
 		Covergroup Instances:        0      10
 		Compilation units:           1       1
 		SV Class declarations:      21      21
 		SV Class specializations:   21      21
-		Process Clocks:            105      28
+		Process Clocks:            109      29
 		Simulation timescale:      1ps
 	Writing initial simulation snapshot: worklib.chain_harness:sv
 DEFINE std       ./STD
@@ -1211,6 +1219,6 @@ coverage setup:
   Coverage database dumped with the set_code_fine_grained_merging command during elaboration.
 
 coverage files:
-  model(design data) :  ./cov_work/scope/icc_46c2a7c5_12022b0c.ucm
-  data               :  ./cov_work/scope/path_03_read_return/icc_46c2a7c5_12022b0c.ucd
-TOOL:	xrun	24.03-s013: Exiting on Oct 15, 2026 at 13:32:28 CDT  (total: 00:00:02)
+  model(design data) :  ./cov_work/scope/icc_467ff59f_5edd0e0c.ucm
+  data               :  ./cov_work/scope/path_03_read_return/icc_467ff59f_5edd0e0c.ucd
+TOOL:	xrun	24.03-s013: Exiting on Oct 22, 2026 at 12:18:32 CDT  (total: 00:00:02)
