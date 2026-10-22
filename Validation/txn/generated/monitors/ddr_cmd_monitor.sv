@@ -4,7 +4,7 @@
 //
 // Interface : ddr_cmd   (Pin-level DDR3 command stream out of cmd_gen)
 // Block     : cmd_gen
-// Manifest  : runs/20261022-124530-interactive/drop/PHASE3RTL/cmd_gen_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

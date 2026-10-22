@@ -779,6 +779,24 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   halt as the backend's own. Three flow tests; backend reply addendum 5.
   His scheduler timing finding (WNS −1.044 ns, `u_cmd_queue.entry_bank →
   u_scheduler.cmd_row`) is the first change request the edge will carry.
+- *2026-10-22, later — Lehana's push: three other specs through the Phase
+  1+2 loop, a JEDEC correction from our spec review, an opt-in `--formal`
+  in flow.py.* She ran `flow.py --phases 1,2` on three compiled specs that
+  are not the golden one (DDR3-800, -1066 and -1600, x8, ONE byte lane, one
+  rank; revisions `compiled_ddr3*_x8_1lane_1rank_*`): spec review PASS on
+  each, 8/8 runnable paths PASS on each, packages committed under their
+  own revision dirs — the first evidence that the spec-driven validation
+  holds on specs it was not built against, including a different lane
+  count. Her `microarch_jedec.py` tRFC for 4Gb goes 260 → 300 ns because
+  the spec review's JEDEC table (J-TIM-009) flagged it: a generator-side
+  error caught by the review stage, as intended. She added
+  `flow.py --formal` (`stage_formal`, informational, never halts); since
+  validate_drop step 4b already re-proves on a passing round, the stage
+  now reuses an applicable report (same drop/design/blocks) instead of a
+  second JasperGold run. No data_path change: the read defect stands and
+  the Phase 4 ask is unchanged. Her commit also carried our generated
+  files from her last run (sva/generated, formal top for path_08): they
+  are regenerated per run and were regenerated for the golden spec here.
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

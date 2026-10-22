@@ -34,8 +34,29 @@ from txn_contract import load_trace
 
 CATALOG = json.load(open(os.path.join(HERE, "..", "txn",
                                       "interface_catalog.json")))["interfaces"]
-SCHEMAS = json.load(open(os.path.join(HERE, "..", "txn", "generated",
-                                      "schemas.json")))["interfaces"]
+_SCHEMAS_PATH = os.path.join(HERE, "..", "txn", "generated", "schemas.json")
+
+
+def _load_schemas():
+    """schemas.json is generated from whatever drop ran last; one committed
+    from a run on another drop (a teammate's run dir, 2026-10-22) names
+    manifests that do not exist here. Regenerate from the declared drop
+    before testing rather than fail on a stale generated file."""
+    with open(_SCHEMAS_PATH) as f:
+        sch = json.load(f)["interfaces"]
+    root = os.path.abspath(os.path.join(HERE, "..", ".."))
+    stale = any(not os.path.exists(os.path.join(root, e.get("manifest", "")))
+                for e in sch.values() if e.get("manifest"))
+    if stale:
+        import subprocess
+        subprocess.run([sys.executable, os.path.join(HERE, "..", "txn", "schema_gen.py")],
+                       cwd=root, capture_output=True, text=True)
+        with open(_SCHEMAS_PATH) as f:
+            sch = json.load(f)["interfaces"]
+    return sch
+
+
+SCHEMAS = _load_schemas()
 
 
 def gen(iface, catalog_override=None):
