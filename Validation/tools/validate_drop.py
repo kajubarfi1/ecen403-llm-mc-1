@@ -66,6 +66,53 @@ def sh(cmd, log=None, check=True, timeout=None):
     return r.returncode, out
 
 
+def formal_replays(head, reports_dir=None):
+    """[(path, {trace, stopat})] for every (path, abstraction set) that has a
+    JasperGold report on some earlier design and none that applies to the
+    design under judgement. The last report's options are the recipe."""
+    import glob as _glob
+    sys.path.insert(0, os.path.join(ROOT, "Validation", "findings"))
+    sys.path.insert(0, os.path.join(ROOT, "Validation", "structural"))
+    import emit_findings as EF
+    import rtl_drop as RD
+    rdir = reports_dir or os.path.join(ROOT, "Validation", "reports", "formal")
+    try:
+        cur_design = RD.design_id()
+    except Exception:
+        cur_design = None
+
+    def block_design(blocks):
+        try:
+            return RD.design_id(blocks)
+        except Exception:
+            return None
+    groups = {}
+    for rp in sorted(_glob.glob(os.path.join(rdir, "jg_*.json")), key=os.path.getmtime):
+        try:
+            with open(rp) as f:
+                rep = json.load(f)
+        except ValueError:
+            continue
+        path = rep.get("path")
+        if not path:
+            continue
+        abs_ = rep.get("abstractions", [])
+        key = tuple(sorted(f"{k}={a[k]}" for a in abs_ for k in ("stopat", "assume", "sva_param") if a.get(k)))
+        g = groups.setdefault((path, key), {"applies": False, "trace": 200})
+        g["applies"] |= EF.formal_report_applies(rep, head, cur_design, block_design)
+        g["trace"] = int(rep.get("max_trace_length") or g["trace"])
+    out = []
+    for (path, key), g in sorted(groups.items()):
+        if g["applies"]:
+            continue
+        opts = {"trace": g["trace"], "stopat": [], "assume": [], "sva_param": []}
+        for item in key:
+            k, _, v = item.partition("=")
+            opts[k].append(v)
+        out.append((path, opts))
+    return out
+
+
 def banner(n, title):
     print(f"\n[{n}] {title}")
     print("    " + "-" * 68)
@@ -143,6 +190,10 @@ def main() -> int:
                          "provides, report the rest as blocked, never substitute")
     ap.add_argument("--no-model-regen", action="store_true",
                     help="stop on a stale model instead of regenerating it")
+    ap.add_argument("--skip-formal", action="store_true",
+                    help="do not re-prove formal paths whose proofs predate this design")
+    ap.add_argument("--formal-time", default="20m",
+                    help="JasperGold prove time limit per re-proved path (default 20m)")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -516,6 +567,37 @@ def main() -> int:
                        "foreign_spec_blocks": foreign,
                        "paths_run": list(paths), "paths_blocked": {},
                        "note": "Complete run: every runnable path simulated on this drop."}
+
+    # 4b. formal ---------------------------------------------------------------
+    # A proof is about a design. A path that has ever been proved and has no
+    # JasperGold report that applies to THIS design (same drop, same design
+    # id, or same blocks) is re-proved here with the options its last report
+    # used, so a design change never leaves `awaiting_formal` findings for a
+    # person to remember (two on 4bf921ce1833, Frontend handoff 2026-10-15).
+    sim_failed = any(v != "PASS" for v in verdicts.values()) if not args.skip_sim else False
+    if not args.skip_formal and not args.skip_sim and not nothing_runs and not args.partial and sim_failed:
+        banner("4b", "formal: deferred")
+        print("    this drop fails simulation; proofs wait for a drop that passes it (an hour of "
+              "JasperGold per failing loop round proves nothing the next round keeps: 2026-10-21)")
+    if not args.skip_formal and not args.skip_sim and not nothing_runs and not args.partial and not sim_failed:
+        banner("4b", "formal: re-prove paths whose proofs predate this design")
+        todo = formal_replays(head)
+        if not todo:
+            print("    every formally proved path has a report for this design")
+        for path, opts in todo:
+            import shlex
+            # no trace cap on a replay: a cap an engine can reach ends the
+            # proof early (run_formal.py --trace); the time limit governs
+            cmd = (f"python3 Validation/tools/run_formal.py --path {path} --time {args.formal_time}"
+                   + "".join(f" --stopat {shlex.quote(sg)}" for sg in opts["stopat"])
+                   + "".join(f" --assume {shlex.quote(e)}" for e in opts["assume"])
+                   + "".join(f" --sva-param {shlex.quote(kv)}" for kv in opts["sva_param"]))
+            abs_note = ", ".join(opts["stopat"] + opts["assume"] + opts["sva_param"])
+            print(f"    {path}{' (abstraction: ' + abs_note + ')' if abs_note else ''}: "
+                  f"JasperGold, up to {args.formal_time} ...")
+            rc, out = sh(cmd, log, check=False, timeout=7200)
+            line = next((l.strip() for l in out.splitlines() if l.strip().startswith("assertions:")), None)
+            print("      " + (line or f"did not complete (rc={rc}); see the log") )
 
     # 5. rollup ----------------------------------------------------------------
     if not args.skip_rollup and not args.skip_sim and not nothing_runs:

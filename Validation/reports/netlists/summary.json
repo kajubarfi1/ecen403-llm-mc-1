@@ -1,21 +1,21 @@
 {
   "$schema": "validation-netlists/1",
-  "generated_utc": "2026-10-15T16:34:26.336674+00:00",
+  "generated_utc": "2026-10-20T21:58:24.979788+00:00",
   "netlists": "backend/outputs/NETLISTS.json",
   "netlists_built_from": {
-    "drop_id": "4b86c7cd3705",
-    "design_equivalent_drop": "a7cd3cb93546"
+    "drop_id": "efece348d04e",
+    "design_equivalent_drop": null
   },
   "judged_against": {
-    "drop_id": "dab971c2aab9",
-    "design_id": "3973ce99af71"
+    "drop_id": "efece348d04e",
+    "design_id": "766dc69c37e9"
   },
   "path_rule": "every runnable path whose harness closure contains the block",
   "blocks": {
     "addr_decoder": {
       "netlist": "backend/outputs/addr_decoder/6_final.v",
       "verdict": "PASS",
-      "stale_netlist": true,
+      "stale_netlist": false,
       "paths": [
         {
           "path": "path_01_write_cmd",
@@ -31,9 +31,10 @@
         },
         {
           "path": "path_03_read_return",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
+          "verdict": "RTL-FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=0/19  value=19",
+          "fired": {},
+          "attribution": "the RTL-only run of this path fails on the same stage (data_path); not the netlist's"
         },
         {
           "path": "path_04_scheduler_bank_loop",
@@ -67,9 +68,10 @@
         },
         {
           "path": "path_18_full_write",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
+          "verdict": "RTL-FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=24/36  value=12",
+          "fired": {},
+          "attribution": "the RTL-only run of this path fails on the same stage (data_path); not the netlist's"
         },
         {
           "path": "path_19_row_conflict",
@@ -87,7 +89,7 @@
       "backend": {
         "fmax_mhz": null,
         "wns_ns": null,
-        "sta": "N/A (no timing paths)",
+        "sta": "N/A",
         "drc_violations": 0,
         "lvs": "PASS"
       }
@@ -95,7 +97,7 @@
     "bank_tracker": {
       "netlist": "backend/outputs/bank_tracker/6_final.v",
       "verdict": "PASS",
-      "stale_netlist": true,
+      "stale_netlist": false,
       "paths": [
         {
           "path": "path_01_write_cmd",
@@ -111,9 +113,10 @@
         },
         {
           "path": "path_03_read_return",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
+          "verdict": "RTL-FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=0/19  value=19",
+          "fired": {},
+          "attribution": "the RTL-only run of this path fails on the same stage (data_path); not the netlist's"
         },
         {
           "path": "path_04_scheduler_bank_loop",
@@ -147,9 +150,10 @@
         },
         {
           "path": "path_18_full_write",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
+          "verdict": "RTL-FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=24/36  value=12",
+          "fired": {},
+          "attribution": "the RTL-only run of this path fails on the same stage (data_path); not the netlist's"
         },
         {
           "path": "path_19_row_conflict",
@@ -165,8 +169,8 @@
         }
       ],
       "backend": {
-        "fmax_mhz": 214.31,
-        "wns_ns": 0.333851,
+        "fmax_mhz": 221.67,
+        "wns_ns": 0.488843,
         "sta": "PASS",
         "drc_violations": 0,
         "lvs": "PASS"
@@ -175,7 +179,7 @@
     "calibration": {
       "netlist": "backend/outputs/calibration/6_final.v",
       "verdict": "PASS",
-      "stale_netlist": true,
+      "stale_netlist": false,
       "paths": [
         {
           "path": "path_08_init_to_cal",
@@ -207,7 +211,7 @@
     "cmd_gen": {
       "netlist": "backend/outputs/cmd_gen/6_final.v",
       "verdict": "PASS",
-      "stale_netlist": true,
+      "stale_netlist": false,
       "paths": [
         {
           "path": "path_01_write_cmd",
@@ -223,9 +227,10 @@
         },
         {
           "path": "path_03_read_return",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
+          "verdict": "RTL-FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=0/19  value=19",
+          "fired": {},
+          "attribution": "the RTL-only run of this path fails on the same stage (data_path); not the netlist's"
         },
         {
           "path": "path_04_scheduler_bank_loop",
@@ -259,9 +264,10 @@
         },
         {
           "path": "path_18_full_write",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
+          "verdict": "RTL-FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=24/36  value=12",
+          "fired": {},
+          "attribution": "the RTL-only run of this path fails on the same stage (data_path); not the netlist's"
         },
         {
           "path": "path_19_row_conflict",
@@ -287,7 +293,7 @@
     "cmd_queue": {
       "netlist": "backend/outputs/cmd_queue/6_final.v",
       "verdict": "PASS",
-      "stale_netlist": true,
+      "stale_netlist": false,
       "paths": [
         {
           "path": "path_01_write_cmd",
@@ -303,9 +309,10 @@
         },
         {
           "path": "path_03_read_return",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
+          "verdict": "RTL-FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=0/19  value=19",
+          "fired": {},
+          "attribution": "the RTL-only run of this path fails on the same stage (data_path); not the netlist's"
         },
         {
           "path": "path_04_scheduler_bank_loop",
@@ -339,9 +346,10 @@
         },
         {
           "path": "path_18_full_write",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
+          "verdict": "RTL-FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=24/36  value=12",
+          "fired": {},
+          "attribution": "the RTL-only run of this path fails on the same stage (data_path); not the netlist's"
         },
         {
           "path": "path_19_row_conflict",
@@ -367,7 +375,7 @@
     "config_regs": {
       "netlist": "backend/outputs/config_regs/6_final.v",
       "verdict": "PASS",
-      "stale_netlist": true,
+      "stale_netlist": false,
       "paths": [
         {
           "path": "path_01_write_cmd",
@@ -383,9 +391,10 @@
         },
         {
           "path": "path_03_read_return",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
+          "verdict": "RTL-FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=0/19  value=19",
+          "fired": {},
+          "attribution": "the RTL-only run of this path fails on the same stage (data_path); not the netlist's"
         },
         {
           "path": "path_04_scheduler_bank_loop",
@@ -449,9 +458,10 @@
         },
         {
           "path": "path_18_full_write",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
+          "verdict": "RTL-FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=24/36  value=12",
+          "fired": {},
+          "attribution": "the RTL-only run of this path fails on the same stage (data_path); not the netlist's"
         },
         {
           "path": "path_19_row_conflict",
@@ -482,8 +492,8 @@
     },
     "data_path": {
       "netlist": "backend/outputs/data_path/6_final.v",
-      "verdict": "PASS",
-      "stale_netlist": true,
+      "verdict": "FAIL",
+      "stale_netlist": false,
       "paths": [
         {
           "path": "path_01_write_cmd",
@@ -499,8 +509,8 @@
         },
         {
           "path": "path_03_read_return",
-          "verdict": "PASS",
-          "first_failure": null,
+          "verdict": "FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=0/19  value=19",
           "fired": {}
         },
         {
@@ -535,8 +545,8 @@
         },
         {
           "path": "path_18_full_write",
-          "verdict": "PASS",
-          "first_failure": null,
+          "verdict": "FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=24/36  value=12",
           "fired": {}
         },
         {
@@ -563,7 +573,7 @@
     "init_fsm": {
       "netlist": "backend/outputs/init_fsm/6_final.v",
       "verdict": "PASS",
-      "stale_netlist": true,
+      "stale_netlist": false,
       "paths": [
         {
           "path": "path_08_init_to_cal",
@@ -604,10 +614,10 @@
         "lvs": "PASS"
       }
     },
-    "refresh_ctrl": {
-      "netlist": "backend/outputs/refresh_ctrl/6_final.v",
+    "scheduler": {
+      "netlist": "backend/outputs/scheduler/6_final.v",
       "verdict": "PASS",
-      "stale_netlist": true,
+      "stale_netlist": false,
       "paths": [
         {
           "path": "path_01_write_cmd",
@@ -623,9 +633,180 @@
         },
         {
           "path": "path_03_read_return",
+          "verdict": "RTL-FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=0/19  value=19",
+          "fired": {},
+          "attribution": "the RTL-only run of this path fails on the same stage (data_path); not the netlist's"
+        },
+        {
+          "path": "path_04_scheduler_bank_loop",
           "verdict": "PASS",
           "first_failure": null,
           "fired": {}
+        },
+        {
+          "path": "path_05_scheduler_refresh_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_07_backpressure",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_12_csr_timing_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_13_csr_refresh_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_18_full_write",
+          "verdict": "RTL-FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=24/36  value=12",
+          "fired": {},
+          "attribution": "the RTL-only run of this path fails on the same stage (data_path); not the netlist's"
+        },
+        {
+          "path": "path_19_row_conflict",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_20_refresh_preempt",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        }
+      ],
+      "backend": {
+        "fmax_mhz": 159.16,
+        "wns_ns": -1.28291,
+        "sta": "FAIL",
+        "drc_violations": 0,
+        "lvs": "PASS"
+      }
+    },
+    "wb_port": {
+      "netlist": "backend/outputs/wb_port/6_final.v",
+      "verdict": "PASS",
+      "stale_netlist": false,
+      "paths": [
+        {
+          "path": "path_01_write_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_02_read_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_03_read_return",
+          "verdict": "RTL-FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=0/19  value=19",
+          "fired": {},
+          "attribution": "the RTL-only run of this path fails on the same stage (data_path); not the netlist's"
+        },
+        {
+          "path": "path_04_scheduler_bank_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_05_scheduler_refresh_loop",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_07_backpressure",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_12_csr_timing_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_13_csr_refresh_to_scheduling",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_18_full_write",
+          "verdict": "RTL-FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=24/36  value=12",
+          "fired": {},
+          "attribution": "the RTL-only run of this path fails on the same stage (data_path); not the netlist's"
+        },
+        {
+          "path": "path_19_row_conflict",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_20_refresh_preempt",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_21_wb_port_standalone",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        }
+      ],
+      "backend": {
+        "fmax_mhz": 248.97,
+        "wns_ns": 0.983423,
+        "sta": "PASS",
+        "drc_violations": 0,
+        "lvs": "PASS"
+      }
+    },
+    "refresh_ctrl": {
+      "netlist": "backend/outputs/refresh_ctrl/6_final.v",
+      "verdict": "PASS",
+      "stale_netlist": false,
+      "paths": [
+        {
+          "path": "path_01_write_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_02_read_cmd",
+          "verdict": "PASS",
+          "first_failure": null,
+          "fired": {}
+        },
+        {
+          "path": "path_03_read_return",
+          "verdict": "RTL-FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=0/19  value=19",
+          "fired": {},
+          "attribution": "the RTL-only run of this path fails on the same stage (data_path); not the netlist's"
         },
         {
           "path": "path_04_scheduler_bank_loop",
@@ -671,9 +852,10 @@
         },
         {
           "path": "path_18_full_write",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
+          "verdict": "RTL-FAIL",
+          "first_failure": "data_path: scope=data_path  strategy=exact  status=fail  matched=24/36  value=12",
+          "fired": {},
+          "attribution": "the RTL-only run of this path fails on the same stage (data_path); not the netlist's"
         },
         {
           "path": "path_19_row_conflict",
@@ -689,179 +871,16 @@
         }
       ],
       "backend": {
-        "fmax_mhz": 265.39,
-        "wns_ns": 1.23194,
-        "sta": "PASS",
-        "drc_violations": 0,
-        "lvs": "PASS"
-      }
-    },
-    "scheduler": {
-      "netlist": "backend/outputs/scheduler/6_final.v",
-      "verdict": "FAIL",
-      "stale_netlist": true,
-      "paths": [
-        {
-          "path": "path_01_write_cmd",
-          "verdict": "FAIL",
-          "first_failure": "cmd_queue+scheduler: scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=23",
-          "fired": {}
-        },
-        {
-          "path": "path_02_read_cmd",
-          "verdict": "FAIL",
-          "first_failure": "cmd_queue+scheduler: scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=38",
-          "fired": {}
-        },
-        {
-          "path": "path_03_read_return",
-          "verdict": "FAIL",
-          "first_failure": "cmd_gen (support): SVA fired: a_PROTO_002 x38, a_TIMING_004 x38, a_TIMING_011 x1",
-          "fired": {}
-        },
-        {
-          "path": "path_04_scheduler_bank_loop",
-          "verdict": "FAIL",
-          "first_failure": "cmd_gen (support): SVA fired: a_PROTO_002 x23, a_TIMING_004 x23, a_TIMING_005 x5, a_TIMING_011 x1",
-          "fired": {}
-        },
-        {
-          "path": "path_05_scheduler_refresh_loop",
-          "verdict": "FAIL",
-          "first_failure": "scheduler: scope=scheduler  strategy=invariant  status=fail  violations=1",
-          "fired": {}
-        },
-        {
-          "path": "path_07_backpressure",
-          "verdict": "FAIL",
-          "first_failure": "cmd_queue+scheduler: scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=55",
-          "fired": {}
-        },
-        {
-          "path": "path_12_csr_timing_to_scheduling",
-          "verdict": "FAIL",
-          "first_failure": "cmd_gen (support): SVA fired: a_TIMING_011 x4",
-          "fired": {}
-        },
-        {
-          "path": "path_13_csr_refresh_to_scheduling",
-          "verdict": "FAIL",
-          "first_failure": "cmd_gen (support): SVA fired: a_TIMING_011 x4",
-          "fired": {}
-        },
-        {
-          "path": "path_18_full_write",
-          "verdict": "FAIL",
-          "first_failure": "cmd_queue+scheduler: scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=35",
-          "fired": {}
-        },
-        {
-          "path": "path_19_row_conflict",
-          "verdict": "FAIL",
-          "first_failure": "cmd_gen (support): SVA fired: a_PROTO_002 x23, a_TIMING_004 x23, a_TIMING_005 x5, a_TIMING_011 x1",
-          "fired": {}
-        },
-        {
-          "path": "path_20_refresh_preempt",
-          "verdict": "FAIL",
-          "first_failure": "cmd_queue+scheduler: scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=964",
-          "fired": {}
-        }
-      ],
-      "backend": {
-        "fmax_mhz": 169.06,
-        "wns_ns": -0.914878,
-        "sta": "FAIL",
-        "drc_violations": 0,
-        "lvs": "PASS"
-      }
-    },
-    "wb_port": {
-      "netlist": "backend/outputs/wb_port/6_final.v",
-      "verdict": "PASS",
-      "stale_netlist": true,
-      "paths": [
-        {
-          "path": "path_01_write_cmd",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
-        },
-        {
-          "path": "path_02_read_cmd",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
-        },
-        {
-          "path": "path_03_read_return",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
-        },
-        {
-          "path": "path_04_scheduler_bank_loop",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
-        },
-        {
-          "path": "path_05_scheduler_refresh_loop",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
-        },
-        {
-          "path": "path_07_backpressure",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
-        },
-        {
-          "path": "path_12_csr_timing_to_scheduling",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
-        },
-        {
-          "path": "path_13_csr_refresh_to_scheduling",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
-        },
-        {
-          "path": "path_18_full_write",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
-        },
-        {
-          "path": "path_19_row_conflict",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
-        },
-        {
-          "path": "path_20_refresh_preempt",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
-        },
-        {
-          "path": "path_21_wb_port_standalone",
-          "verdict": "PASS",
-          "first_failure": null,
-          "fired": {}
-        }
-      ],
-      "backend": {
-        "fmax_mhz": 248.97,
-        "wns_ns": 0.983423,
+        "fmax_mhz": 205.82,
+        "wns_ns": 0.141479,
         "sta": "PASS",
         "drc_violations": 0,
         "lvs": "PASS"
       }
     }
   },
-  "provenance": "STALE: built from another drop and no design id matches"
+  "provenance": "same drop",
+  "block_provenance": {
+    "refresh_ctrl": "current"
+  }
 }

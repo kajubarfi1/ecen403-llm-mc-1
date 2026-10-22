@@ -4,7 +4,7 @@
 //
 // Interface : refresh_level   (The refresh controller's LEVELS: required, urgent, pending count, starve flag. refresh_req carries only the rising edge of ref_required, so a pending count that climbs while the request is outstanding was never observed (M06/M17: the 4-bit count reached 11 against max_postpone 8 on the CSR status level and no checker saw it, 2026-10-09). This stream is the same ports, emitted on every change, so REF_001 is judged on the level the design actually drives.)
 // Block     : refresh_ctrl
-// Manifest  : runs/20261015-123308-llmmc_microarchitectures/drop/PHASE2RTL/refresh_ctrl_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

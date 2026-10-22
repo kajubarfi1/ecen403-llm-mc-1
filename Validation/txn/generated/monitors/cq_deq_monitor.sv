@@ -4,7 +4,7 @@
 //
 // Interface : cq_deq   (Entries retired from the command queue on a scheduler grant)
 // Block     : cmd_queue
-// Manifest  : runs/20261015-123308-llmmc_microarchitectures/drop/PHASE3RTL/cmd_queue_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

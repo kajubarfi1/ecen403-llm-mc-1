@@ -346,7 +346,18 @@ def stamp(blocks):
     return out
 
 
+def block_design_ids(blocks=None):
+    """{block: design id of that block alone}: what a per-block artefact (a
+    gate-level netlist) is evidence about. A netlist built from a drop in
+    which this block's RTL and manifest were the same is current for this
+    block whatever the other blocks did (2026-10-15)."""
+    return {b: design_id([b]) for b in sorted(blocks or all_blocks())}
+
+
 def main() -> int:
+    if "--block-design-ids" in sys.argv:
+        print(json.dumps(block_design_ids()))
+        return 0
     blocks = all_blocks()
     st = stamp(blocks)
     print(f"  drop roots : {', '.join(st['roots']) or 'NONE PRESENT'}")

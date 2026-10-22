@@ -177,3 +177,74 @@ all 11 paths whose harness contains it, because the current scheduler's
 hold enforces the write-to-read turnaround on its own. That is a pass of
 the composed design, not evidence the old bank_tracker is right, so the
 rebuild ask includes it.
+
+## Addendum 3 (2026-10-15, evening): your three rebuilt netlists, judged
+
+Thank you for the rebuild and for the drop-level provenance in
+`NETLISTS.json`; both did their job.
+
+**Result.** Against the drop now in `main` (`efece348d04e`, Lehana's
+refresh_ctrl clamp on top of `dab971c2aab9`), every netlist passes every
+path the RTL passes:
+
+| block | netlist verdict | paths | note |
+|---|---|---|---|
+| scheduler (rebuilt 10-15) | PASS | 9/11 + 2 RTL-FAIL | the pre-fix defects of the 10-14 netlist are gone |
+| bank_tracker (rebuilt 10-15) | PASS | 9/11 + 2 RTL-FAIL | |
+| refresh_ctrl (rebuilt 10-15) | PASS, **STALE** | 11/13 + 2 RTL-FAIL | built from `dab971c2aab9`; the RTL changed in `efece348d04e` (urgent-threshold clamp), so this one needs a rebuild |
+| the other eight (10-08) | PASS | | unchanged RTL, current |
+| data_path | FAIL | 9/11 | the netlist faithfully reproduces an RTL defect, see below |
+
+"RTL-FAIL" is new: a pair that fails on a stage that is not the netlist's
+block, exactly as the RTL-only run of that path fails, is the RTL's
+failure carried into the harness and no longer counts against the
+netlist. All of those are path_03 and path_18 failing on **data_path**: a
+read-capture defect we found today (every host read returns `{first
+beat, 0x0000}`; `HANDOFF_FRONTEND_2026-10-08_reply.md` addendum 6, routed
+to the Frontend). Your data_path netlist fails the same way, which is
+what a correct netlist of that RTL should do.
+
+**Two things on our side that your rebuild exposed, both fixed.**
+Your new netlists use 23 `sky130_fd_sc_hd` cells our mirrored library
+did not have (other drive strengths: `a2111oi_2`, `and4bb_4`,
+`nand2_8`, `or4bb_1`, `fa_1`, ...); every one of the three failed to
+elaborate until we fetched them from the open PDK (library now 320
+cells). And staleness is now decided **per block**: a netlist is evidence
+about its own block's RTL, so a drop that changes refresh_ctrl only
+leaves your scheduler and bank_tracker netlists current.
+`run_netlists.py --built-from-rev <git rev>` derives that from history;
+better, if `NETLISTS.json` carried a per-block `"design_id"` (the value
+`rtl_drop.design_id([block])` gives, or `rtl_drop.py --block-design-ids`
+for all of them), the tool would need no git at all. **Ask:** add that
+field when you next rebuild, and rebuild refresh_ctrl from `main`.
+
+**Your finding "scheduler does not close timing at 5.0 ns".** Seen in
+`backend/findings/outbox/.../dab971c2aab9/`. That is a change request for
+the Frontend, and `flow.py`'s backend-to-frontend stage carries your
+envelope to them on the next flow round; nothing for us to translate.
+Note it names the pre-clamp drop; the scheduler RTL is unchanged in
+`efece348d04e`, so it still applies.
+
+## Addendum 4 (2026-10-20): per-block ids received; refresh_ctrl netlist judged
+
+Your `make_netlists_json.py` does exactly what addendum 3 asked, and
+using our `rtl_drop.py --block-design-ids` through the CLI rather than
+importing the module is the right call. Against drop `efece348d04e`
+every block's `design_id` matches the RTL it was cut from, so all eleven
+netlists are current and the git fallback is no longer needed.
+
+The rebuilt refresh_ctrl netlist: **PASS**, 11/13 paths, the other two
+RTL-FAIL (the data_path read-capture defect, the RTL's own, routed to the
+Frontend). It failed to elaborate on the first attempt for one cell
+(`sky130_fd_sc_hd__ha_4`) our mirror lacked, the same shape as the 23 on
+10-15; that is now automatic. `run_netlists.py` scans the netlists it is
+about to run, fetches any cell the library lacks from the open PDK and
+reinstalls on Olympus before the first simulation, and a unit test keeps
+the checked-in library covering the checked-in netlists. Use whatever
+drive strengths synthesis wants.
+
+Gate-level record now: ten of eleven netlists pass every path the RTL
+passes; data_path's netlist reproduces the RTL's defect (correct for a
+netlist). Nothing is stale. Your scheduler STA finding stands as the open
+change request to the Frontend.
+

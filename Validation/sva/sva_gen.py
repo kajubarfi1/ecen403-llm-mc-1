@@ -230,6 +230,10 @@ def gen_max_interval(rule, spec, enc, sig):
   // Initialised at declaration as well as on reset: a testbench whose reset
   // is X or still high for the first cycles must not see X here and fail
   // (an X in the checked expression is a failure, not a don't-care).
+  // The bound is a module parameter so a formal run can scale it together
+  // with the configuration it assumes (a bounded engine cannot cross
+  // {bound} cycles; tools/run_formal.py --assume/--sva-param, 2026-10-20).
+  // Simulation and the default bind use the spec's value.
   logic [31:0] {lo}_since = '0;
   logic        {lo}_armed = 1'b0;
   always @(posedge clk or negedge rst_n) begin   // plain always: initialiser + always_ff would be two drivers
@@ -246,13 +250,13 @@ def gen_max_interval(rule, spec, enc, sig):
 
   property p_{rid};
     @(posedge clk) disable iff (!rst_n)
-    !({lo}_armed && {lo}_since == {bound + 1});
+    !({lo}_armed && {lo}_since == {rid}_BOUND + 1);
   endproperty
   a_{rid}: assert property (p_{rid})
     else $error("[{rid}] {param} violation: {rule['requirement']}");
   // The interesting event: a {cmd_name} that was postponed past {param}.
   c_{rid}: cover property (@(posedge clk) disable iff (!rst_n)
-    {cmd} && {lo}_armed && {lo}_since > {n});
+    {cmd} && {lo}_armed && {lo}_since > {rid}_INTERVAL);
 
 """
 
@@ -497,6 +501,13 @@ def generate(spec, rules, catalog, schemas):
         addr_port += f",\n    input logic {ev}"
     addr_param = (f",\n    parameter int ADDR_W = {fields[addr_f]['width']}"
                   if addr_f else "")
+    # one (bound, interval) parameter pair per maximum-interval rule, at the
+    # spec's values; a formal run may override them with --sva-param
+    interval_params = ""
+    for r in rules["max_interval_rules"]:
+        n_i, _ns, _per, _mult, bound_i = interval_bound(spec, r)
+        interval_params += (f",\n    parameter int {r['id']}_BOUND = {bound_i}"
+                            f",\n    parameter int {r['id']}_INTERVAL = {n_i}")
     clock_note = ("the controller clock period" if CLOCK_DOMAIN == "controller"
                   else "the DDR clock period (tCK): one command per tCK at the pins")
 
@@ -513,7 +524,7 @@ def generate(spec, rules, catalog, schemas):
 // consult NO signal of the design except the command stream itself.
 
 module {block}_sva{MODULE_SUFFIX} #(
-    parameter int BANK_W = {bank_w}{addr_param}
+    parameter int BANK_W = {bank_w}{addr_param}{interval_params}
 ) (
     input logic clk,
     input logic rst_n,

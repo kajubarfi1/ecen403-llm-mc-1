@@ -12,7 +12,9 @@
 
 module cmd_gen_sva #(
     parameter int BANK_W = 3,
-    parameter int ADDR_W = 15
+    parameter int ADDR_W = 15,
+    parameter int TIMING_012_BOUND = 14040,
+    parameter int TIMING_012_INTERVAL = 1560
 ) (
     input logic clk,
     input logic rst_n,
@@ -187,6 +189,10 @@ module cmd_gen_sva #(
   // Initialised at declaration as well as on reset: a testbench whose reset
   // is X or still high for the first cycles must not see X here and fail
   // (an X in the checked expression is a failure, not a don't-care).
+  // The bound is a module parameter so a formal run can scale it together
+  // with the configuration it assumes (a bounded engine cannot cross
+  // 14040 cycles; tools/run_formal.py --assume/--sva-param, 2026-10-20).
+  // Simulation and the default bind use the spec's value.
   logic [31:0] timing_012_since = '0;
   logic        timing_012_armed = 1'b0;
   always @(posedge clk or negedge rst_n) begin   // plain always: initialiser + always_ff would be two drivers
@@ -203,13 +209,13 @@ module cmd_gen_sva #(
 
   property p_TIMING_012;
     @(posedge clk) disable iff (!rst_n)
-    !(timing_012_armed && timing_012_since == 14041);
+    !(timing_012_armed && timing_012_since == TIMING_012_BOUND + 1);
   endproperty
   a_TIMING_012: assert property (p_TIMING_012)
     else $error("[TIMING_012] tREFI violation: No REFRESH issued within (max_postpone_count + 1) x tREFI of the previous REFRESH.");
   // The interesting event: a REF that was postponed past tREFI.
   c_TIMING_012: cover property (@(posedge clk) disable iff (!rst_n)
-    (ddr_cmd == 4'b0001) && timing_012_armed && timing_012_since > 1560);
+    (ddr_cmd == 4'b0001) && timing_012_armed && timing_012_since > TIMING_012_INTERVAL);
 
   // ---- observed bank state, for the protocol rules below ----------
   // Reconstructed from the command stream. The design's own bank_open_row is

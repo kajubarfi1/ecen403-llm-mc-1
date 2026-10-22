@@ -1,0 +1,138 @@
+{
+  "$schema": "validation-formal/1",
+  "generated_utc": "2026-10-20T23:09:39.921566+00:00",
+  "tool": "JasperGold (Olympus)",
+  "drop": "a82f2070de32",
+  "design_id": "66a76881ed9e",
+  "blocks_design_id": "ea1b53a9b19e",
+  "path": "path_08_init_to_cal",
+  "blocks": [
+    "calibration",
+    "init_fsm"
+  ],
+  "top": "Validation/formal/chain_formal.sv",
+  "assertions_files": [
+    "Validation/sva/generated/calibration_order_sva.sv",
+    "Validation/sva/generated/calibration_order_sva_bind.sv",
+    "Validation/sva/generated/init_fsm_sva.sv",
+    "Validation/sva/generated/init_fsm_sva_bind.sv"
+  ],
+  "abstractions": [
+    {
+      "stopat": "u_init_fsm.wait_cnt",
+      "effect": "signal driven free; proofs remain sound, cex may be spurious"
+    }
+  ],
+  "prove_time_limit": "20m",
+  "max_trace_length": null,
+  "bounded_bar_cycles": 28080,
+  "summary": {
+    "assertions": 7,
+    "proven": 6,
+    "cex": 1,
+    "undetermined": 0,
+    "bounded_proven": 0,
+    "covers": 5,
+    "covered": 5
+  },
+  "results": [
+    {
+      "property": "chain_formal.u_calibration.u_calibration_order_sva.a_CAL_001",
+      "short": "a_CAL_001",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "0.001 s"
+    },
+    {
+      "property": "chain_formal.u_calibration.u_calibration_order_sva.a_CAL_002",
+      "short": "a_CAL_002",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "0.001 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_002",
+      "short": "a_INIT_002",
+      "status": "proven",
+      "engine": "N",
+      "bound": "Infinite",
+      "time": "1.534 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_002_init_done",
+      "short": "a_INIT_002_init_done",
+      "status": "cex",
+      "engine": "Ht",
+      "bound": "11",
+      "time": "0.059 s",
+      "note": "cex found under abstraction (u_init_fsm.wait_cnt); may be spurious -- the timing this property depends on is graded by simulation"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_001",
+      "short": "a_INIT_001",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "1.249 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_001_then",
+      "short": "a_INIT_001_then",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "1.249 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_003_init_done",
+      "short": "a_INIT_003_init_done",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "0.178 s"
+    },
+    {
+      "property": "chain_formal.u_calibration.u_calibration_order_sva.c_CAL_001",
+      "short": "c_CAL_001",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "12",
+      "time": "0.113 s"
+    },
+    {
+      "property": "chain_formal.u_calibration.u_calibration_order_sva.c_CAL_002",
+      "short": "c_CAL_002",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "13",
+      "time": "0.204 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_002",
+      "short": "c_INIT_002",
+      "status": "covered",
+      "engine": "L",
+      "bound": "131 - 136",
+      "time": "0.695 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_002_init_done",
+      "short": "c_INIT_002_init_done",
+      "status": "covered",
+      "engine": "B",
+      "bound": "137",
+      "time": "0.524 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_001",
+      "short": "c_INIT_001",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "9",
+      "time": "0.017 s"
+    }
+  ],
+  "raw_report": "Validation/reports/formal/jg_path_08_init_to_cal_a82f2070de32_abs_report.txt"
+}

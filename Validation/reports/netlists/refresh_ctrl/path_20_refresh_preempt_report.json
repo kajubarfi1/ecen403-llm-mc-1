@@ -3,7 +3,7 @@
   "path": "path_20_refresh_preempt",
   "strategy": "invariant",
   "verdict": "pass",
-  "timestamp": "2026-10-15T11:20:46.045117",
+  "timestamp": "2026-10-20T16:59:20.835870",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,9 +21,9 @@
   "window_cycles": 6000,
   "coverage_collected": true,
   "rtl_drop": {
-    "git_head": "dab971c2aab9",
-    "drop_id": "dab971c2aab9",
-    "design_id": "3973ce99af71",
+    "git_head": "efece348d04e",
+    "drop_id": "efece348d04e",
+    "design_id": "766dc69c37e9",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -35,7 +35,7 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "cb2dc77",
+    "validated_at": "0c57acd",
     "frontend_commits": {
       "addr_decoder": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
       "bank_tracker": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
@@ -43,7 +43,7 @@
       "cmd_queue": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
       "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
       "data_path": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "refresh_ctrl": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "refresh_ctrl": "6f659675f03286f6d19f4946500c8ae93de09850",
       "scheduler": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
       "wb_port": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
     },
@@ -113,7 +113,8 @@
       "scope": "wb_port",
       "verdict": "pass",
       "summary": "scope=wb_port  strategy=exact  status=pass  matched=600/600  (600 output transaction(s) matched)",
-      "detail": []
+      "detail": [],
+      "rule_counts": {}
     },
     {
       "stage": "addr_decoder",
@@ -122,7 +123,8 @@
       "scope": "addr_decoder",
       "verdict": "pass",
       "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=600/600  (600 output transaction(s) matched)",
-      "detail": []
+      "detail": [],
+      "rule_counts": {}
     },
     {
       "stage": "cmd_queue+scheduler",
@@ -130,8 +132,9 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
       "scope": "cmd_queue_scheduler",
       "verdict": "pass",
-      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (10912 transactions, no rule broken)",
-      "detail": []
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (11069 transactions, no rule broken)",
+      "detail": [],
+      "rule_counts": {}
     },
     {
       "stage": "refresh_ctrl",
@@ -147,8 +150,9 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
       "scope": "cmd_gen",
       "verdict": "pass",
-      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=1812/1812  (1812 output transaction(s) matched)",
-      "detail": []
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=1840/1840  (1840 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
     },
     {
       "stage": "(path-level)",
@@ -156,7 +160,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_20_refresh_preempt_checker.py",
       "scope": "path_20_refresh_preempt",
       "verdict": "pass",
-      "summary": "scope=path_20_refresh_preempt  strategy=invariant  status=pass  (10912 transactions, no rule broken)",
+      "summary": "scope=path_20_refresh_preempt  strategy=invariant  status=pass  (11069 transactions, no rule broken)",
       "detail": []
     }
   ],

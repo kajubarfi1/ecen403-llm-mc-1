@@ -1,0 +1,274 @@
+{
+  "$schema": "validation-formal/1",
+  "generated_utc": "2026-10-20T23:03:23.895330+00:00",
+  "tool": "JasperGold (Olympus)",
+  "drop": "a82f2070de32",
+  "design_id": "66a76881ed9e",
+  "blocks_design_id": "f558d3fad076",
+  "path": "path_01_write_cmd",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "top": "Validation/formal/chain_formal.sv",
+  "assertions_files": [
+    "Validation/sva/generated/cmd_gen_sva.sv",
+    "Validation/sva/generated/cmd_gen_sva_bind.sv"
+  ],
+  "abstractions": [
+    {
+      "stopat": "u_config_regs.reg_refresh_config",
+      "effect": "signal driven free; proofs remain sound, cex may be spurious"
+    },
+    {
+      "stopat": "u_config_regs.reg_timing_3",
+      "effect": "signal driven free; proofs remain sound, cex may be spurious"
+    },
+    {
+      "assume": "u_config_regs.reg_refresh_config == 32'h00000111",
+      "effect": "constrains the free signal; a proof holds for the assumed configuration only"
+    },
+    {
+      "assume": "u_config_regs.reg_timing_3 == 32'h00020404",
+      "effect": "constrains the free signal; a proof holds for the assumed configuration only"
+    },
+    {
+      "sva_param": "TIMING_012_BOUND=258",
+      "effect": "assertion bound scaled to match the assumed configuration"
+    },
+    {
+      "sva_param": "TIMING_012_INTERVAL=129",
+      "effect": "assertion bound scaled to match the assumed configuration"
+    }
+  ],
+  "prove_time_limit": "20m",
+  "max_trace_length": null,
+  "bounded_bar_cycles": 516,
+  "summary": {
+    "assertions": 13,
+    "proven": 13,
+    "cex": 0,
+    "undetermined": 0,
+    "bounded_proven": 0,
+    "covers": 13,
+    "covered": 11
+  },
+  "results": [
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_001",
+      "short": "a_TIMING_001",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "39.417 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_002",
+      "short": "a_TIMING_002",
+      "status": "proven",
+      "engine": "AM",
+      "bound": "Infinite",
+      "time": "8.733 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_003",
+      "short": "a_TIMING_003",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "126.671 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004",
+      "short": "a_TIMING_004",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "117.361 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005",
+      "short": "a_TIMING_005",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "6.615 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_007",
+      "short": "a_TIMING_007",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "6.615 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_008",
+      "short": "a_TIMING_008",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "38.338 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_009",
+      "short": "a_TIMING_009",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "12.047 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011",
+      "short": "a_TIMING_011",
+      "status": "proven",
+      "engine": "N",
+      "bound": "Infinite",
+      "time": "0.195 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_006",
+      "short": "a_TIMING_006",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "19.505 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_012",
+      "short": "a_TIMING_012",
+      "status": "proven",
+      "engine": "D",
+      "bound": "Infinite",
+      "time": "1.029 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_001",
+      "short": "a_PROTO_001",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "414.998 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_002",
+      "short": "a_PROTO_002",
+      "status": "proven",
+      "engine": "M",
+      "bound": "Infinite",
+      "time": "1.459 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_001",
+      "short": "c_TIMING_001",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "7",
+      "time": "0.304 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_002",
+      "short": "c_TIMING_002",
+      "status": "covered",
+      "engine": "Bm",
+      "bound": "38",
+      "time": "267.155 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_003",
+      "short": "c_TIMING_003",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "11",
+      "time": "0.497 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_004",
+      "short": "c_TIMING_004",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "14",
+      "time": "5.489 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_005",
+      "short": "c_TIMING_005",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "6",
+      "time": "0.288 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_007",
+      "short": "c_TIMING_007",
+      "status": "covered",
+      "engine": "L",
+      "bound": "15 - 20",
+      "time": "4.299 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_008",
+      "short": "c_TIMING_008",
+      "status": "covered",
+      "engine": "Bm",
+      "bound": "21",
+      "time": "45.070 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_009",
+      "short": "c_TIMING_009",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "20",
+      "time": "31.754 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_011",
+      "short": "c_TIMING_011",
+      "status": "unreachable",
+      "engine": "N",
+      "bound": "Infinite",
+      "time": "0.000 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_006",
+      "short": "c_TIMING_006",
+      "status": "covered",
+      "engine": "Bm",
+      "bound": "5",
+      "time": "0.154 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_012",
+      "short": "c_TIMING_012",
+      "status": "unreachable",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "3.501 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_001",
+      "short": "c_PROTO_001",
+      "status": "covered",
+      "engine": "L",
+      "bound": "14 - 19",
+      "time": "3.911 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_002",
+      "short": "c_PROTO_002",
+      "status": "covered",
+      "engine": "Bm",
+      "bound": "5",
+      "time": "0.154 s"
+    }
+  ],
+  "raw_report": "Validation/reports/formal/jg_path_01_write_cmd_a82f2070de32_abs_report.txt"
+}

@@ -8,11 +8,11 @@ Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path
 Window  : 6000 cycles settle after driver
 Stages  : scheduler(invariant); refresh_ctrl(autonomous)
 
-Running: xrun ... -top chain_harness  (50 file(s))
+Running: xrun ... -top chain_harness  (53 file(s))
   log -> Validation/reports/netlists/wb_port/path_05_scheduler_refresh_loop_sim.log
-11139 transaction(s)
+11069 transaction(s)
     cfg_refresh.reset        1
-    cfg_refresh.update       2
+    cfg_refresh.update       1
     cfg_timing.reset         1
     cq_deq.dequeue           600
     cq_deq.reset             1
@@ -22,11 +22,10 @@ Running: xrun ... -top chain_harness  (50 file(s))
     csr.write                2
     csr_rsp.reset            1
     csr_rsp.write_ack        2
-    csr_sts.event            31
     csr_sts.reset            1
     csr_sts_level.reset      1
-    csr_sts_level.state      94
-    ddr_cmd.command          1846
+    csr_sts_level.state      44
+    ddr_cmd.command          1840
     ddr_cmd.reset            1
     ddr_rd_beat.reset        1
     ddr_wr_beat.beat         1200
@@ -36,30 +35,32 @@ Running: xrun ... -top chain_harness  (50 file(s))
     dp_rd_rsp.reset          1
     dp_wr.reset              1
     dp_wr.write              600
-    refresh_ack.ack          46
+    refresh_ack.ack          22
     refresh_ack.reset        1
-    refresh_req.request      2
+    refresh_level.reset      1
+    refresh_level.state      44
+    refresh_req.request      11
     refresh_req.reset        1
     req.request              600
     req.reset                1
-    sched_cmd.command        1846
+    sched_cmd.command        1840
     sched_cmd.reset          1
     sched_deq.grant          600
     sched_deq.reset          1
-    sched_in.command         1846
+    sched_in.command         1840
     sched_in.reset           1
     wb.reset                 1
     wb.write                 600
     wb_rsp.reset             1
-  time span: 0 .. 57113000
-wrote 11139 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/wb_port/path_05_scheduler_refresh_loop_observed.jsonl
+  time span: 0 .. 59043000
+wrote 11069 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/wb_port/path_05_scheduler_refresh_loop_observed.jsonl
 
 ==================================================================
   scheduler                    [invariant ]  PASS
-      scope=scheduler  strategy=invariant  status=pass  (11139 transactions, no rule broken)
+      scope=scheduler  strategy=invariant  status=pass  (11069 transactions, no rule broken)
   refresh_ctrl                 [autonomous]  SVA-OWNED
   (path-level)                 [invariant ]  PASS
-      scope=path_05_scheduler_refresh_loop  strategy=invariant  status=pass  (11139 transactions, no rule broken)
+      scope=path_05_scheduler_refresh_loop  strategy=invariant  status=pass  (11069 transactions, no rule broken)
 ==================================================================
 
   path verdict : PASS

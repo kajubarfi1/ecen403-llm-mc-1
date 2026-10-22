@@ -190,9 +190,6 @@ class TestDropId(TestResolver):
         self.assertIn("validated_at", st)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 
 class TestDesignIdentity(TestDropId):
     """The drop id is the same on every checkout (CRLF normalised) and the
@@ -215,3 +212,23 @@ class TestDesignIdentity(TestDropId):
         self.assertEqual(g1, g2, "but not a new design")
         self._blk("a", "// Generated: 2026-10-08 12:29:05\nmodule a;\n  wire y;\nendmodule\n", commit="bbbb")
         self.assertNotEqual(g2, RD.design_id(["a"]), "a changed line is a changed design")
+
+
+class TestBlockDesignIds(TestDropId):
+    """A per-block design id is what a per-block artefact (a netlist) is
+    evidence about: changing one block moves only that block's id
+    (2026-10-15, netlist provenance after the refresh_ctrl-only drop)."""
+
+    def test_only_the_changed_block_moves(self):
+        self._blk("a", "module a;\nendmodule\n")
+        self._blk("b", "module b;\nendmodule\n")
+        before = RD.block_design_ids(["a", "b"])
+        self.assertEqual(before["a"], RD.design_id(["a"]))
+        self._blk("b", "module b;\n  wire y;\nendmodule\n")
+        after = RD.block_design_ids(["a", "b"])
+        self.assertEqual(before["a"], after["a"])
+        self.assertNotEqual(before["b"], after["b"])
+
+
+if __name__ == "__main__":
+    unittest.main()

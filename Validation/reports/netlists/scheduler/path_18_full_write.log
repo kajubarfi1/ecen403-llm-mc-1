@@ -1,95 +1,100 @@
-  stimulus: random on wb_port
-random_seed1: 39 step(s) (19 drive, 19 idle covering 144 cycle(s)), targets []
+  stimulus: write_read on wb_port
+write_read_wb_port_seed1: 25 step(s) (24 drive, 0 idle covering 0 cycle(s)), targets ['VP_FAIL_018', 'VP_FAIL_019', 'VP_TIME_012']
   wrote Validation/sequences/generated/runs/netlist_scheduler/path_18_full_write/seq_driver.sv
 wrote Validation/sequences/generated/runs/netlist_scheduler/path_18_full_write/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
 
 Path    : path_18_full_write  [composed]
 Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
-Window  : 400 cycles settle after driver
+Window  : 2000 cycles settle after driver
 Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant); cmd_gen(exact); data_path(exact)
+    ssh connect attempt 1 failed (SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer); retrying in 9s
 
-Running: xrun ... -top chain_harness  (50 file(s))
+Running: xrun ... -top chain_harness  (53 file(s))
   log -> Validation/reports/netlists/scheduler/path_18_full_write_sim.log
-
-  EMBEDDED RTL ASSERTIONS FIRED (178 total) — the design's own checks disagree with its behavior:
-    illegal bin: cp_trc_spacing 35x
-    illegal bin: cp_trrd_spacing 35x
-    illegal bin: cp_tfaw_spacing 35x
-    a_TIMING_004             35x
-    a_PROTO_002              35x
-    illegal bin: cp_trfc_spacing 1x
-    a_TIMING_011             1x
-    a_TIMING_005             1x
-526 transaction(s)
+413 transaction(s)
     cfg_refresh.reset        1
     cfg_timing.reset         1
-    cq_deq.dequeue           19
+    cq_deq.dequeue           24
     cq_deq.reset             1
-    cq_enq.enqueue           19
+    cq_enq.enqueue           24
     cq_enq.reset             1
     csr.reset                1
     csr_rsp.reset            1
     csr_sts.reset            1
     csr_sts_level.reset      1
-    csr_sts_level.state      2
-    ddr_cmd.command          107
+    csr_sts_level.state      4
+    ddr_cmd.command          50
     ddr_cmd.reset            1
-    ddr_rd_beat.beat         18
+    ddr_rd_beat.beat         24
     ddr_rd_beat.reset        1
-    ddr_wr_beat.beat         18
+    ddr_wr_beat.beat         24
     ddr_wr_beat.reset        1
-    dp_cmd.read              9
+    dp_cmd.read              12
     dp_cmd.reset             1
-    dp_cmd.write             10
+    dp_cmd.write             12
     dp_rd_rsp.reset          1
-    dp_rd_rsp.response       9
+    dp_rd_rsp.response       12
     dp_wr.reset              1
-    dp_wr.write              10
+    dp_wr.write              12
     refresh_ack.ack          2
     refresh_ack.reset        1
-    refresh_req.request      1
+    refresh_level.reset      1
+    refresh_level.state      4
+    refresh_req.request      2
     refresh_req.reset        1
-    req.request              19
+    req.request              24
     req.reset                1
-    sched_cmd.command        107
+    sched_cmd.command        50
     sched_cmd.reset          1
-    sched_deq.grant          19
+    sched_deq.grant          24
     sched_deq.reset          1
-    sched_in.command         107
+    sched_in.command         50
     sched_in.reset           1
-    wb.read                  9
+    wb.read                  12
     wb.reset                 1
-    wb.write                 10
-    wb_rsp.read_data         9
+    wb.write                 12
+    wb_rsp.read_data         12
     wb_rsp.reset             1
-  time span: 0 .. 3539000
-wrote 526 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/scheduler/path_18_full_write_observed.jsonl
+  time span: 0 .. 7938000
+wrote 413 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/scheduler/path_18_full_write_observed.jsonl
 
 ==================================================================
   wb_port                      [exact     ]  PASS
-      scope=wb_port  strategy=exact  status=pass  matched=28/28  (28 output transaction(s) matched)
+      scope=wb_port  strategy=exact  status=pass  matched=36/36  (36 output transaction(s) matched)
   addr_decoder                 [exact     ]  PASS
-      scope=addr_decoder  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)
-  cmd_queue+scheduler          [invariant ]  FAIL
-      scope=cmd_queue_scheduler  strategy=invariant  status=fail  violations=35
-        PROTO_002 (double_activate): ACTIVATE to bank 7 row 29188 while row 29188 already active @ [sched_cmd.command aux=0x4 bank=0x7 col=0xa0 ro
-        PROTO_002 (double_activate): ACTIVATE to bank 7 row 29188 while row 29188 already active @ [sched_cmd.command aux=0x4 bank=0x7 col=0xa0 ro
-        PROTO_002 (double_activate): ACTIVATE to bank 4 row 6699 while row 6699 already active @ [sched_cmd.command aux=0x5 bank=0x4 col=0x1e0 row
-        PROTO_002 (double_activate): ACTIVATE to bank 4 row 6699 while row 6699 already active @ [sched_cmd.command aux=0x5 bank=0x4 col=0x1e0 row
-        PROTO_002 (double_activate): ACTIVATE to bank 7 row 1462 while row 1462 already active @ [sched_cmd.command aux=0x6 bank=0x7 col=0xd8 row=
-        PROTO_002 (double_activate): ACTIVATE to bank 7 row 1462 while row 1462 already active @ [sched_cmd.command aux=0x6 bank=0x7 col=0xd8 row=
-  cmd_gen                      [exact     ]  FAIL
-      scope=cmd_gen  strategy=exact  status=pass  matched=107/107  (107 output transaction(s) matched)  SVA fired: a_PROTO_002
-      a_PROTO_002 fired 35x (assertion bound to cmd_gen)
-      a_TIMING_004 fired 35x (assertion bound to cmd_gen)
-      a_TIMING_005 fired 1x (assertion bound to cmd_gen)
-      a_TIMING_011 fired 1x (assertion bound to cmd_gen)
+      scope=addr_decoder  strategy=exact  status=pass  matched=24/24  (24 output transaction(s) matched)
+  cmd_queue+scheduler          [invariant ]  PASS
+      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (413 transactions, no rule broken)
+  cmd_gen                      [exact     ]  PASS
+      scope=cmd_gen  strategy=exact  status=pass  matched=50/50  (50 output transaction(s) matched)
   data_path                    [exact     ]  FAIL
-      scope=data_path  strategy=exact  status=fail  matched=27/29  missing=2
-      scope=data_path  strategy=exact  status=fail  matched=27/29  missing=2
-        ddr_wr_beat[18] missing: predicted [ddr_wr_beat.beat data=0x2741 mask=0x3] but the design produced nothing
-        ddr_wr_beat[19] missing: predicted [ddr_wr_beat.beat data=0x176 mask=0x2] but the design produced nothing
+      scope=data_path  strategy=exact  status=fail  matched=24/36  value=12
+        dp_rd_rsp[0] value: predicted [dp_rd_rsp.response aux=0x1 data=0x1027c4d1] but observed [dp_rd_rsp.response aux=0x1 data=0xc4d10000]
+        dp_rd_rsp[1] value: predicted [dp_rd_rsp.response aux=0x3 data=0x7311d8a3] but observed [dp_rd_rsp.response aux=0x3 data=0xd8a30000]
+        dp_rd_rsp[2] value: predicted [dp_rd_rsp.response aux=0x5 data=0xc9e9c616] but observed [dp_rd_rsp.response aux=0x5 data=0xc6160000]
+        dp_rd_rsp[3] value: predicted [dp_rd_rsp.response aux=0x7 data=0x7ce42c82] but observed [dp_rd_rsp.response aux=0x7 data=0x2c820000]
+        dp_rd_rsp[4] value: predicted [dp_rd_rsp.response aux=0x9 data=0x7204e52d] but observed [dp_rd_rsp.response aux=0x9 data=0xe52d0000]
+        dp_rd_rsp[5] value: predicted [dp_rd_rsp.response aux=0xb data=0x51431193] but observed [dp_rd_rsp.response aux=0xb data=0x11930000]
 ==================================================================
 
   path verdict : FAIL
   report -> Validation/reports/netlists/scheduler/path_18_full_write_report.json
+Exception (client): Error reading SSH protocol banner[Errno 54] Connection reset by peer
+Traceback (most recent call last):
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2363, in _check_banner
+    buf = self.packetizer.readline(timeout)
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 395, in readline
+    buf += self._read_timeout(timeout)
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 663, in _read_timeout
+    x = self.__socket.recv(128)
+ConnectionResetError: [Errno 54] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2179, in run
+    self._check_banner()
+  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2367, in _check_banner
+    raise SSHException(
+paramiko.ssh_exception.SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer
+

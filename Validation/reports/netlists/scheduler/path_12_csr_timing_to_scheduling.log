@@ -8,13 +8,9 @@ Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path
 Window  : 400 cycles settle after driver
 Stages  : config_regs(exact); bank_tracker+scheduler(invariant)
 
-Running: xrun ... -top chain_harness  (50 file(s))
+Running: xrun ... -top chain_harness  (53 file(s))
   log -> Validation/reports/netlists/scheduler/path_12_csr_timing_to_scheduling_sim.log
-
-  EMBEDDED RTL ASSERTIONS FIRED (8 total) — the design's own checks disagree with its behavior:
-    illegal bin: cp_trfc_spacing 4x
-    a_TIMING_011             4x
-289 transaction(s)
+283 transaction(s)
     cfg_refresh.reset        1
     cfg_refresh.update       12
     cfg_timing.reset         1
@@ -30,38 +26,37 @@ Running: xrun ... -top chain_harness  (50 file(s))
     csr_sts.reset            1
     csr_sts_level.reset      1
     csr_sts_level.state      6
-    ddr_cmd.command          6
+    ddr_cmd.command          3
     ddr_cmd.reset            1
     ddr_rd_beat.reset        1
     ddr_wr_beat.reset        1
     dp_cmd.reset             1
     dp_rd_rsp.reset          1
     dp_wr.reset              1
-    refresh_ack.ack          6
+    refresh_ack.ack          3
     refresh_ack.reset        1
-    refresh_req.request      3
+    refresh_level.reset      1
+    refresh_level.state      6
+    refresh_req.request      2
     refresh_req.reset        1
     req.reset                1
-    sched_cmd.command        6
+    sched_cmd.command        3
     sched_cmd.reset          1
     sched_deq.reset          1
-    sched_in.command         6
+    sched_in.command         3
     sched_in.reset           1
     wb.reset                 1
     wb_rsp.reset             1
   time span: 0 .. 2079000
-wrote 289 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/scheduler/path_12_csr_timing_to_scheduling_observed.jsonl
+wrote 283 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/scheduler/path_12_csr_timing_to_scheduling_observed.jsonl
 
 ==================================================================
   config_regs                  [exact     ]  PASS
       scope=config_regs  strategy=exact  status=pass  matched=131/131  WAIVED=2 field comparison(s)  (131 output transaction(s
   bank_tracker+scheduler       [invariant ]  PASS
-      scope=bank_tracker_scheduler  strategy=invariant  status=pass  (289 transactions, no rule broken)
-  cmd_gen (support)            [sva       ]  FAIL
-      SVA fired: a_TIMING_011 x4
-      a_TIMING_011 fired 4x (assertion bound to cmd_gen, not a judged stage)
+      scope=bank_tracker_scheduler  strategy=invariant  status=pass  (283 transactions, no rule broken)
 ==================================================================
 
-  path verdict : FAIL
+  path verdict : PASS
   report -> Validation/reports/netlists/scheduler/path_12_csr_timing_to_scheduling_report.json
   derived path_10_csr_to_timing              PASS  from stage config_regs

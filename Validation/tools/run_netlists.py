@@ -80,7 +80,55 @@ def run_one(block, netlist, path, timeout, judge_only):
             if m2:
                 for name, n in re.findall(r"(a_[A-Z0-9_]+) x(\d+)", m2.group(1)):
                     fired[name] = fired.get(name, 0) + int(n)
-    return {"path": path, "verdict": verdict, "first_failure": first, "fired": fired}
+    return attribute({"path": path, "verdict": verdict, "first_failure": first, "fired": fired}, block)
+
+
+RTL_REPORTS = os.path.join(ROOT, "Validation", "reports", "paths")
+
+
+def attribute(res, block):
+    """A pair that fails on a stage that is not the netlist's block, exactly
+    as the RTL-only run of the same path fails, is the RTL's failure
+    carried into the harness, not evidence about the netlist: every
+    netlist "failed" path_03/18 on the data_path read-capture defect
+    (2026-10-15). Such a pair is RTL-FAIL and does not count against the
+    block; a failure on the block's own stage, or one the RTL run does not
+    show, stays FAIL."""
+    if res.get("verdict") != "FAIL" or not res.get("first_failure"):
+        return res
+    stage = res["first_failure"].split(":", 1)[0]
+    stage_blocks = {b.strip().split(" ")[0] for b in stage.split("+")}
+    if block in stage_blocks:
+        return res
+    rp = os.path.join(RTL_REPORTS, f"{res['path']}_report.json")
+    if not os.path.exists(rp):
+        return res
+    with open(rp) as f:
+        rtl = json.load(f)
+    rtl_first = next((s.get("stage") for s in rtl.get("stages", []) if s.get("verdict") == "fail"), None)
+    if str(rtl.get("verdict", "")).lower() == "fail" and rtl_first == stage:
+        res["verdict"] = "RTL-FAIL"
+        res["attribution"] = f"the RTL-only run of this path fails on the same stage ({stage}); not the netlist's"
+    return res
+
+
+def block_ids_at_rev(rev):
+    """Per-block design ids of Frontend2/OutputFolders at a git revision,
+    computed by rtl_drop itself on a scratch export of that tree (so the
+    hashing is the one the drop id uses, not a reimplementation)."""
+    import tempfile, tarfile, io
+    d = tempfile.mkdtemp(prefix="drop_at_rev_")
+    r = subprocess.run(["git", "archive", rev, "Frontend2/OutputFolders"], cwd=ROOT, capture_output=True)
+    if r.returncode != 0:
+        raise SystemExit(f"--built-from-rev {rev}: git archive failed: {r.stderr.decode(errors='replace')[:200]}")
+    with tarfile.open(fileobj=io.BytesIO(r.stdout)) as t:
+        t.extractall(d)
+    env = dict(os.environ, VALIDATION_RTL_DROP_ROOTS=os.path.join(d, "Frontend2", "OutputFolders"))
+    r = subprocess.run([sys.executable, os.path.join(ROOT, "Validation", "structural", "rtl_drop.py"),
+                        "--block-design-ids"], cwd=ROOT, env=env, capture_output=True, text=True)
+    if r.returncode != 0:
+        raise SystemExit(f"--built-from-rev {rev}: {r.stdout[-300:]}{r.stderr[-300:]}")
+    return json.loads(r.stdout.strip().splitlines()[-1])
 
 
 def main():
@@ -99,6 +147,12 @@ def main():
                          "netlist set; run only the pairs it lacks")
     ap.add_argument("--rescore", action="store_true",
                     help="no runs: rebuild summary.json from the per-path reports on disk")
+    ap.add_argument("--built-from-rev", default=None, metavar="GIT_REV",
+                    help="the git revision whose Frontend2/OutputFolders the netlists were cut "
+                         "from; staleness is then decided PER BLOCK (a block whose RTL did not "
+                         "change between that revision and the drop under judgement has a "
+                         "current netlist). Per-block `design_id` entries in NETLISTS.json "
+                         "do the same without git.")
     args = ap.parse_args()
     OUT = os.path.abspath(args.out)
 
@@ -144,10 +198,21 @@ def main():
                         rep = json.load(f)
                     first = next((f"{s.get('stage')}: {str(s.get('summary', ''))[:160]}"
                                   for s in rep.get("stages", []) if s.get("verdict") == "fail"), None)
-                    done[(b, p)] = {"path": p, "verdict": str(rep.get("verdict", "?")).upper(),
-                                    "first_failure": first, "fired": {}}
+                    done[(b, p)] = attribute({"path": p, "verdict": str(rep.get("verdict", "?")).upper(),
+                                              "first_failure": first, "fired": {}}, b)
     jobs = [(b, os.path.join(ROOT, nl["blocks"][b]["netlist"]), p)
             for b in blocks for p in paths_for(b, pdefs, imap) if (b, p) not in done]
+    if jobs and not args.judge_only:
+        # a rebuilt netlist may use a cell the mirrored library lacks; fetch
+        # it and reinstall before any run, or every pair fails to elaborate
+        import install_sky130_models as ISM
+        fetched = ISM.fetch_missing([os.path.join(ROOT, nl["blocks"][b]["netlist"]) for b in blocks])
+        if fetched:
+            r = subprocess.run([sys.executable, os.path.join(ROOT, "Validation", "tools", "install_sky130_models.py"),
+                                "--no-fetch", "--no-smoke"], cwd=ROOT, capture_output=True, text=True)
+            print("  " + (r.stdout.strip().splitlines() or ["(install produced no output)"])[-1])
+            if r.returncode != 0:
+                raise SystemExit("cell model install failed:\n" + (r.stdout + r.stderr)[-800:])
     if args.rescore:
         jobs = []
     # Provenance: a netlist is evidence about the drop it was cut from. When
@@ -162,10 +227,37 @@ def main():
                              else "same design" if built_design == judged["design_id"]
                              else "STALE: built from another drop and no design id matches"
                              if built else "unknown: the netlist set names no drop")
+    # Per-block provenance: a netlist is evidence about ITS block's RTL. When
+    # the netlist set (or --built-from-rev) says what each block was cut
+    # from, a block unchanged since then has a current netlist even though
+    # the drop id moved (the 10-15 drop changed refresh_ctrl only; the
+    # scheduler and bank_tracker netlists rebuilt that day stay current).
+    current_ids = RD.block_design_ids()
+    built_ids = {b: v.get("design_id") for b, v in nl["blocks"].items() if v.get("design_id")}
+    if args.built_from_rev and not built_ids:
+        built_ids = block_ids_at_rev(args.built_from_rev)
+        summary["netlists_built_from"]["git_rev"] = args.built_from_rev
+    stale_blocks = {}
+    for b in blocks:
+        if built_ids.get(b):
+            stale_blocks[b] = built_ids[b] != current_ids.get(b)
+        else:
+            stale_blocks[b] = stale
+    summary["block_provenance"] = {b: ("current" if not stale_blocks[b] else "STALE") for b in blocks}
+    if stale and built_ids:
+        n_cur = sum(1 for b in blocks if not stale_blocks[b])
+        summary["provenance"] = (f"per block: {n_cur}/{len(blocks)} netlist(s) current for this drop"
+                                 + (f"; STALE: {', '.join(b for b in blocks if stale_blocks[b])}"
+                                    if n_cur < len(blocks) else ""))
     print(f"{len(jobs)} netlist run(s) over {len(blocks)} block(s), {args.jobs} at a time"
           + (f"; {len(done)} already judged" if done else "")
           + f"; judging against drop {judged['drop_id']} (design {judged['design_id']})")
-    if stale:
+    if stale and built_ids:
+        cur = [b for b in blocks if not stale_blocks[b]]
+        print(f"  netlist set built from drop {built}; per-block provenance says "
+              f"{len(cur)}/{len(blocks)} netlist(s) are current for this drop"
+              + (f"; STALE: {', '.join(b for b in blocks if stale_blocks[b])}" if any(stale_blocks.values()) else ""))
+    elif stale:
         print(f"  STALE NETLISTS: built from drop {built}"
               + (f" (design {built_design})" if built_design else " (no design id recorded)")
               + f", the drop under judgement is {judged['drop_id']} (design {judged['design_id']}). "
@@ -185,17 +277,20 @@ def main():
     summary["blocks"].update(kept)
     for b in blocks:
         rows = sorted(results[b], key=lambda r: r["path"])
-        verdict = "PASS" if rows and all(r["verdict"] == "PASS" for r in rows) else "FAIL"
+        verdict = "PASS" if rows and all(r["verdict"] in ("PASS", "RTL-FAIL") for r in rows) else "FAIL"
         summary["blocks"][b] = {"netlist": nl["blocks"][b]["netlist"], "verdict": verdict,
-                                "stale_netlist": stale, "paths": rows,
+                                "stale_netlist": stale_blocks[b], "paths": rows,
                                 "backend": {k: nl["blocks"][b].get(k) for k in ("fmax_mhz", "wns_ns", "sta", "drc_violations", "lvs")}}
     with open(os.path.join(OUT, "summary.json"), "w") as f:
         json.dump(summary, f, indent=2)
-    print("\n  block         verdict  paths" + ("   (STALE netlists, see above)" if stale else ""))
+    print("\n  block         verdict  paths")
     for b in sorted(summary["blocks"]):
         s = summary["blocks"][b]
         n_pass = sum(1 for r in s["paths"] if r["verdict"] == "PASS")
-        print(f"  {b:13} {s['verdict']:7}  {n_pass}/{len(s['paths'])}")
+        n_rtl = sum(1 for r in s["paths"] if r["verdict"] == "RTL-FAIL")
+        print(f"  {b:13} {s['verdict']:7}  {n_pass}/{len(s['paths'])}"
+              + (f"  (+{n_rtl} RTL-FAIL, the RTL's own)" if n_rtl else "")
+              + ("   (STALE netlist)" if s.get("stale_netlist") else ""))
     print(f"  provenance: {summary['provenance']}")
     print(f"  wrote {os.path.relpath(os.path.join(OUT, 'summary.json'), ROOT)}")
     return 0 if all(s["verdict"] == "PASS" for s in summary["blocks"].values()) else 1

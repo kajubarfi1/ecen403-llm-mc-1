@@ -1,4 +1,5 @@
-TOOL:	xrun	24.03-s013: Started on Oct 15, 2026 at 11:18:31 CDT
+TOOL:	xrun	24.03-s013: Started on Oct 15, 2026 at 13:37:40 CDT
+*WARNING* file /home/ugrads/j/jacobz/CDS.log File is already locked by some other process.
 *WARNING* X Window Display Initialization failure
 *WARNING* (DISPLAY "")
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
@@ -3679,6 +3680,9 @@ file: init_status_monitor.sv
 file: refresh_ack_monitor.sv
 	module worklib.refresh_ack_monitor:sv
 		errors: 0, warnings: 0
+file: refresh_level_monitor.sv
+	module worklib.refresh_level_monitor:sv
+		errors: 0, warnings: 0
 file: refresh_req_monitor.sv
 	module worklib.refresh_req_monitor:sv
 		errors: 0, warnings: 0
@@ -3983,7 +3987,7 @@ xmelab: *W,CUVWSP (./config_regs_netlist.v,3360|35): 1 output port was not conne
 xmelab: (/home/ugrads/j/jacobz/cadence_agent_work/sky130/cells/bufinv/sky130_fd_sc_hd__bufinv_16.v,72): Y
 
 	Top level design units:
-		$unit_0x2ee082c4
+		$unit_0x67d09f5d
 		chain_harness
 
 	Extracting FSMs for coverage:
@@ -4049,65 +4053,67 @@ xmvlog_cg: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,1
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
-		worklib.refresh_ctrl_fcov:sv <0x34e9ce22>
+		worklib.refresh_ctrl_fcov:sv <0x0a730964>
 			streams:   4, words:  1993
-		worklib.refresh_req_monitor:sv <0x6176ef78>
+		worklib.refresh_req_monitor:sv <0x0e9bad9b>
 			streams:   3, words:  2241
-		worklib.refresh_ack_monitor:sv <0x777f3b35>
+		worklib.refresh_level_monitor:sv <0x2b779fc7>
+			streams:   3, words:  2531
+		worklib.refresh_ack_monitor:sv <0x646acafe>
 			streams:   2, words:  1543
-		worklib.init_fsm_sva:sv <0x03e0e9e3>
+		worklib.init_fsm_sva:sv <0x69170a11>
 			streams:  43, words: 28893
-		worklib.init_fsm_fcov:sv <0x5b50cc95>
+		worklib.init_fsm_fcov:sv <0x6f3b927b>
 			streams:   4, words:  2295
-		worklib.init_status_monitor:sv <0x7ea2da13>
+		worklib.init_status_monitor:sv <0x2976a769>
 			streams:   3, words:  2016
-		worklib.init_cmd_monitor:sv <0x1a5784aa>
+		worklib.init_cmd_monitor:sv <0x79e81f39>
 			streams:   2, words:  1993
-		worklib.config_regs_fcov:sv <0x70c0884a>
+		worklib.config_regs_fcov:sv <0x10cfcef3>
 			streams:  10, words: 14094
-		worklib.csr_sts_level_monitor:sv <0x44ac2195>
+		worklib.csr_sts_level_monitor:sv <0x1b88fcb2>
 			streams:   3, words:  5770
-		worklib.csr_sts_monitor:sv <0x10a86f97>
+		worklib.csr_sts_monitor:sv <0x36e9b8bd>
 			streams:   2, words:  2016
-		worklib.csr_rsp_monitor:sv <0x7b69dcbe>
+		worklib.csr_rsp_monitor:sv <0x14849e5d>
 			streams:   2, words:  3195
-		worklib.csr_monitor:sv <0x579e6909>
+		worklib.csr_monitor:sv <0x2bb8fe5f>
 			streams:   2, words:  2791
-		worklib.cfg_timing_monitor:sv <0x259ded57>
+		worklib.cfg_timing_monitor:sv <0x5fac10dd>
 			streams:   3, words:  5065
-		worklib.cfg_refresh_monitor:sv <0x345eb41e>
+		worklib.cfg_refresh_monitor:sv <0x6f30abe4>
 			streams:   3, words:  3291
-		worklib.chain_harness:sv <0x73145845>
+		worklib.chain_harness:sv <0x79ca2101>
 			streams:  92, words: 26513
-		worklib.config_regs:sv <0x6bfcf656>
+		worklib.config_regs:sv <0x1099cc9d>
 			streams:  52, words: 19797
-		worklib.init_fsm:sv <0x32c65ab6>
+		worklib.init_fsm:sv <0x6fb88c61>
 			streams:  21, words: 25643
-		worklib.refresh_ctrl:sv <0x460a78d8>
-			streams:  18, words: 11760
-		worklib.\$unit_0x2ee082c4 :compilation_unit <0x0967725d>
+		worklib.refresh_ctrl:sv <0x10348608>
+			streams:  23, words: 12929
+		worklib.\$unit_0x67d09f5d :compilation_unit <0x315d2c5f>
 			streams:   0, words:     0
 	Building instance specific data structures.
 xmelab: *W,CGPIDF: Covergroup "per_instance" option , by default, is set as 0.
 	Loading native compiled code:     .................... Done
 	Design hierarchy summary:
 		                   Instances  Unique
-		Modules:               2,421     128
+		Modules:               2,422     129
 		UDPs:                    476       5
 		Primitives:            2,504       6
-		Registers:               197     199
-		Scalar wires:          5,153       -
+		Registers:               198     200
+		Scalar wires:          5,156       -
 		Expanded wires:          304      26
-		Vectored wires:           90       -
+		Vectored wires:           92       -
 		Named events:              5       5
-		Always blocks:            79      79
+		Always blocks:            81      81
 		Initial blocks:           22      22
-		Cont. assignments:        25      28
-		Pseudo assignments:      144       -
+		Cont. assignments:        26      29
+		Pseudo assignments:      148       -
 		Assertions:                8       8
 		Covergroup Instances:      0       4
 		Compilation units:         1       1
-		Process Clocks:           34      10
+		Process Clocks:           36      10
 		Simulation timescale:    1ps
 	Writing initial simulation snapshot: worklib.chain_harness:sv
 DEFINE std       ./STD
@@ -4162,6 +4168,7 @@ Loading snapshot worklib.chain_harness:sv .................... Done
 xcelium> source /opt/coe/cadence/XCELIUM240/tools/xcelium/files/xmsimrc
 xcelium> run
 TXN refresh_req reset t=0
+TXN refresh_level reset t=0
 TXN refresh_ack reset t=0
 TXN init_status reset t=0
 TXN init_cmd reset t=0
@@ -4179,32 +4186,76 @@ TXN init_cmd command t=700214000 addr=400 bank=0 cmd=6
 TXN init_status done t=700859000 fail=0 state=e
 TXN csr_sts_level state t=700863000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=0 self_refresh=0
 TXN refresh_req request t=700869000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=700869000 pending=1 required=1 starve=0 urgent=0
 TXN csr_sts_level state t=700873000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=1 self_refresh=0
+TXN refresh_level state t=708669000 pending=2 required=1 starve=0 urgent=0
 TXN csr_sts_level state t=708673000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=2 self_refresh=0
+TXN refresh_level state t=716469000 pending=3 required=1 starve=0 urgent=0
 TXN csr_sts_level state t=716473000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=3 self_refresh=0
+TXN refresh_level state t=724269000 pending=4 required=1 starve=0 urgent=0
 TXN csr_sts_level state t=724273000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=4 self_refresh=0
+TXN refresh_level state t=732069000 pending=5 required=1 starve=0 urgent=0
 TXN csr_sts_level state t=732073000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=5 self_refresh=0
+TXN refresh_level state t=739869000 pending=6 required=1 starve=0 urgent=1
 TXN csr_sts_level state t=739873000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=6 self_refresh=0
+TXN refresh_level state t=747669000 pending=7 required=1 starve=0 urgent=1
 TXN csr_sts_level state t=747673000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=7 self_refresh=0
+TXN refresh_level state t=755469000 pending=8 required=1 starve=0 urgent=1
 TXN csr_sts_level state t=755473000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=8 self_refresh=0
+TXN refresh_level state t=763269000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=763269000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=763274000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=771069000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=771069000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=771074000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=778869000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=778869000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=778874000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=786669000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=786669000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=786674000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=794469000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=794469000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=794474000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=802269000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=802269000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=802274000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=810069000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=810069000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=810074000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=817869000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=817869000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=817874000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=825669000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=825669000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=825674000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=833469000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=833469000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=833474000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=841269000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=841269000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=841274000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=849069000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=849069000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=849074000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=856869000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=856869000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=856874000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=864669000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=864669000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=864674000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=872469000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=872469000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=872474000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=880269000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=880269000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=880274000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=888069000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=888069000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=888074000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=895869000 pending=8 required=1 starve=1 urgent=1
 TXN csr_sts event t=895869000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=895874000 pending=8 required=1 starve=0 urgent=1
 HARNESS_DONE
 Simulation complete via $finish(1) at time 900017500 PS + 0
 ./chain_harness.sv:194     $finish;
@@ -4222,6 +4273,6 @@ coverage setup:
   Coverage database dumped with the set_code_fine_grained_merging command during elaboration.
 
 coverage files:
-  model(design data) :  ./cov_work/scope/icc_2dcb328f_48d95dd6.ucm
-  data               :  ./cov_work/scope/path_09_init_to_refresh/icc_2dcb328f_48d95dd6.ucd
-TOOL:	xrun	24.03-s013: Exiting on Oct 15, 2026 at 11:18:35 CDT  (total: 00:00:04)
+  model(design data) :  ./cov_work/scope/icc_2a7af35a_450d7e9b.ucm
+  data               :  ./cov_work/scope/path_09_init_to_refresh/icc_2a7af35a_450d7e9b.ucd
+TOOL:	xrun	24.03-s013: Exiting on Oct 15, 2026 at 13:37:44 CDT  (total: 00:00:04)

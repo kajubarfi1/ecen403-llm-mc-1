@@ -246,7 +246,9 @@ def evidence_from_report(rep, rules, schemas, spec_regs=None, reports_dir=None):
                 po = PRED_OBS_RE.search(rest)
                 exp, act = (po.group(1), po.group(2)) if po else ("", rest)
                 kind = _iface_kind(exp or act)[1]
+                ctx = _mismatch_context(st.get("trace"), iface, idx, block, schemas)
                 ev = {"check_id": f"MISMATCH/{iface}{_mismatch_discriminator(exp, act, spec_regs)}",
+                      "context": ctx,
                       "owner": block,
                       "taxonomy_hint": _exact_taxonomy(block),
                       "iface": iface, "kind": kind,
@@ -321,6 +323,54 @@ def _twin_agrees(reports_dir, scope):
         _AGREEMENT[key] = rows
     r = _AGREEMENT[key].get(scope)
     return bool(r and r.get("traces", 0) > 0 and r.get("disagree", 0) == 0)
+
+
+_TRACES = {}
+
+
+def _mismatch_context(trace_path, iface, idx, block, schemas, n_before=12):
+    """What the block was given when it produced its first wrong value: the
+    transactions on its OTHER interfaces (inputs and sibling outputs) that
+    precede the idx-th event of `iface` in the observed trace, oldest first,
+    then the wrong event itself. Evidence an agent cannot get from expected
+    vs actual alone: the data_path read-capture defect (2026-10-21) reads
+    as 'beat 0 landed in the high half, nothing in the low half' only when
+    the DDR beats that arrived just before the response are beside it; the
+    Phase 4 agent, given only the value and the FIFO anchor, rewrote the
+    word assembly and changed nothing."""
+    if not trace_path or not os.path.exists(trace_path) or idx is None:
+        return None
+    try:
+        idx = int(idx)
+    except (TypeError, ValueError):
+        return None
+    if trace_path not in _TRACES:
+        evs = []
+        with open(trace_path) as f:
+            for ln in f:
+                try:
+                    e = json.loads(ln)
+                except ValueError:
+                    continue
+                if e.get("kind") != "reset":
+                    evs.append(e)
+        _TRACES[trace_path] = evs
+    evs = _TRACES[trace_path]
+    mine = [e for e in evs if e.get("iface") == iface]
+    if idx >= len(mine):
+        return None
+    tgt = mine[idx]
+    t = tgt.get("time_ns", 0)
+    others = {n for n, d in schemas.items() if d.get("block") == block and n != iface}
+    before = [e for e in evs if e.get("iface") in others and e.get("time_ns", 0) <= t][-n_before:]
+
+    def fmt(e, tag=""):
+        fields = " ".join(f"{k}={v:#x}" if isinstance(v, int) else f"{k}={v}"
+                          for k, v in (e.get("fields") or {}).items())
+        return f"t{e.get('time_ns', 0) - t:+d} {e.get('iface')}.{e.get('kind')}{tag} {fields}".rstrip()
+    return {"note": (f"the block's other interfaces in the window before the first wrong value "
+                     f"(times relative to it, in the trace's units; oldest first)"),
+            "events": [fmt(e) for e in before] + [fmt(tgt, " (observed, wrong)")]}
 
 
 def _iface_kind(txn):
@@ -481,6 +531,7 @@ def emit(reports_dir, out_dir=None, drop_status=None):
                     "expected": ev["expected"], "actual": ev["actual"],
                     "detector": ev["detector"],
                     "anchor": anchors_for(ev["owner"], ev.get("iface"), ev.get("kind"), schemas),
+                    "context": ev.get("context"),
                     "mechanism": None,
                     "paths": [], "occurrences": 0,
                     "repro": {
@@ -805,7 +856,9 @@ def formal_findings(spec_rev, head):
         rep = load(rp, {})
         applies = formal_report_applies(rep, head, cur_design, block_design)
         for r in rep.get("results", []):
-            if r.get("status") == "proven":
+            # bounded_proven: no counterexample to a depth at or past the
+            # signoff bar (SIGNOFF §6), recorded by run_formal.py
+            if r.get("status") in ("proven", "bounded_proven"):
                 tid = r.get("short", "").replace("a_", "", 1)
                 proven_before.add(tid)
                 if applies:
