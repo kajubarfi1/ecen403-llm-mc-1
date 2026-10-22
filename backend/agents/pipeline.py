@@ -184,10 +184,20 @@ def mode_of(state: "PipelineState") -> Dict[str, Any]:
 
 
 MAX_TUNER_ITERATIONS  = 3     # Max failure-tuner iterations
-MAX_FMAX_ITERATIONS   = 3     # Max Fmax-optimization iterations
+# Max Fmax-optimization iterations. Each one is a full build, so the cap trades
+# accuracy for wall clock: on calibration, iterations 1-3 gave 400 -> 455 -> 491 MHz
+# and the search was still moving when it stopped. FMAX_MAX_ITERATIONS raises it for
+# a sweep that can afford the builds.
+MAX_FMAX_ITERATIONS   = int(os.environ.get("FMAX_MAX_ITERATIONS") or 3)
+# How close to zero slack the Fmax search drives. A flat margin punishes fast blocks
+# - 0.5 ns is 10% of a 5 ns period but 19% of a 2.6 ns one - so it is a fraction of
+# the current period with a small floor. FMAX_CONVERGED_NS is the point below which
+# another build would be constrained identically and so tells us nothing.
+FMAX_MARGIN_FRACTION  = 0.02
+FMAX_MIN_MARGIN_NS    = 0.02
+FMAX_CONVERGED_NS     = 0.01
 MAX_REPAIR_ITERATIONS = 2     # Max repair attempts before giving up
 MAX_POWER_ITERATIONS  = 3     # Max power-optimization iterations
-FMAX_WNS_THRESHOLD_NS = 0.5   # Min positive WNS to trigger Fmax optimization
 
 # STA sign-off threshold: WNS must be >= this value to pass (soft fail below)
 STA_WNS_THRESHOLD_NS = 0.0
@@ -1760,18 +1770,50 @@ def fmax_tuner_node(state: PipelineState) -> PipelineState:
     platform       = packager_resolved.get("platform", "sky130hd")
     design_name    = packager_resolved.get("design_name", "design")
 
-    # Record this result before changing period
+    # Two different numbers, and conflating them is how a sweep ends up reporting
+    # something weaker than the estimate it was meant to replace:
+    #   demonstrated - a build actually closed at this period. Proof.
+    #   estimated    - what the leftover slack implies. Extrapolation, and the tools
+    #                  behave differently under a tighter constraint, so it is a
+    #                  hypothesis about a build nobody has run.
+    # The sweep exists to turn the second into the first, so both are recorded and
+    # the delivered figure is the demonstrated one.
     fmax_history.append({
-        "iteration":       fmax_iteration - 1,
-        "clock_period_ns": current_period,
-        "wns_ns":          wns,
-        "fmax_mhz":        round(1000.0 / current_period, 2) if current_period > 0 else None,
+        "iteration":            fmax_iteration - 1,
+        "clock_period_ns":      current_period,
+        "wns_ns":               wns,
+        "fmax_mhz":             round(1000.0 / current_period, 2) if current_period > 0 else None,
+        "fmax_demonstrated_mhz": round(1000.0 / current_period, 2) if current_period > 0 else None,
+        "fmax_estimated_mhz":   (round(1000.0 / (current_period - wns), 2)
+                                 if current_period - wns > 0 else None),
     })
 
-    # Tighten: new_period = current - (WNS - margin), floor at 1.0 ns
-    margin_ns  = 0.5
+    # Tighten toward zero slack, leaving a margin only big enough to keep the build
+    # closing. The margin used to be a flat 0.5 ns, which at a 2.6 ns period is 19%
+    # of the cycle: the search stopped with a fifth of the clock unused and reported
+    # that as the block's Fmax. Proportional keeps it meaningful at any speed.
+    margin_ns  = max(FMAX_MIN_MARGIN_NS, FMAX_MARGIN_FRACTION * current_period)
     tighten_by = max(0.0, wns - margin_ns)
     new_period = max(1.0, round(current_period - tighten_by, 3))
+
+    # Nothing left to tighten: another build at the same period returns the same
+    # answer. Stop rather than spending an iteration proving that.
+    if tighten_by < FMAX_CONVERGED_NS:
+        msg = (f"[fmax_tuner] converged at {current_period:.3f}ns "
+               f"(WNS={wns:.3f}ns, margin={margin_ns:.3f}ns): "
+               f"demonstrated {round(1000.0/current_period,1)}MHz"
+               + (f", slack implies {round(1000.0/(current_period-wns),1)}MHz"
+                  if current_period - wns > 0 else ""))
+        print(msg)
+        return {
+            **state,
+            "fmax_iteration":          MAX_FMAX_ITERATIONS,   # stop the loop
+            "fmax_history":            fmax_history,
+            "current_clock_period_ns": current_period,
+            "current_node":            "fmax_tuner",
+            "pipeline_status":         "RUNNING",
+            "messages":                [msg],
+        }
 
     msg = (
         f"[fmax_tuner] Iteration {fmax_iteration}/{MAX_FMAX_ITERATIONS}  "
@@ -2007,7 +2049,14 @@ def _should_autotune(metrics: Dict[str, Any], state: PipelineState) -> bool:
 
 
 def _should_optimize_fmax(metrics: Dict[str, Any], state: PipelineState) -> bool:
-    """Trigger Fmax optimization when run passed and there is meaningful positive slack."""
+    """Trigger Fmax optimization when the run passed and slack is worth reclaiming.
+
+    "Worth reclaiming" has to mean the same thing here as in the tuner, or the search
+    stops somewhere neither of them chose. This gate used to be a flat 0.5 ns while
+    the tuner also left a flat 0.5 ns margin: consistent, but it ended the search with
+    a fifth of a fast block's cycle unused. Both now use the proportional margin, so
+    the loop runs exactly until another iteration would change nothing.
+    """
     if not state.get("optimize_fmax", False):
         return False
     if state.get("fmax_iteration", 0) >= MAX_FMAX_ITERATIONS:
@@ -2015,7 +2064,18 @@ def _should_optimize_fmax(metrics: Dict[str, Any], state: PipelineState) -> bool
     if not metrics.get("run_passed", False):
         return False
     wns = metrics.get("wns_ns")
-    return wns is not None and FMAX_WNS_THRESHOLD_NS < wns < STA_NO_PATHS_NS
+    if wns is None or wns >= STA_NO_PATHS_NS:
+        return False
+    # The period actually in force. The packager's resolved value is the authority
+    # before any tuner has moved it; the literal is only a floor so a missing value
+    # cannot make the margin zero. Deliberately not DEFAULT_CLOCK_PERIOD_NS - that
+    # lives in packager_agent and referencing it here raised a NameError once before.
+    period = (state.get("current_clock_period_ns")
+              or ((state.get("packager_report") or {}).get("packaged_manifest", {})
+                  .get("packager", {}).get("resolved", {}).get("clock_period_ns"))
+              or 5.0)
+    margin = max(FMAX_MIN_MARGIN_NS, FMAX_MARGIN_FRACTION * period)
+    return wns > margin + FMAX_CONVERGED_NS
 
 
 # ── 2f. Repair Node ─────────────────────────────────────────────────────────
@@ -2815,9 +2875,25 @@ def main() -> int:
     _closed = [h for h in _fh if isinstance(h.get("wns_ns"), (int, float)) and h["wns_ns"] >= 0]
     if _closed:
         _best = min(_closed, key=lambda h: h["clock_period_ns"])
+        # Demonstrated: a build closed here. This is the one to quote.
         final_report["fmax_best_closed_mhz"] = round(1000.0 / _best["clock_period_ns"], 2)
         final_report["fmax_best_period_ns"]  = _best["clock_period_ns"]
         final_report["fmax_best_wns_ns"]     = _best["wns_ns"]
+        # Estimated: what the leftover slack implies, for context only. The tools
+        # optimize differently under a tighter constraint, so this is a hypothesis
+        # about a build nobody ran - the same kind of extrapolation the sweep exists
+        # to replace. Never report it as the block's Fmax.
+        _slack_period = _best["clock_period_ns"] - (_best["wns_ns"] or 0.0)
+        if _slack_period > 0:
+            final_report["fmax_best_estimated_mhz"] = round(1000.0 / _slack_period, 2)
+        # A capped search and a converged one produce the same-looking number, and
+        # only one of them is final. Say which: on a cap the figure is a floor, and
+        # raising FMAX_MAX_ITERATIONS would move it.
+        _margin = max(FMAX_MIN_MARGIN_NS, FMAX_MARGIN_FRACTION * _best["clock_period_ns"])
+        _still_moving = (_best["wns_ns"] or 0.0) > _margin + FMAX_CONVERGED_NS
+        _hit_cap = len(_fh) >= MAX_FMAX_ITERATIONS and _still_moving
+        final_report["fmax_search_terminated"] = "iteration_cap" if _hit_cap else "converged"
+        final_report["fmax_is_lower_bound"] = bool(_hit_cap)
 
     _ph = final_state.get("power_history") or []
     if _ph:
