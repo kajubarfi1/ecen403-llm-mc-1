@@ -76,8 +76,8 @@ GENERATOR_INFO = {
     "data_path": ("data_path_gen", "DataPathGenerator"),
 }
 
-_REQUIRED_PROPOSAL_KEYS = ("root_cause", "corrected_generator_source", "explanation",
-                           "shift_left_recommendations", "confidence")
+_REQUIRED_PROPOSAL_KEYS = ("root_cause", "explanation", "shift_left_recommendations",
+                           "confidence", "corrected_generator_source")
 
 PROPOSE_FIX_TOOL = {
     "name": "propose_fix",
@@ -97,23 +97,6 @@ PROPOSE_FIX_TOOL = {
                                 "generator that produced the failing test(s). "
                                 "Name the exact variable/line pattern, not a "
                                 "vague category.",
-            },
-            "corrected_generator_source": {
-                "type": "string",
-                "description": (
-                    "The COMPLETE corrected contents of the generator .py file, "
-                    "ready to write to disk as-is. Must remain syntactically "
-                    "valid Python. Preserve the class's name, constructor "
-                    "signature, and all public method names exactly -- it must "
-                    "stay a drop-in replacement other code imports by name. "
-                    "Change only what's needed to fix the diagnosed root cause; "
-                    "do not refactor, reformat, or touch unrelated logic/"
-                    "comments. Prefer deriving any width/mask/value that was "
-                    "wrong from self.p / self.spec over hardcoding a literal "
-                    "that happens to work for this one spec instance -- a fix "
-                    "that only works for this spec's current parameter values "
-                    "is not actually fixed."
-                ),
             },
             "explanation": {
                 "type": "string",
@@ -144,6 +127,27 @@ PROPOSE_FIX_TOOL = {
                                 "plausible but the failure mode isn't fully "
                                 "pinned down. low: best guess, needs a human "
                                 "to dig further regardless of what re-sim says.",
+            },
+            "corrected_generator_source": {
+                "type": "string",
+                "description": (
+                    "The COMPLETE corrected contents of the generator .py file, "
+                    "ready to write to disk as-is. Must remain syntactically "
+                    "valid Python. Preserve the class's name, constructor "
+                    "signature, and all public method names exactly -- it must "
+                    "stay a drop-in replacement other code imports by name. "
+                    "Change only what's needed to fix the diagnosed root cause; "
+                    "do not refactor, reformat, or touch unrelated logic/"
+                    "comments. Prefer deriving any width/mask/value that was "
+                    "wrong from self.p / self.spec over hardcoding a literal "
+                    "that happens to work for this one spec instance -- a fix "
+                    "that only works for this spec's current parameter values "
+                    "is not actually fixed. Write this LAST, after you have "
+                    "already committed to root_cause/explanation/confidence "
+                    "above -- it is the longest field by far, and whatever "
+                    "would come after a field that breaks down mid-generation "
+                    "is what goes missing."
+                ),
             },
         },
     },
@@ -206,10 +210,12 @@ def _load_external_findings(path: str) -> dict:
             anchors = "; ".join(f"{a.get('file')}:{a.get('line')}" for a in c.get("anchor", [])[:3])
             ctx = c.get("context")
             ctx_events = "; ".join(ctx.get("events", [])) if isinstance(ctx, dict) else ""
+            ctx_prov = "; ".join(ctx.get("value_provenance", [])) if isinstance(ctx, dict) else ""
             lines.append(f"[{c.get('severity', '?')}/{c.get('confidence', '?')}] {c.get('id')}: {c.get('name', '')} | "
                          f"expected={c.get('expected')} actual={c.get('actual')}"
                          + (f" | anchors: {anchors}" if anchors else "")
                          + (f" | context ({ctx.get('note', '')}): {ctx_events}" if ctx_events else "")
+                         + (f" | value_provenance: {ctx_prov}" if ctx_prov else "")
                          + (f" | Validation's proven repair hint: {c['fix']}" if c.get("fix") else ""))
         out[module] = {"external_findings": lines,
                        "confirmed": any(isinstance(c, dict) and c.get("confidence") == "confirmed"

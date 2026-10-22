@@ -1,0 +1,87 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_09_init_to_refresh",
+  "strategy": "invariant",
+  "verdict": "pass",
+  "timestamp": "2026-10-22T12:49:23.948369",
+  "blocks": [
+    "config_regs",
+    "init_fsm",
+    "refresh_ctrl"
+  ],
+  "sequence": null,
+  "stimulus_generator": null,
+  "autonomous": true,
+  "window_cycles": 180000,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "698c6b1ca9cb",
+    "drop_id": "698c6b1ca9cb",
+    "design_id": "12c7bc1b4999",
+    "blocks_used": [
+      "config_regs",
+      "init_fsm",
+      "refresh_ctrl"
+    ],
+    "validated_at": "d9ef79e",
+    "frontend_commits": {
+      "config_regs": "ace4fc2727e3827cf3f17d62977ebdd3bd69daa0",
+      "init_fsm": "ace4fc2727e3827cf3f17d62977ebdd3bd69daa0",
+      "refresh_ctrl": "ace4fc2727e3827cf3f17d62977ebdd3bd69daa0"
+    },
+    "roots": [
+      "runs/20261022-124530-interactive/drop"
+    ],
+    "blocks": {
+      "config_regs": {
+        "rtl": "runs/20261022-124530-interactive/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/20261022-124530-interactive/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_1lane_1rank_ad55209f"
+      },
+      "init_fsm": {
+        "rtl": "runs/20261022-124530-interactive/drop/PHASE1RTL/init_fsm.sv",
+        "manifest": "runs/20261022-124530-interactive/drop/PHASE1RTL/init_fsm_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_1lane_1rank_ad55209f"
+      },
+      "refresh_ctrl": {
+        "rtl": "runs/20261022-124530-interactive/drop/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "runs/20261022-124530-interactive/drop/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_1lane_1rank_ad55209f"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/20261022-124530-interactive/drop/generated_spec.json",
+      "revision": "compiled_ddr31600_x8_1lane_1rank_ad55209f"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "init_fsm",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "init_fsm",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
+    },
+    {
+      "stage": "refresh_ctrl",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "refresh_ctrl",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
+    },
+    {
+      "stage": "(path-level)",
+      "kind": "invariant",
+      "model": "/Users/lehanahome/Documents/ECEN404/ecen403-llm-mc-1/Validation/predictors/path_09_init_to_refresh_checker.py",
+      "scope": "path_09_init_to_refresh",
+      "verdict": "pass",
+      "summary": "scope=path_09_init_to_refresh  strategy=invariant  status=pass  (89 transactions, no rule broken)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/partial/698c6b1ca9cb/path_09_init_to_refresh_sim.log",
+  "observed_trace": "Validation/reports/partial/698c6b1ca9cb/path_09_init_to_refresh_observed.jsonl"
+}

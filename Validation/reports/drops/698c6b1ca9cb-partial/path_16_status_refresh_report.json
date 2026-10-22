@@ -1,0 +1,72 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_16_status_refresh",
+  "strategy": "composed",
+  "verdict": "pass",
+  "timestamp": "2026-10-22T12:49:28.425208",
+  "blocks": [
+    "config_regs",
+    "refresh_ctrl"
+  ],
+  "sequence": "Validation/sequences/generated/path_16_status_refresh_seed1.json",
+  "stimulus_generator": "status_poll",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "698c6b1ca9cb",
+    "drop_id": "698c6b1ca9cb",
+    "design_id": "12c7bc1b4999",
+    "blocks_used": [
+      "config_regs",
+      "refresh_ctrl"
+    ],
+    "validated_at": "d9ef79e",
+    "frontend_commits": {
+      "config_regs": "ace4fc2727e3827cf3f17d62977ebdd3bd69daa0",
+      "refresh_ctrl": "ace4fc2727e3827cf3f17d62977ebdd3bd69daa0"
+    },
+    "roots": [
+      "runs/20261022-124530-interactive/drop"
+    ],
+    "blocks": {
+      "config_regs": {
+        "rtl": "runs/20261022-124530-interactive/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/20261022-124530-interactive/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_1lane_1rank_ad55209f"
+      },
+      "refresh_ctrl": {
+        "rtl": "runs/20261022-124530-interactive/drop/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "runs/20261022-124530-interactive/drop/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_1lane_1rank_ad55209f"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/20261022-124530-interactive/drop/generated_spec.json",
+      "revision": "compiled_ddr31600_x8_1lane_1rank_ad55209f"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "refresh_ctrl",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "refresh_ctrl",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
+    },
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/lehanahome/Documents/ECEN404/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "pass",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=120/120  (120 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    }
+  ],
+  "log": "Validation/reports/partial/698c6b1ca9cb/path_16_status_refresh_sim.log",
+  "observed_trace": "Validation/reports/partial/698c6b1ca9cb/path_16_status_refresh_observed.jsonl"
+}
