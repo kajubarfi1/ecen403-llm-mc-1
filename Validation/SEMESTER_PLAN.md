@@ -797,6 +797,21 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   the Phase 4 ask is unchanged. Her commit also carried our generated
   files from her last run (sva/generated, formal top for path_08): they
   are regenerated per run and were regenerated for the golden spec here.
+- *2026-10-22, night — her hand fix, one run.* `phase4changes`: the read
+  latency count becomes ceil(CL / ratio) (per addendum 6), the tool
+  schema puts the long source field last, and her agents read
+  `value_provenance`. `runs/phase4_loop_3`: first validation halted for
+  infrastructure (9 paths did not simulate: Olympus refused SSH mid-run,
+  empty traces on the long status paths; the halt is the right call and
+  a resume reran them), then FAIL on data_path alone: the capture is now
+  one cycle LATE (`0x00009dac` for `0x9dac7f67`; provenance "beat 2 where
+  beat 1 belongs, nothing where beat 2 belongs"), the count needs a `- 1`
+  for the cycle RD_IDLE→RD_WAIT already spends. Her Phase 4 agent: two
+  schema misses (`explanation` dropped even with the reorder) and a
+  network read timeout during a local outage, four hours, nothing
+  applied. Reply addendum 4 gives the one-line fix and names the schema
+  miss as the Phase 4 blocker; validation has nothing left to add to the
+  package.
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

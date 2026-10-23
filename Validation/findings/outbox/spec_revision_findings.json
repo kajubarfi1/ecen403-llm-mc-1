@@ -1,22 +1,42 @@
 {
   "$schema": "validation-findings/1",
-  "spec_revision": "compiled_ddr31600_x8_1lane_1rank_ad55209f",
-  "spec_id": "379a4af0e4820f34",
-  "validation_spec": "runs/20261022-124530-interactive/spec/generated_spec.json",
-  "shipped_spec": "runs/20261022-124530-interactive/drop/generated_spec.json",
-  "shipped_spec_revision": "compiled_ddr31600_x8_1lane_1rank_ad55209f",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "spec_id": "279cbf6ca7b6f62b",
+  "validation_spec": "runs/phase4_loop_3/spec/generated_spec.json",
+  "shipped_spec": "runs/phase4_loop_3/drop/generated_spec.json",
+  "shipped_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "block_revisions": {
-    "addr_decoder": "compiled_ddr31600_x8_1lane_1rank_ad55209f",
-    "bank_tracker": "compiled_ddr31600_x8_1lane_1rank_ad55209f",
-    "calibration": "compiled_ddr31600_x8_1lane_1rank_ad55209f",
-    "cmd_gen": "compiled_ddr31600_x8_1lane_1rank_ad55209f",
-    "cmd_queue": "compiled_ddr31600_x8_1lane_1rank_ad55209f",
-    "config_regs": "compiled_ddr31600_x8_1lane_1rank_ad55209f",
-    "init_fsm": "compiled_ddr31600_x8_1lane_1rank_ad55209f",
-    "refresh_ctrl": "compiled_ddr31600_x8_1lane_1rank_ad55209f",
-    "scheduler": "compiled_ddr31600_x8_1lane_1rank_ad55209f",
-    "wb_port": "compiled_ddr31600_x8_1lane_1rank_ad55209f"
+    "addr_decoder": "golden_ddr3_1600k_x8_2lane_1rank",
+    "bank_tracker": "golden_ddr3_1600k_x8_2lane_1rank",
+    "calibration": "golden_ddr3_1600k_x8_2lane_1rank",
+    "cmd_gen": "golden_ddr3_1600k_x8_2lane_1rank",
+    "cmd_queue": "golden_ddr3_1600k_x8_2lane_1rank",
+    "config_regs": "golden_ddr3_1600k_x8_2lane_1rank",
+    "data_path": "golden_ddr3_1600k_x8_2lane_1rank",
+    "init_fsm": "golden_ddr3_1600k_x8_2lane_1rank",
+    "refresh_ctrl": "golden_ddr3_1600k_x8_2lane_1rank",
+    "scheduler": "golden_ddr3_1600k_x8_2lane_1rank",
+    "wb_port": "golden_ddr3_1600k_x8_2lane_1rank"
   },
-  "finding_count": 0,
-  "findings": []
+  "finding_count": 1,
+  "findings": [
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "spec_revision_reused",
+      "scope": "spec",
+      "severity": "major",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "spec revision golden_ddr3_1600k_x8_2lane_1rank has named more than one spec (ids e7da1af6b67b7e06, 59b4edadb45f2bf8, 2fb3bbdd55dd72be, f7c16e452e8d9d23, 279cbf6ca7b6f62b)",
+      "detail": "The drop ships runs/phase4_loop_3/drop/generated_spec.json with revision golden_ddr3_1600k_x8_2lane_1rank, but Validation has recorded more than one content id under that revision (Validation/spec/revision_ids.json). A revision must change whenever the content does; otherwise manifests, provenance records and findings that cite it cannot say which spec they mean. Bump `revision` (or derive it from the content) in the compiler whenever the golden file changes.",
+      "evidence": {
+        "shipped_spec": "runs/phase4_loop_3/drop/generated_spec.json",
+        "shipped_spec_id": "279cbf6ca7b6f62b",
+        "validation_spec_id": "f7c16e452e8d9d23",
+        "adopted": false
+      },
+      "spec_ref": "revision",
+      "status": "open"
+    }
+  ]
 }

@@ -2,10 +2,10 @@
   "$schema": "validation-retry-instructions/1",
   "status": "FAIL",
   "pipeline": "validation",
-  "drop": "efece348d04e",
+  "drop": "36dcdfaf136e",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "spec_id": "279cbf6ca7b6f62b",
-  "generated_utc": "2026-10-22T18:00:15.361597Z",
+  "generated_utc": "2026-10-22T18:49:55.027623Z",
   "failed_modules": [
     "data_path"
   ],
@@ -13,27 +13,27 @@
     "data_path": {
       "module": "data_path",
       "attempt": null,
-      "drop": "efece348d04e",
+      "drop": "36dcdfaf136e",
       "failed_checks": [
         {
           "id": "MISMATCH/dp_rd_rsp[data]",
           "name": "data_path must produce the transactions the spec-derived model predicts",
           "pass": false,
           "expected": "dp_rd_rsp.response aux=0x0 data=0x9dac7f67",
-          "actual": "dp_rd_rsp.response aux=0x0 data=0x7f670000",
+          "actual": "dp_rd_rsp.response aux=0x0 data=0x9dac",
           "severity": "critical",
           "confidence": "confirmed",
           "spec_ref": null,
           "anchor": [
             {
-              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-              "line": 300,
+              "file": "runs/phase4_loop_3/drop/PHASE4RTL/data_path.sv",
+              "line": 327,
               "signal": "rd_rsp_data",
               "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
             },
             {
-              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-              "line": 301,
+              "file": "runs/phase4_loop_3/drop/PHASE4RTL/data_path.sv",
+              "line": 328,
               "signal": "rd_rsp_aux",
               "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
             }
@@ -41,14 +41,14 @@
           "context": {
             "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
             "events": [
-              "t-25000 dp_cmd.read aux=0x0",
-              "t-5000 ddr_rd_beat.beat data=0x7f67",
-              "t+0 ddr_rd_beat.beat data=0x9dac",
-              "t+0 dp_rd_rsp.response (observed, wrong) aux=0x0 data=0x7f670000"
+              "t-40000 dp_cmd.read aux=0x0",
+              "t-20000 ddr_rd_beat.beat data=0x7f67",
+              "t-15000 ddr_rd_beat.beat data=0x9dac",
+              "t+0 dp_rd_rsp.response (observed, wrong) aux=0x0 data=0x9dac"
             ],
             "value_provenance": [
-              "data: observed [31:16]=ddr_rd_beat#1.data (t-5000), [15:0]=0",
-              "data: expected [31:16]=ddr_rd_beat#2.data (t+0), [15:0]=ddr_rd_beat#1.data (t-5000)"
+              "data: observed [31:16]=0, [15:0]=ddr_rd_beat#2.data (t-15000)",
+              "data: expected [31:16]=ddr_rd_beat#2.data (t-15000), [15:0]=ddr_rd_beat#1.data (t-20000)"
             ]
           },
           "owner_candidates": [
@@ -68,7 +68,7 @@
             "trace": "Validation/reports/paths/path_03_read_return_observed.jsonl",
             "first_failure": {
               "seq": null,
-              "line": "dp_rd_rsp[0] value: predicted [dp_rd_rsp.response aux=0x0 data=0x9dac7f67] but observed [dp_rd_rsp.response aux=0x0 data=0x7f670000]"
+              "line": "dp_rd_rsp[0] value: predicted [dp_rd_rsp.response aux=0x0 data=0x9dac7f67] but observed [dp_rd_rsp.response aux=0x0 data=0x9dac]"
             }
           },
           "introduced_in": null,
@@ -77,7 +77,7 @@
           "finding_id": "data_path/MISMATCH/dp_rd_rsp[data]"
         }
       ],
-      "message": "1 check(s) failed on drop efece348d04e; 1 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+      "message": "1 check(s) failed on drop 36dcdfaf136e; 1 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
     }
   },
   "resolved_since_previous_drop": [],
@@ -85,7 +85,7 @@
   "source": "Validation/findings/emit_findings.py -> retry_adapter.py",
   "drop_status": {
     "$schema": "validation-drop-status/1",
-    "drop": "efece348d04e",
+    "drop": "36dcdfaf136e",
     "partial": false,
     "blocks_present": [
       "addr_decoder",

@@ -226,3 +226,38 @@ Validation/structural/integration_map.json Validation/formal` is
 enough); the outbox packages under your spec revisions are welcome.
 
 **data_path:** unchanged in this push, so ask 8 stands.
+
+## Addendum 4 (2026-10-22, night): your "phase4changes" push, run once
+
+Your hand fix landed and the loop ran on it (`runs/phase4_loop_3`,
+drop `36dcdfaf136e`). Two results.
+
+**The capture moved one cycle too far.** With
+`rd_lat_ctr <= (cfg_CL_nCK + CLK_RATIO - 1) / CLK_RATIO` the read now
+returns `0x00009dac` for `0x9dac7f67`: beat 2 in the low half, nothing in
+the high half. Before it was `0x7f670000`, beat 1 in the high half,
+nothing in the low half. One cycle early became one cycle late, because
+the RD_IDLE → RD_WAIT transition already spends the cycle in which the
+registered command is seen. The count is one less:
+
+```
+rd_lat_ctr <= (cfg_CL_nCK + CLK_RATIO - 1) / CLK_RATIO - 1'b1;
+```
+
+which at CL = 11, ratio 4 waits 2 and captures beats 0 and 1 on the two
+cycles the DRAM drives them. Capturing on `ddr_dqs_i` would not have
+this off-by-one at all. The package said it in one line
+(`value_provenance`: "observed [31:16]=0, [15:0]=ddr_rd_beat#2";
+"expected [31:16]=ddr_rd_beat#2, [15:0]=ddr_rd_beat#1").
+
+**Your agent still cannot act on it.** With the schema reordered, two of
+three attempts still dropped `explanation` (`stop_reason='tool_use'`),
+and the third died on a network read timeout during an outage on our
+side; the three attempts took four hours end to end and applied nothing.
+So the schema miss is not the field order. Two of three attempts, on a
+one-line fix with the evidence spelled out, is the blocker for Phase 4
+now; the validation side has nothing left to add to the package.
+Suggestions, in the order we would try them: drop `explanation` and
+`shift_left_recommendations` from the required set (they are prose the
+loop never reads), or ask for `root_cause` + `confidence` in one call and
+the corrected source in a second.
