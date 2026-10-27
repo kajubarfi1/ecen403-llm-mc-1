@@ -812,6 +812,11 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   applied. Reply addendum 4 gives the one-line fix and names the schema
   miss as the Phase 4 blocker; validation has nothing left to add to the
   package.
+- *2026-10-27 — Lehana's self-audit of the contract.* Her `drop.py`
+  `compute_drop_id` hashed raw bytes; now CRLF-normalised like
+  `rtl_drop.drop_id()` (contract §2), verified equal on the same tree.
+  Nothing asked. The `- 1` on the read latency and the schema miss are
+  still open; no data_path change in this push.
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

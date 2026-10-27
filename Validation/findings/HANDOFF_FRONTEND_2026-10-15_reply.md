@@ -261,3 +261,16 @@ Suggestions, in the order we would try them: drop `explanation` and
 `shift_left_recommendations` from the required set (they are prose the
 loop never reads), or ask for `root_cause` + `confidence` in one call and
 the corrected source in a second.
+
+## Addendum 5 (2026-10-27): your self-audit of the contract
+
+Good catch, and the right kind: a gap found by reading the contract
+against the code before it bit. The CRLF normalisation in
+`compute_drop_id` is exactly the backend's 10-08 incident waiting to
+repeat on the first Windows checkout, and the way you verified it, the
+same id from both implementations on the same tree, is the check the
+contract asks for. Nothing to add; we will stop printing "matches
+Validation's" as a claim and let the two ids being equal be the proof.
+
+Still open from addendum 4: the `- 1` on the read latency count, and the
+tool-call schema miss. The run after those is the one that should pass.
