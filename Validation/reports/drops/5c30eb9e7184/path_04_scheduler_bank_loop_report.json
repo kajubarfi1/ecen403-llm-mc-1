@@ -1,0 +1,119 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_04_scheduler_bank_loop",
+  "strategy": "invariant",
+  "verdict": "pass",
+  "timestamp": "2026-10-27T13:34:33.479427",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_04_scheduler_bank_loop_seed1.json",
+  "stimulus_generator": "random",
+  "autonomous": false,
+  "window_cycles": 400,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "5c30eb9e7184",
+    "drop_id": "5c30eb9e7184",
+    "design_id": "c43464119623",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "88b77c9",
+    "frontend_commits": {
+      "addr_decoder": "88b77c9b622340bcccf0e35e60e4069fcc51209b",
+      "bank_tracker": "88b77c9b622340bcccf0e35e60e4069fcc51209b",
+      "cmd_gen": "88b77c9b622340bcccf0e35e60e4069fcc51209b",
+      "cmd_queue": "88b77c9b622340bcccf0e35e60e4069fcc51209b",
+      "config_regs": "88b77c9b622340bcccf0e35e60e4069fcc51209b",
+      "data_path": "88b77c9b622340bcccf0e35e60e4069fcc51209b",
+      "refresh_ctrl": "88b77c9b622340bcccf0e35e60e4069fcc51209b",
+      "scheduler": "88b77c9b622340bcccf0e35e60e4069fcc51209b",
+      "wb_port": "88b77c9b622340bcccf0e35e60e4069fcc51209b"
+    },
+    "roots": [
+      "runs/phase4_loop_4/drop"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "runs/phase4_loop_4/drop/PHASE2RTL/addr_decoder.sv",
+        "manifest": "runs/phase4_loop_4/drop/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "bank_tracker": {
+        "rtl": "runs/phase4_loop_4/drop/PHASE2RTL/bank_tracker.sv",
+        "manifest": "runs/phase4_loop_4/drop/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_gen": {
+        "rtl": "runs/phase4_loop_4/drop/PHASE3RTL/cmd_gen.sv",
+        "manifest": "runs/phase4_loop_4/drop/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_queue": {
+        "rtl": "runs/phase4_loop_4/drop/PHASE3RTL/cmd_queue.sv",
+        "manifest": "runs/phase4_loop_4/drop/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "config_regs": {
+        "rtl": "runs/phase4_loop_4/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/phase4_loop_4/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "data_path": {
+        "rtl": "runs/phase4_loop_4/drop/PHASE4RTL/data_path.sv",
+        "manifest": "runs/phase4_loop_4/drop/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "refresh_ctrl": {
+        "rtl": "runs/phase4_loop_4/drop/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "runs/phase4_loop_4/drop/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "scheduler": {
+        "rtl": "runs/phase4_loop_4/drop/PHASE3RTL/scheduler.sv",
+        "manifest": "runs/phase4_loop_4/drop/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "wb_port": {
+        "rtl": "runs/phase4_loop_4/drop/PHASE1RTL/wb_port.sv",
+        "manifest": "runs/phase4_loop_4/drop/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/phase4_loop_4/drop/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "(path-level)",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_04_scheduler_bank_loop_checker.py",
+      "scope": "path_04_scheduler_bank_loop",
+      "verdict": "pass",
+      "summary": "scope=path_04_scheduler_bank_loop  strategy=invariant  status=pass  (353 transactions, no rule broken)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/paths/path_04_scheduler_bank_loop_sim.log",
+  "observed_trace": "Validation/reports/paths/path_04_scheduler_bank_loop_observed.jsonl"
+}

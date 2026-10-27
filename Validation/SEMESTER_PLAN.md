@@ -817,6 +817,23 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   `rtl_drop.drop_id()` (contract §2), verified equal on the same tree.
   Nothing asked. The `- 1` on the read latency and the schema miss are
   still open; no data_path change in this push.
+- *2026-10-27, afternoon — the first all-phase PASS on a real defect.*
+  Her second push of the day: the `- 1` on the read latency exactly as
+  addendum 4 specified, and `explanation`/`shift_left_recommendations`
+  out of the agent's required fields. `runs/phase4_loop_4` from the
+  golden spec: 19/19 PASS in round 1, no findings, drop `5c30eb9e7184`;
+  the two read paths that had failed every round since 10-15 pass, and
+  read-after-write returns what was written. Step 4b re-proved the
+  design: command path 13 proven + REF_001 bounded (tREFI undetermined
+  concretely, bounded under the assumed configuration, no undetermined
+  left there); coverage 28 + 11 unreachable. Flow COMPLETE with backend
+  skipped. The defect was found by validation (10-15), explained to the
+  Frontend, and fixed by hand from that explanation after her agent
+  could not; the loop's routing and confirmation worked every round, the
+  agent's repair did not. The repo's `OutputFolders` still holds the old
+  data_path (she did not regenerate it), so the repo drop still fails
+  and the passing drop lives only under the run: asked her to regenerate
+  and commit (reply addendum 6). Next: one full run with the backend on.
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

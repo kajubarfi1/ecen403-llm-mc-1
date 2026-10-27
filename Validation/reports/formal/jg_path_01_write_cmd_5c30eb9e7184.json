@@ -1,0 +1,301 @@
+{
+  "$schema": "validation-formal/1",
+  "generated_utc": "2026-10-27T18:55:21.570404+00:00",
+  "tool": "JasperGold (Olympus)",
+  "drop": "5c30eb9e7184",
+  "design_id": "c43464119623",
+  "blocks_design_id": "dc5b2b2d6d7f",
+  "path": "path_01_write_cmd",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "top": "Validation/formal/chain_formal.sv",
+  "assertions_files": [
+    "Validation/sva/generated/cmd_gen_sva.sv",
+    "Validation/sva/generated/cmd_gen_sva_bind.sv",
+    "Validation/sva/generated/scheduler_order_sva.sv",
+    "Validation/sva/generated/scheduler_order_sva_bind.sv"
+  ],
+  "abstractions": [],
+  "prove_time_limit": "20m",
+  "max_trace_length": null,
+  "bounded_bar_cycles": 28080,
+  "bounded_bars": {
+    "TIMING_012": 28080,
+    "TIMING_001": 6,
+    "TIMING_002": 6,
+    "TIMING_003": 14,
+    "TIMING_004": 20,
+    "TIMING_005": 4,
+    "TIMING_007": 4,
+    "TIMING_008": 6,
+    "TIMING_009": 4,
+    "TIMING_010": 2,
+    "TIMING_011": 64,
+    "TIMING_006": 16,
+    "REF_001": 368,
+    "*": 28080
+  },
+  "summary": {
+    "assertions": 15,
+    "proven": 13,
+    "cex": 0,
+    "undetermined": 1,
+    "bounded_proven": 1,
+    "covers": 15,
+    "covered": 15
+  },
+  "results": [
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_001",
+      "short": "a_TIMING_001",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "30.935 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_002",
+      "short": "a_TIMING_002",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "30.935 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_003",
+      "short": "a_TIMING_003",
+      "status": "proven",
+      "engine": "N",
+      "bound": "Infinite",
+      "time": "21.947 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004",
+      "short": "a_TIMING_004",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "154.624 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005",
+      "short": "a_TIMING_005",
+      "status": "proven",
+      "engine": "AM",
+      "bound": "Infinite",
+      "time": "1.118 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_007",
+      "short": "a_TIMING_007",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "8.077 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_008",
+      "short": "a_TIMING_008",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "30.935 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_009",
+      "short": "a_TIMING_009",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "15.494 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011",
+      "short": "a_TIMING_011",
+      "status": "proven",
+      "engine": "Ncustom3",
+      "bound": "Infinite",
+      "time": "51.577 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_006",
+      "short": "a_TIMING_006",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "27.760 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_012",
+      "short": "a_TIMING_012",
+      "status": "undetermined",
+      "engine": "Oh",
+      "bound": "14044",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_001",
+      "short": "a_PROTO_001",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "193.713 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_002",
+      "short": "a_PROTO_002",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "776.139 s"
+    },
+    {
+      "property": "chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_002",
+      "short": "a_REF_002",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "15.494 s"
+    },
+    {
+      "property": "chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_001",
+      "short": "a_REF_001",
+      "status": "bounded_proven",
+      "engine": "Ht",
+      "bound": "1770",
+      "time": null,
+      "bounded_bar": 368,
+      "note": "bounded proof: no counterexample to depth 1770, signoff bar 368 (2 x this property's bound under these parameters)"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_001",
+      "short": "c_TIMING_001",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "7",
+      "time": "0.531 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_002",
+      "short": "c_TIMING_002",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "38",
+      "time": "154.474 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_003",
+      "short": "c_TIMING_003",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "11",
+      "time": "0.621 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_004",
+      "short": "c_TIMING_004",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "14",
+      "time": "0.659 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_005",
+      "short": "c_TIMING_005",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "6",
+      "time": "0.424 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_007",
+      "short": "c_TIMING_007",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "20",
+      "time": "10.999 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_008",
+      "short": "c_TIMING_008",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "21",
+      "time": "13.796 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_009",
+      "short": "c_TIMING_009",
+      "status": "covered",
+      "engine": "Bm",
+      "bound": "20",
+      "time": "11.163 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_011",
+      "short": "c_TIMING_011",
+      "status": "covered",
+      "engine": "L",
+      "bound": "35 - 36",
+      "time": "7.056 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_006",
+      "short": "c_TIMING_006",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "5",
+      "time": "0.232 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_012",
+      "short": "c_TIMING_012",
+      "status": "covered",
+      "engine": "J",
+      "bound": "44 - 9401",
+      "time": "15.112 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_001",
+      "short": "c_PROTO_001",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "19",
+      "time": "7.518 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_002",
+      "short": "c_PROTO_002",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "5",
+      "time": "0.232 s"
+    },
+    {
+      "property": "chain_formal.u_scheduler.u_scheduler_order_sva.c_REF_002",
+      "short": "c_REF_002",
+      "status": "covered",
+      "engine": "J",
+      "bound": "42 - 7803",
+      "time": "8.462 s"
+    },
+    {
+      "property": "chain_formal.u_scheduler.u_scheduler_order_sva.c_REF_001",
+      "short": "c_REF_001",
+      "status": "covered",
+      "engine": "J",
+      "bound": "42 - 7803",
+      "time": "8.462 s"
+    }
+  ],
+  "raw_report": "Validation/reports/formal/jg_path_01_write_cmd_5c30eb9e7184_report.txt"
+}

@@ -4,7 +4,7 @@
 //
 // Interface : wb_rsp   (Host Wishbone response stream out of wb_port)
 // Block     : wb_port
-// Manifest  : runs/phase4_loop_3/drop/PHASE1RTL/wb_port_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

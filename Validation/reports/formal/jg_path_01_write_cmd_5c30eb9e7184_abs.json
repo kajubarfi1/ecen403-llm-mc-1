@@ -1,0 +1,336 @@
+{
+  "$schema": "validation-formal/1",
+  "generated_utc": "2026-10-27T19:15:34.784391+00:00",
+  "tool": "JasperGold (Olympus)",
+  "drop": "5c30eb9e7184",
+  "design_id": "c43464119623",
+  "blocks_design_id": "dc5b2b2d6d7f",
+  "path": "path_01_write_cmd",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "top": "Validation/formal/chain_formal.sv",
+  "assertions_files": [
+    "Validation/sva/generated/cmd_gen_sva.sv",
+    "Validation/sva/generated/cmd_gen_sva_bind.sv",
+    "Validation/sva/generated/scheduler_order_sva.sv",
+    "Validation/sva/generated/scheduler_order_sva_bind.sv"
+  ],
+  "abstractions": [
+    {
+      "stopat": "u_config_regs.reg_refresh_config",
+      "effect": "signal driven free; proofs remain sound, cex may be spurious"
+    },
+    {
+      "stopat": "u_config_regs.reg_timing_3",
+      "effect": "signal driven free; proofs remain sound, cex may be spurious"
+    },
+    {
+      "assume": "u_config_regs.reg_refresh_config == 32'h00000111",
+      "effect": "constrains the free signal; a proof holds for the assumed configuration only"
+    },
+    {
+      "assume": "u_config_regs.reg_timing_3 == 32'h00020404",
+      "effect": "constrains the free signal; a proof holds for the assumed configuration only"
+    },
+    {
+      "sva_param": "TIMING_012_BOUND=258",
+      "effect": "assertion bound scaled to match the assumed configuration"
+    },
+    {
+      "sva_param": "TIMING_012_INTERVAL=129",
+      "effect": "assertion bound scaled to match the assumed configuration"
+    }
+  ],
+  "prove_time_limit": "20m",
+  "max_trace_length": null,
+  "bounded_bar_cycles": 516,
+  "bounded_bars": {
+    "TIMING_012": 516,
+    "TIMING_001": 6,
+    "TIMING_002": 6,
+    "TIMING_003": 14,
+    "TIMING_004": 20,
+    "TIMING_005": 4,
+    "TIMING_007": 4,
+    "TIMING_008": 6,
+    "TIMING_009": 4,
+    "TIMING_010": 2,
+    "TIMING_011": 64,
+    "TIMING_006": 16,
+    "REF_001": 368,
+    "*": 516
+  },
+  "summary": {
+    "assertions": 15,
+    "proven": 9,
+    "cex": 0,
+    "undetermined": 0,
+    "bounded_proven": 6,
+    "covers": 15,
+    "covered": 3
+  },
+  "results": [
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_001",
+      "short": "a_TIMING_001",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "50.878 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_002",
+      "short": "a_TIMING_002",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "50.879 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_003",
+      "short": "a_TIMING_003",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "479.809 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004",
+      "short": "a_TIMING_004",
+      "status": "bounded_proven",
+      "engine": "Ht",
+      "bound": "6842",
+      "time": null,
+      "bounded_bar": 20,
+      "note": "bounded proof: no counterexample to depth 6842, signoff bar 20 (2 x this property's bound under these parameters)"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005",
+      "short": "a_TIMING_005",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "7.875 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_007",
+      "short": "a_TIMING_007",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "7.875 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_008",
+      "short": "a_TIMING_008",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "50.879 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_009",
+      "short": "a_TIMING_009",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "16.869 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011",
+      "short": "a_TIMING_011",
+      "status": "bounded_proven",
+      "engine": "Ht",
+      "bound": "6842",
+      "time": null,
+      "bounded_bar": 64,
+      "note": "bounded proof: no counterexample to depth 6842, signoff bar 64 (2 x this property's bound under these parameters)"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_006",
+      "short": "a_TIMING_006",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "33.813 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_012",
+      "short": "a_TIMING_012",
+      "status": "bounded_proven",
+      "engine": "Ht",
+      "bound": "6842",
+      "time": null,
+      "bounded_bar": 516,
+      "note": "bounded proof: no counterexample to depth 6842, signoff bar 516 (2 x this property's bound under these parameters)"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_001",
+      "short": "a_PROTO_001",
+      "status": "bounded_proven",
+      "engine": "Ht",
+      "bound": "6842",
+      "time": null,
+      "bounded_bar": 516,
+      "note": "bounded proof: no counterexample to depth 6842, signoff bar 516 (2 x this property's bound under these parameters)"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_002",
+      "short": "a_PROTO_002",
+      "status": "bounded_proven",
+      "engine": "Ht",
+      "bound": "6842",
+      "time": null,
+      "bounded_bar": 516,
+      "note": "bounded proof: no counterexample to depth 6842, signoff bar 516 (2 x this property's bound under these parameters)"
+    },
+    {
+      "property": "chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_002",
+      "short": "a_REF_002",
+      "status": "proven",
+      "engine": "Mpcustom2",
+      "bound": "Infinite",
+      "time": "16.869 s"
+    },
+    {
+      "property": "chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_001",
+      "short": "a_REF_001",
+      "status": "bounded_proven",
+      "engine": "Ht",
+      "bound": "6842",
+      "time": null,
+      "bounded_bar": 368,
+      "note": "bounded proof: no counterexample to depth 6842, signoff bar 368 (2 x this property's bound under these parameters)"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_001",
+      "short": "c_TIMING_001",
+      "status": "undetermined",
+      "engine": "Ht",
+      "bound": "6842",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_002",
+      "short": "c_TIMING_002",
+      "status": "undetermined",
+      "engine": "Ht",
+      "bound": "6842",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_003",
+      "short": "c_TIMING_003",
+      "status": "undetermined",
+      "engine": "Ht",
+      "bound": "6842",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_004",
+      "short": "c_TIMING_004",
+      "status": "undetermined",
+      "engine": "Ht",
+      "bound": "6842",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_005",
+      "short": "c_TIMING_005",
+      "status": "undetermined",
+      "engine": "Bcustom19",
+      "bound": "7217",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_007",
+      "short": "c_TIMING_007",
+      "status": "undetermined",
+      "engine": "Ht",
+      "bound": "6842",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_008",
+      "short": "c_TIMING_008",
+      "status": "undetermined",
+      "engine": "Ht",
+      "bound": "6842",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_009",
+      "short": "c_TIMING_009",
+      "status": "undetermined",
+      "engine": "Ht",
+      "bound": "6842",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_011",
+      "short": "c_TIMING_011",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "36",
+      "time": "1.069 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_006",
+      "short": "c_TIMING_006",
+      "status": "undetermined",
+      "engine": "Ht",
+      "bound": "6842",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_012",
+      "short": "c_TIMING_012",
+      "status": "covered",
+      "engine": "Ht",
+      "bound": "136",
+      "time": "5.988 s"
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_001",
+      "short": "c_PROTO_001",
+      "status": "undetermined",
+      "engine": "Ht",
+      "bound": "6842",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_002",
+      "short": "c_PROTO_002",
+      "status": "undetermined",
+      "engine": "Ht",
+      "bound": "6842",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_scheduler.u_scheduler_order_sva.c_REF_002",
+      "short": "c_REF_002",
+      "status": "undetermined",
+      "engine": "Ht",
+      "bound": "6842",
+      "time": null
+    },
+    {
+      "property": "chain_formal.u_scheduler.u_scheduler_order_sva.c_REF_001",
+      "short": "c_REF_001",
+      "status": "covered",
+      "engine": "Bm",
+      "bound": "3",
+      "time": "0.165 s"
+    }
+  ],
+  "raw_report": "Validation/reports/formal/jg_path_01_write_cmd_5c30eb9e7184_abs_report.txt"
+}
