@@ -76,8 +76,12 @@ GENERATOR_INFO = {
     "data_path": ("data_path_gen", "DataPathGenerator"),
 }
 
-_REQUIRED_PROPOSAL_KEYS = ("root_cause", "explanation", "shift_left_recommendations",
-                           "confidence", "corrected_generator_source")
+# explanation/shift_left_recommendations dropped from required (Validation
+# addendum 4/5, 2026-10-22/27): prose the loop never reads, and the model
+# kept losing one of them mid-call, burning whole attempts on a one-line
+# fix with nothing left to diagnose. Still requestable -- just not fatal
+# if the model omits them under schema pressure.
+_REQUIRED_PROPOSAL_KEYS = ("root_cause", "confidence", "corrected_generator_source")
 
 PROPOSE_FIX_TOOL = {
     "name": "propose_fix",
@@ -516,11 +520,13 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
 
         print(f"\n  ROOT CAUSE ({proposal['confidence']} confidence):")
         print(f"    {proposal['root_cause']}")
-        print(f"\n  EXPLANATION:")
-        print(f"    {proposal['explanation']}")
-        print(f"\n  SHIFT-LEFT RECOMMENDATIONS:")
-        for r in proposal["shift_left_recommendations"]:
-            print(f"    - {r}")
+        if proposal.get("explanation"):
+            print(f"\n  EXPLANATION:")
+            print(f"    {proposal['explanation']}")
+        if proposal.get("shift_left_recommendations"):
+            print(f"\n  SHIFT-LEFT RECOMMENDATIONS:")
+            for r in proposal["shift_left_recommendations"]:
+                print(f"    - {r}")
         print(f"\n  PROPOSED DIFF ({gen_path}):")
         print(diff if diff.strip() else "  (no textual diff -- proposal is identical to current source)")
 
@@ -584,8 +590,8 @@ def _fix_one_module(module: str, entry: dict, spec_path: str, output_dir: str,
 
         record["attempts"].append({
             "attempt": attempt, "status": "applied",
-            "root_cause": proposal["root_cause"], "explanation": proposal["explanation"],
-            "shift_left_recommendations": proposal["shift_left_recommendations"],
+            "root_cause": proposal["root_cause"], "explanation": proposal.get("explanation"),
+            "shift_left_recommendations": proposal.get("shift_left_recommendations"),
             "confidence": proposal["confidence"], "diff": diff,
             "reverification": reverify, "fixed": fixed,
         })
