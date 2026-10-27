@@ -3,7 +3,7 @@
 // scheduler_tb.sv — 32 self-checking tests
 //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 module scheduler_tb;
-    localparam DEPTH=4,IDX_BITS=2,ROW_BITS=14;
+    localparam DEPTH=16,IDX_BITS=4,ROW_BITS=15;
     localparam COL_BITS=10,BANK_BITS=3,NUM_BANKS=8,AUX_WIDTH=4;
     localparam CMD_NOP=0,CMD_ACT=1,CMD_RD=2,CMD_WR=3,CMD_PRE=4,CMD_REF=5;
     logic clk=0; always #2.5 clk=~clk;

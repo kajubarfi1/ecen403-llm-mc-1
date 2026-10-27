@@ -3,7 +3,7 @@
 // File:      calibration.sv
 // Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)
 // Generator:     Calibration Generator (Phase 2)
-// Spec:      ddr3_mc_800_x16_1lane_1rank rev compiled_ddr3800_x16_1lane_1rank_c28250a3
+// Spec:      ddr3_mc_core_v2 rev golden_ddr3_1600k_x8_2lane_1rank
 //
 // Description:
 //   Minimal calibration block for abstract PHY boundary.

@@ -13,9 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 module cmd_gen #(
-    parameter DDR_ADDR_W = 14,
+    parameter DDR_ADDR_W = 15,
     parameter DDR_BANK_W = 3,
-    parameter ROW_BITS   = 14,
+    parameter ROW_BITS   = 15,
     parameter COL_BITS   = 10,
     parameter BANK_BITS  = 3,
     parameter AUX_WIDTH  = 4

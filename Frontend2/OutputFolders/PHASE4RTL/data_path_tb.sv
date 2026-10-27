@@ -46,7 +46,7 @@
 //==============================================================
 module data_path_tb;
 
-    localparam real CLK_PERIOD = 10.0;
+    localparam real CLK_PERIOD = 5.0;
     localparam DATA_WIDTH = 32;
     localparam DQ_WIDTH   = 16;
     localparam SEL_WIDTH  = 4;
@@ -124,7 +124,7 @@ module data_path_tb;
         wr_data_valid = 0; wr_data = 0; wr_mask = 0;
         test_rd_word = 0; ddr_dqs_i = 0;
         wr_beat_q.delete(); dm_beat_q.delete();
-        cfg_CL_nCK = 8'd6; cfg_CWL_nCK = 8'd5;
+        cfg_CL_nCK = 8'd11; cfg_CWL_nCK = 8'd8;
         repeat (5) @(posedge clk);
         rst_n = 1;
         repeat (2) @(posedge clk);
@@ -228,7 +228,7 @@ module data_path_tb;
             logic got;
             logic [DATA_WIDTH-1:0] rdata;
             logic [AUX_WIDTH-1:0] raux;
-            wait_rd_rsp(got, rdata, raux, 2 + BURST_CTRL_CYC + 10);
+            wait_rd_rsp(got, rdata, raux, 3 + BURST_CTRL_CYC + 10);
             check("C2: rd_rsp_valid asserted", got);
             check($sformatf("C3: rd_rsp_data=0x%08X", rdata), got && rdata==32'hCAFE1234);
             check($sformatf("C4: rd_rsp_aux=%0d [exp 7]", raux), got && raux==4'd7);
@@ -251,7 +251,7 @@ module data_path_tb;
             logic got;
             logic [DATA_WIDTH-1:0] rdata;
             logic [AUX_WIDTH-1:0] raux;
-            wait_rd_rsp(got, rdata, raux, 2 + BURST_CTRL_CYC + 10);
+            wait_rd_rsp(got, rdata, raux, 3 + BURST_CTRL_CYC + 10);
             check("E1: 2 words captured", got);
             check("E2: Responses delivered", got);
         end
@@ -294,7 +294,7 @@ module data_path_tb;
             logic got;
             logic [DATA_WIDTH-1:0] rdata;
             logic [AUX_WIDTH-1:0] raux;
-            wait_rd_rsp(got, rdata, raux, 2 + BURST_CTRL_CYC + 10);
+            wait_rd_rsp(got, rdata, raux, 3 + BURST_CTRL_CYC + 10);
             check($sformatf("G1: Aux tag=%0d [exp 5]", raux), got && raux==4'd5);
         end
         test_rd_word = 0;
@@ -307,7 +307,7 @@ module data_path_tb;
             logic got;
             logic [DATA_WIDTH-1:0] rdata;
             logic [AUX_WIDTH-1:0] raux;
-            wait_rd_rsp(got, rdata, raux, 2 + BURST_CTRL_CYC + 10);
+            wait_rd_rsp(got, rdata, raux, 3 + BURST_CTRL_CYC + 10);
             check($sformatf("G2: Different aux=%0d [exp 9]", raux), got && raux==4'd9);
         end
         test_rd_word = 0;
@@ -326,7 +326,7 @@ module data_path_tb;
             logic got;
             logic [DATA_WIDTH-1:0] rdata;
             logic [AUX_WIDTH-1:0] raux;
-            wait_rd_rsp(got, rdata, raux, 2 + BURST_CTRL_CYC + 10);
+            wait_rd_rsp(got, rdata, raux, 3 + BURST_CTRL_CYC + 10);
             check("H2: Read responses in order", got);
         end
         test_rd_word = 0;
@@ -336,7 +336,7 @@ module data_path_tb;
         issue_wr_cmd(4'd0);
         repeat (2 + BURST_CTRL_CYC + 2) @(posedge clk);
         issue_rd_cmd_data(4'd2, 32'hFEED0000);
-        repeat (2 + BURST_CTRL_CYC + 10) @(posedge clk);
+        repeat (3 + BURST_CTRL_CYC + 10) @(posedge clk);
         test_rd_word = 0;
         check("H3: Write then read no interference", 1);
 

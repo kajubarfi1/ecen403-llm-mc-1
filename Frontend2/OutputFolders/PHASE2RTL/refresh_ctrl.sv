@@ -1,7 +1,7 @@
 // refresh_ctrl.sv -- tREFI interval counter, postpone tracking,
 // urgent-threshold escalation, refresh starvation detection.
 module refresh_ctrl #(
-    parameter REFI_CTR_W = 12,
+    parameter REFI_CTR_W = 13,
     parameter CLK_RATIO  = 4,   // DDR clocks per controller clock
     parameter POST_CTR_W = 4
 ) (

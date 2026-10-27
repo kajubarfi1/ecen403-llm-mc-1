@@ -22,7 +22,7 @@ module ddr3_controller (
     input  logic [15:0]       data_path_ddr_dq_i,
     input  logic              data_path_ddr_dqs_i,
     input  logic              init_fsm_enable,
-    input  logic [27:0]       wb_port_wb_adr_i,
+    input  logic [28:0]       wb_port_wb_adr_i,
     input  logic [1:0]        wb_port_wb_bte_i,
     input  logic [2:0]        wb_port_wb_cti_i,
     input  logic              wb_port_wb_cyc_i,
@@ -36,13 +36,13 @@ module ddr3_controller (
     output logic              calibration_zqcs_req,
     output logic              cmd_gen_cmd_out_valid,
     output logic              cmd_gen_cmd_out_we,
-    output logic [13:0]       cmd_gen_ddr_addr,
+    output logic [14:0]       cmd_gen_ddr_addr,
     output logic [2:0]        cmd_gen_ddr_bank,
     output logic              cmd_gen_ddr_cke,
     output logic [3:0]        cmd_gen_ddr_cmd,
     output logic              cmd_gen_ddr_odt,
     output logic              cmd_gen_ddr_reset_n,
-    output logic [2:0]        cmd_queue_queue_count,
+    output logic [4:0]        cmd_queue_queue_count,
     output logic              cmd_queue_queue_empty,
     output logic              cmd_queue_queue_full,
     output logic [28:0]       config_regs_cfg_bist_addr_end,
@@ -64,7 +64,7 @@ module ddr3_controller (
     output logic              data_path_ddr_dqs_o,
     output logic              data_path_ddr_dqs_oe,
     output logic              data_path_wr_data_ready,
-    output logic [13:0]       init_fsm_init_addr,
+    output logic [14:0]       init_fsm_init_addr,
     output logic [2:0]        init_fsm_init_bank,
     output logic              init_fsm_init_cke,
     output logic [3:0]        init_fsm_init_cmd,
@@ -80,10 +80,10 @@ module ddr3_controller (
     // -- internal nets: direct block-to-block connections --
     logic [2:0]        w_addr_decoder__dec_bank;
     logic [9:0]        w_addr_decoder__dec_col;
-    logic [13:0]       w_addr_decoder__dec_row;
+    logic [14:0]       w_addr_decoder__dec_row;
     logic [7:0]        w_bank_tracker__bank_act_allowed;
     logic [7:0]        w_bank_tracker__bank_is_active;
-    logic [13:0]       w_bank_tracker__bank_open_row[8];
+    logic [14:0]       w_bank_tracker__bank_open_row[8];
     logic [7:0]        w_bank_tracker__bank_pre_allowed;
     logic [7:0]        w_bank_tracker__bank_rd_allowed;
     logic [7:0]        w_bank_tracker__bank_wr_allowed;
@@ -91,7 +91,7 @@ module ddr3_controller (
     logic              w_calibration__cal_fail;
     logic [3:0]        w_cmd_gen__cmd_out_aux;
     logic [2:0]        w_cmd_gen__fb_act_bank;
-    logic [13:0]       w_cmd_gen__fb_act_row;
+    logic [14:0]       w_cmd_gen__fb_act_row;
     logic              w_cmd_gen__fb_act_valid;
     logic              w_cmd_gen__fb_pre_all;
     logic [2:0]        w_cmd_gen__fb_pre_bank;
@@ -102,12 +102,12 @@ module ddr3_controller (
     logic [2:0]        w_cmd_gen__fb_wr_bank;
     logic              w_cmd_gen__fb_wr_valid;
     logic              w_cmd_queue__enq_ready;
-    logic [3:0]        w_cmd_queue__entry_aux[4];
-    logic [2:0]        w_cmd_queue__entry_bank[4];
-    logic [9:0]        w_cmd_queue__entry_col[4];
-    logic [13:0]       w_cmd_queue__entry_row[4];
-    logic [3:0]        w_cmd_queue__entry_valid;
-    logic              w_cmd_queue__entry_we[4];
+    logic [3:0]        w_cmd_queue__entry_aux[16];
+    logic [2:0]        w_cmd_queue__entry_bank[16];
+    logic [9:0]        w_cmd_queue__entry_col[16];
+    logic [14:0]       w_cmd_queue__entry_row[16];
+    logic [15:0]       w_cmd_queue__entry_valid;
+    logic              w_cmd_queue__entry_we[16];
     logic [7:0]        w_config_regs__cfg_CL_nCK;
     logic [7:0]        w_config_regs__cfg_CWL_nCK;
     logic              w_config_regs__cfg_force_refresh;
@@ -138,14 +138,14 @@ module ddr3_controller (
     logic [3:0]        w_scheduler__cmd_aux;
     logic [2:0]        w_scheduler__cmd_bank;
     logic [9:0]        w_scheduler__cmd_col;
-    logic [13:0]       w_scheduler__cmd_row;
+    logic [14:0]       w_scheduler__cmd_row;
     logic [3:0]        w_scheduler__cmd_type;
     logic              w_scheduler__cmd_valid;
     logic              w_scheduler__cmd_we;
     logic              w_scheduler__deq_grant;
-    logic [1:0]        w_scheduler__deq_idx;
+    logic [3:0]        w_scheduler__deq_idx;
     logic              w_scheduler__ref_ack;
-    logic [27:0]       w_wb_port__req_addr;
+    logic [28:0]       w_wb_port__req_addr;
     logic [3:0]        w_wb_port__req_aux;
     logic              w_wb_port__req_valid;
     logic [31:0]       w_wb_port__req_wdata;

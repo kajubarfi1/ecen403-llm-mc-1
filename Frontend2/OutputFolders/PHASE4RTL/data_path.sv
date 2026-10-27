@@ -3,18 +3,18 @@
 // File:      data_path.sv
 // Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)
 // Generator:     Data Path / Alignment Generator (Phase 3)
-// Spec:      ddr3_mc_800_x16_1lane_1rank rev compiled_ddr3800_x16_1lane_1rank_c28250a3
+// Spec:      ddr3_mc_core_v2 rev golden_ddr3_1600k_x8_2lane_1rank
 //
 // Description:
-//   DDR3 data path and alignment block. Bridges the 100MHz
-//   controller domain to the 400MHz DDR domain.
+//   DDR3 data path and alignment block. Bridges the 200MHz
+//   controller domain to the 800MHz DDR domain.
 //   Write: serialize 32-bit words into BL8 DDR transfers.
 //   Read:  deserialize BL8 captures back to 32-bit words.
 //   Alignment: 4:1 ratio, 2 ctrl cycles per BL8 burst.
 //
 // Key parameters:
 //   DATA_WIDTH=32, DQ_WIDTH=16, BL=8
-//   CL=6 nCK (2 ctrl), CWL=5 nCK (2 ctrl)
+//   CL=11 nCK (3 ctrl), CWL=8 nCK (2 ctrl)
 //   AUX_WIDTH=4, RD_FIFO_DEPTH=16
 //
 // Validation: DP-001 .. DP-012
@@ -32,7 +32,7 @@ module data_path #(
     parameter WORD_BEATS       = 2,
     parameter RD_FIFO_DEPTH    = 16,
     parameter FIFO_PTR_W       = 4,
-    parameter CL_CTRL_DEFAULT  = 2,
+    parameter CL_CTRL_DEFAULT  = 3,
     parameter CWL_CTRL_DEFAULT = 2
 ) (
     // Clock / Reset

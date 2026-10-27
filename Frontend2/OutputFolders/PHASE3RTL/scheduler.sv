@@ -10,9 +10,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 module scheduler #(
-    parameter DEPTH     = 4,
-    parameter IDX_BITS  = 2,
-    parameter ROW_BITS  = 14,
+    parameter DEPTH     = 16,
+    parameter IDX_BITS  = 4,
+    parameter ROW_BITS  = 15,
     parameter COL_BITS  = 10,
     parameter BANK_BITS = 3,
     parameter NUM_BANKS = 8,

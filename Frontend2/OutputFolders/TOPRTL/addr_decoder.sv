@@ -3,11 +3,11 @@
 // File:      addr_decoder.sv
 // Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)
 // Generator:     Address Decoder Generator (Phase 2)
-// Spec:      ddr3_mc_800_x16_1lane_1rank rev compiled_ddr3800_x16_1lane_1rank_c28250a3
+// Spec:      ddr3_mc_core_v2 rev golden_ddr3_1600k_x8_2lane_1rank
 //
 // Description:
-//   Combinational address decoder. Maps 28-bit byte address to
-//   row[13:0], bank[2:0], col[9:0].
+//   Combinational address decoder. Maps 29-bit byte address to
+//   row[14:0], bank[2:0], col[9:0].
 //   Mapping policy: row-bank-column
 //   Zero pipeline latency.
 //
@@ -15,15 +15,15 @@
 //   addr[3:0]    → burst byte offset (4 bits, BL8 × 4B)
 //   addr[10:4]   → column [9:3]  (7 usable bits, A[2:0]=0 for BL8)
 //   addr[13:11]  → bank   [2:0]
-//   addr[27:14]  → row    [13:0]
+//   addr[28:14]  → row    [14:0]
 //
 // Dependency: Wishbone Port (receives req_addr)
 // Validation: AD-001 .. AD-003
 ////////////////////////////////////////////////////////////////////////////////
 
 module addr_decoder #(
-    parameter ADDR_WIDTH = 28,
-    parameter ROW_BITS   = 14,
+    parameter ADDR_WIDTH = 29,
+    parameter ROW_BITS   = 15,
     parameter COL_BITS   = 10,
     parameter BANK_BITS  = 3,
     parameter RANK_BITS  = 1
@@ -43,14 +43,14 @@ module addr_decoder #(
     // ================================================================
     // Purely combinational, zero latency.
     //
-    //  |<-- row [14b] -->|<-- bank [3b] -->|<-- col [10b] -->|<-- byte_off [4b] -->|
-    //  [27                  14] [13            11] [10            4] [3             0]
+    //  |<-- row [15b] -->|<-- bank [3b] -->|<-- col [10b] -->|<-- byte_off [4b] -->|
+    //  [28                  14] [13            11] [10            4] [3             0]
     // ================================================================
 
     // Column: upper bits from address, lower 3 bits = 0 (BL8 burst)
     assign dec_col  = {req_addr[10:4], 3'b000};
     assign dec_bank = req_addr[13:11];
-    assign dec_row  = req_addr[27:14];
+    assign dec_row  = req_addr[28:14];
 
     // Single-rank system: rank always 0
     assign dec_rank = '0;

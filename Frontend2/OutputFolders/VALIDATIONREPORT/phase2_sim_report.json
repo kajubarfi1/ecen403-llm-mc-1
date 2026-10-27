@@ -11,14 +11,14 @@
         "[PASS] V1: addr=0x0 bank",
         "[PASS] V1: addr=0x0 col",
         "[PASS] V1: addr=0x0 rank",
-        "[PASS] V2: addr=0xfffffff row",
-        "[PASS] V2: addr=0xfffffff bank",
-        "[PASS] V2: addr=0xfffffff col",
-        "[PASS] V2: addr=0xfffffff rank",
-        "[PASS] V3: addr=0xfffc000 row",
-        "[PASS] V3: addr=0xfffc000 bank",
-        "[PASS] V3: addr=0xfffc000 col",
-        "[PASS] V3: addr=0xfffc000 rank",
+        "[PASS] V2: addr=0x1fffffff row",
+        "[PASS] V2: addr=0x1fffffff bank",
+        "[PASS] V2: addr=0x1fffffff col",
+        "[PASS] V2: addr=0x1fffffff rank",
+        "[PASS] V3: addr=0x1fffc000 row",
+        "[PASS] V3: addr=0x1fffc000 bank",
+        "[PASS] V3: addr=0x1fffc000 col",
+        "[PASS] V3: addr=0x1fffc000 rank",
         "[PASS] V4: addr=0x3800 row",
         "[PASS] V4: addr=0x3800 bank",
         "[PASS] V4: addr=0x3800 col",
@@ -53,7 +53,7 @@
       ],
       "fail_lines": [],
       "assertion_errors": [
-        "xmsim: *E,ASRTST (./calibration.sv,91): (time 85 NS) Assertion calibration_tb.dut.p_cal_after_init has failed"
+        "xmsim: *E,ASRTST (./calibration.sv,91): (time 42500 PS) Assertion calibration_tb.dut.p_cal_after_init has failed"
       ],
       "log_file": "calibration_xrun.log"
     },
@@ -113,7 +113,7 @@
         "[PASS] I0: bank_rd_allowed[1] before the WR",
         "[PASS] I1: bank_rd_allowed[1] blocked right after a WR to bank 0 (tWTR)",
         "[PASS] I2: bank_rd_allowed[1] still blocked after tCCD (tWTR window not over)",
-        "[PASS] I3: bank_rd_allowed[1] after tWTR+CWL+BL/2=13",
+        "[PASS] I3: bank_rd_allowed[1] after tWTR+CWL+BL/2=16",
         "[PASS] J1: bank_is_active all clear after REF",
         "[PASS] J2: all_banks_idle after REF",
         "[PASS] J3: bank_act_allowed[0] blocked right after REF (tRFC)",
@@ -124,6 +124,6 @@
       "log_file": "bank_tracker_xrun.log"
     }
   },
-  "timestamp": "2026-10-27T14:28:06.798295",
+  "timestamp": "2026-10-27T15:37:31.088207",
   "server": "olympus.ece.tamu.edu"
 }

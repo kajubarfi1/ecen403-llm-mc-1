@@ -4,9 +4,9 @@
 module bank_tracker #(
     parameter NUM_BANKS  = 8,
     parameter BANK_BITS  = 3,
-    parameter ROW_BITS   = 14,
-    parameter CTR_WIDTH  = 7,
-    parameter WTR_DATA   = 9   // CWL + BL/2: WR command -> end of write data
+    parameter ROW_BITS   = 15,
+    parameter CTR_WIDTH  = 8,
+    parameter WTR_DATA   = 12   // CWL + BL/2: WR command -> end of write data
 ) (
     input  logic                       clk,
     input  logic                       rst_n,
