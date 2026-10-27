@@ -4,7 +4,7 @@
 //
 // Interface : sched_cmd   (Commands selected by the FR-FCFS scheduler)
 // Block     : scheduler
-// Manifest  : runs/phase4_loop_3/drop/PHASE3RTL/scheduler_manifest.json
+// Manifest  : runs/20261027-142626-interactive/drop/PHASE3RTL/scheduler_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //
@@ -22,7 +22,7 @@ module sched_cmd_monitor #(
     input  logic [3:0] cmd_aux,
     input  logic [2:0] cmd_bank,
     input  logic [9:0] cmd_col,
-    input  logic [14:0] cmd_row,
+    input  logic [13:0] cmd_row,
     input  logic [3:0] cmd_type,
     input  logic cmd_valid,
     input  logic cmd_we

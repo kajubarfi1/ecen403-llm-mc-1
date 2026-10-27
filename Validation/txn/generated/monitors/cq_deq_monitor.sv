@@ -4,7 +4,7 @@
 //
 // Interface : cq_deq   (Entries retired from the command queue on a scheduler grant)
 // Block     : cmd_queue
-// Manifest  : runs/phase4_loop_3/drop/PHASE3RTL/cmd_queue_manifest.json
+// Manifest  : runs/20261027-142626-interactive/drop/PHASE3RTL/cmd_queue_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //
@@ -20,7 +20,7 @@ module cq_deq_monitor #(
     input  logic clk,
     input  logic rst_n,
     input  logic deq_grant,
-    input  logic [3:0] deq_idx
+    input  logic [1:0] deq_idx
 );
 
   // A reset is a real event a stateful predictor must see. Without it the

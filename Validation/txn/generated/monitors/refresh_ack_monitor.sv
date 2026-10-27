@@ -4,7 +4,7 @@
 //
 // Interface : refresh_ack   (Scheduler acknowledgement consumed by the refresh controller)
 // Block     : refresh_ctrl
-// Manifest  : runs/phase4_loop_3/drop/PHASE2RTL/refresh_ctrl_manifest.json
+// Manifest  : runs/20261027-142626-interactive/drop/PHASE2RTL/refresh_ctrl_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //
