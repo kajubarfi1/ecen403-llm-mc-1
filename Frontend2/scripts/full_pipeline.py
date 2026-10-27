@@ -47,14 +47,45 @@
 """
 from __future__ import annotations
 
+import atexit
 import json
 import os
+import shutil
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PYTHON = sys.executable
+# Frontend2/OutputFolders stays the flat, canonical drop location -- it's the
+# default root Validation's HANDOFF_CONTRACT.md names, what backend/agents/
+# pipeline.py auto-discovers, and what Validation/tools/run_netlists.py and
+# two Validation tests read directly. Changing that would mean repointing
+# every one of those each run. Instead: generation still lands there, and a
+# timestamped snapshot is ALSO archived underneath it on exit (see
+# _archive_output_folders_snapshot), so a run never silently overwrites the
+# last one with no record (the exact gap that led to manually re-copying a
+# drop into it on 2026-10-27).
+OUTPUT_FOLDERS = os.path.join(os.path.dirname(HERE), "OutputFolders")
+ARCHIVE_DIR = os.path.join(OUTPUT_FOLDERS, "_archive")
+
+
+def _archive_output_folders_snapshot(output_dir: str) -> None:
+    """Copy output_dir's current contents into OutputFolders/_archive/<timestamp>/.
+    Registered with atexit right after output_dir is resolved, so it runs on
+    every exit path out of main() (success, quit, a failed phase, sys.exit
+    from the top-level bundle step) -- not just a clean finish."""
+    if os.path.abspath(output_dir) != OUTPUT_FOLDERS:
+        return  # a custom output dir is already its own dedicated location
+    snapshot = os.path.join(ARCHIVE_DIR, datetime.now().strftime("%Y%m%d-%H%M%S"))
+    try:
+        shutil.copytree(
+            output_dir, snapshot,
+            ignore=shutil.ignore_patterns("_archive"))
+        print(f"\n    Archived this run's OutputFolders snapshot: {snapshot}\n")
+    except OSError as e:
+        print(f"\n    WARNING: could not archive OutputFolders snapshot: {e}\n")
 
 # (phase_num, subdir, script, rtl_subdir_name)
 PHASES = [
@@ -401,9 +432,10 @@ def main():
     _check_scripts_exist()
     _check_ssh_env()
 
-    output_dir = input("Output dir (Enter for ./output): ").strip() or "./output"
+    output_dir = input(f"Output dir (Enter for {OUTPUT_FOLDERS}): ").strip() or OUTPUT_FOLDERS
     output_dir = os.path.abspath(output_dir)
     os.makedirs(output_dir, exist_ok=True)
+    atexit.register(_archive_output_folders_snapshot, output_dir)
 
     spec_path = resolve_spec_path(output_dir)
     spec_path = run_orchestrator("spec", spec_path, output_dir) or spec_path
