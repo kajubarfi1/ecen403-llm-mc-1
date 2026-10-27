@@ -79,5 +79,20 @@ class TestInvariantRules(unittest.TestCase):
             SG.generate_signal_group(self.spec, grp, self.catalog, self.schemas)
 
 
+
+class TestPartialDrops(unittest.TestCase):
+
+    def test_absent_blocks_parsed_from_schema_notes(self):
+        sdoc = {"streams_without_block": ["sched_cmd (scheduler)", "dp_wr (data_path)", "odd note"]}
+        self.assertEqual(SG.absent_blocks(sdoc), {"scheduler", "data_path"})
+        self.assertEqual(SG.absent_blocks({}), set())
+
+    def test_cmd_macro_on_an_absent_stream_is_a_loud_failure(self):
+        with open(SG.CATALOG_PATH) as f:
+            catalog = json.load(f)["interfaces"]
+        with self.assertRaises(SG.SvaGenError):
+            SG.expand_expr("@cmd(sched_cmd, REF)", "scheduler", catalog, {})
+
+
 if __name__ == "__main__":
     unittest.main()

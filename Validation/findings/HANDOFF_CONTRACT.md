@@ -113,6 +113,14 @@ ledger: every file in it is rewritten by each run (2026-10-15; before that
 `outbox/<revision>/<drop>/` plus each finding's `first_seen` / `last_seen`
 / `resolved_in`.
 
+It describes the drop checked in under `Frontend2/OutputFolders`, and only
+that. A `flow.py` run validates the drop in its own run directory and
+keeps its packages there (`runs/<run>/validation/outbox/`, the same layout,
+handed to the phase agents by path), so a run never rewrites
+`outbox/current` for a drop that is not in the repo (2026-10-27; every run
+before that did). The Validation tools take the target from
+`VALIDATION_OUTBOX`; unset, it is the shared outbox.
+
 **`Validation/findings/outbox/current/`** — always the newest result:
 
 | file | what |

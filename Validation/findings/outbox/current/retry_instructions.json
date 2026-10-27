@@ -1,39 +1,91 @@
 {
   "$schema": "validation-retry-instructions/1",
-  "status": "PASS",
+  "status": "FAIL",
   "pipeline": "validation",
-  "drop": "5c30eb9e7184",
+  "drop": "efece348d04e",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "spec_id": "279cbf6ca7b6f62b",
-  "generated_utc": "2026-10-27T19:15:54.703453Z",
-  "failed_modules": [],
-  "retry_instructions": {},
-  "resolved_since_previous_drop": [
-    {
-      "schema": "validation-findings/2",
-      "id": "data_path/MISMATCH/dp_rd_rsp[data]",
-      "kind": "rtl_defect",
-      "check_id": "MISMATCH/dp_rd_rsp[data]",
-      "taxonomy_id": "DATA_001",
-      "owner_module": "data_path",
-      "severity": "critical",
-      "title": "data_path: MISMATCH/dp_rd_rsp[data]",
-      "paths": [
-        "path_03_read_return",
-        "path_18_full_write"
-      ],
-      "status": "resolved",
-      "resolved_in": "5c30eb9e7184",
-      "last_seen": "36dcdfaf136e",
-      "first_seen": "36dcdfaf136e",
-      "note": "open in drop 36dcdfaf136e, not raised by drop 5c30eb9e7184"
-    }
+  "generated_utc": "2026-10-27T19:45:46.182104Z",
+  "failed_modules": [
+    "data_path"
   ],
+  "retry_instructions": {
+    "data_path": {
+      "module": "data_path",
+      "attempt": null,
+      "drop": "efece348d04e",
+      "failed_checks": [
+        {
+          "id": "MISMATCH/dp_rd_rsp[data]",
+          "name": "data_path must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "dp_rd_rsp.response aux=0x0 data=0x9dac7f67",
+          "actual": "dp_rd_rsp.response aux=0x0 data=0x7f670000",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 300,
+              "signal": "rd_rsp_data",
+              "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 301,
+              "signal": "rd_rsp_aux",
+              "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
+            }
+          ],
+          "context": {
+            "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
+            "events": [
+              "t-25000 dp_cmd.read aux=0x0",
+              "t-5000 ddr_rd_beat.beat data=0x7f67",
+              "t+0 ddr_rd_beat.beat data=0x9dac",
+              "t+0 dp_rd_rsp.response (observed, wrong) aux=0x0 data=0x7f670000"
+            ],
+            "value_provenance": [
+              "data: observed [31:16]=ddr_rd_beat#1.data (t-5000), [15:0]=0",
+              "data: expected [31:16]=ddr_rd_beat#2.data (t+0), [15:0]=ddr_rd_beat#1.data (t-5000)"
+            ]
+          },
+          "owner_candidates": [
+            "data_path"
+          ],
+          "occurrences": 31,
+          "paths": [
+            "path_03_read_return",
+            "path_18_full_write"
+          ],
+          "repro": {
+            "path": "path_03_read_return",
+            "command": "python3 Validation/tools/run_path.py --path path_03_read_return",
+            "sequence": "Validation/sequences/generated/path_03_read_return_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_03_read_return",
+            "log": "Validation/reports/paths/path_03_read_return_sim.log",
+            "trace": "Validation/reports/paths/path_03_read_return_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "dp_rd_rsp[0] value: predicted [dp_rd_rsp.response aux=0x0 data=0x9dac7f67] but observed [dp_rd_rsp.response aux=0x0 data=0x7f670000]"
+            }
+          },
+          "introduced_in": null,
+          "repair": null,
+          "fix": null,
+          "finding_id": "data_path/MISMATCH/dp_rd_rsp[data]"
+        }
+      ],
+      "message": "1 check(s) failed on drop efece348d04e; 1 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+    }
+  },
+  "resolved_since_previous_drop": [],
   "requires_human_review": false,
   "source": "Validation/findings/emit_findings.py -> retry_adapter.py",
   "drop_status": {
     "$schema": "validation-drop-status/1",
-    "drop": "5c30eb9e7184",
+    "drop": "efece348d04e",
     "partial": false,
     "blocks_present": [
       "addr_decoder",

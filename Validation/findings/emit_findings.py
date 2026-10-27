@@ -50,7 +50,13 @@ sys.path.insert(0, os.path.join(ROOT, "Validation", "faults"))
 
 REPORTS = os.path.join(ROOT, "Validation", "reports", "paths")
 DROPS = os.path.join(ROOT, "Validation", "reports", "drops")
-OUTBOX = os.path.join(ROOT, "Validation", "findings", "outbox")
+OUTBOX_SHARED = os.path.join(ROOT, "Validation", "findings", "outbox")
+# Where this run's package goes. The shared outbox is the repo's own drop;
+# a flow run points VALIDATION_OUTBOX at runs/<run>/validation/outbox so
+# its package never overwrites current/ for a drop that is not in the
+# repo (every run did, 2026-10-22..27). History and triage files are
+# still read from the shared outbox.
+OUTBOX = os.environ.get("VALIDATION_OUTBOX") or OUTBOX_SHARED
 STAGE_RULES = os.path.join(ROOT, "Validation", "gates", "stage_invariant_rules.json")
 SVA_RULES = os.path.join(ROOT, "Validation", "sva", "sva_rules.json")
 SPEC = os.path.join(ROOT, "Validation", "spec", "llmmc_microarchitecturespec_filled.json")
@@ -502,7 +508,7 @@ def previous_outbox(spec_rev, head):
     """(drop_head, findings_v2 doc) of the newest outbox drop before `head`
     for this spec revision, by generation time; None when there is none."""
     cands = []
-    for f in glob.glob(os.path.join(OUTBOX, spec_rev, "*", "findings_v2.json")):
+    for f in glob.glob(os.path.join(OUTBOX_SHARED, spec_rev, "*", "findings_v2.json")):
         d = load(f, {})
         h = d.get("drop") or os.path.basename(os.path.dirname(f))
         if h != head and d.get("generated_utc"):
@@ -918,7 +924,7 @@ def formal_findings(spec_rev, head):
                 proven_before.add(tid)
                 if applies:
                     proven_now.add(tid)
-    for f in glob.glob(os.path.join(OUTBOX, spec_rev, "formal_*_findings.json")):
+    for f in glob.glob(os.path.join(OUTBOX_SHARED, spec_rev, "formal_*_findings.json")):
         d = load(f, {})
         for x in d.get("findings", []):
             if x.get("status", "open") != "open":
@@ -971,7 +977,7 @@ def formal_status(tid, proven_now, proven_before):
 
 def manual_related(owner, tid):
     out = []
-    for f in glob.glob(os.path.join(OUTBOX, "*", "*_findings.json")):
+    for f in glob.glob(os.path.join(OUTBOX_SHARED, "*", "*_findings.json")):
         d = load(f, {})
         for x in d.get("findings", []):
             if x.get("scope") == owner or x.get("taxonomy_id") == tid:

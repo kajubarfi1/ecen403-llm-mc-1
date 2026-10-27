@@ -834,6 +834,16 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   data_path (she did not regenerate it), so the repo drop still fails
   and the passing drop lives only under the run: asked her to regenerate
   and commit (reply addendum 6). Next: one full run with the backend on.
+- *2026-10-27, evening — two of our own.* (1) A flow run keeps its
+  packages in `runs/<run>/validation/outbox/` (`VALIDATION_OUTBOX`,
+  honoured by validate_drop, the spec review, the emitter and the adapter;
+  history and triage files still read from the shared outbox), so
+  `outbox/current` describes only the repo's drop — every run until today
+  rewrote it for a drop not in the repo, and each needed a re-validation
+  by hand. Contract §4 and USAGE say so; flow test. (2) validate_drop
+  reruns once any path that came back without a verdict before declaring
+  it not simulated (two Olympus connection drops on 10-22 and 10-27 each
+  cost a halt and a manual resume).
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the
