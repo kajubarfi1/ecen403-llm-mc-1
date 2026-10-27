@@ -164,8 +164,8 @@
         },
         "clock_ratio_ddr_to_controller": {
           "type": "integer",
-          "const": 4,
-          "description": "controller_clock_period_ns / ddr_clock_period_ns. Fixed at 4:1."
+          "enum": [1, 2, 4, 8],
+          "description": "controller_clock_period_ns / ddr_clock_period_ns. A Tier-2 choice (default 4:1); the controller clock is tCK(speed_grade) / this ratio."
         },
         "pipeline_latency_cycles": {
           "type": "integer",

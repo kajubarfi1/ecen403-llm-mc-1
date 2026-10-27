@@ -79,7 +79,11 @@ DENSITY_BITS: dict[str, int] = {
 TWR_NS = 15.0        # write recovery -- fixed across all DDR3 speed grades
 TREFI_NS = 7800.0    # average refresh interval, 7.8 us for Tcase <= 85 C
 BANK_BITS = 3        # DDR3 is always 8 banks
-CLOCK_RATIO_DDR_TO_CTRL = 4   # this design is a 4:1 controller
+CLOCK_RATIO_DDR_TO_CTRL = 4   # default: a 4:1 controller. Tier-2 choice now
+                              # (microarch_compiler.TIER2_DEFAULTS); this is
+                              # only the fallback when a spec doesn't override it.
+CLOCK_RATIO_CHOICES = (1, 2, 4, 8)   # DDR3 controller gearbox rates actually
+                                     # implemented (full/half/quarter/eighth-rate)
 
 DDR3_SPEED_GRADE_CHOICES = tuple(SPEED_GRADES.keys())
 DDR3_DENSITY_CHOICES = tuple(DENSITY_BITS.keys())

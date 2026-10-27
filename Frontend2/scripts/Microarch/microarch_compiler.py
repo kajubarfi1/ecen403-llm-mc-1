@@ -63,6 +63,7 @@ TIER1_CHOICES = {
 
 # Tier-2: medium blast radius. Defaulted; user may override.
 TIER2_DEFAULTS = {
+    "clock_ratio_ddr_to_controller": jd.CLOCK_RATIO_DDR_TO_CTRL,  # 1/2/4/8
     "command_queue_depth": 16,      # power of 2, 4..32
     "lookahead_depth": 8,           # 0..16, <= queue depth
     "address_mapping": "row-bank-column",
@@ -155,6 +156,10 @@ BLAST_RADIUS = {
     "periodic_zqcs_interval": ("isolated",
         "Counter compare value in calibration / scheduler."),
     # ---- regen_local -------------------------------------------------
+    "clock_ratio_ddr_to_controller": ("regen_local",
+        "Changes CLK_RATIO in data_path_gen/refresh_ctrl_gen's read/write "
+        "latency counters and the derived controller frequency. Port names "
+        "and widths stable. Must be one of jd.CLOCK_RATIO_CHOICES."),
     "command_queue_depth": ("regen_local",
         "Drives queue_index_bits -> cmd_queue + scheduler parameter widths. "
         "Port names stable. Must be a power of 2."),
@@ -279,6 +284,14 @@ def validate_choices(choices: dict) -> tuple[list[str], list[str], dict]:
             f"byte_lanes={r['byte_lanes']} is unusual (expected 1/2/4/8); "
             "channel width will not be a power of 2")
 
+    # ---- clock ratio ------------------------------------------------
+    cr = r["clock_ratio_ddr_to_controller"]
+    if cr not in jd.CLOCK_RATIO_CHOICES:
+        errors.append(
+            f"clock_ratio_ddr_to_controller={cr} must be one of "
+            f"{jd.CLOCK_RATIO_CHOICES} (data_path_gen/refresh_ctrl_gen only "
+            "implement these gearbox rates)")
+
     # ---- queue / lookahead ----------------------------------------
     q = r["command_queue_depth"]
     if not (_is_pow2(q) and 4 <= q <= 32):
@@ -355,7 +368,7 @@ def validate_choices(choices: dict) -> tuple[list[str], list[str], dict]:
         errors.append(f"pipeline_latency_cycles={pl} must be in [1, 4]")
 
     ctrl_freq = jd.SPEED_GRADES[r["speed_grade"]]["data_rate_MTps"] / 2.0 \
-        / jd.CLOCK_RATIO_DDR_TO_CTRL
+        / r["clock_ratio_ddr_to_controller"]
     tf = r["target_frequency_mhz"]
     if tf is None:
         r["target_frequency_mhz"] = int(round(ctrl_freq))
@@ -440,7 +453,7 @@ def _geometry(choices: dict) -> dict:
 def _clocking(choices: dict) -> dict:
     sg = choices["speed_grade"]
     tCK = jd.SPEED_GRADES[sg]["tCK_ns"]
-    ratio = jd.CLOCK_RATIO_DDR_TO_CTRL
+    ratio = choices["clock_ratio_ddr_to_controller"]
     ctrl_period = round(tCK * ratio, 6)
     data_rate = jd.SPEED_GRADES[sg]["data_rate_MTps"]
     return {
@@ -679,7 +692,7 @@ def _csr_map(dc: dict, geom: dict, choices: dict, host: dict,
 
 def _latency_model(dc: dict, choices: dict, tm_ns: dict) -> dict:
     pl = choices["pipeline_latency_cycles"]
-    ratio = jd.CLOCK_RATIO_DDR_TO_CTRL
+    ratio = choices["clock_ratio_ddr_to_controller"]
     BL = choices["burst_length"]
     CL = tm_ns["CL_cycles"]
     CWL = tm_ns["CWL_cycles"]
@@ -689,15 +702,22 @@ def _latency_model(dc: dict, choices: dict, tm_ns: dict) -> dict:
     tWTR = dc["tWTR_nCK"]
     tCCD = dc["tCCD_nCK"]
     half_bl = BL // 2
-    rd_hit = pl * ratio + CL + half_bl + 2
-    rd_empty = pl * ratio + tRCD + CL + half_bl + 2
-    rd_miss = pl * ratio + tRP + tRCD + CL + half_bl + 2
-    wr_hit = pl * ratio + CWL + half_bl + tWR
+    # scheduler now pipelines selection into a pending stage before cmd_valid
+    # (2026-10-27 timing fix, backend finding scheduler/TIMING/cmd_row) -- one
+    # real, unconditional controller cycle, independent of the user-tunable
+    # `pl` (pipeline_latency_cycles), which nothing in any generator reads yet.
+    SCHED_PIPE_NCK = ratio
+    rd_hit = pl * ratio + SCHED_PIPE_NCK + CL + half_bl + 2
+    rd_empty = pl * ratio + SCHED_PIPE_NCK + tRCD + CL + half_bl + 2
+    rd_miss = pl * ratio + SCHED_PIPE_NCK + tRP + tRCD + CL + half_bl + 2
+    wr_hit = pl * ratio + SCHED_PIPE_NCK + CWL + half_bl + tWR
     w2r = CWL + half_bl + tWTR
     r2w = CL + tCCD + 2 - CWL
     return {
         "$comment": "Formulas in DDR clock cycles (nCK). pipeline_latency is "
-                    "in controller cycles; multiply by clock_ratio for nCK.",
+                    "in controller cycles; multiply by clock_ratio for nCK. "
+                    "SCHED_PIPE_NCK is the scheduler's own fixed one-cycle "
+                    "selection pipeline (2026-10-27), separate from pl.",
         "read_hit_latency_nCK": rd_hit,
         "read_empty_latency_nCK": rd_empty,
         "read_miss_latency_nCK": rd_miss,

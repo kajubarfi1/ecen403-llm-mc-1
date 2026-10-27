@@ -103,6 +103,14 @@ PROPOSE_TOOL = {
             "scheduler_policy": {"type": "string", "enum": _ENUM["scheduler_policy"]},
             "row_policy": {"type": "string", "enum": _ENUM["row_policy"]},
             # Tier-2 (optional overrides)
+            "clock_ratio_ddr_to_controller": {
+                "type": "integer", "enum": [1, 2, 4, 8],
+                "description": "DDR clocks per controller clock (default 4). "
+                               "Controller frequency = data_rate_MTps / 2 / "
+                               "this. Set explicitly when the user names a "
+                               "target controller frequency -- it is NOT "
+                               "derived from target_frequency_mhz.",
+            },
             "command_queue_depth": {"type": "integer"},
             "lookahead_depth": {"type": "integer"},
             "address_mapping": {"type": "string",
@@ -199,6 +207,10 @@ TIER-1 (you must resolve all of these, or ask):
   row_policy       {_ENUM['row_policy']}
 
 TIER-2 (leave unset unless the user implies a preference):
+  clock_ratio_ddr_to_controller (1/2/4/8, default 4 -- set this when the
+     user names a controller/internal clock frequency; e.g. DDR3-800 needs
+     ratio=2 for 200MHz, DDR3-1600 needs ratio=4 for 200MHz: controller_MHz
+     = data_rate_MTps / 2 / ratio, so pick the ratio that lands on it),
   command_queue_depth (power of 2, 4..32), lookahead_depth (0..16),
   address_mapping, burst_length (4/8), host_data_width (32/64/128),
   read_buffer_depth, write_buffer_depth, interface_type (only
