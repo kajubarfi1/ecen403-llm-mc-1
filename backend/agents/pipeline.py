@@ -111,6 +111,7 @@ class PipelineState(TypedDict):
     enable_autotuner:   bool
     # What ties a finding to the RTL it ran on. Both come from the orchestrator; a
     # standalone block run has neither and says so when it emits.
+    clock_period_ns:    Optional[float]   # CLI override; the manifest otherwise
     drop_id:            Optional[str]
     spec_id:            Optional[str]
     spec_revision:      Optional[str]
@@ -282,7 +283,8 @@ def packager_node(state: PipelineState) -> PipelineState:
             "--intake_report", str(intake_report.resolve()),
             "--out_dir",       str(out_dir.resolve()),
             "--env_file",      str(env_file),
-        ],
+        ] + (["--clock_period_ns", str(state["clock_period_ns"])]
+             if state.get("clock_period_ns") else []),
         capture_output=True, text=True,
         cwd=Path(__file__).parent,
     )
@@ -2769,6 +2771,11 @@ def main() -> int:
                     help="After a clean PASS, tighten clock period to maximize Fmax (up to 3 iterations)")
     ap.add_argument("--optimize_power",   action="store_true", default=False,
                     help="After a clean PASS, use Claude to minimize power while preserving timing (up to 3 iterations)")
+    ap.add_argument("--clock_period_ns", type=float, default=None,
+                    help="Constrain to this period instead of the manifest's. The "
+                         "manifest is the authority for a normal run; this is for "
+                         "asking what a block does at a period the drop does not "
+                         "specify, without editing the bundle.")
     ap.add_argument("--drop_id", default=None,
                     help="The frontend drop's content id (Validation's rtl_drop.py: "
                          "drop_id()). Passed by the orchestrator; findings are filed "
@@ -2795,6 +2802,7 @@ def main() -> int:
         "out_root":         str(args.out_root),
         "env_file":         str(args.env_file),
         "mode":             args.mode,
+        "clock_period_ns":  args.clock_period_ns,
         "drop_id":          args.drop_id,
         "spec_id":          args.spec_id,
         "spec_revision":    args.spec_revision,
