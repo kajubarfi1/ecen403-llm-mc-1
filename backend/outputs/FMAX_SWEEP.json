@@ -1,0 +1,328 @@
+{
+  "$comment": "Per-block Fmax sweep: each block rebuilt at successively tighter clock periods to find the fastest one it actually closes at. fmax_mhz is demonstrated - a build met that period with DRC 0 and LVS matching. fmax_estimated_mhz extrapolates from leftover slack and is context only. Every search hit the 3-iteration cap, so each figure is a floor.",
+  "drop_id": "efece348d04e",
+  "design_id": "766dc69c37e9",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "target_period_ns": 5.0,
+  "target_mhz": 200.0,
+  "swept_utc": "2026-10-22",
+  "blocks": {
+    "addr_decoder": {
+      "fmax_mhz": null,
+      "fmax_estimated_mhz": null,
+      "best_period_ns": null,
+      "search_terminated": null,
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "sta": "N/A",
+      "headroom_vs_target": null
+    },
+    "bank_tracker": {
+      "fmax_mhz": 232.13,
+      "fmax_estimated_mhz": 241.42,
+      "best_period_ns": 4.308,
+      "search_terminated": "iteration_cap",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "sta": "PASS",
+      "headroom_vs_target": 1.16,
+      "iterations": [
+        {
+          "period_ns": 5.0,
+          "wns_ns": 0.488843,
+          "logic_delay_ns": 4.511
+        },
+        {
+          "period_ns": 4.611,
+          "wns_ns": 0.284321,
+          "logic_delay_ns": 4.327
+        },
+        {
+          "period_ns": 4.419,
+          "wns_ns": 0.199698,
+          "logic_delay_ns": 4.219
+        },
+        {
+          "period_ns": 4.308,
+          "wns_ns": 0.165796,
+          "logic_delay_ns": 4.142
+        }
+      ],
+      "logic_delay_improvement_pct": 8.2
+    },
+    "calibration": {
+      "fmax_mhz": 490.68,
+      "fmax_estimated_mhz": 520.97,
+      "best_period_ns": 2.038,
+      "search_terminated": "iteration_cap",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "sta": "PASS",
+      "headroom_vs_target": 2.45,
+      "iterations": [
+        {
+          "period_ns": 5.0,
+          "wns_ns": 2.60077,
+          "logic_delay_ns": 2.399
+        },
+        {
+          "period_ns": 2.499,
+          "wns_ns": 0.353329,
+          "logic_delay_ns": 2.146
+        },
+        {
+          "period_ns": 2.196,
+          "wns_ns": 0.202352,
+          "logic_delay_ns": 1.994
+        },
+        {
+          "period_ns": 2.038,
+          "wns_ns": 0.118522,
+          "logic_delay_ns": 1.919
+        }
+      ],
+      "logic_delay_improvement_pct": 20.0
+    },
+    "cmd_gen": {
+      "fmax_mhz": 546.75,
+      "fmax_estimated_mhz": 573.83,
+      "best_period_ns": 1.829,
+      "search_terminated": "iteration_cap",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "sta": "PASS",
+      "headroom_vs_target": 2.73,
+      "iterations": [
+        {
+          "period_ns": 5.0,
+          "wns_ns": 2.36012,
+          "logic_delay_ns": 2.64
+        },
+        {
+          "period_ns": 2.74,
+          "wns_ns": 0.765758,
+          "logic_delay_ns": 1.974
+        },
+        {
+          "period_ns": 2.029,
+          "wns_ns": 0.240723,
+          "logic_delay_ns": 1.788
+        },
+        {
+          "period_ns": 1.829,
+          "wns_ns": 0.0863296,
+          "logic_delay_ns": 1.743
+        }
+      ],
+      "logic_delay_improvement_pct": 34.0
+    },
+    "cmd_queue": {
+      "fmax_mhz": 302.76,
+      "fmax_estimated_mhz": 316.17,
+      "best_period_ns": 3.303,
+      "search_terminated": "iteration_cap",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "sta": "PASS",
+      "headroom_vs_target": 1.51,
+      "iterations": [
+        {
+          "period_ns": 5.0,
+          "wns_ns": 1.39902,
+          "logic_delay_ns": 3.601
+        },
+        {
+          "period_ns": 3.701,
+          "wns_ns": 0.35467,
+          "logic_delay_ns": 3.346
+        },
+        {
+          "period_ns": 3.42,
+          "wns_ns": 0.185078,
+          "logic_delay_ns": 3.235
+        },
+        {
+          "period_ns": 3.303,
+          "wns_ns": 0.14018,
+          "logic_delay_ns": 3.163
+        }
+      ],
+      "logic_delay_improvement_pct": 12.2
+    },
+    "config_regs": {
+      "fmax_mhz": 411.69,
+      "fmax_estimated_mhz": 442.02,
+      "best_period_ns": 2.429,
+      "search_terminated": "iteration_cap",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "sta": "PASS",
+      "headroom_vs_target": 2.06,
+      "iterations": [
+        {
+          "period_ns": 5.0,
+          "wns_ns": 1.43916,
+          "logic_delay_ns": 3.561
+        },
+        {
+          "period_ns": 3.661,
+          "wns_ns": 0.900716,
+          "logic_delay_ns": 2.76
+        },
+        {
+          "period_ns": 2.834,
+          "wns_ns": 0.462032,
+          "logic_delay_ns": 2.372
+        },
+        {
+          "period_ns": 2.429,
+          "wns_ns": 0.166683,
+          "logic_delay_ns": 2.262
+        }
+      ],
+      "logic_delay_improvement_pct": 36.5
+    },
+    "data_path": {
+      "fmax_mhz": 231.7,
+      "fmax_estimated_mhz": 244.12,
+      "best_period_ns": 4.316,
+      "search_terminated": "iteration_cap",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "sta": "PASS",
+      "headroom_vs_target": 1.16,
+      "iterations": [
+        {
+          "period_ns": 5.0,
+          "wns_ns": 0.537044,
+          "logic_delay_ns": 4.463
+        },
+        {
+          "period_ns": 4.563,
+          "wns_ns": 0.214095,
+          "logic_delay_ns": 4.349
+        },
+        {
+          "period_ns": 4.44,
+          "wns_ns": 0.213024,
+          "logic_delay_ns": 4.227
+        },
+        {
+          "period_ns": 4.316,
+          "wns_ns": 0.219714,
+          "logic_delay_ns": 4.096
+        }
+      ],
+      "logic_delay_improvement_pct": 8.2
+    },
+    "init_fsm": {
+      "fmax_mhz": 361.66,
+      "fmax_estimated_mhz": 384.89,
+      "best_period_ns": 2.765,
+      "search_terminated": "iteration_cap",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "sta": "PASS",
+      "headroom_vs_target": 1.81,
+      "iterations": [
+        {
+          "period_ns": 5.0,
+          "wns_ns": 1.84643,
+          "logic_delay_ns": 3.154
+        },
+        {
+          "period_ns": 3.254,
+          "wns_ns": 0.448256,
+          "logic_delay_ns": 2.806
+        },
+        {
+          "period_ns": 2.871,
+          "wns_ns": 0.163005,
+          "logic_delay_ns": 2.708
+        },
+        {
+          "period_ns": 2.765,
+          "wns_ns": 0.166879,
+          "logic_delay_ns": 2.598
+        }
+      ],
+      "logic_delay_improvement_pct": 17.6
+    },
+    "refresh_ctrl": {
+      "fmax_mhz": 204.83,
+      "fmax_estimated_mhz": 210.5,
+      "best_period_ns": 4.882,
+      "search_terminated": "iteration_cap",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "sta": "PASS",
+      "headroom_vs_target": 1.02,
+      "iterations": [
+        {
+          "period_ns": 5.0,
+          "wns_ns": 0.141479,
+          "logic_delay_ns": 4.859
+        },
+        {
+          "period_ns": 4.959,
+          "wns_ns": 0.13944,
+          "logic_delay_ns": 4.82
+        },
+        {
+          "period_ns": 4.919,
+          "wns_ns": 0.135657,
+          "logic_delay_ns": 4.783
+        },
+        {
+          "period_ns": 4.882,
+          "wns_ns": 0.131358,
+          "logic_delay_ns": 4.751
+        }
+      ],
+      "logic_delay_improvement_pct": 2.2
+    },
+    "scheduler": {
+      "fmax_mhz": null,
+      "fmax_estimated_mhz": null,
+      "best_period_ns": null,
+      "search_terminated": null,
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "sta": "FAIL",
+      "headroom_vs_target": null
+    },
+    "wb_port": {
+      "fmax_mhz": 330.91,
+      "fmax_estimated_mhz": 361.52,
+      "best_period_ns": 3.022,
+      "search_terminated": "iteration_cap",
+      "drc_violations": 0,
+      "lvs": "PASS",
+      "sta": "PASS",
+      "headroom_vs_target": 1.65,
+      "iterations": [
+        {
+          "period_ns": 5.0,
+          "wns_ns": 0.983423,
+          "logic_delay_ns": 4.017
+        },
+        {
+          "period_ns": 4.117,
+          "wns_ns": 0.755086,
+          "logic_delay_ns": 3.362
+        },
+        {
+          "period_ns": 3.444,
+          "wns_ns": 0.490576,
+          "logic_delay_ns": 2.953
+        },
+        {
+          "period_ns": 3.022,
+          "wns_ns": 0.255898,
+          "logic_delay_ns": 2.766
+        }
+      ],
+      "logic_delay_improvement_pct": 31.1
+    }
+  }
+}
