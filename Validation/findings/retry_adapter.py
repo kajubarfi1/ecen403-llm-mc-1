@@ -28,7 +28,7 @@ from datetime import datetime
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-OUTBOX = os.path.join(HERE, "outbox")
+OUTBOX = os.environ.get("VALIDATION_OUTBOX") or os.path.join(HERE, "outbox")   # a flow run's own (emit_findings.py)
 
 
 SPEC = os.environ.get("VALIDATION_SPEC", os.path.join(

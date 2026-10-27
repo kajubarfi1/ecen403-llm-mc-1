@@ -1,15 +1,15 @@
 {
   "$schema": "validation-drop-comparison/1",
   "a": {
-    "dir": "Validation/reports/drops/36dcdfaf136e",
-    "drop_head": "36dcdfaf136e"
+    "dir": "Validation/reports/drops/5c30eb9e7184",
+    "drop_head": "5c30eb9e7184"
   },
   "b": {
     "dir": "Validation/reports/paths",
-    "drop_head": "5c30eb9e7184"
+    "drop_head": "efece348d04e"
   },
   "strict": false,
-  "generated_utc": "2026-10-27T19:15:54.759982Z",
+  "generated_utc": "2026-10-27T19:45:46.239693Z",
   "rows": [
     {
       "path": "path_01_write_cmd",
@@ -41,23 +41,23 @@
     },
     {
       "path": "path_03_read_return",
-      "kind": "fixed",
-      "new": {},
-      "gone": {
+      "kind": "regression",
+      "new": {
         "stage:data_path": 1
       },
+      "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
-      "matched_up": {
+      "matched_down": {
         "matched:data_path": [
-          0,
-          19
+          19,
+          0
         ]
       },
+      "matched_up": {},
       "verdict": [
-        "fail",
-        "pass"
+        "pass",
+        "fail"
       ]
     },
     {
@@ -258,23 +258,23 @@
     },
     {
       "path": "path_18_full_write",
-      "kind": "fixed",
-      "new": {},
-      "gone": {
+      "kind": "regression",
+      "new": {
         "stage:data_path": 1
       },
+      "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
-      "matched_up": {
+      "matched_down": {
         "matched:data_path": [
-          24,
-          36
+          36,
+          24
         ]
       },
+      "matched_up": {},
       "verdict": [
-        "fail",
-        "pass"
+        "pass",
+        "fail"
       ]
     },
     {

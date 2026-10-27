@@ -54,6 +54,11 @@ DROPS = os.path.join(ROOT, "Validation", "reports", "drops")
 LOGS = os.path.join(ROOT, "Validation", "reports", "validate_drop")
 
 
+# the outbox this run writes: the shared one for the repo's own drop, a
+# run-local one when the flow sets VALIDATION_OUTBOX (emit_findings.py)
+OUTBOX_DIR = os.environ.get("VALIDATION_OUTBOX") or os.path.join(ROOT, "Validation", "findings", "outbox")
+
+
 def sh(cmd, log=None, check=True, timeout=None):
     r = subprocess.run(_py(cmd), shell=True, cwd=ROOT, capture_output=True,
                        text=True, timeout=timeout)
@@ -312,8 +317,8 @@ def main() -> int:
                          "validation_spec_id": prev_sha or val_sha,
                          "adopted": adopted},
             "spec_ref": "revision", "status": "open"})
-    os.makedirs(os.path.join(ROOT, "Validation", "findings", "outbox"), exist_ok=True)
-    with open(os.path.join(ROOT, "Validation", "findings", "outbox", "spec_revision_findings.json"), "w") as f:
+    os.makedirs(OUTBOX_DIR, exist_ok=True)
+    with open(os.path.join(OUTBOX_DIR, "spec_revision_findings.json"), "w") as f:
         json.dump({"$schema": "validation-findings/1", "spec_revision": val_rev,
                    "spec_id": val_sha,
                    "validation_spec": os.path.relpath(spec_path, ROOT),
@@ -344,9 +349,9 @@ def main() -> int:
     if not args.skip_regenerate:
         banner(3, "regenerate integration map, schemas, monitors, SVA, coverage from the drop")
         for cmd in ("python3 Validation/structural/integration_map_gen.py --findings "
-                    "Validation/findings/outbox/integration_map_findings.json",
+                    f"{os.path.relpath(os.path.join(OUTBOX_DIR, 'integration_map_findings.json'), ROOT)}",
                     "python3 Validation/structural/width_conformance.py --json "
-                    "Validation/findings/outbox/width_findings.json",
+                    f"{os.path.relpath(os.path.join(OUTBOX_DIR, 'width_findings.json'), ROOT)}",
                     "python3 Validation/txn/schema_gen.py"
                     + (" --allow-missing" if absent else ""),
                     "python3 Validation/txn/monitor_gen.py",
@@ -516,6 +521,17 @@ def main() -> int:
         for p, v, rc in ex.map(run_one, paths):
             verdicts[p] = v
             print(f"    {p:34} {v}")
+    # A path that did not come back with a verdict (SSH refused, Slurm cut,
+    # empty trace) is rerun once before it is declared not simulated: two
+    # rounds halted for Olympus dropping connections mid-run on 2026-10-27
+    # and each needed a resume by hand for a few minutes of sims.
+    retry = [p for p, v in verdicts.items() if v not in ("PASS", "FAIL")]
+    if retry and not args.skip_sim:
+        print(f"    retrying {len(retry)} path(s) that did not simulate: {', '.join(retry)}")
+        with concurrent.futures.ThreadPoolExecutor(max(1, args.jobs)) as ex:
+            for p, v, rc in ex.map(run_one, retry):
+                verdicts[p] = v
+                print(f"    {p:34} {v}  (retry)")
     n_pass = sum(1 for v in verdicts.values() if v == "PASS")
     n_fail = sum(1 for v in verdicts.values() if v == "FAIL")
     n_err = len(verdicts) - n_pass - n_fail

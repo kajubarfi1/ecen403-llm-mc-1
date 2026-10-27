@@ -351,7 +351,9 @@ def stage_spec_review(run, args):
     text -- the one input it revises on) for another round, capped; a
     preset / choices / supplied spec has no agent to revise it and halts."""
     review = os.path.join(run.spec_dir, f"SPEC_REVIEW_round{run.state['rounds']['spec']}.json")
-    rc, txt = sh([PY, SPEC_STAGE, "--spec", run.state["spec"], "--json", review], log=run.log)
+    env = os.environ.copy()
+    env["VALIDATION_OUTBOX"] = run_outbox(run)      # SPEC_REVIEW.json lands in the run's outbox
+    rc, txt = sh([PY, SPEC_STAGE, "--spec", run.state["spec"], "--json", review], env=env, log=run.log)
     gaps = sum(1 for l in txt.splitlines() if "[gap:" in l)
     if rc == 0:
         if os.path.exists(review):
@@ -473,10 +475,18 @@ def stage_rtl_generation(run, args, phases=None):
     return 0
 
 
+def run_outbox(run):
+    """A run's own outbox (VALIDATION_OUTBOX for the Validation tools): its
+    packages never overwrite the shared outbox/current, which describes the
+    repo's own drop (every flow run did until 2026-10-27)."""
+    return os.path.join(run.val_dir, "outbox")
+
+
 def _copy_current(run, dest):
     os.makedirs(dest, exist_ok=True)
-    for f in os.listdir(OUTBOX_CURRENT) if os.path.isdir(OUTBOX_CURRENT) else []:
-        shutil.copy(os.path.join(OUTBOX_CURRENT, f), dest)
+    cur = os.path.join(run_outbox(run), "current")
+    for f in os.listdir(cur) if os.path.isdir(cur) else []:
+        shutil.copy(os.path.join(cur, f), dest)
 
 
 def stage_rtl_validation(run, args, partial=False, tag=None):
@@ -494,6 +504,7 @@ def stage_rtl_validation(run, args, partial=False, tag=None):
     env = os.environ.copy()
     env["VALIDATION_RTL_DROP_ROOTS"] = run.drop
     env["VALIDATION_SPEC"] = run.state["spec"]
+    env["VALIDATION_OUTBOX"] = run_outbox(run)
     partial = partial or bool(getattr(args, "phases", None))
     cmd = [PY, VALIDATE_DROP] + (["--partial"] if partial else [])
     rc, txt = sh(cmd, cwd=ROOT, env=env, log=run.log, timeout=4 * 3600)

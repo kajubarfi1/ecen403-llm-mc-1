@@ -28,6 +28,7 @@ class Fake:
         self.agent_fixes = ["wb_port"]      # what the fake agent's fix report claims (or {phase: [...]})
         self.failed = ["wb_port"]           # what the fake validation reports as failed
         self.backend_crash = False          # pipeline.py exits 1 without a report
+        self.outbox_written = []            # where each fake validate_drop wrote its package
         self.absent = []                     # blocks the fake validation reports absent
         self.synth_rc = 0                    # microarch_cli.py one-shot exit (3 = needs clarification)
         self.calls = []
@@ -73,15 +74,18 @@ class Fake:
                 # a generator refused the drop: no handoff written for it
                 return 1, ("    [1] resolve blocks through the declared drop (git ffff00000000)\n"
                            "    STOP: a generator refused the drop; its output is in the log.\n")
-            os.makedirs(flow.OUTBOX_CURRENT, exist_ok=True)
+            cur = (os.path.join(env["VALIDATION_OUTBOX"], "current")
+                   if env and env.get("VALIDATION_OUTBOX") else flow.OUTBOX_CURRENT)
+            self.outbox_written.append(cur)
+            os.makedirs(cur, exist_ok=True)
             if self.absent:
-                with open(os.path.join(flow.OUTBOX_CURRENT, "DROP_STATUS.json"), "w") as f:
+                with open(os.path.join(cur, "DROP_STATUS.json"), "w") as f:
                     json.dump({"partial": True, "blocks_absent": self.absent, "paths_blocked": {"path_21_wb_port_standalone": ["wb_port"]},
                                "paths_run": []}, f)
-            with open(os.path.join(flow.OUTBOX_CURRENT, "HANDOFF.json"), "w") as f:
+            with open(os.path.join(cur, "HANDOFF.json"), "w") as f:
                 json.dump({"drop_id": "abc123", "design_id": "d51g0", "spec_id": "5pec1d", "status": status,
                            "failed_modules": [] if status == "PASS" else self.failed}, f)
-            with open(os.path.join(flow.OUTBOX_CURRENT, "retry_instructions.json"), "w") as f:
+            with open(os.path.join(cur, "retry_instructions.json"), "w") as f:
                 json.dump({"failed_modules": [] if status == "PASS" else self.failed}, f)
             return 0 if status == "PASS" else 1, ""
         if name == "to_frontend_error_report.py":
@@ -427,6 +431,16 @@ class TestHalts(FlowCase):
         self.assertEqual(run.state["halt"]["stage"], "backend")
         self.assertIn("for drop someoldrop", run.state["halt"]["why"])
 
+    def test_a_run_keeps_its_package_out_of_the_shared_outbox(self):
+        os.environ["USE_DOCKER"] = "1"
+        fake = Fake(self.run_dir, backend={"pipeline_status": "PASS", "artifacts": []})
+        rc, run = self.go(fake, skip_backend=True)
+        self.assertTrue(fake.outbox_written)
+        for cur in fake.outbox_written:
+            self.assertTrue(cur.startswith(os.path.join(self.run_dir, "validation", "outbox")), cur)
+        self.assertFalse(os.path.exists(flow.OUTBOX_CURRENT), "the shared outbox is the repo drop's")
+        self.assertTrue(os.path.exists(os.path.join(self.run_dir, "validation", "round_1", "HANDOFF.json")))
+
     def test_final_stage_runs_each_netlist_through_its_paths(self):
         os.environ["USE_DOCKER"] = "1"
         self.run_paths = []
@@ -547,7 +561,7 @@ class TestPathsThatDidNotRun(FlowCase):
             name = os.path.basename(next((c for c in cmd if c.endswith(".py")), ""))
             rc, out = orig(cmd, cwd, stdin, env, log, timeout)
             if name == "validate_drop.py":
-                with open(os.path.join(flow.OUTBOX_CURRENT, "DROP_STATUS.json"), "w") as f:
+                with open(os.path.join(os.path.join(self.run_dir, "validation", "outbox", "current"), "DROP_STATUS.json"), "w") as f:
                     json.dump({"partial": True, "blocks_absent": [], "paths_run": ["path_14_status_init"],
                                "paths_blocked": {"path_09_init_to_refresh": ["run error (rc=2): see logs"]}}, f)
             return rc, out

@@ -566,6 +566,9 @@ def expand_expr(expr, block, catalog, schemas):
         cat = catalog.get(iface)
         if not cat or cat.get("block") != block:
             raise SvaGenError(f"@cmd({iface}, {name}): {iface!r} is not a stream of {block}")
+        if iface not in schemas:
+            raise SvaGenError(f"@cmd({iface}, {name}): {iface!r} is not in the drop's schemas "
+                              f"(its block is absent from this drop)")
         enc = {k: v for k, v in _stream_encoding(iface, catalog).items() if not k.startswith("$")}
         if name not in enc:
             raise SvaGenError(f"@cmd({iface}, {name}): {name!r} is not in the stream's command_encoding {sorted(enc)}")
@@ -614,6 +617,17 @@ def describe_bound(spec, b):
     if b.get("slack"):
         s += f" + {b['slack']} slack"
     return s
+
+
+def absent_blocks(sdoc):
+    """Blocks schema_gen left out of a phase-partial drop (named in its
+    streams_without_block notes as '<iface> (<block> ...)' or by block)."""
+    out = set()
+    for x in sdoc.get("streams_without_block", []):
+        m = re.search(r"\(([A-Za-z_]\w*)", x)
+        if m:
+            out.add(m.group(1))
+    return out
 
 
 def generate_signal_group(spec, grp, catalog=None, schemas=None):
@@ -776,6 +790,13 @@ bind {block} {mod} u_{block}_sva (.*);
             print(f"    not generated (no separation required at this clock): "
                   f"{', '.join(skipped)}")
     for grp in rules.get("signal_groups", []):
+        # a phase-partial drop without the group's block: its assertions wait
+        # for the drop that brings it, like a command group's (a Phase 1 run
+        # died here on the scheduler's refresh group, 2026-10-27)
+        if grp["block"] not in {d.get("block") for d in schemas.values()} and \
+                grp["block"] in {x.split(" ")[0] for x in sdoc.get("blocks_absent", [])} | absent_blocks(sdoc):
+            print(f"  deferred: signal group {grp['name']} on {grp['block']} (its block is not in the drop)")
+            continue
         try:
             mod, src, block, ids = generate_signal_group(spec, grp, catalog, schemas)
         except SvaGenError as e:

@@ -56,7 +56,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(V, "jedec"))
 
 SCHEMA_PATH = os.path.join(ROOT, "Spec", "llmmc_microarchitecture.schema.json")
-OUTBOX = os.path.join(V, "findings", "outbox")
+OUTBOX = os.environ.get("VALIDATION_OUTBOX") or os.path.join(V, "findings", "outbox")   # a flow run keeps its own
 VALIDATOR = "Validation/spec/validate_spec_stage.py (schema + JESD79-3 + register map + intake gate)"
 
 

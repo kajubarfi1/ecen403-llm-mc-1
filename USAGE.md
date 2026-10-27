@@ -472,7 +472,9 @@ Frontend reads them from one place, `Validation/findings/outbox/current/`.
 That directory is the latest run and nothing else, never a ledger: every
 file in it is rewritten by each complete run (history is
 `outbox/<revision>/<drop>/` and each finding's `first_seen` / `last_seen` /
-`resolved_in`).
+`resolved_in`). It describes the drop checked in under
+`Frontend2/OutputFolders`; a `flow.py` run keeps its own packages under
+`runs/<run>/validation/outbox/` (same layout) and never touches it.
 
 ### 7.2 Additional setup
 
