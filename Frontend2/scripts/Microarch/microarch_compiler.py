@@ -702,15 +702,22 @@ def _latency_model(dc: dict, choices: dict, tm_ns: dict) -> dict:
     tWTR = dc["tWTR_nCK"]
     tCCD = dc["tCCD_nCK"]
     half_bl = BL // 2
-    rd_hit = pl * ratio + CL + half_bl + 2
-    rd_empty = pl * ratio + tRCD + CL + half_bl + 2
-    rd_miss = pl * ratio + tRP + tRCD + CL + half_bl + 2
-    wr_hit = pl * ratio + CWL + half_bl + tWR
+    # scheduler now pipelines selection into a pending stage before cmd_valid
+    # (2026-10-27 timing fix, backend finding scheduler/TIMING/cmd_row) -- one
+    # real, unconditional controller cycle, independent of the user-tunable
+    # `pl` (pipeline_latency_cycles), which nothing in any generator reads yet.
+    SCHED_PIPE_NCK = ratio
+    rd_hit = pl * ratio + SCHED_PIPE_NCK + CL + half_bl + 2
+    rd_empty = pl * ratio + SCHED_PIPE_NCK + tRCD + CL + half_bl + 2
+    rd_miss = pl * ratio + SCHED_PIPE_NCK + tRP + tRCD + CL + half_bl + 2
+    wr_hit = pl * ratio + SCHED_PIPE_NCK + CWL + half_bl + tWR
     w2r = CWL + half_bl + tWTR
     r2w = CL + tCCD + 2 - CWL
     return {
         "$comment": "Formulas in DDR clock cycles (nCK). pipeline_latency is "
-                    "in controller cycles; multiply by clock_ratio for nCK.",
+                    "in controller cycles; multiply by clock_ratio for nCK. "
+                    "SCHED_PIPE_NCK is the scheduler's own fixed one-cycle "
+                    "selection pipeline (2026-10-27), separate from pl.",
         "read_hit_latency_nCK": rd_hit,
         "read_empty_latency_nCK": rd_empty,
         "read_miss_latency_nCK": rd_miss,
