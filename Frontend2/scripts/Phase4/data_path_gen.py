@@ -16,7 +16,7 @@
 |  Implements:                                                         |
 |    Write path: wb_port req_wdata -> serialize -> DQ/DQS/DM pins     |
 |    Read path:  DQ/DQS capture -> deserialize -> rsp_rdata to wb_port |
-|    Alignment:  4:1 clock ratio, BL8 burst packing/unpacking         |
+|    Alignment:  1/2/4/8:1 clock ratio, BL8 burst packing/unpacking    |
 |    Tag track:  aux_width passthrough for read response ordering      |
 |                                                                      |
 |  Testbench: ~35 tests across 8 sections (A-H)                       |
@@ -169,10 +169,10 @@ class DataPathGenerator:
             errors.append(f"WORD_BEATS ({p['WORD_BEATS']}) must be 1-4 to fit the 2-bit beat counter")
         if p["BURST_LEN"] != 8:
             errors.append(f"BURST_LEN must be 8 for DDR3 BL8, got {p['BURST_LEN']}")
-        if p["CLK_RATIO"] != 4:
-            errors.append(f"Expected 4:1 clock ratio, got {p['CLK_RATIO']}:1")
-        if p["BURST_CTRL_CYCLES"] != 2:
-            errors.append(f"BL8 with 4:1 ratio should be 2 ctrl cycles, got {p['BURST_CTRL_CYCLES']}")
+        if p["CLK_RATIO"] not in (1, 2, 4, 8):
+            errors.append(f"Expected clock ratio in (1, 2, 4, 8) -- the DDR3 "
+                           f"controller gearbox rates implemented here -- got "
+                           f"{p['CLK_RATIO']}:1")
         if p["CL"] < 5 or p["CL"] > 14:
             errors.append(f"CAS latency {p['CL']} out of DDR3 range [5,14]")
         if p["CWL"] < 5 or p["CWL"] > 12:
@@ -334,7 +334,12 @@ class DataPathGenerator:
         L(f"                            wr_burst_ctr <= '0;")
         L(f"                        end else begin")
         L(f"                            wr_state   <= WR_WAIT;")
-        L(f"                            wr_lat_ctr <= (cfg_CWL_nCK >> 2) - 1'b1; // nCK to ctrl cycles")
+        L(f"                            // same fix as the read side's rd_lat_ctr (addendum")
+        L(f"                            // 4/5, Validation, 2026-10-22/27): ceil(CWL /")
+        L(f"                            // CLK_RATIO) - 1, not a hardcoded >> 2 -- the latter")
+        L(f"                            // assumed a fixed 4:1 ratio and, like the read side")
+        L(f"                            // before its fix, was one cycle off besides.")
+        L(f"                            wr_lat_ctr <= (cfg_CWL_nCK + CLK_RATIO[7:0] - 1'b1) / CLK_RATIO[7:0] - 1'b1;")
         L(f"                        end")
         L(f"                    end")
         L(f"                end")
