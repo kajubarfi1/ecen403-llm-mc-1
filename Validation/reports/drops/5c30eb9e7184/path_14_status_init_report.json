@@ -1,0 +1,72 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_14_status_init",
+  "strategy": "composed",
+  "verdict": "pass",
+  "timestamp": "2026-10-27T13:34:49.329961",
+  "blocks": [
+    "config_regs",
+    "init_fsm"
+  ],
+  "sequence": "Validation/sequences/generated/path_14_status_init_seed1.json",
+  "stimulus_generator": "status_poll",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "5c30eb9e7184",
+    "drop_id": "5c30eb9e7184",
+    "design_id": "c43464119623",
+    "blocks_used": [
+      "config_regs",
+      "init_fsm"
+    ],
+    "validated_at": "88b77c9",
+    "frontend_commits": {
+      "config_regs": "88b77c9b622340bcccf0e35e60e4069fcc51209b",
+      "init_fsm": "88b77c9b622340bcccf0e35e60e4069fcc51209b"
+    },
+    "roots": [
+      "runs/phase4_loop_4/drop"
+    ],
+    "blocks": {
+      "config_regs": {
+        "rtl": "runs/phase4_loop_4/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/phase4_loop_4/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "init_fsm": {
+        "rtl": "runs/phase4_loop_4/drop/PHASE1RTL/init_fsm.sv",
+        "manifest": "runs/phase4_loop_4/drop/PHASE1RTL/init_fsm_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/phase4_loop_4/drop/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "init_fsm",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "init_fsm",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
+    },
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "pass",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=160/160  (160 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    }
+  ],
+  "log": "Validation/reports/paths/path_14_status_init_sim.log",
+  "observed_trace": "Validation/reports/paths/path_14_status_init_observed.jsonl"
+}

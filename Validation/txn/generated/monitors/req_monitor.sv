@@ -4,7 +4,7 @@
 //
 // Interface : req   (Internal request descriptors wb_port emits toward cmd_queue)
 // Block     : wb_port
-// Manifest  : runs/20261027-142626-interactive/drop/PHASE1RTL/wb_port_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //
@@ -19,7 +19,7 @@ module req_monitor #(
 ) (
     input  logic clk,
     input  logic rst_n,
-    input  logic [27:0] req_addr,
+    input  logic [28:0] req_addr,
     input  logic req_ready,
     input  logic req_valid,
     input  logic [31:0] req_wdata,

@@ -4,7 +4,7 @@
 //
 // Interface : ddr_wr_beat   (Write data beats driven toward the DDR PHY while the data output enable is asserted.)
 // Block     : data_path
-// Manifest  : runs/20261027-142626-interactive/drop/PHASE4RTL/data_path_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

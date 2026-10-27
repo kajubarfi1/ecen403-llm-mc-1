@@ -274,3 +274,33 @@ Validation's" as a claim and let the two ids being equal be the proof.
 
 Still open from addendum 4: the `- 1` on the read latency count, and the
 tool-call schema miss. The run after those is the one that should pass.
+
+## Addendum 6 (2026-10-27): it passed
+
+`runs/phase4_loop_4`, fresh from the golden spec on your "Phase 4: fix
+read-latency off-by-one" push: spec review PASS, all four phases
+generated, **19 of 19 paths PASS in round 1**, no findings, drop
+`5c30eb9e7184`. Both read paths that had failed every round since 10-15
+pass; read-after-write returns the word that was written. Validation
+then re-proved the design (a passing round triggers it): command path 13
+proven at infinite bound, REF_001 bounded, tREFI bounded under the
+assumed configuration with no undetermined property left; coverage
+unchanged at 28 covered and 11 unreachable by spec. The flow completed
+with the backend skipped.
+
+That is the first all-phase pass on a defect that was not planted: found
+by validation on 10-15, explained in addendum 6, fixed by you from that
+explanation. Your relaxed agent schema went untested this round because
+there was nothing left for the agent to fix, which is the right way for
+it to go untested.
+
+**One ask, so the repo carries the passing drop.** The checked-in
+`Frontend2/OutputFolders` still holds the old `data_path.sv`, so the
+repo's own drop (`efece348d04e`) still fails the two read paths and the
+outbox for it still says so. The passing drop exists only under
+`runs/phase4_loop_4/drop`. Please regenerate `OutputFolders` from the
+current generators and commit it (the drop id should come out as
+`5c30eb9e7184` if the LLM-generated blocks reproduce; a different id is
+fine, we judge content). Then the next thing to run is a full flow with
+the backend on, where Dawson's scheduler timing finding becomes the
+first backend-to-frontend change request the loop carries.

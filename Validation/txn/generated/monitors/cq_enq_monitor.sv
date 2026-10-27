@@ -4,7 +4,7 @@
 //
 // Interface : cq_enq   (Request descriptors entering the command queue)
 // Block     : cmd_queue
-// Manifest  : runs/20261027-142626-interactive/drop/PHASE3RTL/cmd_queue_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //
@@ -22,7 +22,7 @@ module cq_enq_monitor #(
     input  logic [2:0] enq_bank,
     input  logic [9:0] enq_col,
     input  logic enq_ready,
-    input  logic [13:0] enq_row,
+    input  logic [14:0] enq_row,
     input  logic enq_valid,
     input  logic enq_we
 );

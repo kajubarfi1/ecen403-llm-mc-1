@@ -15,21 +15,21 @@ module chain_formal (
     input logic free__wb_port__wb_cyc_i,
     input logic free__wb_port__wb_stb_i,
     input logic free__wb_port__wb_we_i,
-    input logic [27:0] free__wb_port__wb_adr_i,
+    input logic [28:0] free__wb_port__wb_adr_i,
     input logic [31:0] free__wb_port__wb_dat_i,
     input logic [3:0] free__wb_port__wb_sel_i,
     input logic [1:0] free__wb_port__wb_bte_i,
     input logic [2:0] free__wb_port__wb_cti_i
 );
 
-  logic [27:0] wb_port__req_addr;
-  logic [13:0] addr_decoder__dec_row;
+  logic [28:0] wb_port__req_addr;
+  logic [14:0] addr_decoder__dec_row;
   logic [2:0] addr_decoder__dec_bank;
   logic [9:0] addr_decoder__dec_col;
   logic addr_decoder__dec_rank;
   logic cmd_gen__fb_act_valid;
   logic [2:0] cmd_gen__fb_act_bank;
-  logic [13:0] cmd_gen__fb_act_row;
+  logic [14:0] cmd_gen__fb_act_row;
   logic cmd_gen__fb_pre_valid;
   logic [2:0] cmd_gen__fb_pre_bank;
   logic cmd_gen__fb_pre_all;
@@ -50,7 +50,7 @@ module chain_formal (
   logic [7:0] config_regs__cfg_tCCD_nCK;
   logic [7:0] config_regs__cfg_tRFC_nCK;
   logic [7:0] bank_tracker__bank_is_active;
-  logic [13:0] bank_tracker__bank_open_row [8];
+  logic [14:0] bank_tracker__bank_open_row [8];
   logic [7:0] bank_tracker__bank_act_allowed;
   logic [7:0] bank_tracker__bank_rd_allowed;
   logic [7:0] bank_tracker__bank_wr_allowed;
@@ -59,13 +59,13 @@ module chain_formal (
   logic bank_tracker__faw_allows_act;
   logic scheduler__cmd_valid;
   logic [3:0] scheduler__cmd_type;
-  logic [13:0] scheduler__cmd_row;
+  logic [14:0] scheduler__cmd_row;
   logic [9:0] scheduler__cmd_col;
   logic [2:0] scheduler__cmd_bank;
   logic scheduler__cmd_we;
   logic [3:0] scheduler__cmd_aux;
   logic [3:0] cmd_gen__ddr_cmd;
-  logic [13:0] cmd_gen__ddr_addr;
+  logic [14:0] cmd_gen__ddr_addr;
   logic [2:0] cmd_gen__ddr_bank;
   logic cmd_gen__ddr_cke;
   logic cmd_gen__ddr_reset_n;
@@ -78,16 +78,16 @@ module chain_formal (
   logic wb_port__req_we;
   logic [3:0] wb_port__req_aux;
   logic scheduler__deq_grant;
-  logic [1:0] scheduler__deq_idx;
-  logic [3:0] cmd_queue__entry_valid;
-  logic [13:0] cmd_queue__entry_row [4];
-  logic [9:0] cmd_queue__entry_col [4];
-  logic [2:0] cmd_queue__entry_bank [4];
-  logic [0:0] cmd_queue__entry_we [4];
-  logic [3:0] cmd_queue__entry_aux [4];
+  logic [3:0] scheduler__deq_idx;
+  logic [15:0] cmd_queue__entry_valid;
+  logic [14:0] cmd_queue__entry_row [16];
+  logic [9:0] cmd_queue__entry_col [16];
+  logic [2:0] cmd_queue__entry_bank [16];
+  logic [0:0] cmd_queue__entry_we [16];
+  logic [3:0] cmd_queue__entry_aux [16];
   logic cmd_queue__queue_full;
   logic cmd_queue__queue_empty;
-  logic [2:0] cmd_queue__queue_count;
+  logic [4:0] cmd_queue__queue_count;
   logic tie__config_regs__csr_cyc_i;
   logic tie__config_regs__csr_stb_i;
   logic tie__config_regs__csr_we_i;

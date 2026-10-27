@@ -3,7 +3,7 @@
   "path": "path_10_csr_to_timing",
   "strategy": "exact",
   "verdict": "pass",
-  "timestamp": "2026-10-27T14:29:12.404975",
+  "timestamp": "2026-10-27T14:17:30.293475",
   "blocks": [
     "config_regs",
     "bank_tracker"
@@ -18,10 +18,10 @@
     {
       "stage": "config_regs",
       "kind": "exact",
-      "model": "/Users/lehanahome/Documents/ECEN404/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
       "scope": "config_regs",
       "verdict": "pass",
-      "summary": "scope=config_regs  strategy=exact  status=pass  matched=131/131  (131 output transaction(s) matched)",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=131/131  WAIVED=2 field comparison(s)  (131 output transaction(s) matched)",
       "detail": [],
       "rule_counts": {}
     }
@@ -29,9 +29,9 @@
   "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
   "observed_trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
   "rtl_drop": {
-    "git_head": "4e04c518306c",
-    "drop_id": "4e04c518306c",
-    "design_id": "0599c459481e",
+    "git_head": "efece348d04e",
+    "drop_id": "efece348d04e",
+    "design_id": "766dc69c37e9",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -43,71 +43,71 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "5863124",
+    "validated_at": "88b77c9",
     "frontend_commits": {
-      "addr_decoder": "5863124657132b0916612c09d9192dc6316237cd",
-      "bank_tracker": "5863124657132b0916612c09d9192dc6316237cd",
-      "cmd_gen": "5863124657132b0916612c09d9192dc6316237cd",
-      "cmd_queue": "5863124657132b0916612c09d9192dc6316237cd",
-      "config_regs": "5863124657132b0916612c09d9192dc6316237cd",
-      "data_path": "5863124657132b0916612c09d9192dc6316237cd",
-      "refresh_ctrl": "5863124657132b0916612c09d9192dc6316237cd",
-      "scheduler": "5863124657132b0916612c09d9192dc6316237cd",
-      "wb_port": "5863124657132b0916612c09d9192dc6316237cd"
+      "addr_decoder": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "bank_tracker": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "cmd_gen": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "cmd_queue": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "data_path": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "refresh_ctrl": "6f659675f03286f6d19f4946500c8ae93de09850",
+      "scheduler": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
+      "wb_port": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
     },
     "roots": [
-      "runs/20261027-142626-interactive/drop"
+      "Frontend2/OutputFolders"
     ],
     "blocks": {
       "addr_decoder": {
-        "rtl": "runs/20261027-142626-interactive/drop/PHASE2RTL/addr_decoder.sv",
-        "manifest": "runs/20261027-142626-interactive/drop/PHASE2RTL/addr_decoder_manifest.json",
-        "spec_revision": "compiled_ddr3800_x16_1lane_1rank_c28250a3"
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/addr_decoder.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "bank_tracker": {
-        "rtl": "runs/20261027-142626-interactive/drop/PHASE2RTL/bank_tracker.sv",
-        "manifest": "runs/20261027-142626-interactive/drop/PHASE2RTL/bank_tracker_manifest.json",
-        "spec_revision": "compiled_ddr3800_x16_1lane_1rank_c28250a3"
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "cmd_gen": {
-        "rtl": "runs/20261027-142626-interactive/drop/PHASE3RTL/cmd_gen.sv",
-        "manifest": "runs/20261027-142626-interactive/drop/PHASE3RTL/cmd_gen_manifest.json",
-        "spec_revision": "compiled_ddr3800_x16_1lane_1rank_c28250a3"
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "cmd_queue": {
-        "rtl": "runs/20261027-142626-interactive/drop/PHASE3RTL/cmd_queue.sv",
-        "manifest": "runs/20261027-142626-interactive/drop/PHASE3RTL/cmd_queue_manifest.json",
-        "spec_revision": "compiled_ddr3800_x16_1lane_1rank_c28250a3"
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "config_regs": {
-        "rtl": "runs/20261027-142626-interactive/drop/PHASE1RTL/config_regs.sv",
-        "manifest": "runs/20261027-142626-interactive/drop/PHASE1RTL/config_regs_manifest.json",
-        "spec_revision": "compiled_ddr3800_x16_1lane_1rank_c28250a3"
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "data_path": {
-        "rtl": "runs/20261027-142626-interactive/drop/PHASE4RTL/data_path.sv",
-        "manifest": "runs/20261027-142626-interactive/drop/PHASE4RTL/data_path_manifest.json",
-        "spec_revision": "compiled_ddr3800_x16_1lane_1rank_c28250a3"
+        "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "refresh_ctrl": {
-        "rtl": "runs/20261027-142626-interactive/drop/PHASE2RTL/refresh_ctrl.sv",
-        "manifest": "runs/20261027-142626-interactive/drop/PHASE2RTL/refresh_ctrl_manifest.json",
-        "spec_revision": "compiled_ddr3800_x16_1lane_1rank_c28250a3"
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "scheduler": {
-        "rtl": "runs/20261027-142626-interactive/drop/PHASE3RTL/scheduler.sv",
-        "manifest": "runs/20261027-142626-interactive/drop/PHASE3RTL/scheduler_manifest.json",
-        "spec_revision": "compiled_ddr3800_x16_1lane_1rank_c28250a3"
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "wb_port": {
-        "rtl": "runs/20261027-142626-interactive/drop/PHASE1RTL/wb_port.sv",
-        "manifest": "runs/20261027-142626-interactive/drop/PHASE1RTL/wb_port_manifest.json",
-        "spec_revision": "compiled_ddr3800_x16_1lane_1rank_c28250a3"
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       }
     },
     "shipped_spec": {
-      "path": "runs/20261027-142626-interactive/drop/generated_spec.json",
-      "revision": "compiled_ddr3800_x16_1lane_1rank_c28250a3"
+      "path": "Frontend2/OutputFolders/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
     },
     "netlists": {}
   },
