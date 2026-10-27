@@ -3,18 +3,18 @@
 // File:      data_path.sv
 // Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)
 // Generator:     Data Path / Alignment Generator (Phase 3)
-// Spec:      ddr3_mc_core_v2 rev golden_ddr3_1600k_x8_2lane_1rank
+// Spec:      ddr3_mc_800_x16_1lane_1rank rev compiled_ddr3800_x16_1lane_1rank_c28250a3
 //
 // Description:
-//   DDR3 data path and alignment block. Bridges the 200MHz
-//   controller domain to the 800MHz DDR domain.
+//   DDR3 data path and alignment block. Bridges the 100MHz
+//   controller domain to the 400MHz DDR domain.
 //   Write: serialize 32-bit words into BL8 DDR transfers.
 //   Read:  deserialize BL8 captures back to 32-bit words.
 //   Alignment: 4:1 ratio, 2 ctrl cycles per BL8 burst.
 //
 // Key parameters:
 //   DATA_WIDTH=32, DQ_WIDTH=16, BL=8
-//   CL=11 nCK (3 ctrl), CWL=8 nCK (2 ctrl)
+//   CL=6 nCK (2 ctrl), CWL=5 nCK (2 ctrl)
 //   AUX_WIDTH=4, RD_FIFO_DEPTH=16
 //
 // Validation: DP-001 .. DP-012
@@ -32,7 +32,7 @@ module data_path #(
     parameter WORD_BEATS       = 2,
     parameter RD_FIFO_DEPTH    = 16,
     parameter FIFO_PTR_W       = 4,
-    parameter CL_CTRL_DEFAULT  = 3,
+    parameter CL_CTRL_DEFAULT  = 2,
     parameter CWL_CTRL_DEFAULT = 2
 ) (
     // Clock / Reset
@@ -140,7 +140,12 @@ module data_path #(
                             wr_burst_ctr <= '0;
                         end else begin
                             wr_state   <= WR_WAIT;
-                            wr_lat_ctr <= (cfg_CWL_nCK >> 2) - 1'b1; // nCK to ctrl cycles
+                            // same fix as the read side's rd_lat_ctr (addendum
+                            // 4/5, Validation, 2026-10-22/27): ceil(CWL /
+                            // CLK_RATIO) - 1, not a hardcoded >> 2 -- the latter
+                            // assumed a fixed 4:1 ratio and, like the read side
+                            // before its fix, was one cycle off besides.
+                            wr_lat_ctr <= (cfg_CWL_nCK + CLK_RATIO[7:0] - 1'b1) / CLK_RATIO[7:0] - 1'b1;
                         end
                     end
                 end
@@ -222,7 +227,12 @@ module data_path #(
                             rd_burst_ctr <= '0;
                         end else begin
                             rd_state   <= RD_WAIT;
-                            rd_lat_ctr <= (cfg_CL_nCK >> 2) - 1'b1;
+                            // addendum 4/5 (Validation, 2026-10-22/27): ceil(CL /
+                            // CLK_RATIO) alone waited one cycle too long -- the
+                            // RD_IDLE -> RD_WAIT transition already spends the cycle
+                            // in which the registered command is seen, so the wait
+                            // count is one less than the ceiling.
+                            rd_lat_ctr <= (cfg_CL_nCK + CLK_RATIO[7:0] - 1'b1) / CLK_RATIO[7:0] - 1'b1;
                         end
                     end
                 end
@@ -263,7 +273,17 @@ module data_path #(
     // partially-real entries into the FIFO per read, which is
     // what showed up downstream as duplicate/X-valued read
     // responses (see Defect 2, Frontend2/VALIDATION_INTEGRATION_
-    // PLAN.md). Low beat first (pack_32_to_16, little-endian).
+    // PLAN.md). Low beat first (pack_32_to_16, little-endian):
+    // beat 0 (first captured) goes to the LOW DQ_WIDTH bits of
+    // the assembled word, matching the write-side packing
+    // (wr_dat_r[(wb+1)*DQ_WIDTH-1 -: DQ_WIDTH] with wb=0 driving
+    // the low half first). Every beat -- including the final
+    // one -- is captured into its own DQ_WIDTH-wide slot at bit
+    // position beat_index*DQ_WIDTH, the same positional scheme
+    // the write path uses, instead of special-casing the final
+    // beat into a fixed top slot via concatenation (which
+    // silently assumed WORD_BEATS==2 and got the beat order
+    // backwards for the final beat).
     wire rd_capture_valid = (rd_state == RD_CAPTURE);
     wire rd_word_complete = rd_capture_valid && (rd_burst_ctr == WORD_BEATS[1:0] - 1'b1);
 
@@ -271,21 +291,32 @@ module data_path #(
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n)
             rd_shift_r <= '0;
-        else if (rd_capture_valid && rd_burst_ctr != WORD_BEATS[1:0] - 1'b1)
-            rd_shift_r[(rd_burst_ctr+1)*DQ_WIDTH-1 -: DQ_WIDTH] <= ddr_dq_i;
+        else if (rd_capture_valid)
+            rd_shift_r[rd_burst_ctr*DQ_WIDTH +: DQ_WIDTH] <= ddr_dq_i;
     end
 
-    // Final beat combines the just-arrived ddr_dq_i directly with
-    // the earlier beats already shifted into rd_shift_r -- avoids
-    // a spurious extra cycle of latency for the last beat.
-    wire [DATA_WIDTH-1:0] rd_word_assembled =
-        {ddr_dq_i, rd_shift_r[DATA_WIDTH-DQ_WIDTH-1:0]};
+    // The word is pushed to the FIFO the cycle AFTER the final
+    // beat is latched into rd_shift_r (rd_word_complete fires on
+    // the final-beat capture cycle itself, but rd_shift_r only
+    // updates on the next edge), so delay rd_word_complete and
+    // rd_aux_r by one cycle to push the fully-assembled word.
+    logic rd_word_complete_d;
+    logic [AUX_WIDTH-1:0] rd_aux_push;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            rd_word_complete_d <= 1'b0;
+            rd_aux_push        <= '0;
+        end else begin
+            rd_word_complete_d <= rd_word_complete;
+            rd_aux_push        <= rd_aux_r;
+        end
+    end
 
     always_ff @(posedge clk or negedge rst_n)
         if (!rst_n)
             rd_wptr <= '0;
-        else if (rd_word_complete) begin
-            rd_fifo[rd_wptr[FIFO_PTR_W-1:0]] <= '{data: rd_word_assembled, aux: rd_aux_r};
+        else if (rd_word_complete_d) begin
+            rd_fifo[rd_wptr[FIFO_PTR_W-1:0]] <= '{data: rd_shift_r, aux: rd_aux_push};
             rd_wptr <= rd_wptr + 1'b1;
         end
 

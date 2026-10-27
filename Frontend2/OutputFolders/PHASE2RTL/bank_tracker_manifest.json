@@ -1,8 +1,8 @@
 {
-  "git_commit": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "generated_utc": "2026-10-08T18:44:38.966698+00:00",
-  "clock_period_ns": 5.0,
+  "git_commit": "5863124657132b0916612c09d9192dc6316237cd",
+  "spec_revision": "compiled_ddr3800_x16_1lane_1rank_c28250a3",
+  "generated_utc": "2026-10-27T19:27:33.304089+00:00",
+  "clock_period_ns": 10.0,
   "module_name": "bank_tracker",
   "file": "bank_tracker.sv",
   "phase": 2,
@@ -13,8 +13,8 @@
   "parameters": {
     "NUM_BANKS": 8,
     "BANK_BITS": 3,
-    "ROW_BITS": 15,
-    "CTR_WIDTH": 8
+    "ROW_BITS": 14,
+    "CTR_WIDTH": 7
   },
   "ports": {
     "clock_reset": [
@@ -44,7 +44,7 @@
       },
       {
         "name": "cmd_act_row",
-        "width": 15,
+        "width": 14,
         "dir": "input",
         "source": "cmd_gen.fb_act_row"
       },
@@ -173,7 +173,7 @@
       },
       {
         "name": "bank_open_row",
-        "width": "8x15",
+        "width": "8x14",
         "dir": "output"
       },
       {

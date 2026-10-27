@@ -3,7 +3,7 @@
 // cmd_queue_tb.sv — 35 self-checking tests
 //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 module cmd_queue_tb;
-    localparam DEPTH=16, IDX_BITS=4, ROW_BITS=15;
+    localparam DEPTH=4, IDX_BITS=2, ROW_BITS=14;
     localparam COL_BITS=10, BANK_BITS=3, AUX_WIDTH=4;
     logic clk=0; always #2.5 clk=~clk;
     logic rst_n, enq_valid, enq_ready, enq_we;

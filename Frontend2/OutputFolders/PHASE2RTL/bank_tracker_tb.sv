@@ -4,7 +4,7 @@ module bank_tracker_tb;
     logic clk = 0;
     always #(CLK_PERIOD/2) clk = ~clk;
 
-    localparam NUM_BANKS=8, BANK_BITS=3, ROW_BITS=15;
+    localparam NUM_BANKS=8, BANK_BITS=3, ROW_BITS=14;
 
     logic rst_n;
     logic cmd_act_valid, cmd_pre_valid, cmd_pre_all, cmd_rd_valid, cmd_wr_valid, cmd_ref_valid;
@@ -81,9 +81,9 @@ module bank_tracker_tb;
         check("A5: bank_pre_allowed all zero at reset (no bank active)", bank_pre_allowed===8'h00);
 
         // -- Section B: ACT to bank 0 -- state + row + RCD/RAS gating --
-        do_act(3'd0, 15'h1234);
+        do_act(3'd0, 14'h1234);
         check("B1: bank_is_active[0] set after ACT", bank_is_active[0]===1'b1);
-        check("B2: bank_open_row[0] captures row", bank_open_row[0]===15'h1234);
+        check("B2: bank_open_row[0] captures row", bank_open_row[0]===14'h1234);
         check("B3: all_banks_idle clears", all_banks_idle===1'b0);
         check("B4: bank_act_allowed[0] clears (state ACTIVE)", bank_act_allowed[0]===1'b0);
         check("B5: bank_rd_allowed[0] blocked (tRCD not elapsed)", bank_rd_allowed[0]===1'b0);
@@ -149,8 +149,8 @@ module bank_tracker_tb;
         check("I1: bank_rd_allowed[1] blocked right after a WR to bank 0 (tWTR)", bank_rd_allowed[1]===1'b0);
         repeat(2 + 1) @(posedge clk);   // tCCD is over; only tWTR can still block
         check("I2: bank_rd_allowed[1] still blocked after tCCD (tWTR window not over)", bank_rd_allowed[1]===1'b0);
-        repeat(16) @(posedge clk);
-        check($sformatf("I3: bank_rd_allowed[1] after tWTR+CWL+BL/2=%0d", 16), bank_rd_allowed[1]===1'b1);
+        repeat(13) @(posedge clk);
+        check($sformatf("I3: bank_rd_allowed[1] after tWTR+CWL+BL/2=%0d", 13), bank_rd_allowed[1]===1'b1);
 
         // -- Section J: REF forces all-idle + tRFC gate --
         hw_reset();

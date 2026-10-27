@@ -1,8 +1,8 @@
 {
-  "git_commit": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "generated_utc": "2026-10-08T18:45:09.588267+00:00",
-  "clock_period_ns": 5.0,
+  "git_commit": "5863124657132b0916612c09d9192dc6316237cd",
+  "spec_revision": "compiled_ddr3800_x16_1lane_1rank_c28250a3",
+  "generated_utc": "2026-10-27T19:28:07.284442+00:00",
+  "clock_period_ns": 10.0,
   "module_name": "cmd_queue",
   "file": "cmd_queue.sv",
   "phase": 3,
@@ -13,14 +13,14 @@
   ],
   "spec_version": "2.0.0",
   "parameters": {
-    "DEPTH": 16,
-    "IDX_BITS": 4,
-    "ROW_BITS": 15,
+    "DEPTH": 4,
+    "IDX_BITS": 2,
+    "ROW_BITS": 14,
     "COL_BITS": 10,
     "BANK_BITS": 3,
     "AUX_WIDTH": 4,
     "DATA_WIDTH": 32,
-    "ENTRY_W": 33
+    "ENTRY_W": 32
   },
   "ports": {
     "clock_reset": [
@@ -49,7 +49,7 @@
       },
       {
         "name": "enq_row",
-        "width": 15,
+        "width": 14,
         "dir": "input",
         "source": "addr_decoder.dec_row"
       },
@@ -87,7 +87,7 @@
       },
       {
         "name": "deq_idx",
-        "width": 4,
+        "width": 2,
         "dir": "input",
         "source": "scheduler.deq_idx"
       }
@@ -95,32 +95,32 @@
     "lookahead": [
       {
         "name": "entry_valid",
-        "width": 16,
+        "width": 4,
         "dir": "output"
       },
       {
         "name": "entry_row",
-        "width": "16x15",
+        "width": "4x14",
         "dir": "output"
       },
       {
         "name": "entry_col",
-        "width": "16x10",
+        "width": "4x10",
         "dir": "output"
       },
       {
         "name": "entry_bank",
-        "width": "16x3",
+        "width": "4x3",
         "dir": "output"
       },
       {
         "name": "entry_we",
-        "width": "16x1",
+        "width": "4x1",
         "dir": "output"
       },
       {
         "name": "entry_aux",
-        "width": "16x4",
+        "width": "4x4",
         "dir": "output"
       }
     ],
@@ -137,7 +137,7 @@
       },
       {
         "name": "queue_count",
-        "width": 5,
+        "width": 3,
         "dir": "output"
       }
     ]

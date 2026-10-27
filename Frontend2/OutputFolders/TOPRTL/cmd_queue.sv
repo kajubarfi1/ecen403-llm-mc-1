@@ -3,15 +3,15 @@
 // Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)
 // Generator:     Command Queue Generator (Phase 3)
 //
-// 16-deep command queue. Accepts decoded requests from addr_decoder,
+// 4-deep command queue. Accepts decoded requests from addr_decoder,
 // presents oldest entries to scheduler via lookahead window.
 // FIFO with per-entry valid bits, enqueue on push, dequeue on grant.
 ////////////////////////////////////////////////////////////////////////////////
 
 module cmd_queue #(
-    parameter DEPTH     = 16,
-    parameter IDX_BITS  = 4,
-    parameter ROW_BITS  = 15,
+    parameter DEPTH     = 4,
+    parameter IDX_BITS  = 2,
+    parameter ROW_BITS  = 14,
     parameter COL_BITS  = 10,
     parameter BANK_BITS = 3,
     parameter AUX_WIDTH = 4

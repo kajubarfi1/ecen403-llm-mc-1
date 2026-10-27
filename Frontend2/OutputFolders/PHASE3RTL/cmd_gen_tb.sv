@@ -3,7 +3,7 @@
 // cmd_gen_tb.sv — 36 self-checking tests
 //━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 module cmd_gen_tb;
-    localparam DDR_ADDR_W=15,DDR_BANK_W=3,ROW_BITS=15;
+    localparam DDR_ADDR_W=14,DDR_BANK_W=3,ROW_BITS=14;
     localparam COL_BITS=10,BANK_BITS=3,AUX_WIDTH=4;
     // DDR encodings
     localparam DDR_NOP=4'b0111,DDR_ACT=4'b0011,DDR_RD=4'b0101,DDR_WR=4'b0100,DDR_PRE=4'b0010,DDR_REF=4'b0001;
@@ -58,9 +58,9 @@ module cmd_gen_tb;
         @(posedge clk); rst_n=1; wc(2);
 
         // T07–T10: ACT command
-        issue(SCMD_ACT, 15'd1234, 0, 3'd2, 0, 0);
+        issue(SCMD_ACT, 14'd1234, 0, 3'd2, 0, 0);
         check("ACT: ddr=ACT",        ddr_cmd===DDR_ACT);
-        check("ACT: addr=row",       ddr_addr==15'd1234);
+        check("ACT: addr=row",       ddr_addr==14'd1234);
         check("ACT: bank=2",         ddr_bank===3'd2);
         check("ACT: fb_act=1",       fb_act_valid===1);
 
@@ -109,7 +109,7 @@ module cmd_gen_tb;
         check("reset_n stays 1",     ddr_reset_n===1);
 
         // T34: Back-to-back commands
-        issue(SCMD_ACT, 15'd500, 0, 3'd4, 0, 0);
+        issue(SCMD_ACT, 14'd500, 0, 3'd4, 0, 0);
         issue(SCMD_RD, 0, 10'd25, 3'd4, 0, 4'd2);
         check("B2B: RD after ACT",   ddr_cmd===DDR_RD);
 

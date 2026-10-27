@@ -1,8 +1,8 @@
 {
-  "git_commit": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "generated_utc": "2026-10-08T18:45:09.584422+00:00",
-  "clock_period_ns": 5.0,
+  "git_commit": "5863124657132b0916612c09d9192dc6316237cd",
+  "spec_revision": "compiled_ddr3800_x16_1lane_1rank_c28250a3",
+  "generated_utc": "2026-10-27T19:28:07.283555+00:00",
+  "clock_period_ns": 10.0,
   "module_name": "cmd_gen",
   "file": "cmd_gen.sv",
   "phase": 3,
@@ -13,10 +13,10 @@
   ],
   "spec_version": "2.0.0",
   "parameters": {
-    "ROW_BITS": 15,
+    "ROW_BITS": 14,
     "COL_BITS": 10,
     "BANK_BITS": 3,
-    "DDR_ADDR_W": 15,
+    "DDR_ADDR_W": 14,
     "DDR_BANK_W": 3,
     "AUX_WIDTH": 4
   },
@@ -48,7 +48,7 @@
       },
       {
         "name": "sched_row",
-        "width": 15,
+        "width": 14,
         "dir": "input",
         "source": "scheduler.cmd_row"
       },
@@ -85,7 +85,7 @@
       },
       {
         "name": "ddr_addr",
-        "width": 15,
+        "width": 14,
         "dir": "output"
       },
       {
@@ -122,7 +122,7 @@
       },
       {
         "name": "fb_act_row",
-        "width": 15,
+        "width": 14,
         "dir": "output"
       },
       {

@@ -4,7 +4,7 @@
 //==============================================================
 module addr_decoder_tb;
 
-    localparam ADDR_WIDTH=29, ROW_BITS=15, BANK_BITS=3, COL_BITS=10, RANK_BITS=1;
+    localparam ADDR_WIDTH=28, ROW_BITS=14, BANK_BITS=3, COL_BITS=10, RANK_BITS=1;
 
     logic [ADDR_WIDTH-1:0] req_addr;
     logic [ROW_BITS-1:0]   dec_row;
@@ -23,33 +23,33 @@ module addr_decoder_tb;
 
     initial begin
         $dumpfile("addr_decoder_tb.vcd"); $dumpvars(0, addr_decoder_tb);
-        req_addr = 29'h00000000; #10;
-        check($sformatf("V1: addr=0x%0h row", req_addr), dec_row === 15'h0000);
+        req_addr = 28'h0000000; #10;
+        check($sformatf("V1: addr=0x%0h row", req_addr), dec_row === 14'h0000);
         check($sformatf("V1: addr=0x%0h bank", req_addr), dec_bank === 3'h0);
         check($sformatf("V1: addr=0x%0h col", req_addr), dec_col === 10'h000);
         check($sformatf("V1: addr=0x%0h rank", req_addr), dec_rank === '0);
-        req_addr = 29'h1FFFFFFF; #10;
-        check($sformatf("V2: addr=0x%0h row", req_addr), dec_row === 15'h7FFF);
+        req_addr = 28'hFFFFFFF; #10;
+        check($sformatf("V2: addr=0x%0h row", req_addr), dec_row === 14'h3FFF);
         check($sformatf("V2: addr=0x%0h bank", req_addr), dec_bank === 3'h7);
         check($sformatf("V2: addr=0x%0h col", req_addr), dec_col === 10'h3F8);
         check($sformatf("V2: addr=0x%0h rank", req_addr), dec_rank === '0);
-        req_addr = 29'h1FFFC000; #10;
-        check($sformatf("V3: addr=0x%0h row", req_addr), dec_row === 15'h7FFF);
+        req_addr = 28'hFFFC000; #10;
+        check($sformatf("V3: addr=0x%0h row", req_addr), dec_row === 14'h3FFF);
         check($sformatf("V3: addr=0x%0h bank", req_addr), dec_bank === 3'h0);
         check($sformatf("V3: addr=0x%0h col", req_addr), dec_col === 10'h000);
         check($sformatf("V3: addr=0x%0h rank", req_addr), dec_rank === '0);
-        req_addr = 29'h00003800; #10;
-        check($sformatf("V4: addr=0x%0h row", req_addr), dec_row === 15'h0000);
+        req_addr = 28'h0003800; #10;
+        check($sformatf("V4: addr=0x%0h row", req_addr), dec_row === 14'h0000);
         check($sformatf("V4: addr=0x%0h bank", req_addr), dec_bank === 3'h7);
         check($sformatf("V4: addr=0x%0h col", req_addr), dec_col === 10'h000);
         check($sformatf("V4: addr=0x%0h rank", req_addr), dec_rank === '0);
-        req_addr = 29'h000007F0; #10;
-        check($sformatf("V5: addr=0x%0h row", req_addr), dec_row === 15'h0000);
+        req_addr = 28'h00007F0; #10;
+        check($sformatf("V5: addr=0x%0h row", req_addr), dec_row === 14'h0000);
         check($sformatf("V5: addr=0x%0h bank", req_addr), dec_bank === 3'h0);
         check($sformatf("V5: addr=0x%0h col", req_addr), dec_col === 10'h3F8);
         check($sformatf("V5: addr=0x%0h rank", req_addr), dec_rank === '0);
-        req_addr = 29'h0015A5A5; #10;
-        check($sformatf("V6: addr=0x%0h row", req_addr), dec_row === 15'h0056);
+        req_addr = 28'h015A5A5; #10;
+        check($sformatf("V6: addr=0x%0h row", req_addr), dec_row === 14'h0056);
         check($sformatf("V6: addr=0x%0h bank", req_addr), dec_bank === 3'h4);
         check($sformatf("V6: addr=0x%0h col", req_addr), dec_col === 10'h2D0);
         check($sformatf("V6: addr=0x%0h rank", req_addr), dec_rank === '0);

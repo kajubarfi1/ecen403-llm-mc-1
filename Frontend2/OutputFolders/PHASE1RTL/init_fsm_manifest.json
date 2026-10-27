@@ -1,21 +1,21 @@
 {
-  "git_commit": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "generated_utc": "2026-10-08T18:44:12.265314+00:00",
-  "clock_period_ns": 5.0,
+  "git_commit": "5863124657132b0916612c09d9192dc6316237cd",
+  "spec_revision": "compiled_ddr3800_x16_1lane_1rank_c28250a3",
+  "generated_utc": "2026-10-27T19:27:09.830103+00:00",
+  "clock_period_ns": 10.0,
   "module_name": "init_fsm",
   "file": "init_fsm.sv",
   "phase": 1,
   "generator": "init_fsm_gen",
   "spec_version": "2.0.0",
-  "design_id": "ddr3_mc_core_v2",
+  "design_id": "ddr3_mc_800_x16_1lane_1rank",
   "parameters": {
-    "DDR_ADDR_W": 15,
+    "DDR_ADDR_W": 14,
     "DDR_BANK_W": 3,
-    "CTR_WIDTH": 17,
-    "WAIT_RESET": 40000,
-    "WAIT_CKE": 100000,
-    "WAIT_TXPR": 34,
+    "CTR_WIDTH": 16,
+    "WAIT_RESET": 20000,
+    "WAIT_CKE": 50000,
+    "WAIT_TXPR": 17,
     "WAIT_ZQCL": 128
   },
   "ports": {
@@ -63,7 +63,7 @@
       },
       {
         "name": "init_addr",
-        "width": 15,
+        "width": 14,
         "dir": "output"
       },
       {

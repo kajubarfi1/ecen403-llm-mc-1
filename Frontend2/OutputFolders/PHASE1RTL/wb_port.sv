@@ -3,23 +3,23 @@
 // File:      wb_port.sv
 // Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)
 // Generator:     Wishbone Port Interface Generator (Phase 1)
-// Spec:      ddr3_mc_core_v2 rev golden_ddr3_1600k_x8_2lane_1rank
+// Spec:      ddr3_mc_800_x16_1lane_1rank rev compiled_ddr3800_x16_1lane_1rank_c28250a3
 //
 // Description:
 //   Wishbone B4 pipelined slave. Backpressure (stall), linear burst (BL8),
 //   byte-lane masking, error signalling, auxiliary tag propagation.
 //
-// Derived: DATA=32 ADDR=29 SEL=4 AUX=4 BURST=8 QUEUE=16
+// Derived: DATA=32 ADDR=28 SEL=4 AUX=4 BURST=8 QUEUE=4
 // Validation: WB-001 .. WB-009
 ////////////////////////////////////////////////////////////////////////////////
 
 module wb_port #(
     parameter DATA_WIDTH     = 32,
-    parameter ADDR_WIDTH     = 29,
+    parameter ADDR_WIDTH     = 28,
     parameter SEL_WIDTH      = 4,
     parameter AUX_WIDTH      = 4,
     parameter MAX_BURST_LEN  = 8,
-    parameter QUEUE_DEPTH    = 16,
+    parameter QUEUE_DEPTH    = 4,
     parameter BURST_CTR_W    = 4,
     parameter TAG_FIFO_DEPTH = 16,
     parameter TAG_PTR_W      = 4

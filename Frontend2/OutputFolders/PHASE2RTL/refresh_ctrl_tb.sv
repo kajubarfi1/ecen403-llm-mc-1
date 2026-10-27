@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 module refresh_ctrl_tb;
-    localparam real CLK_PERIOD = 5.0;
+    localparam real CLK_PERIOD = 10.0;
     logic clk = 0;
     always #(CLK_PERIOD/2) clk = ~clk;
 
