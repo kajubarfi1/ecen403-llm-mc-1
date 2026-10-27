@@ -68,7 +68,11 @@ def compute_drop_id(root, blocks=None) -> str:
             p = have[b].get(kind)
             if p:
                 h.update(b.encode())
-                h.update(p.read_bytes())
+                # line endings are the checkout's, not the drop's (contract
+                # §2: a Windows clone computed a different id for the same
+                # files, 2026-10-08) -- normalise before hashing, same as
+                # Validation/structural/rtl_drop.py:drop_id()
+                h.update(p.read_bytes().replace(b"\r\n", b"\n"))
                 n += 1
     return h.hexdigest()[:12] if n else "empty"
 
