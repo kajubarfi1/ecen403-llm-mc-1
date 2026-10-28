@@ -1,0 +1,90 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_09_init_to_refresh",
+  "strategy": "invariant",
+  "verdict": "fail",
+  "timestamp": "2026-10-28T14:20:14.815217",
+  "blocks": [
+    "config_regs",
+    "init_fsm",
+    "refresh_ctrl"
+  ],
+  "sequence": null,
+  "stimulus_generator": null,
+  "autonomous": true,
+  "window_cycles": 180000,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "99f72da45a32",
+    "drop_id": "99f72da45a32",
+    "design_id": "a2b204453edc",
+    "blocks_used": [
+      "config_regs",
+      "init_fsm",
+      "refresh_ctrl"
+    ],
+    "validated_at": "17274ce",
+    "frontend_commits": {
+      "config_regs": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc",
+      "init_fsm": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc",
+      "refresh_ctrl": "f37ce49d323151a6118ae7765aa766918c816383"
+    },
+    "roots": [
+      "Frontend2/OutputFolders"
+    ],
+    "blocks": {
+      "config_regs": {
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "init_fsm": {
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/init_fsm.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/init_fsm_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "refresh_ctrl": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "Frontend2/OutputFolders/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "init_fsm",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "init_fsm",
+      "verdict": "fail",
+      "summary": "SVA fired: a_TIMING_014 x1",
+      "detail": [
+        "a_TIMING_014 fired 1x (see the sim log)"
+      ]
+    },
+    {
+      "stage": "refresh_ctrl",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "refresh_ctrl",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
+    },
+    {
+      "stage": "(path-level)",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_09_init_to_refresh_checker.py",
+      "scope": "path_09_init_to_refresh",
+      "verdict": "pass",
+      "summary": "scope=path_09_init_to_refresh  strategy=invariant  status=pass  (89 transactions, no rule broken)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/paths/path_09_init_to_refresh_sim.log",
+  "observed_trace": "Validation/reports/paths/path_09_init_to_refresh_observed.jsonl"
+}

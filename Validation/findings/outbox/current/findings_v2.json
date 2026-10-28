@@ -1,11 +1,11 @@
 {
   "schema": "validation-findings/2",
-  "drop": "efece348d04e",
+  "drop": "99f72da45a32",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "spec_id": "279cbf6ca7b6f62b",
-  "generated_utc": "2026-10-28T19:10:44.561948Z",
+  "spec_id": "00d082c3f72d1b34",
+  "generated_utc": "2026-10-28T19:21:30.686596Z",
   "reports": "Validation/reports/paths",
-  "finding_count": 9,
+  "finding_count": 11,
   "findings": [
     {
       "schema": "validation-findings/2",
@@ -26,18 +26,18 @@
       "requirement": "Every RD command the data path is told about (cmd_rd_valid) yields exactly one read response (rd_rsp_valid), whatever the spacing between RD commands: the spec allows CAS-to-CAS at tCCD, so the capture must pipeline or the command generator must be held, not the command dropped.",
       "spec_ref": "timing_model.tCCD_nCK; latency_model.read_latency; host_interface.read_buffer_depth",
       "expected": "Every RD command the data path is told about (cmd_rd_valid) yields exactly one read response (rd_rsp_valid), whatever the spacing between RD commands: the spec allows CAS-to-CAS at tCCD, so the capture must pipeline or the command generator must be held, not the command dropped.",
-      "actual": "13 of 46 dp_cmd.read transaction(s) never produced a dp_rd_rsp by the end of the run (33 observed)",
+      "actual": "15 of 46 dp_cmd.read transaction(s) never produced a dp_rd_rsp by the end of the run (31 observed)",
       "detector": "conservation:READ_CMD_TO_RESPONSE",
       "anchor": [
         {
           "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-          "line": 300,
+          "line": 331,
           "signal": "rd_rsp_data",
           "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
         },
         {
           "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-          "line": 301,
+          "line": 332,
           "signal": "rd_rsp_aux",
           "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
         }
@@ -49,7 +49,7 @@
         "path_07_backpressure",
         "path_18_full_write"
       ],
-      "occurrences": 25,
+      "occurrences": 28,
       "repro": {
         "path": "path_02_read_cmd",
         "command": "python3 Validation/tools/run_path.py --path path_02_read_cmd",
@@ -59,17 +59,17 @@
         "trace": "Validation/reports/paths/path_02_read_cmd_observed.jsonl",
         "first_failure": {
           "seq": null,
-          "line": "CONSERVE READ_CMD_TO_RESPONSE owner=data_path lost=13 of=46 from=dp_cmd.read to=dp_rd_rsp observed=33 | Every RD command the data path is told about (cmd_rd_valid) yields exactly one read response (rd_rsp_valid), whatever the spacing between RD commands: the spec allows CAS-to-CAS at tCCD, so the capture must pipeline or the command generator must be held, not the command dropped."
+          "line": "CONSERVE READ_CMD_TO_RESPONSE owner=data_path lost=15 of=46 from=dp_cmd.read to=dp_rd_rsp observed=31 | Every RD command the data path is told about (cmd_rd_valid) yields exactly one read response (rd_rsp_valid), whatever the spacing between RD commands: the spec allows CAS-to-CAS at tCCD, so the capture must pipeline or the command generator must be held, not the command dropped."
         }
       },
       "drop": {
-        "git_head": "efece348d04e",
+        "git_head": "99f72da45a32",
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
         "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv"
       },
       "introduced_in": "efece348d04e",
       "first_seen": "efece348d04e",
-      "last_seen": "efece348d04e",
+      "last_seen": "99f72da45a32",
       "resolved_in": null,
       "status": "open",
       "related_manual_findings": [
@@ -97,24 +97,24 @@
       "requirement": "Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR command issued to the DRAM without its data writes garbage to the array.",
       "spec_ref": "data_path_mapping.pack_mode; timing_model.tCCD_nCK",
       "expected": "Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR command issued to the DRAM without its data writes garbage to the array.",
-      "actual": "38 of 62 dp_cmd.write transaction(s) never produced a ddr_wr_beat by the end of the run (24 observed, 2 per source)",
+      "actual": "44 of 62 dp_cmd.write transaction(s) never produced a ddr_wr_beat by the end of the run (18 observed, 2 per source)",
       "detector": "conservation:WRITE_CMD_TO_BEATS",
       "anchor": [
         {
           "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-          "line": 170,
+          "line": 175,
           "signal": "ddr_dq_o",
           "text": "ddr_dq_o = wr_dat_r[DQ_WIDTH-1:0];"
         },
         {
           "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-          "line": 173,
+          "line": 178,
           "signal": "ddr_dq_o",
           "text": "ddr_dq_o = wr_dat_r[(wb+1)*DQ_WIDTH-1 -: DQ_WIDTH];"
         },
         {
           "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-          "line": 187,
+          "line": 192,
           "signal": "ddr_dm_o",
           "text": "assign ddr_dm_o   = (wr_state == WR_DRIVE) ? ~dm_beat : '0;  // DM active-high masks"
         }
@@ -125,7 +125,7 @@
         "path_02_read_cmd",
         "path_07_backpressure"
       ],
-      "occurrences": 124,
+      "occurrences": 128,
       "repro": {
         "path": "path_02_read_cmd",
         "command": "python3 Validation/tools/run_path.py --path path_02_read_cmd",
@@ -135,17 +135,17 @@
         "trace": "Validation/reports/paths/path_02_read_cmd_observed.jsonl",
         "first_failure": {
           "seq": null,
-          "line": "CONSERVE WRITE_CMD_TO_BEATS owner=data_path lost=38 of=62 from=dp_cmd.write to=ddr_wr_beat observed=24 per_source=2 | Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR command issued to the DRAM without its data writes garbage to the array."
+          "line": "CONSERVE WRITE_CMD_TO_BEATS owner=data_path lost=44 of=62 from=dp_cmd.write to=ddr_wr_beat observed=18 per_source=2 | Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR command issued to the DRAM without its data writes garbage to the array."
         }
       },
       "drop": {
-        "git_head": "efece348d04e",
+        "git_head": "99f72da45a32",
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
         "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv"
       },
       "introduced_in": "efece348d04e",
       "first_seen": "efece348d04e",
-      "last_seen": "efece348d04e",
+      "last_seen": "99f72da45a32",
       "resolved_in": null,
       "status": "open",
       "related_manual_findings": [
@@ -173,7 +173,7 @@
       "requirement": "Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_buffer_depth words and must drain one per WR command issued, so it never refuses a word the queue has already accepted.",
       "spec_ref": "host_interface.write_buffer_depth; controller_architecture.command_queue_depth",
       "expected": "Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_buffer_depth words and must drain one per WR command issued, so it never refuses a word the queue has already accepted.",
-      "actual": "6 of 31 req[we=1] transaction(s) never produced a dp_wr by the end of the run (25 observed)",
+      "actual": "8 of 31 req[we=1] transaction(s) never produced a dp_wr by the end of the run (23 observed)",
       "detector": "conservation:WRITE_REQUEST_TO_DATA",
       "anchor": [],
       "context": null,
@@ -182,7 +182,7 @@
         "path_02_read_cmd",
         "path_07_backpressure"
       ],
-      "occurrences": 46,
+      "occurrences": 47,
       "repro": {
         "path": "path_02_read_cmd",
         "command": "python3 Validation/tools/run_path.py --path path_02_read_cmd",
@@ -192,17 +192,17 @@
         "trace": "Validation/reports/paths/path_02_read_cmd_observed.jsonl",
         "first_failure": {
           "seq": null,
-          "line": "CONSERVE WRITE_REQUEST_TO_DATA owner=data_path lost=6 of=31 from=req[we=1] to=dp_wr observed=25 | Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_buffer_depth words and must drain one per WR command issued, so it never refuses a word the queue has already accepted."
+          "line": "CONSERVE WRITE_REQUEST_TO_DATA owner=data_path lost=8 of=31 from=req[we=1] to=dp_wr observed=23 | Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_buffer_depth words and must drain one per WR command issued, so it never refuses a word the queue has already accepted."
         }
       },
       "drop": {
-        "git_head": "efece348d04e",
+        "git_head": "99f72da45a32",
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
         "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv"
       },
       "introduced_in": "efece348d04e",
       "first_seen": "efece348d04e",
-      "last_seen": "efece348d04e",
+      "last_seen": "99f72da45a32",
       "resolved_in": null,
       "status": "open",
       "related_manual_findings": [
@@ -231,30 +231,30 @@
       "requirement": "data_path must produce the transactions the spec-derived model predicts",
       "spec_ref": null,
       "expected": "transaction predicted on dp_rd_rsp",
-      "actual": "the design produced [dp_rd_rsp.response aux=0xd data=0x254a0000] with nothing predicted",
+      "actual": "the design produced [dp_rd_rsp.response aux=0x9 data=0x5805975] with nothing predicted",
       "detector": "exact:data_path:unexpected",
       "anchor": [
         {
           "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-          "line": 170,
+          "line": 175,
           "signal": "ddr_dq_o",
           "text": "ddr_dq_o = wr_dat_r[DQ_WIDTH-1:0];"
         },
         {
           "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-          "line": 173,
+          "line": 178,
           "signal": "ddr_dq_o",
           "text": "ddr_dq_o = wr_dat_r[(wb+1)*DQ_WIDTH-1 -: DQ_WIDTH];"
         },
         {
           "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-          "line": 300,
+          "line": 331,
           "signal": "rd_rsp_data",
           "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
         },
         {
           "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-          "line": 301,
+          "line": 332,
           "signal": "rd_rsp_aux",
           "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
         }
@@ -262,19 +262,19 @@
       "context": {
         "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
         "events": [
-          "t-225000 ddr_wr_beat.beat data=0x580 mask=0x0",
-          "t-140000 dp_cmd.read aux=0x9",
-          "t-135000 dp_cmd.read aux=0xf",
-          "t-130000 dp_cmd.write aux=0xc",
-          "t-120000 ddr_rd_beat.beat data=0x5975",
-          "t-115000 ddr_wr_beat.beat data=0x254a mask=0x0",
-          "t-115000 ddr_rd_beat.beat data=0x580",
-          "t-110000 ddr_wr_beat.beat data=0xab99 mask=0x0",
-          "t-110000 ddr_rd_beat.beat data=0xc381",
-          "t-25000 dp_cmd.read aux=0xd",
-          "t-5000 ddr_rd_beat.beat data=0x254a",
-          "t+0 ddr_rd_beat.beat data=0xab99",
-          "t+0 dp_rd_rsp.response (observed, wrong) aux=0xd data=0x254a0000"
+          "t-235000 ddr_wr_beat.beat data=0x5975 mask=0x0",
+          "t-230000 ddr_wr_beat.beat data=0x580 mask=0x0",
+          "t-145000 dp_cmd.write aux=0xc",
+          "t-130000 ddr_wr_beat.beat data=0x254a mask=0x0",
+          "t-125000 ddr_wr_beat.beat data=0xab99 mask=0x0",
+          "t-35000 dp_cmd.read aux=0x9",
+          "t-30000 dp_cmd.read aux=0xd",
+          "t-25000 dp_cmd.read aux=0xf",
+          "t-15000 ddr_rd_beat.beat data=0x5975",
+          "t-10000 ddr_rd_beat.beat data=0x580",
+          "t-5000 ddr_rd_beat.beat data=0xab99",
+          "t+0 ddr_rd_beat.beat data=0xc381",
+          "t+0 dp_rd_rsp.response (observed, wrong) aux=0x9 data=0x5805975"
         ]
       },
       "mechanism": null,
@@ -291,17 +291,17 @@
         "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
         "first_failure": {
           "seq": null,
-          "line": "dp_rd_rsp[7] unexpected: the design produced [dp_rd_rsp.response aux=0xd data=0x254a0000] with nothing predicted"
+          "line": "dp_rd_rsp[6] unexpected: the design produced [dp_rd_rsp.response aux=0x9 data=0x5805975] with nothing predicted"
         }
       },
       "drop": {
-        "git_head": "efece348d04e",
+        "git_head": "99f72da45a32",
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
         "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv"
       },
       "introduced_in": null,
-      "first_seen": "efece348d04e",
-      "last_seen": "efece348d04e",
+      "first_seen": "99f72da45a32",
+      "last_seen": "99f72da45a32",
       "resolved_in": null,
       "status": "open",
       "related_manual_findings": [
@@ -329,19 +329,19 @@
       "title": "data_path: MISMATCH/dp_rd_rsp[data]",
       "requirement": "data_path must produce the transactions the spec-derived model predicts",
       "spec_ref": null,
-      "expected": "dp_rd_rsp.response aux=0x0 data=0x9dac7f67",
-      "actual": "dp_rd_rsp.response aux=0x0 data=0x7f670000",
+      "expected": "dp_rd_rsp.response aux=0x1 data=0xc5b6fecf",
+      "actual": "dp_rd_rsp.response aux=0x1 data=0x1587fddf",
       "detector": "exact:data_path:value",
       "anchor": [
         {
           "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-          "line": 300,
+          "line": 331,
           "signal": "rd_rsp_data",
           "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
         },
         {
           "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
-          "line": 301,
+          "line": 332,
           "signal": "rd_rsp_aux",
           "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
         }
@@ -349,48 +349,164 @@
       "context": {
         "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
         "events": [
-          "t-25000 dp_cmd.read aux=0x0",
-          "t-5000 ddr_rd_beat.beat data=0x7f67",
-          "t+0 ddr_rd_beat.beat data=0x9dac",
-          "t+0 dp_rd_rsp.response (observed, wrong) aux=0x0 data=0x7f670000"
+          "t-180000 ddr_wr_beat.beat data=0xbedc mask=0x0",
+          "t-175000 ddr_wr_beat.beat data=0x7d4 mask=0x0",
+          "t-85000 dp_cmd.read aux=0x1",
+          "t-80000 dp_cmd.read aux=0x3",
+          "t-75000 dp_cmd.read aux=0x7",
+          "t-65000 ddr_rd_beat.beat data=0xc4d1",
+          "t-60000 ddr_rd_beat.beat data=0x1027",
+          "t-55000 ddr_rd_beat.beat data=0x35bf",
+          "t-50000 ddr_rd_beat.beat data=0x7d4",
+          "t-35000 dp_cmd.read aux=0x1",
+          "t-15000 ddr_rd_beat.beat data=0xfddf",
+          "t-10000 ddr_rd_beat.beat data=0x1587",
+          "t+0 dp_rd_rsp.response (observed, wrong) aux=0x1 data=0x1587fddf"
         ],
         "value_provenance": [
-          "data: observed [31:16]=ddr_rd_beat#1.data (t-5000), [15:0]=0",
-          "data: expected [31:16]=ddr_rd_beat#2.data (t+0), [15:0]=ddr_rd_beat#1.data (t-5000)"
+          "data: observed [31:16]=ddr_rd_beat#6.data (t-10000), [15:0]=ddr_rd_beat#5.data (t-15000)",
+          "data: expected [31:16]=0xc5b6 (no input matches), [15:0]=0xfecf (no input matches)"
         ]
       },
       "mechanism": null,
       "paths": [
-        "path_03_read_return",
         "path_18_full_write"
       ],
-      "occurrences": 26,
+      "occurrences": 5,
       "repro": {
-        "path": "path_03_read_return",
-        "command": "python3 Validation/tools/run_path.py --path path_03_read_return",
-        "sequence": "Validation/sequences/generated/path_03_read_return_seed1.json",
-        "work_dir": "Validation/sequences/generated/runs/path_03_read_return",
-        "log": "Validation/reports/paths/path_03_read_return_sim.log",
-        "trace": "Validation/reports/paths/path_03_read_return_observed.jsonl",
+        "path": "path_18_full_write",
+        "command": "python3 Validation/tools/run_path.py --path path_18_full_write",
+        "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_18_full_write",
+        "log": "Validation/reports/paths/path_18_full_write_sim.log",
+        "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
         "first_failure": {
           "seq": null,
-          "line": "dp_rd_rsp[0] value: predicted [dp_rd_rsp.response aux=0x0 data=0x9dac7f67] but observed [dp_rd_rsp.response aux=0x0 data=0x7f670000]"
+          "line": "dp_rd_rsp[1] value: predicted [dp_rd_rsp.response aux=0x1 data=0xc5b6fecf] but observed [dp_rd_rsp.response aux=0x1 data=0x1587fddf]"
         }
       },
       "drop": {
-        "git_head": "efece348d04e",
+        "git_head": "99f72da45a32",
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
         "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv"
       },
       "introduced_in": null,
-      "first_seen": "efece348d04e",
-      "last_seen": "efece348d04e",
+      "first_seen": "99f72da45a32",
+      "last_seen": "99f72da45a32",
       "resolved_in": null,
       "status": "open",
       "related_manual_findings": [
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_read_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_width_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "formal/scheduler/PROTO_001",
+      "kind": "rtl_defect",
+      "check_id": "PROTO_001",
+      "taxonomy_id": "PROTO_001",
+      "detectors": [
+        "formal:jaspergold"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "unverified",
+      "title": "READ issued to a bank one cycle after that bank was PRECHARGEd (no ACTIVATE between)",
+      "requirement": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+      "spec_ref": null,
+      "expected": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+      "actual": "PRE b=1 at cycle 183, RD b=1 at cycle 184.",
+      "detector": "formal:jaspergold",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "cmd_valid/cmd_type/cmd_bank"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "signal": "bank_rd_allowed"
+        }
+      ],
+      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 183 PRE bank 1 (A10=0), cycle 184 RD bank 1 col 0. The generated PROTO_001 tracker (row-open state from the observed ACT/PRE stream) shows bank 1 closed when the READ is issued. Never observed in simulation (no path stimulus reaches this interleaving); the scheduler or its bank_tracker gating lets a CAS follow its own precharge. Likely the same root as the open scheduler re-grant defect (commands are also held for 2-3 consecutive cycles in the trace, i.e. re-issued). [found on drop 1fea117; awaiting formal re-prove on 99f72da45a32]",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+      },
+      "drop": {
+        "git_head": "99f72da45a32",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "1fea117",
+      "last_seen": "99f72da45a32",
+      "resolved_in": null,
+      "status": "awaiting_formal",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "formal/scheduler/TIMING_008",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_008",
+      "taxonomy_id": "TIMING_008",
+      "detectors": [
+        "formal:jaspergold"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "unverified",
+      "title": "PRECHARGE issued one cycle after a WRITE to the same bank (tWR violated; write data lost)",
+      "requirement": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+      "spec_ref": null,
+      "expected": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+      "actual": "WR b=4 at cycle 173, PRE b=4 at cycle 174.",
+      "detector": "formal:jaspergold",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "signal": "bank_pre_allowed / ctr_wr"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "precharge decision"
+        }
+      ],
+      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 173 WR bank 4, cycle 174 PRE bank 4. tWR = 15 ns = 3 controller cycles, so 2 cycles must separate the last write beat from the precharge. Not observed in simulation. bank_tracker's write-recovery timer (cfg_tWR_nCK) does not gate bank_pre_allowed for the cycle after a write, or the scheduler ignores it on the row-conflict path. [found on drop 1fea117; awaiting formal re-prove on 99f72da45a32]",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+      },
+      "drop": {
+        "git_head": "99f72da45a32",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "1fea117",
+      "last_seen": "99f72da45a32",
+      "resolved_in": null,
+      "status": "awaiting_formal",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
       ]
     },
     {
@@ -448,7 +564,7 @@
         "path_18_full_write",
         "path_20_refresh_preempt"
       ],
-      "occurrences": 529,
+      "occurrences": 532,
       "repro": {
         "path": "path_05_scheduler_refresh_loop",
         "command": "python3 Validation/tools/run_path.py --path path_05_scheduler_refresh_loop",
@@ -462,13 +578,13 @@
         }
       },
       "drop": {
-        "git_head": "efece348d04e",
+        "git_head": "99f72da45a32",
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
         "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv"
       },
       "introduced_in": "efece348d04e",
       "first_seen": "efece348d04e",
-      "last_seen": "efece348d04e",
+      "last_seen": "99f72da45a32",
       "resolved_in": null,
       "status": "open",
       "related_manual_findings": []
@@ -527,7 +643,7 @@
         "path_07_backpressure",
         "path_18_full_write"
       ],
-      "occurrences": 79,
+      "occurrences": 85,
       "repro": {
         "path": "path_02_read_cmd",
         "command": "python3 Validation/tools/run_path.py --path path_02_read_cmd",
@@ -541,13 +657,13 @@
         }
       },
       "drop": {
-        "git_head": "efece348d04e",
+        "git_head": "99f72da45a32",
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
         "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv"
       },
       "introduced_in": "efece348d04e",
       "first_seen": "efece348d04e",
-      "last_seen": "efece348d04e",
+      "last_seen": "99f72da45a32",
       "resolved_in": null,
       "status": "open",
       "related_manual_findings": []
@@ -603,17 +719,17 @@
       "context": {
         "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
         "events": [
-          "t-701000 wb.read addr=0x1865a670 bte=0x0 cti=0x0",
-          "t-696000 wb.read addr=0x1b03f53c bte=0x0 cti=0x0",
-          "t-691000 wb.read addr=0xe30323c bte=0x0 cti=0x0",
-          "t-686000 wb.write addr=0x1fbb6344 bte=0x0 cti=0x0 data=0x8d88348a sel=0xf",
-          "t-681000 wb.read addr=0x1d6a24a4 bte=0x0 cti=0x0",
-          "t-676000 wb.write addr=0x160165c bte=0x0 cti=0x0 data=0x19999e3f sel=0xc",
-          "t-671000 wb.write addr=0x7bca93c bte=0x0 cti=0x0 data=0xbe3edc0a sel=0xc",
-          "t-666000 wb.write addr=0xc267f7c bte=0x0 cti=0x0 data=0x4da98f1d sel=0xf",
-          "t-661000 wb.write addr=0x192cb4ac bte=0x0 cti=0x0 data=0x8d6af57 sel=0xf",
-          "t-656000 wb.write addr=0x1a841edc bte=0x0 cti=0x0 data=0xaa2ca1af sel=0xf",
-          "t-651000 wb.write addr=0x588af5c bte=0x0 cti=0x0 data=0x82283d15 sel=0x9",
+          "t-716000 wb.read addr=0x1865a670 bte=0x0 cti=0x0",
+          "t-711000 wb.read addr=0x1b03f53c bte=0x0 cti=0x0",
+          "t-706000 wb.read addr=0xe30323c bte=0x0 cti=0x0",
+          "t-701000 wb.write addr=0x1fbb6344 bte=0x0 cti=0x0 data=0x8d88348a sel=0xf",
+          "t-696000 wb.read addr=0x1d6a24a4 bte=0x0 cti=0x0",
+          "t-691000 wb.write addr=0x160165c bte=0x0 cti=0x0 data=0x19999e3f sel=0xc",
+          "t-686000 wb.write addr=0x7bca93c bte=0x0 cti=0x0 data=0xbe3edc0a sel=0xc",
+          "t-681000 wb.write addr=0xc267f7c bte=0x0 cti=0x0 data=0x4da98f1d sel=0xf",
+          "t-676000 wb.write addr=0x192cb4ac bte=0x0 cti=0x0 data=0x8d6af57 sel=0xf",
+          "t-671000 wb.write addr=0x1a841edc bte=0x0 cti=0x0 data=0xaa2ca1af sel=0xf",
+          "t-666000 wb.write addr=0x588af5c bte=0x0 cti=0x0 data=0x82283d15 sel=0x9",
           "t-1000 wb.write addr=0x17b6a4b4 bte=0x0 cti=0x0 data=0x7923986 sel=0xf",
           "t+0 req.request (observed, wrong) addr=0x17b6a4b4 data=0x7923986 mask=0xf we=0x1"
         ]
@@ -638,13 +754,13 @@
         }
       },
       "drop": {
-        "git_head": "efece348d04e",
+        "git_head": "99f72da45a32",
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
         "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv"
       },
       "introduced_in": null,
-      "first_seen": "efece348d04e",
-      "last_seen": "efece348d04e",
+      "first_seen": "99f72da45a32",
+      "last_seen": "99f72da45a32",
       "resolved_in": null,
       "status": "open",
       "related_manual_findings": [
@@ -721,13 +837,13 @@
         }
       },
       "drop": {
-        "git_head": "efece348d04e",
+        "git_head": "99f72da45a32",
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
         "rtl": "Frontend2/OutputFolders/PHASE1RTL/init_fsm.sv"
       },
       "introduced_in": "efece348d04e",
       "first_seen": "36d3929e5f09",
-      "last_seen": "efece348d04e",
+      "last_seen": "99f72da45a32",
       "resolved_in": null,
       "status": "open",
       "related_manual_findings": []
@@ -736,7 +852,7 @@
   "resolved": [],
   "drop_status": {
     "$schema": "validation-drop-status/1",
-    "drop": "efece348d04e",
+    "drop": "99f72da45a32",
     "partial": false,
     "blocks_present": [
       "addr_decoder",

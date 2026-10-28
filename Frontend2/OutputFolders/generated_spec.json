@@ -439,11 +439,11 @@
   },
 
   "latency_model": {
-    "$comment": "All formulas in DDR clock cycles (nCK). pipeline_latency is in controller cycles, so multiply by clock_ratio for nCK.",
-    "read_hit_latency_nCK": "pipeline_latency*4 + CL + BL/2 + 2 = 2*4 + 11 + 4 + 2 = 25 nCK",
-    "read_empty_latency_nCK": "pipeline_latency*4 + tRCD + CL + BL/2 + 2 = 2*4 + 11 + 11 + 4 + 2 = 36 nCK",
-    "read_miss_latency_nCK": "pipeline_latency*4 + tRP + tRCD + CL + BL/2 + 2 = 2*4 + 11 + 11 + 11 + 4 + 2 = 47 nCK",
-    "write_hit_latency_nCK": "pipeline_latency*4 + CWL + BL/2 + tWR = 2*4 + 8 + 4 + 12 = 32 nCK",
+    "$comment": "All formulas in DDR clock cycles (nCK). pipeline_latency is in controller cycles, so multiply by clock_ratio for nCK. SCHED_PIPE_NCK (= clock_ratio, one controller cycle) is the scheduler's own fixed selection pipeline added 2026-10-27 (backend timing finding scheduler/TIMING/cmd_row), separate from the user-tunable pipeline_latency.",
+    "read_hit_latency_nCK": "pipeline_latency*4 + SCHED_PIPE_NCK + CL + BL/2 + 2 = 2*4 + 4 + 11 + 4 + 2 = 29 nCK",
+    "read_empty_latency_nCK": "pipeline_latency*4 + SCHED_PIPE_NCK + tRCD + CL + BL/2 + 2 = 2*4 + 4 + 11 + 11 + 4 + 2 = 40 nCK",
+    "read_miss_latency_nCK": "pipeline_latency*4 + SCHED_PIPE_NCK + tRP + tRCD + CL + BL/2 + 2 = 2*4 + 4 + 11 + 11 + 11 + 4 + 2 = 51 nCK",
+    "write_hit_latency_nCK": "pipeline_latency*4 + SCHED_PIPE_NCK + CWL + BL/2 + tWR = 2*4 + 4 + 8 + 4 + 12 = 36 nCK",
     "write_to_read_turnaround_nCK": "CWL + BL/2 + tWTR = 8 + 4 + 6 = 18 nCK",
     "read_to_write_turnaround_nCK": "CL + tCCD + 2 - CWL = 11 + 4 + 2 - 8 = 9 nCK"
   },

@@ -1,0 +1,613 @@
+{
+  "$schema": "validation-retry-instructions/1",
+  "status": "FAIL",
+  "pipeline": "validation",
+  "drop": "99f72da45a32",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "spec_id": "00d082c3f72d1b34",
+  "generated_utc": "2026-10-28T19:21:30.716152Z",
+  "failed_modules": [
+    "data_path",
+    "init_fsm",
+    "wb_port"
+  ],
+  "retry_instructions": {
+    "data_path": {
+      "module": "data_path",
+      "attempt": null,
+      "drop": "99f72da45a32",
+      "failed_checks": [
+        {
+          "id": "CONSERVE/READ_CMD_TO_RESPONSE",
+          "name": "Every RD command the data path is told about (cmd_rd_valid) yields exactly one read response (rd_rsp_valid), whatever the spacing between RD commands: the spec ",
+          "pass": false,
+          "expected": "Every RD command the data path is told about (cmd_rd_valid) yields exactly one read response (rd_rsp_valid), whatever the spacing between RD commands: the spec allows CAS-to-CAS at tCCD, so the capture must pipeline or the command generator must be held, not the command dropped.",
+          "actual": "15 of 46 dp_cmd.read transaction(s) never produced a dp_rd_rsp by the end of the run (31 observed)",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": "timing_model.tCCD_nCK; latency_model.read_latency; host_interface.read_buffer_depth",
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 331,
+              "signal": "rd_rsp_data",
+              "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 332,
+              "signal": "rd_rsp_aux",
+              "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
+            }
+          ],
+          "context": null,
+          "owner_candidates": [
+            "data_path"
+          ],
+          "occurrences": 28,
+          "paths": [
+            "path_02_read_cmd",
+            "path_07_backpressure",
+            "path_18_full_write"
+          ],
+          "repro": {
+            "path": "path_02_read_cmd",
+            "command": "python3 Validation/tools/run_path.py --path path_02_read_cmd",
+            "sequence": "Validation/sequences/generated/path_02_read_cmd_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_02_read_cmd",
+            "log": "Validation/reports/paths/path_02_read_cmd_sim.log",
+            "trace": "Validation/reports/paths/path_02_read_cmd_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "CONSERVE READ_CMD_TO_RESPONSE owner=data_path lost=15 of=46 from=dp_cmd.read to=dp_rd_rsp observed=31 | Every RD command the data path is told about (cmd_rd_valid) yields exactly one read response (rd_rsp_valid), whatever the spacing between RD commands: the spec allows CAS-to-CAS at tCCD, so the capture must pipeline or the command generator must be held, not the command dropped."
+            }
+          },
+          "introduced_in": "efece348d04e",
+          "repair": null,
+          "fix": null,
+          "finding_id": "data_path/CONSERVE/READ_CMD_TO_RESPONSE"
+        },
+        {
+          "id": "CONSERVE/WRITE_CMD_TO_BEATS",
+          "name": "Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR comma",
+          "pass": false,
+          "expected": "Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR command issued to the DRAM without its data writes garbage to the array.",
+          "actual": "44 of 62 dp_cmd.write transaction(s) never produced a ddr_wr_beat by the end of the run (18 observed, 2 per source)",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": "data_path_mapping.pack_mode; timing_model.tCCD_nCK",
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 175,
+              "signal": "ddr_dq_o",
+              "text": "ddr_dq_o = wr_dat_r[DQ_WIDTH-1:0];"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 178,
+              "signal": "ddr_dq_o",
+              "text": "ddr_dq_o = wr_dat_r[(wb+1)*DQ_WIDTH-1 -: DQ_WIDTH];"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 192,
+              "signal": "ddr_dm_o",
+              "text": "assign ddr_dm_o   = (wr_state == WR_DRIVE) ? ~dm_beat : '0;  // DM active-high masks"
+            }
+          ],
+          "context": null,
+          "owner_candidates": [
+            "data_path"
+          ],
+          "occurrences": 128,
+          "paths": [
+            "path_02_read_cmd",
+            "path_07_backpressure"
+          ],
+          "repro": {
+            "path": "path_02_read_cmd",
+            "command": "python3 Validation/tools/run_path.py --path path_02_read_cmd",
+            "sequence": "Validation/sequences/generated/path_02_read_cmd_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_02_read_cmd",
+            "log": "Validation/reports/paths/path_02_read_cmd_sim.log",
+            "trace": "Validation/reports/paths/path_02_read_cmd_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "CONSERVE WRITE_CMD_TO_BEATS owner=data_path lost=44 of=62 from=dp_cmd.write to=ddr_wr_beat observed=18 per_source=2 | Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR command issued to the DRAM without its data writes garbage to the array."
+            }
+          },
+          "introduced_in": "efece348d04e",
+          "repair": null,
+          "fix": null,
+          "finding_id": "data_path/CONSERVE/WRITE_CMD_TO_BEATS"
+        },
+        {
+          "id": "CONSERVE/WRITE_REQUEST_TO_DATA",
+          "name": "Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_bu",
+          "pass": false,
+          "expected": "Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_buffer_depth words and must drain one per WR command issued, so it never refuses a word the queue has already accepted.",
+          "actual": "8 of 31 req[we=1] transaction(s) never produced a dp_wr by the end of the run (23 observed)",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": "host_interface.write_buffer_depth; controller_architecture.command_queue_depth",
+          "anchor": [],
+          "context": null,
+          "owner_candidates": [
+            "data_path"
+          ],
+          "occurrences": 47,
+          "paths": [
+            "path_02_read_cmd",
+            "path_07_backpressure"
+          ],
+          "repro": {
+            "path": "path_02_read_cmd",
+            "command": "python3 Validation/tools/run_path.py --path path_02_read_cmd",
+            "sequence": "Validation/sequences/generated/path_02_read_cmd_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_02_read_cmd",
+            "log": "Validation/reports/paths/path_02_read_cmd_sim.log",
+            "trace": "Validation/reports/paths/path_02_read_cmd_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "CONSERVE WRITE_REQUEST_TO_DATA owner=data_path lost=8 of=31 from=req[we=1] to=dp_wr observed=23 | Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_buffer_depth words and must drain one per WR command issued, so it never refuses a word the queue has already accepted."
+            }
+          },
+          "introduced_in": "efece348d04e",
+          "repair": null,
+          "fix": null,
+          "finding_id": "data_path/CONSERVE/WRITE_REQUEST_TO_DATA"
+        },
+        {
+          "id": "MISMATCH/dp_rd_rsp[aux,data]",
+          "name": "data_path must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "transaction predicted on dp_rd_rsp",
+          "actual": "the design produced [dp_rd_rsp.response aux=0x9 data=0x5805975] with nothing predicted",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 175,
+              "signal": "ddr_dq_o",
+              "text": "ddr_dq_o = wr_dat_r[DQ_WIDTH-1:0];"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 178,
+              "signal": "ddr_dq_o",
+              "text": "ddr_dq_o = wr_dat_r[(wb+1)*DQ_WIDTH-1 -: DQ_WIDTH];"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 331,
+              "signal": "rd_rsp_data",
+              "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
+            }
+          ],
+          "context": {
+            "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
+            "events": [
+              "t-235000 ddr_wr_beat.beat data=0x5975 mask=0x0",
+              "t-230000 ddr_wr_beat.beat data=0x580 mask=0x0",
+              "t-145000 dp_cmd.write aux=0xc",
+              "t-130000 ddr_wr_beat.beat data=0x254a mask=0x0",
+              "t-125000 ddr_wr_beat.beat data=0xab99 mask=0x0",
+              "t-35000 dp_cmd.read aux=0x9",
+              "t-30000 dp_cmd.read aux=0xd",
+              "t-25000 dp_cmd.read aux=0xf",
+              "t-15000 ddr_rd_beat.beat data=0x5975",
+              "t-10000 ddr_rd_beat.beat data=0x580",
+              "t-5000 ddr_rd_beat.beat data=0xab99",
+              "t+0 ddr_rd_beat.beat data=0xc381",
+              "t+0 dp_rd_rsp.response (observed, wrong) aux=0x9 data=0x5805975"
+            ]
+          },
+          "owner_candidates": [
+            "data_path"
+          ],
+          "occurrences": 1,
+          "paths": [
+            "path_18_full_write"
+          ],
+          "repro": {
+            "path": "path_18_full_write",
+            "command": "python3 Validation/tools/run_path.py --path path_18_full_write",
+            "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_18_full_write",
+            "log": "Validation/reports/paths/path_18_full_write_sim.log",
+            "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "dp_rd_rsp[6] unexpected: the design produced [dp_rd_rsp.response aux=0x9 data=0x5805975] with nothing predicted"
+            }
+          },
+          "introduced_in": null,
+          "repair": null,
+          "fix": null,
+          "finding_id": "data_path/MISMATCH/dp_rd_rsp[aux,data]"
+        },
+        {
+          "id": "MISMATCH/dp_rd_rsp[data]",
+          "name": "data_path must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "dp_rd_rsp.response aux=0x1 data=0xc5b6fecf",
+          "actual": "dp_rd_rsp.response aux=0x1 data=0x1587fddf",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 331,
+              "signal": "rd_rsp_data",
+              "text": "assign rd_rsp_data  = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].data;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 332,
+              "signal": "rd_rsp_aux",
+              "text": "assign rd_rsp_aux   = rd_fifo[rd_rptr[FIFO_PTR_W-1:0]].aux;"
+            }
+          ],
+          "context": {
+            "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
+            "events": [
+              "t-180000 ddr_wr_beat.beat data=0xbedc mask=0x0",
+              "t-175000 ddr_wr_beat.beat data=0x7d4 mask=0x0",
+              "t-85000 dp_cmd.read aux=0x1",
+              "t-80000 dp_cmd.read aux=0x3",
+              "t-75000 dp_cmd.read aux=0x7",
+              "t-65000 ddr_rd_beat.beat data=0xc4d1",
+              "t-60000 ddr_rd_beat.beat data=0x1027",
+              "t-55000 ddr_rd_beat.beat data=0x35bf",
+              "t-50000 ddr_rd_beat.beat data=0x7d4",
+              "t-35000 dp_cmd.read aux=0x1",
+              "t-15000 ddr_rd_beat.beat data=0xfddf",
+              "t-10000 ddr_rd_beat.beat data=0x1587",
+              "t+0 dp_rd_rsp.response (observed, wrong) aux=0x1 data=0x1587fddf"
+            ],
+            "value_provenance": [
+              "data: observed [31:16]=ddr_rd_beat#6.data (t-10000), [15:0]=ddr_rd_beat#5.data (t-15000)",
+              "data: expected [31:16]=0xc5b6 (no input matches), [15:0]=0xfecf (no input matches)"
+            ]
+          },
+          "owner_candidates": [
+            "data_path"
+          ],
+          "occurrences": 5,
+          "paths": [
+            "path_18_full_write"
+          ],
+          "repro": {
+            "path": "path_18_full_write",
+            "command": "python3 Validation/tools/run_path.py --path path_18_full_write",
+            "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_18_full_write",
+            "log": "Validation/reports/paths/path_18_full_write_sim.log",
+            "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "dp_rd_rsp[1] value: predicted [dp_rd_rsp.response aux=0x1 data=0xc5b6fecf] but observed [dp_rd_rsp.response aux=0x1 data=0x1587fddf]"
+            }
+          },
+          "introduced_in": null,
+          "repair": null,
+          "fix": null,
+          "finding_id": "data_path/MISMATCH/dp_rd_rsp[data]"
+        }
+      ],
+      "message": "5 check(s) failed on drop 99f72da45a32; 5 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+    },
+    "wb_port": {
+      "module": "wb_port",
+      "attempt": null,
+      "drop": "99f72da45a32",
+      "failed_checks": [
+        {
+          "id": "CONSERVE/HOST_BEAT_TO_REQUEST",
+          "name": "Every host beat the port accepts (wb_cyc_i && wb_stb_i && !wb_stall_o) becomes exactly one request presented to and taken by the command queue (req_valid && req",
+          "pass": false,
+          "expected": "Every host beat the port accepts (wb_cyc_i && wb_stb_i && !wb_stall_o) becomes exactly one request presented to and taken by the command queue (req_valid && req_ready). A port that accepts a beat it cannot deliver has lost a host access: a write is acknowledged and lost, a read is never answered. The port must either stall the beat or hold the request until the queue takes it.",
+          "actual": "250 of 600 wb transaction(s) never produced a req by the end of the run (350 observed)",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": "controller_architecture.command_queue_depth; host_interface.interface_type (vplan VP_FLOW_001: no accepted request may be lost while back-pressure is asserted)",
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 142,
+              "signal": "req_we",
+              "text": "req_we    <= wb_we_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 143,
+              "signal": "req_addr",
+              "text": "req_addr  <= wb_adr_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 144,
+              "signal": "req_wdata",
+              "text": "req_wdata <= wb_dat_i;"
+            }
+          ],
+          "context": null,
+          "owner_candidates": [
+            "wb_port"
+          ],
+          "occurrences": 532,
+          "paths": [
+            "path_05_scheduler_refresh_loop",
+            "path_07_backpressure",
+            "path_18_full_write",
+            "path_20_refresh_preempt"
+          ],
+          "repro": {
+            "path": "path_05_scheduler_refresh_loop",
+            "command": "python3 Validation/tools/run_path.py --path path_05_scheduler_refresh_loop",
+            "sequence": "Validation/sequences/generated/path_05_scheduler_refresh_loop_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_05_scheduler_refresh_loop",
+            "log": "Validation/reports/paths/path_05_scheduler_refresh_loop_sim.log",
+            "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "CONSERVE HOST_BEAT_TO_REQUEST owner=wb_port lost=250 of=600 from=wb to=req observed=350 | Every host beat the port accepts (wb_cyc_i && wb_stb_i && !wb_stall_o) becomes exactly one request presented to and taken by the command queue (req_valid && req_ready). A port that accepts a beat it cannot deliver has lost a host access: a write is acknowledged and lost, a read is never answered. The port must either stall the beat or hold the request until the queue takes it."
+            }
+          },
+          "introduced_in": "efece348d04e",
+          "repair": null,
+          "fix": null,
+          "finding_id": "wb_port/CONSERVE/HOST_BEAT_TO_REQUEST"
+        },
+        {
+          "id": "HANDSHAKE/wb",
+          "name": "every wb beat the slave accepts is acknowledged exactly once (wb_ack_o), in a pipelined run as in a single access",
+          "pass": false,
+          "expected": "every wb beat the slave accepts is acknowledged exactly once (wb_ack_o), in a pipelined run as in a single access",
+          "actual": "1 of 5 pipelined beat(s) never acknowledged (wb_ack_o)",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": "host_interface.interface_type",
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 142,
+              "signal": "req_we",
+              "text": "req_we    <= wb_we_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 143,
+              "signal": "req_addr",
+              "text": "req_addr  <= wb_adr_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 144,
+              "signal": "req_wdata",
+              "text": "req_wdata <= wb_dat_i;"
+            }
+          ],
+          "context": null,
+          "owner_candidates": [
+            "wb_port"
+          ],
+          "occurrences": 85,
+          "paths": [
+            "path_02_read_cmd",
+            "path_07_backpressure",
+            "path_18_full_write"
+          ],
+          "repro": {
+            "path": "path_02_read_cmd",
+            "command": "python3 Validation/tools/run_path.py --path path_02_read_cmd",
+            "sequence": "Validation/sequences/generated/path_02_read_cmd_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_02_read_cmd",
+            "log": "Validation/reports/paths/path_02_read_cmd_sim.log",
+            "trace": "Validation/reports/paths/path_02_read_cmd_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "DRIVER_STALL: wb \u2014 1 of 5 pipelined beat(s) never acknowledged (wb_ack_o)"
+            }
+          },
+          "introduced_in": "efece348d04e",
+          "repair": null,
+          "fix": null,
+          "finding_id": "wb_port/HANDSHAKE/wb"
+        },
+        {
+          "id": "MISMATCH/req[addr,data,mask,we]",
+          "name": "wb_port must produce the transactions the spec-derived model predicts",
+          "pass": false,
+          "expected": "transaction predicted on req",
+          "actual": "predicted [req.request addr=0x588af5c data=0x82283d15 mask=0x9 we=0x1] but the design produced nothing",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 142,
+              "signal": "req_we",
+              "text": "req_we    <= wb_we_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 143,
+              "signal": "req_addr",
+              "text": "req_addr  <= wb_adr_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 144,
+              "signal": "req_wdata",
+              "text": "req_wdata <= wb_dat_i;"
+            }
+          ],
+          "context": {
+            "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
+            "events": [
+              "t-716000 wb.read addr=0x1865a670 bte=0x0 cti=0x0",
+              "t-711000 wb.read addr=0x1b03f53c bte=0x0 cti=0x0",
+              "t-706000 wb.read addr=0xe30323c bte=0x0 cti=0x0",
+              "t-701000 wb.write addr=0x1fbb6344 bte=0x0 cti=0x0 data=0x8d88348a sel=0xf",
+              "t-696000 wb.read addr=0x1d6a24a4 bte=0x0 cti=0x0",
+              "t-691000 wb.write addr=0x160165c bte=0x0 cti=0x0 data=0x19999e3f sel=0xc",
+              "t-686000 wb.write addr=0x7bca93c bte=0x0 cti=0x0 data=0xbe3edc0a sel=0xc",
+              "t-681000 wb.write addr=0xc267f7c bte=0x0 cti=0x0 data=0x4da98f1d sel=0xf",
+              "t-676000 wb.write addr=0x192cb4ac bte=0x0 cti=0x0 data=0x8d6af57 sel=0xf",
+              "t-671000 wb.write addr=0x1a841edc bte=0x0 cti=0x0 data=0xaa2ca1af sel=0xf",
+              "t-666000 wb.write addr=0x588af5c bte=0x0 cti=0x0 data=0x82283d15 sel=0x9",
+              "t-1000 wb.write addr=0x17b6a4b4 bte=0x0 cti=0x0 data=0x7923986 sel=0xf",
+              "t+0 req.request (observed, wrong) addr=0x17b6a4b4 data=0x7923986 mask=0xf we=0x1"
+            ]
+          },
+          "owner_candidates": [
+            "wb_port"
+          ],
+          "occurrences": 44,
+          "paths": [
+            "path_07_backpressure",
+            "path_18_full_write",
+            "path_20_refresh_preempt"
+          ],
+          "repro": {
+            "path": "path_07_backpressure",
+            "command": "python3 Validation/tools/run_path.py --path path_07_backpressure",
+            "sequence": "Validation/sequences/generated/path_07_backpressure_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_07_backpressure",
+            "log": "Validation/reports/paths/path_07_backpressure_sim.log",
+            "trace": "Validation/reports/paths/path_07_backpressure_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "req[16] missing: predicted [req.request addr=0x588af5c data=0x82283d15 mask=0x9 we=0x1] but the design produced nothing"
+            }
+          },
+          "introduced_in": null,
+          "repair": null,
+          "fix": null,
+          "finding_id": "wb_port/MISMATCH/req[addr,data,mask,we]"
+        }
+      ],
+      "message": "3 check(s) failed on drop 99f72da45a32; 3 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+    },
+    "init_fsm": {
+      "module": "init_fsm",
+      "attempt": null,
+      "drop": "99f72da45a32",
+      "failed_checks": [
+        {
+          "id": "TIMING_014",
+          "name": "A non-MRS command issued before tMOD elapsed after an MRS command.",
+          "pass": false,
+          "expected": "A non-MRS command issued before tMOD elapsed after an MRS command.",
+          "actual": "fired 1x; first: xmsim: *E,ASRTST (./init_fsm_sva.sv,52): (time 700217500 PS) Assertion chain_harness.u_init_fsm.u_init_fsm_sva.a_TIMING_014 has failed",
+          "severity": "major",
+          "confidence": "confirmed",
+          "spec_ref": "timing_model.tMOD",
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/init_fsm.sv",
+              "line": 88,
+              "signal": "init_cmd",
+              "text": "init_cmd  = CMD_NOP;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/init_fsm.sv",
+              "line": 92,
+              "signal": "init_addr",
+              "text": "S_MR2:  begin init_cmd_valid = 1'b1; init_cmd = CMD_MRS;  init_addr = MR2_VAL;   init_bank = 2; end"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/init_fsm.sv",
+              "line": 92,
+              "signal": "init_bank",
+              "text": "S_MR2:  begin init_cmd_valid = 1'b1; init_cmd = CMD_MRS;  init_addr = MR2_VAL;   init_bank = 2; end"
+            }
+          ],
+          "context": null,
+          "owner_candidates": [
+            "init_fsm"
+          ],
+          "occurrences": 5,
+          "paths": [
+            "path_08_init_to_cal",
+            "path_09_init_to_refresh",
+            "path_14_status_init",
+            "path_15_status_cal",
+            "path_17_full_boot"
+          ],
+          "repro": {
+            "path": "path_08_init_to_cal",
+            "command": "python3 Validation/tools/run_path.py --path path_08_init_to_cal",
+            "sequence": null,
+            "work_dir": "Validation/sequences/generated/runs/path_08_init_to_cal",
+            "log": "Validation/reports/paths/path_08_init_to_cal_sim.log",
+            "trace": "Validation/reports/paths/path_08_init_to_cal_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "xmsim: *E,ASRTST (./init_fsm_sva.sv,52): (time 700217500 PS) Assertion chain_harness.u_init_fsm.u_init_fsm_sva.a_TIMING_014 has failed"
+            }
+          },
+          "introduced_in": "efece348d04e",
+          "repair": null,
+          "fix": null,
+          "finding_id": "init_fsm/TIMING_014"
+        }
+      ],
+      "message": "1 check(s) failed on drop 99f72da45a32; 1 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+    }
+  },
+  "resolved_since_previous_drop": [],
+  "requires_human_review": false,
+  "source": "Validation/findings/emit_findings.py -> retry_adapter.py",
+  "drop_status": {
+    "$schema": "validation-drop-status/1",
+    "drop": "99f72da45a32",
+    "partial": false,
+    "blocks_present": [
+      "addr_decoder",
+      "bank_tracker",
+      "calibration",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "init_fsm",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "blocks_absent": [],
+    "inconsistent_edges": [],
+    "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "foreign_spec_blocks": {},
+    "paths_run": [
+      "path_01_write_cmd",
+      "path_02_read_cmd",
+      "path_03_read_return",
+      "path_04_scheduler_bank_loop",
+      "path_05_scheduler_refresh_loop",
+      "path_07_backpressure",
+      "path_08_init_to_cal",
+      "path_09_init_to_refresh",
+      "path_12_csr_timing_to_scheduling",
+      "path_13_csr_refresh_to_scheduling",
+      "path_14_status_init",
+      "path_15_status_cal",
+      "path_16_status_refresh",
+      "path_17_full_boot",
+      "path_18_full_write",
+      "path_19_row_conflict",
+      "path_20_refresh_preempt",
+      "path_21_wb_port_standalone",
+      "path_22_csr_standalone"
+    ],
+    "paths_blocked": {},
+    "note": "Complete run: every runnable path simulated on this drop."
+  }
+}

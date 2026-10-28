@@ -499,3 +499,13 @@ The data_path read-capture defect (addendum 2) and the init_fsm tMOD
 defect (addendum 8) are still in the checked-in drop; both are fixed
 in your generators, so a regenerated `OutputFolders` clears them. Ask 9
 (your testbench's white-box read beats) stands.
+
+**Update, same day, on your pushed drop 99f72da45a32** (data_path read
+fix, pipelined scheduler): path_03 passes, so the read-capture defect
+(addendum 2) is confirmed closed on the checked-in drop. The two
+findings above stand unchanged (the port's lost beats, the data path's
+dropped commands), tMOD (addendum 8) is still in `init_fsm.sv`, and
+code coverage on this drop is 86.8 %. The scheduler's two old formal
+findings (PROTO_001, TIMING_008, proven closed on the previous design)
+are back to `awaiting_formal` because the scheduler changed; the
+re-proof on the pipelined scheduler is running and will settle them.

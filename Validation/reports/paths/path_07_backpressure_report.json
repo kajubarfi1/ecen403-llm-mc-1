@@ -3,7 +3,7 @@
   "path": "path_07_backpressure",
   "strategy": "composed",
   "verdict": "fail",
-  "timestamp": "2026-10-28T14:09:16.754925",
+  "timestamp": "2026-10-28T14:20:11.814875",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,9 +21,9 @@
   "window_cycles": 6000,
   "coverage_collected": true,
   "rtl_drop": {
-    "git_head": "efece348d04e",
-    "drop_id": "efece348d04e",
-    "design_id": "766dc69c37e9",
+    "git_head": "99f72da45a32",
+    "drop_id": "99f72da45a32",
+    "design_id": "a2b204453edc",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -35,17 +35,17 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "835760c",
+    "validated_at": "17274ce",
     "frontend_commits": {
-      "addr_decoder": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "bank_tracker": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "cmd_gen": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "cmd_queue": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "data_path": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "refresh_ctrl": "6f659675f03286f6d19f4946500c8ae93de09850",
-      "scheduler": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "wb_port": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
+      "addr_decoder": "f37ce49d323151a6118ae7765aa766918c816383",
+      "bank_tracker": "f37ce49d323151a6118ae7765aa766918c816383",
+      "cmd_gen": "f37ce49d323151a6118ae7765aa766918c816383",
+      "cmd_queue": "f37ce49d323151a6118ae7765aa766918c816383",
+      "config_regs": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc",
+      "data_path": "f37ce49d323151a6118ae7765aa766918c816383",
+      "refresh_ctrl": "f37ce49d323151a6118ae7765aa766918c816383",
+      "scheduler": "1bc0ce7e4655061d5017f4bab90690a52a9a563f",
+      "wb_port": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc"
     },
     "roots": [
       "Frontend2/OutputFolders"
@@ -110,7 +110,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
       "scope": "wb_port",
       "verdict": "fail",
-      "summary": "scope=wb_port  strategy=exact  status=fail  matched=273/298  missing=25",
+      "summary": "scope=wb_port  strategy=exact  status=fail  matched=273/301  missing=28",
       "detail": [
         "  req[35] missing: predicted [req.request addr=0x1038a880 data=0x0 mask=0x0 we=0x0] but the design produced nothing",
         "  req[37] missing: predicted [req.request addr=0xe6c8724 data=0x0 mask=0x0 we=0x0] but the design produced nothing",
@@ -123,7 +123,7 @@
         "  req[56] missing: predicted [req.request addr=0xda247b8 data=0x8c31406d mask=0xe we=0x1] but the design produced nothing",
         "  req[57] missing: predicted [req.request addr=0xf045950 data=0xa57af35 mask=0xf we=0x1] but the design produced nothing",
         "  req[62] missing: predicted [req.request addr=0x8a9822c data=0xc52f4fbe mask=0xf we=0x1] but the design produced nothing",
-        "  ... and 5 more"
+        "  ... and 8 more"
       ],
       "rule_counts": {}
     },
@@ -133,7 +133,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
       "scope": "addr_decoder",
       "verdict": "pass",
-      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=218/218  (218 output transaction(s) matched)",
+      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=217/217  (217 output transaction(s) matched)",
       "detail": [],
       "rule_counts": {}
     },
@@ -143,7 +143,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
       "scope": "cmd_queue_scheduler",
       "verdict": "pass",
-      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (3816 transactions, no rule broken)",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (3802 transactions, no rule broken)",
       "detail": [],
       "rule_counts": {}
     },
@@ -155,10 +155,10 @@
       "verdict": "fail",
       "summary": "scope=(conservation)  strategy=conservation  status=fail  rules=6 checked, 4 broken, 0 not applicable",
       "detail": [
-        "CONSERVE HOST_BEAT_TO_REQUEST owner=wb_port lost=25 of=243 from=wb to=req observed=218 | Every host beat the port accepts (wb_cyc_i && wb_stb_i && !wb_stall_o) becomes exactly one request presented to and taken by the command queue (req_valid && req_ready). A port that accepts a beat it cannot deliver has lost a host access: a write is acknowledged and lost, a read is never answered. The port must either stall the beat or hold the request until the queue takes it.",
-        "CONSERVE READ_CMD_TO_RESPONSE owner=data_path lost=8 of=63 from=dp_cmd.read to=dp_rd_rsp observed=55 | Every RD command the data path is told about (cmd_rd_valid) yields exactly one read response (rd_rsp_valid), whatever the spacing between RD commands: the spec allows CAS-to-CAS at tCCD, so the capture must pipeline or the command generator must be held, not the command dropped.",
-        "CONSERVE WRITE_REQUEST_TO_DATA owner=data_path lost=40 of=155 from=req[we=1] to=dp_wr observed=115 | Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_buffer_depth words and must drain one per WR command issued, so it never refuses a word the queue has already accepted.",
-        "CONSERVE WRITE_CMD_TO_BEATS owner=data_path lost=86 of=310 from=dp_cmd.write to=ddr_wr_beat observed=224 per_source=2 | Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR command issued to the DRAM without its data writes garbage to the array."
+        "CONSERVE HOST_BEAT_TO_REQUEST owner=wb_port lost=28 of=245 from=wb to=req observed=217 | Every host beat the port accepts (wb_cyc_i && wb_stb_i && !wb_stall_o) becomes exactly one request presented to and taken by the command queue (req_valid && req_ready). A port that accepts a beat it cannot deliver has lost a host access: a write is acknowledged and lost, a read is never answered. The port must either stall the beat or hold the request until the queue takes it.",
+        "CONSERVE READ_CMD_TO_RESPONSE owner=data_path lost=8 of=64 from=dp_cmd.read to=dp_rd_rsp observed=56 | Every RD command the data path is told about (cmd_rd_valid) yields exactly one read response (rd_rsp_valid), whatever the spacing between RD commands: the spec allows CAS-to-CAS at tCCD, so the capture must pipeline or the command generator must be held, not the command dropped.",
+        "CONSERVE WRITE_REQUEST_TO_DATA owner=data_path lost=39 of=153 from=req[we=1] to=dp_wr observed=114 | Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_buffer_depth words and must drain one per WR command issued, so it never refuses a word the queue has already accepted.",
+        "CONSERVE WRITE_CMD_TO_BEATS owner=data_path lost=84 of=306 from=dp_cmd.write to=ddr_wr_beat observed=222 per_source=2 | Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR command issued to the DRAM without its data writes garbage to the array."
       ]
     },
     {
@@ -169,7 +169,7 @@
       "verdict": "fail",
       "summary": "1 driver completion timeout(s): the slave never acknowledged every beat it accepted",
       "detail": [
-        "DRIVER_STALL: wb \u2014 12 of 240 pipelined beat(s) never acknowledged (wb_ack_o)"
+        "DRIVER_STALL: wb \u2014 10 of 240 pipelined beat(s) never acknowledged (wb_ack_o)"
       ]
     }
   ],

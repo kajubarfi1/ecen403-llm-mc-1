@@ -76,7 +76,8 @@ module scheduler #(
     wire all_banks_idle = ~(|bank_is_active);
 
     // ════════════════════════════════════════════════════
-    // Feedback-latency hold (FB_LAG = 2 cycles)
+    // Feedback-latency hold (FB_LAG = 2 cycles after cmd_valid, plus the
+    // one pending cycle the selection pipeline below adds)
     // ════════════════════════════════════════════════════
     // A command selected in cycle N is registered at the end of N (cmd_*),
     // cmd_gen registers its fb_* strobes at the end of N+1, and bank_tracker
@@ -86,6 +87,15 @@ module scheduler #(
     // ACT inside tRC/tRRD, a REF or RD straight after the PRE/ACT/WR that
     // should have blocked it). Track what was issued in the last two cycles
     // (cmd_* now, d1_* one cycle ago) and hold anything those could change.
+    //
+    // 2026-10-27 (backend timing finding scheduler/TIMING/cmd_row): selection
+    // is now two pipeline stages (classify+prioritize, then mux+register --
+    // see sel_*_r below), so a decision can sit for one cycle as sel_*_r
+    // before it is even registered as cmd_valid. That cycle isn't covered by
+    // cmd_*/d1_* at all, so it needs its own mask term (the sel_*_r
+    // contribution in the inflight block below) -- without it, the cycle
+    // right after a selection and right before it becomes cmd_valid could
+    // pick a second, conflicting command for the same bank.
     logic                 d1_valid;
     logic [3:0]           d1_type;
     logic [BANK_BITS-1:0] d1_bank;
@@ -100,6 +110,28 @@ module scheduler #(
             d1_bank  <= cmd_bank;
         end
     end
+
+    // Pending selection, one cycle ahead of cmd_valid (driven by the
+    // always_ff right after the priority-select block below, which computes
+    // sel_valid/sel_idx/... in the same cycle this register samples them).
+    // Declared here so the inflight mask and the candidate-classification
+    // guard below can both read it.
+    logic                    sel_valid_r;
+    logic [IDX_BITS-1:0]     sel_idx_r;
+    logic [3:0]              sel_type_r;
+    logic                    sel_is_ref_r;
+    logic                    sel_from_queue_r;
+    logic [BANK_BITS-1:0]    sel_bank_r;
+    // 2026-10-27 (backend timing finding scheduler/TIMING/sel_idx_r): both of
+    // these used to be derived FROM sel_idx_r every cycle (one-hot-by-
+    // comparison in recently_granted, a q_bank[sel_idx_r] mux here), which
+    // put sel_idx_r's own fanout back into the cone that computes the next
+    // sel_idx_r -- a 32-level loop, not two cut stages. Registering them
+    // directly (as of the SAME cycle sel_idx/sel_bank are computed, not
+    // re-derived from the registered index) removes both structures from
+    // the loop entirely; see sel_onehot and sel_bank_eff below.
+    logic [DEPTH-1:0]        sel_onehot_r;      // one bit per entry, set iff that entry is the pending CAS pick
+    logic [BANK_BITS-1:0]    sel_bank_eff_r;    // the pending decision's bank, captured at selection time
 
     logic [NUM_BANKS-1:0] inflight_any;    // any command to this bank in flight
     logic [NUM_BANKS-1:0] inflight_state;  // an ACT or PRE to this bank in flight
@@ -130,6 +162,17 @@ module scheduler #(
                 if (d1_type == CMD_WR)  inflight_wr  = 1'b1;
             end
         end
+        // Pending (sel_*_r): decided, not yet cmd_valid -- see the comment
+        // by sel_valid_r's declaration above.
+        if (sel_valid_r) begin
+            if (sel_type_r == CMD_REF) inflight_ref = 1'b1;
+            else if (sel_type_r != CMD_NOP) begin
+                inflight_any[sel_bank_eff_r] = 1'b1;
+                if (sel_type_r == CMD_ACT || sel_type_r == CMD_PRE) inflight_state[sel_bank_eff_r] = 1'b1;
+                if (sel_type_r == CMD_ACT) inflight_act = 1'b1;
+                if (sel_type_r == CMD_WR)  inflight_wr  = 1'b1;
+            end
+        end
     end
 
     // REF needs every bank idle AND past tRP/tRC/tRFC (bank_act_allowed
@@ -148,7 +191,27 @@ module scheduler #(
             // re-granted every cycle until the queue catches up (observed:
             // 19 enqueued, 16 dequeued -- see
             // Frontend2/VALIDATION_INTEGRATION_PLAN.md Defect 1).
-            recently_granted = deq_grant && (deq_idx == i[IDX_BITS-1:0]);
+            // Also exclude an entry already pending in sel_*_r for CAS --
+            // one cycle before deq_grant actually fires, now that selection
+            // is two pipeline stages (2026-10-27). is_cas_ready deliberately
+            // allows back-to-back CAS to the SAME bank (no inflight_any
+            // check), so without this the identical entry could be re-picked
+            // for RD/WR the cycle right after being picked, before its
+            // dequeue retires -- the Defect-1 bug shape, stretched by the
+            // new pipeline stage. ACT/PRE re-selection is already blocked by
+            // the bank-level inflight_any/inflight_act mask above, which the
+            // sel_*_r contribution covers -- this guard only needs CAS.
+            //
+            // sel_onehot_r[i], not (sel_idx_r == i[IDX_BITS-1:0]) (2026-10-27,
+            // finding scheduler/TIMING/sel_idx_r): the equality form put 16
+            // four-bit comparators against sel_idx_r in the same cone that
+            // computes the next sel_idx_r, closing a feedback loop through
+            // the register the pipeline stage was supposed to cut. A single
+            // registered bit read has no such dependency.
+            recently_granted = (deq_grant && (deq_idx == i[IDX_BITS-1:0]))
+                               || (sel_valid_r && sel_from_queue_r
+                                   && (sel_type_r == CMD_RD || sel_type_r == CMD_WR)
+                                   && sel_onehot_r[i]);
             is_row_hit[i]   = q_valid[i] && bank_is_active[b] &&
                                (bank_open_row[b] == q_row[i]);
             is_cas_ready[i] = is_row_hit[i] && !recently_granted &&
@@ -164,6 +227,7 @@ module scheduler #(
     // ════════════════════════════════════════════════════
     logic                    sel_valid;
     logic [IDX_BITS-1:0]     sel_idx;
+    logic [DEPTH-1:0]        sel_onehot;   // sel_idx, decoded -- see sel_onehot_r above
     logic [3:0]              sel_type;
     logic                    sel_is_ref;
     // Most commands source row/col/bank/we/aux from the winning queue entry
@@ -176,6 +240,7 @@ module scheduler #(
     always_comb begin
         sel_valid      = 1'b0;
         sel_idx        = '0;
+        sel_onehot     = '0;
         sel_type       = CMD_NOP;
         sel_is_ref     = 1'b0;
         sel_from_queue = 1'b1;
@@ -209,9 +274,10 @@ module scheduler #(
         else begin
             for (int i = 0; i < DEPTH; i++) begin
                 if (is_cas_ready[i] && !sel_valid) begin
-                    sel_valid = 1'b1;
-                    sel_idx   = i[IDX_BITS-1:0];
-                    sel_type  = q_we[i] ? CMD_WR : CMD_RD;
+                    sel_valid      = 1'b1;
+                    sel_idx        = i[IDX_BITS-1:0];
+                    sel_onehot[i]  = 1'b1;
+                    sel_type       = q_we[i] ? CMD_WR : CMD_RD;
                 end
             end
             // Priority 3: ACT for row-miss (need PRE first if bank active with wrong row)
@@ -222,14 +288,16 @@ module scheduler #(
                         b = q_bank[i];
                         if (bank_is_active[b] && bank_pre_allowed[b] && !inflight_any[b] && !inflight_ref) begin
                             // Need PRE first
-                            sel_valid = 1'b1;
-                            sel_idx   = i[IDX_BITS-1:0];
-                            sel_type  = CMD_PRE;
+                            sel_valid     = 1'b1;
+                            sel_idx       = i[IDX_BITS-1:0];
+                            sel_onehot[i] = 1'b1;
+                            sel_type      = CMD_PRE;
                         end else if (!bank_is_active[b] && bank_act_allowed[b] && !inflight_any[b] && !inflight_act && !inflight_ref) begin
                             // Bank idle, can ACT
-                            sel_valid = 1'b1;
-                            sel_idx   = i[IDX_BITS-1:0];
-                            sel_type  = CMD_ACT;
+                            sel_valid     = 1'b1;
+                            sel_idx       = i[IDX_BITS-1:0];
+                            sel_onehot[i] = 1'b1;
+                            sel_type      = CMD_ACT;
                         end
                     end
                 end
@@ -255,8 +323,52 @@ module scheduler #(
         end
     end
 
+    // The pending decision's bank, computed once here (from the UN-registered
+    // sel_idx/sel_bank, same cycle as the rest of selection) and captured as
+    // sel_bank_eff_r below -- not re-derived from q_bank[sel_idx_r] every
+    // cycle, which put a 16-way mux back in the feedback loop (2026-10-27,
+    // finding scheduler/TIMING/sel_idx_r).
+    wire [BANK_BITS-1:0] sel_bank_eff = sel_from_queue ? q_bank[sel_idx] : sel_bank;
+
     // ════════════════════════════════════════════════════
-    // Output registration
+    // Pipeline stage: register the selection (timing fix, 2026-10-27)
+    // ════════════════════════════════════════════════════
+    // Backend finding scheduler/TIMING/cmd_row: the old single-cycle chain
+    // (classify all DEPTH entries -> prioritize -> mux q_*[sel_idx] on the
+    // just-computed sel_idx -> register cmd_*) measured 36 logic levels,
+    // WNS -1.04ns at 200MHz. This register ends the classify+prioritize
+    // half; the q_*[sel_idx_r] mux and cmd_* registration below are the
+    // second half, one cycle later -- splitting the chain roughly in half.
+    // Costs one extra cycle of scheduling latency (candidate-ready to
+    // cmd_valid), not throughput (a new decision still pipelines in every
+    // cycle). cmd_queue needs no change: it only invalidates an entry on
+    // deq_grant (now delayed to match), and entries are a flat array with
+    // per-index valid bits, never shifted/compacted, so q_*[sel_idx_r] is
+    // still the right data one cycle after sel_idx was first computed.
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            sel_valid_r      <= 1'b0;
+            sel_idx_r        <= '0;
+            sel_onehot_r     <= '0;
+            sel_type_r       <= CMD_NOP;
+            sel_is_ref_r     <= 1'b0;
+            sel_from_queue_r <= 1'b1;
+            sel_bank_r       <= '0;
+            sel_bank_eff_r   <= '0;
+        end else begin
+            sel_valid_r      <= sel_valid;
+            sel_idx_r        <= sel_idx;
+            sel_onehot_r     <= sel_onehot;
+            sel_type_r       <= sel_type;
+            sel_is_ref_r     <= sel_is_ref;
+            sel_from_queue_r <= sel_from_queue;
+            sel_bank_r       <= sel_bank;
+            sel_bank_eff_r   <= sel_bank_eff;
+        end
+    end
+
+    // ════════════════════════════════════════════════════
+    // Output registration (reads the registered sel_*_r, not sel_*)
     // ════════════════════════════════════════════════════
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -271,37 +383,37 @@ module scheduler #(
             deq_idx   <= '0;
             ref_ack   <= 1'b0;
         end else begin
-            cmd_valid <= sel_valid;
-            cmd_type  <= sel_type;
+            cmd_valid <= sel_valid_r;
+            cmd_type  <= sel_type_r;
             deq_grant <= 1'b0;
             ref_ack   <= 1'b0;
 
-            if (sel_valid) begin
-                if (sel_is_ref) begin
+            if (sel_valid_r) begin
+                if (sel_is_ref_r) begin
                     ref_ack  <= 1'b1;
                     cmd_bank <= '0;
                     cmd_row  <= '0;
                     cmd_col  <= '0;
                     cmd_we   <= 1'b0;
                     cmd_aux  <= '0;
-                end else if (!sel_from_queue) begin
+                end else if (!sel_from_queue_r) begin
                     // Forced precharge ahead of refresh -- bank only, no
                     // backing queue entry, so nothing to dequeue.
-                    cmd_bank <= sel_bank;
+                    cmd_bank <= sel_bank_r;
                     cmd_row  <= '0;
                     cmd_col  <= '0;
                     cmd_we   <= 1'b0;
                     cmd_aux  <= '0;
                 end else begin
-                    cmd_row  <= q_row[sel_idx];
-                    cmd_col  <= q_col[sel_idx];
-                    cmd_bank <= q_bank[sel_idx];
-                    cmd_we   <= q_we[sel_idx];
-                    cmd_aux  <= q_aux[sel_idx];
+                    cmd_row  <= q_row[sel_idx_r];
+                    cmd_col  <= q_col[sel_idx_r];
+                    cmd_bank <= q_bank[sel_idx_r];
+                    cmd_we   <= q_we[sel_idx_r];
+                    cmd_aux  <= q_aux[sel_idx_r];
                     // Dequeue only on CAS (RD/WR) — ACT/PRE don't consume entry
-                    if (sel_type == CMD_RD || sel_type == CMD_WR) begin
+                    if (sel_type_r == CMD_RD || sel_type_r == CMD_WR) begin
                         deq_grant <= 1'b1;
-                        deq_idx   <= sel_idx;
+                        deq_idx   <= sel_idx_r;
                     end
                 end
             end

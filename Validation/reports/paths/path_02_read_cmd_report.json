@@ -3,7 +3,7 @@
   "path": "path_02_read_cmd",
   "strategy": "composed",
   "verdict": "fail",
-  "timestamp": "2026-10-28T14:09:11.357524",
+  "timestamp": "2026-10-28T14:19:59.708251",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,9 +21,9 @@
   "window_cycles": 600,
   "coverage_collected": true,
   "rtl_drop": {
-    "git_head": "efece348d04e",
-    "drop_id": "efece348d04e",
-    "design_id": "766dc69c37e9",
+    "git_head": "99f72da45a32",
+    "drop_id": "99f72da45a32",
+    "design_id": "a2b204453edc",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -35,17 +35,17 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "835760c",
+    "validated_at": "17274ce",
     "frontend_commits": {
-      "addr_decoder": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "bank_tracker": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "cmd_gen": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "cmd_queue": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "data_path": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "refresh_ctrl": "6f659675f03286f6d19f4946500c8ae93de09850",
-      "scheduler": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "wb_port": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
+      "addr_decoder": "f37ce49d323151a6118ae7765aa766918c816383",
+      "bank_tracker": "f37ce49d323151a6118ae7765aa766918c816383",
+      "cmd_gen": "f37ce49d323151a6118ae7765aa766918c816383",
+      "cmd_queue": "f37ce49d323151a6118ae7765aa766918c816383",
+      "config_regs": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc",
+      "data_path": "f37ce49d323151a6118ae7765aa766918c816383",
+      "refresh_ctrl": "f37ce49d323151a6118ae7765aa766918c816383",
+      "scheduler": "1bc0ce7e4655061d5017f4bab90690a52a9a563f",
+      "wb_port": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc"
     },
     "roots": [
       "Frontend2/OutputFolders"
@@ -110,7 +110,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
       "scope": "wb_port",
       "verdict": "pass",
-      "summary": "scope=wb_port  strategy=exact  status=pass  matched=110/110  (110 output transaction(s) matched)",
+      "summary": "scope=wb_port  strategy=exact  status=pass  matched=108/108  (108 output transaction(s) matched)",
       "detail": [],
       "rule_counts": {}
     },
@@ -130,7 +130,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
       "scope": "cmd_queue_scheduler",
       "verdict": "pass",
-      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (1240 transactions, no rule broken)",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (1235 transactions, no rule broken)",
       "detail": [],
       "rule_counts": {}
     },
@@ -140,7 +140,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
       "scope": "cmd_gen",
       "verdict": "pass",
-      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=159/159  (159 output transaction(s) matched)",
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=160/160  (160 output transaction(s) matched)",
       "detail": [],
       "rule_counts": {}
     },
@@ -152,9 +152,9 @@
       "verdict": "fail",
       "summary": "scope=(conservation)  strategy=conservation  status=fail  rules=6 checked, 3 broken, 0 not applicable",
       "detail": [
-        "CONSERVE READ_CMD_TO_RESPONSE owner=data_path lost=13 of=46 from=dp_cmd.read to=dp_rd_rsp observed=33 | Every RD command the data path is told about (cmd_rd_valid) yields exactly one read response (rd_rsp_valid), whatever the spacing between RD commands: the spec allows CAS-to-CAS at tCCD, so the capture must pipeline or the command generator must be held, not the command dropped.",
-        "CONSERVE WRITE_REQUEST_TO_DATA owner=data_path lost=6 of=31 from=req[we=1] to=dp_wr observed=25 | Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_buffer_depth words and must drain one per WR command issued, so it never refuses a word the queue has already accepted.",
-        "CONSERVE WRITE_CMD_TO_BEATS owner=data_path lost=38 of=62 from=dp_cmd.write to=ddr_wr_beat observed=24 per_source=2 | Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR command issued to the DRAM without its data writes garbage to the array."
+        "CONSERVE READ_CMD_TO_RESPONSE owner=data_path lost=15 of=46 from=dp_cmd.read to=dp_rd_rsp observed=31 | Every RD command the data path is told about (cmd_rd_valid) yields exactly one read response (rd_rsp_valid), whatever the spacing between RD commands: the spec allows CAS-to-CAS at tCCD, so the capture must pipeline or the command generator must be held, not the command dropped.",
+        "CONSERVE WRITE_REQUEST_TO_DATA owner=data_path lost=8 of=31 from=req[we=1] to=dp_wr observed=23 | Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_buffer_depth words and must drain one per WR command issued, so it never refuses a word the queue has already accepted.",
+        "CONSERVE WRITE_CMD_TO_BEATS owner=data_path lost=44 of=62 from=dp_cmd.write to=ddr_wr_beat observed=18 per_source=2 | Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR command issued to the DRAM without its data writes garbage to the array."
       ]
     },
     {
@@ -170,11 +170,11 @@
         "DRIVER_STALL: wb \u2014 1 of 18 pipelined beat(s) never acknowledged (wb_ack_o)",
         "DRIVER_STALL: wb \u2014 4 of 23 pipelined beat(s) never acknowledged (wb_ack_o)",
         "DRIVER_STALL: wb \u2014 6 of 26 pipelined beat(s) never acknowledged (wb_ack_o)",
-        "DRIVER_STALL: wb \u2014 8 of 30 pipelined beat(s) never acknowledged (wb_ack_o)",
-        "DRIVER_STALL: wb \u2014 8 of 37 pipelined beat(s) never acknowledged (wb_ack_o)",
-        "DRIVER_STALL: wb \u2014 8 of 45 pipelined beat(s) never acknowledged (wb_ack_o)",
-        "DRIVER_STALL: wb \u2014 13 of 53 pipelined beat(s) never acknowledged (wb_ack_o)",
-        "DRIVER_STALL: wb \u2014 13 of 77 pipelined beat(s) never acknowledged (wb_ack_o)"
+        "DRIVER_STALL: wb \u2014 9 of 30 pipelined beat(s) never acknowledged (wb_ack_o)",
+        "DRIVER_STALL: wb \u2014 9 of 37 pipelined beat(s) never acknowledged (wb_ack_o)",
+        "DRIVER_STALL: wb \u2014 9 of 45 pipelined beat(s) never acknowledged (wb_ack_o)",
+        "DRIVER_STALL: wb \u2014 15 of 53 pipelined beat(s) never acknowledged (wb_ack_o)",
+        "DRIVER_STALL: wb \u2014 15 of 77 pipelined beat(s) never acknowledged (wb_ack_o)"
       ]
     }
   ],

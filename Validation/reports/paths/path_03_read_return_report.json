@@ -2,8 +2,8 @@
   "$schema": "validation-path-run/1",
   "path": "path_03_read_return",
   "strategy": "composed",
-  "verdict": "fail",
-  "timestamp": "2026-10-28T14:09:12.019864",
+  "verdict": "pass",
+  "timestamp": "2026-10-28T14:19:59.376722",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,9 +21,9 @@
   "window_cycles": 400,
   "coverage_collected": true,
   "rtl_drop": {
-    "git_head": "efece348d04e",
-    "drop_id": "efece348d04e",
-    "design_id": "766dc69c37e9",
+    "git_head": "99f72da45a32",
+    "drop_id": "99f72da45a32",
+    "design_id": "a2b204453edc",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -35,17 +35,17 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "835760c",
+    "validated_at": "17274ce",
     "frontend_commits": {
-      "addr_decoder": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "bank_tracker": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "cmd_gen": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "cmd_queue": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "data_path": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "refresh_ctrl": "6f659675f03286f6d19f4946500c8ae93de09850",
-      "scheduler": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "wb_port": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
+      "addr_decoder": "f37ce49d323151a6118ae7765aa766918c816383",
+      "bank_tracker": "f37ce49d323151a6118ae7765aa766918c816383",
+      "cmd_gen": "f37ce49d323151a6118ae7765aa766918c816383",
+      "cmd_queue": "f37ce49d323151a6118ae7765aa766918c816383",
+      "config_regs": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc",
+      "data_path": "f37ce49d323151a6118ae7765aa766918c816383",
+      "refresh_ctrl": "f37ce49d323151a6118ae7765aa766918c816383",
+      "scheduler": "1bc0ce7e4655061d5017f4bab90690a52a9a563f",
+      "wb_port": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc"
     },
     "roots": [
       "Frontend2/OutputFolders"
@@ -109,22 +109,9 @@
       "kind": "exact",
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/data_path_predictor.py",
       "scope": "data_path",
-      "verdict": "fail",
-      "summary": "scope=data_path  strategy=exact  status=fail  matched=0/19  value=19",
-      "detail": [
-        "  dp_rd_rsp[7] value: predicted [dp_rd_rsp.response aux=0x7 data=0x5d807daf] but observed [dp_rd_rsp.response aux=0x7 data=0x7daf0000]",
-        "  dp_rd_rsp[8] value: predicted [dp_rd_rsp.response aux=0x8 data=0xa597fcd7] but observed [dp_rd_rsp.response aux=0x8 data=0xfcd70000]",
-        "  dp_rd_rsp[9] value: predicted [dp_rd_rsp.response aux=0x9 data=0x35acff67] but observed [dp_rd_rsp.response aux=0x9 data=0xff670000]",
-        "  dp_rd_rsp[10] value: predicted [dp_rd_rsp.response aux=0xa data=0xedbb7e1f] but observed [dp_rd_rsp.response aux=0xa data=0x7e1f0000]",
-        "  dp_rd_rsp[11] value: predicted [dp_rd_rsp.response aux=0xb data=0x15bbfe17] but observed [dp_rd_rsp.response aux=0xb data=0xfe170000]",
-        "  dp_rd_rsp[12] value: predicted [dp_rd_rsp.response aux=0xc data=0x2593fc97] but observed [dp_rd_rsp.response aux=0xc data=0xfc970000]",
-        "  dp_rd_rsp[13] value: predicted [dp_rd_rsp.response aux=0xd data=0xb59ffc57] but observed [dp_rd_rsp.response aux=0xd data=0xfc570000]",
-        "  dp_rd_rsp[14] value: predicted [dp_rd_rsp.response aux=0xe data=0x7580fda7] but observed [dp_rd_rsp.response aux=0xe data=0xfda70000]",
-        "  dp_rd_rsp[15] value: predicted [dp_rd_rsp.response aux=0xf data=0x7db47ee7] but observed [dp_rd_rsp.response aux=0xf data=0x7ee70000]",
-        "  dp_rd_rsp[16] value: predicted [dp_rd_rsp.response aux=0x0 data=0x9581fdb7] but observed [dp_rd_rsp.response aux=0x0 data=0xfdb70000]",
-        "  dp_rd_rsp[17] value: predicted [dp_rd_rsp.response aux=0x1 data=0x25bcfe67] but observed [dp_rd_rsp.response aux=0x1 data=0xfe670000]",
-        "  dp_rd_rsp[18] value: predicted [dp_rd_rsp.response aux=0x2 data=0x6d927c87] but observed [dp_rd_rsp.response aux=0x2 data=0x7c870000]"
-      ],
+      "verdict": "pass",
+      "summary": "scope=data_path  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)",
+      "detail": [],
       "rule_counts": {}
     },
     {

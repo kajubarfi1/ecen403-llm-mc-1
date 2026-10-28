@@ -151,7 +151,10 @@ module scheduler_tb;
             check("UrgRef: type=REF",    got && ctype===CMD_REF);
             check("UrgRef: ref_ack",     got && ref_ack===1);
         end
-        ref_urgent=0; wc(2);
+        // wc(3), not 2: inflight_ref now clears over 3 cycles (the new
+        // sel_*_r pending stage, cmd_*, d1_*), one more than before --
+        // restore the same drain margin the next test was written with.
+        ref_urgent=0; wc(3);
 
         // T19–T20: Normal refresh when idle
         clear_queue(); set_bank_idle();
@@ -163,7 +166,7 @@ module scheduler_tb;
             check("NormRef: type=REF",   got && ctype===CMD_REF);
             check("NormRef: ref_ack",    got && ref_ack===1);
         end
-        ref_required=0; wc(2);
+        ref_required=0; wc(3);
 
         // T21–T23: FR-FCFS priority (row-hit over row-miss). Poll for the
         // FIRST command issued -- with two CAS-ready-or-better candidates,
@@ -206,7 +209,9 @@ module scheduler_tb;
         wc(2);
         check("TimingBlk: no CAS",   cmd_type!==CMD_RD && cmd_type!==CMD_WR);
         bank_rd_allowed[5]=1;
-        wc(2);
+        // wc(3): selection now takes 2 cycles to reach cmd_valid (classify
+        // -> sel_*_r -> cmd_*), one more than before; wc(2) left zero margin.
+        wc(3);
         check("TimingOk: CAS now",   cmd_type===CMD_RD);
 
         // T28–T29: No deadlock — always produces something or NOP
@@ -220,7 +225,8 @@ module scheduler_tb;
         // T30–T32: Aux passthrough
         clear_queue(); set_bank_idle(); set_bank_active(3'd0, 14'd42);
         q_valid[0]=1; q_row[0]=14'd42; q_col[0]=10'd77; q_bank[0]=3'd0; q_we[0]=1; q_aux[0]=4'hB;
-        wc(2);
+        // wc(3): same reason as TimingOk above.
+        wc(3);
         check("Aux: passthrough",    cmd_aux===4'hB);
         check("Aux: col",            cmd_col===10'd77);
         check("Aux: row",            cmd_row===14'd42);
@@ -261,11 +267,16 @@ module scheduler_tb;
         end
         ref_urgent=0; wc(2);
 
-        // T39-T47: feedback-latency hold (FB_LAG = 2). bank_tracker learns of a
-        // command two cycles after the scheduler registers it, and this
-        // testbench deliberately never updates the bank state, so the permission
-        // inputs stay stale exactly as they do in the real loop. Command
-        // pulses are sampled once per cycle (value seen at each posedge).
+        // T39-T47: feedback-latency hold (FB_LAG = 2 after cmd_valid, now 3
+        // classification cycles total with the 2026-10-27 timing fix: scheduler
+        // itself pipelines selection into a pending sel_*_r stage one cycle
+        // before cmd_valid registers, extending the observed gap between
+        // pulses by one cycle; see scheduler_gen.py's sel_valid_r comment).
+        // bank_tracker learns of a command two cycles after the scheduler
+        // registers it, and this testbench deliberately never updates the bank
+        // state, so the permission inputs stay stale exactly as they do in the
+        // real loop. Command pulses are sampled once per cycle (value seen at
+        // each posedge).
         //
         // ACT: a second ACT to the same bank must not follow within the window.
         clear_queue(); set_bank_idle();
@@ -280,7 +291,9 @@ module scheduler_tb;
             @(posedge clk);
             check("Hold ACT: no repeat ACT, cycle 2",       cmd_valid===0);
             @(posedge clk);
-            check("Hold ACT: window ends after 2 cycles",   cmd_valid===1 && cmd_type===CMD_ACT);
+            check("Hold ACT: no repeat ACT, cycle 3",       cmd_valid===0);
+            @(posedge clk);
+            check("Hold ACT: window ends after 3 cycles",   cmd_valid===1 && cmd_type===CMD_ACT);
         end
 
         // REF: a REFRESH must not follow an ACT that bank_tracker has not yet
@@ -297,6 +310,8 @@ module scheduler_tb;
             check("Hold REF: no REF, cycle 1",              cmd_valid===0);
             @(posedge clk);
             check("Hold REF: no REF, cycle 2",              cmd_valid===0);
+            @(posedge clk);
+            check("Hold REF: no REF, cycle 3",              cmd_valid===0);
             @(posedge clk);
             check("Hold REF: REF once the window is over",  cmd_valid===1 && cmd_type===CMD_REF);
         end
@@ -315,7 +330,9 @@ module scheduler_tb;
             q_valid[0]=0; q_valid[1]=1; q_row[1]=14'd200; q_bank[1]=3'd1; q_we[1]=0;
             @(posedge clk);
             @(posedge clk);
-            check("Hold RD: no RD while the WR is in flight", cmd_valid===0);
+            check("Hold RD: no RD while the WR is in flight, cycle 1", cmd_valid===0);
+            @(posedge clk);
+            check("Hold RD: no RD while the WR is in flight, cycle 2", cmd_valid===0);
             @(posedge clk);
             check("Hold RD: RD allowed after the window",   cmd_valid===1 && cmd_type===CMD_RD);
         end
