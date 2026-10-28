@@ -127,6 +127,19 @@ def metrics_for(block: str) -> Dict[str, Any]:
     if rs.exists():
         m = json.loads(rs.read_text(encoding="utf-8")).get("metrics", {})
         out.update({k: m.get(k) for k in ("fmax_mhz", "wns_ns", "cell_count", "area_um2")})
+    # The reporter's fmax_mhz is 1000/(period - wns): what the leftover slack implies
+    # for that build, which is an extrapolation. When the block was swept, the final
+    # report carries the demonstrated figure - a period a build actually met - and
+    # that is the one to publish. Otherwise the same block reads 521 MHz here and
+    # 491 in FMAX_SWEEP.json, and the higher number is the softer one.
+    if rep.exists():
+        d = json.loads(rep.read_text(encoding="utf-8"))
+        if d.get("fmax_best_closed_mhz") is not None:
+            out["fmax_estimated_mhz"] = out.get("fmax_mhz")
+            out["fmax_mhz"] = d["fmax_best_closed_mhz"]
+            out["fmax_is_demonstrated"] = True
+        elif out.get("fmax_mhz") is not None:
+            out["fmax_is_demonstrated"] = False
     return out
 
 
