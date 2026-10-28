@@ -122,10 +122,16 @@ module scheduler #(
     logic                    sel_is_ref_r;
     logic                    sel_from_queue_r;
     logic [BANK_BITS-1:0]    sel_bank_r;
-    // The bank the pending decision targets -- q_bank[sel_idx_r] for a
-    // queue-sourced pick, sel_bank_r for a forced precharge ahead of refresh
-    // (same two sources the output stage below resolves cmd_bank from).
-    wire  [BANK_BITS-1:0]    sel_bank_eff_r = sel_from_queue_r ? q_bank[sel_idx_r] : sel_bank_r;
+    // 2026-10-27 (backend timing finding scheduler/TIMING/sel_idx_r): both of
+    // these used to be derived FROM sel_idx_r every cycle (one-hot-by-
+    // comparison in recently_granted, a q_bank[sel_idx_r] mux here), which
+    // put sel_idx_r's own fanout back into the cone that computes the next
+    // sel_idx_r -- a 32-level loop, not two cut stages. Registering them
+    // directly (as of the SAME cycle sel_idx/sel_bank are computed, not
+    // re-derived from the registered index) removes both structures from
+    // the loop entirely; see sel_onehot and sel_bank_eff below.
+    logic [DEPTH-1:0]        sel_onehot_r;      // one bit per entry, set iff that entry is the pending CAS pick
+    logic [BANK_BITS-1:0]    sel_bank_eff_r;    // the pending decision's bank, captured at selection time
 
     logic [NUM_BANKS-1:0] inflight_any;    // any command to this bank in flight
     logic [NUM_BANKS-1:0] inflight_state;  // an ACT or PRE to this bank in flight
@@ -195,10 +201,17 @@ module scheduler #(
             // new pipeline stage. ACT/PRE re-selection is already blocked by
             // the bank-level inflight_any/inflight_act mask above, which the
             // sel_*_r contribution covers -- this guard only needs CAS.
+            //
+            // sel_onehot_r[i], not (sel_idx_r == i[IDX_BITS-1:0]) (2026-10-27,
+            // finding scheduler/TIMING/sel_idx_r): the equality form put 16
+            // four-bit comparators against sel_idx_r in the same cone that
+            // computes the next sel_idx_r, closing a feedback loop through
+            // the register the pipeline stage was supposed to cut. A single
+            // registered bit read has no such dependency.
             recently_granted = (deq_grant && (deq_idx == i[IDX_BITS-1:0]))
                                || (sel_valid_r && sel_from_queue_r
                                    && (sel_type_r == CMD_RD || sel_type_r == CMD_WR)
-                                   && (sel_idx_r == i[IDX_BITS-1:0]));
+                                   && sel_onehot_r[i]);
             is_row_hit[i]   = q_valid[i] && bank_is_active[b] &&
                                (bank_open_row[b] == q_row[i]);
             is_cas_ready[i] = is_row_hit[i] && !recently_granted &&
@@ -214,6 +227,7 @@ module scheduler #(
     // ════════════════════════════════════════════════════
     logic                    sel_valid;
     logic [IDX_BITS-1:0]     sel_idx;
+    logic [DEPTH-1:0]        sel_onehot;   // sel_idx, decoded -- see sel_onehot_r above
     logic [3:0]              sel_type;
     logic                    sel_is_ref;
     // Most commands source row/col/bank/we/aux from the winning queue entry
@@ -226,6 +240,7 @@ module scheduler #(
     always_comb begin
         sel_valid      = 1'b0;
         sel_idx        = '0;
+        sel_onehot     = '0;
         sel_type       = CMD_NOP;
         sel_is_ref     = 1'b0;
         sel_from_queue = 1'b1;
@@ -259,9 +274,10 @@ module scheduler #(
         else begin
             for (int i = 0; i < DEPTH; i++) begin
                 if (is_cas_ready[i] && !sel_valid) begin
-                    sel_valid = 1'b1;
-                    sel_idx   = i[IDX_BITS-1:0];
-                    sel_type  = q_we[i] ? CMD_WR : CMD_RD;
+                    sel_valid      = 1'b1;
+                    sel_idx        = i[IDX_BITS-1:0];
+                    sel_onehot[i]  = 1'b1;
+                    sel_type       = q_we[i] ? CMD_WR : CMD_RD;
                 end
             end
             // Priority 3: ACT for row-miss (need PRE first if bank active with wrong row)
@@ -272,14 +288,16 @@ module scheduler #(
                         b = q_bank[i];
                         if (bank_is_active[b] && bank_pre_allowed[b] && !inflight_any[b] && !inflight_ref) begin
                             // Need PRE first
-                            sel_valid = 1'b1;
-                            sel_idx   = i[IDX_BITS-1:0];
-                            sel_type  = CMD_PRE;
+                            sel_valid     = 1'b1;
+                            sel_idx       = i[IDX_BITS-1:0];
+                            sel_onehot[i] = 1'b1;
+                            sel_type      = CMD_PRE;
                         end else if (!bank_is_active[b] && bank_act_allowed[b] && !inflight_any[b] && !inflight_act && !inflight_ref) begin
                             // Bank idle, can ACT
-                            sel_valid = 1'b1;
-                            sel_idx   = i[IDX_BITS-1:0];
-                            sel_type  = CMD_ACT;
+                            sel_valid     = 1'b1;
+                            sel_idx       = i[IDX_BITS-1:0];
+                            sel_onehot[i] = 1'b1;
+                            sel_type      = CMD_ACT;
                         end
                     end
                 end
@@ -305,6 +323,13 @@ module scheduler #(
         end
     end
 
+    // The pending decision's bank, computed once here (from the UN-registered
+    // sel_idx/sel_bank, same cycle as the rest of selection) and captured as
+    // sel_bank_eff_r below -- not re-derived from q_bank[sel_idx_r] every
+    // cycle, which put a 16-way mux back in the feedback loop (2026-10-27,
+    // finding scheduler/TIMING/sel_idx_r).
+    wire [BANK_BITS-1:0] sel_bank_eff = sel_from_queue ? q_bank[sel_idx] : sel_bank;
+
     // ════════════════════════════════════════════════════
     // Pipeline stage: register the selection (timing fix, 2026-10-27)
     // ════════════════════════════════════════════════════
@@ -324,17 +349,21 @@ module scheduler #(
         if (!rst_n) begin
             sel_valid_r      <= 1'b0;
             sel_idx_r        <= '0;
+            sel_onehot_r     <= '0;
             sel_type_r       <= CMD_NOP;
             sel_is_ref_r     <= 1'b0;
             sel_from_queue_r <= 1'b1;
             sel_bank_r       <= '0;
+            sel_bank_eff_r   <= '0;
         end else begin
             sel_valid_r      <= sel_valid;
             sel_idx_r        <= sel_idx;
+            sel_onehot_r     <= sel_onehot;
             sel_type_r       <= sel_type;
             sel_is_ref_r     <= sel_is_ref;
             sel_from_queue_r <= sel_from_queue;
             sel_bank_r       <= sel_bank;
+            sel_bank_eff_r   <= sel_bank_eff;
         end
     end
 
