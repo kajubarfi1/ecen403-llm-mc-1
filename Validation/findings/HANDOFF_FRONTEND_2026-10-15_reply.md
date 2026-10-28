@@ -304,3 +304,198 @@ current generators and commit it (the drop id should come out as
 fine, we judge content). Then the next thing to run is a full flow with
 the backend on, where Dawson's scheduler timing finding becomes the
 first backend-to-frontend change request the loop carries.
+
+## Addendum 7 (2026-10-27, evening): a non-golden spec through all four phases, and a testbench finding
+
+`runs/preset_lowcost`: `flow.py --preset low-cost-embedded`, the first
+spec other than the golden one through Phases 1–4 (DDR3-800 at tCK 2.5
+ns, ONE byte lane, CL 6, a 4-deep command queue; revision
+`compiled_ddr3800_x8_1lane_1rank_08cc0fbc`). Spec review PASS, Phases
+1–3 PASS, then **your Phase 4 pipeline failed its own sim gate** on
+data_path:
+
+```
+[FAIL] 15: C3: rd_rsp_data=0x12121234     (expected 0xCAFE1234)
+```
+
+We then ran our validation on that drop as it stood (the data_path RTL
+is there; only your gate refused it): **19 of 19 paths PASS**, 0
+findings, read-after-write returns the written word on four 8-bit beats,
+second opinions agree, code coverage 84.8 %. Your generator is right and
+your testbench is wrong. `data_path_tb.sv` line 88:
+
+```
+assign ddr_dq_i = (dut.rd_burst_ctr == 2'd0) ? ... : ...;
+```
+
+The testbench drives the read beats by peeking at the DUT's internal
+burst counter with a two-way choice, so with WORD_BEATS = 4 beats 1, 2
+and 3 all get the same byte: `0x12121234` is beat 0 = 0x34 and 0x12 three
+times. **ask 9:** generate the read-beat stimulus from the testbench's
+own count, one value per beat for WORD_BEATS beats, and not from
+`dut.rd_burst_ctr`; a testbench that reads the design's internal state
+to decide what to drive cannot catch a wrong count in that state. The
+same white-box pattern is worth a scan in the other phases' testbench
+generators.
+
+On our side from this run: `flow.py` now hands a phase's own gate
+failure to that phase's agent (it reads your error report natively) and
+regenerates, instead of halting for a person; and the vplan is
+regenerated from the judged spec on every validation (it was still the
+golden one's text on this spec). Three specs have now been through
+Phases 1–2 and one through all four; a two-rank or ECC preset is the
+next one worth sending.
+
+## Addendum 8 (2026-10-27, night): a Phase 1 finding — tMOD in the init sequence
+
+Regenerating the verification plan from the spec (it had been the
+golden plan's text since 10-08) surfaced six taxonomy items nothing
+measured, among them tMRD and tMOD, which are in the spec's
+`timing_model` since the October revisions but had no assertion because
+they were not when the init rules were written. Both are now asserted on
+the init FSM's own command stream (`init_fsm_sva.sv`: TIMING_013,
+TIMING_014), and TIMING_014 fires once on the golden drop:
+
+```
+MRS (MR2)  t
+MRS (MR3)  t + 1 cycle
+MRS (MR1)  t + 2
+MRS (MR0)  t + 3
+ZQCL       t + 4          <- 1 controller cycle = 4 nCK after MR0; tMOD = 12 nCK (15 ns)
+```
+
+`init_fsm.sv` goes `S_MR0 -> S_ZQCL` on the next cycle with no wait
+(lines 75 and 95). JESD79-3 requires tMOD, max(12 nCK, 15 ns), between
+an MRS and any non-MRS command; the MRS-to-MRS spacing (tMRD, 4 nCK)
+is met because one controller cycle is 4 nCK. It will arrive in the
+next package as `init_fsm/TIMING_014`, owner init_fsm, Phase 1: a
+tMOD wait state (3 controller cycles at this clock, derived from
+`timing_model.tMOD` and the clock period, not a literal) between the
+last MRS and ZQCL. It is the second defect validation has found on the
+real design, and the first in an LLM-generated block; the first was
+the data_path read capture.
+
+## Addendum 9 (2026-10-28): two more real defects, found by driving the port the way the spec describes it
+
+We went after code coverage today and the stimulus that closed it found
+two defects in the checked-in drop (efece348d04e), one in Phase 1 and
+one in Phase 4. Both are in the current package
+(`Validation/findings/outbox/current/`, 9 findings, FAIL on data_path,
+init_fsm, wb_port) and will route to your Phase 1 and Phase 4 agents on
+the next flow run as `wb_port/CONSERVE/HOST_BEAT_TO_REQUEST`,
+`wb_port/HANDSHAKE/wb`, `data_path/CONSERVE/READ_CMD_TO_RESPONSE`,
+`data_path/CONSERVE/WRITE_CMD_TO_BEATS` and
+`data_path/CONSERVE/WRITE_REQUEST_TO_DATA`. Code coverage on the drop is
+85.4 % (was 77.3 %), over the 85 % target for the first time.
+
+### What changed on our side
+
+Every sequence we had ever driven on the host port used classic single
+cycles: present one beat, wait for its ack, present the next. The
+spec's `host_interface` says `wishbone_pipelined`, linear bursts up to
+8 beats, a 16-deep read buffer, and your `wb_port.sv` header says
+"Wishbone B4 pipelined slave", so the burst tracker, `cti`/`bte` and
+the tag FIFO had never run. Two generators now drive what the spec
+declares: `wb_burst` (linear bursts, `cti` INCREMENTING then END,
+reads and writes, and a pile of pipelined reads deeper than the read
+buffer) on path_02, and `saturate` (240 back-to-back mixed beats, the
+next presented the cycle after the previous is accepted, acks trailing)
+on path_07. The refresh paths (05, 20) and path_18 pick up the
+pipelined driver too.
+
+Our `wb_rsp` monitor was wrong under this traffic: it qualified a read
+response on `wb_ack_o && !wb_we_i` and read `wb_adr_i` at ack time,
+which on a pipelined bus are a later beat's. It now qualifies on your
+`rsp_valid` input and attaches the accepted read addresses in order.
+That was a monitor bug, not a design one, and it is fixed; nothing
+below depends on it.
+
+### Finding 1 — wb_port loses accepted beats when the queue fills (Phase 1, critical)
+
+`wb_stall_o` is combinational from `req_ready` (the queue's
+`enq_ready`), and the accepted beat is registered into `req_*` and
+presented to the queue one cycle later, with no holding register and
+no check that the queue still has room. When the request already in
+flight fills the queue on that same edge (count 15 → 16), the beat just
+accepted is presented to a full queue and dropped: `enq_valid &&
+!enq_ready` in `cmd_queue.sv` is ignored. For a write the host has
+already received `wr_ack_r`, so the write is acknowledged and lost; for
+a read, nothing ever comes back and the host waits forever.
+
+Evidence (all from this drop, Olympus, today):
+
+| path | beats accepted | requests taken by the queue | lost | host saw |
+|---|---|---|---|---|
+| path_07 (saturate) | 243 | 218 | 25 (18 writes, 7 reads) | 12 beats never acknowledged |
+| path_05 / path_20 (refresh_stress, now pipelined) | 600 | 350 | 250 | — |
+| path_18 (write_read) | 24 | 20 | 4 | 4 beats never acknowledged |
+
+Every lost beat sits at a cycle where the queue reached 16 on the edge
+that accepted it (`cq_enq` / `cq_deq` counted from the trace). Under
+sustained traffic the port loses about one beat per freed slot, which
+is why path_05 and path_20 lose 250 of 600. This violates vplan
+VP_FLOW_001 ("no accepted request may be lost while back-pressure is
+asserted") and `controller_architecture.command_queue_depth`. Fix on
+the generator (`wb_port_gen.py`): either stall when the queue is one
+short of full while a request is in flight (`!req_ready || (req_valid
+&& <queue_count == DEPTH-1>)` needs the count, which the port does not
+see), or the cleaner one: hold `req_valid` until `req_ready` (a
+one-entry skid) and assert `wb_stall_o` while the holding register is
+occupied. The `req` monitor's qualifier is `req_valid && req_ready`, so
+a request the queue did not take is, correctly, not a request.
+
+While reading the port for this we noticed `wb_ack_o = wr_ack_r |
+rd_ack`: a write acknowledge (one cycle after the beat) and a read
+response arriving in that same cycle merge into one ack, and the host
+loses one completion. We did not see it happen in today's runs; it is
+now a port property, HOST_001, that formal will prove or refute on the
+next formal run and that fires in simulation if it ever occurs. Not a
+finding yet; flagged so the same fix can take it into account (hold
+one of the two).
+
+### Finding 2 — data_path ignores a RD or WR command while its FSM is busy (Phase 4, critical)
+
+`rd_state` and `wr_state` are one-deep. A RD command (`cmd_rd_valid`)
+is only latched in `RD_IDLE`; a WR command only in `WR_IDLE`. With
+CL = 11 nCK the read FSM is busy for 4 controller cycles per read
+(wait 2, capture 2); the write FSM likewise. The spec allows CAS to CAS
+at tCCD = 4 nCK = one controller cycle, and your scheduler and cmd_gen
+issue at that rate, so the second and third of three back-to-back
+reads are simply never captured: no response, no entry in the response
+FIFO, the port's tag FIFO goes out of step (`p_tag`, your WB-009,
+fires on every later response) and the host never gets an ack. For
+writes, a WR command issued while `wr_state != WR_IDLE` pops nothing
+from the write buffer and drives nothing on DQ, so the DRAM receives a
+WRITE with no data, and the un-popped words accumulate until `wr_full`
+refuses new ones (`p_wr_no_overflow`, your DP-001, fires).
+
+| path | RD cmds | read responses | lost | WR cmds | DQ words driven | WR without data | write words refused at full buffer |
+|---|---|---|---|---|---|---|---|
+| path_02 (wb_burst) | 46 | 33 | 13 | 31 | 12 | 19 | 6 |
+| path_07 (saturate) | 63 | 55 | 8 | 155 | 112 | 43 | 40 |
+
+The 13 lost reads on path_02 are exactly the RD commands issued within
+4 cycles of the previous one. Who fixes it is your call: pipeline the
+capture (a shift of pending `(aux, CL countdown)` entries, one per RD,
+is the usual shape), or make the data path tell cmd_gen it is busy and
+have the scheduler hold CAS until it is not. The second needs a port
+the manifests do not have; the first stays inside data_path. The
+finding is filed on data_path because that is where the command is
+dropped.
+
+Note this is why path_02 had passed before today: a read the data path
+drops predicts nothing downstream (our port predictor answers a read
+only when the data path does), so every stage checker matched what
+appeared. We added a `(conservation)` stage from catalog rules (every
+transaction a block is handed must have produced the one it owes by
+the end of the run, attributed to the block that must deliver) and a
+`(host handshake)` stage from the driver's own count of beats never
+acknowledged. Those are what carry these two findings; the exact
+stages corroborate them on path_07 and path_18 (`req` missing).
+
+### Still open from before
+
+The data_path read-capture defect (addendum 2) and the init_fsm tMOD
+defect (addendum 8) are still in the checked-in drop; both are fixed
+in your generators, so a regenerated `OutputFolders` clears them. Ask 9
+(your testbench's white-box read beats) stands.

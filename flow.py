@@ -390,6 +390,24 @@ def stage_spec_review(run, args):
     return stage_spec_synthesis(run, args, feedback=feedback)
 
 
+GATE_FIX_TRIES = 2      # agent passes on a phase's own gate failure before halting
+
+
+def _agent_fixed(run, n):
+    """Modules the phase agent's fix report says ended 'fixed'."""
+    p = os.path.join(run.drop, "VALIDATIONREPORT", f"phase{n}_fix_report.json")
+    if not os.path.exists(p):
+        return []
+    with open(p) as f:
+        rep = json.load(f)
+    out = []
+    for r in rep.get("results", []) or rep.get("modules", []):
+        st = r.get("final_status") or r.get("status")
+        if st == "fixed" or (st is None and any(a.get("status") == "applied" for a in r.get("attempts", []))):
+            out.append(r.get("module"))
+    return [m for m in out if m]
+
+
 def _phase_report(run, n):
     for kind in ("final", "error"):
         p = os.path.join(run.drop, "VALIDATIONREPORT", f"phase{n}_{kind}_report.json")
@@ -433,14 +451,46 @@ def stage_rtl_generation(run, args, phases=None):
         rc, txt = sh([PY, script_path], cwd=os.path.dirname(script_path),
                      stdin=f"{spec}\n{run.drop}\n", env=env, log=run.log, timeout=4 * 3600)
         kind, rep = _phase_report(run, n)
+        tries = 0
+        while (rc != 0 or kind != "final") and tries < GATE_FIX_TRIES:
+            # The phase failed its OWN gate (lint or the Frontend's behavioural
+            # sim). Its fix agent reads that error report natively, so route it
+            # there instead of halting for a person (the low-cost-embedded
+            # preset's one-lane data_path failed its sim gate, 2026-10-27).
+            why = (f"phase {n} failed at {rep.get('failure_stage')} "
+                   f"({', '.join(rep.get('failed_modules', []))})" if rep else
+                   f"phase {n} exited {rc} with no report")
+            agent = phase_agent(n)
+            if not os.path.exists(agent) or not os.environ.get("ANTHROPIC_API_KEY"):
+                break
+            tries += 1
+            run.record("rtl_generation", "FAIL", why + f"; its own fix agent, pass {tries}", phase=n)
+            run.log(f"-- phase {n} validation agent on the Frontend's own error report")
+            cmd = [PY, agent, "--output-dir", run.drop, "--spec", spec]
+            if agent_takes_yes(agent):
+                cmd.append("--yes")
+            arc, atxt = sh(cmd, cwd=os.path.dirname(agent), stdin="a\n" * 40, log=run.log, timeout=3600)
+            fixed = _agent_fixed(run, n)
+            run.record("rtl_generation", "AGENT", f"phase {n} agent exited {arc}; fixed: "
+                       f"{', '.join(fixed) or 'none'}", phase=n)
+            if not fixed:
+                break
+            run.log(f"-- phase {n}: regenerating after its agent's fix")
+            rc, txt = sh([PY, script_path], cwd=os.path.dirname(script_path),
+                         stdin=f"{spec}\n{run.drop}\n", env=env, log=run.log, timeout=4 * 3600)
+            kind, rep = _phase_report(run, n)
         if rc != 0 or kind != "final":
             why = (f"phase {n} failed at {rep.get('failure_stage')} "
                    f"({', '.join(rep.get('failed_modules', []))})" if rep else
                    f"phase {n} exited {rc} with no report")
             run.record("rtl_generation", "FAIL", why, phase=n)
-            return run.halt("rtl_generation", why + ". The Frontend's own fix agents need a "
-                            "person at the keyboard (phaseN_validation_agent.py); run one, then "
-                            "resume.", phase=n,
+            agent = phase_agent(n)
+            how = (f"its fix agent ({os.path.relpath(agent, ROOT)}) ran {tries} time(s) on the "
+                   f"Frontend's own error report and did not clear it" if tries else
+                   f"the Frontend has no fix agent for phase {n} yet ({os.path.relpath(agent, ROOT)})"
+                   if not os.path.exists(agent) else
+                   "the Frontend's fix agents need ANTHROPIC_API_KEY")
+            return run.halt("rtl_generation", why + f". {how}; fix by hand, then resume.", phase=n,
                             report=os.path.relpath(os.path.join(run.drop, "VALIDATIONREPORT",
                                                                 f"phase{n}_error_report.json"), ROOT))
         # Frontend 2026-10-01: a gate that could not run fails the phase

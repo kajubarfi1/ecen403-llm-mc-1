@@ -1,12 +1,12 @@
 {
-  "$comment": "Recipes for the vplan coverpoints that are NOT timing-spacing points (those come from sva_rules.json via coverage_gen.py). Each coverpoint names a recipe; block_coverage_gen.py turns recipes into SystemVerilog covergroups bound into the named block. Everything a recipe references is checked against the block's manifest at generation time — a port that does not exist is a loud generation failure, never a silently absent bin.",
+  "$comment": "Recipes for the vplan coverpoints that are NOT timing-spacing points (those come from sva_rules.json via coverage_gen.py). Each coverpoint names a recipe; block_coverage_gen.py turns recipes into SystemVerilog covergroups bound into the named block. Everything a recipe references is checked against the block's manifest at generation time \u2014 a port that does not exist is a loud generation failure, never a silently absent bin.",
   "$recipes": {
-    "occurred": "One 'occurred' bin. Fires when `expr` (over the block's ports) is true, or when the `iface` stream's qualifier fires — optionally only for `command` (resolved through the catalog's command_encoding).",
+    "occurred": "One 'occurred' bin. Fires when `expr` (over the block's ports) is true, or when the `iface` stream's qualifier fires \u2014 optionally only for `command` (resolved through the catalog's command_encoding).",
     "register_access": "One bin per register in the spec's register map whose access type is in `access` (or, with field_level, that contains a field of that type), sampled on writes (`on: write`) or reads (`on: read`) to the register bus.",
     "cross_pattern": "Cross of the named register_access coverpoint with the module's write-data pattern coverpoint (zeros / ones / 0xA5.. / 0x5A.. / other).",
-    "first_read_after_reset": "One bin per register: a read that happens before any write to that register since reset — the reset-value check actually happened.",
+    "first_read_after_reset": "One bin per register: a read that happens before any write to that register since reset \u2014 the reset-value check actually happened.",
     "unmapped_access": "One 'occurred' bin: any access to an offset the register map does not declare.",
-    "access_violation_attempt": "One 'occurred' bin: a write to a read-only register, or a read of a register that contains only write-only fields — the antecedent of CSR_001."
+    "access_violation_attempt": "One 'occurred' bin: a write to a read-only register, or a read of a register that contains only write-only fields \u2014 the antecedent of CSR_001."
   },
   "covergroups": {
     "cg_csr_access": {
@@ -155,6 +155,26 @@
           "recipe": "occurred",
           "expr": "!enq_ready",
           "why": "The queue refused a request: the cycles in which back-pressure (and the host stall it must cause) is tested. Measured on the ready signal alone because a host port is free to gate valid on ready (this design's wb_port does: wb_beat = cyc & stb & ~stall, stall = !req_ready), in which case 'valid && !ready' never samples true even while the queue sits full and the host is stalled for 45 cycles per write (path_07, 2026-10-15). That no accepted request is lost under back-pressure is the scoreboard's check, not this bin's."
+        }
+      }
+    },
+    "cg_scheduling": {
+      "block": "scheduler",
+      "coverpoints": {
+        "cp_sched_001_exercised": {
+          "recipe": "occurred",
+          "iface": "sched_deq",
+          "why": "A queued request was granted to the scheduler: the antecedent of SCHED_001 (a dequeued request must reach DRAM)."
+        },
+        "cp_sched_002_exercised": {
+          "recipe": "occurred",
+          "iface": "sched_cmd",
+          "why": "A command was issued: the antecedent of SCHED_002 (every issued command must match a request or a maintenance need)."
+        },
+        "cp_sched_003_exercised": {
+          "recipe": "occurred",
+          "expr": "ref_required",
+          "why": "A refresh was pending at the scheduler: the antecedent of SCHED_003 (a pending refresh must be issued)."
         }
       }
     }

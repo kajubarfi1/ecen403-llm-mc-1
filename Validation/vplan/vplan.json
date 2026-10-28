@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "spec_source": "ddr3_mc_core_v2",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "item_count": 39,
+  "item_count": 45,
   "items": [
     {
       "id": "VP_FAIL_001",
@@ -229,7 +229,7 @@
       "id": "VP_FAIL_012",
       "title": "Refresh starvation",
       "scope": "refresh",
-      "requirement": "The design shall never exhibit: Refresh postpone count exceeded max_postpone_count.",
+      "requirement": "The design shall never exhibit: Refresh postpone count reached cfg_max_postpone while a refresh was still owed (postpone_cnt saturates at cfg_max_postpone by construction, so it never exceeds it); the design's own signal is ref_starve_flag.",
       "spec_ref": "failure_taxonomy.categories[REF_001]",
       "failure_ref": "REF_001",
       "method": "assertion",
@@ -261,7 +261,7 @@
         }
       ],
       "priority": "major",
-      "status": "covered",
+      "status": "partial",
       "derived": true,
       "tests": []
     },
@@ -401,6 +401,126 @@
         }
       ],
       "priority": "minor",
+      "status": "covered",
+      "derived": true,
+      "tests": []
+    },
+    {
+      "id": "VP_FAIL_021",
+      "title": "tREFI violation",
+      "scope": "timing",
+      "requirement": "The design shall never exhibit: Average refresh interval tREFI exceeded: refreshes not issued often enough.",
+      "spec_ref": "failure_taxonomy.categories[TIMING_012]",
+      "failure_ref": "TIMING_012",
+      "method": "assertion",
+      "coverage_items": [
+        {
+          "type": "functional",
+          "name": "cg_timing.cp_timing_012_exercised",
+          "goal": 100
+        }
+      ],
+      "priority": "critical",
+      "status": "covered",
+      "derived": true,
+      "tests": []
+    },
+    {
+      "id": "VP_FAIL_022",
+      "title": "tMRD violation",
+      "scope": "timing",
+      "requirement": "The design shall never exhibit: Two MRS commands issued closer together than tMRD.",
+      "spec_ref": "failure_taxonomy.categories[TIMING_013]",
+      "failure_ref": "TIMING_013",
+      "method": "assertion",
+      "coverage_items": [
+        {
+          "type": "functional",
+          "name": "cg_timing.cp_timing_013_exercised",
+          "goal": 100
+        }
+      ],
+      "priority": "major",
+      "status": "covered",
+      "derived": true,
+      "tests": []
+    },
+    {
+      "id": "VP_FAIL_023",
+      "title": "tMOD violation",
+      "scope": "timing",
+      "requirement": "The design shall never exhibit: A non-MRS command issued before tMOD elapsed after an MRS command.",
+      "spec_ref": "failure_taxonomy.categories[TIMING_014]",
+      "failure_ref": "TIMING_014",
+      "method": "assertion",
+      "coverage_items": [
+        {
+          "type": "functional",
+          "name": "cg_timing.cp_timing_014_exercised",
+          "goal": 100
+        }
+      ],
+      "priority": "major",
+      "status": "covered",
+      "derived": true,
+      "tests": []
+    },
+    {
+      "id": "VP_FAIL_024",
+      "title": "Dropped request",
+      "scope": "scheduling",
+      "requirement": "The design shall never exhibit: An enqueued host request is never issued to DRAM.",
+      "spec_ref": "failure_taxonomy.categories[SCHED_001]",
+      "failure_ref": "SCHED_001",
+      "method": "assertion",
+      "coverage_items": [
+        {
+          "type": "functional",
+          "name": "cg_scheduling.cp_sched_001_exercised",
+          "goal": 100
+        }
+      ],
+      "priority": "critical",
+      "status": "covered",
+      "derived": true,
+      "tests": []
+    },
+    {
+      "id": "VP_FAIL_025",
+      "title": "Invented command",
+      "scope": "scheduling",
+      "requirement": "The design shall never exhibit: A DRAM command is issued that matches no queued request or required maintenance.",
+      "spec_ref": "failure_taxonomy.categories[SCHED_002]",
+      "failure_ref": "SCHED_002",
+      "method": "assertion",
+      "coverage_items": [
+        {
+          "type": "functional",
+          "name": "cg_scheduling.cp_sched_002_exercised",
+          "goal": 100
+        }
+      ],
+      "priority": "critical",
+      "status": "covered",
+      "derived": true,
+      "tests": []
+    },
+    {
+      "id": "VP_FAIL_026",
+      "title": "Refresh never serviced",
+      "scope": "scheduling",
+      "requirement": "The design shall never exhibit: A pending refresh is never issued (starved by the scheduler).",
+      "spec_ref": "failure_taxonomy.categories[SCHED_003]",
+      "failure_ref": "SCHED_003",
+      "method": "assertion",
+      "coverage_items": [
+        {
+          "type": "functional",
+          "name": "cg_scheduling.cp_sched_003_exercised",
+          "goal": 100
+        }
+      ],
+      "priority": "critical",
       "status": "covered",
       "derived": true,
       "tests": []
@@ -711,7 +831,7 @@
       "scope": "timing",
       "requirement": "Stimulus shall drive the tREFI interval to its boundary (6240 cycles at tCK=1.25ns): refreshes both within the interval and postponed past it (within the spec's postpone budget), so the maximum-interval assertion is non-vacuous.",
       "spec_ref": "timing_model.$derived_cycles.tREFI_nCK",
-      "failure_ref": null,
+      "failure_ref": "TIMING_012",
       "method": "random",
       "coverage_items": [
         {
@@ -720,7 +840,7 @@
           "goal": 100
         }
       ],
-      "priority": "major",
+      "priority": "critical",
       "status": "covered",
       "derived": true,
       "target_cycles": 6240,

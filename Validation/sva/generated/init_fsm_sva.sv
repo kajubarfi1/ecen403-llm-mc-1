@@ -4,7 +4,7 @@
 //
 // Spec revision : golden_ddr3_1600k_x8_2lane_1rank
 // Bound to      : init_fsm (via the bind statement in init_fsm_sva_bind.sv)
-// Covers        : INIT_002, INIT_002, INIT_001, INIT_003
+// Covers        : INIT_002, TIMING_013, TIMING_014, INIT_002, INIT_001, INIT_003
 //
 // Every bound below is recomputed from the spec's nanosecond timing values
 // and the controller clock period, not copied from a table. These assertions
@@ -34,6 +34,23 @@ module init_fsm_sva #(
   a_INIT_002: assert property (p_INIT_002)
     else $error("[INIT_002] initialization_sequence.tZQinit_ns violation: Insufficient delay between init sequence steps: a command issued before tZQinit elapsed after ZQCL.");
   c_INIT_002: cover property (p_INIT_002);
+
+  // TIMING_013 (tMRD = 5.0ns = 1 cycle(s) at 5.0ns): no separation required beyond the issue cycle itself, so no
+  // assertion is generated. Generating `[*0]` would be a property that is always true —
+  // an assertion that cannot fail is worse than none, because it looks like coverage.
+  // ---- TIMING_014 -------------------------------------------------------
+  // A non-MRS command issued before tMOD elapsed after an MRS command.
+  // Bound: tMOD = 15.0ns; at a 5.0ns controller clock that is
+  // ceil(15.0/5.0) = 3 cycle(s) of separation, so 2 cycle(s)
+  // between the two commands must be free of the second command on any bank.
+  // Counted from the observed command stream — no DUT counter is consulted.
+  property p_TIMING_014;
+    @(posedge clk) disable iff (!rst_n)
+    (init_cmd_valid && (init_cmd == 4'b0000)) |=> !((init_cmd_valid && (init_cmd == 4'b0001 || init_cmd == 4'b0010 || init_cmd == 4'b0011 || init_cmd == 4'b0100 || init_cmd == 4'b0101 || init_cmd == 4'b0110)))[*2];
+  endproperty
+  a_TIMING_014: assert property (p_TIMING_014)
+    else $error("[TIMING_014] tMOD violation: A non-MRS command issued before tMOD elapsed after an MRS command.");
+  c_TIMING_014: cover property (p_TIMING_014);
 
   // ---- INIT_002 (init_done after ZQCL) --------------------------------
   // init_done must not be asserted until tZQinit has elapsed after ZQCL (JESD79-3: ZQ calibration must complete before normal operation).

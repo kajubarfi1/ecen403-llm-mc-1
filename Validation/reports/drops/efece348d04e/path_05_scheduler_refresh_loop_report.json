@@ -2,8 +2,8 @@
   "$schema": "validation-path-run/1",
   "path": "path_05_scheduler_refresh_loop",
   "strategy": "invariant",
-  "verdict": "pass",
-  "timestamp": "2026-10-27T14:44:32.571034",
+  "verdict": "fail",
+  "timestamp": "2026-10-28T14:09:15.909181",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -35,7 +35,7 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "f5cf4a9",
+    "validated_at": "835760c",
     "frontend_commits": {
       "addr_decoder": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
       "bank_tracker": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
@@ -110,7 +110,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/scheduler_checker.py",
       "scope": "scheduler",
       "verdict": "pass",
-      "summary": "scope=scheduler  strategy=invariant  status=pass  (11069 transactions, no rule broken)",
+      "summary": "scope=scheduler  strategy=invariant  status=pass  (6718 transactions, no rule broken)",
       "detail": [],
       "rule_counts": {}
     },
@@ -128,8 +128,19 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_05_scheduler_refresh_loop_checker.py",
       "scope": "path_05_scheduler_refresh_loop",
       "verdict": "pass",
-      "summary": "scope=path_05_scheduler_refresh_loop  strategy=invariant  status=pass  (11069 transactions, no rule broken)",
+      "summary": "scope=path_05_scheduler_refresh_loop  strategy=invariant  status=pass  (6718 transactions, no rule broken)",
       "detail": []
+    },
+    {
+      "stage": "(conservation)",
+      "kind": "conservation",
+      "scope": "(conservation)",
+      "model": null,
+      "verdict": "fail",
+      "summary": "scope=(conservation)  strategy=conservation  status=fail  rules=6 checked, 1 broken, 0 not applicable",
+      "detail": [
+        "CONSERVE HOST_BEAT_TO_REQUEST owner=wb_port lost=250 of=600 from=wb to=req observed=350 | Every host beat the port accepts (wb_cyc_i && wb_stb_i && !wb_stall_o) becomes exactly one request presented to and taken by the command queue (req_valid && req_ready). A port that accepts a beat it cannot deliver has lost a host access: a write is acknowledged and lost, a read is never answered. The port must either stall the beat or hold the request until the queue takes it."
+      ]
     }
   ],
   "log": "Validation/reports/paths/path_05_scheduler_refresh_loop_sim.log",

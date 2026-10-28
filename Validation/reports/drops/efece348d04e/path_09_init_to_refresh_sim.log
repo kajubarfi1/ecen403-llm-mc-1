@@ -1,4 +1,4 @@
-TOOL:	xrun	24.03-s013: Started on Oct 27, 2026 at 14:44:30 CDT
+TOOL:	xrun	24.03-s013: Started on Oct 28, 2026 at 14:09:14 CDT
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xrun: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
@@ -348,6 +348,10 @@ file: init_fsm_fcov.sv
 	module worklib.init_fsm_fcov:sv
 		errors: 0, warnings: 0
 file: init_fsm_fcov_bind.sv
+file: init_fsm_coverage.sv
+	module worklib.init_fsm_coverage:sv
+		errors: 0, warnings: 0
+file: init_fsm_coverage_bind.sv
 file: init_fsm_sva.sv
 	module worklib.init_fsm_sva:sv
 		errors: 0, warnings: 0
@@ -506,11 +510,12 @@ xmelab: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment
 xmelab: *N,CGNSWA: (File: ./cov_conf.ccf, Line: 6): A covergroup is not (de)selected with the "-all" option of the (de)select_coverage command. Use the coverage metric "-covergroup" with the (de)select_coverage command to (de)select a covergroup.
 		Caching library 'worklib' ....... Done
 	Top level design units:
-		$unit_0x0ca3adc2
+		$unit_0x01f97720
 		chain_harness
 
 	Extracting FSMs for coverage:
 		worklib.config_regs
+		worklib.init_fsm_coverage
 		worklib.init_fsm_sva
 		worklib.init_fsm
 			FSM extracted for state register state
@@ -571,64 +576,69 @@ xmvlog_cg: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,1
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
-		worklib.refresh_ctrl_fcov:sv <0x28260c70>
+		worklib.refresh_ctrl_fcov:sv <0x67175d83>
 			streams:   4, words:  1993
-		worklib.refresh_req_monitor:sv <0x2550deda>
+		worklib.refresh_req_monitor:sv <0x51d0e03f>
 			streams:   3, words:  2241
-		worklib.refresh_level_monitor:sv <0x3346e440>
+		worklib.refresh_level_monitor:sv <0x7f70c0bd>
 			streams:   3, words:  2531
-		worklib.refresh_ack_monitor:sv <0x65828366>
+		worklib.refresh_ack_monitor:sv <0x04310090>
 			streams:   2, words:  1543
-		worklib.init_fsm_sva:sv <0x171b3e0a>
-			streams:  43, words: 28893
-		worklib.init_fsm_fcov:sv <0x1c54785c>
+		worklib.init_fsm_sva:sv <0x59159af4>
+			streams:  52, words: 35183
+		worklib.init_fsm_coverage:sv <0x662220bb>
+			streams:  11, words: 11738
+		worklib.init_fsm_fcov:sv <0x5a010215>
 			streams:   4, words:  2295
-		worklib.init_status_monitor:sv <0x183e2399>
+		worklib.init_status_monitor:sv <0x1d29a6a4>
 			streams:   3, words:  2016
-		worklib.init_cmd_monitor:sv <0x425fd438>
+		worklib.init_cmd_monitor:sv <0x6f3434c6>
 			streams:   2, words:  1993
-		worklib.config_regs_fcov:sv <0x17256f49>
+		worklib.config_regs_fcov:sv <0x33042ac1>
 			streams:  10, words: 13585
-		worklib.csr_sts_level_monitor:sv <0x3af2104a>
+		worklib.csr_sts_level_monitor:sv <0x32bf8e0c>
 			streams:   3, words:  5328
-		worklib.csr_sts_monitor:sv <0x50f68ecb>
+		worklib.csr_sts_monitor:sv <0x398bfd6e>
 			streams:   2, words:  2016
-		worklib.csr_rsp_monitor:sv <0x3d91ea3b>
+		worklib.csr_rsp_monitor:sv <0x4911d4de>
 			streams:   2, words:  3103
-		worklib.csr_monitor:sv <0x368e350c>
+		worklib.csr_monitor:sv <0x682de7c7>
 			streams:   2, words:  2653
-		worklib.cfg_timing_monitor:sv <0x5ccd1be7>
+		worklib.cfg_timing_monitor:sv <0x445f8605>
 			streams:   3, words:  5065
-		worklib.cfg_refresh_monitor:sv <0x4e750e81>
+		worklib.cfg_refresh_monitor:sv <0x2f1581bb>
 			streams:   3, words:  3291
-		worklib.chain_harness:sv <0x096b041f>
+		worklib.chain_harness:sv <0x62c53158>
 			streams:  92, words: 26033
-		worklib.config_regs:sv <0x62614f58>
+		worklib.config_regs:sv <0x73d4e486>
 			streams:  64, words: 58855
-		worklib.init_fsm:sv <0x5eea0818>
-			streams:  21, words: 25643
-		worklib.refresh_ctrl:sv <0x3fb2d1c0>
+		worklib.init_fsm:sv <0x5194e78f>
+			streams:  23, words: 25837
+		worklib.refresh_ctrl:sv <0x3510d65f>
 			streams:  23, words: 12929
-		worklib.\$unit_0x0ca3adc2 :compilation_unit <0x3d17029d>
+		worklib.\$unit_0x01f97720 :compilation_unit <0x27118ba4>
 			streams:   0, words:     0
+  int unsigned since_mrs [8];
+                       |
+xmelab: *W,COVUTA (./init_fsm_coverage.sv,24|23): Toggle coverage is not supported for SystemVerilog integer, real array, string, dynamic array, sparse memory and reference ports. It is also not supported for VHDL multi-dimensional array and array of record. There may also be other such objects in the design.
 	Building instance specific data structures.
 xmelab: *W,CGPIDF: Covergroup "per_instance" option , by default, is set as 0.
 	Loading native compiled code:     .................... Done
 	Design hierarchy summary:
 		                 Instances  Unique
-		Modules:                19      19
-		Registers:             223     223
+		Modules:                20      20
+		Registers:             244     244
 		Scalar wires:          112       -
-		Vectored wires:        117       -
-		Named events:            5       5
-		Always blocks:         103     103
-		Initial blocks:         24      24
+		Vectored wires:        119       -
+		Named events:            6       6
+		Always blocks:         114     114
+		Initial blocks:         28      28
 		Cont. assignments:      40      63
-		Pseudo assignments:    117       -
-		Assertions:             10      10
-		Covergroup Instances:    0       4
+		Pseudo assignments:    119       -
+		Assertions:             12      12
+		Covergroup Instances:    0       5
 		Compilation units:       1       1
-		Process Clocks:         39      12
+		Process Clocks:         42      12
 		Simulation timescale:  1ps
 	Writing initial simulation snapshot: worklib.chain_harness:sv
 DEFINE std       ./STD
@@ -698,6 +708,8 @@ TXN init_cmd command t=700199000 addr=0 bank=3 cmd=0
 TXN init_cmd command t=700204000 addr=4 bank=1 cmd=0
 TXN init_cmd command t=700209000 addr=1d34 bank=0 cmd=0
 TXN init_cmd command t=700214000 addr=400 bank=0 cmd=6
+xmsim: *E,ASRTST (./init_fsm_sva.sv,52): (time 700217500 PS) Assertion chain_harness.u_init_fsm.u_init_fsm_sva.a_TIMING_014 has failed
+[TIMING_014] tMOD violation: A non-MRS command issued before tMOD elapsed after an MRS command.
 TXN init_status done t=700859000 fail=0 state=e
 TXN csr_sts_level state t=700863000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=0 self_refresh=0
 TXN refresh_req request t=700869000 pending=1 starve=0 urgent=0
@@ -778,7 +790,8 @@ xcelium> exit
 xmsim: *W,CGDEFN: Default name "config_regs_fcov#(32'h00000001).cg_csr_access_inst" will be generated for covergroup instance "chain_harness.u_config_regs.u_config_regs_fcov.cg_csr_access_inst@1_1" as the name of the covergroup instance is not specified explicitly: ./config_regs_fcov.sv, 120.
 xmsim: *W,CGDEFN: Default name "config_regs_fcov#(32'h00000001).cg_config_regs_inst" will be generated for covergroup instance "chain_harness.u_config_regs.u_config_regs_fcov.cg_config_regs_inst@2_1" as the name of the covergroup instance is not specified explicitly: ./config_regs_fcov.sv, 132.
 xmsim: *W,CGDEFN: Default name "init_fsm_fcov#(32'h00000001).cg_init_sequence_inst" will be generated for covergroup instance "chain_harness.u_init_fsm.u_init_fsm_fcov.cg_init_sequence_inst@3_1" as the name of the covergroup instance is not specified explicitly: ./init_fsm_fcov.sv, 34.
-xmsim: *W,CGDEFN: Default name "refresh_ctrl_fcov#(32'h00000001).cg_refresh_inst" will be generated for covergroup instance "chain_harness.u_refresh_ctrl.u_refresh_ctrl_fcov.cg_refresh_inst@4_1" as the name of the covergroup instance is not specified explicitly: ./refresh_ctrl_fcov.sv, 29.
+xmsim: *W,CGDEFN: Default name "init_fsm_coverage.cg_timing_inst" will be generated for covergroup instance "chain_harness.u_init_fsm.u_init_fsm_cov.cg_timing_inst@4_1" as the name of the covergroup instance is not specified explicitly: ./init_fsm_coverage.sv, 60.
+xmsim: *W,CGDEFN: Default name "refresh_ctrl_fcov#(32'h00000001).cg_refresh_inst" will be generated for covergroup instance "chain_harness.u_refresh_ctrl.u_refresh_ctrl_fcov.cg_refresh_inst@5_1" as the name of the covergroup instance is not specified explicitly: ./refresh_ctrl_fcov.sv, 29.
 
 coverage setup:
   workdir  :  ./cov_work
@@ -788,6 +801,6 @@ coverage setup:
   Coverage database dumped with the set_code_fine_grained_merging command during elaboration.
 
 coverage files:
-  model(design data) :  ./cov_work/scope/icc_2f2c6585_32eff682.ucm (reused)
-  data               :  ./cov_work/scope/path_09_init_to_refresh/icc_2f2c6585_32eff682.ucd
-TOOL:	xrun	24.03-s013: Exiting on Oct 27, 2026 at 14:44:32 CDT  (total: 00:00:02)
+  model(design data) :  ./cov_work/scope/icc_52947c74_1745f9d3.ucm (reused)
+  data               :  ./cov_work/scope/path_09_init_to_refresh/icc_52947c74_1745f9d3.ucd
+TOOL:	xrun	24.03-s013: Exiting on Oct 28, 2026 at 14:09:16 CDT  (total: 00:00:02)

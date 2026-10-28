@@ -1,0 +1,150 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_01_write_cmd",
+  "strategy": "composed",
+  "verdict": "pass",
+  "timestamp": "2026-10-27T15:11:40.444067",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+  "stimulus_generator": "random",
+  "autonomous": false,
+  "window_cycles": 400,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "36d3929e5f09",
+    "drop_id": "36d3929e5f09",
+    "design_id": "67baf4d80639",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "835760c",
+    "frontend_commits": {
+      "addr_decoder": "835760c7f9fda7652558b62685c51271acf9a882",
+      "bank_tracker": "835760c7f9fda7652558b62685c51271acf9a882",
+      "cmd_gen": "835760c7f9fda7652558b62685c51271acf9a882",
+      "cmd_queue": "835760c7f9fda7652558b62685c51271acf9a882",
+      "config_regs": "835760c7f9fda7652558b62685c51271acf9a882",
+      "data_path": "835760c7f9fda7652558b62685c51271acf9a882",
+      "refresh_ctrl": "835760c7f9fda7652558b62685c51271acf9a882",
+      "scheduler": "835760c7f9fda7652558b62685c51271acf9a882",
+      "wb_port": "835760c7f9fda7652558b62685c51271acf9a882"
+    },
+    "roots": [
+      "runs/tmod_loop/drop"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "runs/tmod_loop/drop/PHASE2RTL/addr_decoder.sv",
+        "manifest": "runs/tmod_loop/drop/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "bank_tracker": {
+        "rtl": "runs/tmod_loop/drop/PHASE2RTL/bank_tracker.sv",
+        "manifest": "runs/tmod_loop/drop/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_gen": {
+        "rtl": "runs/tmod_loop/drop/PHASE3RTL/cmd_gen.sv",
+        "manifest": "runs/tmod_loop/drop/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_queue": {
+        "rtl": "runs/tmod_loop/drop/PHASE3RTL/cmd_queue.sv",
+        "manifest": "runs/tmod_loop/drop/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "config_regs": {
+        "rtl": "runs/tmod_loop/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/tmod_loop/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "data_path": {
+        "rtl": "runs/tmod_loop/drop/PHASE4RTL/data_path.sv",
+        "manifest": "runs/tmod_loop/drop/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "refresh_ctrl": {
+        "rtl": "runs/tmod_loop/drop/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "runs/tmod_loop/drop/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "scheduler": {
+        "rtl": "runs/tmod_loop/drop/PHASE3RTL/scheduler.sv",
+        "manifest": "runs/tmod_loop/drop/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "wb_port": {
+        "rtl": "runs/tmod_loop/drop/PHASE1RTL/wb_port.sv",
+        "manifest": "runs/tmod_loop/drop/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/tmod_loop/drop/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "pass",
+      "summary": "scope=wb_port  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "addr_decoder",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
+      "scope": "addr_decoder",
+      "verdict": "pass",
+      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "cmd_queue+scheduler",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
+      "scope": "cmd_queue_scheduler",
+      "verdict": "pass",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (353 transactions, no rule broken)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "cmd_gen",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
+      "scope": "cmd_gen",
+      "verdict": "pass",
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=51/51  (51 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    }
+  ],
+  "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+  "observed_trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl"
+}

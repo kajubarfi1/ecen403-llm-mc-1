@@ -127,6 +127,11 @@ def generate_sequence(pdef, entry, out, seed=1, drives=19, override=None,
                f"--drives {max(drives, 600)} --out {out}")
     elif gen == "burst":
         cmd = f"python3 Validation/sequences/burst.py --seed {seed} --out {out}"
+    elif gen == "wb_burst":
+        cmd = f"python3 Validation/sequences/wb_burst.py --seed {seed} --out {out}"
+    elif gen == "saturate":
+        cmd = (f"python3 Validation/sequences/saturate.py --seed {seed} "
+               f"--drives {max(drives, 240)} --out {out}")
     elif gen == "write_read":
         cmd = (f"python3 Validation/sequences/write_read.py --seed {seed} "
                f"--pairs {max(drives // 2, 12)} --out {out}")

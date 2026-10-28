@@ -19,9 +19,12 @@ module wb_rsp_monitor #(
 ) (
     input  logic clk,
     input  logic rst_n,
-    input  logic wb_ack_o,
+    input  logic rsp_valid,
     input  logic [28:0] wb_adr_i,
+    input  logic wb_cyc_i,
     input  logic [31:0] wb_dat_o,
+    input  logic wb_stall_o,
+    input  logic wb_stb_i,
     input  logic wb_we_i
 );
 
@@ -32,11 +35,28 @@ module wb_rsp_monitor #(
     $display("TXN wb_rsp reset t=%0t", $time);
   end
 
-  // Transaction detected when: wb_ack_o && !wb_we_i
+  logic [28:0] wb_rsp_pend_addr [$];   // captured at pending.push
+  logic [28:0] wb_rsp_pend_addr_v;
+
+  // pending.push: wb_cyc_i && wb_stb_i && !wb_stall_o && !wb_we_i
+  always @(posedge clk) begin
+    if (rst_n && (wb_cyc_i && wb_stb_i && !wb_stall_o && !wb_we_i)) begin
+      wb_rsp_pend_addr.push_back(wb_adr_i);
+    end
+  end
+  always @(negedge rst_n) begin
+    wb_rsp_pend_addr.delete();
+  end
+
+  // Transaction detected when: rsp_valid
   always @(posedge clk) begin
     #SAMPLE_DELAY;                 // sample after non-blocking assignments commit
-    if (rst_n && (wb_ack_o && !wb_we_i)) begin
-        $display("TXN wb_rsp read_data t=%0t addr=%0h data=%0h", $time, wb_adr_i, wb_dat_o);
+    if (rst_n && (rsp_valid)) begin
+      if (wb_rsp_pend_addr.size() == 0) begin
+        wb_rsp_pend_addr_v = 'x;
+        $display("MONITOR_WARN wb_rsp: response with no pending request (field addr) t=%0t", $time);
+      end else wb_rsp_pend_addr_v = wb_rsp_pend_addr.pop_front();
+        $display("TXN wb_rsp read_data t=%0t addr=%0h data=%0h", $time, wb_rsp_pend_addr_v, wb_dat_o);
     end
   end
 

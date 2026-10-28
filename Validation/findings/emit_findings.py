@@ -79,6 +79,11 @@ RULE_RE = re.compile(r"^\s*([a-z_]\w*): (.*?)(?: @ \[(.*)\])?$")
 MISMATCH_RE = re.compile(r"^\s*(\w+)\[(\d+)\] (value|missing|unexpected): (.*)$")
 PRED_OBS_RE = re.compile(r"predicted \[(.*?)\] but observed \[(.*?)\]")
 XVAL_RE = re.compile(r"^\s*x_value: (\w+)\.(\w+) seq=(\d+) carries X/Z on \[(.*?)\]")
+# conservation.py: "CONSERVE <rule> owner=<blk> lost=<n> of=<m> from=<sel> to=<sel> observed=<k> [per_source=p] | <requirement>"
+CONSERVE_RE = re.compile(r"^\s*CONSERVE (\w+) owner=(\w+) (lost|extra)=(\d+) of=(\d+) from=(\S+) to=(\S+) observed=(\d+)(?: per_source=(\d+))? \| (.*)$")
+# the generated driver: "DRIVER_STALL: <iface> — <n> of <m> pipelined beat(s) never acknowledged (<signal>)" or "... — <what>"
+STALL_RE = re.compile(r"^\s*DRIVER_STALL: (\w+) — (.*)$")
+STALL_BEATS_RE = re.compile(r"(\d+) of (\d+) pipelined beat\(s\) never acknowledged \((\w+)\)")
 ASSERT_RE = re.compile(r"Assertion \S*\.(\w+) has failed.*?(?:at time (\S+))?", re.S)
 ASSERT_LINE_RE = re.compile(r"^(.*Assertion \S*\.(\w+) has failed.*)$", re.M)
 
@@ -214,6 +219,39 @@ def evidence_from_report(rep, rules, schemas, spec_regs=None, reports_dir=None):
         out = rejudge(st)
         lines = out.splitlines() if out else st.get("detail", [])
         for ln in lines:
+            m = CONSERVE_RE.match(ln)
+            if m:
+                rule, owner, how, n, total, frm, to, obs, per, req = m.groups()
+                to_iface = to.split(".")[0].split("[")[0]
+                to_kinds = list(schemas.get(to_iface, {}).get("kinds", {}))
+                cat = _catalog_conservation().get(rule, {})
+                yield {"check_id": f"CONSERVE/{rule}", "owner": owner, "owner_candidates": [owner],
+                       "iface": to_iface, "kind": to_kinds[0] if len(to_kinds) == 1 else None,
+                       "detector": f"conservation:{rule}",
+                       "expected": req,
+                       "actual": (f"{n} of {total} {frm} transaction(s) never produced a {to} by the end of "
+                                  f"the run ({obs} observed{', ' + per + ' per source' if per else ''})"
+                                  if how == "lost" else
+                                  f"{n} more {to} transaction(s) than the {total} the {frm} stream calls for"),
+                       "path": path, "confidence": "confirmed", "count": int(n), "line": ln.strip(),
+                       "taxonomy_hint": cat.get("taxonomy", _exact_taxonomy(owner)),
+                       "spec_ref": cat.get("spec_ref")}
+                continue
+            m = STALL_RE.match(ln)
+            if m:
+                iface, what = m.groups()
+                owner = schemas.get(iface, {}).get("block", block)
+                mb = STALL_BEATS_RE.search(what)
+                sig = mb.group(3) if mb else None
+                yield {"check_id": f"HANDSHAKE/{iface}", "owner": owner, "owner_candidates": [owner],
+                       "iface": iface, "kind": None, "detector": f"handshake:{iface}",
+                       "expected": (f"every {iface} beat the slave accepts is acknowledged exactly once"
+                                    + (f" ({sig})" if sig else "") + ", in a pipelined run as in a single access"),
+                       "actual": what.strip(), "path": path, "confidence": "confirmed",
+                       "count": int(mb.group(1)) if mb else 1, "line": ln.strip(),
+                       "taxonomy_hint": "SCHED_001",
+                       "spec_ref": "host_interface.interface_type"}
+                continue
             m = XVAL_RE.match(ln)
             if m:
                 iface, kind, seq = m.group(1), m.group(2), int(m.group(3))
@@ -477,6 +515,21 @@ def _register_names(spec):
     return out
 
 
+_CONS_CACHE = None
+
+
+def _catalog_conservation():
+    """{rule_id: rule} from the catalog's conservation section."""
+    global _CONS_CACHE
+    if _CONS_CACHE is None:
+        try:
+            with open(os.path.join(ROOT, "Validation", "txn", "interface_catalog.json")) as f:
+                _CONS_CACHE = {r["id"]: r for r in json.load(f).get("conservation", {}).get("rules", [])}
+        except Exception:
+            _CONS_CACHE = {}
+    return _CONS_CACHE
+
+
 def _exact_taxonomy(block):
     return {"config_regs": "CSR_001", "data_path": "DATA_001", "wb_port": "DATA_001",
             "addr_decoder": "DATA_001", "cmd_gen": "PROTO_003"}.get(block, "DATA_001")
@@ -529,6 +582,10 @@ def history_for(check_id, detector, snaps, current_head):
         keys.add(f"id:{parts[2]}")          # checker rule name
     if check_id.startswith("MISMATCH/"):
         keys.add("id:value")
+    if check_id.startswith("CONSERVE/"):
+        keys.add("stage:(conservation)")
+    if check_id.startswith("HANDSHAKE/"):
+        keys.add("stage:(host handshake)")
     seen = [h for h, _, k in snaps if keys & k]
     first = seen[0] if seen else current_head
     introduced = None
@@ -572,7 +629,7 @@ def emit(reports_dir, out_dir=None, drop_status=None):
             key = (ev["owner"], ev["check_id"])
             f = findings.get(key)
             if f is None:
-                tid = (ev.get("taxonomy_hint") if ev["check_id"].startswith("MISMATCH/")
+                tid = (ev.get("taxonomy_hint") if ev["check_id"].startswith(("MISMATCH/", "CONSERVE/", "HANDSHAKE/"))
                        else ev["check_id"])
                 first_seen, introduced = history_for(ev["check_id"], ev["detector"], snaps, head)
                 f = {
@@ -586,7 +643,7 @@ def emit(reports_dir, out_dir=None, drop_status=None):
                     "severity": rules.severity.get(tid, "major"),
                     "confidence": ev["confidence"],
                     "title": f"{ev['owner']}: {ev['check_id']}",
-                    "requirement": ev.get("expected") if ev["detector"].startswith(("invariant", "assertion")) else
+                    "requirement": ev.get("expected") if ev["detector"].startswith(("invariant", "assertion", "conservation", "handshake")) else
                                    f"{ev['owner']} must produce the transactions the spec-derived model predicts",
                     "spec_ref": ev.get("spec_ref"),
                     "expected": ev["expected"], "actual": ev["actual"],

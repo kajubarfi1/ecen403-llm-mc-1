@@ -1,0 +1,61 @@
+{
+  "$schema": "validation-coverage-exclusions-report/1",
+  "instances": {
+    "u_cmd_queue": {
+      "uncovered_toggle_bits": 360,
+      "excluded_approved": 0,
+      "excluded_proposed": 100,
+      "measured_percent": 85.8,
+      "adjusted_percent": 85.8,
+      "adjusted_if_proposed_approved_percent": 93.6
+    },
+    "u_scheduler": {
+      "uncovered_toggle_bits": 186,
+      "excluded_approved": 0,
+      "excluded_proposed": 52,
+      "measured_percent": 90.3,
+      "adjusted_percent": 90.3,
+      "adjusted_if_proposed_approved_percent": 95.1
+    },
+    "u_wb_port": {
+      "uncovered_toggle_bits": 140,
+      "excluded_approved": 0,
+      "excluded_proposed": 1,
+      "measured_percent": 84.3,
+      "adjusted_percent": 84.3,
+      "adjusted_if_proposed_approved_percent": 84.4
+    }
+  },
+  "exclusions": [
+    {
+      "id": "X-001",
+      "code": "E-SPEC",
+      "status": "proposed",
+      "approved_by": null,
+      "matched_bits": {
+        "approved": 0,
+        "proposed": 99
+      }
+    },
+    {
+      "id": "X-002",
+      "code": "E-SPEC",
+      "status": "proposed",
+      "approved_by": null,
+      "matched_bits": {
+        "approved": 0,
+        "proposed": 51
+      }
+    },
+    {
+      "id": "X-003",
+      "code": "E-RESET",
+      "status": "proposed",
+      "approved_by": null,
+      "matched_bits": {
+        "approved": 0,
+        "proposed": 3
+      }
+    }
+  ]
+}

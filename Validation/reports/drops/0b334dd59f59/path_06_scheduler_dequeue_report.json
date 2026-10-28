@@ -1,0 +1,115 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_06_scheduler_dequeue",
+  "strategy": "exact",
+  "verdict": "pass",
+  "timestamp": "2026-10-27T14:55:01.619198",
+  "blocks": [
+    "scheduler",
+    "cmd_queue"
+  ],
+  "derived_from": {
+    "host": "path_01_write_cmd",
+    "stage": "cmd_queue+scheduler"
+  },
+  "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+  "stimulus_generator": "random",
+  "stages": [
+    {
+      "stage": "cmd_queue+scheduler",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
+      "scope": "cmd_queue_scheduler",
+      "verdict": "pass",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (391 transactions, no rule broken)",
+      "detail": [],
+      "rule_counts": {}
+    }
+  ],
+  "log": "Validation/reports/paths/path_01_write_cmd_sim.log",
+  "observed_trace": "Validation/reports/paths/path_01_write_cmd_observed.jsonl",
+  "rtl_drop": {
+    "git_head": "0b334dd59f59",
+    "drop_id": "0b334dd59f59",
+    "design_id": "7165e4d3da3d",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "835760c",
+    "frontend_commits": {
+      "addr_decoder": "835760c7f9fda7652558b62685c51271acf9a882",
+      "bank_tracker": "835760c7f9fda7652558b62685c51271acf9a882",
+      "cmd_gen": "835760c7f9fda7652558b62685c51271acf9a882",
+      "cmd_queue": "835760c7f9fda7652558b62685c51271acf9a882",
+      "config_regs": "835760c7f9fda7652558b62685c51271acf9a882",
+      "data_path": "835760c7f9fda7652558b62685c51271acf9a882",
+      "refresh_ctrl": "835760c7f9fda7652558b62685c51271acf9a882",
+      "scheduler": "835760c7f9fda7652558b62685c51271acf9a882",
+      "wb_port": "835760c7f9fda7652558b62685c51271acf9a882"
+    },
+    "roots": [
+      "runs/preset_lowcost/drop"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "runs/preset_lowcost/drop/PHASE2RTL/addr_decoder.sv",
+        "manifest": "runs/preset_lowcost/drop/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc"
+      },
+      "bank_tracker": {
+        "rtl": "runs/preset_lowcost/drop/PHASE2RTL/bank_tracker.sv",
+        "manifest": "runs/preset_lowcost/drop/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc"
+      },
+      "cmd_gen": {
+        "rtl": "runs/preset_lowcost/drop/PHASE3RTL/cmd_gen.sv",
+        "manifest": "runs/preset_lowcost/drop/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc"
+      },
+      "cmd_queue": {
+        "rtl": "runs/preset_lowcost/drop/PHASE3RTL/cmd_queue.sv",
+        "manifest": "runs/preset_lowcost/drop/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc"
+      },
+      "config_regs": {
+        "rtl": "runs/preset_lowcost/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/preset_lowcost/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc"
+      },
+      "data_path": {
+        "rtl": "runs/preset_lowcost/drop/PHASE4RTL/data_path.sv",
+        "manifest": "runs/preset_lowcost/drop/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc"
+      },
+      "refresh_ctrl": {
+        "rtl": "runs/preset_lowcost/drop/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "runs/preset_lowcost/drop/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc"
+      },
+      "scheduler": {
+        "rtl": "runs/preset_lowcost/drop/PHASE3RTL/scheduler.sv",
+        "manifest": "runs/preset_lowcost/drop/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc"
+      },
+      "wb_port": {
+        "rtl": "runs/preset_lowcost/drop/PHASE1RTL/wb_port.sv",
+        "manifest": "runs/preset_lowcost/drop/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/preset_lowcost/drop/generated_spec.json",
+      "revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc"
+    },
+    "netlists": {}
+  },
+  "coverage_collected": true
+}

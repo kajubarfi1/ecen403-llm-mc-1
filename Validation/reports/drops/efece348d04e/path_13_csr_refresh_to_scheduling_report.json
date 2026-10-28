@@ -3,7 +3,7 @@
   "path": "path_13_csr_refresh_to_scheduling",
   "strategy": "composed",
   "verdict": "pass",
-  "timestamp": "2026-10-27T14:44:39.668471",
+  "timestamp": "2026-10-28T14:09:20.305732",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -35,7 +35,7 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "f5cf4a9",
+    "validated_at": "835760c",
     "frontend_commits": {
       "addr_decoder": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
       "bank_tracker": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
@@ -131,6 +131,15 @@
       "summary": "scope=scheduler  strategy=invariant  status=pass  (283 transactions, no rule broken)",
       "detail": [],
       "rule_counts": {}
+    },
+    {
+      "stage": "(conservation)",
+      "kind": "conservation",
+      "scope": "(conservation)",
+      "model": null,
+      "verdict": "pass",
+      "summary": "scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable",
+      "detail": []
     }
   ],
   "log": "Validation/reports/paths/path_13_csr_refresh_to_scheduling_sim.log",

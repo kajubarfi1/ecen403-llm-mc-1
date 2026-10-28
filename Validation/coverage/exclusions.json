@@ -1,0 +1,39 @@
+{
+  "$schema": "validation-coverage-exclusions/1",
+  "$comment": "Code-coverage exclusions under SIGNOFF.md section 4: each names the instance, the signal bits, one of the four allowed codes and the reason, and is counted only once a named person approved it. apply_exclusions.py matches these against the uncovered-items reports (measure_coverage.py --uncovered) and writes the adjusted numbers; nothing here changes what the simulator measures.",
+  "exclusions": [
+    {
+      "id": "X-001",
+      "code": "E-SPEC",
+      "instance": "u_cmd_queue",
+      "signals": ["entry_col", "mem_col", "enq_col"],
+      "bits": [0, 1, 2],
+      "reason": "The three low column bits are the burst offset within a BL8 burst (spec memory_geometry.burst_length = 8); the address decoder issues every column aligned to the burst, so these bits are constant 0 at the controller. The queue stores them because the port width is the full column.",
+      "status": "proposed",
+      "approved_by": null,
+      "approved_utc": null
+    },
+    {
+      "id": "X-002",
+      "code": "E-SPEC",
+      "instance": "u_scheduler",
+      "signals": ["q_col", "cmd_col"],
+      "bits": [0, 1, 2],
+      "reason": "Same bits as X-001 seen from the scheduler: the queue entries' column and the issued command's column carry a burst-aligned column, low three bits constant under burst_length = 8.",
+      "status": "proposed",
+      "approved_by": null,
+      "approved_utc": null
+    },
+    {
+      "id": "X-003",
+      "code": "E-RESET",
+      "instance": "*",
+      "signals": ["rst_n"],
+      "bits": "all",
+      "reason": "The reset input rises once per simulation and never falls again; the init paths' assertions cover reset behaviour. A fall toggle would need a second reset, which no path applies.",
+      "status": "proposed",
+      "approved_by": null,
+      "approved_utc": null
+    }
+  ]
+}

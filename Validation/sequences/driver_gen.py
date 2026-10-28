@@ -92,6 +92,21 @@ def generate(seq, schemas, catalog):
     waits = []
     for iface in ifaces:
         drv = catalog[iface].get("drive")
+        if drv and drv.get("pipelined") and drv.get("complete"):
+            # a run of consecutive drives: beats are issued on acceptance, acks
+            # trail; the run ends when every issued beat has been acknowledged
+            c = drv["complete"]
+            waits.append(f"""  int issued_{iface} = 0;
+  int acked_{iface}  = 0;
+  always @(negedge clk) if (rst_n && {c}) acked_{iface}++;
+  task automatic wait_all_{iface}();
+    int w_;
+    w_ = 0;
+    while (acked_{iface} < issued_{iface} && w_ < 2048) begin @(negedge clk); w_++; end
+    if (acked_{iface} < issued_{iface})
+      $display("DRIVER_STALL: {iface} — %0d of %0d pipelined beat(s) never acknowledged ({c})", issued_{iface} - acked_{iface}, issued_{iface});
+  endtask
+""")
         if drv and drv.get("accept"):
             # pipelined handshake: hold the request while the slave stalls;
             # the posedge after `accept` takes it, then release what the
@@ -153,6 +168,34 @@ def generate(seq, schemas, catalog):
             assigns.append(f"{ksig[0]} = 1'b{ksig[1]}")
 
         drv = cat.get("drive")
+        if drv and drv.get("pipelined") and drv.get("accept") and drv.get("complete"):
+            # Pipelined run (catalog `pipelined`, 2026-10-28): consecutive
+            # drives of this interface are one run. The first beat starts on
+            # the next negedge like any handshake drive; each later beat is
+            # presented at the negedge right after the previous acceptance, so
+            # a Wishbone burst is back to back and reads pile up without
+            # waiting for their acks; signals in hold_across_run (cyc) stay
+            # high for the run; the run ends by waiting for every ack.
+            prev = steps[i - 1] if i else None
+            in_run = bool(prev and prev.get("op") == "drive" and prev.get("iface") == iface)
+            continues = bool(nxt and nxt.get("op") == "drive" and nxt.get("iface") == iface)
+            req = list(drv.get("assert", [])) + list(drv.get("assert_by_kind", {}).get(kind, []))
+            for sig, val in drv.get("hold", {}).items():
+                assigns.append(f"{sig} = {val}")
+            for sig in req:
+                if not (ksig and sig == ksig[0]):
+                    assigns.append(f"{sig} = 1'b1")
+            line = (f"      // {iface}.{kind} (pipelined beat; run {'continues' if continues else 'ends'})\n"
+                    + ("      @(negedge clk); " if not in_run else "      ")
+                    + f"{'; '.join(assigns)};\n"
+                    f"      accept_{iface}(); issued_{iface}++;")
+            if not continues:
+                held = set(drv.get("hold_across_run", []))
+                drop = sorted((set(req) | set(drv.get("hold", {})) | ({ksig[0]} if ksig else set())) - set(drv.get("release_on_accept", [])))
+                line += (f"\n      wait_all_{iface}();\n"
+                         "      " + "; ".join(f"{sg} = '0" for sg in drop) + ";")
+            body.append(line)
+            continue
         if drv:
             req = list(drv.get("assert", [])) + \
                 list(drv.get("assert_by_kind", {}).get(kind, []))

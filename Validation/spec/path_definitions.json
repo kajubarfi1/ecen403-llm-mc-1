@@ -677,8 +677,10 @@
       "stimulus_kinds": [
         "read"
       ],
-      "settle_cycles": 400,
-      "$settle_note": "2026-09-24: 400 (was the 64-cycle default) so accepted requests and their read responses can drain before the trace ends. SCHED_001 counts outstanding requests as dropped and the data_path model reports undelivered responses as missing; both are only fair when the window exceeds the worst-case service time (measured on drop 5661e03: 7 phantom drops at 64 cycles, 0 at 400)."
+      "settle_cycles": 600,
+      "$settle_note": "2026-09-24: 400 (was the 64-cycle default) so accepted requests and their read responses can drain before the trace ends. SCHED_001 counts outstanding requests as dropped and the data_path model reports undelivered responses as missing; both are only fair when the window exceeds the worst-case service time (measured on drop 5661e03: 7 phantom drops at 64 cycles, 0 at 400).",
+      "stimulus_generator": "wb_burst",
+      "$stimulus_note": "2026-10-28: Wishbone linear bursts (reads and writes) and a pile of pipelined reads deeper than the read buffer (wb_burst.py): the burst tracker, cti/bte and the tag FIFO at full depth never ran under classic single cycles. On this full-closure path the reads return, so the pile drains; on the standalone port path they never would (responses tied off), which is why it is not there."
     },
     {
       "id": "path_03_read_return",
@@ -832,8 +834,9 @@
       "stimulus_kinds": [
         "write"
       ],
-      "stimulus_generator": "burst",
-      "settle_cycles": 3000
+      "stimulus_generator": "saturate",
+      "settle_cycles": 6000,
+      "$stimulus_note": "2026-10-28: a long pipelined mixed stream (saturate.py, 240 drives, no idle) instead of 32 writes: keeps every queue slot occupied and rewritten with unlike values while the scheduler drains at its limit; back-pressure is still exercised. Settle 6000 for the drain (~45 cycles per request)."
     },
     {
       "id": "path_08_init_to_cal",

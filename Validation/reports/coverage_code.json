@@ -1,6 +1,6 @@
 {
   "$schema": "validation-code-coverage/1",
-  "generated_utc": "2026-10-27T19:45:45.227498Z",
+  "generated_utc": "2026-10-28T19:10:43.506140Z",
   "runs": [
     "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_work/scope/path_01_write_cmd",
     "/home/ugrads/j/jacobz/cadence_agent_work/runs/path_02_read_cmd/cov_work/scope/path_02_read_cmd",
@@ -27,12 +27,12 @@
     "~/cadence_agent_work/cov_work/scope/*",
     "~/cadence_agent_work/runs/*/cov_work/scope/*"
   ],
-  "since": "2026-10-27T14:43:12",
+  "since": "2026-10-28T14:08:05",
   "merge": "imc merge -initial_model union_all",
   "design_total": {
-    "covered": 4384,
+    "covered": 4846,
     "total": 5675,
-    "percent": 77.25
+    "percent": 85.39
   },
   "per_module": {
     "addr_decoder": {
@@ -56,9 +56,9 @@
       "percent": 92.17
     },
     "cmd_queue": {
-      "covered": 787,
+      "covered": 1023,
       "total": 1193,
-      "percent": 65.97
+      "percent": 85.75
     },
     "config_regs": {
       "covered": 774,
@@ -66,9 +66,9 @@
       "percent": 85.05
     },
     "data_path": {
-      "covered": 354,
+      "covered": 359,
       "total": 459,
-      "percent": 77.12
+      "percent": 78.21
     },
     "init_fsm": {
       "covered": 151,
@@ -76,19 +76,19 @@
       "percent": 89.35
     },
     "refresh_ctrl": {
-      "covered": 157,
+      "covered": 156,
       "total": 168,
-      "percent": 93.45
+      "percent": 92.86
     },
     "scheduler": {
-      "covered": 823,
+      "covered": 932,
       "total": 1032,
-      "percent": 79.75
+      "percent": 90.31
     },
     "wb_port": {
-      "covered": 278,
+      "covered": 391,
       "total": 464,
-      "percent": 59.91
+      "percent": 84.27
     }
   },
   "testbench_excluded": [
@@ -119,6 +119,7 @@
     "dp_wr_monitor",
     "dram_stub",
     "init_cmd_monitor",
+    "init_fsm_coverage",
     "init_fsm_fcov",
     "init_fsm_sva",
     "init_status_monitor",
@@ -134,6 +135,7 @@
     "scheduler_order_sva",
     "seq_driver",
     "wb_monitor",
+    "wb_port_order_sva",
     "wb_rsp_monitor"
   ],
   "imc_report_dir": "/var/folders/cf/9xfxgjjd46g31957zb0jn43w0000gn/T/cov_paths_x/cov_report_paths"

@@ -1,0 +1,263 @@
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<> User: jacobz
+
+Host: n01-zeus.olympus.ece.tamu.edu
+
+Report date: Wed 28 Oct 2026 12:45:33 CDT
+
+Report options: -detail -metrics toggle:fsm -out /home/ugrads/j/jacobz/cov_uncov_u_wb_port.txt -inst chain_harness.u_wb_port -uncovered -source on -overwrite
+
+Coverage database path: /home/ugrads/j/jacobz/cov_merged_paths
+
+Coverage model files: /home/ugrads/j/jacobz/cov_merged_paths/icc_07dafd6d_719b1f4e.ucm
+
+Coverage data files: /home/ugrads/j/jacobz/cov_merged_paths/icc_07dafd6d_719b1f4e.ucd
+
+CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_conf.ccf
+    // Xcelium coverage configuration for the DDR3 validation subsystem.
+    //
+    // Fed to xrun via:  -coverage A -covoverwrite -covfile <this file>
+    
+    // --- What to collect -------------------------------------------------------
+    select_coverage -all
+    select_functional                       // covergroups: the vplan's 42 items
+    
+    // --- What NOT to count -----------------------------------------------------
+    // Testbench code is not the design. With everything selected, the harness,
+    // the generated driver, the passive monitors and the DRAM stub all land in
+    // the headline number and dilute it (22.4% reported vs ~25% design-only on
+    // the first merged sweep). Code coverage of a monitor says nothing about the
+    // controller. Covergroup modules (*_coverage) are deliberately NOT excluded:
+    // they carry the vplan's functional coverage.
+    deselect_coverage -all -module chain_harness
+    deselect_coverage -all -module *_txn_harness
+    deselect_coverage -all -module seq_driver
+    deselect_coverage -all -module dram_stub
+    deselect_coverage -all -module *_monitor
+    deselect_coverage -all -module *_tb
+    // Covergroup carriers: drop their CODE coverage only. '-all' would also
+    // drop functional coverage and silence the very covergroups they exist
+    // to hold (which is exactly what happened on the first try: 0% on every
+    // new coverpoint while the design merged fine).
+    deselect_coverage -block -expr -toggle -fsm -module *_fcov
+    
+    // --- Covergroups -----------------------------------------------------------
+    set_covergroup -new_instance_reporting  // per-instance scoping and naming
+    set_optimize -prune_covergroup
+    
+    // --- Block / statement / branch --------------------------------------------
+    // The course disables implicit and explicit block scoring and relies on
+    // statement + branch instead; keeping that identical for comparability.
+    set_implicit_block_scoring -off
+    set_explicit_block_scoring -off
+    set_statement_scoring
+    set_branch_scoring
+    set_code_fine_grained_merging
+    
+    // --- Expression ------------------------------------------------------------
+    set_expr_scoring -max_expr_terms 2048
+    set_expr_coverable_operators -bitwise -relational -reduction -logical_not
+    set_expr_coverable_statements -all
+    set_optimize -top_expr_non_scorable
+    
+    // --- Toggle ----------------------------------------------------------------
+    set_toggle_includez
+    set_toggle_scoring -sv_enum
+    set_toggle_scoring -sv_mda 16 -regeot
+    
+    // --- FSM -------------------------------------------------------------------
+    // Matters for this design: init_fsm and calibration are the autonomous blocks
+    // behind the five deferred paths, and the spec's INIT_001/INIT_002 failure
+    // categories are ordering properties over their states.
+    set_fsm_scoring -hold_transition on
+    
+    // --- Misc ------------------------------------------------------------------
+    set_parameterized_module_coverage
+    set_libcell_scoring -enable_vy
+    set_subprogram_scoring -all -svpackage
+    set_refinement_resilience
+    
+
+
+Coverage database date: Tue 27 Oct 2026 15:11:40 CDT
+
+*** There were no refinement files applied ***
+
+ <>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Coverage Table Legend
+---------------------
+  EXCL       excluded using refinement rule
+  P-EXCL     excluded from parent
+  U-EXCL     excluded and unreachable by IEV
+  T-EXCL     excluded from type
+  S-EXCL     smart excluded using refinement rule
+  EXCL(S)    smart indirect excluded
+  EMPTY      all children are excluded
+  CONST      marked constant during simulation
+  IGN        marked ignored during simulation
+  UNG        marked ungradeable during simulation
+  DES        marked deselected during simulation
+  UNR        marked unreachable by IEV
+  UNG-Expr   expression marked ungradeable during simulation
+  UNG-Toggle toggle marked ungradeable during simulation
+
+
+Uncovered Toggle Detail Report, Instance Based
+==============================================
+
+Instance name: chain_harness.u_wb_port
+Type name: wb_port#(32'h00000020,32'h0000001d,32'h00000004,32'h00000004,32'h00000008,32'h00000010,32'h00000004,32'h00000010,32'h00000004,3'h0,3'h1,3'h2,3'h7,2'h0,4)
+File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/wb_port.sv
+Number of uncovered signal bits: 140 of 342
+Number of unreachable signal bits: 0
+Number of signal bits partially toggled(rise): 6 of 342
+Number of signal bits partially toggled(fall): 2 of 342
+
+Hit(Full)  Hit(Rise)  Hit(Fall)  Signal                    
+-----------------------------------------------------------
+0          1          0          rst_n                     
+0          0          0          wb_bte_i[1]               
+0          0          0          wb_bte_i[0]               
+0          0          0          wb_cti_i[2]               
+0          0          0          wb_cti_i[1]               
+0          0          0          wb_cti_i[0]               
+0          0          0          wb_dat_o[26]              
+0          0          0          wb_dat_o[25]              
+0          0          0          wb_dat_o[24]              
+0          0          0          wb_dat_o[23]              
+0          0          0          wb_dat_o[22]              
+0          0          0          wb_dat_o[14]              
+0          0          0          wb_dat_o[13]              
+0          0          0          wb_dat_o[12]              
+0          0          0          wb_dat_o[11]              
+0          0          0          wb_dat_o[10]              
+0          1          0          wb_dat_o[3]               
+0          0          0          wb_dat_o[2]               
+0          0          0          wb_dat_o[1]               
+0          0          0          wb_dat_o[0]               
+0          0          0          rsp_rdata[26]             
+0          0          0          rsp_rdata[25]             
+0          0          0          rsp_rdata[24]             
+0          0          0          rsp_rdata[23]             
+0          0          0          rsp_rdata[22]             
+0          0          0          rsp_rdata[14]             
+0          0          0          rsp_rdata[13]             
+0          0          0          rsp_rdata[12]             
+0          0          0          rsp_rdata[11]             
+0          0          0          rsp_rdata[10]             
+0          1          0          rsp_rdata[3]              
+0          0          0          rsp_rdata[2]              
+0          0          0          rsp_rdata[1]              
+0          0          0          rsp_rdata[0]              
+0          0          1          rsp_aux[3]                
+0          0          1          rsp_aux[2]                
+0          0          0          tag_mem[15][0]            
+0          0          0          tag_mem[15][1]            
+0          0          0          tag_mem[15][2]            
+0          0          0          tag_mem[15][3]            
+0          0          0          tag_mem[14][0]            
+0          0          0          tag_mem[14][1]            
+0          0          0          tag_mem[14][2]            
+0          0          0          tag_mem[14][3]            
+0          0          0          tag_mem[13][0]            
+0          0          0          tag_mem[13][1]            
+0          0          0          tag_mem[13][2]            
+0          0          0          tag_mem[13][3]            
+0          0          0          tag_mem[12][0]            
+0          0          0          tag_mem[12][1]            
+0          0          0          tag_mem[12][2]            
+0          0          0          tag_mem[12][3]            
+0          0          0          tag_mem[11][0]            
+0          0          0          tag_mem[11][1]            
+0          0          0          tag_mem[11][2]            
+0          0          0          tag_mem[11][3]            
+0          0          0          tag_mem[10][0]            
+0          0          0          tag_mem[10][1]            
+0          0          0          tag_mem[10][2]            
+0          0          0          tag_mem[10][3]            
+0          0          0          tag_mem[9][0]             
+0          0          0          tag_mem[9][1]             
+0          0          0          tag_mem[9][2]             
+0          0          0          tag_mem[9][3]             
+0          0          0          tag_mem[8][0]             
+0          0          0          tag_mem[8][1]             
+0          0          0          tag_mem[8][2]             
+0          0          0          tag_mem[8][3]             
+0          0          0          tag_mem[7][0]             
+0          0          0          tag_mem[7][1]             
+0          0          0          tag_mem[7][2]             
+0          0          0          tag_mem[7][3]             
+0          0          0          tag_mem[6][0]             
+0          0          0          tag_mem[6][1]             
+0          0          0          tag_mem[6][2]             
+0          0          0          tag_mem[6][3]             
+0          0          0          tag_mem[5][0]             
+0          0          0          tag_mem[5][1]             
+0          0          0          tag_mem[5][2]             
+0          0          0          tag_mem[5][3]             
+0          0          0          tag_mem[4][0]             
+0          0          0          tag_mem[4][1]             
+0          0          0          tag_mem[4][2]             
+0          0          0          tag_mem[4][3]             
+0          0          0          tag_mem[3][0]             
+0          0          0          tag_mem[3][1]             
+0          0          0          tag_mem[3][2]             
+0          0          0          tag_mem[3][3]             
+0          0          0          tag_mem[2][0]             
+0          0          0          tag_mem[2][1]             
+0          0          0          tag_mem[2][2]             
+0          0          0          tag_mem[2][3]             
+0          0          0          tag_mem[1][0]             
+0          0          0          tag_mem[1][1]             
+0          0          0          tag_mem[1][2]             
+0          0          0          tag_mem[1][3]             
+0          0          0          tag_mem[0][0]             
+0          0          0          tag_mem[0][1]             
+0          0          0          tag_mem[0][2]             
+0          0          0          tag_mem[0][3]             
+0          1          0          tag_wr[4]                 
+0          1          0          tag_rd[4]                 
+0          0          0          tag_cnt[4]                
+0          1          0          tag_cnt[3]                
+0          0          0          tag_full                  
+0          0          0          burst_active              
+0          0          0          burst_cnt[3]              
+0          0          0          burst_cnt[2]              
+0          0          0          burst_cnt[1]              
+0          0          0          burst_cnt[0]              
+0          0          0          burst_nxt_addr[28]        
+0          0          0          burst_nxt_addr[27]        
+0          0          0          burst_nxt_addr[26]        
+0          0          0          burst_nxt_addr[25]        
+0          0          0          burst_nxt_addr[24]        
+0          0          0          burst_nxt_addr[23]        
+0          0          0          burst_nxt_addr[22]        
+0          0          0          burst_nxt_addr[21]        
+0          0          0          burst_nxt_addr[20]        
+0          0          0          burst_nxt_addr[19]        
+0          0          0          burst_nxt_addr[18]        
+0          0          0          burst_nxt_addr[17]        
+0          0          0          burst_nxt_addr[16]        
+0          0          0          burst_nxt_addr[15]        
+0          0          0          burst_nxt_addr[14]        
+0          0          0          burst_nxt_addr[13]        
+0          0          0          burst_nxt_addr[12]        
+0          0          0          burst_nxt_addr[11]        
+0          0          0          burst_nxt_addr[10]        
+0          0          0          burst_nxt_addr[9]         
+0          0          0          burst_nxt_addr[8]         
+0          0          0          burst_nxt_addr[7]         
+0          0          0          burst_nxt_addr[6]         
+0          0          0          burst_nxt_addr[5]         
+0          0          0          burst_nxt_addr[4]         
+0          0          0          burst_nxt_addr[3]         
+0          0          0          burst_nxt_addr[2]         
+0          0          0          burst_nxt_addr[1]         
+0          0          0          burst_nxt_addr[0]         
+0          0          0          burst_we                  
+
+Uncovered Fsm Detail Report, Instance Based
+===========================================
+

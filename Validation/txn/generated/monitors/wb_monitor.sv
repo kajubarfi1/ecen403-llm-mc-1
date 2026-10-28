@@ -20,6 +20,8 @@ module wb_monitor #(
     input  logic clk,
     input  logic rst_n,
     input  logic [28:0] wb_adr_i,
+    input  logic [1:0] wb_bte_i,
+    input  logic [2:0] wb_cti_i,
     input  logic wb_cyc_i,
     input  logic [31:0] wb_dat_i,
     input  logic [3:0] wb_sel_i,
@@ -40,9 +42,9 @@ module wb_monitor #(
     // sample: pre_nba -- what the DUT's flops saw at this edge (qualifier mixes a held input with combinational ready/stall)
     if (rst_n && (wb_cyc_i && wb_stb_i && !wb_stall_o)) begin
         if ((wb_we_i) == 1)
-          $display("TXN wb write t=%0t addr=%0h data=%0h sel=%0h", $time, wb_adr_i, wb_dat_i, wb_sel_i);
+          $display("TXN wb write t=%0t addr=%0h bte=%0h cti=%0h data=%0h sel=%0h", $time, wb_adr_i, wb_bte_i, wb_cti_i, wb_dat_i, wb_sel_i);
         else if ((wb_we_i) == 0)
-          $display("TXN wb read t=%0t addr=%0h", $time, wb_adr_i);
+          $display("TXN wb read t=%0t addr=%0h bte=%0h cti=%0h", $time, wb_adr_i, wb_bte_i, wb_cti_i);
     end
   end
 

@@ -348,7 +348,11 @@ def main() -> int:
     # 3. regenerate ------------------------------------------------------------
     if not args.skip_regenerate:
         banner(3, "regenerate integration map, schemas, monitors, SVA, coverage from the drop")
-        for cmd in ("python3 Validation/structural/integration_map_gen.py --findings "
+        for cmd in (# the verification plan is derived from the spec under judgement
+                    # (its items' bounds and text; coverage_gen reads it); on a
+                    # non-golden spec it was still the golden one's (2026-10-27)
+                    "python3 Validation/vplan/vplan_gen.py",
+                    "python3 Validation/structural/integration_map_gen.py --findings "
                     f"{os.path.relpath(os.path.join(OUTBOX_DIR, 'integration_map_findings.json'), ROOT)}",
                     "python3 Validation/structural/width_conformance.py --json "
                     f"{os.path.relpath(os.path.join(OUTBOX_DIR, 'width_findings.json'), ROOT)}",
@@ -436,6 +440,44 @@ def main() -> int:
                 return 1
         # the primary model changed: the agreement record against the second
         # opinion is stale until step 8 recomputes it
+
+    # The second-opinion models hold under this spec and these rules too, or
+    # their agreement is not corroboration. They were never re-graded: the
+    # scheduler twin raised the pre-10-15 wording of SCHED_003 on a 10-27
+    # trace. Same gate, same rule; a twin the agent cannot regenerate is set
+    # aside (agreement for that scope is skipped), never a stop: the twin is
+    # corroboration, the primary is the judgement.
+    second_dir = os.path.join(ROOT, "Validation", "predictors", "second_opinion")
+    for prov in sorted(glob.glob(os.path.join(second_dir, "*.provenance.json"))):
+        name = os.path.basename(prov)[:-len(".provenance.json")]
+        scope, kind = name.rsplit("_", 1)
+        mpath = os.path.join(second_dir, name + ".py")
+        if not os.path.exists(mpath):
+            continue
+        with open(prov) as f:
+            pdoc = json.load(f)
+        if absent:
+            needs = set(pdoc.get("input_ifaces") or []) | set(pdoc.get("output_ifaces") or [])
+            if sorted(needs - present_ifaces):
+                print(f"    n/a   {scope:34} twin      streams absent from this partial drop")
+                continue
+        failures, gate, _strategy = PA.regrade(scope, mpath)
+        if not failures:
+            print(f"    ok    {scope:34} twin      gate {gate}")
+            continue
+        print(f"    STALE {scope:34} twin      gate {gate}: {len(failures)} fault(s); regenerating (second_opinion.py)")
+        print(f"          {failures[0][:150]}")
+        if args.no_model_regen:
+            print("    (--no-model-regen: the twin is set aside, not regenerated)")
+            rc = 1
+        else:
+            rc, out = sh(f"python3 Validation/agreement/second_opinion.py --scope {scope} --retries 3",
+                         log, check=False)
+        if rc != 0:
+            for q in (mpath, prov):
+                os.replace(q, q + ".stale")
+            print(f"    set aside {scope} twin: agreement for this scope is skipped until a twin "
+                  f"the gate accepts exists (second_opinion.py --scope {scope})")
 
     # 3b. what can run ----------------------------------------------------------
     # A path is blocked when its closure needs an absent block, or crosses an

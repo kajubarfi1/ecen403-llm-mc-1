@@ -1,8 +1,10 @@
-TOOL:	xrun	24.03-s013: Started on Oct 27, 2026 at 14:44:38 CDT
+TOOL:	xrun	24.03-s013: Started on Oct 28, 2026 at 14:09:19 CDT
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xrun: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
 xrun: 24.03-s013: (c) Copyright 1995-2025 Cadence Design Systems, Inc.
+*WARNING* X Window Display Initialization failure
+*WARNING* (DISPLAY "")
 xrun: *N,CLEAN: Removing existing directory ./xcelium.d.
 DEFINE std       ./STD
 |
@@ -145,10 +147,6 @@ xrun: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,14): c
 DEFINE cds_amsfunctions ./CDS_AMSFUNCTIONS
 |
 xrun: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,15): cds.lib Invalid path '/opt/coe/cadence/XCELIUM240/tools/inca/files/CDS_AMSFUNCTIONS' (cds.lib command ignored).
-*WARNING* file /home/ugrads/j/jacobz/CDS.log File is already locked by some other process.
-*WARNING* file /home/ugrads/j/jacobz/CDS.log.1 File is already locked by some other process.
-*WARNING* X Window Display Initialization failure
-*WARNING* (DISPLAY "")
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xrun: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
@@ -354,6 +352,10 @@ file: init_fsm_fcov.sv
 	module worklib.init_fsm_fcov:sv
 		errors: 0, warnings: 0
 file: init_fsm_fcov_bind.sv
+file: init_fsm_coverage.sv
+	module worklib.init_fsm_coverage:sv
+		errors: 0, warnings: 0
+file: init_fsm_coverage_bind.sv
 file: init_fsm_sva.sv
 	module worklib.init_fsm_sva:sv
 		errors: 0, warnings: 0
@@ -508,13 +510,14 @@ xmelab: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment
 xmelab: *N,CGNSWA: (File: ./cov_conf.ccf, Line: 6): A covergroup is not (de)selected with the "-all" option of the (de)select_coverage command. Use the coverage metric "-covergroup" with the (de)select_coverage command to (de)select a covergroup.
 		Caching library 'worklib' ....... Done
 	Top level design units:
-		$unit_0x6f83fcb4
+		$unit_0x557c26b7
 		chain_harness
 
 	Extracting FSMs for coverage:
 		worklib.calibration_order_sva
 		worklib.calibration
 		worklib.config_regs
+		worklib.init_fsm_coverage
 		worklib.init_fsm_sva
 		worklib.init_fsm
 			FSM extracted for state register state
@@ -573,64 +576,69 @@ xmvlog_cg: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,1
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
-		worklib.init_fsm_sva:sv <0x540e4930>
-			streams:  43, words: 28893
-		worklib.init_fsm_fcov:sv <0x39ac6bc0>
+		worklib.init_fsm_sva:sv <0x554a004c>
+			streams:  52, words: 35183
+		worklib.init_fsm_coverage:sv <0x5412e85b>
+			streams:  11, words: 11738
+		worklib.init_fsm_fcov:sv <0x69c0bfe8>
 			streams:   4, words:  2295
-		worklib.init_status_monitor:sv <0x2cc32ea8>
+		worklib.init_status_monitor:sv <0x62a87ac5>
 			streams:   3, words:  2016
-		worklib.init_cmd_monitor:sv <0x4c867723>
+		worklib.init_cmd_monitor:sv <0x713cb370>
 			streams:   2, words:  1993
-		worklib.config_regs_fcov:sv <0x05ed1a67>
+		worklib.config_regs_fcov:sv <0x17586a2e>
 			streams:  10, words: 13585
-		worklib.csr_sts_level_monitor:sv <0x107c6e9f>
+		worklib.csr_sts_level_monitor:sv <0x7d2c1010>
 			streams:   3, words:  5328
-		worklib.csr_sts_monitor:sv <0x08923ace>
+		worklib.csr_sts_monitor:sv <0x1d16b66c>
 			streams:   2, words:  2016
-		worklib.csr_rsp_monitor:sv <0x596a7c0b>
+		worklib.csr_rsp_monitor:sv <0x2d569e54>
 			streams:   2, words:  3103
-		worklib.csr_monitor:sv <0x2726e497>
+		worklib.csr_monitor:sv <0x46075deb>
 			streams:   2, words:  2653
-		worklib.cfg_timing_monitor:sv <0x0f1f69fa>
+		worklib.cfg_timing_monitor:sv <0x60c022bf>
 			streams:   3, words:  5065
-		worklib.cfg_refresh_monitor:sv <0x02dda454>
+		worklib.cfg_refresh_monitor:sv <0x476c2d58>
 			streams:   3, words:  3291
-		worklib.calibration_order_sva:sv <0x3b7ee5eb>
+		worklib.calibration_order_sva:sv <0x755c0f8c>
 			streams:  18, words: 10862
-		worklib.cal_zqcs_monitor:sv <0x259ae448>
+		worklib.cal_zqcs_monitor:sv <0x4703c266>
 			streams:   3, words:  1566
-		worklib.cal_status_monitor:sv <0x3741eac2>
+		worklib.cal_status_monitor:sv <0x0afb2e91>
 			streams:   3, words:  1791
-		worklib.seq_driver:sv <0x657c3039>
+		worklib.seq_driver:sv <0x1ad69e6a>
 			streams:   4, words: 13326
-		worklib.chain_harness:sv <0x5f31fc0e>
+		worklib.chain_harness:sv <0x6174730a>
 			streams:  88, words: 24847
-		worklib.calibration:sv <0x0c338d1c>
+		worklib.calibration:sv <0x162a44db>
 			streams:  31, words: 18329
-		worklib.config_regs:sv <0x00bfebff>
+		worklib.config_regs:sv <0x57ede070>
 			streams:  64, words: 58855
-		worklib.init_fsm:sv <0x29eaa985>
-			streams:  21, words: 25643
-		worklib.\$unit_0x6f83fcb4 :compilation_unit <0x67544f1a>
+		worklib.init_fsm:sv <0x70b27f44>
+			streams:  23, words: 25837
+		worklib.\$unit_0x557c26b7 :compilation_unit <0x328bac23>
 			streams:   0, words:     0
+  int unsigned since_mrs [8];
+                       |
+xmelab: *W,COVUTA (./init_fsm_coverage.sv,24|23): Toggle coverage is not supported for SystemVerilog integer, real array, string, dynamic array, sparse memory and reference ports. It is also not supported for VHDL multi-dimensional array and array of record. There may also be other such objects in the design.
 	Building instance specific data structures.
 xmelab: *W,CGPIDF: Covergroup "per_instance" option , by default, is set as 0.
 	Loading native compiled code:     .................... Done
 	Design hierarchy summary:
 		                 Instances  Unique
-		Modules:                19      19
-		Registers:             282     282
+		Modules:                20      20
+		Registers:             303     303
 		Scalar wires:          117       -
-		Vectored wires:        108       -
-		Named events:           10      10
-		Always blocks:         131     131
-		Initial blocks:         33      33
+		Vectored wires:        110       -
+		Named events:           11      11
+		Always blocks:         142     142
+		Initial blocks:         37      37
 		Cont. assignments:      30      53
-		Pseudo assignments:    114       -
-		Assertions:             17      17
-		Covergroup Instances:    0       4
+		Pseudo assignments:    116       -
+		Assertions:             19      19
+		Covergroup Instances:    0       5
 		Compilation units:       1       1
-		Process Clocks:         43      13
+		Process Clocks:         46      13
 		Simulation timescale:  1ps
 	Writing initial simulation snapshot: worklib.chain_harness:sv
 DEFINE std       ./STD
@@ -979,6 +987,8 @@ TXN init_cmd command t=700199000 addr=0 bank=3 cmd=0
 TXN init_cmd command t=700204000 addr=4 bank=1 cmd=0
 TXN init_cmd command t=700209000 addr=1d34 bank=0 cmd=0
 TXN init_cmd command t=700214000 addr=400 bank=0 cmd=6
+xmsim: *E,ASRTST (./init_fsm_sva.sv,52): (time 700217500 PS) Assertion chain_harness.u_init_fsm.u_init_fsm_sva.a_TIMING_014 has failed
+[TIMING_014] tMOD violation: A non-MRS command issued before tMOD elapsed after an MRS command.
 TXN init_status done t=700859000 fail=0 state=e
 TXN csr_sts_level state t=700863000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=0 self_refresh=0
 TXN cal_status done t=700864000 fail=0
@@ -1072,6 +1082,7 @@ xmsim: *W,CGDEFN: Default name "calibration#(32'h00000011,32'h0001f400,32'h00000
 xmsim: *W,CGDEFN: Default name "config_regs_fcov#(32'h00000001).cg_csr_access_inst" will be generated for covergroup instance "chain_harness.u_config_regs.u_config_regs_fcov.cg_csr_access_inst@2_1" as the name of the covergroup instance is not specified explicitly: ./config_regs_fcov.sv, 120.
 xmsim: *W,CGDEFN: Default name "config_regs_fcov#(32'h00000001).cg_config_regs_inst" will be generated for covergroup instance "chain_harness.u_config_regs.u_config_regs_fcov.cg_config_regs_inst@3_1" as the name of the covergroup instance is not specified explicitly: ./config_regs_fcov.sv, 132.
 xmsim: *W,CGDEFN: Default name "init_fsm_fcov#(32'h00000001).cg_init_sequence_inst" will be generated for covergroup instance "chain_harness.u_init_fsm.u_init_fsm_fcov.cg_init_sequence_inst@4_1" as the name of the covergroup instance is not specified explicitly: ./init_fsm_fcov.sv, 34.
+xmsim: *W,CGDEFN: Default name "init_fsm_coverage.cg_timing_inst" will be generated for covergroup instance "chain_harness.u_init_fsm.u_init_fsm_cov.cg_timing_inst@5_1" as the name of the covergroup instance is not specified explicitly: ./init_fsm_coverage.sv, 60.
 
 coverage setup:
   workdir  :  ./cov_work
@@ -1081,6 +1092,6 @@ coverage setup:
   Coverage database dumped with the set_code_fine_grained_merging command during elaboration.
 
 coverage files:
-  model(design data) :  ./cov_work/scope/icc_077020cf_4d402adb.ucm (reused)
-  data               :  ./cov_work/scope/path_15_status_cal/icc_077020cf_4d402adb.ucd
-TOOL:	xrun	24.03-s013: Exiting on Oct 27, 2026 at 14:44:39 CDT  (total: 00:00:01)
+  model(design data) :  ./cov_work/scope/icc_74f670aa_588e0371.ucm (reused)
+  data               :  ./cov_work/scope/path_15_status_cal/icc_74f670aa_588e0371.ucd
+TOOL:	xrun	24.03-s013: Exiting on Oct 28, 2026 at 14:09:21 CDT  (total: 00:00:02)

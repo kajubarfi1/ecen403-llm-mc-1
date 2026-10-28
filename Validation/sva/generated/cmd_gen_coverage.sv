@@ -138,6 +138,12 @@ module cmd_gen_coverage (
       bins occurred = {1'b1};
     }
 
+    // TIMING_012: did stimulus ever create this situation? An assertion whose
+    // antecedent never occurred has proved nothing.
+    cp_timing_012_exercised: coverpoint ((ddr_cmd == 4'b0001)) iff (rst_n) {
+      bins occurred = {1'b1};
+    }
+
     // tRCD = 13.75ns = 3 cycle(s) at 5.0ns. The at_minimum bin is
     // the one that matters: a suite that always leaves slack satisfies the
     // constraint without ever testing it.

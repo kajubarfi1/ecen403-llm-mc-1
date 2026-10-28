@@ -50,6 +50,18 @@
             "port": "wb_sel_i",
             "width": 4,
             "dir": "input"
+          },
+          "cti": {
+            "port": "wb_cti_i",
+            "width": 3,
+            "dir": "input",
+            "default": 0
+          },
+          "bte": {
+            "port": "wb_bte_i",
+            "width": 2,
+            "dir": "input",
+            "default": 0
           }
         },
         "read": {
@@ -57,6 +69,18 @@
             "port": "wb_adr_i",
             "width": 29,
             "dir": "input"
+          },
+          "cti": {
+            "port": "wb_cti_i",
+            "width": 3,
+            "dir": "input",
+            "default": 0
+          },
+          "bte": {
+            "port": "wb_bte_i",
+            "width": 2,
+            "dir": "input",
+            "default": 0
           }
         }
       }
@@ -159,7 +183,8 @@
           "addr": {
             "port": "wb_adr_i",
             "width": 29,
-            "dir": "input"
+            "dir": "input",
+            "pending": true
           },
           "data": {
             "port": "wb_dat_o",

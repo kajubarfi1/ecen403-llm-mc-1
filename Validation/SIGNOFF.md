@@ -24,7 +24,7 @@ A drop failing A1 or A3 is returned to the Frontend without simulation.
 
 | Level | Criterion |
 |---|---|
-| Path PASS | every stage checker passes, no assertion failure, no illegal coverage bin, no harness timeout, no X on a checked field |
+| Path PASS | every stage checker passes, no assertion failure, no illegal coverage bin, no harness timeout, no X on a checked field, every request conserved (`(conservation)` stage: each catalog `conservation` rule's `from` count produced its `to` count by the end of the run) and every accepted host beat acknowledged (`(host handshake)` stage from the driver's count; expected to fail only on a standalone path with responses tied off) |
 | Path FAIL | otherwise; the failing stage and first failing check are recorded, and a finding is emitted (or re-attached to an open one) |
 | Block PASS | every path that instantiates the block passes, **and** every formal property owned by the block is proven or bounded-proven to the agreed depth |
 | Block PASS-with-waivers | as above, except failures that are covered by an approved waiver (§5) |
@@ -54,17 +54,31 @@ when listed in §4 with a reason; "not hit" is not "unreachable".
 
 Current measurement (drop dab971c2aab9, 2026-10-15, directed + random
 stimulus): design 77.2 %; scheduler 79.8 %, cmd_queue 66.0 %, bank_tracker
-80.8 %, wb_port 59.9 %, data_path 77.1 %; vplan 28/39 items fully covered
+80.8 %, wb_port 59.9 %, data_path 77.1 %; vplan 34/45 items fully covered
 and the other 11 `unreachable_by_spec` (the exact-minimum timing bins under
-`timing_model.counter_clock.window_scale = 4`, §4), 0 partial. The code
-coverage gap to target (scheduler, cmd_queue, wb_port) is what the closure
-loop and constrained-random v2 exist to close.
+`timing_model.counter_clock.window_scale = 4`, §4), 0 partial, 0 not
+measured (the plan is regenerated from the judged spec on every run since
+2026-10-27; the six taxonomy items that regeneration surfaced, tREFI /
+tMRD / tMOD and SCHED_001–003 exercised, have coverpoints now, and the
+tMOD rule found a Phase 1 defect on the golden drop). Code coverage reached
+the target on 2026-10-28: 85.4 % on drop efece348d04e (cmd_queue 85.8,
+scheduler 90.3, wb_port 84.3, data_path 78.2, bank_tracker 80.8) once the
+host port was driven as the spec describes it (pipelined bursts, `wb_burst`
+and `saturate`); that stimulus also found two defects (reply addendum 9).
+Functional: 33/45 covered, 11 unreachable by spec, 1 partial
+(`cg_refresh.cp_ref_002_exercised`, covered on 10-27, lost while the port
+drops half the pipelined traffic; it returns with the wb_port fix).
 
 ## 4. Exclusion rules
 
 An uncovered item may be excluded from the target only for one of these
-reasons, recorded in `coverage/exclusions.json` (to be created with the first
-exclusion) with the item, the reason code and the approver:
+reasons, recorded in `coverage/exclusions.json` with the item, the reason code
+and the approver. An entry with `status: proposed` and `approved_by: null` is
+a proposal: `coverage/apply_exclusions.py` reports the adjusted percentage it
+would give but the raw number stands until a named approver sets
+`status: approved`. Three proposals are on file (2026-10-28): the constant
+column bits [2:0] of the queue and scheduler entry storage (E-SPEC, the
+burst-aligned address mapping fixes them) and the reset defaults (E-RESET).
 
 | Code | Reason | Example |
 |---|---|---|

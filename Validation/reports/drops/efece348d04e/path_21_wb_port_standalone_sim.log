@@ -1,4 +1,4 @@
-TOOL:	xrun	24.03-s013: Started on Oct 27, 2026 at 14:44:49 CDT
+TOOL:	xrun	24.03-s013: Started on Oct 28, 2026 at 14:09:26 CDT
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xrun: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
@@ -313,6 +313,10 @@ file: wb_monitor.sv
 file: wb_rsp_monitor.sv
 	module worklib.wb_rsp_monitor:sv
 		errors: 0, warnings: 0
+file: wb_port_order_sva.sv
+	module worklib.wb_port_order_sva:sv
+		errors: 0, warnings: 0
+file: wb_port_order_sva_bind.sv
 	Total errors/warnings found outside modules and primitives:
 		errors: 0, warnings: 16
 DEFINE std       ./STD
@@ -463,10 +467,11 @@ xmelab: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment
 xmelab: *N,CGNSWA: (File: ./cov_conf.ccf, Line: 6): A covergroup is not (de)selected with the "-all" option of the (de)select_coverage command. Use the coverage metric "-covergroup" with the (de)select_coverage command to (de)select a covergroup.
 		Caching library 'worklib' ....... Done
 	Top level design units:
-		$unit_0x14b85b43
+		$unit_0x40dea8b4
 		chain_harness
 
 	Extracting FSMs for coverage:
+		worklib.wb_port_order_sva
 		worklib.wb_port
 	Total FSMs extracted = 0
 xmelab: *W,ICFNFR: Module "*_txn_harness", specified on line 17 of file "./cov_conf.ccf", not found in the design.
@@ -525,38 +530,40 @@ xmvlog_cg: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,1
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
-		worklib.wb_rsp_monitor:sv <0x7125350d>
-			streams:   2, words:  1788
-		worklib.wb_monitor:sv <0x0ec18113>
-			streams:   2, words:  2913
-		worklib.req_monitor:sv <0x133385d5>
+		worklib.wb_port_order_sva:sv <0x4929ab36>
+			streams:   9, words:  4830
+		worklib.wb_rsp_monitor:sv <0x7735140d>
+			streams:   4, words:  3426
+		worklib.wb_monitor:sv <0x39ad5f19>
+			streams:   2, words:  3813
+		worklib.req_monitor:sv <0x4c6b10a7>
 			streams:   2, words:  2235
-		worklib.seq_driver:sv <0x73f17281>
-			streams:   5, words: 32108
-		worklib.chain_harness:sv <0x4828cd2e>
-			streams:  44, words: 12037
-		worklib.wb_port:sv <0x31e4f2fb>
-			streams:  58, words: 45842
-		worklib.\$unit_0x14b85b43 :compilation_unit <0x15929ac4>
+		worklib.seq_driver:sv <0x4235bc80>
+			streams:   9, words: 38117
+		worklib.chain_harness:sv <0x26c77d1d>
+			streams:  44, words: 12021
+		worklib.wb_port:sv <0x311b3c46>
+			streams:  59, words: 45721
+		worklib.\$unit_0x40dea8b4 :compilation_unit <0x6b4432dc>
 			streams:   0, words:     0
 	Building instance specific data structures.
 xmelab: *W,CGPIDF: Covergroup "per_instance" option , by default, is set as 0.
 	Loading native compiled code:     .................... Done
 	Design hierarchy summary:
 		                 Instances  Unique
-		Modules:                 6       6
-		Registers:              76      76
-		Scalar wires:           42       -
-		Vectored wires:         33       -
-		Named events:            5       5
-		Always blocks:          35      35
-		Initial blocks:         10      10
-		Cont. assignments:      12      13
-		Pseudo assignments:     42       -
-		Assertions:              5       5
+		Modules:                 7       7
+		Registers:             100     100
+		Scalar wires:           43       -
+		Vectored wires:         35       -
+		Named events:            6       6
+		Always blocks:          48      48
+		Initial blocks:         15      15
+		Cont. assignments:      10      11
+		Pseudo assignments:     45       -
+		Assertions:              7       7
 		Covergroup Instances:    0       1
 		Compilation units:       1       1
-		Process Clocks:         12       5
+		Process Clocks:         16       6
 		Simulation timescale:  1ps
 	Writing initial simulation snapshot: worklib.chain_harness:sv
 DEFINE std       ./STD
@@ -613,58 +620,68 @@ xcelium> run
 TXN wb_rsp reset t=0
 TXN wb reset t=0
 TXN req reset t=0
-TXN wb read t=38000 addr=409f134
+TXN wb read t=38000 addr=409f134 bte=0 cti=4
 TXN req request t=39000 addr=409f134 data=0 mask=0 we=0
-DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb read t=1353000 addr=1fb5355e
-TXN req request t=1354000 addr=1fb5355e data=0 mask=0 we=0
-DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb write t=2683000 addr=184b9da5 data=c9e9c616 sel=3
-TXN req request t=2684000 addr=184b9da5 data=c9e9c616 mask=3 we=1
-TXN wb read t=2733000 addr=18f2a0a3
-TXN req request t=2734000 addr=18f2a0a3 data=c9e9c616 mask=3 we=0
-DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb read t=4058000 addr=1c81394b
-TXN req request t=4059000 addr=1c81394b data=c9e9c616 mask=3 we=0
-DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb read t=5373000 addr=68ae3c7
-TXN req request t=5374000 addr=68ae3c7 data=c9e9c616 mask=3 we=0
-DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb read t=6693000 addr=16db9b8
-TXN req request t=6694000 addr=16db9b8 data=c9e9c616 mask=3 we=0
-DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb read t=7988000 addr=1865a673
-TXN req request t=7989000 addr=1865a673 data=c9e9c616 mask=3 we=0
-DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb read t=9333000 addr=1b03f53d
-TXN req request t=9334000 addr=1b03f53d data=c9e9c616 mask=3 we=0
-DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb read t=10683000 addr=e30323f
-TXN req request t=10684000 addr=e30323f data=c9e9c616 mask=3 we=0
-DRIVER_STALL: wb — wb_ack_o never asserted within 256 cycles
-TXN wb write t=12013000 addr=eeadb0e data=587fd280 sel=7
-TXN req request t=12014000 addr=eeadb0e data=587fd280 mask=7 we=1
-TXN wb write t=12063000 addr=160165d data=19999e3f sel=9
-TXN req request t=12064000 addr=160165d data=19999e3f mask=9 we=1
-TXN wb write t=12083000 addr=1b03cd16 data=3099fdf5 sel=9
-TXN req request t=12084000 addr=1b03cd16 data=3099fdf5 mask=9 we=1
-TXN wb write t=12143000 addr=192cb4af data=8d6af57 sel=7
-TXN req request t=12144000 addr=192cb4af data=8d6af57 mask=7 we=1
-TXN wb write t=12213000 addr=1a841edd data=aa2ca1af sel=b
-TXN req request t=12214000 addr=1a841edd data=aa2ca1af mask=b we=1
-TXN wb write t=12268000 addr=588af5e data=82283d15 sel=5
-TXN req request t=12269000 addr=588af5e data=82283d15 mask=5 we=1
-TXN wb write t=12323000 addr=17b6a4b6 data=7923986 sel=1
-TXN req request t=12324000 addr=17b6a4b6 data=7923986 mask=1 we=1
-TXN wb write t=12358000 addr=ae70053 data=8c5fe8f8 sel=c
-TXN req request t=12359000 addr=ae70053 data=8c5fe8f8 mask=c we=1
-TXN wb write t=12413000 addr=169c0b3e data=1762741 sel=4
-TXN req request t=12414000 addr=169c0b3e data=1762741 mask=4 we=1
+DRIVER_STALL: wb — 1 of 1 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb write t=10328000 addr=1e394418 bte=3 cti=1 data=a6cecc1b sel=6
+TXN req request t=10329000 addr=1e394418 data=a6cecc1b mask=6 we=1
+DRIVER_STALL: wb — 1 of 2 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb write t=20583000 addr=1bb274a1 bte=1 cti=4 data=c4647159 sel=e
+TXN req request t=20584000 addr=1bb274a1 data=c4647159 mask=e we=1
+DRIVER_STALL: wb — 1 of 3 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb read t=30883000 addr=1450c464 bte=0 cti=0
+TXN req request t=30884000 addr=1450c464 data=c4647159 mask=e we=0
+DRIVER_STALL: wb — 2 of 4 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb read t=41138000 addr=1865a673 bte=3 cti=3
+TXN req request t=41139000 addr=1865a673 data=c4647159 mask=e we=0
+DRIVER_STALL: wb — 3 of 5 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb read t=51448000 addr=e30323f bte=3 cti=7
+TXN req request t=51449000 addr=e30323f data=c4647159 mask=e we=0
+DRIVER_STALL: wb — 4 of 6 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb read t=61743000 addr=161ff4a0 bte=1 cti=3
+TXN req request t=61744000 addr=161ff4a0 data=c4647159 mask=e we=0
+DRIVER_STALL: wb — 5 of 7 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb write t=72033000 addr=160165d bte=2 cti=1 data=19999e3f sel=9
+TXN req request t=72034000 addr=160165d data=19999e3f mask=9 we=1
+DRIVER_STALL: wb — 5 of 8 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb write t=82343000 addr=c267f7d bte=0 cti=6 data=4da98f1d sel=f
+TXN req request t=82344000 addr=c267f7d data=4da98f1d mask=f we=1
+DRIVER_STALL: wb — 5 of 9 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb read t=92633000 addr=19dfdb2f bte=1 cti=6
+TXN req request t=92634000 addr=19dfdb2f data=4da98f1d mask=f we=0
+DRIVER_STALL: wb — 6 of 10 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb write t=102913000 addr=588af5e bte=2 cti=6 data=82283d15 sel=5
+TXN req request t=102914000 addr=588af5e data=82283d15 mask=5 we=1
+DRIVER_STALL: wb — 6 of 11 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb read t=113203000 addr=1e09575a bte=2 cti=0
+TXN req request t=113204000 addr=1e09575a data=82283d15 mask=5 we=0
+DRIVER_STALL: wb — 7 of 12 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb write t=123513000 addr=ae70053 bte=2 cti=5 data=8c5fe8f8 sel=c
+TXN req request t=123514000 addr=ae70053 data=8c5fe8f8 mask=c we=1
+DRIVER_STALL: wb — 7 of 13 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb write t=133803000 addr=5d89d0 bte=2 cti=7 data=349aae90 sel=1
+TXN req request t=133804000 addr=5d89d0 data=349aae90 mask=1 we=1
+DRIVER_STALL: wb — 7 of 14 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb read t=144103000 addr=1a752577 bte=2 cti=7
+TXN req request t=144104000 addr=1a752577 data=349aae90 mask=1 we=0
+DRIVER_STALL: wb — 8 of 15 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb write t=154388000 addr=19f6ea bte=1 cti=0 data=9cc9af4e sel=e
+TXN req request t=154389000 addr=19f6ea data=9cc9af4e mask=e we=1
+DRIVER_STALL: wb — 8 of 16 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb read t=164693000 addr=b91f703 bte=2 cti=1
+TXN req request t=164694000 addr=b91f703 data=9cc9af4e mask=e we=0
+DRIVER_STALL: wb — 9 of 17 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb read t=174948000 addr=553b544 bte=3 cti=0
+TXN req request t=174949000 addr=553b544 data=9cc9af4e mask=e we=0
+DRIVER_STALL: wb — 10 of 18 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb write t=185203000 addr=ff8c740 bte=2 cti=5 data=44c5b476 sel=5
+TXN req request t=185204000 addr=ff8c740 data=44c5b476 mask=5 we=1
+DRIVER_STALL: wb — 10 of 19 pipelined beat(s) never acknowledged (wb_ack_o)
 HARNESS_DONE
-Simulation complete via $finish(1) at time 12857500 PS + 0
+Simulation complete via $finish(1) at time 195852500 PS + 0
 ./chain_harness.sv:98     $finish;
 xcelium> exit
-xmsim: *W,CGDEFN: Default name "wb_port#(32'h00000020,32'h0000001d,32'h00000004,32'h00000004,32'h00000008,32'h00000010,32'h00000004,32'h00000010,32'h00000004,3'h0,3'h1,3'h2,3'h7,2'h0,4).cg_inst" will be generated for covergroup instance "chain_harness.u_wb_port.cg_inst@1_1" as the name of the covergroup instance is not specified explicitly: ./wb_port.sv, 226.
+xmsim: *W,CGDEFN: Default name "wb_port#(32'h00000020,32'h0000001d,32'h00000004,32'h00000004,32'h00000008,32'h00000010,32'h00000004,32'h00000010,32'h00000004,3'h0,3'h1,3'h2,3'h7,2'h0,4).cg_inst" will be generated for covergroup instance "chain_harness.u_wb_port.cg_inst@2_1" as the name of the covergroup instance is not specified explicitly: ./wb_port.sv, 226.
 
 coverage setup:
   workdir  :  ./cov_work
@@ -674,6 +691,6 @@ coverage setup:
   Coverage database dumped with the set_code_fine_grained_merging command during elaboration.
 
 coverage files:
-  model(design data) :  ./cov_work/scope/icc_154b5263_58da17e8.ucm (reused)
-  data               :  ./cov_work/scope/path_21_wb_port_standalone/icc_154b5263_58da17e8.ucd
-TOOL:	xrun	24.03-s013: Exiting on Oct 27, 2026 at 14:44:51 CDT  (total: 00:00:02)
+  model(design data) :  ./cov_work/scope/icc_63dfb2a3_20c84979.ucm
+  data               :  ./cov_work/scope/path_21_wb_port_standalone/icc_63dfb2a3_20c84979.ucd
+TOOL:	xrun	24.03-s013: Exiting on Oct 28, 2026 at 14:09:28 CDT  (total: 00:00:02)

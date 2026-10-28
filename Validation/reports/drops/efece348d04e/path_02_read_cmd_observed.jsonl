@@ -27,343 +27,1214 @@
 {"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 26, "time_ns": 34000}
 {"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 1}, "seq": 27, "time_ns": 34000}
 {"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 28, "time_ns": 34000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 67760436}, "seq": 29, "time_ns": 38000}
-{"iface": "req", "kind": "request", "fields": {"addr": 67760436, "data": 0, "mask": 0, "we": 0}, "seq": 30, "time_ns": 39000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 273878284, "bte": 0, "cti": 2, "data": 506456969, "sel": 15}, "seq": 29, "time_ns": 38000}
+{"iface": "req", "kind": "request", "fields": {"addr": 273878284, "data": 506456969, "mask": 15, "we": 1}, "seq": 30, "time_ns": 39000}
 {"iface": "refresh_level", "kind": "state", "fields": {"pending": 0, "required": 0, "starve": 0, "urgent": 0}, "seq": 31, "time_ns": 39000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 152, "row": 4135, "we": 0}, "seq": 32, "time_ns": 39000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 33, "time_ns": 39000}
-{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 34, "time_ns": 43000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 152, "row": 4135, "type": 1, "we": 0}, "seq": 35, "time_ns": 689000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 152, "row": 4135, "type": 1, "we": 0}, "seq": 36, "time_ns": 689000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 4135, "bank": 6, "cmd": 3}, "seq": 37, "time_ns": 694000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 38, "time_ns": 759000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 152, "row": 4135, "type": 2, "we": 0}, "seq": 39, "time_ns": 759000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 40, "time_ns": 759000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 152, "row": 4135, "type": 2, "we": 0}, "seq": 41, "time_ns": 759000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 0}, "seq": 42, "time_ns": 764000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 152, "bank": 6, "cmd": 5}, "seq": 43, "time_ns": 764000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32615}, "seq": 44, "time_ns": 784000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 67760436, "data": 2137456640}, "seq": 45, "time_ns": 789000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 0, "data": 2137456640}, "seq": 46, "time_ns": 789000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 40364}, "seq": 47, "time_ns": 789000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 531969374}, "seq": 48, "time_ns": 823000}
-{"iface": "req", "kind": "request", "fields": {"addr": 531969374, "data": 0, "mask": 0, "we": 0}, "seq": 49, "time_ns": 824000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 680, "row": 32468, "we": 0}, "seq": 50, "time_ns": 824000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 1, "bank": 6, "col": 680, "row": 32468, "type": 4, "we": 0}, "seq": 51, "time_ns": 844000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 1, "bank": 6, "col": 680, "row": 32468, "type": 4, "we": 0}, "seq": 52, "time_ns": 844000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 6, "cmd": 2}, "seq": 53, "time_ns": 849000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 1, "bank": 6, "col": 680, "row": 32468, "type": 1, "we": 0}, "seq": 54, "time_ns": 914000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 1, "bank": 6, "col": 680, "row": 32468, "type": 1, "we": 0}, "seq": 55, "time_ns": 914000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 32468, "bank": 6, "cmd": 3}, "seq": 56, "time_ns": 919000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 57, "time_ns": 984000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 1, "bank": 6, "col": 680, "row": 32468, "type": 2, "we": 0}, "seq": 58, "time_ns": 984000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 59, "time_ns": 984000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 1, "bank": 6, "col": 680, "row": 32468, "type": 2, "we": 0}, "seq": 60, "time_ns": 984000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 1}, "seq": 61, "time_ns": 989000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 680, "bank": 6, "cmd": 5}, "seq": 62, "time_ns": 989000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 64855}, "seq": 63, "time_ns": 1009000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 531969374, "data": 4250337280}, "seq": 64, "time_ns": 1014000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 1, "data": 4250337280}, "seq": 65, "time_ns": 1014000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 1423}, "seq": 66, "time_ns": 1014000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 407608741}, "seq": 67, "time_ns": 1063000}
-{"iface": "req", "kind": "request", "fields": {"addr": 407608741, "data": 0, "mask": 0, "we": 0}, "seq": 68, "time_ns": 1064000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 3, "col": 720, "row": 24878, "we": 0}, "seq": 69, "time_ns": 1064000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 2, "bank": 3, "col": 720, "row": 24878, "type": 1, "we": 0}, "seq": 70, "time_ns": 1074000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 2, "bank": 3, "col": 720, "row": 24878, "type": 1, "we": 0}, "seq": 71, "time_ns": 1074000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 24878, "bank": 3, "cmd": 3}, "seq": 72, "time_ns": 1079000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 73, "time_ns": 1144000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 2, "bank": 3, "col": 720, "row": 24878, "type": 2, "we": 0}, "seq": 74, "time_ns": 1144000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 75, "time_ns": 1144000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 2, "bank": 3, "col": 720, "row": 24878, "type": 2, "we": 0}, "seq": 76, "time_ns": 1144000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 2}, "seq": 77, "time_ns": 1149000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 720, "bank": 3, "cmd": 5}, "seq": 78, "time_ns": 1149000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 64815}, "seq": 79, "time_ns": 1169000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 407608741, "data": 4247715840}, "seq": 80, "time_ns": 1174000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 2, "data": 4247715840}, "seq": 81, "time_ns": 1174000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 54664}, "seq": 82, "time_ns": 1174000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 523832096}, "seq": 83, "time_ns": 1203000}
-{"iface": "req", "kind": "request", "fields": {"addr": 523832096, "data": 0, "mask": 0, "we": 0}, "seq": 84, "time_ns": 1204000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 1, "col": 400, "row": 31972, "we": 0}, "seq": 85, "time_ns": 1204000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 3, "bank": 1, "col": 400, "row": 31972, "type": 1, "we": 0}, "seq": 86, "time_ns": 1214000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 3, "bank": 1, "col": 400, "row": 31972, "type": 1, "we": 0}, "seq": 87, "time_ns": 1214000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 31972, "bank": 1, "cmd": 3}, "seq": 88, "time_ns": 1219000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 89, "time_ns": 1284000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 3, "bank": 1, "col": 400, "row": 31972, "type": 2, "we": 0}, "seq": 90, "time_ns": 1284000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 91, "time_ns": 1284000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 3, "bank": 1, "col": 400, "row": 31972, "type": 2, "we": 0}, "seq": 92, "time_ns": 1284000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 3}, "seq": 93, "time_ns": 1289000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 400, "bank": 1, "cmd": 5}, "seq": 94, "time_ns": 1289000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 65135}, "seq": 95, "time_ns": 1309000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 523832096, "data": 4268687360}, "seq": 96, "time_ns": 1314000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 3, "data": 4268687360}, "seq": 97, "time_ns": 1314000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 34236}, "seq": 98, "time_ns": 1314000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 464680097}, "seq": 99, "time_ns": 1328000}
-{"iface": "req", "kind": "request", "fields": {"addr": 464680097, "data": 0, "mask": 0, "we": 0}, "seq": 100, "time_ns": 1329000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 592, "row": 28361, "we": 0}, "seq": 101, "time_ns": 1329000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 4, "bank": 6, "col": 592, "row": 28361, "type": 4, "we": 0}, "seq": 102, "time_ns": 1339000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 4, "bank": 6, "col": 592, "row": 28361, "type": 4, "we": 0}, "seq": 103, "time_ns": 1339000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 6, "cmd": 2}, "seq": 104, "time_ns": 1344000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 4, "bank": 6, "col": 592, "row": 28361, "type": 1, "we": 0}, "seq": 105, "time_ns": 1409000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 4, "bank": 6, "col": 592, "row": 28361, "type": 1, "we": 0}, "seq": 106, "time_ns": 1409000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 28361, "bank": 6, "cmd": 3}, "seq": 107, "time_ns": 1414000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 108, "time_ns": 1479000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 4, "bank": 6, "col": 592, "row": 28361, "type": 2, "we": 0}, "seq": 109, "time_ns": 1479000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 110, "time_ns": 1479000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 4, "bank": 6, "col": 592, "row": 28361, "type": 2, "we": 0}, "seq": 111, "time_ns": 1479000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 4}, "seq": 112, "time_ns": 1484000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 592, "bank": 6, "cmd": 5}, "seq": 113, "time_ns": 1484000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32175}, "seq": 114, "time_ns": 1504000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 464680097, "data": 2108620800}, "seq": 115, "time_ns": 1509000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 4, "data": 2108620800}, "seq": 116, "time_ns": 1509000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 60800}, "seq": 117, "time_ns": 1509000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 478230859}, "seq": 118, "time_ns": 1568000}
-{"iface": "req", "kind": "request", "fields": {"addr": 478230859, "data": 0, "mask": 0, "we": 0}, "seq": 119, "time_ns": 1569000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 7, "col": 160, "row": 29188, "we": 0}, "seq": 120, "time_ns": 1569000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 5, "bank": 7, "col": 160, "row": 29188, "type": 1, "we": 0}, "seq": 121, "time_ns": 1579000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 5, "bank": 7, "col": 160, "row": 29188, "type": 1, "we": 0}, "seq": 122, "time_ns": 1579000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 29188, "bank": 7, "cmd": 3}, "seq": 123, "time_ns": 1584000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 124, "time_ns": 1649000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 5, "bank": 7, "col": 160, "row": 29188, "type": 2, "we": 0}, "seq": 125, "time_ns": 1649000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 126, "time_ns": 1649000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 5, "bank": 7, "col": 160, "row": 29188, "type": 2, "we": 0}, "seq": 127, "time_ns": 1649000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 5}, "seq": 128, "time_ns": 1654000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 160, "bank": 7, "cmd": 5}, "seq": 129, "time_ns": 1654000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 65375}, "seq": 130, "time_ns": 1674000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 478230859, "data": 4284416000}, "seq": 131, "time_ns": 1679000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 5, "data": 4284416000}, "seq": 132, "time_ns": 1679000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 34223}, "seq": 133, "time_ns": 1679000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 109765575}, "seq": 134, "time_ns": 1713000}
-{"iface": "req", "kind": "request", "fields": {"addr": 109765575, "data": 0, "mask": 0, "we": 0}, "seq": 135, "time_ns": 1714000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 4, "col": 480, "row": 6699, "we": 0}, "seq": 136, "time_ns": 1714000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 6, "bank": 4, "col": 480, "row": 6699, "type": 1, "we": 0}, "seq": 137, "time_ns": 1724000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 6, "bank": 4, "col": 480, "row": 6699, "type": 1, "we": 0}, "seq": 138, "time_ns": 1724000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 6699, "bank": 4, "cmd": 3}, "seq": 139, "time_ns": 1729000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 140, "time_ns": 1794000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 6, "bank": 4, "col": 480, "row": 6699, "type": 2, "we": 0}, "seq": 141, "time_ns": 1794000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 142, "time_ns": 1794000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 6, "bank": 4, "col": 480, "row": 6699, "type": 2, "we": 0}, "seq": 143, "time_ns": 1794000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 6}, "seq": 144, "time_ns": 1799000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 480, "bank": 4, "cmd": 5}, "seq": 145, "time_ns": 1799000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32287}, "seq": 146, "time_ns": 1819000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 109765575, "data": 2115960832}, "seq": 147, "time_ns": 1824000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 6, "data": 2115960832}, "seq": 148, "time_ns": 1824000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 64955}, "seq": 149, "time_ns": 1824000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 23968184}, "seq": 150, "time_ns": 1863000}
-{"iface": "req", "kind": "request", "fields": {"addr": 23968184, "data": 0, "mask": 0, "we": 0}, "seq": 151, "time_ns": 1864000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 7, "col": 216, "row": 1462, "we": 0}, "seq": 152, "time_ns": 1864000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 7, "bank": 7, "col": 216, "row": 1462, "type": 4, "we": 0}, "seq": 153, "time_ns": 1874000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 7, "bank": 7, "col": 216, "row": 1462, "type": 4, "we": 0}, "seq": 154, "time_ns": 1874000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 7, "cmd": 2}, "seq": 155, "time_ns": 1879000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 7, "bank": 7, "col": 216, "row": 1462, "type": 1, "we": 0}, "seq": 156, "time_ns": 1944000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 7, "bank": 7, "col": 216, "row": 1462, "type": 1, "we": 0}, "seq": 157, "time_ns": 1944000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 1462, "bank": 7, "cmd": 3}, "seq": 158, "time_ns": 1949000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 159, "time_ns": 2014000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 7, "bank": 7, "col": 216, "row": 1462, "type": 2, "we": 0}, "seq": 160, "time_ns": 2014000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 161, "time_ns": 2014000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 7, "bank": 7, "col": 216, "row": 1462, "type": 2, "we": 0}, "seq": 162, "time_ns": 2014000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 7}, "seq": 163, "time_ns": 2019000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 216, "bank": 7, "cmd": 5}, "seq": 164, "time_ns": 2019000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 65319}, "seq": 165, "time_ns": 2039000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 23968184, "data": 4280745984}, "seq": 166, "time_ns": 2044000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 7, "data": 4280745984}, "seq": 167, "time_ns": 2044000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 5544}, "seq": 168, "time_ns": 2044000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 409314931}, "seq": 169, "time_ns": 2058000}
-{"iface": "req", "kind": "request", "fields": {"addr": 409314931, "data": 0, "mask": 0, "we": 0}, "seq": 170, "time_ns": 2059000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 4, "col": 824, "row": 24982, "we": 0}, "seq": 171, "time_ns": 2059000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 8, "bank": 4, "col": 824, "row": 24982, "type": 4, "we": 0}, "seq": 172, "time_ns": 2069000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 8, "bank": 4, "col": 824, "row": 24982, "type": 4, "we": 0}, "seq": 173, "time_ns": 2069000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 4, "cmd": 2}, "seq": 174, "time_ns": 2074000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 8, "bank": 4, "col": 824, "row": 24982, "type": 1, "we": 0}, "seq": 175, "time_ns": 2139000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 8, "bank": 4, "col": 824, "row": 24982, "type": 1, "we": 0}, "seq": 176, "time_ns": 2139000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 24982, "bank": 4, "cmd": 3}, "seq": 177, "time_ns": 2144000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 178, "time_ns": 2209000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 8, "bank": 4, "col": 824, "row": 24982, "type": 2, "we": 0}, "seq": 179, "time_ns": 2209000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 180, "time_ns": 2209000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 8, "bank": 4, "col": 824, "row": 24982, "type": 2, "we": 0}, "seq": 181, "time_ns": 2209000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 8}, "seq": 182, "time_ns": 2214000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 824, "bank": 4, "cmd": 5}, "seq": 183, "time_ns": 2214000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 64711}, "seq": 184, "time_ns": 2234000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 409314931, "data": 4240900096}, "seq": 185, "time_ns": 2239000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 8, "data": 4240900096}, "seq": 186, "time_ns": 2239000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 5526}, "seq": 187, "time_ns": 2239000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 453244221}, "seq": 188, "time_ns": 2303000}
-{"iface": "req", "kind": "request", "fields": {"addr": 453244221, "data": 0, "mask": 0, "we": 0}, "seq": 189, "time_ns": 2304000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 664, "row": 27663, "we": 0}, "seq": 190, "time_ns": 2304000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 9, "bank": 6, "col": 664, "row": 27663, "type": 4, "we": 0}, "seq": 191, "time_ns": 2314000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 9, "bank": 6, "col": 664, "row": 27663, "type": 4, "we": 0}, "seq": 192, "time_ns": 2314000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 6, "cmd": 2}, "seq": 193, "time_ns": 2319000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 9, "bank": 6, "col": 664, "row": 27663, "type": 1, "we": 0}, "seq": 194, "time_ns": 2384000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 9, "bank": 6, "col": 664, "row": 27663, "type": 1, "we": 0}, "seq": 195, "time_ns": 2384000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 27663, "bank": 6, "cmd": 3}, "seq": 196, "time_ns": 2389000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 197, "time_ns": 2454000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 9, "bank": 6, "col": 664, "row": 27663, "type": 2, "we": 0}, "seq": 198, "time_ns": 2454000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 199, "time_ns": 2454000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 9, "bank": 6, "col": 664, "row": 27663, "type": 2, "we": 0}, "seq": 200, "time_ns": 2454000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 9}, "seq": 201, "time_ns": 2459000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 664, "bank": 6, "cmd": 5}, "seq": 202, "time_ns": 2459000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32103}, "seq": 203, "time_ns": 2479000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 453244221, "data": 2103902208}, "seq": 204, "time_ns": 2484000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 9, "data": 2103902208}, "seq": 205, "time_ns": 2484000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 56716}, "seq": 206, "time_ns": 2484000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 238039615}, "seq": 207, "time_ns": 2553000}
-{"iface": "req", "kind": "request", "fields": {"addr": 238039615, "data": 0, "mask": 0, "we": 0}, "seq": 208, "time_ns": 2554000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 280, "row": 14528, "we": 0}, "seq": 209, "time_ns": 2554000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 10, "bank": 6, "col": 280, "row": 14528, "type": 4, "we": 0}, "seq": 210, "time_ns": 2564000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 10, "bank": 6, "col": 280, "row": 14528, "type": 4, "we": 0}, "seq": 211, "time_ns": 2564000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 6, "cmd": 2}, "seq": 212, "time_ns": 2569000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 10, "bank": 6, "col": 280, "row": 14528, "type": 1, "we": 0}, "seq": 213, "time_ns": 2634000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 10, "bank": 6, "col": 280, "row": 14528, "type": 1, "we": 0}, "seq": 214, "time_ns": 2634000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 14528, "bank": 6, "cmd": 3}, "seq": 215, "time_ns": 2639000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 216, "time_ns": 2704000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 10, "bank": 6, "col": 280, "row": 14528, "type": 2, "we": 0}, "seq": 217, "time_ns": 2704000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 218, "time_ns": 2704000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 10, "bank": 6, "col": 280, "row": 14528, "type": 2, "we": 0}, "seq": 219, "time_ns": 2704000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 10}, "seq": 220, "time_ns": 2709000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 280, "bank": 6, "cmd": 5}, "seq": 221, "time_ns": 2709000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 65255}, "seq": 222, "time_ns": 2729000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 238039615, "data": 4276551680}, "seq": 223, "time_ns": 2734000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 10, "data": 4276551680}, "seq": 224, "time_ns": 2734000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 42420}, "seq": 225, "time_ns": 2734000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 250272526}, "seq": 226, "time_ns": 2783000}
-{"iface": "req", "kind": "request", "fields": {"addr": 250272526, "data": 0, "mask": 0, "we": 0}, "seq": 227, "time_ns": 2784000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 3, "col": 384, "row": 15275, "we": 0}, "seq": 228, "time_ns": 2784000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 11, "bank": 3, "col": 384, "row": 15275, "type": 4, "we": 0}, "seq": 229, "time_ns": 2794000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 11, "bank": 3, "col": 384, "row": 15275, "type": 4, "we": 0}, "seq": 230, "time_ns": 2794000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 3, "cmd": 2}, "seq": 231, "time_ns": 2799000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 11, "bank": 3, "col": 384, "row": 15275, "type": 1, "we": 0}, "seq": 232, "time_ns": 2864000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 11, "bank": 3, "col": 384, "row": 15275, "type": 1, "we": 0}, "seq": 233, "time_ns": 2864000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 15275, "bank": 3, "cmd": 3}, "seq": 234, "time_ns": 2869000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 235, "time_ns": 2934000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 11, "bank": 3, "col": 384, "row": 15275, "type": 2, "we": 0}, "seq": 236, "time_ns": 2934000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 237, "time_ns": 2934000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 11, "bank": 3, "col": 384, "row": 15275, "type": 2, "we": 0}, "seq": 238, "time_ns": 2934000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 11}, "seq": 239, "time_ns": 2939000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 384, "bank": 3, "cmd": 5}, "seq": 240, "time_ns": 2939000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32383}, "seq": 241, "time_ns": 2959000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 250272526, "data": 2122252288}, "seq": 242, "time_ns": 2964000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 11, "data": 2122252288}, "seq": 243, "time_ns": 2964000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 64957}, "seq": 244, "time_ns": 2964000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 234914346}, "seq": 245, "time_ns": 3003000}
-{"iface": "req", "kind": "request", "fields": {"addr": 234914346, "data": 0, "mask": 0, "we": 0}, "seq": 246, "time_ns": 3004000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 0, "col": 272, "row": 14338, "we": 0}, "seq": 247, "time_ns": 3004000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 12, "bank": 0, "col": 272, "row": 14338, "type": 1, "we": 0}, "seq": 248, "time_ns": 3014000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 12, "bank": 0, "col": 272, "row": 14338, "type": 1, "we": 0}, "seq": 249, "time_ns": 3014000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 14338, "bank": 0, "cmd": 3}, "seq": 250, "time_ns": 3019000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 251, "time_ns": 3084000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 12, "bank": 0, "col": 272, "row": 14338, "type": 2, "we": 0}, "seq": 252, "time_ns": 3084000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 253, "time_ns": 3084000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 12, "bank": 0, "col": 272, "row": 14338, "type": 2, "we": 0}, "seq": 254, "time_ns": 3084000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 12}, "seq": 255, "time_ns": 3089000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 272, "bank": 0, "cmd": 5}, "seq": 256, "time_ns": 3089000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 65263}, "seq": 257, "time_ns": 3109000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 234914346, "data": 4277075968}, "seq": 258, "time_ns": 3114000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 12, "data": 4277075968}, "seq": 259, "time_ns": 3114000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 46516}, "seq": 260, "time_ns": 3114000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 23074397}, "seq": 261, "time_ns": 3163000}
-{"iface": "req", "kind": "request", "fields": {"addr": 23074397, "data": 0, "mask": 0, "we": 0}, "seq": 262, "time_ns": 3164000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 2, "col": 808, "row": 1408, "we": 0}, "seq": 263, "time_ns": 3164000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 13, "bank": 2, "col": 808, "row": 1408, "type": 1, "we": 0}, "seq": 264, "time_ns": 3174000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 13, "bank": 2, "col": 808, "row": 1408, "type": 1, "we": 0}, "seq": 265, "time_ns": 3174000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 1408, "bank": 2, "cmd": 3}, "seq": 266, "time_ns": 3179000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 267, "time_ns": 3244000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 13, "bank": 2, "col": 808, "row": 1408, "type": 2, "we": 0}, "seq": 268, "time_ns": 3244000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 269, "time_ns": 3244000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 13, "bank": 2, "col": 808, "row": 1408, "type": 2, "we": 0}, "seq": 270, "time_ns": 3244000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 13}, "seq": 271, "time_ns": 3249000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 808, "bank": 2, "cmd": 5}, "seq": 272, "time_ns": 3249000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 64727}, "seq": 273, "time_ns": 3269000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 23074397, "data": 4241948672}, "seq": 274, "time_ns": 3274000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 13, "data": 4241948672}, "seq": 275, "time_ns": 3274000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 42391}, "seq": 276, "time_ns": 3274000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 199615329}, "seq": 277, "time_ns": 3318000}
-{"iface": "req", "kind": "request", "fields": {"addr": 199615329, "data": 0, "mask": 0, "we": 0}, "seq": 278, "time_ns": 3319000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 4, "col": 432, "row": 12183, "we": 0}, "seq": 279, "time_ns": 3319000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 14, "bank": 4, "col": 432, "row": 12183, "type": 4, "we": 0}, "seq": 280, "time_ns": 3329000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 14, "bank": 4, "col": 432, "row": 12183, "type": 4, "we": 0}, "seq": 281, "time_ns": 3329000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 4, "cmd": 2}, "seq": 282, "time_ns": 3334000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 14, "bank": 4, "col": 432, "row": 12183, "type": 1, "we": 0}, "seq": 283, "time_ns": 3399000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 14, "bank": 4, "col": 432, "row": 12183, "type": 1, "we": 0}, "seq": 284, "time_ns": 3399000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 12183, "bank": 4, "cmd": 3}, "seq": 285, "time_ns": 3404000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 286, "time_ns": 3469000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 14, "bank": 4, "col": 432, "row": 12183, "type": 2, "we": 0}, "seq": 287, "time_ns": 3469000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 288, "time_ns": 3469000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 14, "bank": 4, "col": 432, "row": 12183, "type": 2, "we": 0}, "seq": 289, "time_ns": 3469000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 14}, "seq": 290, "time_ns": 3474000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 432, "bank": 4, "cmd": 5}, "seq": 291, "time_ns": 3474000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32335}, "seq": 292, "time_ns": 3494000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 199615329, "data": 2119106560}, "seq": 293, "time_ns": 3499000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 14, "data": 2119106560}, "seq": 294, "time_ns": 3499000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 7614}, "seq": 295, "time_ns": 3499000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 129804604}, "seq": 296, "time_ns": 3563000}
-{"iface": "req", "kind": "request", "fields": {"addr": 129804604, "data": 0, "mask": 0, "we": 0}, "seq": 297, "time_ns": 3564000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 152, "row": 7922, "we": 0}, "seq": 298, "time_ns": 3564000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 15, "bank": 5, "col": 152, "row": 7922, "type": 1, "we": 0}, "seq": 299, "time_ns": 3574000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 15, "bank": 5, "col": 152, "row": 7922, "type": 1, "we": 0}, "seq": 300, "time_ns": 3574000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 7922, "bank": 5, "cmd": 3}, "seq": 301, "time_ns": 3579000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 302, "time_ns": 3644000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 15, "bank": 5, "col": 152, "row": 7922, "type": 2, "we": 0}, "seq": 303, "time_ns": 3644000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 304, "time_ns": 3644000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 15, "bank": 5, "col": 152, "row": 7922, "type": 2, "we": 0}, "seq": 305, "time_ns": 3644000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 15}, "seq": 306, "time_ns": 3649000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 152, "bank": 5, "cmd": 5}, "seq": 307, "time_ns": 3649000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 65383}, "seq": 308, "time_ns": 3669000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 129804604, "data": 4284940288}, "seq": 309, "time_ns": 3674000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 15, "data": 4284940288}, "seq": 310, "time_ns": 3674000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 13740}, "seq": 311, "time_ns": 3674000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 453233942}, "seq": 312, "time_ns": 3743000}
-{"iface": "req", "kind": "request", "fields": {"addr": 453233942, "data": 0, "mask": 0, "we": 0}, "seq": 313, "time_ns": 3744000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 1, "col": 648, "row": 27663, "we": 0}, "seq": 314, "time_ns": 3744000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 648, "row": 27663, "type": 4, "we": 0}, "seq": 315, "time_ns": 3754000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 648, "row": 27663, "type": 4, "we": 0}, "seq": 316, "time_ns": 3754000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 1, "cmd": 2}, "seq": 317, "time_ns": 3759000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 648, "row": 27663, "type": 1, "we": 0}, "seq": 318, "time_ns": 3824000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 648, "row": 27663, "type": 1, "we": 0}, "seq": 319, "time_ns": 3824000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 27663, "bank": 1, "cmd": 3}, "seq": 320, "time_ns": 3829000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 321, "time_ns": 3894000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 648, "row": 27663, "type": 2, "we": 0}, "seq": 322, "time_ns": 3894000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 323, "time_ns": 3894000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 648, "row": 27663, "type": 2, "we": 0}, "seq": 324, "time_ns": 3894000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 0}, "seq": 325, "time_ns": 3899000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 648, "bank": 1, "cmd": 5}, "seq": 326, "time_ns": 3899000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32119}, "seq": 327, "time_ns": 3919000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 453233942, "data": 2104950784}, "seq": 328, "time_ns": 3924000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 0, "data": 2104950784}, "seq": 329, "time_ns": 3924000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 56717}, "seq": 330, "time_ns": 3924000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 325739463}, "seq": 331, "time_ns": 3978000}
-{"iface": "req", "kind": "request", "fields": {"addr": 325739463, "data": 0, "mask": 0, "we": 0}, "seq": 332, "time_ns": 3979000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 4, "col": 480, "row": 19881, "we": 0}, "seq": 333, "time_ns": 3979000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 1, "bank": 4, "col": 480, "row": 19881, "type": 4, "we": 0}, "seq": 334, "time_ns": 3989000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 1, "bank": 4, "col": 480, "row": 19881, "type": 4, "we": 0}, "seq": 335, "time_ns": 3989000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 4, "cmd": 2}, "seq": 336, "time_ns": 3994000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 1, "bank": 4, "col": 480, "row": 19881, "type": 1, "we": 0}, "seq": 337, "time_ns": 4059000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 1, "bank": 4, "col": 480, "row": 19881, "type": 1, "we": 0}, "seq": 338, "time_ns": 4059000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 19881, "bank": 4, "cmd": 3}, "seq": 339, "time_ns": 4064000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 340, "time_ns": 4129000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 1, "bank": 4, "col": 480, "row": 19881, "type": 2, "we": 0}, "seq": 341, "time_ns": 4129000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 342, "time_ns": 4129000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 1, "bank": 4, "col": 480, "row": 19881, "type": 2, "we": 0}, "seq": 343, "time_ns": 4129000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 1}, "seq": 344, "time_ns": 4134000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 480, "bank": 4, "cmd": 5}, "seq": 345, "time_ns": 4134000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32287}, "seq": 346, "time_ns": 4154000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 325739463, "data": 2115960832}, "seq": 347, "time_ns": 4159000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 1, "data": 2115960832}, "seq": 348, "time_ns": 4159000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 60859}, "seq": 349, "time_ns": 4159000}
-{"iface": "wb", "kind": "read", "fields": {"addr": 422360239}, "seq": 350, "time_ns": 4193000}
-{"iface": "req", "kind": "request", "fields": {"addr": 422360239, "data": 0, "mask": 0, "we": 0}, "seq": 351, "time_ns": 4194000}
-{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 592, "row": 25778, "we": 0}, "seq": 352, "time_ns": 4194000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 2, "bank": 6, "col": 592, "row": 25778, "type": 4, "we": 0}, "seq": 353, "time_ns": 4204000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 2, "bank": 6, "col": 592, "row": 25778, "type": 4, "we": 0}, "seq": 354, "time_ns": 4204000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 6, "cmd": 2}, "seq": 355, "time_ns": 4209000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 2, "bank": 6, "col": 592, "row": 25778, "type": 1, "we": 0}, "seq": 356, "time_ns": 4274000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 2, "bank": 6, "col": 592, "row": 25778, "type": 1, "we": 0}, "seq": 357, "time_ns": 4274000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 25778, "bank": 6, "cmd": 3}, "seq": 358, "time_ns": 4279000}
-{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 359, "time_ns": 4344000}
-{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 2, "bank": 6, "col": 592, "row": 25778, "type": 2, "we": 0}, "seq": 360, "time_ns": 4344000}
-{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 361, "time_ns": 4344000}
-{"iface": "sched_in", "kind": "command", "fields": {"aux": 2, "bank": 6, "col": 592, "row": 25778, "type": 2, "we": 0}, "seq": 362, "time_ns": 4344000}
-{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 2}, "seq": 363, "time_ns": 4349000}
-{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 592, "bank": 6, "cmd": 5}, "seq": 364, "time_ns": 4349000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 64943}, "seq": 365, "time_ns": 4369000}
-{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 422360239, "data": 4256104448}, "seq": 366, "time_ns": 4374000}
-{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 2, "data": 4256104448}, "seq": 367, "time_ns": 4374000}
-{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 13696}, "seq": 368, "time_ns": 4374000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 506456969, "mask": 15}, "seq": 32, "time_ns": 39000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 1, "col": 640, "row": 16716, "we": 1}, "seq": 33, "time_ns": 39000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 34, "time_ns": 39000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 273878288, "bte": 0, "cti": 2, "data": 3268308804, "sel": 15}, "seq": 35, "time_ns": 43000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 36, "time_ns": 43000}
+{"iface": "req", "kind": "request", "fields": {"addr": 273878288, "data": 3268308804, "mask": 15, "we": 1}, "seq": 37, "time_ns": 44000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 3268308804, "mask": 15}, "seq": 38, "time_ns": 44000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 1, "col": 648, "row": 16716, "we": 1}, "seq": 39, "time_ns": 44000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 273878292, "bte": 0, "cti": 7, "data": 901749037, "sel": 15}, "seq": 40, "time_ns": 48000}
+{"iface": "req", "kind": "request", "fields": {"addr": 273878292, "data": 901749037, "mask": 15, "we": 1}, "seq": 41, "time_ns": 49000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 901749037, "mask": 15}, "seq": 42, "time_ns": 49000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 1, "col": 648, "row": 16716, "we": 1}, "seq": 43, "time_ns": 49000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 464680096, "bte": 0, "cti": 2}, "seq": 44, "time_ns": 88000}
+{"iface": "req", "kind": "request", "fields": {"addr": 464680096, "data": 901749037, "mask": 15, "we": 0}, "seq": 45, "time_ns": 89000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 592, "row": 28361, "we": 0}, "seq": 46, "time_ns": 89000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 464680100, "bte": 0, "cti": 7}, "seq": 47, "time_ns": 93000}
+{"iface": "req", "kind": "request", "fields": {"addr": 464680100, "data": 901749037, "mask": 15, "we": 0}, "seq": 48, "time_ns": 94000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 592, "row": 28361, "we": 0}, "seq": 49, "time_ns": 94000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 640, "row": 16716, "type": 1, "we": 1}, "seq": 50, "time_ns": 689000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 640, "row": 16716, "type": 1, "we": 1}, "seq": 51, "time_ns": 689000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 16716, "bank": 1, "cmd": 3}, "seq": 52, "time_ns": 694000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 3, "bank": 6, "col": 592, "row": 28361, "type": 1, "we": 0}, "seq": 53, "time_ns": 734000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 3, "bank": 6, "col": 592, "row": 28361, "type": 1, "we": 0}, "seq": 54, "time_ns": 734000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 28361, "bank": 6, "cmd": 3}, "seq": 55, "time_ns": 739000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 56, "time_ns": 759000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 640, "row": 16716, "type": 3, "we": 1}, "seq": 57, "time_ns": 759000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 58, "time_ns": 759000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 640, "row": 16716, "type": 3, "we": 1}, "seq": 59, "time_ns": 759000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 1}, "seq": 60, "time_ns": 764000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 1, "bank": 1, "col": 648, "row": 16716, "type": 3, "we": 1}, "seq": 61, "time_ns": 764000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 0}, "seq": 62, "time_ns": 764000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 1}, "seq": 63, "time_ns": 764000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 1, "bank": 1, "col": 648, "row": 16716, "type": 3, "we": 1}, "seq": 64, "time_ns": 764000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 640, "bank": 1, "cmd": 4}, "seq": 65, "time_ns": 764000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 2}, "seq": 66, "time_ns": 769000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 2, "bank": 1, "col": 648, "row": 16716, "type": 3, "we": 1}, "seq": 67, "time_ns": 769000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 1}, "seq": 68, "time_ns": 769000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 2}, "seq": 69, "time_ns": 769000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 2, "bank": 1, "col": 648, "row": 16716, "type": 3, "we": 1}, "seq": 70, "time_ns": 769000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 648, "bank": 1, "cmd": 4}, "seq": 71, "time_ns": 769000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 2}, "seq": 72, "time_ns": 774000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 648, "bank": 1, "cmd": 4}, "seq": 73, "time_ns": 774000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 60297, "mask": 0}, "seq": 74, "time_ns": 779000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 7727, "mask": 0}, "seq": 75, "time_ns": 784000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 3}, "seq": 76, "time_ns": 874000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 3, "bank": 6, "col": 592, "row": 28361, "type": 2, "we": 0}, "seq": 77, "time_ns": 874000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 3}, "seq": 78, "time_ns": 874000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 3, "bank": 6, "col": 592, "row": 28361, "type": 2, "we": 0}, "seq": 79, "time_ns": 874000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 4}, "seq": 80, "time_ns": 879000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 4, "bank": 6, "col": 592, "row": 28361, "type": 2, "we": 0}, "seq": 81, "time_ns": 879000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 3}, "seq": 82, "time_ns": 879000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 4}, "seq": 83, "time_ns": 879000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 4, "bank": 6, "col": 592, "row": 28361, "type": 2, "we": 0}, "seq": 84, "time_ns": 879000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 592, "bank": 6, "cmd": 5}, "seq": 85, "time_ns": 879000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 4}, "seq": 86, "time_ns": 884000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 592, "bank": 6, "cmd": 5}, "seq": 87, "time_ns": 884000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32175}, "seq": 88, "time_ns": 899000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 464680096, "data": 2108620800}, "seq": 89, "time_ns": 904000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 3, "data": 2108620800}, "seq": 90, "time_ns": 904000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 60800}, "seq": 91, "time_ns": 904000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 60800}, "seq": 92, "time_ns": 909000}
+{"iface": "refresh_req", "kind": "request", "fields": {"pending": 1, "starve": 0, "urgent": 0}, "seq": 93, "time_ns": 7829000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 1, "required": 1, "starve": 0, "urgent": 0}, "seq": 94, "time_ns": 7829000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 1, "self_refresh": 0}, "seq": 95, "time_ns": 7833000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 96, "time_ns": 7834000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 97, "time_ns": 7834000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 98, "time_ns": 7839000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 99, "time_ns": 7839000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 1, "cmd": 2}, "seq": 100, "time_ns": 7839000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 6, "cmd": 2}, "seq": 101, "time_ns": 7844000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 102, "time_ns": 7909000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 1}, "seq": 103, "time_ns": 7909000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 104, "time_ns": 7909000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 0, "required": 0, "starve": 0, "urgent": 0}, "seq": 105, "time_ns": 7914000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 106, "time_ns": 7914000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 107, "time_ns": 7918000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 478230856, "bte": 0, "cti": 2, "data": 3443818037, "sel": 15}, "seq": 108, "time_ns": 10373000}
+{"iface": "req", "kind": "request", "fields": {"addr": 478230856, "data": 3443818037, "mask": 15, "we": 1}, "seq": 109, "time_ns": 10374000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 3443818037, "mask": 15}, "seq": 110, "time_ns": 10374000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 7, "col": 160, "row": 29188, "we": 1}, "seq": 111, "time_ns": 10374000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 478230860, "bte": 0, "cti": 2, "data": 1363349907, "sel": 15}, "seq": 112, "time_ns": 10378000}
+{"iface": "req", "kind": "request", "fields": {"addr": 478230860, "data": 1363349907, "mask": 15, "we": 1}, "seq": 113, "time_ns": 10379000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 1363349907, "mask": 15}, "seq": 114, "time_ns": 10379000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 7, "col": 160, "row": 29188, "we": 1}, "seq": 115, "time_ns": 10379000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 478230864, "bte": 0, "cti": 2, "data": 95872739, "sel": 15}, "seq": 116, "time_ns": 10383000}
+{"iface": "req", "kind": "request", "fields": {"addr": 478230864, "data": 95872739, "mask": 15, "we": 1}, "seq": 117, "time_ns": 10384000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 5, "bank": 7, "col": 160, "row": 29188, "type": 1, "we": 1}, "seq": 118, "time_ns": 10384000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 95872739, "mask": 15}, "seq": 119, "time_ns": 10384000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 7, "col": 168, "row": 29188, "we": 1}, "seq": 120, "time_ns": 10384000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 5, "bank": 7, "col": 160, "row": 29188, "type": 1, "we": 1}, "seq": 121, "time_ns": 10384000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 478230868, "bte": 0, "cti": 2, "data": 3784870617, "sel": 15}, "seq": 122, "time_ns": 10388000}
+{"iface": "req", "kind": "request", "fields": {"addr": 478230868, "data": 3784870617, "mask": 15, "we": 1}, "seq": 123, "time_ns": 10389000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 3784870617, "mask": 15}, "seq": 124, "time_ns": 10389000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 7, "col": 168, "row": 29188, "we": 1}, "seq": 125, "time_ns": 10389000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 29188, "bank": 7, "cmd": 3}, "seq": 126, "time_ns": 10389000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 478230872, "bte": 0, "cti": 2, "data": 2948425721, "sel": 15}, "seq": 127, "time_ns": 10393000}
+{"iface": "req", "kind": "request", "fields": {"addr": 478230872, "data": 2948425721, "mask": 15, "we": 1}, "seq": 128, "time_ns": 10394000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 2948425721, "mask": 15}, "seq": 129, "time_ns": 10394000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 7, "col": 168, "row": 29188, "we": 1}, "seq": 130, "time_ns": 10394000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 478230876, "bte": 0, "cti": 2, "data": 4161997890, "sel": 15}, "seq": 131, "time_ns": 10398000}
+{"iface": "req", "kind": "request", "fields": {"addr": 478230876, "data": 4161997890, "mask": 15, "we": 1}, "seq": 132, "time_ns": 10399000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 4161997890, "mask": 15}, "seq": 133, "time_ns": 10399000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 7, "col": 168, "row": 29188, "we": 1}, "seq": 134, "time_ns": 10399000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 478230880, "bte": 0, "cti": 2, "data": 3117513184, "sel": 15}, "seq": 135, "time_ns": 10403000}
+{"iface": "req", "kind": "request", "fields": {"addr": 478230880, "data": 3117513184, "mask": 15, "we": 1}, "seq": 136, "time_ns": 10404000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 3117513184, "mask": 15}, "seq": 137, "time_ns": 10404000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 7, "col": 176, "row": 29188, "we": 1}, "seq": 138, "time_ns": 10404000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 478230884, "bte": 0, "cti": 7, "data": 2266151100, "sel": 15}, "seq": 139, "time_ns": 10408000}
+{"iface": "req", "kind": "request", "fields": {"addr": 478230884, "data": 2266151100, "mask": 15, "we": 1}, "seq": 140, "time_ns": 10409000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 2266151100, "mask": 15}, "seq": 141, "time_ns": 10409000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 7, "col": 176, "row": 29188, "we": 1}, "seq": 142, "time_ns": 10409000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 143, "time_ns": 10454000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 5, "bank": 7, "col": 160, "row": 29188, "type": 3, "we": 1}, "seq": 144, "time_ns": 10454000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 145, "time_ns": 10454000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 5, "bank": 7, "col": 160, "row": 29188, "type": 3, "we": 1}, "seq": 146, "time_ns": 10454000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 1}, "seq": 147, "time_ns": 10459000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 6, "bank": 7, "col": 160, "row": 29188, "type": 3, "we": 1}, "seq": 148, "time_ns": 10459000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 5}, "seq": 149, "time_ns": 10459000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 1}, "seq": 150, "time_ns": 10459000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 6, "bank": 7, "col": 160, "row": 29188, "type": 3, "we": 1}, "seq": 151, "time_ns": 10459000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 160, "bank": 7, "cmd": 4}, "seq": 152, "time_ns": 10459000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 2}, "seq": 153, "time_ns": 10464000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 7, "bank": 7, "col": 168, "row": 29188, "type": 3, "we": 1}, "seq": 154, "time_ns": 10464000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 6}, "seq": 155, "time_ns": 10464000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 2}, "seq": 156, "time_ns": 10464000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 7, "bank": 7, "col": 168, "row": 29188, "type": 3, "we": 1}, "seq": 157, "time_ns": 10464000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 160, "bank": 7, "cmd": 4}, "seq": 158, "time_ns": 10464000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 7}, "seq": 159, "time_ns": 10469000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 168, "bank": 7, "cmd": 4}, "seq": 160, "time_ns": 10469000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 28484, "mask": 0}, "seq": 161, "time_ns": 10474000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 49870, "mask": 0}, "seq": 162, "time_ns": 10479000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 3}, "seq": 163, "time_ns": 10499000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 8, "bank": 7, "col": 168, "row": 29188, "type": 3, "we": 1}, "seq": 164, "time_ns": 10499000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 3}, "seq": 165, "time_ns": 10499000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 8, "bank": 7, "col": 168, "row": 29188, "type": 3, "we": 1}, "seq": 166, "time_ns": 10499000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 4}, "seq": 167, "time_ns": 10504000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 9, "bank": 7, "col": 168, "row": 29188, "type": 3, "we": 1}, "seq": 168, "time_ns": 10504000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 8}, "seq": 169, "time_ns": 10504000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 4}, "seq": 170, "time_ns": 10504000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 9, "bank": 7, "col": 168, "row": 29188, "type": 3, "we": 1}, "seq": 171, "time_ns": 10504000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 168, "bank": 7, "cmd": 4}, "seq": 172, "time_ns": 10504000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 5}, "seq": 173, "time_ns": 10509000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 10, "bank": 7, "col": 168, "row": 29188, "type": 3, "we": 1}, "seq": 174, "time_ns": 10509000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 9}, "seq": 175, "time_ns": 10509000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 5}, "seq": 176, "time_ns": 10509000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 10, "bank": 7, "col": 168, "row": 29188, "type": 3, "we": 1}, "seq": 177, "time_ns": 10509000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 168, "bank": 7, "cmd": 4}, "seq": 178, "time_ns": 10509000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 10}, "seq": 179, "time_ns": 10514000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 168, "bank": 7, "cmd": 4}, "seq": 180, "time_ns": 10514000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 39213, "mask": 0}, "seq": 181, "time_ns": 10519000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 13759, "mask": 0}, "seq": 182, "time_ns": 10524000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 6}, "seq": 183, "time_ns": 10544000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 11, "bank": 7, "col": 176, "row": 29188, "type": 3, "we": 1}, "seq": 184, "time_ns": 10544000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 6}, "seq": 185, "time_ns": 10544000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 11, "bank": 7, "col": 176, "row": 29188, "type": 3, "we": 1}, "seq": 186, "time_ns": 10544000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 7}, "seq": 187, "time_ns": 10549000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 12, "bank": 7, "col": 176, "row": 29188, "type": 3, "we": 1}, "seq": 188, "time_ns": 10549000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 11}, "seq": 189, "time_ns": 10549000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 7}, "seq": 190, "time_ns": 10549000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 12, "bank": 7, "col": 176, "row": 29188, "type": 3, "we": 1}, "seq": 191, "time_ns": 10549000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 176, "bank": 7, "cmd": 4}, "seq": 192, "time_ns": 10549000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 12}, "seq": 193, "time_ns": 10554000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 176, "bank": 7, "cmd": 4}, "seq": 194, "time_ns": 10554000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 32309, "mask": 0}, "seq": 195, "time_ns": 10564000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 52548, "mask": 0}, "seq": 196, "time_ns": 10569000}
+{"iface": "refresh_req", "kind": "request", "fields": {"pending": 1, "starve": 0, "urgent": 0}, "seq": 197, "time_ns": 15629000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 1, "required": 1, "starve": 0, "urgent": 0}, "seq": 198, "time_ns": 15629000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 1, "self_refresh": 0}, "seq": 199, "time_ns": 15633000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 7, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 200, "time_ns": 15634000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 7, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 201, "time_ns": 15634000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 7, "cmd": 2}, "seq": 202, "time_ns": 15639000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 203, "time_ns": 15704000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 1}, "seq": 204, "time_ns": 15704000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 205, "time_ns": 15704000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 0, "required": 0, "starve": 0, "urgent": 0}, "seq": 206, "time_ns": 15709000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 207, "time_ns": 15709000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 208, "time_ns": 15713000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 371192992, "bte": 0, "cti": 2, "data": 92297589, "sel": 15}, "seq": 209, "time_ns": 20683000}
+{"iface": "req", "kind": "request", "fields": {"addr": 371192992, "data": 92297589, "mask": 15, "we": 1}, "seq": 210, "time_ns": 20684000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 92297589, "mask": 15}, "seq": 211, "time_ns": 20684000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 592, "row": 22655, "we": 1}, "seq": 212, "time_ns": 20684000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 371192996, "bte": 0, "cti": 2, "data": 2758633299, "sel": 15}, "seq": 213, "time_ns": 20688000}
+{"iface": "req", "kind": "request", "fields": {"addr": 371192996, "data": 2758633299, "mask": 15, "we": 1}, "seq": 214, "time_ns": 20689000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 2758633299, "mask": 15}, "seq": 215, "time_ns": 20689000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 592, "row": 22655, "we": 1}, "seq": 216, "time_ns": 20689000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 371193000, "bte": 0, "cti": 2, "data": 3693442237, "sel": 15}, "seq": 217, "time_ns": 20693000}
+{"iface": "req", "kind": "request", "fields": {"addr": 371193000, "data": 3693442237, "mask": 15, "we": 1}, "seq": 218, "time_ns": 20694000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 13, "bank": 6, "col": 592, "row": 22655, "type": 1, "we": 1}, "seq": 219, "time_ns": 20694000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 3693442237, "mask": 15}, "seq": 220, "time_ns": 20694000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 592, "row": 22655, "we": 1}, "seq": 221, "time_ns": 20694000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 13, "bank": 6, "col": 592, "row": 22655, "type": 1, "we": 1}, "seq": 222, "time_ns": 20694000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 371193004, "bte": 0, "cti": 2, "data": 2878940490, "sel": 15}, "seq": 223, "time_ns": 20698000}
+{"iface": "req", "kind": "request", "fields": {"addr": 371193004, "data": 2878940490, "mask": 15, "we": 1}, "seq": 224, "time_ns": 20699000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 2878940490, "mask": 15}, "seq": 225, "time_ns": 20699000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 592, "row": 22655, "we": 1}, "seq": 226, "time_ns": 20699000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 22655, "bank": 6, "cmd": 3}, "seq": 227, "time_ns": 20699000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 371193008, "bte": 0, "cti": 7, "data": 1302957853, "sel": 15}, "seq": 228, "time_ns": 20703000}
+{"iface": "req", "kind": "request", "fields": {"addr": 371193008, "data": 1302957853, "mask": 15, "we": 1}, "seq": 229, "time_ns": 20704000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 1302957853, "mask": 15}, "seq": 230, "time_ns": 20704000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 600, "row": 22655, "we": 1}, "seq": 231, "time_ns": 20704000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 232, "time_ns": 20764000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 13, "bank": 6, "col": 592, "row": 22655, "type": 3, "we": 1}, "seq": 233, "time_ns": 20764000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 234, "time_ns": 20764000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 13, "bank": 6, "col": 592, "row": 22655, "type": 3, "we": 1}, "seq": 235, "time_ns": 20764000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 1}, "seq": 236, "time_ns": 20769000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 14, "bank": 6, "col": 592, "row": 22655, "type": 3, "we": 1}, "seq": 237, "time_ns": 20769000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 13}, "seq": 238, "time_ns": 20769000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 1}, "seq": 239, "time_ns": 20769000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 14, "bank": 6, "col": 592, "row": 22655, "type": 3, "we": 1}, "seq": 240, "time_ns": 20769000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 592, "bank": 6, "cmd": 4}, "seq": 241, "time_ns": 20769000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 2}, "seq": 242, "time_ns": 20774000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 15, "bank": 6, "col": 592, "row": 22655, "type": 3, "we": 1}, "seq": 243, "time_ns": 20774000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 14}, "seq": 244, "time_ns": 20774000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 2}, "seq": 245, "time_ns": 20774000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 15, "bank": 6, "col": 592, "row": 22655, "type": 3, "we": 1}, "seq": 246, "time_ns": 20774000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 592, "bank": 6, "cmd": 4}, "seq": 247, "time_ns": 20774000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 15}, "seq": 248, "time_ns": 20779000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 592, "bank": 6, "cmd": 4}, "seq": 249, "time_ns": 20779000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 4499, "mask": 0}, "seq": 250, "time_ns": 20784000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 20803, "mask": 0}, "seq": 251, "time_ns": 20789000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 3}, "seq": 252, "time_ns": 20809000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 592, "row": 22655, "type": 3, "we": 1}, "seq": 253, "time_ns": 20809000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 3}, "seq": 254, "time_ns": 20809000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 592, "row": 22655, "type": 3, "we": 1}, "seq": 255, "time_ns": 20809000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 4}, "seq": 256, "time_ns": 20814000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 1, "bank": 6, "col": 600, "row": 22655, "type": 3, "we": 1}, "seq": 257, "time_ns": 20814000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 0}, "seq": 258, "time_ns": 20814000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 4}, "seq": 259, "time_ns": 20814000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 1, "bank": 6, "col": 600, "row": 22655, "type": 3, "we": 1}, "seq": 260, "time_ns": 20814000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 592, "bank": 6, "cmd": 4}, "seq": 261, "time_ns": 20814000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 1}, "seq": 262, "time_ns": 20819000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 600, "bank": 6, "cmd": 4}, "seq": 263, "time_ns": 20819000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 59107, "mask": 0}, "seq": 264, "time_ns": 20829000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 1462, "mask": 0}, "seq": 265, "time_ns": 20834000}
+{"iface": "refresh_req", "kind": "request", "fields": {"pending": 1, "starve": 0, "urgent": 0}, "seq": 266, "time_ns": 23429000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 1, "required": 1, "starve": 0, "urgent": 0}, "seq": 267, "time_ns": 23429000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 1, "self_refresh": 0}, "seq": 268, "time_ns": 23433000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 269, "time_ns": 23434000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 270, "time_ns": 23434000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 6, "cmd": 2}, "seq": 271, "time_ns": 23439000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 272, "time_ns": 23504000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 1}, "seq": 273, "time_ns": 23504000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 274, "time_ns": 23504000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 0, "required": 0, "starve": 0, "urgent": 0}, "seq": 275, "time_ns": 23509000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 276, "time_ns": 23509000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 277, "time_ns": 23513000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 37071828, "bte": 0, "cti": 2}, "seq": 278, "time_ns": 30983000}
+{"iface": "req", "kind": "request", "fields": {"addr": 37071828, "data": 1302957853, "mask": 15, "we": 0}, "seq": 279, "time_ns": 30984000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 488, "row": 2262, "we": 0}, "seq": 280, "time_ns": 30984000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 37071832, "bte": 0, "cti": 2}, "seq": 281, "time_ns": 30988000}
+{"iface": "req", "kind": "request", "fields": {"addr": 37071832, "data": 1302957853, "mask": 15, "we": 0}, "seq": 282, "time_ns": 30989000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 488, "row": 2262, "we": 0}, "seq": 283, "time_ns": 30989000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 37071836, "bte": 0, "cti": 2}, "seq": 284, "time_ns": 30993000}
+{"iface": "req", "kind": "request", "fields": {"addr": 37071836, "data": 1302957853, "mask": 15, "we": 0}, "seq": 285, "time_ns": 30994000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 2, "bank": 5, "col": 488, "row": 2262, "type": 1, "we": 0}, "seq": 286, "time_ns": 30994000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 488, "row": 2262, "we": 0}, "seq": 287, "time_ns": 30994000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 2, "bank": 5, "col": 488, "row": 2262, "type": 1, "we": 0}, "seq": 288, "time_ns": 30994000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 37071840, "bte": 0, "cti": 2}, "seq": 289, "time_ns": 30998000}
+{"iface": "req", "kind": "request", "fields": {"addr": 37071840, "data": 1302957853, "mask": 15, "we": 0}, "seq": 290, "time_ns": 30999000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 496, "row": 2262, "we": 0}, "seq": 291, "time_ns": 30999000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 2262, "bank": 5, "cmd": 3}, "seq": 292, "time_ns": 30999000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 37071844, "bte": 0, "cti": 7}, "seq": 293, "time_ns": 31003000}
+{"iface": "req", "kind": "request", "fields": {"addr": 37071844, "data": 1302957853, "mask": 15, "we": 0}, "seq": 294, "time_ns": 31004000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 496, "row": 2262, "we": 0}, "seq": 295, "time_ns": 31004000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 296, "time_ns": 31064000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 2, "bank": 5, "col": 488, "row": 2262, "type": 2, "we": 0}, "seq": 297, "time_ns": 31064000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 298, "time_ns": 31064000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 2, "bank": 5, "col": 488, "row": 2262, "type": 2, "we": 0}, "seq": 299, "time_ns": 31064000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 1}, "seq": 300, "time_ns": 31069000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 3, "bank": 5, "col": 488, "row": 2262, "type": 2, "we": 0}, "seq": 301, "time_ns": 31069000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 2}, "seq": 302, "time_ns": 31069000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 1}, "seq": 303, "time_ns": 31069000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 3, "bank": 5, "col": 488, "row": 2262, "type": 2, "we": 0}, "seq": 304, "time_ns": 31069000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 488, "bank": 5, "cmd": 5}, "seq": 305, "time_ns": 31069000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 2}, "seq": 306, "time_ns": 31074000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 4, "bank": 5, "col": 488, "row": 2262, "type": 2, "we": 0}, "seq": 307, "time_ns": 31074000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 3}, "seq": 308, "time_ns": 31074000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 2}, "seq": 309, "time_ns": 31074000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 4, "bank": 5, "col": 488, "row": 2262, "type": 2, "we": 0}, "seq": 310, "time_ns": 31074000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 488, "bank": 5, "cmd": 5}, "seq": 311, "time_ns": 31074000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 4}, "seq": 312, "time_ns": 31079000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 488, "bank": 5, "cmd": 5}, "seq": 313, "time_ns": 31079000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 65047}, "seq": 314, "time_ns": 31089000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 464680100, "data": 4262920192}, "seq": 315, "time_ns": 31094000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 2, "data": 4262920192}, "seq": 316, "time_ns": 31094000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 5563}, "seq": 317, "time_ns": 31094000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 5563}, "seq": 318, "time_ns": 31099000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 5563}, "seq": 319, "time_ns": 31104000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 3}, "seq": 320, "time_ns": 31109000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 5, "bank": 5, "col": 496, "row": 2262, "type": 2, "we": 0}, "seq": 321, "time_ns": 31109000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 3}, "seq": 322, "time_ns": 31109000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 5, "bank": 5, "col": 496, "row": 2262, "type": 2, "we": 0}, "seq": 323, "time_ns": 31109000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 4}, "seq": 324, "time_ns": 31114000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 6, "bank": 5, "col": 496, "row": 2262, "type": 2, "we": 0}, "seq": 325, "time_ns": 31114000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 5}, "seq": 326, "time_ns": 31114000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 4}, "seq": 327, "time_ns": 31114000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 6, "bank": 5, "col": 496, "row": 2262, "type": 2, "we": 0}, "seq": 328, "time_ns": 31114000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 496, "bank": 5, "cmd": 5}, "seq": 329, "time_ns": 31114000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 6}, "seq": 330, "time_ns": 31119000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 496, "bank": 5, "cmd": 5}, "seq": 331, "time_ns": 31119000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 65039}, "seq": 332, "time_ns": 31134000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 37071828, "data": 4262395904}, "seq": 333, "time_ns": 31139000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 5, "data": 4262395904}, "seq": 334, "time_ns": 31139000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 5562}, "seq": 335, "time_ns": 31139000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 5562}, "seq": 336, "time_ns": 31144000}
+{"iface": "refresh_req", "kind": "request", "fields": {"pending": 1, "starve": 0, "urgent": 0}, "seq": 337, "time_ns": 31229000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 1, "required": 1, "starve": 0, "urgent": 0}, "seq": 338, "time_ns": 31229000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 1, "self_refresh": 0}, "seq": 339, "time_ns": 31233000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 5, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 340, "time_ns": 31234000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 5, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 341, "time_ns": 31234000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 5, "cmd": 2}, "seq": 342, "time_ns": 31239000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 343, "time_ns": 31304000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 1}, "seq": 344, "time_ns": 31304000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 345, "time_ns": 31304000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 0, "required": 0, "starve": 0, "urgent": 0}, "seq": 346, "time_ns": 31309000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 347, "time_ns": 31309000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 348, "time_ns": 31313000}
+{"iface": "refresh_req", "kind": "request", "fields": {"pending": 1, "starve": 0, "urgent": 0}, "seq": 349, "time_ns": 39029000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 1, "required": 1, "starve": 0, "urgent": 0}, "seq": 350, "time_ns": 39029000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 1, "self_refresh": 0}, "seq": 351, "time_ns": 39033000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 352, "time_ns": 39034000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 1}, "seq": 353, "time_ns": 39034000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 354, "time_ns": 39034000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 0, "required": 0, "starve": 0, "urgent": 0}, "seq": 355, "time_ns": 39039000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 356, "time_ns": 39039000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 357, "time_ns": 39043000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 444866268, "bte": 0, "cti": 2}, "seq": 358, "time_ns": 41278000}
+{"iface": "req", "kind": "request", "fields": {"addr": 444866268, "data": 1302957853, "mask": 15, "we": 0}, "seq": 359, "time_ns": 41279000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 3, "col": 872, "row": 27152, "we": 0}, "seq": 360, "time_ns": 41279000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 444866272, "bte": 0, "cti": 2}, "seq": 361, "time_ns": 41283000}
+{"iface": "req", "kind": "request", "fields": {"addr": 444866272, "data": 1302957853, "mask": 15, "we": 0}, "seq": 362, "time_ns": 41284000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 3, "col": 880, "row": 27152, "we": 0}, "seq": 363, "time_ns": 41284000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 444866276, "bte": 0, "cti": 7}, "seq": 364, "time_ns": 41288000}
+{"iface": "req", "kind": "request", "fields": {"addr": 444866276, "data": 1302957853, "mask": 15, "we": 0}, "seq": 365, "time_ns": 41289000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 7, "bank": 3, "col": 872, "row": 27152, "type": 1, "we": 0}, "seq": 366, "time_ns": 41289000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 3, "col": 880, "row": 27152, "we": 0}, "seq": 367, "time_ns": 41289000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 7, "bank": 3, "col": 872, "row": 27152, "type": 1, "we": 0}, "seq": 368, "time_ns": 41289000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 27152, "bank": 3, "cmd": 3}, "seq": 369, "time_ns": 41294000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 370, "time_ns": 41359000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 7, "bank": 3, "col": 872, "row": 27152, "type": 2, "we": 0}, "seq": 371, "time_ns": 41359000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 372, "time_ns": 41359000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 7, "bank": 3, "col": 872, "row": 27152, "type": 2, "we": 0}, "seq": 373, "time_ns": 41359000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 1}, "seq": 374, "time_ns": 41364000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 8, "bank": 3, "col": 880, "row": 27152, "type": 2, "we": 0}, "seq": 375, "time_ns": 41364000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 7}, "seq": 376, "time_ns": 41364000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 1}, "seq": 377, "time_ns": 41364000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 8, "bank": 3, "col": 880, "row": 27152, "type": 2, "we": 0}, "seq": 378, "time_ns": 41364000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 872, "bank": 3, "cmd": 5}, "seq": 379, "time_ns": 41364000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 2}, "seq": 380, "time_ns": 41369000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 9, "bank": 3, "col": 880, "row": 27152, "type": 2, "we": 0}, "seq": 381, "time_ns": 41369000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 8}, "seq": 382, "time_ns": 41369000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 2}, "seq": 383, "time_ns": 41369000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 9, "bank": 3, "col": 880, "row": 27152, "type": 2, "we": 0}, "seq": 384, "time_ns": 41369000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 880, "bank": 3, "cmd": 5}, "seq": 385, "time_ns": 41369000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 9}, "seq": 386, "time_ns": 41374000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 880, "bank": 3, "cmd": 5}, "seq": 387, "time_ns": 41374000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 64663}, "seq": 388, "time_ns": 41384000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 37071832, "data": 4237754368}, "seq": 389, "time_ns": 41389000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 7, "data": 4237754368}, "seq": 390, "time_ns": 41389000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 9619}, "seq": 391, "time_ns": 41389000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 9618}, "seq": 392, "time_ns": 41394000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 9618}, "seq": 393, "time_ns": 41399000}
+{"iface": "refresh_req", "kind": "request", "fields": {"pending": 1, "starve": 0, "urgent": 0}, "seq": 394, "time_ns": 46829000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 1, "required": 1, "starve": 0, "urgent": 0}, "seq": 395, "time_ns": 46829000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 1, "self_refresh": 0}, "seq": 396, "time_ns": 46833000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 3, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 397, "time_ns": 46834000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 3, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 398, "time_ns": 46834000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 3, "cmd": 2}, "seq": 399, "time_ns": 46839000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 400, "time_ns": 46904000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 1}, "seq": 401, "time_ns": 46904000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 402, "time_ns": 46904000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 0, "required": 0, "starve": 0, "urgent": 0}, "seq": 403, "time_ns": 46909000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 404, "time_ns": 46909000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 405, "time_ns": 46913000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 92843868, "bte": 0, "cti": 2}, "seq": 406, "time_ns": 51553000}
+{"iface": "req", "kind": "request", "fields": {"addr": 92843868, "data": 1302957853, "mask": 15, "we": 0}, "seq": 407, "time_ns": 51554000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 936, "row": 5666, "we": 0}, "seq": 408, "time_ns": 51554000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 92843872, "bte": 0, "cti": 2}, "seq": 409, "time_ns": 51558000}
+{"iface": "req", "kind": "request", "fields": {"addr": 92843872, "data": 1302957853, "mask": 15, "we": 0}, "seq": 410, "time_ns": 51559000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 944, "row": 5666, "we": 0}, "seq": 411, "time_ns": 51559000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 92843876, "bte": 0, "cti": 2}, "seq": 412, "time_ns": 51563000}
+{"iface": "req", "kind": "request", "fields": {"addr": 92843876, "data": 1302957853, "mask": 15, "we": 0}, "seq": 413, "time_ns": 51564000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 10, "bank": 5, "col": 936, "row": 5666, "type": 1, "we": 0}, "seq": 414, "time_ns": 51564000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 944, "row": 5666, "we": 0}, "seq": 415, "time_ns": 51564000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 10, "bank": 5, "col": 936, "row": 5666, "type": 1, "we": 0}, "seq": 416, "time_ns": 51564000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 92843880, "bte": 0, "cti": 7}, "seq": 417, "time_ns": 51568000}
+{"iface": "req", "kind": "request", "fields": {"addr": 92843880, "data": 1302957853, "mask": 15, "we": 0}, "seq": 418, "time_ns": 51569000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 944, "row": 5666, "we": 0}, "seq": 419, "time_ns": 51569000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 5666, "bank": 5, "cmd": 3}, "seq": 420, "time_ns": 51569000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 421, "time_ns": 51634000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 10, "bank": 5, "col": 936, "row": 5666, "type": 2, "we": 0}, "seq": 422, "time_ns": 51634000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 423, "time_ns": 51634000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 10, "bank": 5, "col": 936, "row": 5666, "type": 2, "we": 0}, "seq": 424, "time_ns": 51634000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 1}, "seq": 425, "time_ns": 51639000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 11, "bank": 5, "col": 944, "row": 5666, "type": 2, "we": 0}, "seq": 426, "time_ns": 51639000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 10}, "seq": 427, "time_ns": 51639000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 1}, "seq": 428, "time_ns": 51639000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 11, "bank": 5, "col": 944, "row": 5666, "type": 2, "we": 0}, "seq": 429, "time_ns": 51639000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 936, "bank": 5, "cmd": 5}, "seq": 430, "time_ns": 51639000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 2}, "seq": 431, "time_ns": 51644000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 12, "bank": 5, "col": 944, "row": 5666, "type": 2, "we": 0}, "seq": 432, "time_ns": 51644000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 11}, "seq": 433, "time_ns": 51644000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 2}, "seq": 434, "time_ns": 51644000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 12, "bank": 5, "col": 944, "row": 5666, "type": 2, "we": 0}, "seq": 435, "time_ns": 51644000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 944, "bank": 5, "cmd": 5}, "seq": 436, "time_ns": 51644000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 12}, "seq": 437, "time_ns": 51649000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 944, "bank": 5, "cmd": 5}, "seq": 438, "time_ns": 51649000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 64599}, "seq": 439, "time_ns": 51659000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 37071836, "data": 4233560064}, "seq": 440, "time_ns": 51664000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 10, "data": 4233560064}, "seq": 441, "time_ns": 51664000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 46495}, "seq": 442, "time_ns": 51664000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 46494}, "seq": 443, "time_ns": 51669000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 46494}, "seq": 444, "time_ns": 51674000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 3}, "seq": 445, "time_ns": 51679000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 13, "bank": 5, "col": 944, "row": 5666, "type": 2, "we": 0}, "seq": 446, "time_ns": 51679000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 3}, "seq": 447, "time_ns": 51679000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 13, "bank": 5, "col": 944, "row": 5666, "type": 2, "we": 0}, "seq": 448, "time_ns": 51679000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 13}, "seq": 449, "time_ns": 51684000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 944, "bank": 5, "cmd": 5}, "seq": 450, "time_ns": 51684000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 64591}, "seq": 451, "time_ns": 51704000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 37071840, "data": 4233035776}, "seq": 452, "time_ns": 51709000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 13, "data": 4233035776}, "seq": 453, "time_ns": 51709000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 46494}, "seq": 454, "time_ns": 51709000}
+{"iface": "refresh_req", "kind": "request", "fields": {"pending": 1, "starve": 0, "urgent": 0}, "seq": 455, "time_ns": 54629000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 1, "required": 1, "starve": 0, "urgent": 0}, "seq": 456, "time_ns": 54629000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 1, "self_refresh": 0}, "seq": 457, "time_ns": 54633000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 5, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 458, "time_ns": 54634000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 5, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 459, "time_ns": 54634000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 5, "cmd": 2}, "seq": 460, "time_ns": 54639000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 461, "time_ns": 54704000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 1}, "seq": 462, "time_ns": 54704000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 463, "time_ns": 54704000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 0, "required": 0, "starve": 0, "urgent": 0}, "seq": 464, "time_ns": 54709000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 465, "time_ns": 54709000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 466, "time_ns": 54713000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 175769704, "bte": 0, "cti": 2, "data": 1689017785, "sel": 15}, "seq": 467, "time_ns": 61843000}
+{"iface": "req", "kind": "request", "fields": {"addr": 175769704, "data": 1689017785, "mask": 15, "we": 1}, "seq": 468, "time_ns": 61844000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 1689017785, "mask": 15}, "seq": 469, "time_ns": 61844000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 1, "col": 48, "row": 10728, "we": 1}, "seq": 470, "time_ns": 61844000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 175769708, "bte": 0, "cti": 2, "data": 127023494, "sel": 15}, "seq": 471, "time_ns": 61848000}
+{"iface": "req", "kind": "request", "fields": {"addr": 175769708, "data": 127023494, "mask": 15, "we": 1}, "seq": 472, "time_ns": 61849000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 127023494, "mask": 15}, "seq": 473, "time_ns": 61849000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 1, "col": 48, "row": 10728, "we": 1}, "seq": 474, "time_ns": 61849000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 175769712, "bte": 0, "cti": 2, "data": 186776492, "sel": 15}, "seq": 475, "time_ns": 61853000}
+{"iface": "req", "kind": "request", "fields": {"addr": 175769712, "data": 186776492, "mask": 15, "we": 1}, "seq": 476, "time_ns": 61854000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 14, "bank": 1, "col": 48, "row": 10728, "type": 1, "we": 1}, "seq": 477, "time_ns": 61854000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 186776492, "mask": 15}, "seq": 478, "time_ns": 61854000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 1, "col": 56, "row": 10728, "we": 1}, "seq": 479, "time_ns": 61854000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 14, "bank": 1, "col": 48, "row": 10728, "type": 1, "we": 1}, "seq": 480, "time_ns": 61854000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 175769716, "bte": 0, "cti": 2, "data": 731644238, "sel": 15}, "seq": 481, "time_ns": 61858000}
+{"iface": "req", "kind": "request", "fields": {"addr": 175769716, "data": 731644238, "mask": 15, "we": 1}, "seq": 482, "time_ns": 61859000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 731644238, "mask": 15}, "seq": 483, "time_ns": 61859000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 1, "col": 56, "row": 10728, "we": 1}, "seq": 484, "time_ns": 61859000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 10728, "bank": 1, "cmd": 3}, "seq": 485, "time_ns": 61859000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 175769720, "bte": 0, "cti": 2, "data": 2157098196, "sel": 15}, "seq": 486, "time_ns": 61863000}
+{"iface": "req", "kind": "request", "fields": {"addr": 175769720, "data": 2157098196, "mask": 15, "we": 1}, "seq": 487, "time_ns": 61864000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 2157098196, "mask": 15}, "seq": 488, "time_ns": 61864000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 1, "col": 56, "row": 10728, "we": 1}, "seq": 489, "time_ns": 61864000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 175769724, "bte": 0, "cti": 2, "data": 4217987067, "sel": 15}, "seq": 490, "time_ns": 61868000}
+{"iface": "req", "kind": "request", "fields": {"addr": 175769724, "data": 4217987067, "mask": 15, "we": 1}, "seq": 491, "time_ns": 61869000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 4217987067, "mask": 15}, "seq": 492, "time_ns": 61869000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 1, "col": 56, "row": 10728, "we": 1}, "seq": 493, "time_ns": 61869000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 175769728, "bte": 0, "cti": 7, "data": 3309371709, "sel": 15}, "seq": 494, "time_ns": 61873000}
+{"iface": "req", "kind": "request", "fields": {"addr": 175769728, "data": 3309371709, "mask": 15, "we": 1}, "seq": 495, "time_ns": 61874000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 1, "col": 64, "row": 10728, "we": 1}, "seq": 496, "time_ns": 61874000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 497, "time_ns": 61924000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 14, "bank": 1, "col": 48, "row": 10728, "type": 3, "we": 1}, "seq": 498, "time_ns": 61924000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 499, "time_ns": 61924000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 14, "bank": 1, "col": 48, "row": 10728, "type": 3, "we": 1}, "seq": 500, "time_ns": 61924000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 1}, "seq": 501, "time_ns": 61929000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 15, "bank": 1, "col": 48, "row": 10728, "type": 3, "we": 1}, "seq": 502, "time_ns": 61929000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 14}, "seq": 503, "time_ns": 61929000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 1}, "seq": 504, "time_ns": 61929000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 15, "bank": 1, "col": 48, "row": 10728, "type": 3, "we": 1}, "seq": 505, "time_ns": 61929000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 48, "bank": 1, "cmd": 4}, "seq": 506, "time_ns": 61929000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 2}, "seq": 507, "time_ns": 61934000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 56, "row": 10728, "type": 3, "we": 1}, "seq": 508, "time_ns": 61934000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 15}, "seq": 509, "time_ns": 61934000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 2}, "seq": 510, "time_ns": 61934000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 56, "row": 10728, "type": 3, "we": 1}, "seq": 511, "time_ns": 61934000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 48, "bank": 1, "cmd": 4}, "seq": 512, "time_ns": 61934000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 0}, "seq": 513, "time_ns": 61939000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 56, "bank": 1, "cmd": 4}, "seq": 514, "time_ns": 61939000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 35545, "mask": 0}, "seq": 515, "time_ns": 61944000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 57752, "mask": 0}, "seq": 516, "time_ns": 61949000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 3}, "seq": 517, "time_ns": 61969000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 1, "bank": 1, "col": 56, "row": 10728, "type": 3, "we": 1}, "seq": 518, "time_ns": 61969000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 3}, "seq": 519, "time_ns": 61969000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 1, "bank": 1, "col": 56, "row": 10728, "type": 3, "we": 1}, "seq": 520, "time_ns": 61969000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 4}, "seq": 521, "time_ns": 61974000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 2, "bank": 1, "col": 56, "row": 10728, "type": 3, "we": 1}, "seq": 522, "time_ns": 61974000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 1}, "seq": 523, "time_ns": 61974000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 4}, "seq": 524, "time_ns": 61974000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 2, "bank": 1, "col": 56, "row": 10728, "type": 3, "we": 1}, "seq": 525, "time_ns": 61974000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 56, "bank": 1, "cmd": 4}, "seq": 526, "time_ns": 61974000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 5}, "seq": 527, "time_ns": 61979000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 3, "bank": 1, "col": 56, "row": 10728, "type": 3, "we": 1}, "seq": 528, "time_ns": 61979000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 2}, "seq": 529, "time_ns": 61979000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 5}, "seq": 530, "time_ns": 61979000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 3, "bank": 1, "col": 56, "row": 10728, "type": 3, "we": 1}, "seq": 531, "time_ns": 61979000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 56, "bank": 1, "cmd": 4}, "seq": 532, "time_ns": 61979000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 3}, "seq": 533, "time_ns": 61984000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 56, "bank": 1, "cmd": 4}, "seq": 534, "time_ns": 61984000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 26617, "mask": 0}, "seq": 535, "time_ns": 61989000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 44989, "mask": 0}, "seq": 536, "time_ns": 61994000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 6}, "seq": 537, "time_ns": 62014000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 4, "bank": 1, "col": 64, "row": 10728, "type": 3, "we": 1}, "seq": 538, "time_ns": 62014000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 6}, "seq": 539, "time_ns": 62014000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 4, "bank": 1, "col": 64, "row": 10728, "type": 3, "we": 1}, "seq": 540, "time_ns": 62014000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 4}, "seq": 541, "time_ns": 62019000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 64, "bank": 1, "cmd": 4}, "seq": 542, "time_ns": 62019000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 3138, "mask": 0}, "seq": 543, "time_ns": 62034000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 63507, "mask": 0}, "seq": 544, "time_ns": 62039000}
+{"iface": "refresh_req", "kind": "request", "fields": {"pending": 1, "starve": 0, "urgent": 0}, "seq": 545, "time_ns": 62429000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 1, "required": 1, "starve": 0, "urgent": 0}, "seq": 546, "time_ns": 62429000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 1, "self_refresh": 0}, "seq": 547, "time_ns": 62433000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 548, "time_ns": 62434000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 549, "time_ns": 62434000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 1, "cmd": 2}, "seq": 550, "time_ns": 62439000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 551, "time_ns": 62504000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 1}, "seq": 552, "time_ns": 62504000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 553, "time_ns": 62504000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 0, "required": 0, "starve": 0, "urgent": 0}, "seq": 554, "time_ns": 62509000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 555, "time_ns": 62509000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 556, "time_ns": 62513000}
+{"iface": "refresh_req", "kind": "request", "fields": {"pending": 1, "starve": 0, "urgent": 0}, "seq": 557, "time_ns": 70229000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 1, "required": 1, "starve": 0, "urgent": 0}, "seq": 558, "time_ns": 70229000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 1, "self_refresh": 0}, "seq": 559, "time_ns": 70233000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 560, "time_ns": 70234000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 1}, "seq": 561, "time_ns": 70234000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 562, "time_ns": 70234000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 0, "required": 0, "starve": 0, "urgent": 0}, "seq": 563, "time_ns": 70239000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 564, "time_ns": 70239000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 565, "time_ns": 70243000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 434280104, "bte": 0, "cti": 2, "data": 2206632489, "sel": 15}, "seq": 566, "time_ns": 72153000}
+{"iface": "req", "kind": "request", "fields": {"addr": 434280104, "data": 2206632489, "mask": 15, "we": 1}, "seq": 567, "time_ns": 72154000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 2206632489, "mask": 15}, "seq": 568, "time_ns": 72154000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 2, "col": 848, "row": 26506, "we": 1}, "seq": 569, "time_ns": 72154000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 434280108, "bte": 0, "cti": 2, "data": 2481609806, "sel": 15}, "seq": 570, "time_ns": 72158000}
+{"iface": "req", "kind": "request", "fields": {"addr": 434280108, "data": 2481609806, "mask": 15, "we": 1}, "seq": 571, "time_ns": 72159000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 2481609806, "mask": 15}, "seq": 572, "time_ns": 72159000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 2, "col": 848, "row": 26506, "we": 1}, "seq": 573, "time_ns": 72159000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 434280112, "bte": 0, "cti": 2, "data": 24520513, "sel": 15}, "seq": 574, "time_ns": 72163000}
+{"iface": "req", "kind": "request", "fields": {"addr": 434280112, "data": 24520513, "mask": 15, "we": 1}, "seq": 575, "time_ns": 72164000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 5, "bank": 2, "col": 848, "row": 26506, "type": 1, "we": 1}, "seq": 576, "time_ns": 72164000}
+{"iface": "dp_wr", "kind": "write", "fields": {"data": 24520513, "mask": 15}, "seq": 577, "time_ns": 72164000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 2, "col": 856, "row": 26506, "we": 1}, "seq": 578, "time_ns": 72164000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 5, "bank": 2, "col": 848, "row": 26506, "type": 1, "we": 1}, "seq": 579, "time_ns": 72164000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 434280116, "bte": 0, "cti": 2, "data": 3475229416, "sel": 15}, "seq": 580, "time_ns": 72168000}
+{"iface": "req", "kind": "request", "fields": {"addr": 434280116, "data": 3475229416, "mask": 15, "we": 1}, "seq": 581, "time_ns": 72169000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 2, "col": 856, "row": 26506, "we": 1}, "seq": 582, "time_ns": 72169000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 26506, "bank": 2, "cmd": 3}, "seq": 583, "time_ns": 72169000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 434280120, "bte": 0, "cti": 2, "data": 2411013676, "sel": 15}, "seq": 584, "time_ns": 72173000}
+{"iface": "req", "kind": "request", "fields": {"addr": 434280120, "data": 2411013676, "mask": 15, "we": 1}, "seq": 585, "time_ns": 72174000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 2, "col": 856, "row": 26506, "we": 1}, "seq": 586, "time_ns": 72174000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 434280124, "bte": 0, "cti": 2, "data": 241047738, "sel": 15}, "seq": 587, "time_ns": 72178000}
+{"iface": "req", "kind": "request", "fields": {"addr": 434280124, "data": 241047738, "mask": 15, "we": 1}, "seq": 588, "time_ns": 72179000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 2, "col": 856, "row": 26506, "we": 1}, "seq": 589, "time_ns": 72179000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 434280128, "bte": 0, "cti": 2, "data": 3736665164, "sel": 15}, "seq": 590, "time_ns": 72183000}
+{"iface": "req", "kind": "request", "fields": {"addr": 434280128, "data": 3736665164, "mask": 15, "we": 1}, "seq": 591, "time_ns": 72184000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 2, "col": 864, "row": 26506, "we": 1}, "seq": 592, "time_ns": 72184000}
+{"iface": "wb", "kind": "write", "fields": {"addr": 434280132, "bte": 0, "cti": 7, "data": 2167757907, "sel": 15}, "seq": 593, "time_ns": 72188000}
+{"iface": "req", "kind": "request", "fields": {"addr": 434280132, "data": 2167757907, "mask": 15, "we": 1}, "seq": 594, "time_ns": 72189000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 2, "col": 864, "row": 26506, "we": 1}, "seq": 595, "time_ns": 72189000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 596, "time_ns": 72234000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 5, "bank": 2, "col": 848, "row": 26506, "type": 3, "we": 1}, "seq": 597, "time_ns": 72234000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 598, "time_ns": 72234000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 5, "bank": 2, "col": 848, "row": 26506, "type": 3, "we": 1}, "seq": 599, "time_ns": 72234000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 1}, "seq": 600, "time_ns": 72239000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 6, "bank": 2, "col": 848, "row": 26506, "type": 3, "we": 1}, "seq": 601, "time_ns": 72239000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 5}, "seq": 602, "time_ns": 72239000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 1}, "seq": 603, "time_ns": 72239000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 6, "bank": 2, "col": 848, "row": 26506, "type": 3, "we": 1}, "seq": 604, "time_ns": 72239000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 848, "bank": 2, "cmd": 4}, "seq": 605, "time_ns": 72239000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 2}, "seq": 606, "time_ns": 72244000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 7, "bank": 2, "col": 856, "row": 26506, "type": 3, "we": 1}, "seq": 607, "time_ns": 72244000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 6}, "seq": 608, "time_ns": 72244000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 2}, "seq": 609, "time_ns": 72244000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 7, "bank": 2, "col": 856, "row": 26506, "type": 3, "we": 1}, "seq": 610, "time_ns": 72244000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 848, "bank": 2, "cmd": 4}, "seq": 611, "time_ns": 72244000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 7}, "seq": 612, "time_ns": 72249000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 856, "bank": 2, "cmd": 4}, "seq": 613, "time_ns": 72249000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 31200, "mask": 0}, "seq": 614, "time_ns": 72254000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 47569, "mask": 0}, "seq": 615, "time_ns": 72259000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 3}, "seq": 616, "time_ns": 72279000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 8, "bank": 2, "col": 856, "row": 26506, "type": 3, "we": 1}, "seq": 617, "time_ns": 72279000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 3}, "seq": 618, "time_ns": 72279000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 8, "bank": 2, "col": 856, "row": 26506, "type": 3, "we": 1}, "seq": 619, "time_ns": 72279000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 4}, "seq": 620, "time_ns": 72284000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 9, "bank": 2, "col": 856, "row": 26506, "type": 3, "we": 1}, "seq": 621, "time_ns": 72284000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 8}, "seq": 622, "time_ns": 72284000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 4}, "seq": 623, "time_ns": 72284000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 9, "bank": 2, "col": 856, "row": 26506, "type": 3, "we": 1}, "seq": 624, "time_ns": 72284000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 856, "bank": 2, "cmd": 4}, "seq": 625, "time_ns": 72284000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 5}, "seq": 626, "time_ns": 72289000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 10, "bank": 2, "col": 856, "row": 26506, "type": 3, "we": 1}, "seq": 627, "time_ns": 72289000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 9}, "seq": 628, "time_ns": 72289000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 5}, "seq": 629, "time_ns": 72289000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 10, "bank": 2, "col": 856, "row": 26506, "type": 3, "we": 1}, "seq": 630, "time_ns": 72289000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 856, "bank": 2, "cmd": 4}, "seq": 631, "time_ns": 72289000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 10}, "seq": 632, "time_ns": 72294000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 856, "bank": 2, "cmd": 4}, "seq": 633, "time_ns": 72294000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 47292, "mask": 0}, "seq": 634, "time_ns": 72299000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 34578, "mask": 0}, "seq": 635, "time_ns": 72304000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 6}, "seq": 636, "time_ns": 72324000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 11, "bank": 2, "col": 864, "row": 26506, "type": 3, "we": 1}, "seq": 637, "time_ns": 72324000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 6}, "seq": 638, "time_ns": 72324000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 11, "bank": 2, "col": 864, "row": 26506, "type": 3, "we": 1}, "seq": 639, "time_ns": 72324000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 7}, "seq": 640, "time_ns": 72329000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 12, "bank": 2, "col": 864, "row": 26506, "type": 3, "we": 1}, "seq": 641, "time_ns": 72329000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 11}, "seq": 642, "time_ns": 72329000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 7}, "seq": 643, "time_ns": 72329000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 12, "bank": 2, "col": 864, "row": 26506, "type": 3, "we": 1}, "seq": 644, "time_ns": 72329000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 864, "bank": 2, "cmd": 4}, "seq": 645, "time_ns": 72329000}
+{"iface": "dp_cmd", "kind": "write", "fields": {"aux": 12}, "seq": 646, "time_ns": 72334000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 864, "bank": 2, "cmd": 4}, "seq": 647, "time_ns": 72334000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 22901, "mask": 0}, "seq": 648, "time_ns": 72344000}
+{"iface": "ddr_wr_beat", "kind": "beat", "fields": {"data": 1408, "mask": 0}, "seq": 649, "time_ns": 72349000}
+{"iface": "refresh_req", "kind": "request", "fields": {"pending": 1, "starve": 0, "urgent": 0}, "seq": 650, "time_ns": 78029000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 1, "required": 1, "starve": 0, "urgent": 0}, "seq": 651, "time_ns": 78029000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 1, "self_refresh": 0}, "seq": 652, "time_ns": 78033000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 2, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 653, "time_ns": 78034000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 2, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 654, "time_ns": 78034000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 2, "cmd": 2}, "seq": 655, "time_ns": 78039000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 656, "time_ns": 78104000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 1}, "seq": 657, "time_ns": 78104000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 658, "time_ns": 78104000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 0, "required": 0, "starve": 0, "urgent": 0}, "seq": 659, "time_ns": 78109000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 660, "time_ns": 78109000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 661, "time_ns": 78113000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 444984936, "bte": 0, "cti": 2}, "seq": 662, "time_ns": 82463000}
+{"iface": "req", "kind": "request", "fields": {"addr": 444984936, "data": 2167757907, "mask": 15, "we": 0}, "seq": 663, "time_ns": 82464000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 816, "row": 27159, "we": 0}, "seq": 664, "time_ns": 82464000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 444984940, "bte": 0, "cti": 2}, "seq": 665, "time_ns": 82468000}
+{"iface": "req", "kind": "request", "fields": {"addr": 444984940, "data": 2167757907, "mask": 15, "we": 0}, "seq": 666, "time_ns": 82469000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 816, "row": 27159, "we": 0}, "seq": 667, "time_ns": 82469000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 444984944, "bte": 0, "cti": 2}, "seq": 668, "time_ns": 82473000}
+{"iface": "req", "kind": "request", "fields": {"addr": 444984944, "data": 2167757907, "mask": 15, "we": 0}, "seq": 669, "time_ns": 82474000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 13, "bank": 5, "col": 816, "row": 27159, "type": 1, "we": 0}, "seq": 670, "time_ns": 82474000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 824, "row": 27159, "we": 0}, "seq": 671, "time_ns": 82474000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 13, "bank": 5, "col": 816, "row": 27159, "type": 1, "we": 0}, "seq": 672, "time_ns": 82474000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 444984948, "bte": 0, "cti": 2}, "seq": 673, "time_ns": 82478000}
+{"iface": "req", "kind": "request", "fields": {"addr": 444984948, "data": 2167757907, "mask": 15, "we": 0}, "seq": 674, "time_ns": 82479000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 824, "row": 27159, "we": 0}, "seq": 675, "time_ns": 82479000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 27159, "bank": 5, "cmd": 3}, "seq": 676, "time_ns": 82479000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 444984952, "bte": 0, "cti": 2}, "seq": 677, "time_ns": 82483000}
+{"iface": "req", "kind": "request", "fields": {"addr": 444984952, "data": 2167757907, "mask": 15, "we": 0}, "seq": 678, "time_ns": 82484000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 824, "row": 27159, "we": 0}, "seq": 679, "time_ns": 82484000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 444984956, "bte": 0, "cti": 2}, "seq": 680, "time_ns": 82488000}
+{"iface": "req", "kind": "request", "fields": {"addr": 444984956, "data": 2167757907, "mask": 15, "we": 0}, "seq": 681, "time_ns": 82489000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 824, "row": 27159, "we": 0}, "seq": 682, "time_ns": 82489000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 444984960, "bte": 0, "cti": 2}, "seq": 683, "time_ns": 82493000}
+{"iface": "req", "kind": "request", "fields": {"addr": 444984960, "data": 2167757907, "mask": 15, "we": 0}, "seq": 684, "time_ns": 82494000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 832, "row": 27159, "we": 0}, "seq": 685, "time_ns": 82494000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 444984964, "bte": 0, "cti": 7}, "seq": 686, "time_ns": 82498000}
+{"iface": "req", "kind": "request", "fields": {"addr": 444984964, "data": 2167757907, "mask": 15, "we": 0}, "seq": 687, "time_ns": 82499000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 832, "row": 27159, "we": 0}, "seq": 688, "time_ns": 82499000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 689, "time_ns": 82544000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 13, "bank": 5, "col": 816, "row": 27159, "type": 2, "we": 0}, "seq": 690, "time_ns": 82544000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 691, "time_ns": 82544000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 13, "bank": 5, "col": 816, "row": 27159, "type": 2, "we": 0}, "seq": 692, "time_ns": 82544000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 1}, "seq": 693, "time_ns": 82549000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 14, "bank": 5, "col": 816, "row": 27159, "type": 2, "we": 0}, "seq": 694, "time_ns": 82549000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 13}, "seq": 695, "time_ns": 82549000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 1}, "seq": 696, "time_ns": 82549000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 14, "bank": 5, "col": 816, "row": 27159, "type": 2, "we": 0}, "seq": 697, "time_ns": 82549000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 816, "bank": 5, "cmd": 5}, "seq": 698, "time_ns": 82549000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 2}, "seq": 699, "time_ns": 82554000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 15, "bank": 5, "col": 824, "row": 27159, "type": 2, "we": 0}, "seq": 700, "time_ns": 82554000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 14}, "seq": 701, "time_ns": 82554000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 2}, "seq": 702, "time_ns": 82554000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 15, "bank": 5, "col": 824, "row": 27159, "type": 2, "we": 0}, "seq": 703, "time_ns": 82554000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 816, "bank": 5, "cmd": 5}, "seq": 704, "time_ns": 82554000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 15}, "seq": 705, "time_ns": 82559000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 824, "bank": 5, "cmd": 5}, "seq": 706, "time_ns": 82559000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 31951}, "seq": 707, "time_ns": 82569000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 37071844, "data": 2093940736}, "seq": 708, "time_ns": 82574000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 13, "data": 2093940736}, "seq": 709, "time_ns": 82574000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 7574}, "seq": 710, "time_ns": 82574000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 7574}, "seq": 711, "time_ns": 82579000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 7574}, "seq": 712, "time_ns": 82584000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 3}, "seq": 713, "time_ns": 82589000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 5, "col": 824, "row": 27159, "type": 2, "we": 0}, "seq": 714, "time_ns": 82589000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 3}, "seq": 715, "time_ns": 82589000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 5, "col": 824, "row": 27159, "type": 2, "we": 0}, "seq": 716, "time_ns": 82589000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 4}, "seq": 717, "time_ns": 82594000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 1, "bank": 5, "col": 824, "row": 27159, "type": 2, "we": 0}, "seq": 718, "time_ns": 82594000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 0}, "seq": 719, "time_ns": 82594000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 4}, "seq": 720, "time_ns": 82594000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 1, "bank": 5, "col": 824, "row": 27159, "type": 2, "we": 0}, "seq": 721, "time_ns": 82594000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 824, "bank": 5, "cmd": 5}, "seq": 722, "time_ns": 82594000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 5}, "seq": 723, "time_ns": 82599000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 2, "bank": 5, "col": 824, "row": 27159, "type": 2, "we": 0}, "seq": 724, "time_ns": 82599000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 1}, "seq": 725, "time_ns": 82599000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 5}, "seq": 726, "time_ns": 82599000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 2, "bank": 5, "col": 824, "row": 27159, "type": 2, "we": 0}, "seq": 727, "time_ns": 82599000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 824, "bank": 5, "cmd": 5}, "seq": 728, "time_ns": 82599000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 2}, "seq": 729, "time_ns": 82604000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 824, "bank": 5, "cmd": 5}, "seq": 730, "time_ns": 82604000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 31943}, "seq": 731, "time_ns": 82614000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 444866268, "data": 2093416448}, "seq": 732, "time_ns": 82619000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 0, "data": 2093416448}, "seq": 733, "time_ns": 82619000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 7574}, "seq": 734, "time_ns": 82619000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 7574}, "seq": 735, "time_ns": 82624000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 7574}, "seq": 736, "time_ns": 82629000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 6}, "seq": 737, "time_ns": 82634000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 3, "bank": 5, "col": 832, "row": 27159, "type": 2, "we": 0}, "seq": 738, "time_ns": 82634000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 6}, "seq": 739, "time_ns": 82634000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 3, "bank": 5, "col": 832, "row": 27159, "type": 2, "we": 0}, "seq": 740, "time_ns": 82634000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 7}, "seq": 741, "time_ns": 82639000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 4, "bank": 5, "col": 832, "row": 27159, "type": 2, "we": 0}, "seq": 742, "time_ns": 82639000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 3}, "seq": 743, "time_ns": 82639000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 7}, "seq": 744, "time_ns": 82639000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 4, "bank": 5, "col": 832, "row": 27159, "type": 2, "we": 0}, "seq": 745, "time_ns": 82639000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 832, "bank": 5, "cmd": 5}, "seq": 746, "time_ns": 82639000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 4}, "seq": 747, "time_ns": 82644000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 832, "bank": 5, "cmd": 5}, "seq": 748, "time_ns": 82644000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 31935}, "seq": 749, "time_ns": 82659000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 444866272, "data": 2092892160}, "seq": 750, "time_ns": 82664000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 3, "data": 2092892160}, "seq": 751, "time_ns": 82664000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 7569}, "seq": 752, "time_ns": 82664000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 7569}, "seq": 753, "time_ns": 82669000}
+{"iface": "refresh_req", "kind": "request", "fields": {"pending": 1, "starve": 0, "urgent": 0}, "seq": 754, "time_ns": 85829000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 1, "required": 1, "starve": 0, "urgent": 0}, "seq": 755, "time_ns": 85829000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 1, "self_refresh": 0}, "seq": 756, "time_ns": 85833000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 5, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 757, "time_ns": 85834000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 5, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 758, "time_ns": 85834000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 5, "cmd": 2}, "seq": 759, "time_ns": 85839000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 760, "time_ns": 85904000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 1}, "seq": 761, "time_ns": 85904000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 762, "time_ns": 85904000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 0, "required": 0, "starve": 0, "urgent": 0}, "seq": 763, "time_ns": 85909000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 764, "time_ns": 85909000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 765, "time_ns": 85913000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 1701608, "bte": 0, "cti": 0}, "seq": 766, "time_ns": 92768000}
+{"iface": "req", "kind": "request", "fields": {"addr": 1701608, "data": 2167757907, "mask": 15, "we": 0}, "seq": 767, "time_ns": 92769000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 880, "row": 103, "we": 0}, "seq": 768, "time_ns": 92769000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 355556132, "bte": 0, "cti": 0}, "seq": 769, "time_ns": 92773000}
+{"iface": "req", "kind": "request", "fields": {"addr": 355556132, "data": 2167757907, "mask": 15, "we": 0}, "seq": 770, "time_ns": 92774000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 3, "col": 400, "row": 21701, "we": 0}, "seq": 771, "time_ns": 92774000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 491931376, "bte": 0, "cti": 0}, "seq": 772, "time_ns": 92778000}
+{"iface": "req", "kind": "request", "fields": {"addr": 491931376, "data": 2167757907, "mask": 15, "we": 0}, "seq": 773, "time_ns": 92779000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 5, "bank": 6, "col": 880, "row": 103, "type": 1, "we": 0}, "seq": 774, "time_ns": 92779000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 0, "col": 888, "row": 30025, "we": 0}, "seq": 775, "time_ns": 92779000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 5, "bank": 6, "col": 880, "row": 103, "type": 1, "we": 0}, "seq": 776, "time_ns": 92779000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 103, "bank": 6, "cmd": 3}, "seq": 777, "time_ns": 92784000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 6, "bank": 3, "col": 400, "row": 21701, "type": 1, "we": 0}, "seq": 778, "time_ns": 92824000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 6, "bank": 3, "col": 400, "row": 21701, "type": 1, "we": 0}, "seq": 779, "time_ns": 92824000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 21701, "bank": 3, "cmd": 3}, "seq": 780, "time_ns": 92829000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 781, "time_ns": 92849000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 5, "bank": 6, "col": 880, "row": 103, "type": 2, "we": 0}, "seq": 782, "time_ns": 92849000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 783, "time_ns": 92849000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 5, "bank": 6, "col": 880, "row": 103, "type": 2, "we": 0}, "seq": 784, "time_ns": 92849000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 5}, "seq": 785, "time_ns": 92854000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 880, "bank": 6, "cmd": 5}, "seq": 786, "time_ns": 92854000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 7, "bank": 0, "col": 888, "row": 30025, "type": 1, "we": 0}, "seq": 787, "time_ns": 92869000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 7, "bank": 0, "col": 888, "row": 30025, "type": 1, "we": 0}, "seq": 788, "time_ns": 92869000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 31887}, "seq": 789, "time_ns": 92874000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 30025, "bank": 0, "cmd": 3}, "seq": 790, "time_ns": 92874000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 444866276, "data": 2089746432}, "seq": 791, "time_ns": 92879000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 5, "data": 2089746432}, "seq": 792, "time_ns": 92879000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 40338}, "seq": 793, "time_ns": 92879000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 30037904, "bte": 0, "cti": 0}, "seq": 794, "time_ns": 92888000}
+{"iface": "req", "kind": "request", "fields": {"addr": 30037904, "data": 2167757907, "mask": 15, "we": 0}, "seq": 795, "time_ns": 92889000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 2, "col": 968, "row": 1833, "we": 0}, "seq": 796, "time_ns": 92889000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 1}, "seq": 797, "time_ns": 92894000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 6, "bank": 3, "col": 400, "row": 21701, "type": 2, "we": 0}, "seq": 798, "time_ns": 92894000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 1}, "seq": 799, "time_ns": 92894000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 6, "bank": 3, "col": 400, "row": 21701, "type": 2, "we": 0}, "seq": 800, "time_ns": 92894000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 6}, "seq": 801, "time_ns": 92899000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 400, "bank": 3, "cmd": 5}, "seq": 802, "time_ns": 92899000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 8, "bank": 2, "col": 968, "row": 1833, "type": 1, "we": 0}, "seq": 803, "time_ns": 92914000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 8, "bank": 2, "col": 968, "row": 1833, "type": 1, "we": 0}, "seq": 804, "time_ns": 92914000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32367}, "seq": 805, "time_ns": 92919000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 1833, "bank": 2, "cmd": 3}, "seq": 806, "time_ns": 92919000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 92843868, "data": 2121203712}, "seq": 807, "time_ns": 92924000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 6, "data": 2121203712}, "seq": 808, "time_ns": 92924000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 36284}, "seq": 809, "time_ns": 92924000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 246536520, "bte": 0, "cti": 0}, "seq": 810, "time_ns": 92933000}
+{"iface": "req", "kind": "request", "fields": {"addr": 246536520, "data": 2167757907, "mask": 15, "we": 0}, "seq": 811, "time_ns": 92934000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 3, "col": 160, "row": 15047, "we": 0}, "seq": 812, "time_ns": 92934000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 2}, "seq": 813, "time_ns": 92939000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 7, "bank": 0, "col": 888, "row": 30025, "type": 2, "we": 0}, "seq": 814, "time_ns": 92939000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 2}, "seq": 815, "time_ns": 92939000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 7, "bank": 0, "col": 888, "row": 30025, "type": 2, "we": 0}, "seq": 816, "time_ns": 92939000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 7}, "seq": 817, "time_ns": 92944000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 888, "bank": 0, "cmd": 5}, "seq": 818, "time_ns": 92944000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 31879}, "seq": 819, "time_ns": 92964000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 92843872, "data": 2089222144}, "seq": 820, "time_ns": 92969000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 7, "data": 2089222144}, "seq": 821, "time_ns": 92969000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 60818}, "seq": 822, "time_ns": 92969000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 190279140, "bte": 0, "cti": 0}, "seq": 823, "time_ns": 92978000}
+{"iface": "req", "kind": "request", "fields": {"addr": 190279140, "data": 2167757907, "mask": 15, "we": 0}, "seq": 824, "time_ns": 92979000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 9, "bank": 3, "col": 160, "row": 15047, "type": 4, "we": 0}, "seq": 825, "time_ns": 92979000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 752, "row": 11613, "we": 0}, "seq": 826, "time_ns": 92979000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 9, "bank": 3, "col": 160, "row": 15047, "type": 4, "we": 0}, "seq": 827, "time_ns": 92979000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 828, "time_ns": 92984000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 8, "bank": 2, "col": 968, "row": 1833, "type": 2, "we": 0}, "seq": 829, "time_ns": 92984000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 830, "time_ns": 92984000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 8, "bank": 2, "col": 968, "row": 1833, "type": 2, "we": 0}, "seq": 831, "time_ns": 92984000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 3, "cmd": 2}, "seq": 832, "time_ns": 92984000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 10, "bank": 5, "col": 752, "row": 11613, "type": 1, "we": 0}, "seq": 833, "time_ns": 92989000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 8}, "seq": 834, "time_ns": 92989000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 10, "bank": 5, "col": 752, "row": 11613, "type": 1, "we": 0}, "seq": 835, "time_ns": 92989000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 968, "bank": 2, "cmd": 5}, "seq": 836, "time_ns": 92989000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 11613, "bank": 5, "cmd": 3}, "seq": 837, "time_ns": 92994000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 31799}, "seq": 838, "time_ns": 93009000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 92843876, "data": 2083979264}, "seq": 839, "time_ns": 93014000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 8, "data": 2083979264}, "seq": 840, "time_ns": 93014000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 60825}, "seq": 841, "time_ns": 93014000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 194115328, "bte": 0, "cti": 0}, "seq": 842, "time_ns": 93023000}
+{"iface": "req", "kind": "request", "fields": {"addr": 194115328, "data": 2167757907, "mask": 15, "we": 0}, "seq": 843, "time_ns": 93024000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 896, "row": 11847, "we": 0}, "seq": 844, "time_ns": 93024000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 11, "bank": 6, "col": 896, "row": 11847, "type": 4, "we": 0}, "seq": 845, "time_ns": 93034000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 11, "bank": 6, "col": 896, "row": 11847, "type": 4, "we": 0}, "seq": 846, "time_ns": 93034000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 6, "cmd": 2}, "seq": 847, "time_ns": 93039000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 9, "bank": 3, "col": 160, "row": 15047, "type": 1, "we": 0}, "seq": 848, "time_ns": 93049000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 9, "bank": 3, "col": 160, "row": 15047, "type": 1, "we": 0}, "seq": 849, "time_ns": 93049000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 15047, "bank": 3, "cmd": 3}, "seq": 850, "time_ns": 93054000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 2}, "seq": 851, "time_ns": 93059000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 10, "bank": 5, "col": 752, "row": 11613, "type": 2, "we": 0}, "seq": 852, "time_ns": 93059000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 2}, "seq": 853, "time_ns": 93059000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 10, "bank": 5, "col": 752, "row": 11613, "type": 2, "we": 0}, "seq": 854, "time_ns": 93059000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 10}, "seq": 855, "time_ns": 93064000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 752, "bank": 5, "cmd": 5}, "seq": 856, "time_ns": 93064000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32015}, "seq": 857, "time_ns": 93084000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 92843880, "data": 2098135040}, "seq": 858, "time_ns": 93089000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 10, "data": 2098135040}, "seq": 859, "time_ns": 93089000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 19850}, "seq": 860, "time_ns": 93089000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 98356256, "bte": 0, "cti": 0}, "seq": 861, "time_ns": 93098000}
+{"iface": "req", "kind": "request", "fields": {"addr": 98356256, "data": 2167757907, "mask": 15, "we": 0}, "seq": 862, "time_ns": 93099000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 1, "col": 528, "row": 6003, "we": 0}, "seq": 863, "time_ns": 93099000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 11, "bank": 6, "col": 896, "row": 11847, "type": 1, "we": 0}, "seq": 864, "time_ns": 93104000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 11, "bank": 6, "col": 896, "row": 11847, "type": 1, "we": 0}, "seq": 865, "time_ns": 93104000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 11847, "bank": 6, "cmd": 3}, "seq": 866, "time_ns": 93109000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 1}, "seq": 867, "time_ns": 93119000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 9, "bank": 3, "col": 160, "row": 15047, "type": 2, "we": 0}, "seq": 868, "time_ns": 93119000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 1}, "seq": 869, "time_ns": 93119000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 9, "bank": 3, "col": 160, "row": 15047, "type": 2, "we": 0}, "seq": 870, "time_ns": 93119000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 9}, "seq": 871, "time_ns": 93124000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 160, "bank": 3, "cmd": 5}, "seq": 872, "time_ns": 93124000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32607}, "seq": 873, "time_ns": 93144000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 444984936, "data": 2136932352}, "seq": 874, "time_ns": 93149000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 12, "bank": 1, "col": 528, "row": 6003, "type": 1, "we": 0}, "seq": 875, "time_ns": 93149000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 9, "data": 2136932352}, "seq": 876, "time_ns": 93149000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 40367}, "seq": 877, "time_ns": 93149000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 12, "bank": 1, "col": 528, "row": 6003, "type": 1, "we": 0}, "seq": 878, "time_ns": 93149000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 6003, "bank": 1, "cmd": 3}, "seq": 879, "time_ns": 93154000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 274119888, "bte": 0, "cti": 0}, "seq": 880, "time_ns": 93158000}
+{"iface": "req", "kind": "request", "fields": {"addr": 274119888, "data": 2167757907, "mask": 15, "we": 0}, "seq": 881, "time_ns": 93159000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 7, "col": 616, "row": 16730, "we": 0}, "seq": 882, "time_ns": 93159000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 883, "time_ns": 93174000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 11, "bank": 6, "col": 896, "row": 11847, "type": 2, "we": 0}, "seq": 884, "time_ns": 93174000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 885, "time_ns": 93174000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 11, "bank": 6, "col": 896, "row": 11847, "type": 2, "we": 0}, "seq": 886, "time_ns": 93174000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 11}, "seq": 887, "time_ns": 93179000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 896, "bank": 6, "cmd": 5}, "seq": 888, "time_ns": 93179000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 13, "bank": 7, "col": 616, "row": 16730, "type": 1, "we": 0}, "seq": 889, "time_ns": 93194000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 13, "bank": 7, "col": 616, "row": 16730, "type": 1, "we": 0}, "seq": 890, "time_ns": 93194000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 31871}, "seq": 891, "time_ns": 93199000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 16730, "bank": 7, "cmd": 3}, "seq": 892, "time_ns": 93199000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 444984940, "data": 2088697856}, "seq": 893, "time_ns": 93204000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 11, "data": 2088697856}, "seq": 894, "time_ns": 93204000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 40349}, "seq": 895, "time_ns": 93204000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 34852724, "bte": 0, "cti": 0}, "seq": 896, "time_ns": 93213000}
+{"iface": "req", "kind": "request", "fields": {"addr": 34852724, "data": 2167757907, "mask": 15, "we": 0}, "seq": 897, "time_ns": 93214000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 1, "col": 952, "row": 2127, "we": 0}, "seq": 898, "time_ns": 93214000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 2}, "seq": 899, "time_ns": 93219000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 12, "bank": 1, "col": 528, "row": 6003, "type": 2, "we": 0}, "seq": 900, "time_ns": 93219000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 2}, "seq": 901, "time_ns": 93219000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 12, "bank": 1, "col": 528, "row": 6003, "type": 2, "we": 0}, "seq": 902, "time_ns": 93219000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 12}, "seq": 903, "time_ns": 93224000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 528, "bank": 1, "cmd": 5}, "seq": 904, "time_ns": 93224000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32239}, "seq": 905, "time_ns": 93244000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 444984944, "data": 2112815104}, "seq": 906, "time_ns": 93249000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 12, "data": 2112815104}, "seq": 907, "time_ns": 93249000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 15748}, "seq": 908, "time_ns": 93249000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 75648840, "bte": 0, "cti": 0}, "seq": 909, "time_ns": 93258000}
+{"iface": "req", "kind": "request", "fields": {"addr": 75648840, "data": 2167757907, "mask": 15, "we": 0}, "seq": 910, "time_ns": 93259000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 1, "col": 928, "row": 4617, "we": 0}, "seq": 911, "time_ns": 93259000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 1}, "seq": 912, "time_ns": 93264000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 13, "bank": 7, "col": 616, "row": 16730, "type": 2, "we": 0}, "seq": 913, "time_ns": 93264000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 1}, "seq": 914, "time_ns": 93264000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 13, "bank": 7, "col": 616, "row": 16730, "type": 2, "we": 0}, "seq": 915, "time_ns": 93264000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 13}, "seq": 916, "time_ns": 93269000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 616, "bank": 7, "cmd": 5}, "seq": 917, "time_ns": 93269000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 64919}, "seq": 918, "time_ns": 93289000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 444984948, "data": 4254531584}, "seq": 919, "time_ns": 93294000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 13, "data": 4254531584}, "seq": 920, "time_ns": 93294000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 30083}, "seq": 921, "time_ns": 93294000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 89371972, "bte": 0, "cti": 0}, "seq": 922, "time_ns": 93303000}
+{"iface": "req", "kind": "request", "fields": {"addr": 89371972, "data": 2167757907, "mask": 15, "we": 0}, "seq": 923, "time_ns": 93304000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 14, "bank": 1, "col": 952, "row": 2127, "type": 4, "we": 0}, "seq": 924, "time_ns": 93304000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 672, "row": 5454, "we": 0}, "seq": 925, "time_ns": 93304000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 14, "bank": 1, "col": 952, "row": 2127, "type": 4, "we": 0}, "seq": 926, "time_ns": 93304000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 1, "cmd": 2}, "seq": 927, "time_ns": 93309000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 672, "row": 5454, "type": 4, "we": 0}, "seq": 928, "time_ns": 93314000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 672, "row": 5454, "type": 4, "we": 0}, "seq": 929, "time_ns": 93314000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 6, "cmd": 2}, "seq": 930, "time_ns": 93319000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 14, "bank": 1, "col": 952, "row": 2127, "type": 1, "we": 0}, "seq": 931, "time_ns": 93374000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 14, "bank": 1, "col": 952, "row": 2127, "type": 1, "we": 0}, "seq": 932, "time_ns": 93374000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 2127, "bank": 1, "cmd": 3}, "seq": 933, "time_ns": 93379000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 672, "row": 5454, "type": 1, "we": 0}, "seq": 934, "time_ns": 93419000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 672, "row": 5454, "type": 1, "we": 0}, "seq": 935, "time_ns": 93419000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 5454, "bank": 6, "cmd": 3}, "seq": 936, "time_ns": 93424000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 937, "time_ns": 93444000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 14, "bank": 1, "col": 952, "row": 2127, "type": 2, "we": 0}, "seq": 938, "time_ns": 93444000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 939, "time_ns": 93444000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 14, "bank": 1, "col": 952, "row": 2127, "type": 2, "we": 0}, "seq": 940, "time_ns": 93444000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 14}, "seq": 941, "time_ns": 93449000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 952, "bank": 1, "cmd": 5}, "seq": 942, "time_ns": 93449000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 31815}, "seq": 943, "time_ns": 93469000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 444984952, "data": 2085027840}, "seq": 944, "time_ns": 93474000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 14, "data": 2085027840}, "seq": 945, "time_ns": 93474000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 56734}, "seq": 946, "time_ns": 93474000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 17921428, "bte": 0, "cti": 0}, "seq": 947, "time_ns": 93483000}
+{"iface": "req", "kind": "request", "fields": {"addr": 17921428, "data": 2167757907, "mask": 15, "we": 0}, "seq": 948, "time_ns": 93484000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 712, "row": 1093, "we": 0}, "seq": 949, "time_ns": 93484000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 1}, "seq": 950, "time_ns": 93489000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 672, "row": 5454, "type": 2, "we": 0}, "seq": 951, "time_ns": 93489000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 1}, "seq": 952, "time_ns": 93489000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 672, "row": 5454, "type": 2, "we": 0}, "seq": 953, "time_ns": 93489000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 0}, "seq": 954, "time_ns": 93494000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 672, "bank": 6, "cmd": 5}, "seq": 955, "time_ns": 93494000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 64863}, "seq": 956, "time_ns": 93514000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 444984956, "data": 4250861568}, "seq": 957, "time_ns": 93519000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 0, "data": 4250861568}, "seq": 958, "time_ns": 93519000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 54671}, "seq": 959, "time_ns": 93519000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 486403744, "bte": 0, "cti": 0}, "seq": 960, "time_ns": 93528000}
+{"iface": "req", "kind": "request", "fields": {"addr": 486403744, "data": 2167757907, "mask": 15, "we": 0}, "seq": 961, "time_ns": 93529000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 15, "bank": 1, "col": 928, "row": 4617, "type": 4, "we": 0}, "seq": 962, "time_ns": 93529000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 848, "row": 29687, "we": 0}, "seq": 963, "time_ns": 93529000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 15, "bank": 1, "col": 928, "row": 4617, "type": 4, "we": 0}, "seq": 964, "time_ns": 93529000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 1, "cmd": 2}, "seq": 965, "time_ns": 93534000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 2, "bank": 5, "col": 848, "row": 29687, "type": 4, "we": 0}, "seq": 966, "time_ns": 93539000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 2, "bank": 5, "col": 848, "row": 29687, "type": 4, "we": 0}, "seq": 967, "time_ns": 93539000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 5, "cmd": 2}, "seq": 968, "time_ns": 93544000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 1, "bank": 6, "col": 712, "row": 1093, "type": 4, "we": 0}, "seq": 969, "time_ns": 93574000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 1, "bank": 6, "col": 712, "row": 1093, "type": 4, "we": 0}, "seq": 970, "time_ns": 93574000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 6, "cmd": 2}, "seq": 971, "time_ns": 93579000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 15, "bank": 1, "col": 928, "row": 4617, "type": 1, "we": 0}, "seq": 972, "time_ns": 93599000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 15, "bank": 1, "col": 928, "row": 4617, "type": 1, "we": 0}, "seq": 973, "time_ns": 93599000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 4617, "bank": 1, "cmd": 3}, "seq": 974, "time_ns": 93604000}
+{"iface": "refresh_req", "kind": "request", "fields": {"pending": 1, "starve": 0, "urgent": 0}, "seq": 975, "time_ns": 93629000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 1, "required": 1, "starve": 0, "urgent": 0}, "seq": 976, "time_ns": 93629000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 1, "self_refresh": 0}, "seq": 977, "time_ns": 93633000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 978, "time_ns": 93634000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 979, "time_ns": 93634000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 2, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 980, "time_ns": 93639000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 2, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 981, "time_ns": 93639000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 2}, "seq": 982, "time_ns": 93639000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 1, "bank": 6, "col": 712, "row": 1093, "type": 1, "we": 0}, "seq": 983, "time_ns": 93644000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 1, "bank": 6, "col": 712, "row": 1093, "type": 1, "we": 0}, "seq": 984, "time_ns": 93644000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 2, "cmd": 2}, "seq": 985, "time_ns": 93644000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 3, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 986, "time_ns": 93649000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 3, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 987, "time_ns": 93649000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 1093, "bank": 6, "cmd": 3}, "seq": 988, "time_ns": 93649000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 7, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 989, "time_ns": 93654000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 7, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 990, "time_ns": 93654000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 3, "cmd": 2}, "seq": 991, "time_ns": 93654000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 7, "cmd": 2}, "seq": 992, "time_ns": 93659000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 2}, "seq": 993, "time_ns": 93669000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 15, "bank": 1, "col": 928, "row": 4617, "type": 2, "we": 0}, "seq": 994, "time_ns": 93669000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 2}, "seq": 995, "time_ns": 93669000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 15, "bank": 1, "col": 928, "row": 4617, "type": 2, "we": 0}, "seq": 996, "time_ns": 93669000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 15}, "seq": 997, "time_ns": 93674000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 928, "bank": 1, "cmd": 5}, "seq": 998, "time_ns": 93674000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 2, "bank": 5, "col": 848, "row": 29687, "type": 1, "we": 0}, "seq": 999, "time_ns": 93689000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 2, "bank": 5, "col": 848, "row": 29687, "type": 1, "we": 0}, "seq": 1000, "time_ns": 93689000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 31839}, "seq": 1001, "time_ns": 93694000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 29687, "bank": 5, "cmd": 3}, "seq": 1002, "time_ns": 93694000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 444984960, "data": 2086600704}, "seq": 1003, "time_ns": 93699000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 15, "data": 2086600704}, "seq": 1004, "time_ns": 93699000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 60831}, "seq": 1005, "time_ns": 93699000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 15633652, "bte": 0, "cti": 0}, "seq": 1006, "time_ns": 93708000}
+{"iface": "req", "kind": "request", "fields": {"addr": 15633652, "data": 2167757907, "mask": 15, "we": 0}, "seq": 1007, "time_ns": 93709000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 1, "col": 632, "row": 954, "we": 0}, "seq": 1008, "time_ns": 93709000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 1009, "time_ns": 93714000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 1, "bank": 6, "col": 712, "row": 1093, "type": 2, "we": 0}, "seq": 1010, "time_ns": 93714000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 1011, "time_ns": 93714000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 1, "bank": 6, "col": 712, "row": 1093, "type": 2, "we": 0}, "seq": 1012, "time_ns": 93714000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 1}, "seq": 1013, "time_ns": 93719000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 712, "bank": 6, "cmd": 5}, "seq": 1014, "time_ns": 93719000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32055}, "seq": 1015, "time_ns": 93739000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 444984964, "data": 2100756480}, "seq": 1016, "time_ns": 93744000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 1, "data": 2100756480}, "seq": 1017, "time_ns": 93744000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 36233}, "seq": 1018, "time_ns": 93744000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 301932632, "bte": 0, "cti": 0}, "seq": 1019, "time_ns": 93753000}
+{"iface": "req", "kind": "request", "fields": {"addr": 301932632, "data": 2167757907, "mask": 15, "we": 0}, "seq": 1020, "time_ns": 93754000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 3, "bank": 1, "col": 632, "row": 954, "type": 4, "we": 0}, "seq": 1021, "time_ns": 93754000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 4, "col": 40, "row": 18428, "we": 0}, "seq": 1022, "time_ns": 93754000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 3, "bank": 1, "col": 632, "row": 954, "type": 4, "we": 0}, "seq": 1023, "time_ns": 93754000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 1}, "seq": 1024, "time_ns": 93759000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 2, "bank": 5, "col": 848, "row": 29687, "type": 2, "we": 0}, "seq": 1025, "time_ns": 93759000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 1}, "seq": 1026, "time_ns": 93759000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 2, "bank": 5, "col": 848, "row": 29687, "type": 2, "we": 0}, "seq": 1027, "time_ns": 93759000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 1, "cmd": 2}, "seq": 1028, "time_ns": 93759000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 4, "bank": 4, "col": 40, "row": 18428, "type": 1, "we": 0}, "seq": 1029, "time_ns": 93764000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 2}, "seq": 1030, "time_ns": 93764000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 4, "bank": 4, "col": 40, "row": 18428, "type": 1, "we": 0}, "seq": 1031, "time_ns": 93764000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 848, "bank": 5, "cmd": 5}, "seq": 1032, "time_ns": 93764000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 18428, "bank": 4, "cmd": 3}, "seq": 1033, "time_ns": 93769000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 31919}, "seq": 1034, "time_ns": 93784000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 1701608, "data": 2091843584}, "seq": 1035, "time_ns": 93789000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 2, "data": 2091843584}, "seq": 1036, "time_ns": 93789000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 7568}, "seq": 1037, "time_ns": 93789000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 267962176, "bte": 0, "cti": 0}, "seq": 1038, "time_ns": 93798000}
+{"iface": "req", "kind": "request", "fields": {"addr": 267962176, "data": 2167757907, "mask": 15, "we": 0}, "seq": 1039, "time_ns": 93799000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1040, "time_ns": 93799000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 0, "col": 928, "row": 16355, "we": 0}, "seq": 1041, "time_ns": 93799000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1042, "time_ns": 93799000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 6, "cmd": 2}, "seq": 1043, "time_ns": 93804000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 5, "bank": 0, "col": 928, "row": 16355, "type": 1, "we": 0}, "seq": 1044, "time_ns": 93809000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 5, "bank": 0, "col": 928, "row": 16355, "type": 1, "we": 0}, "seq": 1045, "time_ns": 93809000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 16355, "bank": 0, "cmd": 3}, "seq": 1046, "time_ns": 93814000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 1047, "time_ns": 93834000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 4, "bank": 4, "col": 40, "row": 18428, "type": 2, "we": 0}, "seq": 1048, "time_ns": 93834000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 1049, "time_ns": 93834000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 4, "bank": 4, "col": 40, "row": 18428, "type": 2, "we": 0}, "seq": 1050, "time_ns": 93834000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 4}, "seq": 1051, "time_ns": 93839000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 40, "bank": 4, "cmd": 5}, "seq": 1052, "time_ns": 93839000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 5, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1053, "time_ns": 93844000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 5, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1054, "time_ns": 93844000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 5, "cmd": 2}, "seq": 1055, "time_ns": 93849000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 3, "bank": 1, "col": 632, "row": 954, "type": 1, "we": 0}, "seq": 1056, "time_ns": 93854000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 3, "bank": 1, "col": 632, "row": 954, "type": 1, "we": 0}, "seq": 1057, "time_ns": 93854000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 65495}, "seq": 1058, "time_ns": 93859000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 954, "bank": 1, "cmd": 3}, "seq": 1059, "time_ns": 93859000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 355556132, "data": 4292280320}, "seq": 1060, "time_ns": 93864000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 4, "data": 4292280320}, "seq": 1061, "time_ns": 93864000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 17831}, "seq": 1062, "time_ns": 93864000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 288451868, "bte": 0, "cti": 0}, "seq": 1063, "time_ns": 93873000}
+{"iface": "req", "kind": "request", "fields": {"addr": 288451868, "data": 2167757907, "mask": 15, "we": 0}, "seq": 1064, "time_ns": 93874000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 5, "col": 648, "row": 17605, "we": 0}, "seq": 1065, "time_ns": 93874000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 1}, "seq": 1066, "time_ns": 93879000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 5, "bank": 0, "col": 928, "row": 16355, "type": 2, "we": 0}, "seq": 1067, "time_ns": 93879000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 1}, "seq": 1068, "time_ns": 93879000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 5, "bank": 0, "col": 928, "row": 16355, "type": 2, "we": 0}, "seq": 1069, "time_ns": 93879000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 5}, "seq": 1070, "time_ns": 93884000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 928, "bank": 0, "cmd": 5}, "seq": 1071, "time_ns": 93884000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 31839}, "seq": 1072, "time_ns": 93904000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 491931376, "data": 2086600704}, "seq": 1073, "time_ns": 93909000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 5, "data": 2086600704}, "seq": 1074, "time_ns": 93909000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 48543}, "seq": 1075, "time_ns": 93909000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 6, "bank": 5, "col": 648, "row": 17605, "type": 1, "we": 0}, "seq": 1076, "time_ns": 93914000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 6, "bank": 5, "col": 648, "row": 17605, "type": 1, "we": 0}, "seq": 1077, "time_ns": 93914000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 117562512, "bte": 0, "cti": 0}, "seq": 1078, "time_ns": 93918000}
+{"iface": "req", "kind": "request", "fields": {"addr": 117562512, "data": 2167757907, "mask": 15, "we": 0}, "seq": 1079, "time_ns": 93919000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 4, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1080, "time_ns": 93919000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 3, "col": 584, "row": 7175, "we": 0}, "seq": 1081, "time_ns": 93919000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 4, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1082, "time_ns": 93919000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 17605, "bank": 5, "cmd": 3}, "seq": 1083, "time_ns": 93919000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 2}, "seq": 1084, "time_ns": 93924000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 3, "bank": 1, "col": 632, "row": 954, "type": 2, "we": 0}, "seq": 1085, "time_ns": 93924000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 2}, "seq": 1086, "time_ns": 93924000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 3, "bank": 1, "col": 632, "row": 954, "type": 2, "we": 0}, "seq": 1087, "time_ns": 93924000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 4, "cmd": 2}, "seq": 1088, "time_ns": 93924000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 3}, "seq": 1089, "time_ns": 93929000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 632, "bank": 1, "cmd": 5}, "seq": 1090, "time_ns": 93929000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 64903}, "seq": 1091, "time_ns": 93949000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 30037904, "data": 4253483008}, "seq": 1092, "time_ns": 93954000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 3, "data": 4253483008}, "seq": 1093, "time_ns": 93954000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 30082}, "seq": 1094, "time_ns": 93954000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 7, "bank": 3, "col": 584, "row": 7175, "type": 1, "we": 0}, "seq": 1095, "time_ns": 93959000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 7, "bank": 3, "col": 584, "row": 7175, "type": 1, "we": 0}, "seq": 1096, "time_ns": 93959000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 198223672, "bte": 0, "cti": 0}, "seq": 1097, "time_ns": 93963000}
+{"iface": "req", "kind": "request", "fields": {"addr": 198223672, "data": 2167757907, "mask": 15, "we": 0}, "seq": 1098, "time_ns": 93964000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1099, "time_ns": 93964000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 4, "col": 920, "row": 12098, "we": 0}, "seq": 1100, "time_ns": 93964000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1101, "time_ns": 93964000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 7175, "bank": 3, "cmd": 3}, "seq": 1102, "time_ns": 93964000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 2}, "seq": 1103, "time_ns": 93969000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 1104, "time_ns": 93984000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 6, "bank": 5, "col": 648, "row": 17605, "type": 2, "we": 0}, "seq": 1105, "time_ns": 93984000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 1106, "time_ns": 93984000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 6, "bank": 5, "col": 648, "row": 17605, "type": 2, "we": 0}, "seq": 1107, "time_ns": 93984000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 6}, "seq": 1108, "time_ns": 93989000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 648, "bank": 5, "cmd": 5}, "seq": 1109, "time_ns": 93989000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 8, "bank": 4, "col": 920, "row": 12098, "type": 1, "we": 0}, "seq": 1110, "time_ns": 94004000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 8, "bank": 4, "col": 920, "row": 12098, "type": 1, "we": 0}, "seq": 1111, "time_ns": 94004000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1112, "time_ns": 94009000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32119}, "seq": 1113, "time_ns": 94009000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 1, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1114, "time_ns": 94009000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 12098, "bank": 4, "cmd": 3}, "seq": 1115, "time_ns": 94009000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 246536520, "data": 2104950784}, "seq": 1116, "time_ns": 94014000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 6, "data": 2104950784}, "seq": 1117, "time_ns": 94014000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 36237}, "seq": 1118, "time_ns": 94014000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 1, "cmd": 2}, "seq": 1119, "time_ns": 94014000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 369821232, "bte": 0, "cti": 0}, "seq": 1120, "time_ns": 94023000}
+{"iface": "req", "kind": "request", "fields": {"addr": 369821232, "data": 2167757907, "mask": 15, "we": 0}, "seq": 1121, "time_ns": 94024000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 0, "col": 792, "row": 22572, "we": 0}, "seq": 1122, "time_ns": 94024000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 1}, "seq": 1123, "time_ns": 94029000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 7, "bank": 3, "col": 584, "row": 7175, "type": 2, "we": 0}, "seq": 1124, "time_ns": 94029000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 1}, "seq": 1125, "time_ns": 94029000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 7, "bank": 3, "col": 584, "row": 7175, "type": 2, "we": 0}, "seq": 1126, "time_ns": 94029000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 7}, "seq": 1127, "time_ns": 94034000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 584, "bank": 3, "cmd": 5}, "seq": 1128, "time_ns": 94034000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 9, "bank": 0, "col": 792, "row": 22572, "type": 1, "we": 0}, "seq": 1129, "time_ns": 94049000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 9, "bank": 0, "col": 792, "row": 22572, "type": 1, "we": 0}, "seq": 1130, "time_ns": 94049000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32183}, "seq": 1131, "time_ns": 94054000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 22572, "bank": 0, "cmd": 3}, "seq": 1132, "time_ns": 94054000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 190279140, "data": 2109145088}, "seq": 1133, "time_ns": 94059000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 7, "data": 2109145088}, "seq": 1134, "time_ns": 94059000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 40321}, "seq": 1135, "time_ns": 94059000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 311690420, "bte": 0, "cti": 0}, "seq": 1136, "time_ns": 94068000}
+{"iface": "req", "kind": "request", "fields": {"addr": 311690420, "data": 2167757907, "mask": 15, "we": 0}, "seq": 1137, "time_ns": 94069000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 5, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1138, "time_ns": 94069000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 0, "col": 600, "row": 19024, "we": 0}, "seq": 1139, "time_ns": 94069000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 5, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1140, "time_ns": 94069000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 2}, "seq": 1141, "time_ns": 94074000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 8, "bank": 4, "col": 920, "row": 12098, "type": 2, "we": 0}, "seq": 1142, "time_ns": 94074000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 2}, "seq": 1143, "time_ns": 94074000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 8, "bank": 4, "col": 920, "row": 12098, "type": 2, "we": 0}, "seq": 1144, "time_ns": 94074000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 5, "cmd": 2}, "seq": 1145, "time_ns": 94074000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 8}, "seq": 1146, "time_ns": 94079000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 920, "bank": 4, "cmd": 5}, "seq": 1147, "time_ns": 94079000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 64615}, "seq": 1148, "time_ns": 94099000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 194115328, "data": 4234608640}, "seq": 1149, "time_ns": 94104000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 8, "data": 4234608640}, "seq": 1150, "time_ns": 94104000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 46492}, "seq": 1151, "time_ns": 94104000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 74641568, "bte": 0, "cti": 0}, "seq": 1152, "time_ns": 94113000}
+{"iface": "req", "kind": "request", "fields": {"addr": 74641568, "data": 2167757907, "mask": 15, "we": 0}, "seq": 1153, "time_ns": 94114000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 3, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1154, "time_ns": 94114000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 6, "col": 80, "row": 4555, "we": 0}, "seq": 1155, "time_ns": 94114000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 3, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1156, "time_ns": 94114000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 1157, "time_ns": 94119000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 9, "bank": 0, "col": 792, "row": 22572, "type": 2, "we": 0}, "seq": 1158, "time_ns": 94119000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 1159, "time_ns": 94119000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 9, "bank": 0, "col": 792, "row": 22572, "type": 2, "we": 0}, "seq": 1160, "time_ns": 94119000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 3, "cmd": 2}, "seq": 1161, "time_ns": 94119000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 11, "bank": 6, "col": 80, "row": 4555, "type": 1, "we": 0}, "seq": 1162, "time_ns": 94124000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 9}, "seq": 1163, "time_ns": 94124000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 11, "bank": 6, "col": 80, "row": 4555, "type": 1, "we": 0}, "seq": 1164, "time_ns": 94124000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 792, "bank": 0, "cmd": 5}, "seq": 1165, "time_ns": 94124000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 4555, "bank": 6, "cmd": 3}, "seq": 1166, "time_ns": 94129000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 64743}, "seq": 1167, "time_ns": 94144000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 98356256, "data": 4242997248}, "seq": 1168, "time_ns": 94149000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 9, "data": 4242997248}, "seq": 1169, "time_ns": 94149000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 50580}, "seq": 1170, "time_ns": 94149000}
+{"iface": "wb", "kind": "read", "fields": {"addr": 179819876, "bte": 0, "cti": 0}, "seq": 1171, "time_ns": 94158000}
+{"iface": "req", "kind": "request", "fields": {"addr": 179819876, "data": 2167757907, "mask": 15, "we": 0}, "seq": 1172, "time_ns": 94159000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 4, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1173, "time_ns": 94159000}
+{"iface": "cq_enq", "kind": "enqueue", "fields": {"bank": 2, "col": 688, "row": 10975, "we": 0}, "seq": 1174, "time_ns": 94159000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 4, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1175, "time_ns": 94159000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 4, "cmd": 2}, "seq": 1176, "time_ns": 94164000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 12, "bank": 2, "col": 688, "row": 10975, "type": 1, "we": 0}, "seq": 1177, "time_ns": 94169000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 12, "bank": 2, "col": 688, "row": 10975, "type": 1, "we": 0}, "seq": 1178, "time_ns": 94169000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 10975, "bank": 2, "cmd": 3}, "seq": 1179, "time_ns": 94174000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 2}, "seq": 1180, "time_ns": 94194000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 11, "bank": 6, "col": 80, "row": 4555, "type": 2, "we": 0}, "seq": 1181, "time_ns": 94194000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 2}, "seq": 1182, "time_ns": 94194000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 11, "bank": 6, "col": 80, "row": 4555, "type": 2, "we": 0}, "seq": 1183, "time_ns": 94194000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 11}, "seq": 1184, "time_ns": 94199000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 80, "bank": 6, "cmd": 5}, "seq": 1185, "time_ns": 94199000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 10, "bank": 0, "col": 600, "row": 19024, "type": 4, "we": 0}, "seq": 1186, "time_ns": 94204000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 10, "bank": 0, "col": 600, "row": 19024, "type": 4, "we": 0}, "seq": 1187, "time_ns": 94204000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 2}, "seq": 1188, "time_ns": 94209000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32687}, "seq": 1189, "time_ns": 94219000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 274119888, "data": 2142175232}, "seq": 1190, "time_ns": 94224000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 11, "data": 2142175232}, "seq": 1191, "time_ns": 94224000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 64928}, "seq": 1192, "time_ns": 94224000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 0}, "seq": 1193, "time_ns": 94239000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 12, "bank": 2, "col": 688, "row": 10975, "type": 2, "we": 0}, "seq": 1194, "time_ns": 94239000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 0}, "seq": 1195, "time_ns": 94239000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 12, "bank": 2, "col": 688, "row": 10975, "type": 2, "we": 0}, "seq": 1196, "time_ns": 94239000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 12}, "seq": 1197, "time_ns": 94244000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 688, "bank": 2, "cmd": 5}, "seq": 1198, "time_ns": 94244000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 32079}, "seq": 1199, "time_ns": 94264000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 34852724, "data": 2102329344}, "seq": 1200, "time_ns": 94269000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 12, "data": 2102329344}, "seq": 1201, "time_ns": 94269000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 23950}, "seq": 1202, "time_ns": 94269000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 10, "bank": 0, "col": 600, "row": 19024, "type": 1, "we": 0}, "seq": 1203, "time_ns": 94274000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 10, "bank": 0, "col": 600, "row": 19024, "type": 1, "we": 0}, "seq": 1204, "time_ns": 94274000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1205, "time_ns": 94279000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 6, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1206, "time_ns": 94279000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 19024, "bank": 0, "cmd": 3}, "seq": 1207, "time_ns": 94279000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 6, "cmd": 2}, "seq": 1208, "time_ns": 94284000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 2, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1209, "time_ns": 94324000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 2, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1210, "time_ns": 94324000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 2, "cmd": 2}, "seq": 1211, "time_ns": 94329000}
+{"iface": "sched_deq", "kind": "grant", "fields": {"idx": 1}, "seq": 1212, "time_ns": 94344000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 10, "bank": 0, "col": 600, "row": 19024, "type": 2, "we": 0}, "seq": 1213, "time_ns": 94344000}
+{"iface": "cq_deq", "kind": "dequeue", "fields": {"idx": 1}, "seq": 1214, "time_ns": 94344000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 10, "bank": 0, "col": 600, "row": 19024, "type": 2, "we": 0}, "seq": 1215, "time_ns": 94344000}
+{"iface": "dp_cmd", "kind": "read", "fields": {"aux": 10}, "seq": 1216, "time_ns": 94349000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 600, "bank": 0, "cmd": 5}, "seq": 1217, "time_ns": 94349000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 64935}, "seq": 1218, "time_ns": 94369000}
+{"iface": "wb_rsp", "kind": "read_data", "fields": {"addr": 75648840, "data": 4255580160}, "seq": 1219, "time_ns": 94374000}
+{"iface": "dp_rd_rsp", "kind": "response", "fields": {"aux": 10, "data": 4255580160}, "seq": 1220, "time_ns": 94374000}
+{"iface": "ddr_rd_beat", "kind": "beat", "fields": {"data": 9600}, "seq": 1221, "time_ns": 94374000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1222, "time_ns": 94429000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 4, "we": 0}, "seq": 1223, "time_ns": 94429000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 2}, "seq": 1224, "time_ns": 94434000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 1225, "time_ns": 94499000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 1}, "seq": 1226, "time_ns": 94499000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 1227, "time_ns": 94499000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 0, "required": 0, "starve": 0, "urgent": 0}, "seq": 1228, "time_ns": 94504000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 1229, "time_ns": 94504000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 1230, "time_ns": 94508000}
+{"iface": "refresh_req", "kind": "request", "fields": {"pending": 1, "starve": 0, "urgent": 0}, "seq": 1231, "time_ns": 101429000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 1, "required": 1, "starve": 0, "urgent": 0}, "seq": 1232, "time_ns": 101429000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 1, "self_refresh": 0}, "seq": 1233, "time_ns": 101433000}
+{"iface": "sched_cmd", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 1234, "time_ns": 101434000}
+{"iface": "refresh_ack", "kind": "ack", "fields": {"pending": 1}, "seq": 1235, "time_ns": 101434000}
+{"iface": "sched_in", "kind": "command", "fields": {"aux": 0, "bank": 0, "col": 0, "row": 0, "type": 5, "we": 0}, "seq": 1236, "time_ns": 101434000}
+{"iface": "refresh_level", "kind": "state", "fields": {"pending": 0, "required": 0, "starve": 0, "urgent": 0}, "seq": 1237, "time_ns": 101439000}
+{"iface": "ddr_cmd", "kind": "command", "fields": {"addr": 0, "bank": 0, "cmd": 1}, "seq": 1238, "time_ns": 101439000}
+{"iface": "csr_sts_level", "kind": "state", "fields": {"bist_done": 0, "bist_fail": 0, "bist_fail_addr": 0, "cal_done": 0, "cal_fail": 0, "ecc_ce_count": 0, "init_done": 0, "ref_pending": 0, "self_refresh": 0}, "seq": 1239, "time_ns": 101443000}

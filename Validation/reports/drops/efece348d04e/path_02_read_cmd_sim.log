@@ -1,4 +1,6 @@
-TOOL:	xrun	24.03-s013: Started on Oct 27, 2026 at 14:44:21 CDT
+TOOL:	xrun	24.03-s013: Started on Oct 28, 2026 at 14:09:09 CDT
+*WARNING* X Window Display Initialization failure
+*WARNING* (DISPLAY "")
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xrun: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
@@ -46,8 +48,6 @@ xrun: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,13): c
 DEFINE cds_spicelib ./CDS_SPICELIB
 |
 xrun: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,14): cds.lib Invalid path '/opt/coe/cadence/XCELIUM240/tools/inca/files/CDS_SPICELIB' (cds.lib command ignored).
-*WARNING* X Window Display Initialization failure
-*WARNING* (DISPLAY "")
 DEFINE cds_amsfunctions ./CDS_AMSFUNCTIONS
 |
 xrun: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,15): cds.lib Invalid path '/opt/coe/cadence/XCELIUM240/tools/inca/files/CDS_AMSFUNCTIONS' (cds.lib command ignored).
@@ -436,6 +436,10 @@ file: scheduler_order_sva.sv
 	module worklib.scheduler_order_sva:sv
 		errors: 0, warnings: 0
 file: scheduler_order_sva_bind.sv
+file: wb_port_order_sva.sv
+	module worklib.wb_port_order_sva:sv
+		errors: 0, warnings: 0
+file: wb_port_order_sva_bind.sv
 	Total errors/warnings found outside modules and primitives:
 		errors: 0, warnings: 16
 DEFINE std       ./STD
@@ -586,7 +590,7 @@ xmelab: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment
 xmelab: *N,CGNSWA: (File: ./cov_conf.ccf, Line: 6): A covergroup is not (de)selected with the "-all" option of the (de)select_coverage command. Use the coverage metric "-covergroup" with the (de)select_coverage command to (de)select a covergroup.
 		Caching library 'worklib' ....... Done
 	Top level design units:
-		$unit_0x0e6a150a
+		$unit_0x007516de
 		chain_harness
 
 	Extracting FSMs for coverage:
@@ -603,6 +607,7 @@ xmelab: *N,CGNSWA: (File: ./cov_conf.ccf, Line: 6): A covergroup is not (de)sele
 		worklib.refresh_ctrl
 		worklib.scheduler_order_sva
 		worklib.scheduler
+		worklib.wb_port_order_sva
 		worklib.wb_port
 	Total FSMs extracted = 2
 xmelab: *W,ICFNFR: Module "*_txn_harness", specified on line 17 of file "./cov_conf.ccf", not found in the design.
@@ -659,95 +664,97 @@ xmvlog_cg: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,1
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
-		worklib.dram_stub:sv <0x2488c616>
+		worklib.dram_stub:sv <0x6b900fae>
 			streams:   3, words:  7224
-		worklib.wb_rsp_monitor:sv <0x508a3eaa>
-			streams:   2, words:  1788
-		worklib.wb_monitor:sv <0x4f1ce723>
-			streams:   2, words:  2913
-		worklib.req_monitor:sv <0x25eba47a>
+		worklib.wb_port_order_sva:sv <0x017215f0>
+			streams:   9, words:  4830
+		worklib.wb_rsp_monitor:sv <0x4cdcfbc1>
+			streams:   4, words:  3426
+		worklib.wb_monitor:sv <0x54c229f7>
+			streams:   2, words:  3813
+		worklib.req_monitor:sv <0x6ad95e38>
 			streams:   2, words:  2235
-		worklib.scheduler_order_sva:sv <0x169ec36c>
+		worklib.scheduler_order_sva:sv <0x1bcb36cd>
 			streams:  18, words:  9906
-		worklib.scheduler_fcov:sv <0x12bd02c4>
-			streams:   4, words:  1955
-		worklib.sched_deq_monitor:sv <0x2838711b>
+		worklib.scheduler_fcov:sv <0x7080a0fb>
+			streams:   7, words:  4507
+		worklib.sched_deq_monitor:sv <0x7612a6f7>
 			streams:   2, words:  1543
-		worklib.sched_cmd_monitor:sv <0x39789cfc>
+		worklib.sched_cmd_monitor:sv <0x2306d573>
 			streams:   2, words:  2668
-		worklib.refresh_ctrl_fcov:sv <0x0c6ea5a7>
+		worklib.refresh_ctrl_fcov:sv <0x22a25f47>
 			streams:   4, words:  1993
-		worklib.refresh_req_monitor:sv <0x713dc8df>
+		worklib.refresh_req_monitor:sv <0x6aa02ef7>
 			streams:   3, words:  2241
-		worklib.refresh_level_monitor:sv <0x3c5a05a2>
+		worklib.refresh_level_monitor:sv <0x26244c2d>
 			streams:   3, words:  2531
-		worklib.refresh_ack_monitor:sv <0x668a9ac3>
+		worklib.refresh_ack_monitor:sv <0x4d03c49f>
 			streams:   2, words:  1543
-		worklib.data_path_fcov:sv <0x4a647f79>
+		worklib.data_path_fcov:sv <0x52953526>
 			streams:   4, words:  2329
-		worklib.dp_wr_monitor:sv <0x1e015798>
+		worklib.dp_wr_monitor:sv <0x358809c4>
 			streams:   2, words:  1785
-		worklib.dp_rd_rsp_monitor:sv <0x4a636f91>
+		worklib.dp_rd_rsp_monitor:sv <0x373935c1>
 			streams:   2, words:  1768
-		worklib.dp_cmd_monitor:sv <0x39408d7f>
+		worklib.dp_cmd_monitor:sv <0x0845959b>
 			streams:   2, words:  2452
-		worklib.ddr_wr_beat_monitor:sv <0x0d24f99c>
+		worklib.ddr_wr_beat_monitor:sv <0x49e2e507>
 			streams:   2, words:  1768
-		worklib.ddr_rd_beat_monitor:sv <0x6094d12f>
+		worklib.ddr_rd_beat_monitor:sv <0x4b1d8f73>
 			streams:   2, words:  1543
-		worklib.config_regs_fcov:sv <0x6b9666df>
+		worklib.config_regs_fcov:sv <0x57f5b5e6>
 			streams:  10, words: 13585
-		worklib.csr_sts_level_monitor:sv <0x08205b88>
+		worklib.csr_sts_level_monitor:sv <0x67e65281>
 			streams:   3, words:  5328
-		worklib.csr_sts_monitor:sv <0x343a1703>
+		worklib.csr_sts_monitor:sv <0x49604d53>
 			streams:   2, words:  2016
-		worklib.csr_rsp_monitor:sv <0x69fcfc3e>
+		worklib.csr_rsp_monitor:sv <0x72611a16>
 			streams:   2, words:  3103
-		worklib.csr_monitor:sv <0x5a254d99>
+		worklib.csr_monitor:sv <0x1ee35102>
 			streams:   2, words:  2653
-		worklib.cfg_timing_monitor:sv <0x0f927749>
+		worklib.cfg_timing_monitor:sv <0x044a2edb>
 			streams:   3, words:  5065
-		worklib.cfg_refresh_monitor:sv <0x30b54edb>
+		worklib.cfg_refresh_monitor:sv <0x361af3fb>
 			streams:   3, words:  3291
-		worklib.cmd_queue_fcov:sv <0x4f3197fb>
+		worklib.cmd_queue_fcov:sv <0x3d9cdebd>
 			streams:   4, words:  1898
-		worklib.cq_enq_monitor:sv <0x1a19b542>
+		worklib.cq_enq_monitor:sv <0x776434ae>
 			streams:   2, words:  2235
-		worklib.cq_deq_monitor:sv <0x397eaf4f>
+		worklib.cq_deq_monitor:sv <0x36e0bcfa>
 			streams:   2, words:  1543
-		worklib.cmd_gen_coverage:sv <0x56490576>
-			streams:  25, words: 45158
-		worklib.sched_in_monitor:sv <0x38382b8b>
+		worklib.cmd_gen_coverage:sv <0x0ca0958a>
+			streams:  25, words: 45759
+		worklib.sched_in_monitor:sv <0x4ea48295>
 			streams:   2, words:  2668
-		worklib.ddr_cmd_monitor:sv <0x3b0c0ab3>
+		worklib.ddr_cmd_monitor:sv <0x465650e3>
 			streams:   2, words:  2037
-		worklib.bank_tracker_fcov:sv <0x3f3be4f4>
+		worklib.bank_tracker_fcov:sv <0x11f71e14>
 			streams:   4, words:  2393
-		worklib.addr_decoder:sv <0x049e6be1>
+		worklib.addr_decoder:sv <0x3904ceeb>
 			streams:   2, words:  1259
-		worklib.seq_driver:sv <0x56dc5887>
-			streams:   5, words: 29378
-		worklib.chain_harness:sv <0x12944764>
-			streams: 246, words: 66465
-		worklib.bank_tracker:sv <0x66dd9a2f>
+		worklib.seq_driver:sv <0x75db4c15>
+			streams:   9, words: 86308
+		worklib.chain_harness:sv <0x492570b0>
+			streams: 246, words: 66449
+		worklib.bank_tracker:sv <0x29665636>
 			streams:  37, words: 49233
-		worklib.config_regs:sv <0x7567b7e9>
+		worklib.config_regs:sv <0x40a4daac>
 			streams:  64, words: 58855
-		worklib.cmd_queue:sv <0x624b27fa>
+		worklib.cmd_queue:sv <0x5654213b>
 			streams:  21, words: 20719
-		worklib.cmd_gen:sv <0x35fdbff1>
+		worklib.cmd_gen:sv <0x0627931e>
 			streams:  19, words: 19688
-		worklib.data_path:sv <0x06014fb4>
+		worklib.data_path:sv <0x17eeefd9>
 			streams:  60, words: 47462
-		worklib.refresh_ctrl:sv <0x65d4c22b>
+		worklib.refresh_ctrl:sv <0x53b01040>
 			streams:  23, words: 12929
-		worklib.wb_port:sv <0x41938f41>
-			streams:  58, words: 45842
-		worklib.scheduler:sv <0x70e9c8a4>
-			streams:  31, words: 46489
-		worklib.cmd_gen_sva:sv <0x570733aa>
+		worklib.wb_port:sv <0x10846e96>
+			streams:  59, words: 45721
+		worklib.scheduler:sv <0x2a84c01b>
+			streams:  33, words: 46703
+		worklib.cmd_gen_sva:sv <0x02b1d2ea>
 			streams: 333, words: 140663
-		worklib.\$unit_0x0e6a150a :compilation_unit <0x6f483041>
+		worklib.\$unit_0x007516de :compilation_unit <0x05362c8d>
 			streams:   0, words:     0
 xmelab: *W,COVNOEN: By default, toggle coverage is not supported for systemverilog static arrays of enumerated nets and variables. To enable toggle coverage of these objects, specify the 'set_toggle_scoring -sv_enum enable_mda' command in the coverage configuration file.
   int unsigned since_act [8];
@@ -758,21 +765,21 @@ xmelab: *W,CGPIDF: Covergroup "per_instance" option , by default, is set as 0.
 	Loading native compiled code:     .................... Done
 	Design hierarchy summary:
 		                     Instances  Unique
-		Modules:                    44      44
-		Registers:                 853     874
-		Scalar wires:              244       -
-		Vectored wires:            278       -
-		Named events:               23      23
-		Always blocks:             316     309
-		Initial blocks:             75      75
-		Cont. assignments:          70      98
-		Pseudo assignments:        292       -
-		Assertions:                 40      40
-		Covergroup Instances:        0      10
+		Modules:                    45      45
+		Registers:                 877     898
+		Scalar wires:              247       -
+		Vectored wires:            280       -
+		Named events:               24      24
+		Always blocks:             329     322
+		Initial blocks:             81      81
+		Cont. assignments:          68      96
+		Pseudo assignments:        297       -
+		Assertions:                 42      42
+		Covergroup Instances:        0      11
 		Compilation units:           1       1
 		SV Class declarations:      21      21
 		SV Class specializations:   21      21
-		Process Clocks:            109      29
+		Process Clocks:            113      30
 		Simulation timescale:      1ps
 	Writing initial simulation snapshot: worklib.chain_harness:sv
 DEFINE std       ./STD
@@ -855,360 +862,1350 @@ TXN csr_sts_level state t=33000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_don
 TXN sched_cmd command t=34000 aux=0 bank=0 col=0 row=0 type=5 we=0
 TXN refresh_ack ack t=34000 pending=1
 TXN sched_in command t=34000 aux=0 bank=0 col=0 row=0 type=5 we=0
-TXN wb read t=38000 addr=409f134
-TXN req request t=39000 addr=409f134 data=0 mask=0 we=0
+TXN wb write t=38000 addr=10530d0c bte=0 cti=2 data=1e2feb89 sel=f
+TXN req request t=39000 addr=10530d0c data=1e2feb89 mask=f we=1
 TXN refresh_level state t=39000 pending=0 required=0 starve=0 urgent=0
-TXN cq_enq enqueue t=39000 bank=6 col=98 row=1027 we=0
+TXN dp_wr write t=39000 data=1e2feb89 mask=f
+TXN cq_enq enqueue t=39000 bank=1 col=280 row=414c we=1
 TXN ddr_cmd command t=39000 addr=0 bank=0 cmd=1
+TXN wb write t=43000 addr=10530d10 bte=0 cti=2 data=c2ce6f44 sel=f
 TXN csr_sts_level state t=43000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
-TXN sched_cmd command t=689000 aux=0 bank=6 col=98 row=1027 type=1 we=0
-TXN sched_in command t=689000 aux=0 bank=6 col=98 row=1027 type=1 we=0
-TXN ddr_cmd command t=694000 addr=1027 bank=6 cmd=3
+TXN req request t=44000 addr=10530d10 data=c2ce6f44 mask=f we=1
+TXN dp_wr write t=44000 data=c2ce6f44 mask=f
+TXN cq_enq enqueue t=44000 bank=1 col=288 row=414c we=1
+TXN wb write t=48000 addr=10530d14 bte=0 cti=7 data=35bf992d sel=f
+TXN req request t=49000 addr=10530d14 data=35bf992d mask=f we=1
+TXN dp_wr write t=49000 data=35bf992d mask=f
+TXN cq_enq enqueue t=49000 bank=1 col=288 row=414c we=1
+TXN wb read t=88000 addr=1bb274a0 bte=0 cti=2
+TXN req request t=89000 addr=1bb274a0 data=35bf992d mask=f we=0
+TXN cq_enq enqueue t=89000 bank=6 col=250 row=6ec9 we=0
+TXN wb read t=93000 addr=1bb274a4 bte=0 cti=7
+TXN req request t=94000 addr=1bb274a4 data=35bf992d mask=f we=0
+TXN cq_enq enqueue t=94000 bank=6 col=250 row=6ec9 we=0
+TXN sched_cmd command t=689000 aux=0 bank=1 col=280 row=414c type=1 we=1
+TXN sched_in command t=689000 aux=0 bank=1 col=280 row=414c type=1 we=1
+TXN ddr_cmd command t=694000 addr=414c bank=1 cmd=3
+TXN sched_cmd command t=734000 aux=3 bank=6 col=250 row=6ec9 type=1 we=0
+TXN sched_in command t=734000 aux=3 bank=6 col=250 row=6ec9 type=1 we=0
+TXN ddr_cmd command t=739000 addr=6ec9 bank=6 cmd=3
 TXN sched_deq grant t=759000 idx=0
-TXN sched_cmd command t=759000 aux=0 bank=6 col=98 row=1027 type=2 we=0
+TXN sched_cmd command t=759000 aux=0 bank=1 col=280 row=414c type=3 we=1
 TXN cq_deq dequeue t=759000 idx=0
-TXN sched_in command t=759000 aux=0 bank=6 col=98 row=1027 type=2 we=0
-TXN dp_cmd read t=764000 aux=0
-TXN ddr_cmd command t=764000 addr=98 bank=6 cmd=5
-TXN ddr_rd_beat beat t=784000 data=7f67
-TXN wb_rsp read_data t=789000 addr=409f134 data=7f670000
-TXN dp_rd_rsp response t=789000 aux=0 data=7f670000
-TXN ddr_rd_beat beat t=789000 data=9dac
-TXN wb read t=823000 addr=1fb5355e
-TXN req request t=824000 addr=1fb5355e data=0 mask=0 we=0
-TXN cq_enq enqueue t=824000 bank=6 col=2a8 row=7ed4 we=0
-TXN sched_cmd command t=844000 aux=1 bank=6 col=2a8 row=7ed4 type=4 we=0
-TXN sched_in command t=844000 aux=1 bank=6 col=2a8 row=7ed4 type=4 we=0
-TXN ddr_cmd command t=849000 addr=0 bank=6 cmd=2
-TXN sched_cmd command t=914000 aux=1 bank=6 col=2a8 row=7ed4 type=1 we=0
-TXN sched_in command t=914000 aux=1 bank=6 col=2a8 row=7ed4 type=1 we=0
-TXN ddr_cmd command t=919000 addr=7ed4 bank=6 cmd=3
-TXN sched_deq grant t=984000 idx=0
-TXN sched_cmd command t=984000 aux=1 bank=6 col=2a8 row=7ed4 type=2 we=0
-TXN cq_deq dequeue t=984000 idx=0
-TXN sched_in command t=984000 aux=1 bank=6 col=2a8 row=7ed4 type=2 we=0
-TXN dp_cmd read t=989000 aux=1
-TXN ddr_cmd command t=989000 addr=2a8 bank=6 cmd=5
-TXN ddr_rd_beat beat t=1009000 data=fd57
-TXN wb_rsp read_data t=1014000 addr=1fb5355e data=fd570000
-TXN dp_rd_rsp response t=1014000 aux=1 data=fd570000
-TXN ddr_rd_beat beat t=1014000 data=58f
-TXN wb read t=1063000 addr=184b9da5
-TXN req request t=1064000 addr=184b9da5 data=0 mask=0 we=0
-TXN cq_enq enqueue t=1064000 bank=3 col=2d0 row=612e we=0
-TXN sched_cmd command t=1074000 aux=2 bank=3 col=2d0 row=612e type=1 we=0
-TXN sched_in command t=1074000 aux=2 bank=3 col=2d0 row=612e type=1 we=0
-TXN ddr_cmd command t=1079000 addr=612e bank=3 cmd=3
-TXN sched_deq grant t=1144000 idx=0
-TXN sched_cmd command t=1144000 aux=2 bank=3 col=2d0 row=612e type=2 we=0
-TXN cq_deq dequeue t=1144000 idx=0
-TXN sched_in command t=1144000 aux=2 bank=3 col=2d0 row=612e type=2 we=0
-TXN dp_cmd read t=1149000 aux=2
-TXN ddr_cmd command t=1149000 addr=2d0 bank=3 cmd=5
-TXN ddr_rd_beat beat t=1169000 data=fd2f
-TXN wb_rsp read_data t=1174000 addr=184b9da5 data=fd2f0000
-TXN dp_rd_rsp response t=1174000 aux=2 data=fd2f0000
-TXN ddr_rd_beat beat t=1174000 data=d588
-TXN wb read t=1203000 addr=1f390b20
-TXN req request t=1204000 addr=1f390b20 data=0 mask=0 we=0
-TXN cq_enq enqueue t=1204000 bank=1 col=190 row=7ce4 we=0
-TXN sched_cmd command t=1214000 aux=3 bank=1 col=190 row=7ce4 type=1 we=0
-TXN sched_in command t=1214000 aux=3 bank=1 col=190 row=7ce4 type=1 we=0
-TXN ddr_cmd command t=1219000 addr=7ce4 bank=1 cmd=3
-TXN sched_deq grant t=1284000 idx=0
-TXN sched_cmd command t=1284000 aux=3 bank=1 col=190 row=7ce4 type=2 we=0
-TXN cq_deq dequeue t=1284000 idx=0
-TXN sched_in command t=1284000 aux=3 bank=1 col=190 row=7ce4 type=2 we=0
-TXN dp_cmd read t=1289000 aux=3
-TXN ddr_cmd command t=1289000 addr=190 bank=1 cmd=5
-TXN ddr_rd_beat beat t=1309000 data=fe6f
-TXN wb_rsp read_data t=1314000 addr=1f390b20 data=fe6f0000
-TXN dp_rd_rsp response t=1314000 aux=3 data=fe6f0000
-TXN ddr_rd_beat beat t=1314000 data=85bc
-TXN wb read t=1328000 addr=1bb274a1
-TXN req request t=1329000 addr=1bb274a1 data=0 mask=0 we=0
-TXN cq_enq enqueue t=1329000 bank=6 col=250 row=6ec9 we=0
-TXN sched_cmd command t=1339000 aux=4 bank=6 col=250 row=6ec9 type=4 we=0
-TXN sched_in command t=1339000 aux=4 bank=6 col=250 row=6ec9 type=4 we=0
-TXN ddr_cmd command t=1344000 addr=0 bank=6 cmd=2
-TXN sched_cmd command t=1409000 aux=4 bank=6 col=250 row=6ec9 type=1 we=0
-TXN sched_in command t=1409000 aux=4 bank=6 col=250 row=6ec9 type=1 we=0
-TXN ddr_cmd command t=1414000 addr=6ec9 bank=6 cmd=3
-TXN sched_deq grant t=1479000 idx=0
-TXN sched_cmd command t=1479000 aux=4 bank=6 col=250 row=6ec9 type=2 we=0
-TXN cq_deq dequeue t=1479000 idx=0
-TXN sched_in command t=1479000 aux=4 bank=6 col=250 row=6ec9 type=2 we=0
-TXN dp_cmd read t=1484000 aux=4
-TXN ddr_cmd command t=1484000 addr=250 bank=6 cmd=5
-TXN ddr_rd_beat beat t=1504000 data=7daf
-TXN wb_rsp read_data t=1509000 addr=1bb274a1 data=7daf0000
-TXN dp_rd_rsp response t=1509000 aux=4 data=7daf0000
-TXN ddr_rd_beat beat t=1509000 data=ed80
-TXN wb read t=1568000 addr=1c81394b
-TXN req request t=1569000 addr=1c81394b data=0 mask=0 we=0
-TXN cq_enq enqueue t=1569000 bank=7 col=a0 row=7204 we=0
-TXN sched_cmd command t=1579000 aux=5 bank=7 col=a0 row=7204 type=1 we=0
-TXN sched_in command t=1579000 aux=5 bank=7 col=a0 row=7204 type=1 we=0
-TXN ddr_cmd command t=1584000 addr=7204 bank=7 cmd=3
-TXN sched_deq grant t=1649000 idx=0
-TXN sched_cmd command t=1649000 aux=5 bank=7 col=a0 row=7204 type=2 we=0
-TXN cq_deq dequeue t=1649000 idx=0
-TXN sched_in command t=1649000 aux=5 bank=7 col=a0 row=7204 type=2 we=0
-TXN dp_cmd read t=1654000 aux=5
-TXN ddr_cmd command t=1654000 addr=a0 bank=7 cmd=5
-TXN ddr_rd_beat beat t=1674000 data=ff5f
-TXN wb_rsp read_data t=1679000 addr=1c81394b data=ff5f0000
-TXN dp_rd_rsp response t=1679000 aux=5 data=ff5f0000
-TXN ddr_rd_beat beat t=1679000 data=85af
-TXN wb read t=1713000 addr=68ae3c7
-TXN req request t=1714000 addr=68ae3c7 data=0 mask=0 we=0
-TXN cq_enq enqueue t=1714000 bank=4 col=1e0 row=1a2b we=0
-TXN sched_cmd command t=1724000 aux=6 bank=4 col=1e0 row=1a2b type=1 we=0
-TXN sched_in command t=1724000 aux=6 bank=4 col=1e0 row=1a2b type=1 we=0
-TXN ddr_cmd command t=1729000 addr=1a2b bank=4 cmd=3
-TXN sched_deq grant t=1794000 idx=0
-TXN sched_cmd command t=1794000 aux=6 bank=4 col=1e0 row=1a2b type=2 we=0
-TXN cq_deq dequeue t=1794000 idx=0
-TXN sched_in command t=1794000 aux=6 bank=4 col=1e0 row=1a2b type=2 we=0
-TXN dp_cmd read t=1799000 aux=6
-TXN ddr_cmd command t=1799000 addr=1e0 bank=4 cmd=5
-TXN ddr_rd_beat beat t=1819000 data=7e1f
-TXN wb_rsp read_data t=1824000 addr=68ae3c7 data=7e1f0000
-TXN dp_rd_rsp response t=1824000 aux=6 data=7e1f0000
-TXN ddr_rd_beat beat t=1824000 data=fdbb
-TXN wb read t=1863000 addr=16db9b8
-TXN req request t=1864000 addr=16db9b8 data=0 mask=0 we=0
-TXN cq_enq enqueue t=1864000 bank=7 col=d8 row=5b6 we=0
-TXN sched_cmd command t=1874000 aux=7 bank=7 col=d8 row=5b6 type=4 we=0
-TXN sched_in command t=1874000 aux=7 bank=7 col=d8 row=5b6 type=4 we=0
-TXN ddr_cmd command t=1879000 addr=0 bank=7 cmd=2
-TXN sched_cmd command t=1944000 aux=7 bank=7 col=d8 row=5b6 type=1 we=0
-TXN sched_in command t=1944000 aux=7 bank=7 col=d8 row=5b6 type=1 we=0
-TXN ddr_cmd command t=1949000 addr=5b6 bank=7 cmd=3
-TXN sched_deq grant t=2014000 idx=0
-TXN sched_cmd command t=2014000 aux=7 bank=7 col=d8 row=5b6 type=2 we=0
-TXN cq_deq dequeue t=2014000 idx=0
-TXN sched_in command t=2014000 aux=7 bank=7 col=d8 row=5b6 type=2 we=0
-TXN dp_cmd read t=2019000 aux=7
-TXN ddr_cmd command t=2019000 addr=d8 bank=7 cmd=5
-TXN ddr_rd_beat beat t=2039000 data=ff27
-TXN wb_rsp read_data t=2044000 addr=16db9b8 data=ff270000
-TXN dp_rd_rsp response t=2044000 aux=7 data=ff270000
-TXN ddr_rd_beat beat t=2044000 data=15a8
-TXN wb read t=2058000 addr=1865a673
-TXN req request t=2059000 addr=1865a673 data=0 mask=0 we=0
-TXN cq_enq enqueue t=2059000 bank=4 col=338 row=6196 we=0
-TXN sched_cmd command t=2069000 aux=8 bank=4 col=338 row=6196 type=4 we=0
-TXN sched_in command t=2069000 aux=8 bank=4 col=338 row=6196 type=4 we=0
-TXN ddr_cmd command t=2074000 addr=0 bank=4 cmd=2
-TXN sched_cmd command t=2139000 aux=8 bank=4 col=338 row=6196 type=1 we=0
-TXN sched_in command t=2139000 aux=8 bank=4 col=338 row=6196 type=1 we=0
-TXN ddr_cmd command t=2144000 addr=6196 bank=4 cmd=3
-TXN sched_deq grant t=2209000 idx=0
-TXN sched_cmd command t=2209000 aux=8 bank=4 col=338 row=6196 type=2 we=0
-TXN cq_deq dequeue t=2209000 idx=0
-TXN sched_in command t=2209000 aux=8 bank=4 col=338 row=6196 type=2 we=0
-TXN dp_cmd read t=2214000 aux=8
-TXN ddr_cmd command t=2214000 addr=338 bank=4 cmd=5
-TXN ddr_rd_beat beat t=2234000 data=fcc7
-TXN wb_rsp read_data t=2239000 addr=1865a673 data=fcc70000
-TXN dp_rd_rsp response t=2239000 aux=8 data=fcc70000
-TXN ddr_rd_beat beat t=2239000 data=1596
-TXN wb read t=2303000 addr=1b03f53d
-TXN req request t=2304000 addr=1b03f53d data=0 mask=0 we=0
-TXN cq_enq enqueue t=2304000 bank=6 col=298 row=6c0f we=0
-TXN sched_cmd command t=2314000 aux=9 bank=6 col=298 row=6c0f type=4 we=0
-TXN sched_in command t=2314000 aux=9 bank=6 col=298 row=6c0f type=4 we=0
-TXN ddr_cmd command t=2319000 addr=0 bank=6 cmd=2
-TXN sched_cmd command t=2384000 aux=9 bank=6 col=298 row=6c0f type=1 we=0
-TXN sched_in command t=2384000 aux=9 bank=6 col=298 row=6c0f type=1 we=0
-TXN ddr_cmd command t=2389000 addr=6c0f bank=6 cmd=3
-TXN sched_deq grant t=2454000 idx=0
-TXN sched_cmd command t=2454000 aux=9 bank=6 col=298 row=6c0f type=2 we=0
-TXN cq_deq dequeue t=2454000 idx=0
-TXN sched_in command t=2454000 aux=9 bank=6 col=298 row=6c0f type=2 we=0
-TXN dp_cmd read t=2459000 aux=9
-TXN ddr_cmd command t=2459000 addr=298 bank=6 cmd=5
-TXN ddr_rd_beat beat t=2479000 data=7d67
-TXN wb_rsp read_data t=2484000 addr=1b03f53d data=7d670000
-TXN dp_rd_rsp response t=2484000 aux=9 data=7d670000
-TXN ddr_rd_beat beat t=2484000 data=dd8c
-TXN wb read t=2553000 addr=e30323f
-TXN req request t=2554000 addr=e30323f data=0 mask=0 we=0
-TXN cq_enq enqueue t=2554000 bank=6 col=118 row=38c0 we=0
-TXN sched_cmd command t=2564000 aux=a bank=6 col=118 row=38c0 type=4 we=0
-TXN sched_in command t=2564000 aux=a bank=6 col=118 row=38c0 type=4 we=0
-TXN ddr_cmd command t=2569000 addr=0 bank=6 cmd=2
-TXN sched_cmd command t=2634000 aux=a bank=6 col=118 row=38c0 type=1 we=0
-TXN sched_in command t=2634000 aux=a bank=6 col=118 row=38c0 type=1 we=0
-TXN ddr_cmd command t=2639000 addr=38c0 bank=6 cmd=3
-TXN sched_deq grant t=2704000 idx=0
-TXN sched_cmd command t=2704000 aux=a bank=6 col=118 row=38c0 type=2 we=0
-TXN cq_deq dequeue t=2704000 idx=0
-TXN sched_in command t=2704000 aux=a bank=6 col=118 row=38c0 type=2 we=0
-TXN dp_cmd read t=2709000 aux=a
-TXN ddr_cmd command t=2709000 addr=118 bank=6 cmd=5
-TXN ddr_rd_beat beat t=2729000 data=fee7
-TXN wb_rsp read_data t=2734000 addr=e30323f data=fee70000
-TXN dp_rd_rsp response t=2734000 aux=a data=fee70000
-TXN ddr_rd_beat beat t=2734000 data=a5b4
-TXN wb read t=2783000 addr=eeadb0e
-TXN req request t=2784000 addr=eeadb0e data=0 mask=0 we=0
-TXN cq_enq enqueue t=2784000 bank=3 col=180 row=3bab we=0
-TXN sched_cmd command t=2794000 aux=b bank=3 col=180 row=3bab type=4 we=0
-TXN sched_in command t=2794000 aux=b bank=3 col=180 row=3bab type=4 we=0
-TXN ddr_cmd command t=2799000 addr=0 bank=3 cmd=2
-TXN sched_cmd command t=2864000 aux=b bank=3 col=180 row=3bab type=1 we=0
-TXN sched_in command t=2864000 aux=b bank=3 col=180 row=3bab type=1 we=0
-TXN ddr_cmd command t=2869000 addr=3bab bank=3 cmd=3
-TXN sched_deq grant t=2934000 idx=0
-TXN sched_cmd command t=2934000 aux=b bank=3 col=180 row=3bab type=2 we=0
-TXN cq_deq dequeue t=2934000 idx=0
-TXN sched_in command t=2934000 aux=b bank=3 col=180 row=3bab type=2 we=0
-TXN dp_cmd read t=2939000 aux=b
-TXN ddr_cmd command t=2939000 addr=180 bank=3 cmd=5
-TXN ddr_rd_beat beat t=2959000 data=7e7f
-TXN wb_rsp read_data t=2964000 addr=eeadb0e data=7e7f0000
-TXN dp_rd_rsp response t=2964000 aux=b data=7e7f0000
-TXN ddr_rd_beat beat t=2964000 data=fdbd
-TXN wb read t=3003000 addr=e00822a
-TXN req request t=3004000 addr=e00822a data=0 mask=0 we=0
-TXN cq_enq enqueue t=3004000 bank=0 col=110 row=3802 we=0
-TXN sched_cmd command t=3014000 aux=c bank=0 col=110 row=3802 type=1 we=0
-TXN sched_in command t=3014000 aux=c bank=0 col=110 row=3802 type=1 we=0
-TXN ddr_cmd command t=3019000 addr=3802 bank=0 cmd=3
-TXN sched_deq grant t=3084000 idx=0
-TXN sched_cmd command t=3084000 aux=c bank=0 col=110 row=3802 type=2 we=0
-TXN cq_deq dequeue t=3084000 idx=0
-TXN sched_in command t=3084000 aux=c bank=0 col=110 row=3802 type=2 we=0
-TXN dp_cmd read t=3089000 aux=c
-TXN ddr_cmd command t=3089000 addr=110 bank=0 cmd=5
-TXN ddr_rd_beat beat t=3109000 data=feef
-TXN wb_rsp read_data t=3114000 addr=e00822a data=feef0000
-TXN dp_rd_rsp response t=3114000 aux=c data=feef0000
-TXN ddr_rd_beat beat t=3114000 data=b5b4
-TXN wb read t=3163000 addr=160165d
-TXN req request t=3164000 addr=160165d data=0 mask=0 we=0
-TXN cq_enq enqueue t=3164000 bank=2 col=328 row=580 we=0
-TXN sched_cmd command t=3174000 aux=d bank=2 col=328 row=580 type=1 we=0
-TXN sched_in command t=3174000 aux=d bank=2 col=328 row=580 type=1 we=0
-TXN ddr_cmd command t=3179000 addr=580 bank=2 cmd=3
-TXN sched_deq grant t=3244000 idx=0
-TXN sched_cmd command t=3244000 aux=d bank=2 col=328 row=580 type=2 we=0
-TXN cq_deq dequeue t=3244000 idx=0
-TXN sched_in command t=3244000 aux=d bank=2 col=328 row=580 type=2 we=0
-TXN dp_cmd read t=3249000 aux=d
-TXN ddr_cmd command t=3249000 addr=328 bank=2 cmd=5
-TXN ddr_rd_beat beat t=3269000 data=fcd7
-TXN wb_rsp read_data t=3274000 addr=160165d data=fcd70000
-TXN dp_rd_rsp response t=3274000 aux=d data=fcd70000
-TXN ddr_rd_beat beat t=3274000 data=a597
-TXN wb read t=3318000 addr=be5e361
-TXN req request t=3319000 addr=be5e361 data=0 mask=0 we=0
-TXN cq_enq enqueue t=3319000 bank=4 col=1b0 row=2f97 we=0
-TXN sched_cmd command t=3329000 aux=e bank=4 col=1b0 row=2f97 type=4 we=0
-TXN sched_in command t=3329000 aux=e bank=4 col=1b0 row=2f97 type=4 we=0
-TXN ddr_cmd command t=3334000 addr=0 bank=4 cmd=2
-TXN sched_cmd command t=3399000 aux=e bank=4 col=1b0 row=2f97 type=1 we=0
-TXN sched_in command t=3399000 aux=e bank=4 col=1b0 row=2f97 type=1 we=0
-TXN ddr_cmd command t=3404000 addr=2f97 bank=4 cmd=3
-TXN sched_deq grant t=3469000 idx=0
-TXN sched_cmd command t=3469000 aux=e bank=4 col=1b0 row=2f97 type=2 we=0
-TXN cq_deq dequeue t=3469000 idx=0
-TXN sched_in command t=3469000 aux=e bank=4 col=1b0 row=2f97 type=2 we=0
-TXN dp_cmd read t=3474000 aux=e
-TXN ddr_cmd command t=3474000 addr=1b0 bank=4 cmd=5
-TXN ddr_rd_beat beat t=3494000 data=7e4f
-TXN wb_rsp read_data t=3499000 addr=be5e361 data=7e4f0000
-TXN dp_rd_rsp response t=3499000 aux=e data=7e4f0000
-TXN ddr_rd_beat beat t=3499000 data=1dbe
-TXN wb read t=3563000 addr=7bca93c
-TXN req request t=3564000 addr=7bca93c data=0 mask=0 we=0
-TXN cq_enq enqueue t=3564000 bank=5 col=98 row=1ef2 we=0
-TXN sched_cmd command t=3574000 aux=f bank=5 col=98 row=1ef2 type=1 we=0
-TXN sched_in command t=3574000 aux=f bank=5 col=98 row=1ef2 type=1 we=0
-TXN ddr_cmd command t=3579000 addr=1ef2 bank=5 cmd=3
-TXN sched_deq grant t=3644000 idx=0
-TXN sched_cmd command t=3644000 aux=f bank=5 col=98 row=1ef2 type=2 we=0
-TXN cq_deq dequeue t=3644000 idx=0
-TXN sched_in command t=3644000 aux=f bank=5 col=98 row=1ef2 type=2 we=0
-TXN dp_cmd read t=3649000 aux=f
-TXN ddr_cmd command t=3649000 addr=98 bank=5 cmd=5
-TXN ddr_rd_beat beat t=3669000 data=ff67
-TXN wb_rsp read_data t=3674000 addr=7bca93c data=ff670000
-TXN dp_rd_rsp response t=3674000 aux=f data=ff670000
-TXN ddr_rd_beat beat t=3674000 data=35ac
-TXN wb read t=3743000 addr=1b03cd16
-TXN req request t=3744000 addr=1b03cd16 data=0 mask=0 we=0
-TXN cq_enq enqueue t=3744000 bank=1 col=288 row=6c0f we=0
-TXN sched_cmd command t=3754000 aux=0 bank=1 col=288 row=6c0f type=4 we=0
-TXN sched_in command t=3754000 aux=0 bank=1 col=288 row=6c0f type=4 we=0
-TXN ddr_cmd command t=3759000 addr=0 bank=1 cmd=2
-TXN sched_cmd command t=3824000 aux=0 bank=1 col=288 row=6c0f type=1 we=0
-TXN sched_in command t=3824000 aux=0 bank=1 col=288 row=6c0f type=1 we=0
-TXN ddr_cmd command t=3829000 addr=6c0f bank=1 cmd=3
-TXN sched_deq grant t=3894000 idx=0
-TXN sched_cmd command t=3894000 aux=0 bank=1 col=288 row=6c0f type=2 we=0
-TXN cq_deq dequeue t=3894000 idx=0
-TXN sched_in command t=3894000 aux=0 bank=1 col=288 row=6c0f type=2 we=0
-TXN dp_cmd read t=3899000 aux=0
-TXN ddr_cmd command t=3899000 addr=288 bank=1 cmd=5
-TXN ddr_rd_beat beat t=3919000 data=7d77
-TXN wb_rsp read_data t=3924000 addr=1b03cd16 data=7d770000
-TXN dp_rd_rsp response t=3924000 aux=0 data=7d770000
-TXN ddr_rd_beat beat t=3924000 data=dd8d
-TXN wb read t=3978000 addr=136a63c7
-TXN req request t=3979000 addr=136a63c7 data=0 mask=0 we=0
-TXN cq_enq enqueue t=3979000 bank=4 col=1e0 row=4da9 we=0
-TXN sched_cmd command t=3989000 aux=1 bank=4 col=1e0 row=4da9 type=4 we=0
-TXN sched_in command t=3989000 aux=1 bank=4 col=1e0 row=4da9 type=4 we=0
-TXN ddr_cmd command t=3994000 addr=0 bank=4 cmd=2
-TXN sched_cmd command t=4059000 aux=1 bank=4 col=1e0 row=4da9 type=1 we=0
-TXN sched_in command t=4059000 aux=1 bank=4 col=1e0 row=4da9 type=1 we=0
-TXN ddr_cmd command t=4064000 addr=4da9 bank=4 cmd=3
-TXN sched_deq grant t=4129000 idx=0
-TXN sched_cmd command t=4129000 aux=1 bank=4 col=1e0 row=4da9 type=2 we=0
-TXN cq_deq dequeue t=4129000 idx=0
-TXN sched_in command t=4129000 aux=1 bank=4 col=1e0 row=4da9 type=2 we=0
-TXN dp_cmd read t=4134000 aux=1
-TXN ddr_cmd command t=4134000 addr=1e0 bank=4 cmd=5
-TXN ddr_rd_beat beat t=4154000 data=7e1f
-TXN wb_rsp read_data t=4159000 addr=136a63c7 data=7e1f0000
-TXN dp_rd_rsp response t=4159000 aux=1 data=7e1f0000
-TXN ddr_rd_beat beat t=4159000 data=edbb
-TXN wb read t=4193000 addr=192cb4af
-TXN req request t=4194000 addr=192cb4af data=0 mask=0 we=0
-TXN cq_enq enqueue t=4194000 bank=6 col=250 row=64b2 we=0
-TXN sched_cmd command t=4204000 aux=2 bank=6 col=250 row=64b2 type=4 we=0
-TXN sched_in command t=4204000 aux=2 bank=6 col=250 row=64b2 type=4 we=0
-TXN ddr_cmd command t=4209000 addr=0 bank=6 cmd=2
-TXN sched_cmd command t=4274000 aux=2 bank=6 col=250 row=64b2 type=1 we=0
-TXN sched_in command t=4274000 aux=2 bank=6 col=250 row=64b2 type=1 we=0
-TXN ddr_cmd command t=4279000 addr=64b2 bank=6 cmd=3
-TXN sched_deq grant t=4344000 idx=0
-TXN sched_cmd command t=4344000 aux=2 bank=6 col=250 row=64b2 type=2 we=0
-TXN cq_deq dequeue t=4344000 idx=0
-TXN sched_in command t=4344000 aux=2 bank=6 col=250 row=64b2 type=2 we=0
-TXN dp_cmd read t=4349000 aux=2
-TXN ddr_cmd command t=4349000 addr=250 bank=6 cmd=5
-TXN ddr_rd_beat beat t=4369000 data=fdaf
-TXN wb_rsp read_data t=4374000 addr=192cb4af data=fdaf0000
-TXN dp_rd_rsp response t=4374000 aux=2 data=fdaf0000
-TXN ddr_rd_beat beat t=4374000 data=3580
+TXN sched_in command t=759000 aux=0 bank=1 col=280 row=414c type=3 we=1
+TXN sched_deq grant t=764000 idx=1
+TXN sched_cmd command t=764000 aux=1 bank=1 col=288 row=414c type=3 we=1
+TXN dp_cmd write t=764000 aux=0
+TXN cq_deq dequeue t=764000 idx=1
+TXN sched_in command t=764000 aux=1 bank=1 col=288 row=414c type=3 we=1
+TXN ddr_cmd command t=764000 addr=280 bank=1 cmd=4
+TXN sched_deq grant t=769000 idx=2
+TXN sched_cmd command t=769000 aux=2 bank=1 col=288 row=414c type=3 we=1
+TXN dp_cmd write t=769000 aux=1
+TXN cq_deq dequeue t=769000 idx=2
+TXN sched_in command t=769000 aux=2 bank=1 col=288 row=414c type=3 we=1
+TXN ddr_cmd command t=769000 addr=288 bank=1 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 772500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN dp_cmd write t=774000 aux=2
+TXN ddr_cmd command t=774000 addr=288 bank=1 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 777500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_wr_beat beat t=779000 data=eb89 mask=0
+TXN ddr_wr_beat beat t=784000 data=1e2f mask=0
+TXN sched_deq grant t=874000 idx=3
+TXN sched_cmd command t=874000 aux=3 bank=6 col=250 row=6ec9 type=2 we=0
+TXN cq_deq dequeue t=874000 idx=3
+TXN sched_in command t=874000 aux=3 bank=6 col=250 row=6ec9 type=2 we=0
+TXN sched_deq grant t=879000 idx=4
+TXN sched_cmd command t=879000 aux=4 bank=6 col=250 row=6ec9 type=2 we=0
+TXN dp_cmd read t=879000 aux=3
+TXN cq_deq dequeue t=879000 idx=4
+TXN sched_in command t=879000 aux=4 bank=6 col=250 row=6ec9 type=2 we=0
+TXN ddr_cmd command t=879000 addr=250 bank=6 cmd=5
+TXN dp_cmd read t=884000 aux=4
+TXN ddr_cmd command t=884000 addr=250 bank=6 cmd=5
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 887500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_rd_beat beat t=899000 data=7daf
+TXN wb_rsp read_data t=904000 addr=1bb274a0 data=7daf0000
+TXN dp_rd_rsp response t=904000 aux=3 data=7daf0000
+TXN ddr_rd_beat beat t=904000 data=ed80
+TXN ddr_rd_beat beat t=909000 data=ed80
+TXN refresh_req request t=7829000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=7829000 pending=1 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=7833000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
+TXN sched_cmd command t=7834000 aux=0 bank=1 col=0 row=0 type=4 we=0
+TXN sched_in command t=7834000 aux=0 bank=1 col=0 row=0 type=4 we=0
+TXN sched_cmd command t=7839000 aux=0 bank=6 col=0 row=0 type=4 we=0
+TXN sched_in command t=7839000 aux=0 bank=6 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=7839000 addr=0 bank=1 cmd=2
+TXN ddr_cmd command t=7844000 addr=0 bank=6 cmd=2
+TXN sched_cmd command t=7909000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_ack ack t=7909000 pending=1
+TXN sched_in command t=7909000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_level state t=7914000 pending=0 required=0 starve=0 urgent=0
+TXN ddr_cmd command t=7914000 addr=0 bank=0 cmd=1
+TXN csr_sts_level state t=7918000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
+DRIVER_STALL: wb — 1 of 5 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb write t=10373000 addr=1c813948 bte=0 cti=2 data=cd447e35 sel=f
+TXN req request t=10374000 addr=1c813948 data=cd447e35 mask=f we=1
+TXN dp_wr write t=10374000 data=cd447e35 mask=f
+TXN cq_enq enqueue t=10374000 bank=7 col=a0 row=7204 we=1
+TXN wb write t=10378000 addr=1c81394c bte=0 cti=2 data=51431193 sel=f
+TXN req request t=10379000 addr=1c81394c data=51431193 mask=f we=1
+TXN dp_wr write t=10379000 data=51431193 mask=f
+TXN cq_enq enqueue t=10379000 bank=7 col=a0 row=7204 we=1
+TXN wb write t=10383000 addr=1c813950 bte=0 cti=2 data=5b6e6e3 sel=f
+TXN req request t=10384000 addr=1c813950 data=5b6e6e3 mask=f we=1
+TXN sched_cmd command t=10384000 aux=5 bank=7 col=a0 row=7204 type=1 we=1
+TXN dp_wr write t=10384000 data=5b6e6e3 mask=f
+TXN cq_enq enqueue t=10384000 bank=7 col=a8 row=7204 we=1
+TXN sched_in command t=10384000 aux=5 bank=7 col=a0 row=7204 type=1 we=1
+TXN wb write t=10388000 addr=1c813954 bte=0 cti=2 data=e1988ad9 sel=f
+TXN req request t=10389000 addr=1c813954 data=e1988ad9 mask=f we=1
+TXN dp_wr write t=10389000 data=e1988ad9 mask=f
+TXN cq_enq enqueue t=10389000 bank=7 col=a8 row=7204 we=1
+TXN ddr_cmd command t=10389000 addr=7204 bank=7 cmd=3
+TXN wb write t=10393000 addr=1c813958 bte=0 cti=2 data=afbd67f9 sel=f
+TXN req request t=10394000 addr=1c813958 data=afbd67f9 mask=f we=1
+TXN dp_wr write t=10394000 data=afbd67f9 mask=f
+TXN cq_enq enqueue t=10394000 bank=7 col=a8 row=7204 we=1
+TXN wb write t=10398000 addr=1c81395c bte=0 cti=2 data=f8130c42 sel=f
+TXN req request t=10399000 addr=1c81395c data=f8130c42 mask=f we=1
+TXN dp_wr write t=10399000 data=f8130c42 mask=f
+TXN cq_enq enqueue t=10399000 bank=7 col=a8 row=7204 we=1
+TXN wb write t=10403000 addr=1c813960 bte=0 cti=2 data=b9d179e0 sel=f
+TXN req request t=10404000 addr=1c813960 data=b9d179e0 mask=f we=1
+TXN dp_wr write t=10404000 data=b9d179e0 mask=f
+TXN cq_enq enqueue t=10404000 bank=7 col=b0 row=7204 we=1
+TXN wb write t=10408000 addr=1c813964 bte=0 cti=7 data=8712b8bc sel=f
+TXN req request t=10409000 addr=1c813964 data=8712b8bc mask=f we=1
+TXN dp_wr write t=10409000 data=8712b8bc mask=f
+TXN cq_enq enqueue t=10409000 bank=7 col=b0 row=7204 we=1
+TXN sched_deq grant t=10454000 idx=0
+TXN sched_cmd command t=10454000 aux=5 bank=7 col=a0 row=7204 type=3 we=1
+TXN cq_deq dequeue t=10454000 idx=0
+TXN sched_in command t=10454000 aux=5 bank=7 col=a0 row=7204 type=3 we=1
+TXN sched_deq grant t=10459000 idx=1
+TXN sched_cmd command t=10459000 aux=6 bank=7 col=a0 row=7204 type=3 we=1
+TXN dp_cmd write t=10459000 aux=5
+TXN cq_deq dequeue t=10459000 idx=1
+TXN sched_in command t=10459000 aux=6 bank=7 col=a0 row=7204 type=3 we=1
+TXN ddr_cmd command t=10459000 addr=a0 bank=7 cmd=4
+TXN sched_deq grant t=10464000 idx=2
+TXN sched_cmd command t=10464000 aux=7 bank=7 col=a8 row=7204 type=3 we=1
+TXN dp_cmd write t=10464000 aux=6
+TXN cq_deq dequeue t=10464000 idx=2
+TXN sched_in command t=10464000 aux=7 bank=7 col=a8 row=7204 type=3 we=1
+TXN ddr_cmd command t=10464000 addr=a0 bank=7 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 10467500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN dp_cmd write t=10469000 aux=7
+TXN ddr_cmd command t=10469000 addr=a8 bank=7 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 10472500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_wr_beat beat t=10474000 data=6f44 mask=0
+TXN ddr_wr_beat beat t=10479000 data=c2ce mask=0
+TXN sched_deq grant t=10499000 idx=3
+TXN sched_cmd command t=10499000 aux=8 bank=7 col=a8 row=7204 type=3 we=1
+TXN cq_deq dequeue t=10499000 idx=3
+TXN sched_in command t=10499000 aux=8 bank=7 col=a8 row=7204 type=3 we=1
+TXN sched_deq grant t=10504000 idx=4
+TXN sched_cmd command t=10504000 aux=9 bank=7 col=a8 row=7204 type=3 we=1
+TXN dp_cmd write t=10504000 aux=8
+TXN cq_deq dequeue t=10504000 idx=4
+TXN sched_in command t=10504000 aux=9 bank=7 col=a8 row=7204 type=3 we=1
+TXN ddr_cmd command t=10504000 addr=a8 bank=7 cmd=4
+TXN sched_deq grant t=10509000 idx=5
+TXN sched_cmd command t=10509000 aux=a bank=7 col=a8 row=7204 type=3 we=1
+TXN dp_cmd write t=10509000 aux=9
+TXN cq_deq dequeue t=10509000 idx=5
+TXN sched_in command t=10509000 aux=a bank=7 col=a8 row=7204 type=3 we=1
+TXN ddr_cmd command t=10509000 addr=a8 bank=7 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 10512500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN dp_cmd write t=10514000 aux=a
+TXN ddr_cmd command t=10514000 addr=a8 bank=7 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 10517500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_wr_beat beat t=10519000 data=992d mask=0
+TXN ddr_wr_beat beat t=10524000 data=35bf mask=0
+TXN sched_deq grant t=10544000 idx=6
+TXN sched_cmd command t=10544000 aux=b bank=7 col=b0 row=7204 type=3 we=1
+TXN cq_deq dequeue t=10544000 idx=6
+TXN sched_in command t=10544000 aux=b bank=7 col=b0 row=7204 type=3 we=1
+TXN sched_deq grant t=10549000 idx=7
+TXN sched_cmd command t=10549000 aux=c bank=7 col=b0 row=7204 type=3 we=1
+TXN dp_cmd write t=10549000 aux=b
+TXN cq_deq dequeue t=10549000 idx=7
+TXN sched_in command t=10549000 aux=c bank=7 col=b0 row=7204 type=3 we=1
+TXN ddr_cmd command t=10549000 addr=b0 bank=7 cmd=4
+TXN dp_cmd write t=10554000 aux=c
+TXN ddr_cmd command t=10554000 addr=b0 bank=7 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 10557500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_wr_beat beat t=10564000 data=7e35 mask=0
+TXN ddr_wr_beat beat t=10569000 data=cd44 mask=0
+TXN refresh_req request t=15629000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=15629000 pending=1 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=15633000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
+TXN sched_cmd command t=15634000 aux=0 bank=7 col=0 row=0 type=4 we=0
+TXN sched_in command t=15634000 aux=0 bank=7 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=15639000 addr=0 bank=7 cmd=2
+TXN sched_cmd command t=15704000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_ack ack t=15704000 pending=1
+TXN sched_in command t=15704000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_level state t=15709000 pending=0 required=0 starve=0 urgent=0
+TXN ddr_cmd command t=15709000 addr=0 bank=0 cmd=1
+TXN csr_sts_level state t=15713000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
+DRIVER_STALL: wb — 1 of 13 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb write t=20683000 addr=161ff4a0 bte=0 cti=2 data=5805975 sel=f
+TXN req request t=20684000 addr=161ff4a0 data=5805975 mask=f we=1
+TXN dp_wr write t=20684000 data=5805975 mask=f
+TXN cq_enq enqueue t=20684000 bank=6 col=250 row=587f we=1
+TXN wb write t=20688000 addr=161ff4a4 bte=0 cti=2 data=a46d6753 sel=f
+TXN req request t=20689000 addr=161ff4a4 data=a46d6753 mask=f we=1
+TXN dp_wr write t=20689000 data=a46d6753 mask=f
+TXN cq_enq enqueue t=20689000 bank=6 col=250 row=587f we=1
+TXN wb write t=20693000 addr=161ff4a8 bte=0 cti=2 data=dc2574bd sel=f
+TXN req request t=20694000 addr=161ff4a8 data=dc2574bd mask=f we=1
+TXN sched_cmd command t=20694000 aux=d bank=6 col=250 row=587f type=1 we=1
+TXN dp_wr write t=20694000 data=dc2574bd mask=f
+TXN cq_enq enqueue t=20694000 bank=6 col=250 row=587f we=1
+TXN sched_in command t=20694000 aux=d bank=6 col=250 row=587f type=1 we=1
+TXN wb write t=20698000 addr=161ff4ac bte=0 cti=2 data=ab99254a sel=f
+TXN req request t=20699000 addr=161ff4ac data=ab99254a mask=f we=1
+TXN dp_wr write t=20699000 data=ab99254a mask=f
+TXN cq_enq enqueue t=20699000 bank=6 col=250 row=587f we=1
+TXN ddr_cmd command t=20699000 addr=587f bank=6 cmd=3
+TXN wb write t=20703000 addr=161ff4b0 bte=0 cti=7 data=4da98f1d sel=f
+TXN req request t=20704000 addr=161ff4b0 data=4da98f1d mask=f we=1
+TXN dp_wr write t=20704000 data=4da98f1d mask=f
+TXN cq_enq enqueue t=20704000 bank=6 col=258 row=587f we=1
+TXN sched_deq grant t=20764000 idx=0
+TXN sched_cmd command t=20764000 aux=d bank=6 col=250 row=587f type=3 we=1
+TXN cq_deq dequeue t=20764000 idx=0
+TXN sched_in command t=20764000 aux=d bank=6 col=250 row=587f type=3 we=1
+TXN sched_deq grant t=20769000 idx=1
+TXN sched_cmd command t=20769000 aux=e bank=6 col=250 row=587f type=3 we=1
+TXN dp_cmd write t=20769000 aux=d
+TXN cq_deq dequeue t=20769000 idx=1
+TXN sched_in command t=20769000 aux=e bank=6 col=250 row=587f type=3 we=1
+TXN ddr_cmd command t=20769000 addr=250 bank=6 cmd=4
+TXN sched_deq grant t=20774000 idx=2
+TXN sched_cmd command t=20774000 aux=f bank=6 col=250 row=587f type=3 we=1
+TXN dp_cmd write t=20774000 aux=e
+TXN cq_deq dequeue t=20774000 idx=2
+TXN sched_in command t=20774000 aux=f bank=6 col=250 row=587f type=3 we=1
+TXN ddr_cmd command t=20774000 addr=250 bank=6 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 20777500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN dp_cmd write t=20779000 aux=f
+TXN ddr_cmd command t=20779000 addr=250 bank=6 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 20782500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_wr_beat beat t=20784000 data=1193 mask=0
+TXN ddr_wr_beat beat t=20789000 data=5143 mask=0
+TXN sched_deq grant t=20809000 idx=3
+TXN sched_cmd command t=20809000 aux=0 bank=6 col=250 row=587f type=3 we=1
+TXN cq_deq dequeue t=20809000 idx=3
+TXN sched_in command t=20809000 aux=0 bank=6 col=250 row=587f type=3 we=1
+TXN sched_deq grant t=20814000 idx=4
+TXN sched_cmd command t=20814000 aux=1 bank=6 col=258 row=587f type=3 we=1
+TXN dp_cmd write t=20814000 aux=0
+TXN cq_deq dequeue t=20814000 idx=4
+TXN sched_in command t=20814000 aux=1 bank=6 col=258 row=587f type=3 we=1
+TXN ddr_cmd command t=20814000 addr=250 bank=6 cmd=4
+TXN dp_cmd write t=20819000 aux=1
+TXN ddr_cmd command t=20819000 addr=258 bank=6 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 20822500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_wr_beat beat t=20829000 data=e6e3 mask=0
+TXN ddr_wr_beat beat t=20834000 data=5b6 mask=0
+TXN refresh_req request t=23429000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=23429000 pending=1 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=23433000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
+TXN sched_cmd command t=23434000 aux=0 bank=6 col=0 row=0 type=4 we=0
+TXN sched_in command t=23434000 aux=0 bank=6 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=23439000 addr=0 bank=6 cmd=2
+TXN sched_cmd command t=23504000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_ack ack t=23504000 pending=1
+TXN sched_in command t=23504000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_level state t=23509000 pending=0 required=0 starve=0 urgent=0
+TXN ddr_cmd command t=23509000 addr=0 bank=0 cmd=1
+TXN csr_sts_level state t=23513000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
+DRIVER_STALL: wb — 1 of 18 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb read t=30983000 addr=235abd4 bte=0 cti=2
+TXN req request t=30984000 addr=235abd4 data=4da98f1d mask=f we=0
+TXN cq_enq enqueue t=30984000 bank=5 col=1e8 row=8d6 we=0
+TXN wb read t=30988000 addr=235abd8 bte=0 cti=2
+TXN req request t=30989000 addr=235abd8 data=4da98f1d mask=f we=0
+TXN cq_enq enqueue t=30989000 bank=5 col=1e8 row=8d6 we=0
+TXN wb read t=30993000 addr=235abdc bte=0 cti=2
+TXN req request t=30994000 addr=235abdc data=4da98f1d mask=f we=0
+TXN sched_cmd command t=30994000 aux=2 bank=5 col=1e8 row=8d6 type=1 we=0
+TXN cq_enq enqueue t=30994000 bank=5 col=1e8 row=8d6 we=0
+TXN sched_in command t=30994000 aux=2 bank=5 col=1e8 row=8d6 type=1 we=0
+TXN wb read t=30998000 addr=235abe0 bte=0 cti=2
+TXN req request t=30999000 addr=235abe0 data=4da98f1d mask=f we=0
+TXN cq_enq enqueue t=30999000 bank=5 col=1f0 row=8d6 we=0
+TXN ddr_cmd command t=30999000 addr=8d6 bank=5 cmd=3
+TXN wb read t=31003000 addr=235abe4 bte=0 cti=7
+TXN req request t=31004000 addr=235abe4 data=4da98f1d mask=f we=0
+TXN cq_enq enqueue t=31004000 bank=5 col=1f0 row=8d6 we=0
+TXN sched_deq grant t=31064000 idx=0
+TXN sched_cmd command t=31064000 aux=2 bank=5 col=1e8 row=8d6 type=2 we=0
+TXN cq_deq dequeue t=31064000 idx=0
+TXN sched_in command t=31064000 aux=2 bank=5 col=1e8 row=8d6 type=2 we=0
+TXN sched_deq grant t=31069000 idx=1
+TXN sched_cmd command t=31069000 aux=3 bank=5 col=1e8 row=8d6 type=2 we=0
+TXN dp_cmd read t=31069000 aux=2
+TXN cq_deq dequeue t=31069000 idx=1
+TXN sched_in command t=31069000 aux=3 bank=5 col=1e8 row=8d6 type=2 we=0
+TXN ddr_cmd command t=31069000 addr=1e8 bank=5 cmd=5
+TXN sched_deq grant t=31074000 idx=2
+TXN sched_cmd command t=31074000 aux=4 bank=5 col=1e8 row=8d6 type=2 we=0
+TXN dp_cmd read t=31074000 aux=3
+TXN cq_deq dequeue t=31074000 idx=2
+TXN sched_in command t=31074000 aux=4 bank=5 col=1e8 row=8d6 type=2 we=0
+TXN ddr_cmd command t=31074000 addr=1e8 bank=5 cmd=5
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 31077500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN dp_cmd read t=31079000 aux=4
+TXN ddr_cmd command t=31079000 addr=1e8 bank=5 cmd=5
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 31082500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_rd_beat beat t=31089000 data=fe17
+TXN wb_rsp read_data t=31094000 addr=1bb274a4 data=fe170000
+TXN dp_rd_rsp response t=31094000 aux=2 data=fe170000
+TXN ddr_rd_beat beat t=31094000 data=15bb
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 31097500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN ddr_rd_beat beat t=31099000 data=15bb
+TXN ddr_rd_beat beat t=31104000 data=15bb
+TXN sched_deq grant t=31109000 idx=3
+TXN sched_cmd command t=31109000 aux=5 bank=5 col=1f0 row=8d6 type=2 we=0
+TXN cq_deq dequeue t=31109000 idx=3
+TXN sched_in command t=31109000 aux=5 bank=5 col=1f0 row=8d6 type=2 we=0
+TXN sched_deq grant t=31114000 idx=4
+TXN sched_cmd command t=31114000 aux=6 bank=5 col=1f0 row=8d6 type=2 we=0
+TXN dp_cmd read t=31114000 aux=5
+TXN cq_deq dequeue t=31114000 idx=4
+TXN sched_in command t=31114000 aux=6 bank=5 col=1f0 row=8d6 type=2 we=0
+TXN ddr_cmd command t=31114000 addr=1f0 bank=5 cmd=5
+TXN dp_cmd read t=31119000 aux=6
+TXN ddr_cmd command t=31119000 addr=1f0 bank=5 cmd=5
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 31122500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_rd_beat beat t=31134000 data=fe0f
+TXN wb_rsp read_data t=31139000 addr=235abd4 data=fe0f0000
+TXN dp_rd_rsp response t=31139000 aux=5 data=fe0f0000
+TXN ddr_rd_beat beat t=31139000 data=15ba
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 31142500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN ddr_rd_beat beat t=31144000 data=15ba
+TXN refresh_req request t=31229000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=31229000 pending=1 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=31233000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
+TXN sched_cmd command t=31234000 aux=0 bank=5 col=0 row=0 type=4 we=0
+TXN sched_in command t=31234000 aux=0 bank=5 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=31239000 addr=0 bank=5 cmd=2
+TXN sched_cmd command t=31304000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_ack ack t=31304000 pending=1
+TXN sched_in command t=31304000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_level state t=31309000 pending=0 required=0 starve=0 urgent=0
+TXN ddr_cmd command t=31309000 addr=0 bank=0 cmd=1
+TXN csr_sts_level state t=31313000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
+TXN refresh_req request t=39029000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=39029000 pending=1 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=39033000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
+TXN sched_cmd command t=39034000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_ack ack t=39034000 pending=1
+TXN sched_in command t=39034000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_level state t=39039000 pending=0 required=0 starve=0 urgent=0
+TXN ddr_cmd command t=39039000 addr=0 bank=0 cmd=1
+TXN csr_sts_level state t=39043000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
+DRIVER_STALL: wb — 4 of 23 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb read t=41278000 addr=1a841edc bte=0 cti=2
+TXN req request t=41279000 addr=1a841edc data=4da98f1d mask=f we=0
+TXN cq_enq enqueue t=41279000 bank=3 col=368 row=6a10 we=0
+TXN wb read t=41283000 addr=1a841ee0 bte=0 cti=2
+TXN req request t=41284000 addr=1a841ee0 data=4da98f1d mask=f we=0
+TXN cq_enq enqueue t=41284000 bank=3 col=370 row=6a10 we=0
+TXN wb read t=41288000 addr=1a841ee4 bte=0 cti=7
+TXN req request t=41289000 addr=1a841ee4 data=4da98f1d mask=f we=0
+TXN sched_cmd command t=41289000 aux=7 bank=3 col=368 row=6a10 type=1 we=0
+TXN cq_enq enqueue t=41289000 bank=3 col=370 row=6a10 we=0
+TXN sched_in command t=41289000 aux=7 bank=3 col=368 row=6a10 type=1 we=0
+TXN ddr_cmd command t=41294000 addr=6a10 bank=3 cmd=3
+TXN sched_deq grant t=41359000 idx=0
+TXN sched_cmd command t=41359000 aux=7 bank=3 col=368 row=6a10 type=2 we=0
+TXN cq_deq dequeue t=41359000 idx=0
+TXN sched_in command t=41359000 aux=7 bank=3 col=368 row=6a10 type=2 we=0
+TXN sched_deq grant t=41364000 idx=1
+TXN sched_cmd command t=41364000 aux=8 bank=3 col=370 row=6a10 type=2 we=0
+TXN dp_cmd read t=41364000 aux=7
+TXN cq_deq dequeue t=41364000 idx=1
+TXN sched_in command t=41364000 aux=8 bank=3 col=370 row=6a10 type=2 we=0
+TXN ddr_cmd command t=41364000 addr=368 bank=3 cmd=5
+TXN sched_deq grant t=41369000 idx=2
+TXN sched_cmd command t=41369000 aux=9 bank=3 col=370 row=6a10 type=2 we=0
+TXN dp_cmd read t=41369000 aux=8
+TXN cq_deq dequeue t=41369000 idx=2
+TXN sched_in command t=41369000 aux=9 bank=3 col=370 row=6a10 type=2 we=0
+TXN ddr_cmd command t=41369000 addr=370 bank=3 cmd=5
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 41372500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN dp_cmd read t=41374000 aux=9
+TXN ddr_cmd command t=41374000 addr=370 bank=3 cmd=5
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 41377500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_rd_beat beat t=41384000 data=fc97
+TXN wb_rsp read_data t=41389000 addr=235abd8 data=fc970000
+TXN dp_rd_rsp response t=41389000 aux=7 data=fc970000
+TXN ddr_rd_beat beat t=41389000 data=2593
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 41392500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN ddr_rd_beat beat t=41394000 data=2592
+TXN ddr_rd_beat beat t=41399000 data=2592
+TXN refresh_req request t=46829000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=46829000 pending=1 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=46833000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
+TXN sched_cmd command t=46834000 aux=0 bank=3 col=0 row=0 type=4 we=0
+TXN sched_in command t=46834000 aux=0 bank=3 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=46839000 addr=0 bank=3 cmd=2
+TXN sched_cmd command t=46904000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_ack ack t=46904000 pending=1
+TXN sched_in command t=46904000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_level state t=46909000 pending=0 required=0 starve=0 urgent=0
+TXN ddr_cmd command t=46909000 addr=0 bank=0 cmd=1
+TXN csr_sts_level state t=46913000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
+DRIVER_STALL: wb — 6 of 26 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb read t=51553000 addr=588af5c bte=0 cti=2
+TXN req request t=51554000 addr=588af5c data=4da98f1d mask=f we=0
+TXN cq_enq enqueue t=51554000 bank=5 col=3a8 row=1622 we=0
+TXN wb read t=51558000 addr=588af60 bte=0 cti=2
+TXN req request t=51559000 addr=588af60 data=4da98f1d mask=f we=0
+TXN cq_enq enqueue t=51559000 bank=5 col=3b0 row=1622 we=0
+TXN wb read t=51563000 addr=588af64 bte=0 cti=2
+TXN req request t=51564000 addr=588af64 data=4da98f1d mask=f we=0
+TXN sched_cmd command t=51564000 aux=a bank=5 col=3a8 row=1622 type=1 we=0
+TXN cq_enq enqueue t=51564000 bank=5 col=3b0 row=1622 we=0
+TXN sched_in command t=51564000 aux=a bank=5 col=3a8 row=1622 type=1 we=0
+TXN wb read t=51568000 addr=588af68 bte=0 cti=7
+TXN req request t=51569000 addr=588af68 data=4da98f1d mask=f we=0
+TXN cq_enq enqueue t=51569000 bank=5 col=3b0 row=1622 we=0
+TXN ddr_cmd command t=51569000 addr=1622 bank=5 cmd=3
+TXN sched_deq grant t=51634000 idx=0
+TXN sched_cmd command t=51634000 aux=a bank=5 col=3a8 row=1622 type=2 we=0
+TXN cq_deq dequeue t=51634000 idx=0
+TXN sched_in command t=51634000 aux=a bank=5 col=3a8 row=1622 type=2 we=0
+TXN sched_deq grant t=51639000 idx=1
+TXN sched_cmd command t=51639000 aux=b bank=5 col=3b0 row=1622 type=2 we=0
+TXN dp_cmd read t=51639000 aux=a
+TXN cq_deq dequeue t=51639000 idx=1
+TXN sched_in command t=51639000 aux=b bank=5 col=3b0 row=1622 type=2 we=0
+TXN ddr_cmd command t=51639000 addr=3a8 bank=5 cmd=5
+TXN sched_deq grant t=51644000 idx=2
+TXN sched_cmd command t=51644000 aux=c bank=5 col=3b0 row=1622 type=2 we=0
+TXN dp_cmd read t=51644000 aux=b
+TXN cq_deq dequeue t=51644000 idx=2
+TXN sched_in command t=51644000 aux=c bank=5 col=3b0 row=1622 type=2 we=0
+TXN ddr_cmd command t=51644000 addr=3b0 bank=5 cmd=5
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 51647500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN dp_cmd read t=51649000 aux=c
+TXN ddr_cmd command t=51649000 addr=3b0 bank=5 cmd=5
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 51652500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_rd_beat beat t=51659000 data=fc57
+TXN wb_rsp read_data t=51664000 addr=235abdc data=fc570000
+TXN dp_rd_rsp response t=51664000 aux=a data=fc570000
+TXN ddr_rd_beat beat t=51664000 data=b59f
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 51667500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN ddr_rd_beat beat t=51669000 data=b59e
+TXN ddr_rd_beat beat t=51674000 data=b59e
+TXN sched_deq grant t=51679000 idx=3
+TXN sched_cmd command t=51679000 aux=d bank=5 col=3b0 row=1622 type=2 we=0
+TXN cq_deq dequeue t=51679000 idx=3
+TXN sched_in command t=51679000 aux=d bank=5 col=3b0 row=1622 type=2 we=0
+TXN dp_cmd read t=51684000 aux=d
+TXN ddr_cmd command t=51684000 addr=3b0 bank=5 cmd=5
+TXN ddr_rd_beat beat t=51704000 data=fc4f
+TXN wb_rsp read_data t=51709000 addr=235abe0 data=fc4f0000
+TXN dp_rd_rsp response t=51709000 aux=d data=fc4f0000
+TXN ddr_rd_beat beat t=51709000 data=b59e
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 51712500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN refresh_req request t=54629000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=54629000 pending=1 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=54633000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
+TXN sched_cmd command t=54634000 aux=0 bank=5 col=0 row=0 type=4 we=0
+TXN sched_in command t=54634000 aux=0 bank=5 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=54639000 addr=0 bank=5 cmd=2
+TXN sched_cmd command t=54704000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_ack ack t=54704000 pending=1
+TXN sched_in command t=54704000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_level state t=54709000 pending=0 required=0 starve=0 urgent=0
+TXN ddr_cmd command t=54709000 addr=0 bank=0 cmd=1
+TXN csr_sts_level state t=54713000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
+DRIVER_STALL: wb — 8 of 30 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb write t=61843000 addr=a7a0868 bte=0 cti=2 data=64ac5db9 sel=f
+TXN req request t=61844000 addr=a7a0868 data=64ac5db9 mask=f we=1
+TXN dp_wr write t=61844000 data=64ac5db9 mask=f
+TXN cq_enq enqueue t=61844000 bank=1 col=30 row=29e8 we=1
+TXN wb write t=61848000 addr=a7a086c bte=0 cti=2 data=7923986 sel=f
+TXN req request t=61849000 addr=a7a086c data=7923986 mask=f we=1
+TXN dp_wr write t=61849000 data=7923986 mask=f
+TXN cq_enq enqueue t=61849000 bank=1 col=30 row=29e8 we=1
+TXN wb write t=61853000 addr=a7a0870 bte=0 cti=2 data=b21fbac sel=f
+TXN req request t=61854000 addr=a7a0870 data=b21fbac mask=f we=1
+TXN sched_cmd command t=61854000 aux=e bank=1 col=30 row=29e8 type=1 we=1
+TXN dp_wr write t=61854000 data=b21fbac mask=f
+TXN cq_enq enqueue t=61854000 bank=1 col=38 row=29e8 we=1
+TXN sched_in command t=61854000 aux=e bank=1 col=30 row=29e8 type=1 we=1
+TXN wb write t=61858000 addr=a7a0874 bte=0 cti=2 data=2b9c014e sel=f
+TXN req request t=61859000 addr=a7a0874 data=2b9c014e mask=f we=1
+TXN dp_wr write t=61859000 data=2b9c014e mask=f
+TXN cq_enq enqueue t=61859000 bank=1 col=38 row=29e8 we=1
+TXN ddr_cmd command t=61859000 addr=29e8 bank=1 cmd=3
+TXN wb write t=61863000 addr=a7a0878 bte=0 cti=2 data=8092b4d4 sel=f
+TXN req request t=61864000 addr=a7a0878 data=8092b4d4 mask=f we=1
+TXN dp_wr write t=61864000 data=8092b4d4 mask=f
+TXN cq_enq enqueue t=61864000 bank=1 col=38 row=29e8 we=1
+TXN wb write t=61868000 addr=a7a087c bte=0 cti=2 data=fb695ffb sel=f
+TXN req request t=61869000 addr=a7a087c data=fb695ffb mask=f we=1
+TXN dp_wr write t=61869000 data=fb695ffb mask=f
+TXN cq_enq enqueue t=61869000 bank=1 col=38 row=29e8 we=1
+TXN wb write t=61873000 addr=a7a0880 bte=0 cti=7 data=c541013d sel=f
+TXN req request t=61874000 addr=a7a0880 data=c541013d mask=f we=1
+TXN cq_enq enqueue t=61874000 bank=1 col=40 row=29e8 we=1
+xmsim: *E,ASRTST (./data_path.sv,315): (time 61877500 PS) Assertion chain_harness.u_data_path.p_wr_no_overflow has failed
+[DP-001] Write buffer overflow
+TXN sched_deq grant t=61924000 idx=0
+TXN sched_cmd command t=61924000 aux=e bank=1 col=30 row=29e8 type=3 we=1
+TXN cq_deq dequeue t=61924000 idx=0
+TXN sched_in command t=61924000 aux=e bank=1 col=30 row=29e8 type=3 we=1
+TXN sched_deq grant t=61929000 idx=1
+TXN sched_cmd command t=61929000 aux=f bank=1 col=30 row=29e8 type=3 we=1
+TXN dp_cmd write t=61929000 aux=e
+TXN cq_deq dequeue t=61929000 idx=1
+TXN sched_in command t=61929000 aux=f bank=1 col=30 row=29e8 type=3 we=1
+TXN ddr_cmd command t=61929000 addr=30 bank=1 cmd=4
+TXN sched_deq grant t=61934000 idx=2
+TXN sched_cmd command t=61934000 aux=0 bank=1 col=38 row=29e8 type=3 we=1
+TXN dp_cmd write t=61934000 aux=f
+TXN cq_deq dequeue t=61934000 idx=2
+TXN sched_in command t=61934000 aux=0 bank=1 col=38 row=29e8 type=3 we=1
+TXN ddr_cmd command t=61934000 addr=30 bank=1 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 61937500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN dp_cmd write t=61939000 aux=0
+TXN ddr_cmd command t=61939000 addr=38 bank=1 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 61942500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_wr_beat beat t=61944000 data=8ad9 mask=0
+TXN ddr_wr_beat beat t=61949000 data=e198 mask=0
+TXN sched_deq grant t=61969000 idx=3
+TXN sched_cmd command t=61969000 aux=1 bank=1 col=38 row=29e8 type=3 we=1
+TXN cq_deq dequeue t=61969000 idx=3
+TXN sched_in command t=61969000 aux=1 bank=1 col=38 row=29e8 type=3 we=1
+TXN sched_deq grant t=61974000 idx=4
+TXN sched_cmd command t=61974000 aux=2 bank=1 col=38 row=29e8 type=3 we=1
+TXN dp_cmd write t=61974000 aux=1
+TXN cq_deq dequeue t=61974000 idx=4
+TXN sched_in command t=61974000 aux=2 bank=1 col=38 row=29e8 type=3 we=1
+TXN ddr_cmd command t=61974000 addr=38 bank=1 cmd=4
+TXN sched_deq grant t=61979000 idx=5
+TXN sched_cmd command t=61979000 aux=3 bank=1 col=38 row=29e8 type=3 we=1
+TXN dp_cmd write t=61979000 aux=2
+TXN cq_deq dequeue t=61979000 idx=5
+TXN sched_in command t=61979000 aux=3 bank=1 col=38 row=29e8 type=3 we=1
+TXN ddr_cmd command t=61979000 addr=38 bank=1 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 61982500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN dp_cmd write t=61984000 aux=3
+TXN ddr_cmd command t=61984000 addr=38 bank=1 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 61987500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_wr_beat beat t=61989000 data=67f9 mask=0
+TXN ddr_wr_beat beat t=61994000 data=afbd mask=0
+TXN sched_deq grant t=62014000 idx=6
+TXN sched_cmd command t=62014000 aux=4 bank=1 col=40 row=29e8 type=3 we=1
+TXN cq_deq dequeue t=62014000 idx=6
+TXN sched_in command t=62014000 aux=4 bank=1 col=40 row=29e8 type=3 we=1
+TXN dp_cmd write t=62019000 aux=4
+TXN ddr_cmd command t=62019000 addr=40 bank=1 cmd=4
+TXN ddr_wr_beat beat t=62034000 data=c42 mask=0
+TXN ddr_wr_beat beat t=62039000 data=f813 mask=0
+TXN refresh_req request t=62429000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=62429000 pending=1 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=62433000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
+TXN sched_cmd command t=62434000 aux=0 bank=1 col=0 row=0 type=4 we=0
+TXN sched_in command t=62434000 aux=0 bank=1 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=62439000 addr=0 bank=1 cmd=2
+TXN sched_cmd command t=62504000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_ack ack t=62504000 pending=1
+TXN sched_in command t=62504000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_level state t=62509000 pending=0 required=0 starve=0 urgent=0
+TXN ddr_cmd command t=62509000 addr=0 bank=0 cmd=1
+TXN csr_sts_level state t=62513000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
+TXN refresh_req request t=70229000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=70229000 pending=1 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=70233000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
+TXN sched_cmd command t=70234000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_ack ack t=70234000 pending=1
+TXN sched_in command t=70234000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_level state t=70239000 pending=0 required=0 starve=0 urgent=0
+TXN ddr_cmd command t=70239000 addr=0 bank=0 cmd=1
+TXN csr_sts_level state t=70243000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
+DRIVER_STALL: wb — 8 of 37 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb write t=72153000 addr=19e296a8 bte=0 cti=2 data=83868a29 sel=f
+TXN req request t=72154000 addr=19e296a8 data=83868a29 mask=f we=1
+TXN dp_wr write t=72154000 data=83868a29 mask=f
+TXN cq_enq enqueue t=72154000 bank=2 col=350 row=678a we=1
+TXN wb write t=72158000 addr=19e296ac bte=0 cti=2 data=93ea5c4e sel=f
+TXN req request t=72159000 addr=19e296ac data=93ea5c4e mask=f we=1
+TXN dp_wr write t=72159000 data=93ea5c4e mask=f
+TXN cq_enq enqueue t=72159000 bank=2 col=350 row=678a we=1
+TXN wb write t=72163000 addr=19e296b0 bte=0 cti=2 data=1762741 sel=f
+TXN req request t=72164000 addr=19e296b0 data=1762741 mask=f we=1
+TXN sched_cmd command t=72164000 aux=5 bank=2 col=350 row=678a type=1 we=1
+TXN dp_wr write t=72164000 data=1762741 mask=f
+TXN cq_enq enqueue t=72164000 bank=2 col=358 row=678a we=1
+TXN sched_in command t=72164000 aux=5 bank=2 col=350 row=678a type=1 we=1
+TXN wb write t=72168000 addr=19e296b4 bte=0 cti=2 data=cf23cae8 sel=f
+TXN req request t=72169000 addr=19e296b4 data=cf23cae8 mask=f we=1
+TXN cq_enq enqueue t=72169000 bank=2 col=358 row=678a we=1
+TXN ddr_cmd command t=72169000 addr=678a bank=2 cmd=3
+TXN wb write t=72173000 addr=19e296b8 bte=0 cti=2 data=8fb5262c sel=f
+xmsim: *E,ASRTST (./data_path.sv,315): (time 72172500 PS) Assertion chain_harness.u_data_path.p_wr_no_overflow has failed
+[DP-001] Write buffer overflow
+TXN req request t=72174000 addr=19e296b8 data=8fb5262c mask=f we=1
+TXN cq_enq enqueue t=72174000 bank=2 col=358 row=678a we=1
+TXN wb write t=72178000 addr=19e296bc bte=0 cti=2 data=e5e18ba sel=f
+xmsim: *E,ASRTST (./data_path.sv,315): (time 72177500 PS) Assertion chain_harness.u_data_path.p_wr_no_overflow has failed
+[DP-001] Write buffer overflow
+TXN req request t=72179000 addr=19e296bc data=e5e18ba mask=f we=1
+TXN cq_enq enqueue t=72179000 bank=2 col=358 row=678a we=1
+TXN wb write t=72183000 addr=19e296c0 bte=0 cti=2 data=deb8fc4c sel=f
+xmsim: *E,ASRTST (./data_path.sv,315): (time 72182500 PS) Assertion chain_harness.u_data_path.p_wr_no_overflow has failed
+[DP-001] Write buffer overflow
+TXN req request t=72184000 addr=19e296c0 data=deb8fc4c mask=f we=1
+TXN cq_enq enqueue t=72184000 bank=2 col=360 row=678a we=1
+TXN wb write t=72188000 addr=19e296c4 bte=0 cti=7 data=81355c53 sel=f
+xmsim: *E,ASRTST (./data_path.sv,315): (time 72187500 PS) Assertion chain_harness.u_data_path.p_wr_no_overflow has failed
+[DP-001] Write buffer overflow
+TXN req request t=72189000 addr=19e296c4 data=81355c53 mask=f we=1
+TXN cq_enq enqueue t=72189000 bank=2 col=360 row=678a we=1
+xmsim: *E,ASRTST (./data_path.sv,315): (time 72192500 PS) Assertion chain_harness.u_data_path.p_wr_no_overflow has failed
+[DP-001] Write buffer overflow
+TXN sched_deq grant t=72234000 idx=0
+TXN sched_cmd command t=72234000 aux=5 bank=2 col=350 row=678a type=3 we=1
+TXN cq_deq dequeue t=72234000 idx=0
+TXN sched_in command t=72234000 aux=5 bank=2 col=350 row=678a type=3 we=1
+TXN sched_deq grant t=72239000 idx=1
+TXN sched_cmd command t=72239000 aux=6 bank=2 col=350 row=678a type=3 we=1
+TXN dp_cmd write t=72239000 aux=5
+TXN cq_deq dequeue t=72239000 idx=1
+TXN sched_in command t=72239000 aux=6 bank=2 col=350 row=678a type=3 we=1
+TXN ddr_cmd command t=72239000 addr=350 bank=2 cmd=4
+TXN sched_deq grant t=72244000 idx=2
+TXN sched_cmd command t=72244000 aux=7 bank=2 col=358 row=678a type=3 we=1
+TXN dp_cmd write t=72244000 aux=6
+TXN cq_deq dequeue t=72244000 idx=2
+TXN sched_in command t=72244000 aux=7 bank=2 col=358 row=678a type=3 we=1
+TXN ddr_cmd command t=72244000 addr=350 bank=2 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 72247500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN dp_cmd write t=72249000 aux=7
+TXN ddr_cmd command t=72249000 addr=358 bank=2 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 72252500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_wr_beat beat t=72254000 data=79e0 mask=0
+TXN ddr_wr_beat beat t=72259000 data=b9d1 mask=0
+TXN sched_deq grant t=72279000 idx=3
+TXN sched_cmd command t=72279000 aux=8 bank=2 col=358 row=678a type=3 we=1
+TXN cq_deq dequeue t=72279000 idx=3
+TXN sched_in command t=72279000 aux=8 bank=2 col=358 row=678a type=3 we=1
+TXN sched_deq grant t=72284000 idx=4
+TXN sched_cmd command t=72284000 aux=9 bank=2 col=358 row=678a type=3 we=1
+TXN dp_cmd write t=72284000 aux=8
+TXN cq_deq dequeue t=72284000 idx=4
+TXN sched_in command t=72284000 aux=9 bank=2 col=358 row=678a type=3 we=1
+TXN ddr_cmd command t=72284000 addr=358 bank=2 cmd=4
+TXN sched_deq grant t=72289000 idx=5
+TXN sched_cmd command t=72289000 aux=a bank=2 col=358 row=678a type=3 we=1
+TXN dp_cmd write t=72289000 aux=9
+TXN cq_deq dequeue t=72289000 idx=5
+TXN sched_in command t=72289000 aux=a bank=2 col=358 row=678a type=3 we=1
+TXN ddr_cmd command t=72289000 addr=358 bank=2 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 72292500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN dp_cmd write t=72294000 aux=a
+TXN ddr_cmd command t=72294000 addr=358 bank=2 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 72297500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_wr_beat beat t=72299000 data=b8bc mask=0
+TXN ddr_wr_beat beat t=72304000 data=8712 mask=0
+TXN sched_deq grant t=72324000 idx=6
+TXN sched_cmd command t=72324000 aux=b bank=2 col=360 row=678a type=3 we=1
+TXN cq_deq dequeue t=72324000 idx=6
+TXN sched_in command t=72324000 aux=b bank=2 col=360 row=678a type=3 we=1
+TXN sched_deq grant t=72329000 idx=7
+TXN sched_cmd command t=72329000 aux=c bank=2 col=360 row=678a type=3 we=1
+TXN dp_cmd write t=72329000 aux=b
+TXN cq_deq dequeue t=72329000 idx=7
+TXN sched_in command t=72329000 aux=c bank=2 col=360 row=678a type=3 we=1
+TXN ddr_cmd command t=72329000 addr=360 bank=2 cmd=4
+TXN dp_cmd write t=72334000 aux=c
+TXN ddr_cmd command t=72334000 addr=360 bank=2 cmd=4
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 72337500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_wr_beat beat t=72344000 data=5975 mask=0
+TXN ddr_wr_beat beat t=72349000 data=580 mask=0
+TXN refresh_req request t=78029000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=78029000 pending=1 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=78033000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
+TXN sched_cmd command t=78034000 aux=0 bank=2 col=0 row=0 type=4 we=0
+TXN sched_in command t=78034000 aux=0 bank=2 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=78039000 addr=0 bank=2 cmd=2
+TXN sched_cmd command t=78104000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_ack ack t=78104000 pending=1
+TXN sched_in command t=78104000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_level state t=78109000 pending=0 required=0 starve=0 urgent=0
+TXN ddr_cmd command t=78109000 addr=0 bank=0 cmd=1
+TXN csr_sts_level state t=78113000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
+DRIVER_STALL: wb — 8 of 45 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb read t=82463000 addr=1a85ee68 bte=0 cti=2
+TXN req request t=82464000 addr=1a85ee68 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=82464000 bank=5 col=330 row=6a17 we=0
+TXN wb read t=82468000 addr=1a85ee6c bte=0 cti=2
+TXN req request t=82469000 addr=1a85ee6c data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=82469000 bank=5 col=330 row=6a17 we=0
+TXN wb read t=82473000 addr=1a85ee70 bte=0 cti=2
+TXN req request t=82474000 addr=1a85ee70 data=81355c53 mask=f we=0
+TXN sched_cmd command t=82474000 aux=d bank=5 col=330 row=6a17 type=1 we=0
+TXN cq_enq enqueue t=82474000 bank=5 col=338 row=6a17 we=0
+TXN sched_in command t=82474000 aux=d bank=5 col=330 row=6a17 type=1 we=0
+TXN wb read t=82478000 addr=1a85ee74 bte=0 cti=2
+TXN req request t=82479000 addr=1a85ee74 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=82479000 bank=5 col=338 row=6a17 we=0
+TXN ddr_cmd command t=82479000 addr=6a17 bank=5 cmd=3
+TXN wb read t=82483000 addr=1a85ee78 bte=0 cti=2
+TXN req request t=82484000 addr=1a85ee78 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=82484000 bank=5 col=338 row=6a17 we=0
+TXN wb read t=82488000 addr=1a85ee7c bte=0 cti=2
+TXN req request t=82489000 addr=1a85ee7c data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=82489000 bank=5 col=338 row=6a17 we=0
+TXN wb read t=82493000 addr=1a85ee80 bte=0 cti=2
+TXN req request t=82494000 addr=1a85ee80 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=82494000 bank=5 col=340 row=6a17 we=0
+TXN wb read t=82498000 addr=1a85ee84 bte=0 cti=7
+TXN req request t=82499000 addr=1a85ee84 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=82499000 bank=5 col=340 row=6a17 we=0
+TXN sched_deq grant t=82544000 idx=0
+TXN sched_cmd command t=82544000 aux=d bank=5 col=330 row=6a17 type=2 we=0
+TXN cq_deq dequeue t=82544000 idx=0
+TXN sched_in command t=82544000 aux=d bank=5 col=330 row=6a17 type=2 we=0
+TXN sched_deq grant t=82549000 idx=1
+TXN sched_cmd command t=82549000 aux=e bank=5 col=330 row=6a17 type=2 we=0
+TXN dp_cmd read t=82549000 aux=d
+TXN cq_deq dequeue t=82549000 idx=1
+TXN sched_in command t=82549000 aux=e bank=5 col=330 row=6a17 type=2 we=0
+TXN ddr_cmd command t=82549000 addr=330 bank=5 cmd=5
+TXN sched_deq grant t=82554000 idx=2
+TXN sched_cmd command t=82554000 aux=f bank=5 col=338 row=6a17 type=2 we=0
+TXN dp_cmd read t=82554000 aux=e
+TXN cq_deq dequeue t=82554000 idx=2
+TXN sched_in command t=82554000 aux=f bank=5 col=338 row=6a17 type=2 we=0
+TXN ddr_cmd command t=82554000 addr=330 bank=5 cmd=5
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 82557500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN dp_cmd read t=82559000 aux=f
+TXN ddr_cmd command t=82559000 addr=338 bank=5 cmd=5
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 82562500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_rd_beat beat t=82569000 data=7ccf
+TXN wb_rsp read_data t=82574000 addr=235abe4 data=7ccf0000
+TXN dp_rd_rsp response t=82574000 aux=d data=7ccf0000
+TXN ddr_rd_beat beat t=82574000 data=1d96
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 82577500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN ddr_rd_beat beat t=82579000 data=1d96
+TXN ddr_rd_beat beat t=82584000 data=1d96
+TXN sched_deq grant t=82589000 idx=3
+TXN sched_cmd command t=82589000 aux=0 bank=5 col=338 row=6a17 type=2 we=0
+TXN cq_deq dequeue t=82589000 idx=3
+TXN sched_in command t=82589000 aux=0 bank=5 col=338 row=6a17 type=2 we=0
+TXN sched_deq grant t=82594000 idx=4
+TXN sched_cmd command t=82594000 aux=1 bank=5 col=338 row=6a17 type=2 we=0
+TXN dp_cmd read t=82594000 aux=0
+TXN cq_deq dequeue t=82594000 idx=4
+TXN sched_in command t=82594000 aux=1 bank=5 col=338 row=6a17 type=2 we=0
+TXN ddr_cmd command t=82594000 addr=338 bank=5 cmd=5
+TXN sched_deq grant t=82599000 idx=5
+TXN sched_cmd command t=82599000 aux=2 bank=5 col=338 row=6a17 type=2 we=0
+TXN dp_cmd read t=82599000 aux=1
+TXN cq_deq dequeue t=82599000 idx=5
+TXN sched_in command t=82599000 aux=2 bank=5 col=338 row=6a17 type=2 we=0
+TXN ddr_cmd command t=82599000 addr=338 bank=5 cmd=5
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 82602500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN dp_cmd read t=82604000 aux=2
+TXN ddr_cmd command t=82604000 addr=338 bank=5 cmd=5
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 82607500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_rd_beat beat t=82614000 data=7cc7
+TXN wb_rsp read_data t=82619000 addr=1a841edc data=7cc70000
+TXN dp_rd_rsp response t=82619000 aux=0 data=7cc70000
+TXN ddr_rd_beat beat t=82619000 data=1d96
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 82622500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN ddr_rd_beat beat t=82624000 data=1d96
+TXN ddr_rd_beat beat t=82629000 data=1d96
+TXN sched_deq grant t=82634000 idx=6
+TXN sched_cmd command t=82634000 aux=3 bank=5 col=340 row=6a17 type=2 we=0
+TXN cq_deq dequeue t=82634000 idx=6
+TXN sched_in command t=82634000 aux=3 bank=5 col=340 row=6a17 type=2 we=0
+TXN sched_deq grant t=82639000 idx=7
+TXN sched_cmd command t=82639000 aux=4 bank=5 col=340 row=6a17 type=2 we=0
+TXN dp_cmd read t=82639000 aux=3
+TXN cq_deq dequeue t=82639000 idx=7
+TXN sched_in command t=82639000 aux=4 bank=5 col=340 row=6a17 type=2 we=0
+TXN ddr_cmd command t=82639000 addr=340 bank=5 cmd=5
+TXN dp_cmd read t=82644000 aux=4
+TXN ddr_cmd command t=82644000 addr=340 bank=5 cmd=5
+xmsim: *E,EILLVU: (File: ./cmd_gen_coverage.sv, Line: 324):(Time: 82647500 PS + 1) Sampled value (0) for coverpoint (chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1.cp_tccd_spacing) is an illegal value.
+TXN ddr_rd_beat beat t=82659000 data=7cbf
+TXN wb_rsp read_data t=82664000 addr=1a841ee0 data=7cbf0000
+TXN dp_rd_rsp response t=82664000 aux=3 data=7cbf0000
+TXN ddr_rd_beat beat t=82664000 data=1d91
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 82667500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN ddr_rd_beat beat t=82669000 data=1d91
+TXN refresh_req request t=85829000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=85829000 pending=1 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=85833000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
+TXN sched_cmd command t=85834000 aux=0 bank=5 col=0 row=0 type=4 we=0
+TXN sched_in command t=85834000 aux=0 bank=5 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=85839000 addr=0 bank=5 cmd=2
+TXN sched_cmd command t=85904000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_ack ack t=85904000 pending=1
+TXN sched_in command t=85904000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_level state t=85909000 pending=0 required=0 starve=0 urgent=0
+TXN ddr_cmd command t=85909000 addr=0 bank=0 cmd=1
+TXN csr_sts_level state t=85913000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
+DRIVER_STALL: wb — 13 of 53 pipelined beat(s) never acknowledged (wb_ack_o)
+TXN wb read t=92768000 addr=19f6e8 bte=0 cti=0
+TXN req request t=92769000 addr=19f6e8 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=92769000 bank=6 col=370 row=67 we=0
+TXN wb read t=92773000 addr=15315b24 bte=0 cti=0
+TXN req request t=92774000 addr=15315b24 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=92774000 bank=3 col=190 row=54c5 we=0
+TXN wb read t=92778000 addr=1d5246f0 bte=0 cti=0
+TXN req request t=92779000 addr=1d5246f0 data=81355c53 mask=f we=0
+TXN sched_cmd command t=92779000 aux=5 bank=6 col=370 row=67 type=1 we=0
+TXN cq_enq enqueue t=92779000 bank=0 col=378 row=7549 we=0
+TXN sched_in command t=92779000 aux=5 bank=6 col=370 row=67 type=1 we=0
+TXN ddr_cmd command t=92784000 addr=67 bank=6 cmd=3
+TXN sched_cmd command t=92824000 aux=6 bank=3 col=190 row=54c5 type=1 we=0
+TXN sched_in command t=92824000 aux=6 bank=3 col=190 row=54c5 type=1 we=0
+TXN ddr_cmd command t=92829000 addr=54c5 bank=3 cmd=3
+TXN sched_deq grant t=92849000 idx=0
+TXN sched_cmd command t=92849000 aux=5 bank=6 col=370 row=67 type=2 we=0
+TXN cq_deq dequeue t=92849000 idx=0
+TXN sched_in command t=92849000 aux=5 bank=6 col=370 row=67 type=2 we=0
+TXN dp_cmd read t=92854000 aux=5
+TXN ddr_cmd command t=92854000 addr=370 bank=6 cmd=5
+TXN sched_cmd command t=92869000 aux=7 bank=0 col=378 row=7549 type=1 we=0
+TXN sched_in command t=92869000 aux=7 bank=0 col=378 row=7549 type=1 we=0
+TXN ddr_rd_beat beat t=92874000 data=7c8f
+TXN ddr_cmd command t=92874000 addr=7549 bank=0 cmd=3
+TXN wb_rsp read_data t=92879000 addr=1a841ee4 data=7c8f0000
+TXN dp_rd_rsp response t=92879000 aux=5 data=7c8f0000
+TXN ddr_rd_beat beat t=92879000 data=9d92
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 92882500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=92888000 addr=1ca5790 bte=0 cti=0
+TXN req request t=92889000 addr=1ca5790 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=92889000 bank=2 col=3c8 row=729 we=0
+TXN sched_deq grant t=92894000 idx=1
+TXN sched_cmd command t=92894000 aux=6 bank=3 col=190 row=54c5 type=2 we=0
+TXN cq_deq dequeue t=92894000 idx=1
+TXN sched_in command t=92894000 aux=6 bank=3 col=190 row=54c5 type=2 we=0
+TXN dp_cmd read t=92899000 aux=6
+TXN ddr_cmd command t=92899000 addr=190 bank=3 cmd=5
+TXN sched_cmd command t=92914000 aux=8 bank=2 col=3c8 row=729 type=1 we=0
+TXN sched_in command t=92914000 aux=8 bank=2 col=3c8 row=729 type=1 we=0
+TXN ddr_rd_beat beat t=92919000 data=7e6f
+TXN ddr_cmd command t=92919000 addr=729 bank=2 cmd=3
+TXN wb_rsp read_data t=92924000 addr=588af5c data=7e6f0000
+TXN dp_rd_rsp response t=92924000 aux=6 data=7e6f0000
+TXN ddr_rd_beat beat t=92924000 data=8dbc
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 92927500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=92933000 addr=eb1d948 bte=0 cti=0
+TXN req request t=92934000 addr=eb1d948 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=92934000 bank=3 col=a0 row=3ac7 we=0
+TXN sched_deq grant t=92939000 idx=2
+TXN sched_cmd command t=92939000 aux=7 bank=0 col=378 row=7549 type=2 we=0
+TXN cq_deq dequeue t=92939000 idx=2
+TXN sched_in command t=92939000 aux=7 bank=0 col=378 row=7549 type=2 we=0
+TXN dp_cmd read t=92944000 aux=7
+TXN ddr_cmd command t=92944000 addr=378 bank=0 cmd=5
+TXN ddr_rd_beat beat t=92964000 data=7c87
+TXN wb_rsp read_data t=92969000 addr=588af60 data=7c870000
+TXN dp_rd_rsp response t=92969000 aux=7 data=7c870000
+TXN ddr_rd_beat beat t=92969000 data=ed92
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 92972500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=92978000 addr=b576de4 bte=0 cti=0
+TXN req request t=92979000 addr=b576de4 data=81355c53 mask=f we=0
+TXN sched_cmd command t=92979000 aux=9 bank=3 col=a0 row=3ac7 type=4 we=0
+TXN cq_enq enqueue t=92979000 bank=5 col=2f0 row=2d5d we=0
+TXN sched_in command t=92979000 aux=9 bank=3 col=a0 row=3ac7 type=4 we=0
+TXN sched_deq grant t=92984000 idx=0
+TXN sched_cmd command t=92984000 aux=8 bank=2 col=3c8 row=729 type=2 we=0
+TXN cq_deq dequeue t=92984000 idx=0
+TXN sched_in command t=92984000 aux=8 bank=2 col=3c8 row=729 type=2 we=0
+TXN ddr_cmd command t=92984000 addr=0 bank=3 cmd=2
+TXN sched_cmd command t=92989000 aux=a bank=5 col=2f0 row=2d5d type=1 we=0
+TXN dp_cmd read t=92989000 aux=8
+TXN sched_in command t=92989000 aux=a bank=5 col=2f0 row=2d5d type=1 we=0
+TXN ddr_cmd command t=92989000 addr=3c8 bank=2 cmd=5
+TXN ddr_cmd command t=92994000 addr=2d5d bank=5 cmd=3
+TXN ddr_rd_beat beat t=93009000 data=7c37
+TXN wb_rsp read_data t=93014000 addr=588af64 data=7c370000
+TXN dp_rd_rsp response t=93014000 aux=8 data=7c370000
+TXN ddr_rd_beat beat t=93014000 data=ed99
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 93017500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=93023000 addr=b91f700 bte=0 cti=0
+TXN req request t=93024000 addr=b91f700 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=93024000 bank=6 col=380 row=2e47 we=0
+TXN sched_cmd command t=93034000 aux=b bank=6 col=380 row=2e47 type=4 we=0
+TXN sched_in command t=93034000 aux=b bank=6 col=380 row=2e47 type=4 we=0
+TXN ddr_cmd command t=93039000 addr=0 bank=6 cmd=2
+TXN sched_cmd command t=93049000 aux=9 bank=3 col=a0 row=3ac7 type=1 we=0
+TXN sched_in command t=93049000 aux=9 bank=3 col=a0 row=3ac7 type=1 we=0
+TXN ddr_cmd command t=93054000 addr=3ac7 bank=3 cmd=3
+TXN sched_deq grant t=93059000 idx=2
+TXN sched_cmd command t=93059000 aux=a bank=5 col=2f0 row=2d5d type=2 we=0
+TXN cq_deq dequeue t=93059000 idx=2
+TXN sched_in command t=93059000 aux=a bank=5 col=2f0 row=2d5d type=2 we=0
+TXN dp_cmd read t=93064000 aux=a
+TXN ddr_cmd command t=93064000 addr=2f0 bank=5 cmd=5
+TXN ddr_rd_beat beat t=93084000 data=7d0f
+TXN wb_rsp read_data t=93089000 addr=588af68 data=7d0f0000
+TXN dp_rd_rsp response t=93089000 aux=a data=7d0f0000
+TXN ddr_rd_beat beat t=93089000 data=4d8a
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 93092500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=93098000 addr=5dccc20 bte=0 cti=0
+TXN req request t=93099000 addr=5dccc20 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=93099000 bank=1 col=210 row=1773 we=0
+TXN sched_cmd command t=93104000 aux=b bank=6 col=380 row=2e47 type=1 we=0
+TXN sched_in command t=93104000 aux=b bank=6 col=380 row=2e47 type=1 we=0
+TXN ddr_cmd command t=93109000 addr=2e47 bank=6 cmd=3
+TXN sched_deq grant t=93119000 idx=1
+TXN sched_cmd command t=93119000 aux=9 bank=3 col=a0 row=3ac7 type=2 we=0
+TXN cq_deq dequeue t=93119000 idx=1
+TXN sched_in command t=93119000 aux=9 bank=3 col=a0 row=3ac7 type=2 we=0
+TXN dp_cmd read t=93124000 aux=9
+TXN ddr_cmd command t=93124000 addr=a0 bank=3 cmd=5
+TXN ddr_rd_beat beat t=93144000 data=7f5f
+TXN wb_rsp read_data t=93149000 addr=1a85ee68 data=7f5f0000
+TXN sched_cmd command t=93149000 aux=c bank=1 col=210 row=1773 type=1 we=0
+TXN dp_rd_rsp response t=93149000 aux=9 data=7f5f0000
+TXN ddr_rd_beat beat t=93149000 data=9daf
+TXN sched_in command t=93149000 aux=c bank=1 col=210 row=1773 type=1 we=0
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 93152500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN ddr_cmd command t=93154000 addr=1773 bank=1 cmd=3
+TXN wb read t=93158000 addr=1056bcd0 bte=0 cti=0
+TXN req request t=93159000 addr=1056bcd0 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=93159000 bank=7 col=268 row=415a we=0
+TXN sched_deq grant t=93174000 idx=0
+TXN sched_cmd command t=93174000 aux=b bank=6 col=380 row=2e47 type=2 we=0
+TXN cq_deq dequeue t=93174000 idx=0
+TXN sched_in command t=93174000 aux=b bank=6 col=380 row=2e47 type=2 we=0
+TXN dp_cmd read t=93179000 aux=b
+TXN ddr_cmd command t=93179000 addr=380 bank=6 cmd=5
+TXN sched_cmd command t=93194000 aux=d bank=7 col=268 row=415a type=1 we=0
+TXN sched_in command t=93194000 aux=d bank=7 col=268 row=415a type=1 we=0
+TXN ddr_rd_beat beat t=93199000 data=7c7f
+TXN ddr_cmd command t=93199000 addr=415a bank=7 cmd=3
+TXN wb_rsp read_data t=93204000 addr=1a85ee6c data=7c7f0000
+TXN dp_rd_rsp response t=93204000 aux=b data=7c7f0000
+TXN ddr_rd_beat beat t=93204000 data=9d9d
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 93207500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=93213000 addr=213cf74 bte=0 cti=0
+TXN req request t=93214000 addr=213cf74 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=93214000 bank=1 col=3b8 row=84f we=0
+TXN sched_deq grant t=93219000 idx=2
+TXN sched_cmd command t=93219000 aux=c bank=1 col=210 row=1773 type=2 we=0
+TXN cq_deq dequeue t=93219000 idx=2
+TXN sched_in command t=93219000 aux=c bank=1 col=210 row=1773 type=2 we=0
+TXN dp_cmd read t=93224000 aux=c
+TXN ddr_cmd command t=93224000 addr=210 bank=1 cmd=5
+TXN ddr_rd_beat beat t=93244000 data=7def
+TXN wb_rsp read_data t=93249000 addr=1a85ee70 data=7def0000
+TXN dp_rd_rsp response t=93249000 aux=c data=7def0000
+TXN ddr_rd_beat beat t=93249000 data=3d84
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 93252500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=93258000 addr=4824f48 bte=0 cti=0
+TXN req request t=93259000 addr=4824f48 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=93259000 bank=1 col=3a0 row=1209 we=0
+TXN sched_deq grant t=93264000 idx=1
+TXN sched_cmd command t=93264000 aux=d bank=7 col=268 row=415a type=2 we=0
+TXN cq_deq dequeue t=93264000 idx=1
+TXN sched_in command t=93264000 aux=d bank=7 col=268 row=415a type=2 we=0
+TXN dp_cmd read t=93269000 aux=d
+TXN ddr_cmd command t=93269000 addr=268 bank=7 cmd=5
+TXN ddr_rd_beat beat t=93289000 data=fd97
+TXN wb_rsp read_data t=93294000 addr=1a85ee74 data=fd970000
+TXN dp_rd_rsp response t=93294000 aux=d data=fd970000
+TXN ddr_rd_beat beat t=93294000 data=7583
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 93297500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=93303000 addr=553b544 bte=0 cti=0
+TXN req request t=93304000 addr=553b544 data=81355c53 mask=f we=0
+TXN sched_cmd command t=93304000 aux=e bank=1 col=3b8 row=84f type=4 we=0
+TXN cq_enq enqueue t=93304000 bank=6 col=2a0 row=154e we=0
+TXN sched_in command t=93304000 aux=e bank=1 col=3b8 row=84f type=4 we=0
+TXN ddr_cmd command t=93309000 addr=0 bank=1 cmd=2
+TXN sched_cmd command t=93314000 aux=0 bank=6 col=2a0 row=154e type=4 we=0
+TXN sched_in command t=93314000 aux=0 bank=6 col=2a0 row=154e type=4 we=0
+TXN ddr_cmd command t=93319000 addr=0 bank=6 cmd=2
+TXN sched_cmd command t=93374000 aux=e bank=1 col=3b8 row=84f type=1 we=0
+TXN sched_in command t=93374000 aux=e bank=1 col=3b8 row=84f type=1 we=0
+TXN ddr_cmd command t=93379000 addr=84f bank=1 cmd=3
+TXN sched_cmd command t=93419000 aux=0 bank=6 col=2a0 row=154e type=1 we=0
+TXN sched_in command t=93419000 aux=0 bank=6 col=2a0 row=154e type=1 we=0
+TXN ddr_cmd command t=93424000 addr=154e bank=6 cmd=3
+TXN sched_deq grant t=93444000 idx=0
+TXN sched_cmd command t=93444000 aux=e bank=1 col=3b8 row=84f type=2 we=0
+TXN cq_deq dequeue t=93444000 idx=0
+TXN sched_in command t=93444000 aux=e bank=1 col=3b8 row=84f type=2 we=0
+TXN dp_cmd read t=93449000 aux=e
+TXN ddr_cmd command t=93449000 addr=3b8 bank=1 cmd=5
+TXN ddr_rd_beat beat t=93469000 data=7c47
+TXN wb_rsp read_data t=93474000 addr=1a85ee78 data=7c470000
+TXN dp_rd_rsp response t=93474000 aux=e data=7c470000
+TXN ddr_rd_beat beat t=93474000 data=dd9e
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 93477500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=93483000 addr=1117594 bte=0 cti=0
+TXN req request t=93484000 addr=1117594 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=93484000 bank=6 col=2c8 row=445 we=0
+TXN sched_deq grant t=93489000 idx=1
+TXN sched_cmd command t=93489000 aux=0 bank=6 col=2a0 row=154e type=2 we=0
+TXN cq_deq dequeue t=93489000 idx=1
+TXN sched_in command t=93489000 aux=0 bank=6 col=2a0 row=154e type=2 we=0
+TXN dp_cmd read t=93494000 aux=0
+TXN ddr_cmd command t=93494000 addr=2a0 bank=6 cmd=5
+TXN ddr_rd_beat beat t=93514000 data=fd5f
+TXN wb_rsp read_data t=93519000 addr=1a85ee7c data=fd5f0000
+TXN dp_rd_rsp response t=93519000 aux=0 data=fd5f0000
+TXN ddr_rd_beat beat t=93519000 data=d58f
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 93522500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=93528000 addr=1cfdeea0 bte=0 cti=0
+TXN req request t=93529000 addr=1cfdeea0 data=81355c53 mask=f we=0
+TXN sched_cmd command t=93529000 aux=f bank=1 col=3a0 row=1209 type=4 we=0
+TXN cq_enq enqueue t=93529000 bank=5 col=350 row=73f7 we=0
+TXN sched_in command t=93529000 aux=f bank=1 col=3a0 row=1209 type=4 we=0
+TXN ddr_cmd command t=93534000 addr=0 bank=1 cmd=2
+TXN sched_cmd command t=93539000 aux=2 bank=5 col=350 row=73f7 type=4 we=0
+TXN sched_in command t=93539000 aux=2 bank=5 col=350 row=73f7 type=4 we=0
+TXN ddr_cmd command t=93544000 addr=0 bank=5 cmd=2
+TXN sched_cmd command t=93574000 aux=1 bank=6 col=2c8 row=445 type=4 we=0
+TXN sched_in command t=93574000 aux=1 bank=6 col=2c8 row=445 type=4 we=0
+TXN ddr_cmd command t=93579000 addr=0 bank=6 cmd=2
+TXN sched_cmd command t=93599000 aux=f bank=1 col=3a0 row=1209 type=1 we=0
+TXN sched_in command t=93599000 aux=f bank=1 col=3a0 row=1209 type=1 we=0
+TXN ddr_cmd command t=93604000 addr=1209 bank=1 cmd=3
+TXN refresh_req request t=93629000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=93629000 pending=1 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=93633000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
+TXN sched_cmd command t=93634000 aux=0 bank=0 col=0 row=0 type=4 we=0
+TXN sched_in command t=93634000 aux=0 bank=0 col=0 row=0 type=4 we=0
+TXN sched_cmd command t=93639000 aux=0 bank=2 col=0 row=0 type=4 we=0
+TXN sched_in command t=93639000 aux=0 bank=2 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=93639000 addr=0 bank=0 cmd=2
+TXN sched_cmd command t=93644000 aux=1 bank=6 col=2c8 row=445 type=1 we=0
+TXN sched_in command t=93644000 aux=1 bank=6 col=2c8 row=445 type=1 we=0
+TXN ddr_cmd command t=93644000 addr=0 bank=2 cmd=2
+TXN sched_cmd command t=93649000 aux=0 bank=3 col=0 row=0 type=4 we=0
+TXN sched_in command t=93649000 aux=0 bank=3 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=93649000 addr=445 bank=6 cmd=3
+TXN sched_cmd command t=93654000 aux=0 bank=7 col=0 row=0 type=4 we=0
+TXN sched_in command t=93654000 aux=0 bank=7 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=93654000 addr=0 bank=3 cmd=2
+TXN ddr_cmd command t=93659000 addr=0 bank=7 cmd=2
+TXN sched_deq grant t=93669000 idx=2
+TXN sched_cmd command t=93669000 aux=f bank=1 col=3a0 row=1209 type=2 we=0
+TXN cq_deq dequeue t=93669000 idx=2
+TXN sched_in command t=93669000 aux=f bank=1 col=3a0 row=1209 type=2 we=0
+TXN dp_cmd read t=93674000 aux=f
+TXN ddr_cmd command t=93674000 addr=3a0 bank=1 cmd=5
+TXN sched_cmd command t=93689000 aux=2 bank=5 col=350 row=73f7 type=1 we=0
+TXN sched_in command t=93689000 aux=2 bank=5 col=350 row=73f7 type=1 we=0
+TXN ddr_rd_beat beat t=93694000 data=7c5f
+TXN ddr_cmd command t=93694000 addr=73f7 bank=5 cmd=3
+TXN wb_rsp read_data t=93699000 addr=1a85ee80 data=7c5f0000
+TXN dp_rd_rsp response t=93699000 aux=f data=7c5f0000
+TXN ddr_rd_beat beat t=93699000 data=ed9f
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 93702500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=93708000 addr=ee8cf4 bte=0 cti=0
+TXN req request t=93709000 addr=ee8cf4 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=93709000 bank=1 col=278 row=3ba we=0
+TXN sched_deq grant t=93714000 idx=0
+TXN sched_cmd command t=93714000 aux=1 bank=6 col=2c8 row=445 type=2 we=0
+TXN cq_deq dequeue t=93714000 idx=0
+TXN sched_in command t=93714000 aux=1 bank=6 col=2c8 row=445 type=2 we=0
+TXN dp_cmd read t=93719000 aux=1
+TXN ddr_cmd command t=93719000 addr=2c8 bank=6 cmd=5
+TXN ddr_rd_beat beat t=93739000 data=7d37
+TXN wb_rsp read_data t=93744000 addr=1a85ee84 data=7d370000
+TXN dp_rd_rsp response t=93744000 aux=1 data=7d370000
+TXN ddr_rd_beat beat t=93744000 data=8d89
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 93747500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=93753000 addr=11ff2058 bte=0 cti=0
+TXN req request t=93754000 addr=11ff2058 data=81355c53 mask=f we=0
+TXN sched_cmd command t=93754000 aux=3 bank=1 col=278 row=3ba type=4 we=0
+TXN cq_enq enqueue t=93754000 bank=4 col=28 row=47fc we=0
+TXN sched_in command t=93754000 aux=3 bank=1 col=278 row=3ba type=4 we=0
+TXN sched_deq grant t=93759000 idx=1
+TXN sched_cmd command t=93759000 aux=2 bank=5 col=350 row=73f7 type=2 we=0
+TXN cq_deq dequeue t=93759000 idx=1
+TXN sched_in command t=93759000 aux=2 bank=5 col=350 row=73f7 type=2 we=0
+TXN ddr_cmd command t=93759000 addr=0 bank=1 cmd=2
+TXN sched_cmd command t=93764000 aux=4 bank=4 col=28 row=47fc type=1 we=0
+TXN dp_cmd read t=93764000 aux=2
+TXN sched_in command t=93764000 aux=4 bank=4 col=28 row=47fc type=1 we=0
+TXN ddr_cmd command t=93764000 addr=350 bank=5 cmd=5
+TXN ddr_cmd command t=93769000 addr=47fc bank=4 cmd=3
+TXN ddr_rd_beat beat t=93784000 data=7caf
+TXN wb_rsp read_data t=93789000 addr=19f6e8 data=7caf0000
+TXN dp_rd_rsp response t=93789000 aux=2 data=7caf0000
+TXN ddr_rd_beat beat t=93789000 data=1d90
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 93792500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=93798000 addr=ff8c740 bte=0 cti=0
+TXN req request t=93799000 addr=ff8c740 data=81355c53 mask=f we=0
+TXN sched_cmd command t=93799000 aux=0 bank=6 col=0 row=0 type=4 we=0
+TXN cq_enq enqueue t=93799000 bank=0 col=3a0 row=3fe3 we=0
+TXN sched_in command t=93799000 aux=0 bank=6 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=93804000 addr=0 bank=6 cmd=2
+TXN sched_cmd command t=93809000 aux=5 bank=0 col=3a0 row=3fe3 type=1 we=0
+TXN sched_in command t=93809000 aux=5 bank=0 col=3a0 row=3fe3 type=1 we=0
+TXN ddr_cmd command t=93814000 addr=3fe3 bank=0 cmd=3
+TXN sched_deq grant t=93834000 idx=0
+TXN sched_cmd command t=93834000 aux=4 bank=4 col=28 row=47fc type=2 we=0
+TXN cq_deq dequeue t=93834000 idx=0
+TXN sched_in command t=93834000 aux=4 bank=4 col=28 row=47fc type=2 we=0
+TXN dp_cmd read t=93839000 aux=4
+TXN ddr_cmd command t=93839000 addr=28 bank=4 cmd=5
+TXN sched_cmd command t=93844000 aux=0 bank=5 col=0 row=0 type=4 we=0
+TXN sched_in command t=93844000 aux=0 bank=5 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=93849000 addr=0 bank=5 cmd=2
+TXN sched_cmd command t=93854000 aux=3 bank=1 col=278 row=3ba type=1 we=0
+TXN sched_in command t=93854000 aux=3 bank=1 col=278 row=3ba type=1 we=0
+TXN ddr_rd_beat beat t=93859000 data=ffd7
+TXN ddr_cmd command t=93859000 addr=3ba bank=1 cmd=3
+TXN wb_rsp read_data t=93864000 addr=15315b24 data=ffd70000
+TXN dp_rd_rsp response t=93864000 aux=4 data=ffd70000
+TXN ddr_rd_beat beat t=93864000 data=45a7
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 93867500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=93873000 addr=11316d1c bte=0 cti=0
+TXN req request t=93874000 addr=11316d1c data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=93874000 bank=5 col=288 row=44c5 we=0
+TXN sched_deq grant t=93879000 idx=1
+TXN sched_cmd command t=93879000 aux=5 bank=0 col=3a0 row=3fe3 type=2 we=0
+TXN cq_deq dequeue t=93879000 idx=1
+TXN sched_in command t=93879000 aux=5 bank=0 col=3a0 row=3fe3 type=2 we=0
+TXN dp_cmd read t=93884000 aux=5
+TXN ddr_cmd command t=93884000 addr=3a0 bank=0 cmd=5
+TXN ddr_rd_beat beat t=93904000 data=7c5f
+TXN wb_rsp read_data t=93909000 addr=1d5246f0 data=7c5f0000
+TXN dp_rd_rsp response t=93909000 aux=5 data=7c5f0000
+TXN ddr_rd_beat beat t=93909000 data=bd9f
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 93912500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN sched_cmd command t=93914000 aux=6 bank=5 col=288 row=44c5 type=1 we=0
+TXN sched_in command t=93914000 aux=6 bank=5 col=288 row=44c5 type=1 we=0
+TXN wb read t=93918000 addr=701dc90 bte=0 cti=0
+TXN req request t=93919000 addr=701dc90 data=81355c53 mask=f we=0
+TXN sched_cmd command t=93919000 aux=0 bank=4 col=0 row=0 type=4 we=0
+TXN cq_enq enqueue t=93919000 bank=3 col=248 row=1c07 we=0
+TXN sched_in command t=93919000 aux=0 bank=4 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=93919000 addr=44c5 bank=5 cmd=3
+TXN sched_deq grant t=93924000 idx=2
+TXN sched_cmd command t=93924000 aux=3 bank=1 col=278 row=3ba type=2 we=0
+TXN cq_deq dequeue t=93924000 idx=2
+TXN sched_in command t=93924000 aux=3 bank=1 col=278 row=3ba type=2 we=0
+TXN ddr_cmd command t=93924000 addr=0 bank=4 cmd=2
+TXN dp_cmd read t=93929000 aux=3
+TXN ddr_cmd command t=93929000 addr=278 bank=1 cmd=5
+TXN ddr_rd_beat beat t=93949000 data=fd87
+TXN wb_rsp read_data t=93954000 addr=1ca5790 data=fd870000
+TXN dp_rd_rsp response t=93954000 aux=3 data=fd870000
+TXN ddr_rd_beat beat t=93954000 data=7582
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 93957500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN sched_cmd command t=93959000 aux=7 bank=3 col=248 row=1c07 type=1 we=0
+TXN sched_in command t=93959000 aux=7 bank=3 col=248 row=1c07 type=1 we=0
+TXN wb read t=93963000 addr=bd0a738 bte=0 cti=0
+TXN req request t=93964000 addr=bd0a738 data=81355c53 mask=f we=0
+TXN sched_cmd command t=93964000 aux=0 bank=0 col=0 row=0 type=4 we=0
+TXN cq_enq enqueue t=93964000 bank=4 col=398 row=2f42 we=0
+TXN sched_in command t=93964000 aux=0 bank=0 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=93964000 addr=1c07 bank=3 cmd=3
+TXN ddr_cmd command t=93969000 addr=0 bank=0 cmd=2
+TXN sched_deq grant t=93984000 idx=0
+TXN sched_cmd command t=93984000 aux=6 bank=5 col=288 row=44c5 type=2 we=0
+TXN cq_deq dequeue t=93984000 idx=0
+TXN sched_in command t=93984000 aux=6 bank=5 col=288 row=44c5 type=2 we=0
+TXN dp_cmd read t=93989000 aux=6
+TXN ddr_cmd command t=93989000 addr=288 bank=5 cmd=5
+TXN sched_cmd command t=94004000 aux=8 bank=4 col=398 row=2f42 type=1 we=0
+TXN sched_in command t=94004000 aux=8 bank=4 col=398 row=2f42 type=1 we=0
+TXN sched_cmd command t=94009000 aux=0 bank=1 col=0 row=0 type=4 we=0
+TXN ddr_rd_beat beat t=94009000 data=7d77
+TXN sched_in command t=94009000 aux=0 bank=1 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=94009000 addr=2f42 bank=4 cmd=3
+TXN wb_rsp read_data t=94014000 addr=eb1d948 data=7d770000
+TXN dp_rd_rsp response t=94014000 aux=6 data=7d770000
+TXN ddr_rd_beat beat t=94014000 data=8d8d
+TXN ddr_cmd command t=94014000 addr=0 bank=1 cmd=2
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 94017500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=94023000 addr=160b0630 bte=0 cti=0
+TXN req request t=94024000 addr=160b0630 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=94024000 bank=0 col=318 row=582c we=0
+TXN sched_deq grant t=94029000 idx=1
+TXN sched_cmd command t=94029000 aux=7 bank=3 col=248 row=1c07 type=2 we=0
+TXN cq_deq dequeue t=94029000 idx=1
+TXN sched_in command t=94029000 aux=7 bank=3 col=248 row=1c07 type=2 we=0
+TXN dp_cmd read t=94034000 aux=7
+TXN ddr_cmd command t=94034000 addr=248 bank=3 cmd=5
+TXN sched_cmd command t=94049000 aux=9 bank=0 col=318 row=582c type=1 we=0
+TXN sched_in command t=94049000 aux=9 bank=0 col=318 row=582c type=1 we=0
+TXN ddr_rd_beat beat t=94054000 data=7db7
+TXN ddr_cmd command t=94054000 addr=582c bank=0 cmd=3
+TXN wb_rsp read_data t=94059000 addr=b576de4 data=7db70000
+TXN dp_rd_rsp response t=94059000 aux=7 data=7db70000
+TXN ddr_rd_beat beat t=94059000 data=9d81
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 94062500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=94068000 addr=129404b4 bte=0 cti=0
+TXN req request t=94069000 addr=129404b4 data=81355c53 mask=f we=0
+TXN sched_cmd command t=94069000 aux=0 bank=5 col=0 row=0 type=4 we=0
+TXN cq_enq enqueue t=94069000 bank=0 col=258 row=4a50 we=0
+TXN sched_in command t=94069000 aux=0 bank=5 col=0 row=0 type=4 we=0
+TXN sched_deq grant t=94074000 idx=2
+TXN sched_cmd command t=94074000 aux=8 bank=4 col=398 row=2f42 type=2 we=0
+TXN cq_deq dequeue t=94074000 idx=2
+TXN sched_in command t=94074000 aux=8 bank=4 col=398 row=2f42 type=2 we=0
+TXN ddr_cmd command t=94074000 addr=0 bank=5 cmd=2
+TXN dp_cmd read t=94079000 aux=8
+TXN ddr_cmd command t=94079000 addr=398 bank=4 cmd=5
+TXN ddr_rd_beat beat t=94099000 data=fc67
+TXN wb_rsp read_data t=94104000 addr=b91f700 data=fc670000
+TXN dp_rd_rsp response t=94104000 aux=8 data=fc670000
+TXN ddr_rd_beat beat t=94104000 data=b59c
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 94107500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=94113000 addr=472f0a0 bte=0 cti=0
+TXN req request t=94114000 addr=472f0a0 data=81355c53 mask=f we=0
+TXN sched_cmd command t=94114000 aux=0 bank=3 col=0 row=0 type=4 we=0
+TXN cq_enq enqueue t=94114000 bank=6 col=50 row=11cb we=0
+TXN sched_in command t=94114000 aux=0 bank=3 col=0 row=0 type=4 we=0
+TXN sched_deq grant t=94119000 idx=0
+TXN sched_cmd command t=94119000 aux=9 bank=0 col=318 row=582c type=2 we=0
+TXN cq_deq dequeue t=94119000 idx=0
+TXN sched_in command t=94119000 aux=9 bank=0 col=318 row=582c type=2 we=0
+TXN ddr_cmd command t=94119000 addr=0 bank=3 cmd=2
+TXN sched_cmd command t=94124000 aux=b bank=6 col=50 row=11cb type=1 we=0
+TXN dp_cmd read t=94124000 aux=9
+TXN sched_in command t=94124000 aux=b bank=6 col=50 row=11cb type=1 we=0
+TXN ddr_cmd command t=94124000 addr=318 bank=0 cmd=5
+TXN ddr_cmd command t=94129000 addr=11cb bank=6 cmd=3
+TXN ddr_rd_beat beat t=94144000 data=fce7
+TXN wb_rsp read_data t=94149000 addr=5dccc20 data=fce70000
+TXN dp_rd_rsp response t=94149000 aux=9 data=fce70000
+TXN ddr_rd_beat beat t=94149000 data=c594
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 94152500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN wb read t=94158000 addr=ab7d564 bte=0 cti=0
+TXN req request t=94159000 addr=ab7d564 data=81355c53 mask=f we=0
+TXN sched_cmd command t=94159000 aux=0 bank=4 col=0 row=0 type=4 we=0
+TXN cq_enq enqueue t=94159000 bank=2 col=2b0 row=2adf we=0
+TXN sched_in command t=94159000 aux=0 bank=4 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=94164000 addr=0 bank=4 cmd=2
+TXN sched_cmd command t=94169000 aux=c bank=2 col=2b0 row=2adf type=1 we=0
+TXN sched_in command t=94169000 aux=c bank=2 col=2b0 row=2adf type=1 we=0
+TXN ddr_cmd command t=94174000 addr=2adf bank=2 cmd=3
+TXN sched_deq grant t=94194000 idx=2
+TXN sched_cmd command t=94194000 aux=b bank=6 col=50 row=11cb type=2 we=0
+TXN cq_deq dequeue t=94194000 idx=2
+TXN sched_in command t=94194000 aux=b bank=6 col=50 row=11cb type=2 we=0
+TXN dp_cmd read t=94199000 aux=b
+TXN ddr_cmd command t=94199000 addr=50 bank=6 cmd=5
+TXN sched_cmd command t=94204000 aux=a bank=0 col=258 row=4a50 type=4 we=0
+TXN sched_in command t=94204000 aux=a bank=0 col=258 row=4a50 type=4 we=0
+TXN ddr_cmd command t=94209000 addr=0 bank=0 cmd=2
+TXN ddr_rd_beat beat t=94219000 data=7faf
+TXN wb_rsp read_data t=94224000 addr=1056bcd0 data=7faf0000
+TXN dp_rd_rsp response t=94224000 aux=b data=7faf0000
+TXN ddr_rd_beat beat t=94224000 data=fda0
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 94227500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN sched_deq grant t=94239000 idx=0
+TXN sched_cmd command t=94239000 aux=c bank=2 col=2b0 row=2adf type=2 we=0
+TXN cq_deq dequeue t=94239000 idx=0
+TXN sched_in command t=94239000 aux=c bank=2 col=2b0 row=2adf type=2 we=0
+TXN dp_cmd read t=94244000 aux=c
+TXN ddr_cmd command t=94244000 addr=2b0 bank=2 cmd=5
+TXN ddr_rd_beat beat t=94264000 data=7d4f
+TXN wb_rsp read_data t=94269000 addr=213cf74 data=7d4f0000
+TXN dp_rd_rsp response t=94269000 aux=c data=7d4f0000
+TXN ddr_rd_beat beat t=94269000 data=5d8e
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 94272500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN sched_cmd command t=94274000 aux=a bank=0 col=258 row=4a50 type=1 we=0
+TXN sched_in command t=94274000 aux=a bank=0 col=258 row=4a50 type=1 we=0
+TXN sched_cmd command t=94279000 aux=0 bank=6 col=0 row=0 type=4 we=0
+TXN sched_in command t=94279000 aux=0 bank=6 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=94279000 addr=4a50 bank=0 cmd=3
+TXN ddr_cmd command t=94284000 addr=0 bank=6 cmd=2
+TXN sched_cmd command t=94324000 aux=0 bank=2 col=0 row=0 type=4 we=0
+TXN sched_in command t=94324000 aux=0 bank=2 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=94329000 addr=0 bank=2 cmd=2
+TXN sched_deq grant t=94344000 idx=1
+TXN sched_cmd command t=94344000 aux=a bank=0 col=258 row=4a50 type=2 we=0
+TXN cq_deq dequeue t=94344000 idx=1
+TXN sched_in command t=94344000 aux=a bank=0 col=258 row=4a50 type=2 we=0
+TXN dp_cmd read t=94349000 aux=a
+TXN ddr_cmd command t=94349000 addr=258 bank=0 cmd=5
+TXN ddr_rd_beat beat t=94369000 data=fda7
+TXN wb_rsp read_data t=94374000 addr=4824f48 data=fda70000
+TXN dp_rd_rsp response t=94374000 aux=a data=fda70000
+TXN ddr_rd_beat beat t=94374000 data=2580
+xmsim: *E,ASRTST (./wb_port.sv,191): (time 94377500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN sched_cmd command t=94429000 aux=0 bank=0 col=0 row=0 type=4 we=0
+TXN sched_in command t=94429000 aux=0 bank=0 col=0 row=0 type=4 we=0
+TXN ddr_cmd command t=94434000 addr=0 bank=0 cmd=2
+TXN sched_cmd command t=94499000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_ack ack t=94499000 pending=1
+TXN sched_in command t=94499000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_level state t=94504000 pending=0 required=0 starve=0 urgent=0
+TXN ddr_cmd command t=94504000 addr=0 bank=0 cmd=1
+TXN csr_sts_level state t=94508000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
+TXN refresh_req request t=101429000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=101429000 pending=1 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=101433000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
+TXN sched_cmd command t=101434000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_ack ack t=101434000 pending=1
+TXN sched_in command t=101434000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_level state t=101439000 pending=0 required=0 starve=0 urgent=0
+TXN ddr_cmd command t=101439000 addr=0 bank=0 cmd=1
+TXN csr_sts_level state t=101443000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
+DRIVER_STALL: wb — 13 of 77 pipelined beat(s) never acknowledged (wb_ack_o)
 HARNESS_DONE
-Simulation complete via $finish(1) at time 6502500 PS + 0
+Simulation complete via $finish(1) at time 107477500 PS + 0
 ./chain_harness.sv:452     $finish;
 xcelium> exit
-xmsim: *W,CGDEFN: Default name "bank_tracker_fcov#(32'h00000001).cg_scheduler_inst" will be generated for covergroup instance "chain_harness.u_bank_tracker.u_bank_tracker_fcov.cg_scheduler_inst@2_1" as the name of the covergroup instance is not specified explicitly: ./bank_tracker_fcov.sv, 34.
-xmsim: *W,CGDEFN: Default name "cmd_gen_coverage.cg_timing_inst" will be generated for covergroup instance "chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@3_1" as the name of the covergroup instance is not specified explicitly: ./cmd_gen_coverage.sv, 372.
-xmsim: *W,CGDEFN: Default name "cmd_queue_fcov#(32'h00000001).cg_cmd_queue_inst" will be generated for covergroup instance "chain_harness.u_cmd_queue.u_cmd_queue_fcov.cg_cmd_queue_inst@4_1" as the name of the covergroup instance is not specified explicitly: ./cmd_queue_fcov.sv, 27.
-xmsim: *W,CGDEFN: Default name "config_regs_fcov#(32'h00000001).cg_csr_access_inst" will be generated for covergroup instance "chain_harness.u_config_regs.u_config_regs_fcov.cg_csr_access_inst@5_1" as the name of the covergroup instance is not specified explicitly: ./config_regs_fcov.sv, 120.
-xmsim: *W,CGDEFN: Default name "config_regs_fcov#(32'h00000001).cg_config_regs_inst" will be generated for covergroup instance "chain_harness.u_config_regs.u_config_regs_fcov.cg_config_regs_inst@6_1" as the name of the covergroup instance is not specified explicitly: ./config_regs_fcov.sv, 132.
-xmsim: *W,CGDEFN: Default name "data_path#(32'h00000020,32'h00000010,32'h00000002,32'h00000004,32'h00000004,32'h00000008,32'h00000004,32'h00000002,32'h00000002,32'h00000010,32'h00000004,32'h00000003,32'h00000002,2).cg_inst" will be generated for covergroup instance "chain_harness.u_data_path.cg_inst@7_1" as the name of the covergroup instance is not specified explicitly: ./data_path.sv, 341.
-xmsim: *W,CGDEFN: Default name "data_path_fcov#(32'h00000001).cg_data_path_inst" will be generated for covergroup instance "chain_harness.u_data_path.u_data_path_fcov.cg_data_path_inst@8_1" as the name of the covergroup instance is not specified explicitly: ./data_path_fcov.sv, 34.
-xmsim: *W,CGDEFN: Default name "refresh_ctrl_fcov#(32'h00000001).cg_refresh_inst" will be generated for covergroup instance "chain_harness.u_refresh_ctrl.u_refresh_ctrl_fcov.cg_refresh_inst@9_1" as the name of the covergroup instance is not specified explicitly: ./refresh_ctrl_fcov.sv, 29.
-xmsim: *W,CGDEFN: Default name "scheduler_fcov#(32'h00000001).cg_refresh_inst" will be generated for covergroup instance "chain_harness.u_scheduler.u_scheduler_fcov.cg_refresh_inst@10_1" as the name of the covergroup instance is not specified explicitly: ./scheduler_fcov.sv, 28.
-xmsim: *W,CGDEFN: Default name "wb_port#(32'h00000020,32'h0000001d,32'h00000004,32'h00000004,32'h00000008,32'h00000010,32'h00000004,32'h00000010,32'h00000004,3'h0,3'h1,3'h2,3'h7,2'h0,4).cg_inst" will be generated for covergroup instance "chain_harness.u_wb_port.cg_inst@11_1" as the name of the covergroup instance is not specified explicitly: ./wb_port.sv, 226.
+xmsim: *W,CGDEFN: Default name "bank_tracker_fcov#(32'h00000001).cg_scheduler_inst" will be generated for covergroup instance "chain_harness.u_bank_tracker.u_bank_tracker_fcov.cg_scheduler_inst@3_1" as the name of the covergroup instance is not specified explicitly: ./bank_tracker_fcov.sv, 34.
+xmsim: *W,CGDEFN: Default name "cmd_gen_coverage.cg_timing_inst" will be generated for covergroup instance "chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1" as the name of the covergroup instance is not specified explicitly: ./cmd_gen_coverage.sv, 378.
+xmsim: *W,CGDEFN: Default name "cmd_queue_fcov#(32'h00000001).cg_cmd_queue_inst" will be generated for covergroup instance "chain_harness.u_cmd_queue.u_cmd_queue_fcov.cg_cmd_queue_inst@5_1" as the name of the covergroup instance is not specified explicitly: ./cmd_queue_fcov.sv, 27.
+xmsim: *W,CGDEFN: Default name "config_regs_fcov#(32'h00000001).cg_csr_access_inst" will be generated for covergroup instance "chain_harness.u_config_regs.u_config_regs_fcov.cg_csr_access_inst@6_1" as the name of the covergroup instance is not specified explicitly: ./config_regs_fcov.sv, 120.
+xmsim: *W,CGDEFN: Default name "config_regs_fcov#(32'h00000001).cg_config_regs_inst" will be generated for covergroup instance "chain_harness.u_config_regs.u_config_regs_fcov.cg_config_regs_inst@7_1" as the name of the covergroup instance is not specified explicitly: ./config_regs_fcov.sv, 132.
+xmsim: *W,CGDEFN: Default name "data_path#(32'h00000020,32'h00000010,32'h00000002,32'h00000004,32'h00000004,32'h00000008,32'h00000004,32'h00000002,32'h00000002,32'h00000010,32'h00000004,32'h00000003,32'h00000002,2).cg_inst" will be generated for covergroup instance "chain_harness.u_data_path.cg_inst@8_1" as the name of the covergroup instance is not specified explicitly: ./data_path.sv, 341.
+xmsim: *W,CGDEFN: Default name "data_path_fcov#(32'h00000001).cg_data_path_inst" will be generated for covergroup instance "chain_harness.u_data_path.u_data_path_fcov.cg_data_path_inst@9_1" as the name of the covergroup instance is not specified explicitly: ./data_path_fcov.sv, 34.
+xmsim: *W,CGDEFN: Default name "refresh_ctrl_fcov#(32'h00000001).cg_refresh_inst" will be generated for covergroup instance "chain_harness.u_refresh_ctrl.u_refresh_ctrl_fcov.cg_refresh_inst@10_1" as the name of the covergroup instance is not specified explicitly: ./refresh_ctrl_fcov.sv, 29.
+xmsim: *W,CGDEFN: Default name "scheduler_fcov#(32'h00000001).cg_refresh_inst" will be generated for covergroup instance "chain_harness.u_scheduler.u_scheduler_fcov.cg_refresh_inst@11_1" as the name of the covergroup instance is not specified explicitly: ./scheduler_fcov.sv, 31.
+xmsim: *W,CGDEFN: Default name "scheduler_fcov#(32'h00000001).cg_scheduling_inst" will be generated for covergroup instance "chain_harness.u_scheduler.u_scheduler_fcov.cg_scheduling_inst@12_1" as the name of the covergroup instance is not specified explicitly: ./scheduler_fcov.sv, 53.
+xmsim: *W,CGDEFN: Default name "wb_port#(32'h00000020,32'h0000001d,32'h00000004,32'h00000004,32'h00000008,32'h00000010,32'h00000004,32'h00000010,32'h00000004,3'h0,3'h1,3'h2,3'h7,2'h0,4).cg_inst" will be generated for covergroup instance "chain_harness.u_wb_port.cg_inst@13_1" as the name of the covergroup instance is not specified explicitly: ./wb_port.sv, 226.
 
 coverage setup:
   workdir  :  ./cov_work
@@ -1218,6 +2215,6 @@ coverage setup:
   Coverage database dumped with the set_code_fine_grained_merging command during elaboration.
 
 coverage files:
-  model(design data) :  ./cov_work/scope/icc_467ff59f_5edd0e0c.ucm (reused)
-  data               :  ./cov_work/scope/path_02_read_cmd/icc_467ff59f_5edd0e0c.ucd
-TOOL:	xrun	24.03-s013: Exiting on Oct 27, 2026 at 14:44:23 CDT  (total: 00:00:02)
+  model(design data) :  ./cov_work/scope/icc_3898755b_69a4d771.ucm
+  data               :  ./cov_work/scope/path_02_read_cmd/icc_3898755b_69a4d771.ucd
+TOOL:	xrun	24.03-s013: Exiting on Oct 28, 2026 at 14:09:11 CDT  (total: 00:00:02)

@@ -1,0 +1,309 @@
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<> User: jacobz
+
+Host: n01-zeus.olympus.ece.tamu.edu
+
+Report date: Wed 28 Oct 2026 12:45:33 CDT
+
+Report options: -detail -metrics toggle:fsm -out /home/ugrads/j/jacobz/cov_uncov_u_scheduler.txt -inst chain_harness.u_scheduler -uncovered -source on -overwrite
+
+Coverage database path: /home/ugrads/j/jacobz/cov_merged_paths
+
+Coverage model files: /home/ugrads/j/jacobz/cov_merged_paths/icc_07dafd6d_719b1f4e.ucm
+
+Coverage data files: /home/ugrads/j/jacobz/cov_merged_paths/icc_07dafd6d_719b1f4e.ucd
+
+CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_conf.ccf
+    // Xcelium coverage configuration for the DDR3 validation subsystem.
+    //
+    // Fed to xrun via:  -coverage A -covoverwrite -covfile <this file>
+    
+    // --- What to collect -------------------------------------------------------
+    select_coverage -all
+    select_functional                       // covergroups: the vplan's 42 items
+    
+    // --- What NOT to count -----------------------------------------------------
+    // Testbench code is not the design. With everything selected, the harness,
+    // the generated driver, the passive monitors and the DRAM stub all land in
+    // the headline number and dilute it (22.4% reported vs ~25% design-only on
+    // the first merged sweep). Code coverage of a monitor says nothing about the
+    // controller. Covergroup modules (*_coverage) are deliberately NOT excluded:
+    // they carry the vplan's functional coverage.
+    deselect_coverage -all -module chain_harness
+    deselect_coverage -all -module *_txn_harness
+    deselect_coverage -all -module seq_driver
+    deselect_coverage -all -module dram_stub
+    deselect_coverage -all -module *_monitor
+    deselect_coverage -all -module *_tb
+    // Covergroup carriers: drop their CODE coverage only. '-all' would also
+    // drop functional coverage and silence the very covergroups they exist
+    // to hold (which is exactly what happened on the first try: 0% on every
+    // new coverpoint while the design merged fine).
+    deselect_coverage -block -expr -toggle -fsm -module *_fcov
+    
+    // --- Covergroups -----------------------------------------------------------
+    set_covergroup -new_instance_reporting  // per-instance scoping and naming
+    set_optimize -prune_covergroup
+    
+    // --- Block / statement / branch --------------------------------------------
+    // The course disables implicit and explicit block scoring and relies on
+    // statement + branch instead; keeping that identical for comparability.
+    set_implicit_block_scoring -off
+    set_explicit_block_scoring -off
+    set_statement_scoring
+    set_branch_scoring
+    set_code_fine_grained_merging
+    
+    // --- Expression ------------------------------------------------------------
+    set_expr_scoring -max_expr_terms 2048
+    set_expr_coverable_operators -bitwise -relational -reduction -logical_not
+    set_expr_coverable_statements -all
+    set_optimize -top_expr_non_scorable
+    
+    // --- Toggle ----------------------------------------------------------------
+    set_toggle_includez
+    set_toggle_scoring -sv_enum
+    set_toggle_scoring -sv_mda 16 -regeot
+    
+    // --- FSM -------------------------------------------------------------------
+    // Matters for this design: init_fsm and calibration are the autonomous blocks
+    // behind the five deferred paths, and the spec's INIT_001/INIT_002 failure
+    // categories are ordering properties over their states.
+    set_fsm_scoring -hold_transition on
+    
+    // --- Misc ------------------------------------------------------------------
+    set_parameterized_module_coverage
+    set_libcell_scoring -enable_vy
+    set_subprogram_scoring -all -svpackage
+    set_refinement_resilience
+    
+
+
+Coverage database date: Tue 27 Oct 2026 15:11:40 CDT
+
+*** There were no refinement files applied ***
+
+ <>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Coverage Table Legend
+---------------------
+  EXCL       excluded using refinement rule
+  P-EXCL     excluded from parent
+  U-EXCL     excluded and unreachable by IEV
+  T-EXCL     excluded from type
+  S-EXCL     smart excluded using refinement rule
+  EXCL(S)    smart indirect excluded
+  EMPTY      all children are excluded
+  CONST      marked constant during simulation
+  IGN        marked ignored during simulation
+  UNG        marked ungradeable during simulation
+  DES        marked deselected during simulation
+  UNR        marked unreachable by IEV
+  UNG-Expr   expression marked ungradeable during simulation
+  UNG-Toggle toggle marked ungradeable during simulation
+
+
+Uncovered Toggle Detail Report, Instance Based
+==============================================
+
+Instance name: chain_harness.u_scheduler
+Type name: scheduler#(32'h00000010,32'h00000004,32'h0000000f,32'h0000000a,32'h00000003,32'h00000008,32'h00000004,4'h0,4'h1,4'h2,4'h3,4'h4,4'h5)
+File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/scheduler.sv
+Number of uncovered signal bits: 186 of 860
+Number of unreachable signal bits: 0
+Number of signal bits partially toggled(rise): 124 of 860
+Number of signal bits partially toggled(fall): 0 of 860
+
+Hit(Full)  Hit(Rise)  Hit(Fall)  Signal                    
+-----------------------------------------------------------
+0          1          0          rst_n                     
+0          1          0          q_row[15][0]              
+0          1          0          q_row[15][1]              
+0          1          0          q_row[15][2]              
+0          1          0          q_row[15][3]              
+0          1          0          q_row[15][4]              
+0          1          0          q_row[15][5]              
+0          1          0          q_row[15][6]              
+0          1          0          q_row[15][7]              
+0          1          0          q_row[15][8]              
+0          0          0          q_row[15][9]              
+0          1          0          q_row[15][10]             
+0          1          0          q_row[15][11]             
+0          1          0          q_row[15][12]             
+0          1          0          q_row[15][13]             
+0          1          0          q_row[15][14]             
+0          1          0          q_row[14][0]              
+0          1          0          q_row[14][1]              
+0          1          0          q_row[14][4]              
+0          1          0          q_row[14][5]              
+0          1          0          q_row[14][6]              
+0          1          0          q_row[14][8]              
+0          0          0          q_row[14][9]              
+0          1          0          q_row[14][10]             
+0          1          0          q_row[14][11]             
+0          0          0          q_row[14][12]             
+0          1          0          q_row[14][13]             
+0          1          0          q_row[13][0]              
+0          1          0          q_row[13][1]              
+0          1          0          q_row[13][2]              
+0          1          0          q_row[13][3]              
+0          1          0          q_row[13][4]              
+0          1          0          q_row[13][6]              
+0          1          0          q_row[13][8]              
+0          1          0          q_row[13][10]             
+0          1          0          q_row[13][11]             
+0          1          0          q_row[13][12]             
+0          0          0          q_row[13][13]             
+0          1          0          q_row[13][14]             
+0          1          0          q_row[12][11]             
+0          1          0          q_row[12][13]             
+0          1          0          q_row[11][0]              
+0          1          0          q_row[11][1]              
+0          1          0          q_row[11][2]              
+0          1          0          q_row[11][3]              
+0          1          0          q_row[11][4]              
+0          1          0          q_row[11][5]              
+0          1          0          q_row[11][6]              
+0          1          0          q_row[11][7]              
+0          1          0          q_row[11][8]              
+0          1          0          q_row[11][9]              
+0          1          0          q_row[11][10]             
+0          1          0          q_row[11][11]             
+0          1          0          q_row[11][12]             
+0          1          0          q_row[11][13]             
+0          1          0          q_row[11][14]             
+0          1          0          q_row[10][9]              
+0          1          0          q_row[10][14]             
+0          0          0          q_col[15][0]              
+0          0          0          q_col[15][1]              
+0          0          0          q_col[15][2]              
+0          1          0          q_col[15][3]              
+0          1          0          q_col[15][4]              
+0          1          0          q_col[15][5]              
+0          1          0          q_col[15][6]              
+0          1          0          q_col[15][7]              
+0          1          0          q_col[15][8]              
+0          1          0          q_col[15][9]              
+0          0          0          q_col[14][0]              
+0          0          0          q_col[14][1]              
+0          0          0          q_col[14][2]              
+0          1          0          q_col[14][3]              
+0          1          0          q_col[14][5]              
+0          1          0          q_col[14][6]              
+0          1          0          q_col[14][7]              
+0          1          0          q_col[14][9]              
+0          0          0          q_col[13][0]              
+0          0          0          q_col[13][1]              
+0          0          0          q_col[13][2]              
+0          1          0          q_col[13][3]              
+0          1          0          q_col[13][5]              
+0          1          0          q_col[13][6]              
+0          1          0          q_col[13][7]              
+0          1          0          q_col[13][8]              
+0          1          0          q_col[13][9]              
+0          0          0          q_col[12][0]              
+0          0          0          q_col[12][1]              
+0          0          0          q_col[12][2]              
+0          1          0          q_col[12][9]              
+0          0          0          q_col[11][0]              
+0          0          0          q_col[11][1]              
+0          0          0          q_col[11][2]              
+0          1          0          q_col[11][3]              
+0          1          0          q_col[11][4]              
+0          0          0          q_col[11][5]              
+0          1          0          q_col[11][6]              
+0          1          0          q_col[11][7]              
+0          1          0          q_col[11][8]              
+0          1          0          q_col[11][9]              
+0          0          0          q_col[10][0]              
+0          0          0          q_col[10][1]              
+0          0          0          q_col[10][2]              
+0          1          0          q_col[10][7]              
+0          1          0          q_col[10][9]              
+0          0          0          q_col[9][0]               
+0          0          0          q_col[9][1]               
+0          0          0          q_col[9][2]               
+0          0          0          q_col[8][0]               
+0          0          0          q_col[8][1]               
+0          0          0          q_col[8][2]               
+0          0          0          q_col[7][0]               
+0          0          0          q_col[7][1]               
+0          0          0          q_col[7][2]               
+0          0          0          q_col[6][0]               
+0          0          0          q_col[6][1]               
+0          0          0          q_col[6][2]               
+0          0          0          q_col[5][0]               
+0          0          0          q_col[5][1]               
+0          0          0          q_col[5][2]               
+0          0          0          q_col[4][0]               
+0          0          0          q_col[4][1]               
+0          0          0          q_col[4][2]               
+0          0          0          q_col[3][0]               
+0          0          0          q_col[3][1]               
+0          0          0          q_col[3][2]               
+0          0          0          q_col[2][0]               
+0          0          0          q_col[2][1]               
+0          0          0          q_col[2][2]               
+0          0          0          q_col[1][0]               
+0          0          0          q_col[1][1]               
+0          0          0          q_col[1][2]               
+0          0          0          q_col[0][0]               
+0          0          0          q_col[0][1]               
+0          0          0          q_col[0][2]               
+0          1          0          q_bank[15][0]             
+0          1          0          q_bank[15][1]             
+0          1          0          q_bank[15][2]             
+0          1          0          q_bank[14][0]             
+0          1          0          q_bank[14][1]             
+0          1          0          q_bank[14][2]             
+0          1          0          q_bank[13][1]             
+0          1          0          q_bank[12][0]             
+0          0          0          q_bank[12][1]             
+0          1          0          q_bank[11][0]             
+0          1          0          q_bank[11][1]             
+0          1          0          q_bank[11][2]             
+0          1          0          q_we[15]                  
+0          1          0          q_we[14]                  
+0          1          0          q_we[13]                  
+0          1          0          q_we[12]                  
+0          1          0          q_we[11]                  
+0          1          0          q_we[10]                  
+0          1          0          q_we[9]                   
+0          1          0          q_we[8]                   
+0          1          0          q_we[7]                   
+0          1          0          q_we[6]                   
+0          1          0          q_we[5]                   
+0          1          0          q_we[4]                   
+0          1          0          q_we[3]                   
+0          1          0          q_we[2]                   
+0          1          0          q_we[1]                   
+0          1          0          q_we[0]                   
+0          1          0          q_aux[15][0]              
+0          1          0          q_aux[15][1]              
+0          1          0          q_aux[15][2]              
+0          1          0          q_aux[15][3]              
+0          1          0          q_aux[14][0]              
+0          1          0          q_aux[14][1]              
+0          1          0          q_aux[13][1]              
+0          1          0          q_aux[13][2]              
+0          1          0          q_aux[13][3]              
+0          1          0          q_aux[12][0]              
+0          1          0          q_aux[12][1]              
+0          1          0          q_aux[11][0]              
+0          1          0          q_aux[11][1]              
+0          0          0          q_aux[11][2]              
+0          1          0          q_aux[11][3]              
+0          1          0          q_aux[10][0]              
+0          1          0          q_aux[10][2]              
+0          0          0          cmd_type[3]               
+0          0          0          cmd_col[2]                
+0          0          0          cmd_col[1]                
+0          0          0          cmd_col[0]                
+0          0          0          d1_type[3]                
+0          0          0          sel_type_r[3]             
+0          0          0          sel_type[3]               
+
+Uncovered Fsm Detail Report, Instance Based
+===========================================
+

@@ -178,6 +178,28 @@ def generate_monitor(iface, cat_entry, schema_entry):
         for port in expression_ports(expr, manifest_ports, iface, what):
             ports.setdefault(port, manifest_ports[port])
 
+    # --- pending fields: captured at `pending.push`, replayed at the qualifier
+    # A pipelined response carries no address of its own (wb_adr_i at ack
+    # time is whatever beat the master is presenting now). The catalog marks
+    # such a field `pending`; the monitor records it from every accepted
+    # request, in order, and attaches the oldest to each response. Still
+    # passive: a monitor-local queue, nothing driven.
+    pending_fields = sorted({f for k in kinds for f, info in kinds[k].items()
+                             if info.get("pending")})
+    pend = cat_entry.get("pending")
+    if pending_fields and not (pend and pend.get("push")):
+        raise MonitorGenError(
+            f"{iface}: field(s) {pending_fields} are marked pending but the "
+            f"catalog has no 'pending': {{'push': <expr>}} saying when to capture "
+            f"them. Add it to interface_catalog.json.")
+    if pend and not pending_fields:
+        raise MonitorGenError(
+            f"{iface}: the catalog declares 'pending' but no field is marked "
+            f"pending; either mark the replayed field(s) or drop the block.")
+    if pend:
+        for port in expression_ports(pend["push"], manifest_ports, iface, "pending.push"):
+            ports.setdefault(port, manifest_ports[port])
+
     # --- port list: clock, reset, then every referenced signal --------------
     decls = [_decl(clk, 1), _decl(rst, 1)]
     for p in sorted(ports):
@@ -190,7 +212,8 @@ def generate_monitor(iface, cat_entry, schema_entry):
         fields = kinds[kind]
         names = sorted(fields)
         fmt = " ".join(f"{n}=%0h" for n in names)
-        args = ", ".join(fields[n]["port"] for n in names)
+        args = ", ".join(f"{iface}_pend_{n}_v" if fields[n].get("pending")
+                         else fields[n]["port"] for n in names)
         return (f'$display("TXN {iface} {kind} t=%0t {fmt}", $time, {args});'
                 if args else
                 f'$display("TXN {iface} {kind} t=%0t", $time);')
@@ -211,6 +234,41 @@ def generate_monitor(iface, cat_entry, schema_entry):
         body = f"        {display_for(only)}"
 
     rst_cond = f"{rst}" if active_low else f"!{rst}"
+
+    pend_decl, pend_pop, pend_track = "", "", ""
+    if pend:
+        widths = {}
+        for k in kinds:
+            for f, info in kinds[k].items():
+                if info.get("pending"):
+                    widths[f] = info["width"]
+        lines_d, lines_p, lines_t = [], [], []
+        for f in pending_fields:
+            w = widths[f]
+            port = next(kinds[k][f]["port"] for k in kinds if f in kinds[k])
+            lines_d.append(f"  logic [{int(w) - 1}:0] {iface}_pend_{f} [$];   // captured at pending.push")
+            lines_d.append(f"  logic [{int(w) - 1}:0] {iface}_pend_{f}_v;")
+            lines_p.append(
+                f"      if ({iface}_pend_{f}.size() == 0) begin\n"
+                f"        {iface}_pend_{f}_v = 'x;\n"
+                f"        $display(\"MONITOR_WARN {iface}: response with no pending request "
+                f"(field {f}) t=%0t\", $time);\n"
+                f"      end else {iface}_pend_{f}_v = {iface}_pend_{f}.pop_front();")
+            lines_t.append(f"      {iface}_pend_{f}.push_back({port});")
+        pend_decl = "\n".join(lines_d) + "\n\n"
+        pend_pop = "\n".join(lines_p) + "\n"
+        # The capture samples AT the edge (pre-NBA), the same view the request
+        # stream's monitor takes of a combinational accept.
+        pend_track = (
+            f"  // pending.push: {pend['push']}\n"
+            f"  always @(posedge {clk}) begin\n"
+            f"    if ({rst_cond} && ({pend['push']})) begin\n"
+            + "\n".join(lines_t) + "\n"
+            f"    end\n"
+            f"  end\n"
+            f"  always @(negedge {rst}) begin\n"
+            + "\n".join(f"    {iface}_pend_{f}.delete();" for f in pending_fields) + "\n"
+            f"  end\n\n")
 
     # Some interfaces are qualified by a LEVEL that stays high (init_done,
     # cal_done, ref_required). Emitting every cycle it is high would flood the
@@ -300,11 +358,11 @@ module {mod} #(
     $display("TXN {iface} reset t=%0t", $time);
   end
 
-{edge_decl}  // Transaction detected when: {qual}{EDGE_LABEL[edge]}
+{edge_decl}{pend_decl}{pend_track}  // Transaction detected when: {qual}{EDGE_LABEL[edge]}
   always @(posedge {clk}) begin
 {sample_line}
     if ({rst_cond} && {fire_cond}) begin
-{body}
+{pend_pop}{body}
     end{edge_track}
   end
 

@@ -2,8 +2,8 @@
   "$schema": "validation-path-run/1",
   "path": "path_15_status_cal",
   "strategy": "composed",
-  "verdict": "pass",
-  "timestamp": "2026-10-27T14:44:39.694217",
+  "verdict": "fail",
+  "timestamp": "2026-10-28T14:09:21.402719",
   "blocks": [
     "calibration",
     "config_regs",
@@ -23,7 +23,7 @@
       "config_regs",
       "init_fsm"
     ],
-    "validated_at": "f5cf4a9",
+    "validated_at": "835760c",
     "frontend_commits": {
       "calibration": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
       "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
@@ -73,6 +73,17 @@
       "summary": "scope=config_regs  strategy=exact  status=pass  matched=180/180  (180 output transaction(s) matched)",
       "detail": [],
       "rule_counts": {}
+    },
+    {
+      "stage": "init_fsm (support)",
+      "kind": "sva",
+      "scope": "init_fsm",
+      "model": null,
+      "verdict": "fail",
+      "summary": "SVA fired: a_TIMING_014 x1",
+      "detail": [
+        "a_TIMING_014 fired 1x (assertion bound to init_fsm, not a judged stage)"
+      ]
     }
   ],
   "log": "Validation/reports/paths/path_15_status_cal_sim.log",

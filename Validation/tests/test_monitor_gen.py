@@ -411,6 +411,11 @@ class TestMonitorToScoreboardRoundTrip(unittest.TestCase):
                 if "$display" not in line:
                     continue
                 fmt = line.split('"')[1]
+                if fmt.startswith("MONITOR_WARN"):
+                    # a diagnostic, deliberately not a TXN line: the extractor
+                    # must ignore it (it contains no 'TXN ')
+                    self.assertNotIn("TXN ", fmt)
+                    continue
                 literal = (fmt.replace("%0t", "1000").replace("%0h", "ff"))
                 parsed = trace_extract.TXN_RE.match(literal)
                 self.assertIsNotNone(
@@ -429,3 +434,37 @@ class TestMonitorToScoreboardRoundTrip(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=1)
+
+
+class TestPendingFields(unittest.TestCase):
+    """A pipelined response carries no address of its own: wb_adr_i at ack
+    time is the beat the master is presenting now. A field marked `pending`
+    is captured at the catalog's pending.push and replayed in order."""
+
+    def test_pending_field_is_captured_and_replayed(self):
+        _, src = gen("wb_rsp")
+        self.assertIn("wb_rsp_pend_addr.push_back(wb_adr_i)", src)
+        self.assertIn("wb_rsp_pend_addr.pop_front()", src)
+        self.assertIn("addr=%0h", src)
+        # the display reads the replayed value, never the live bus address
+        disp = [l for l in src.splitlines() if "TXN wb_rsp read_data" in l][0]
+        self.assertIn("wb_rsp_pend_addr_v", disp)
+        self.assertNotIn(", wb_adr_i", disp)
+        # the capture samples at the edge, like the request stream's monitor
+        push = src[src.index("pending.push"):src.index("// Transaction detected")]
+        self.assertNotIn("SAMPLE_DELAY", push)
+        self.assertIn("MONITOR_WARN", src)
+
+    def test_pending_without_push_is_rejected(self):
+        with self.assertRaises(monitor_gen.MonitorGenError):
+            gen("wb_rsp", {"pending": None})
+
+    def test_push_naming_a_missing_port_is_rejected(self):
+        with self.assertRaises(monitor_gen.MonitorGenError):
+            gen("wb_rsp", {"pending": {"push": "no_such_port"}})
+
+    def test_pending_block_without_a_pending_field_is_rejected(self):
+        entry = dict(CATALOG["wb"])
+        entry["pending"] = {"push": "wb_cyc_i"}
+        with self.assertRaises(monitor_gen.MonitorGenError):
+            monitor_gen.generate_monitor("wb", entry, SCHEMAS["wb"])

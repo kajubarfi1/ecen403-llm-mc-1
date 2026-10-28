@@ -165,7 +165,8 @@
   ],
   "proposed_taxonomy_extensions": {
     "$why": "The taxonomy bounds every timing parameter except tREFI. tREFI is a MAXIMUM interval, not a minimum separation, so it needs its own rule kind; JESD79-3 allows up to max_postpone_count refreshes to be deferred, so the observable bound is (max_postpone_count + 1) x tREFI between REFRESH commands.",
-    "TIMING_012": "tREFI violation: no REFRESH issued within (max_postpone_count + 1) x tREFI of the previous REFRESH."
+    "TIMING_012": "tREFI violation: no REFRESH issued within (max_postpone_count + 1) x tREFI of the previous REFRESH.",
+    "HOST_001": "Host acknowledge collision: a write acknowledge and a read response complete in the same cycle on a Wishbone port that has one ack line, so the host sees one ack for two beats and waits forever for the other. Code-reading on wb_port (wb_ack_o = wr_ack_r | rd_ack, 2026-10-28); not yet seen in simulation."
   },
   "max_interval_rules": [
     {
@@ -183,7 +184,7 @@
   "command_groups": [
     {
       "name": "init",
-      "$why": "The init FSM issues its own command stream (init_cmd) before cmd_gen owns the pins. Its inter-step delays are INIT_002; the spec states tZQinit (initialization_sequence.tZQinit_ns) \u2014 tMRD and tMOD are NOT in the spec, so MRS-to-MRS spacing cannot be asserted (intake rule INIT_TMRD/INIT_TMOD).",
+      "$why": "The init FSM issues its own command stream (init_cmd) before cmd_gen owns the pins. Its inter-step delays are INIT_002 (tZQinit); tMRD and tMOD are in the spec's timing_model since the 2026-10 revisions, so MRS spacing is asserted here as TIMING_013/014 (added 2026-10-27 when the regenerated vplan showed them unmeasured).",
       "command_signals": {
         "interface": "init_cmd",
         "cmd_field": "cmd",
@@ -208,6 +209,35 @@
           "param": "initialization_sequence.tZQinit_ns",
           "same_bank": null,
           "requirement": "Insufficient delay between init sequence steps: a command issued before tZQinit elapsed after ZQCL."
+        },
+        {
+          "id": "TIMING_013",
+          "from": [
+            "MRS"
+          ],
+          "to": [
+            "MRS"
+          ],
+          "param": "tMRD",
+          "same_bank": null,
+          "requirement": "Two MRS commands issued closer together than tMRD."
+        },
+        {
+          "id": "TIMING_014",
+          "from": [
+            "MRS"
+          ],
+          "to": [
+            "REF",
+            "PRE",
+            "ACT",
+            "WR",
+            "RD",
+            "ZQCL"
+          ],
+          "param": "tMOD",
+          "same_bank": null,
+          "requirement": "A non-MRS command issued before tMOD elapsed after an MRS command."
         }
       ],
       "window_rules": [],
@@ -259,6 +289,15 @@
     ],
     "INIT_002": [
       "init_fsm"
+    ],
+    "TIMING_013": [
+      "init_fsm"
+    ],
+    "TIMING_014": [
+      "init_fsm"
+    ],
+    "HOST_001": [
+      "wb_port"
     ]
   },
   "signal_groups": [
@@ -314,6 +353,20 @@
           },
           "requirement": "Refresh starvation: under refresh_priority = urgent_preempt an urgent refresh must be acknowledged within the time to precharge every open bank and refresh (tRAS + tRP + tRFC in the design's enforced windows, one cycle per bank, a few cycles of pipeline), or the postpone budget is exhausted and ticks are dropped. Bound to the scheduler, the block obliged to act: on a path without a scheduler nothing can acknowledge, and the obligation does not exist (the refresh_ctrl-side 'never ref_starve_flag' form fired on every such path, 2026-10-22).",
           "spec_ref": "failure_taxonomy.categories[REF_001]"
+        }
+      ]
+    },
+    {
+      "name": "host_port",
+      "block": "wb_port",
+      "$note": "The host side of the port, on its ports only. A pipelined Wishbone slave answers every accepted beat with exactly one ack; two completions in one cycle cannot both be seen. (2026-10-28) The design registers the write ack one cycle after the beat and ORs it with the read response; the collision is reachable whenever a read response lands the cycle after a write beat. Formal proves or refutes it on the command path; in simulation the assertion fires on the first collision.",
+      "invariant_rules": [
+        {
+          "id": "HOST_001",
+          "never": "$past(wb_cyc_i && wb_stb_i && !wb_stall_o && wb_we_i) && rsp_valid",
+          "cover": "wb_cyc_i && wb_stb_i && !wb_stall_o && wb_we_i",
+          "requirement": "Host acknowledge collision: a write beat accepted in the previous cycle (its acknowledge is due now) and a read response arriving now would be two completions on one ack line. The port must hold one of them so every accepted beat is acknowledged exactly once.",
+          "spec_ref": "host_interface.interface_type (wishbone_pipelined: one acknowledge per accepted beat)"
         }
       ]
     }

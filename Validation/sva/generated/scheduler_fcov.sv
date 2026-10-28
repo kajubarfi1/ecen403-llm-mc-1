@@ -9,6 +9,9 @@
 module scheduler_fcov (
     input logic [7:0] bank_is_active,
     input logic clk,
+    input logic cmd_valid,
+    input logic deq_grant,
+    input logic ref_required,
     input logic ref_urgent,
     input logic rst_n
 );
@@ -27,6 +30,28 @@ module scheduler_fcov (
 
   cg_refresh cg_refresh_inst = new();
 
+  covergroup cg_scheduling;
+    option.per_instance = 1;
+
+    // cg_scheduling.cp_sched_001_exercised — A queued request was granted to the scheduler: the antecedent of SCHED_001 (a dequeued request must reach DRAM).
+    cp_sched_001_exercised: coverpoint ((deq_grant)) iff (rst_n) {
+      bins occurred = {1'b1};
+    }
+
+    // cg_scheduling.cp_sched_002_exercised — A command was issued: the antecedent of SCHED_002 (every issued command must match a request or a maintenance need).
+    cp_sched_002_exercised: coverpoint ((cmd_valid)) iff (rst_n) {
+      bins occurred = {1'b1};
+    }
+
+    // cg_scheduling.cp_sched_003_exercised — A refresh was pending at the scheduler: the antecedent of SCHED_003 (a pending refresh must be issued).
+    cp_sched_003_exercised: coverpoint (ref_required) iff (rst_n) {
+      bins occurred = {1'b1};
+    }
+
+  endgroup
+
+  cg_scheduling cg_scheduling_inst = new();
+
   // Sampling discipline, identical to the generated monitors: sample AFTER
   // the NBA region of the clock edge. A covergroup clocked directly on
   // @(posedge clk) samples pre-NBA, so a registered handshake output (the
@@ -37,6 +62,7 @@ module scheduler_fcov (
   always @(posedge clk) begin
     #SAMPLE_DELAY;
     cg_refresh_inst.sample();
+    cg_scheduling_inst.sample();
 
   end
 

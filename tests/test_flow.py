@@ -28,6 +28,7 @@ class Fake:
         self.agent_fixes = ["wb_port"]      # what the fake agent's fix report claims (or {phase: [...]})
         self.failed = ["wb_port"]           # what the fake validation reports as failed
         self.backend_crash = False          # pipeline.py exits 1 without a report
+        self.gate_agent_fixes = True        # a phase agent run on the phase's own gate failure fixes it
         self.outbox_written = []            # where each fake validate_drop wrote its package
         self.absent = []                     # blocks the fake validation reports absent
         self.synth_rc = 0                    # microarch_cli.py one-shot exit (3 = needs clarification)
@@ -99,6 +100,8 @@ class Fake:
             self.calls[-1] = (name, list(cmd), stdin, dict(env or {}))
             outdir = cmd[cmd.index("--output-dir") + 1]
             n = int(name[5])
+            if self.phase_fail == n and self.gate_agent_fixes:
+                self.phase_fail = None          # the agent's fix makes the phase's own gate pass next time
             fixes = (self.agent_fixes.get(n, []) if isinstance(self.agent_fixes, dict)
                      else self.agent_fixes)
             if fixes is not None:
@@ -234,10 +237,33 @@ class TestHalts(FlowCase):
         self.assertEqual(len([c for c in fake.calls if c[0] == "microarch_cli.py"]), 2)
 
     def test_frontend_phase_failure_halts_with_its_report(self):
+        # no agent registered for phase 2: the gate failure halts as before
         rc, run = self.go(Fake(self.run_dir, phase_fail=2))
         self.assertEqual(run.state["halt"]["stage"], "rtl_generation")
         self.assertIn("phase 2 failed at LINT", run.state["halt"]["why"])
+        self.assertIn("no fix agent", run.state["halt"]["why"])
         self.assertEqual(run.state["halt"]["phase"], 2)
+
+    def test_frontend_gate_failure_goes_to_its_own_agent_then_regenerates(self):
+        # the phase's own gate (lint / its sim) fails; its agent reads that error
+        # report natively, fixes, and the phase is regenerated (2026-10-27)
+        self._agent(2)
+        fake = Fake(self.run_dir, phase_fail=2)
+        rc, run = self.go(fake, skip_backend=True)
+        names = [c[0] for c in fake.calls]
+        self.assertIn("phase2_validation_agent.py", names)
+        self.assertIn(("rtl_generation", "AGENT"), self.stages(run))
+        self.assertEqual(names.count("phase2_pipeline.py"), 2, "regenerated after the agent's fix")
+        self.assertEqual(run.state["status"], "complete")
+
+    def test_frontend_gate_failure_the_agent_cannot_fix_halts_after_its_tries(self):
+        self._agent(2)
+        fake = Fake(self.run_dir, phase_fail=2)
+        fake.gate_agent_fixes = False
+        fake.agent_fixes = {2: []}
+        rc, run = self.go(fake)
+        self.assertEqual(run.state["halt"]["stage"], "rtl_generation")
+        self.assertIn("did not clear it", run.state["halt"]["why"])
 
     def test_validation_fail_without_a_phase_agent_halts_with_the_package(self):
         rc, run = self.go(Fake(self.run_dir, validation=["FAIL"]))        # wb_port: phase 1, no agent

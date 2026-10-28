@@ -57,15 +57,36 @@
         "write": {
           "addr": "wb_adr_i",
           "data": "wb_dat_i",
-          "sel": "wb_sel_i"
+          "sel": "wb_sel_i",
+          "cti": {
+            "port": "wb_cti_i",
+            "default": 0
+          },
+          "bte": {
+            "port": "wb_bte_i",
+            "default": 0
+          }
         },
         "read": {
-          "addr": "wb_adr_i"
+          "addr": "wb_adr_i",
+          "cti": {
+            "port": "wb_cti_i",
+            "default": 0
+          },
+          "bte": {
+            "port": "wb_bte_i",
+            "default": 0
+          }
         }
       },
+      "$burst_note": "cti/bte are the Wishbone B4 cycle-type and burst-type tags (spec host_interface.burst_type = linear, max_burst_length 8). A field with a default is optional in a sequence step: a step that leaves it out drives the default (classic cycle), so every existing sequence is unchanged; wb_burst.py sets them (2026-10-28).",
       "role": "request",
       "drive": {
-        "$note": "Pipelined: assert cyc+stb (we from kind_select); hold while the slave stalls; the cycle after acceptance drop stb only; keep cyc, address and data until ack, then drop everything.",
+        "$note": "Pipelined: assert cyc+stb (we from kind_select); hold while the slave stalls; the cycle after acceptance drop stb only; keep cyc, address and data until ack, then drop everything. With `pipelined`, consecutive drives of this interface are one run: the next beat is presented the cycle after the previous one is accepted without waiting for its ack, cyc stays high across the run (hold_across_run), and the driver waits for every outstanding ack at the end of the run -- a Wishbone linear burst, or reads piled up until the tag FIFO stalls.",
+        "pipelined": true,
+        "hold_across_run": [
+          "wb_cyc_i"
+        ],
         "assert": [
           "wb_cyc_i",
           "wb_stb_i"
@@ -251,11 +272,14 @@
       "clock": "clk",
       "reset": "rst_n",
       "reset_active_low": true,
-      "qualifier": "wb_ack_o && !wb_we_i",
-      "qualifier_note": "Only reads return data; a write's completion is the ack itself.",
+      "qualifier": "rsp_valid",
+      "qualifier_note": "The data path's read response arriving at the port (a wb_port boundary port). The host-side wb_ack_o is shared with the write acknowledge and, on a pipelined bus, wb_we_i/wb_adr_i at ack time belong to whatever beat the master is presenting, not to the beat being completed -- qualifying on wb_ack_o && !wb_we_i and reading wb_adr_i mis-attributed every response under burst/pipelined stimulus (2026-10-28, path_02).",
       "kinds": {
         "read_data": {
-          "addr": "wb_adr_i",
+          "addr": {
+            "port": "wb_adr_i",
+            "pending": true
+          },
           "data": "wb_dat_o"
         }
       },
@@ -282,6 +306,10 @@
           },
           "$why": "The read response's data arrives later from the data path; the gate drives the request, expects nothing, then drives the completing dp_rd_rsp and expects the response with its data. Declared 2026-09-30 after two models were rejected for correctly refusing to answer a read from the request alone."
         }
+      },
+      "pending": {
+        "push": "wb_cyc_i && wb_stb_i && !wb_stall_o && !wb_we_i",
+        "$why": "A read response carries no address on the bus. The monitor records the address of every accepted read beat (same pre-NBA sample as the wb request stream) and replays them in order as responses arrive -- the in-order rule the spec's model_guidance already states. A read the design drops shifts every later response's address, which is exactly what the scoreboard should then see."
       }
     },
     "init_cmd": {
@@ -795,5 +823,100 @@
     "addr_decoder": "Purely combinational: req_addr in, dec_row/bank/col/rank out, with no clock or valid to qualify a transaction. Checked instead by an SVA derived from memory_geometry asserting the row-bank-column slicing holds every cycle, which is a stronger claim than a sampled comparison.",
     "bank_tracker": "Has no output transaction stream at all \u2014 every output (bank_is_active, bank_open_row, *_allowed) is continuously visible STATE, not an event. Verified via check_strategy 'invariant': input command events are monitored, and the state itself is checked by the TIMING_001-011 assertions that live in this block."
   },
-  "version": "1.17"
+  "version": "1.18",
+  "conservation": {
+    "$comment": "Request conservation: counts that must agree by the end of a run, whatever the models predict. An exact scoreboard sees a transaction the design produced wrongly; it cannot see one the design silently never produced when the predictor only answers once the downstream completion arrives (wb_rsp completes_on dp_rd_rsp), and a stage judged by invariants counts nothing. Each rule: every `from` transaction (optionally one kind, or a field value) must have produced `per_source` (default 1) `to` transactions by the end of the run, provided both interfaces' blocks are instantiated in the harness. Owner is the block that must deliver the `to` stream. Declared 2026-10-28 after path_02 passed every stage while 13 of 46 host reads were never answered (data_path ignores a RD command while its read FSM is busy) and the port lost 25 accepted beats into a full queue (path_07). A rule is DATA: add one per handoff edge; conservation.py checks them all.",
+    "rules": [
+      {
+        "id": "HOST_BEAT_TO_REQUEST",
+        "from": {
+          "iface": "wb"
+        },
+        "to": {
+          "iface": "req"
+        },
+        "owner": "wb_port",
+        "requirement": "Every host beat the port accepts (wb_cyc_i && wb_stb_i && !wb_stall_o) becomes exactly one request presented to and taken by the command queue (req_valid && req_ready). A port that accepts a beat it cannot deliver has lost a host access: a write is acknowledged and lost, a read is never answered. The port must either stall the beat or hold the request until the queue takes it.",
+        "taxonomy": "SCHED_001",
+        "spec_ref": "controller_architecture.command_queue_depth; host_interface.interface_type (vplan VP_FLOW_001: no accepted request may be lost while back-pressure is asserted)"
+      },
+      {
+        "id": "REQUEST_TO_ENQUEUE",
+        "from": {
+          "iface": "req"
+        },
+        "to": {
+          "iface": "cq_enq"
+        },
+        "owner": "cmd_queue",
+        "requirement": "Every request the queue takes from the port (req_valid && req_ready) is enqueued (enq_valid && enq_ready).",
+        "taxonomy": "SCHED_001",
+        "spec_ref": "controller_architecture.command_queue_depth"
+      },
+      {
+        "id": "READ_CMD_TO_RESPONSE",
+        "from": {
+          "iface": "dp_cmd",
+          "kinds": [
+            "read"
+          ]
+        },
+        "to": {
+          "iface": "dp_rd_rsp"
+        },
+        "owner": "data_path",
+        "requirement": "Every RD command the data path is told about (cmd_rd_valid) yields exactly one read response (rd_rsp_valid), whatever the spacing between RD commands: the spec allows CAS-to-CAS at tCCD, so the capture must pipeline or the command generator must be held, not the command dropped.",
+        "taxonomy": "DATA_001",
+        "spec_ref": "timing_model.tCCD_nCK; latency_model.read_latency; host_interface.read_buffer_depth"
+      },
+      {
+        "id": "WRITE_REQUEST_TO_DATA",
+        "from": {
+          "iface": "req",
+          "where": {
+            "we": 1
+          }
+        },
+        "to": {
+          "iface": "dp_wr"
+        },
+        "owner": "data_path",
+        "requirement": "Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_buffer_depth words and must drain one per WR command issued, so it never refuses a word the queue has already accepted.",
+        "taxonomy": "DATA_001",
+        "spec_ref": "host_interface.write_buffer_depth; controller_architecture.command_queue_depth"
+      },
+      {
+        "id": "WRITE_CMD_TO_BEATS",
+        "from": {
+          "iface": "dp_cmd",
+          "kinds": [
+            "write"
+          ]
+        },
+        "to": {
+          "iface": "ddr_wr_beat"
+        },
+        "per_source": {
+          "$spec": "data_path_mapping.host_width_bits / data_path_mapping.ddr_channel_width_bits"
+        },
+        "owner": "data_path",
+        "requirement": "Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR command issued to the DRAM without its data writes garbage to the array.",
+        "taxonomy": "DATA_001",
+        "spec_ref": "data_path_mapping.pack_mode; timing_model.tCCD_nCK"
+      },
+      {
+        "id": "RESPONSE_TO_HOST",
+        "from": {
+          "iface": "dp_rd_rsp"
+        },
+        "to": {
+          "iface": "wb_rsp"
+        },
+        "owner": "wb_port",
+        "requirement": "Every read response the data path returns (rd_rsp_valid) is returned to the host as a read-data ack.",
+        "taxonomy": "DATA_001",
+        "spec_ref": "host_interface.interface_type"
+      }
+    ]
+  }
 }

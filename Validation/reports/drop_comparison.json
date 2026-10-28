@@ -1,15 +1,15 @@
 {
   "$schema": "validation-drop-comparison/1",
   "a": {
-    "dir": "Validation/reports/drops/5c30eb9e7184",
-    "drop_head": "5c30eb9e7184"
+    "dir": "Validation/reports/drops/504b5a5aa9d5",
+    "drop_head": "504b5a5aa9d5"
   },
   "b": {
     "dir": "Validation/reports/paths",
     "drop_head": "efece348d04e"
   },
   "strict": false,
-  "generated_utc": "2026-10-27T19:45:46.239693Z",
+  "generated_utc": "2026-10-28T19:10:44.648673Z",
   "rows": [
     {
       "path": "path_01_write_cmd",
@@ -27,16 +27,37 @@
     },
     {
       "path": "path_02_read_cmd",
-      "kind": "same",
-      "new": {},
+      "kind": "changed",
+      "new": {
+        "assert:p_tag": 32,
+        "assert:p_wr_no_overflow": 6,
+        "id:DRIVER_STALL": 10,
+        "illegal:cp_tccd_spacing": 32,
+        "log:DRIVER_STALL": 10,
+        "stage:(conservation)": 1,
+        "stage:(host handshake)": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {},
+      "matched_up": {
+        "matched:addr_decoder": [
+          19,
+          77
+        ],
+        "matched:cmd_gen": [
+          50,
+          159
+        ],
+        "matched:wb_port": [
+          38,
+          110
+        ]
+      },
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
@@ -76,8 +97,10 @@
     },
     {
       "path": "path_05_scheduler_refresh_loop",
-      "kind": "same",
-      "new": {},
+      "kind": "regression",
+      "new": {
+        "stage:(conservation)": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
@@ -85,7 +108,7 @@
       "matched_up": {},
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
@@ -104,22 +127,43 @@
     },
     {
       "path": "path_07_backpressure",
-      "kind": "same",
-      "new": {},
+      "kind": "changed",
+      "new": {
+        "assert:p_tag": 52,
+        "assert:p_wr_no_overflow": 40,
+        "id:DRIVER_STALL": 1,
+        "illegal:cp_tccd_spacing": 41,
+        "log:DRIVER_STALL": 1,
+        "stage:(conservation)": 1,
+        "stage:(host handshake)": 1,
+        "stage:wb_port": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {},
+      "matched_up": {
+        "matched:addr_decoder": [
+          32,
+          218
+        ],
+        "matched:wb_port": [
+          32,
+          273
+        ]
+      },
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
       "path": "path_08_init_to_cal",
-      "kind": "same",
-      "new": {},
+      "kind": "regression",
+      "new": {
+        "assert:a_TIMING_014": 1,
+        "stage:init_fsm": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
@@ -127,13 +171,16 @@
       "matched_up": {},
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
       "path": "path_09_init_to_refresh",
-      "kind": "same",
-      "new": {},
+      "kind": "regression",
+      "new": {
+        "assert:a_TIMING_014": 1,
+        "stage:init_fsm": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
@@ -141,7 +188,7 @@
       "matched_up": {},
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
@@ -202,8 +249,11 @@
     },
     {
       "path": "path_14_status_init",
-      "kind": "same",
-      "new": {},
+      "kind": "regression",
+      "new": {
+        "assert:a_TIMING_014": 1,
+        "stage:init_fsm": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
@@ -211,13 +261,16 @@
       "matched_up": {},
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
       "path": "path_15_status_cal",
-      "kind": "same",
-      "new": {},
+      "kind": "regression",
+      "new": {
+        "assert:a_TIMING_014": 1,
+        "stage:init_fsm (support)": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
@@ -225,7 +278,7 @@
       "matched_up": {},
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
@@ -244,8 +297,11 @@
     },
     {
       "path": "path_17_full_boot",
-      "kind": "same",
-      "new": {},
+      "kind": "regression",
+      "new": {
+        "assert:a_TIMING_014": 1,
+        "stage:init_fsm": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
@@ -253,25 +309,44 @@
       "matched_up": {},
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
       "path": "path_18_full_write",
-      "kind": "regression",
+      "kind": "changed",
       "new": {
-        "stage:data_path": 1
+        "assert:p_tag": 4,
+        "id:DRIVER_STALL": 1,
+        "log:DRIVER_STALL": 1,
+        "stage:(conservation)": 1,
+        "stage:(host handshake)": 1,
+        "stage:data_path": 1,
+        "stage:wb_port": 1
       },
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {
+        "matched:addr_decoder": [
+          24,
+          20
+        ],
         "matched:data_path": [
           36,
-          24
+          16
+        ],
+        "matched:wb_port": [
+          36,
+          28
         ]
       },
-      "matched_up": {},
+      "matched_up": {
+        "matched:cmd_gen": [
+          50,
+          55
+        ]
+      },
       "verdict": [
         "pass",
         "fail"
@@ -293,24 +368,45 @@
     },
     {
       "path": "path_20_refresh_preempt",
-      "kind": "same",
-      "new": {},
+      "kind": "regression",
+      "new": {
+        "stage:(conservation)": 1,
+        "stage:wb_port": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
+      "matched_down": {
+        "matched:addr_decoder": [
+          600,
+          350
+        ],
+        "matched:cmd_gen": [
+          1844,
+          1066
+        ],
+        "matched:wb_port": [
+          600,
+          350
+        ]
+      },
       "matched_up": {},
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
       "path": "path_21_wb_port_standalone",
-      "kind": "same",
+      "kind": "regression",
       "new": {},
       "gone": {},
-      "grew": {},
+      "grew": {
+        "log:DRIVER_STALL": [
+          9,
+          19
+        ]
+      },
       "shrank": {},
       "matched_down": {},
       "matched_up": {},

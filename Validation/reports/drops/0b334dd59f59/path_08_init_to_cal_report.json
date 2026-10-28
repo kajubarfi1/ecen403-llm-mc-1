@@ -1,0 +1,79 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_08_init_to_cal",
+  "strategy": "invariant",
+  "verdict": "pass",
+  "timestamp": "2026-10-27T14:55:08.510437",
+  "blocks": [
+    "calibration",
+    "init_fsm"
+  ],
+  "sequence": null,
+  "stimulus_generator": null,
+  "autonomous": true,
+  "window_cycles": 180000,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "0b334dd59f59",
+    "drop_id": "0b334dd59f59",
+    "design_id": "7165e4d3da3d",
+    "blocks_used": [
+      "calibration",
+      "init_fsm"
+    ],
+    "validated_at": "835760c",
+    "frontend_commits": {
+      "calibration": "835760c7f9fda7652558b62685c51271acf9a882",
+      "init_fsm": "835760c7f9fda7652558b62685c51271acf9a882"
+    },
+    "roots": [
+      "runs/preset_lowcost/drop"
+    ],
+    "blocks": {
+      "calibration": {
+        "rtl": "runs/preset_lowcost/drop/PHASE2RTL/calibration.sv",
+        "manifest": "runs/preset_lowcost/drop/PHASE2RTL/calibration_manifest.json",
+        "spec_revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc"
+      },
+      "init_fsm": {
+        "rtl": "runs/preset_lowcost/drop/PHASE1RTL/init_fsm.sv",
+        "manifest": "runs/preset_lowcost/drop/PHASE1RTL/init_fsm_manifest.json",
+        "spec_revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/preset_lowcost/drop/generated_spec.json",
+      "revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "init_fsm",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "init_fsm",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
+    },
+    {
+      "stage": "calibration",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "calibration",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
+    },
+    {
+      "stage": "(path-level)",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_08_init_to_cal_checker.py",
+      "scope": "path_08_init_to_cal",
+      "verdict": "pass",
+      "summary": "scope=path_08_init_to_cal  strategy=invariant  status=pass  (12 transactions, no rule broken)",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/paths/path_08_init_to_cal_sim.log",
+  "observed_trace": "Validation/reports/paths/path_08_init_to_cal_observed.jsonl"
+}

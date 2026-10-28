@@ -117,7 +117,10 @@ def resolve(catalog_path=CATALOG, frontend_root=FRONTEND_ROOT,
         kinds = {}
         for kind, fmap in idef["kinds"].items():
             fields = {}
-            for fname, pname in fmap.items():
+            for fname, pdef in fmap.items():
+                # a field is "port" or {"port", "default"}: a default makes the
+                # field optional in a sequence step (sequence_contract fills it)
+                pname = pdef["port"] if isinstance(pdef, dict) else pdef
                 if pname not in ports:
                     errors.append(
                         f"{iface}.{kind}.{fname}: port {pname!r} not in "
@@ -129,6 +132,13 @@ def resolve(catalog_path=CATALOG, frontend_root=FRONTEND_ROOT,
                     "width": ports[pname]["width"],
                     "dir": ports[pname]["dir"],
                 }
+                if isinstance(pdef, dict) and "default" in pdef:
+                    fields[fname]["default"] = pdef["default"]
+                if isinstance(pdef, dict) and pdef.get("pending"):
+                    # the value is captured when the catalog's `pending.push`
+                    # fires and replayed, in order, when the qualifier fires:
+                    # a pipelined response carries no address of its own
+                    fields[fname]["pending"] = True
             kinds[kind] = fields
         schemas[iface] = {
             "block": block,

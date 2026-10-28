@@ -192,6 +192,13 @@ def validate(seq, schemas, drivable_ifaces, require_targets=True):
                 continue
             want = set(kinds[kind])
             got = set(st.get("fields", {}))
+            # a field with a schema default is optional: fill it, so a
+            # sequence written before the field existed still drives the
+            # classic value (wb cti/bte, 2026-10-28)
+            for fname in want - got:
+                if "default" in kinds[kind][fname]:
+                    st.setdefault("fields", {})[fname] = kinds[kind][fname]["default"]
+            got = set(st.get("fields", {}))
             if got != want:
                 missing, extra = sorted(want - got), sorted(got - want)
                 errs.append(

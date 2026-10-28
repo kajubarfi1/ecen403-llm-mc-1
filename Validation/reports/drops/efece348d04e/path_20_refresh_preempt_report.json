@@ -2,8 +2,8 @@
   "$schema": "validation-path-run/1",
   "path": "path_20_refresh_preempt",
   "strategy": "invariant",
-  "verdict": "pass",
-  "timestamp": "2026-10-27T14:44:57.472251",
+  "verdict": "fail",
+  "timestamp": "2026-10-28T14:09:31.654425",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -35,7 +35,7 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "f5cf4a9",
+    "validated_at": "835760c",
     "frontend_commits": {
       "addr_decoder": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
       "bank_tracker": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
@@ -109,9 +109,22 @@
       "kind": "exact",
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
       "scope": "wb_port",
-      "verdict": "pass",
-      "summary": "scope=wb_port  strategy=exact  status=pass  matched=600/600  (600 output transaction(s) matched)",
-      "detail": [],
+      "verdict": "fail",
+      "summary": "scope=wb_port  strategy=exact  status=fail  matched=350/600  missing=250",
+      "detail": [
+        "  req[39] missing: predicted [req.request addr=0x12ea557c data=0xecd1345e mask=0xf we=0x1] but the design produced nothing",
+        "  req[43] missing: predicted [req.request addr=0x1e87555b data=0x50806f01 mask=0xf we=0x1] but the design produced nothing",
+        "  req[45] missing: predicted [req.request addr=0x41bb8aa data=0xe9d40f2b mask=0xf we=0x1] but the design produced nothing",
+        "  req[47] missing: predicted [req.request addr=0x13ab2635 data=0x32ffd03d mask=0xf we=0x1] but the design produced nothing",
+        "  req[49] missing: predicted [req.request addr=0x13a25a99 data=0xa826695 mask=0xf we=0x1] but the design produced nothing",
+        "  req[52] missing: predicted [req.request addr=0x1607c95 data=0xa2a866b4 mask=0xf we=0x1] but the design produced nothing",
+        "  req[54] missing: predicted [req.request addr=0x90ef622 data=0x51dd5d5c mask=0xf we=0x1] but the design produced nothing",
+        "  req[57] missing: predicted [req.request addr=0x100399fb data=0x8a97b9d8 mask=0xf we=0x1] but the design produced nothing",
+        "  req[59] missing: predicted [req.request addr=0x1aaaf2de data=0x4d75988 mask=0xf we=0x1] but the design produced nothing",
+        "  req[62] missing: predicted [req.request addr=0x1c0d6289 data=0x39c97ab1 mask=0xf we=0x1] but the design produced nothing",
+        "  req[64] missing: predicted [req.request addr=0xe0bc879 data=0xe09edd5a mask=0xf we=0x1] but the design produced nothing",
+        "  ... and 230 more"
+      ],
       "rule_counts": {}
     },
     {
@@ -120,7 +133,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
       "scope": "addr_decoder",
       "verdict": "pass",
-      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=600/600  (600 output transaction(s) matched)",
+      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=350/350  (350 output transaction(s) matched)",
       "detail": [],
       "rule_counts": {}
     },
@@ -130,7 +143,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
       "scope": "cmd_queue_scheduler",
       "verdict": "pass",
-      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (11069 transactions, no rule broken)",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (6718 transactions, no rule broken)",
       "detail": [],
       "rule_counts": {}
     },
@@ -148,7 +161,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
       "scope": "cmd_gen",
       "verdict": "pass",
-      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=1840/1840  (1840 output transaction(s) matched)",
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=1066/1066  (1066 output transaction(s) matched)",
       "detail": [],
       "rule_counts": {}
     },
@@ -158,8 +171,19 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_20_refresh_preempt_checker.py",
       "scope": "path_20_refresh_preempt",
       "verdict": "pass",
-      "summary": "scope=path_20_refresh_preempt  strategy=invariant  status=pass  (11069 transactions, no rule broken)",
+      "summary": "scope=path_20_refresh_preempt  strategy=invariant  status=pass  (6718 transactions, no rule broken)",
       "detail": []
+    },
+    {
+      "stage": "(conservation)",
+      "kind": "conservation",
+      "scope": "(conservation)",
+      "model": null,
+      "verdict": "fail",
+      "summary": "scope=(conservation)  strategy=conservation  status=fail  rules=6 checked, 1 broken, 0 not applicable",
+      "detail": [
+        "CONSERVE HOST_BEAT_TO_REQUEST owner=wb_port lost=250 of=600 from=wb to=req observed=350 | Every host beat the port accepts (wb_cyc_i && wb_stb_i && !wb_stall_o) becomes exactly one request presented to and taken by the command queue (req_valid && req_ready). A port that accepts a beat it cannot deliver has lost a host access: a write is acknowledged and lost, a read is never answered. The port must either stall the beat or hold the request until the queue takes it."
+      ]
     }
   ],
   "log": "Validation/reports/paths/path_20_refresh_preempt_sim.log",

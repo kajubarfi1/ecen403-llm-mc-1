@@ -3,7 +3,7 @@
   "path": "path_18_full_write",
   "strategy": "composed",
   "verdict": "fail",
-  "timestamp": "2026-10-27T14:44:50.796054",
+  "timestamp": "2026-10-28T14:09:27.614215",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -35,7 +35,7 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "f5cf4a9",
+    "validated_at": "835760c",
     "frontend_commits": {
       "addr_decoder": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
       "bank_tracker": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
@@ -109,9 +109,15 @@
       "kind": "exact",
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
       "scope": "wb_port",
-      "verdict": "pass",
-      "summary": "scope=wb_port  strategy=exact  status=pass  matched=36/36  (36 output transaction(s) matched)",
-      "detail": [],
+      "verdict": "fail",
+      "summary": "scope=wb_port  strategy=exact  status=fail  matched=28/32  missing=4",
+      "detail": [
+        "scope=wb_port  strategy=exact  status=fail  matched=28/32  missing=4",
+        "  req[16] missing: predicted [req.request addr=0x1ff58c45 data=0x815a47c5 mask=0xf we=0x1] but the design produced nothing",
+        "  req[18] missing: predicted [req.request addr=0xf890d38 data=0x677f6cbd mask=0xf we=0x1] but the design produced nothing",
+        "  req[20] missing: predicted [req.request addr=0x17fb2263 data=0x1622bd79 mask=0xf we=0x1] but the design produced nothing",
+        "  req[22] missing: predicted [req.request addr=0x192b176e data=0x5eda92d8 mask=0xf we=0x1] but the design produced nothing"
+      ],
       "rule_counts": {}
     },
     {
@@ -120,7 +126,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
       "scope": "addr_decoder",
       "verdict": "pass",
-      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=24/24  (24 output transaction(s) matched)",
+      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=20/20  (20 output transaction(s) matched)",
       "detail": [],
       "rule_counts": {}
     },
@@ -130,7 +136,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
       "scope": "cmd_queue_scheduler",
       "verdict": "pass",
-      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (413 transactions, no rule broken)",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (390 transactions, no rule broken)",
       "detail": [],
       "rule_counts": {}
     },
@@ -140,7 +146,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
       "scope": "cmd_gen",
       "verdict": "pass",
-      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=50/50  (50 output transaction(s) matched)",
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=55/55  (55 output transaction(s) matched)",
       "detail": [],
       "rule_counts": {}
     },
@@ -150,22 +156,45 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/data_path_predictor.py",
       "scope": "data_path",
       "verdict": "fail",
-      "summary": "scope=data_path  strategy=exact  status=fail  matched=24/36  value=12",
+      "summary": "scope=data_path  strategy=exact  status=fail  matched=16/26  missing=3 unexpected=1 value=7",
       "detail": [
+        "scope=data_path  strategy=exact  status=fail  matched=16/26  missing=3 unexpected=1 value=7",
         "  dp_rd_rsp[0] value: predicted [dp_rd_rsp.response aux=0x1 data=0x1027c4d1] but observed [dp_rd_rsp.response aux=0x1 data=0xc4d10000]",
-        "  dp_rd_rsp[1] value: predicted [dp_rd_rsp.response aux=0x3 data=0x7311d8a3] but observed [dp_rd_rsp.response aux=0x3 data=0xd8a30000]",
-        "  dp_rd_rsp[2] value: predicted [dp_rd_rsp.response aux=0x5 data=0xc9e9c616] but observed [dp_rd_rsp.response aux=0x5 data=0xc6160000]",
-        "  dp_rd_rsp[3] value: predicted [dp_rd_rsp.response aux=0x7 data=0x7ce42c82] but observed [dp_rd_rsp.response aux=0x7 data=0x2c820000]",
-        "  dp_rd_rsp[4] value: predicted [dp_rd_rsp.response aux=0x9 data=0x7204e52d] but observed [dp_rd_rsp.response aux=0x9 data=0xe52d0000]",
-        "  dp_rd_rsp[5] value: predicted [dp_rd_rsp.response aux=0xb data=0x51431193] but observed [dp_rd_rsp.response aux=0xb data=0x11930000]",
-        "  dp_rd_rsp[6] value: predicted [dp_rd_rsp.response aux=0xd data=0x8a9a021e] but observed [dp_rd_rsp.response aux=0xd data=0x21e0000]",
-        "  dp_rd_rsp[7] value: predicted [dp_rd_rsp.response aux=0xf data=0xafbd67f9] but observed [dp_rd_rsp.response aux=0xf data=0x67f90000]",
-        "  dp_rd_rsp[8] value: predicted [dp_rd_rsp.response aux=0x1 data=0xb9d179e0] but observed [dp_rd_rsp.response aux=0x1 data=0x79e00000]",
-        "  dp_rd_rsp[9] value: predicted [dp_rd_rsp.response aux=0x3 data=0xc381e88f] but observed [dp_rd_rsp.response aux=0x3 data=0xe88f0000]",
-        "  dp_rd_rsp[10] value: predicted [dp_rd_rsp.response aux=0x5 data=0x8d88348a] but observed [dp_rd_rsp.response aux=0x5 data=0x348a0000]",
-        "  dp_rd_rsp[11] value: predicted [dp_rd_rsp.response aux=0x7 data=0x5805975] but observed [dp_rd_rsp.response aux=0x7 data=0x59750000]"
+        "  dp_rd_rsp[1] value: predicted [dp_rd_rsp.response aux=0x1 data=0xc5b6fecf] but observed [dp_rd_rsp.response aux=0x1 data=0xfddf0000]",
+        "  dp_rd_rsp[2] value: predicted [dp_rd_rsp.response aux=0x5 data=0xc59efc4f] but observed [dp_rd_rsp.response aux=0x5 data=0xfecf0000]",
+        "  dp_rd_rsp[3] value: predicted [dp_rd_rsp.response aux=0x7 data=0x1587fddf] but observed [dp_rd_rsp.response aux=0x7 data=0xfc4f0000]",
+        "  dp_rd_rsp[4] value: predicted [dp_rd_rsp.response aux=0x3 data=0x7d435bf] but observed [dp_rd_rsp.response aux=0x3 data=0xfd670000]",
+        "  dp_rd_rsp[5] value: predicted [dp_rd_rsp.response aux=0xb data=0xc3810580] but observed [dp_rd_rsp.response aux=0xb data=0x67f90000]",
+        "  dp_rd_rsp[6] value: predicted [dp_rd_rsp.response aux=0x9 data=0xab99254a] but observed [dp_rd_rsp.response aux=0x9 data=0x59750000]",
+        "  dp_rd_rsp[7] unexpected: the design produced [dp_rd_rsp.response aux=0xd data=0x254a0000] with nothing predicted",
+        "  dp_rd_rsp[-1] missing: predicted [dp_rd_rsp.response aux=0x3 data=0x67f97204] but the design produced nothing",
+        "  dp_rd_rsp[-1] missing: predicted [dp_rd_rsp.response aux=0x7 data=0x858cfd67] but the design produced nothing",
+        "  dp_rd_rsp[-1] missing: predicted [dp_rd_rsp.response aux=0x5 data=0x5975afbd] but the design produced nothing"
       ],
       "rule_counts": {}
+    },
+    {
+      "stage": "(conservation)",
+      "kind": "conservation",
+      "scope": "(conservation)",
+      "model": null,
+      "verdict": "fail",
+      "summary": "scope=(conservation)  strategy=conservation  status=fail  rules=6 checked, 2 broken, 0 not applicable",
+      "detail": [
+        "CONSERVE HOST_BEAT_TO_REQUEST owner=wb_port lost=4 of=24 from=wb to=req observed=20 | Every host beat the port accepts (wb_cyc_i && wb_stb_i && !wb_stall_o) becomes exactly one request presented to and taken by the command queue (req_valid && req_ready). A port that accepts a beat it cannot deliver has lost a host access: a write is acknowledged and lost, a read is never answered. The port must either stall the beat or hold the request until the queue takes it.",
+        "CONSERVE READ_CMD_TO_RESPONSE owner=data_path lost=4 of=12 from=dp_cmd.read to=dp_rd_rsp observed=8 | Every RD command the data path is told about (cmd_rd_valid) yields exactly one read response (rd_rsp_valid), whatever the spacing between RD commands: the spec allows CAS-to-CAS at tCCD, so the capture must pipeline or the command generator must be held, not the command dropped."
+      ]
+    },
+    {
+      "stage": "(host handshake)",
+      "kind": "handshake",
+      "scope": "(host handshake)",
+      "model": null,
+      "verdict": "fail",
+      "summary": "1 driver completion timeout(s): the slave never acknowledged every beat it accepted",
+      "detail": [
+        "DRIVER_STALL: wb \u2014 4 of 24 pipelined beat(s) never acknowledged (wb_ack_o)"
+      ]
     }
   ],
   "log": "Validation/reports/paths/path_18_full_write_sim.log",

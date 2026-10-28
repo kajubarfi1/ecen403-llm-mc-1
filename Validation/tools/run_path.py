@@ -297,7 +297,7 @@ def main() -> int:
                          "path's settle_cycles / window_cycles")
     ap.add_argument("--stimulus", default=None,
                     choices=["random", "random_v2", "register_walk", "status_poll",
-                             "refresh_stress", "burst", "write_read"],
+                             "refresh_stress", "burst", "write_read", "wb_burst", "saturate"],
                     help="override the path's stimulus_generator")
     ap.add_argument("--no-coverage", action="store_true")
     ap.add_argument("--prep-only", action="store_true")
@@ -612,6 +612,13 @@ def main() -> int:
               + (" (expected: standalone path, responses tied off; requests "
                  "are still judged)" if exp else " — see the log"))
 
+    warns = [l for l in lines if l.startswith("MONITOR_WARN")]
+    if warns:
+        # a monitor replayed a pending field for a response that had no
+        # request on record: the design answered something it was never
+        # asked, or answered twice. The field is x in the trace.
+        print(f"\n  MONITOR warnings: {len(warns)} — first: {warns[0]}")
+
     trace = os.path.join(rep_dir, f"{args.path}_observed.jsonl")
     rc, out = run_local(
         f"python3 Validation/txn/trace_extract.py --log {log_path} "
@@ -623,6 +630,41 @@ def main() -> int:
 
     # --- judge -------------------------------------------------------------
     results = judge(trace, jobs, args.path, rep_dir, fired_by_block)
+    # Request conservation: what the design never produced. The exact
+    # stages judge the transactions that appeared; a read the data path
+    # silently dropped predicts nothing downstream (wb_rsp completes_on
+    # dp_rd_rsp) and every stage passes (path_02, 2026-10-28, 13 of 46
+    # reads never answered). Rules are data in the catalog; a rule applies
+    # when both of its blocks are in the harness.
+    if not observe:
+        rc_c, out_c = run_local(
+            f"python3 Validation/txn/conservation.py --trace {trace} "
+            f"--blocks {','.join(blocks)}")
+        c_lines = out_c.strip().splitlines()
+        c_first = next((l for l in c_lines if "status=" in l), "")
+        if rc_c != 0 or not c_first:
+            # the checker itself broke: no verdict, the path is incomplete
+            c_verdict = "unknown"
+        elif "status=not_applicable" in c_first:
+            c_verdict = None                 # no rule names two blocks of this harness: no row
+        else:
+            c_verdict = "pass" if "status=pass" in c_first else "fail"
+        if c_verdict:
+            results.append({"stage": "(conservation)", "kind": "conservation",
+                            "scope": "(conservation)", "model": None,
+                            "verdict": c_verdict, "summary": c_first.strip() or out_c.strip()[-200:],
+                            "detail": [l.strip() for l in c_lines if l.strip().startswith("CONSERVE")]})
+    # The host handshake: the driver counted every beat the slave accepted
+    # and every acknowledge it returned. A beat never acknowledged is a
+    # host access the controller lost, whichever block lost it (the
+    # conservation rows say which); on a standalone path with responses
+    # tied off it is expected and judged on the request stream instead.
+    if stalls and not pdef.get("standalone"):
+        results.append({"stage": "(host handshake)", "kind": "handshake",
+                        "scope": "(host handshake)", "model": None, "verdict": "fail",
+                        "summary": f"{len(stalls)} driver completion timeout(s): the slave never "
+                                   f"acknowledged every beat it accepted",
+                        "detail": [l.strip() for l in stalls]})
     print("\n" + "=" * 66)
     worst = "pass"
     for r in results:

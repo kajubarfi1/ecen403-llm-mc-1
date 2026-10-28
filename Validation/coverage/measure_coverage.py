@@ -95,6 +95,41 @@ def select_runs_since(agent, run_globs, since):
     out = r["stdout"] if isinstance(r, dict) else (r[0] if isinstance(r, tuple) else str(r))
     return [l.strip() for l in out.splitlines() if l.strip().startswith("/")]
 
+def uncovered_report(instances, label, metrics="block:expression:toggle"):
+    """Per-instance list of uncovered blocks and expressions, with source
+    lines, from the merged database of the last measurement
+    (~/cov_merged_<label>). This is the input for closing code coverage:
+    what stimulus has to reach, and what goes into coverage/exclusions.json
+    with a reason."""
+    a = CadenceSSHAgent()
+    a.connect(password=password())
+    try:
+        home = _home(a)
+        tcl = f"load -run {home}/cov_merged_{label}\n"
+        for inst in instances:
+            tcl += (f"report -detail -metrics {metrics} -uncovered -source on -inst chain_harness.{inst} "
+                    f"-out {home}/cov_uncov_{inst}.txt -overwrite\n")
+        tcl += "exit\n"
+        a.write_remote_file(f"cov_uncov_{label}.tcl", tcl)
+        r = a.srun(f"cp ~/cadence_agent_work/cov_uncov_{label}.tcl ~/cov_uncov.tcl && cd /tmp && "
+                   f"imc -exec ~/cov_uncov.tcl 2>&1 | grep -i '\\*E\\|error' | head -5; "
+                   + " ".join(f"cp {home}/cov_uncov_{i}.txt ~/cadence_agent_work/cov_uncov_{i}.txt;" for i in instances)
+                   + " echo DONE", timeout=600)
+        print(r["stdout"].strip())
+        outdir = os.path.join(ROOT, "Validation", "reports")
+        for inst in instances:
+            local = os.path.join(outdir, f"coverage_uncovered_{inst}.txt")
+            try:
+                a.download_file(f"cov_uncov_{inst}.txt", local)
+                n = sum(1 for l in open(local, errors="replace") if l.strip())
+                print(f"  wrote {os.path.relpath(local, ROOT)} ({n} lines)")
+            except Exception as e:
+                print(f"  {inst}: no report ({type(e).__name__}: {e})")
+    finally:
+        a.disconnect()
+    return 0
+
+
 def merge_and_report(agent, run_globs, label):
     """imc: merge -> load -> report_metrics; returns local tree.json path."""
     remote_db = f"{_home(agent)}/cov_merged_{label}"
@@ -151,6 +186,12 @@ def main() -> int:
     ap.add_argument("--rollup", action="store_true",
                     help="also roll the covergroups in the same report up "
                          "to the vplan (coverage_rollup.py)")
+    ap.add_argument("--uncovered", nargs="*", metavar="INSTANCE",
+                    help="write the uncovered block/expression items of these harness instances "
+                         "(e.g. u_wb_port) from the LAST merged database to reports/coverage_uncovered_<inst>.txt; "
+                         "no merge, no rollup (what closure and the exclusions file work from, 2026-10-28)")
+    ap.add_argument("--metrics", default="block:expression:toggle",
+                    help="with --uncovered: imc metrics to list (default block:expression:toggle)")
     ap.add_argument("--since", metavar="YYYY-MM-DDTHH:MM:SS",
                     help="merge only run directories modified at or after this "
                          "time (the drop run's start). Without it the globs "
@@ -158,6 +199,8 @@ def main() -> int:
                          "runs of OLDER drops, and a rewritten block is counted "
                          "twice (old code + new code) with only the new half hit.")
     args = ap.parse_args()
+    if args.uncovered is not None:
+        return uncovered_report(args.uncovered or ["u_wb_port", "u_cmd_queue", "u_scheduler"], args.label, args.metrics)
 
     agent = CadenceSSHAgent()
     agent.connect(password=password())

@@ -844,6 +844,85 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   reruns once any path that came back without a verdict before declaring
   it not simulated (two Olympus connection drops on 10-22 and 10-27 each
   cost a halt and a manual resume).
+- *2026-10-27, night — first non-golden spec through all four phases
+  (roadmap item 7).* `flow.py --preset low-cost-embedded`
+  (`runs/preset_lowcost`): DDR3-800, tCK 2.5 ns, one byte lane, CL 6,
+  4-deep queue. Spec review PASS, Phases 1–3 PASS, her Phase 4 sim gate
+  FAIL (`C3: rd_rsp_data=0x12121234`, expected `0xCAFE1234`). Our
+  validation on the same drop: 19/19 PASS, 0 findings, second opinions
+  agree, code coverage 84.8 % — her generator is right and her testbench
+  is wrong: `data_path_tb.sv` drives the read beats from
+  `dut.rd_burst_ctr` with a two-way choice, so with four beats three get
+  the same byte (ask 9, reply addendum 7). From this: `flow.py` hands a
+  phase's own gate failure to that phase's agent (reads her error report
+  natively, `GATE_FIX_TRIES` passes, then regenerates; tests), and
+  `validate_drop` regenerates the vplan from the judged spec in step 3
+  (coverage was being measured against the golden plan's text). Open:
+  the scheduler twin checker raised the OLD SCHED_003 ("no REFRESH before
+  end of trace") on one trace — the second-opinion models are not
+  regenerated when a rule is restated; their provenance should carry the
+  rules' hash like the primaries carry the spec's. Generated files and
+  reports in the shared tree are the one-lane spec's until the repo drop
+  is re-validated (done at the end of the day).
+- *2026-10-27, late — the regenerated plan had six unmeasured items; one
+  of them is a real defect.* The plan now derives 45 items from the
+  spec's taxonomy (the committed 39 predated it): tREFI / tMRD / tMOD
+  "exercised" and SCHED_001/002/003 "exercised" had no coverpoint.
+  Added: `coverage_gen` emits a timing covergroup per command stream
+  (init_fsm's own, not only cmd_gen's) and an exercised point for the
+  max-interval rule; `cg_scheduling` recipes at the scheduler
+  (dequeue, command, refresh pending); and tMRD / tMOD as init-stream
+  rules TIMING_013/014 now that the spec carries both (tMRD needs no
+  separation at this clock: one controller cycle is 4 nCK). TIMING_014
+  fires on the golden drop: `init_fsm` goes MR0 → ZQCL on the next cycle
+  (4 nCK) against tMOD = 12 nCK. A real Phase 1 defect in an
+  LLM-generated block, the second real defect validation has found
+  (reply addendum 8); it will route to her Phase 1 agent on the next
+  flow run.
+
+- *2026-10-28 — code coverage: the stimulus nobody had driven, and what
+  it found.* The uncovered report (`measure_coverage.py --uncovered`)
+  said where the code coverage sat: the port's burst tracker, cti/bte
+  and tag FIFO (never driven: every sequence used classic single
+  cycles), the queue's slots 10–15 (never filled), the scheduler's
+  entry storage. Two generators now drive what the spec's
+  host_interface declares: `wb_burst.py` (linear bursts, cti INC/END,
+  and a pile of pipelined reads deeper than the read buffer) on
+  path_02, `saturate.py` (240 back-to-back mixed beats) on path_07; the
+  catalog's `wb` stream gained `cti`/`bte` with defaults and a
+  `pipelined` drive block, the generated driver counts issued and
+  acknowledged beats per run. Exclusion proposals for the constant
+  column bits and reset defaults are in `coverage/exclusions.json`
+  (`status: proposed`, no approver yet, so they do not count).
+  Both paths failed, and the diagnosis split three ways. (1) Ours: the
+  `wb_rsp` monitor qualified on `wb_ack_o && !wb_we_i` and read
+  `wb_adr_i` at ack time — classic-bus assumptions; under pipelined
+  traffic the bus carries a later beat. It now qualifies on the port's
+  `rsp_valid` and replays the accepted read addresses in order (catalog
+  `pending` fields, monitor-local queue). (2) The design: the port
+  accepts a beat on the queue's current `enq_ready` and presents the
+  request a cycle later with no holding register; when the previous
+  request fills the queue on that same edge the new one is dropped —
+  18 writes acknowledged and lost, 7 reads never answered, in 243
+  beats (path_07). (3) The design: the data path ignores a RD or WR
+  command while its one-deep capture/drive FSM is busy, and the spec
+  allows CAS-to-CAS at tCCD (one controller cycle): 13 of 46 reads
+  never answered on path_02, 19 WR bursts issued without data, 6 write
+  words refused at a full buffer (DP-001 fires). Every stage had
+  passed on path_02: the predictor answers a read only when the data
+  path does (`completes_on`), so a dropped read predicts nothing. New
+  `(conservation)` stage from catalog rules (every `from` transaction
+  must have produced its `to` by the end of the run, attributed to the
+  block that must deliver it; `txn/conservation.py`), and a `(host
+  handshake)` stage from the driver's own count of beats never
+  acknowledged. HOST_001 (write ack and read response in one cycle,
+  one ack line) added as a port property for formal; read from the
+  code, not yet seen. Full run on efece348d04e: 8 pass / 11 fail, 9
+  findings (5 new: 2 on wb_port, 3 on data_path), code coverage 85.4 %
+  (target met; was 77.3 %), functional 33/45 + 11 unreachable (the
+  ref_002 exercised bin fell to partial under the lost traffic).
+  Findings route to her Phase 1 (wb_port) and Phase 4 (data_path)
+  agents on the next flow run; reply addendum 9.
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

@@ -518,8 +518,14 @@ python3 Validation/tools/validate_drop.py --paths path_01_write_cmd path_22_csr_
 
 The nine steps print as they run: resolve the drop, review the spec, regenerate
 the environment, re-grade the models, simulate, roll up coverage, emit
-findings, compare with the previous drop, refresh the dashboard. The last line
-is the verdict:
+findings, compare with the previous drop, refresh the dashboard. Each path's
+report carries, after its stage checkers, a `(conservation)` row (every
+transaction a block was handed produced the one it owes downstream by the end
+of the run; the rules are the `conservation` section of
+`Validation/txn/interface_catalog.json`, attributed to the block that must
+deliver) and, when the driver's own count disagrees, a `(host handshake)` row
+(beats the host presented that were never acknowledged). The last line is the
+verdict:
 
 ```
   drop a7cd3cb93546: 19 pass / 0 fail / 0 error in 1.6 min; log Validation/reports/validate_drop/a7cd3cb93546.log
@@ -555,7 +561,13 @@ python3 Validation/tools/run_path.py --path path_22_csr_standalone --probe "u_co
 ```
 
 The path list is `Validation/spec/path_definitions.json`; `--help` lists the
-stimulus generators.
+stimulus generators. `wb_burst` drives Wishbone linear bursts and a pile of
+pipelined reads deeper than the read buffer; `saturate` drives back-to-back
+mixed beats until the queue stalls the port; `write_read` writes then reads
+back. A response that carries no address of its own on the bus (a pipelined
+read ack) is attributed by the monitor from the accepted requests in order
+(catalog `pending` fields); a `MONITOR warnings` line in the summary means a
+response arrived with no request on record.
 
 ### 7.5 Gate-level: the backend's netlists through the same paths
 

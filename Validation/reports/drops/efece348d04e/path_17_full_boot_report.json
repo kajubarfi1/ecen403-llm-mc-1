@@ -2,8 +2,8 @@
   "$schema": "validation-path-run/1",
   "path": "path_17_full_boot",
   "strategy": "composed",
-  "verdict": "pass",
-  "timestamp": "2026-10-27T14:44:46.438813",
+  "verdict": "fail",
+  "timestamp": "2026-10-28T14:09:24.401669",
   "blocks": [
     "calibration",
     "config_regs",
@@ -23,7 +23,7 @@
       "config_regs",
       "init_fsm"
     ],
-    "validated_at": "f5cf4a9",
+    "validated_at": "835760c",
     "frontend_commits": {
       "calibration": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
       "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
@@ -61,8 +61,11 @@
       "kind": "autonomous",
       "model": null,
       "scope": "init_fsm",
-      "verdict": "sva",
-      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
+      "verdict": "fail",
+      "summary": "SVA fired: a_TIMING_014 x1",
+      "detail": [
+        "a_TIMING_014 fired 1x (see the sim log)"
+      ]
     },
     {
       "stage": "calibration",
