@@ -229,7 +229,12 @@ def signoff(a, res: dict) -> None:
         lvs.update(status="ERROR", detail=f"LVS produced no verdict or database (klayout rc={rc}); see lvs.log")
         res["lvs"] = lvs
         return
-    _, xt, _ = run(["klayout", "-b", "-rd", f"lvsdb={lvsdb}", "-rd", f"b={d}", "-r", so / "lvs" / "xref_summary.rb"],
+    # `r`, not `d`: these scripts find the top circuit by name in the LVS
+    # database, and that name is the MODULE. Passing the directory name made
+    # xref_summary match nothing, so it printed no "XREF top" line at all and
+    # LVS reported 0 nets and 0 pins compared while klayout's own verdict said
+    # "match" — a comparison of nothing against nothing (2026-10-29, TOPRTL).
+    _, xt, _ = run(["klayout", "-b", "-rd", f"lvsdb={lvsdb}", "-rd", f"b={r}", "-r", so / "lvs" / "xref_summary.rb"],
                    out / "xref.log", 600, flow)
     top = re.search(r"XREF top (\S+) compared: devices=(\d+) nets=(\d+) pins=(\d+)", xt)
     cells = re.findall(r"XREF cell (\S+) (\S+)", xt)
@@ -256,7 +261,7 @@ def signoff(a, res: dict) -> None:
     res["lvs"] = lvs
 
     # 5. Pin audit (LVS blind spot)
-    _, at, _ = run(["klayout", "-b", "-rd", f"lvsdb={lvsdb}", "-rd", f"b={d}", "-rd", f"base={base}",
+    _, at, _ = run(["klayout", "-b", "-rd", f"lvsdb={lvsdb}", "-rd", f"b={r}", "-rd", f"base={base}",
                     "-r", so / "lvs" / "audit_pins.rb"], out / "audit.log", 600, flow)
     m = re.search(r"AUDIT pins_in_layout=(\d+)/(\d+) pin_to_pin_feedthroughs=(\d+)/(\d+) "
                   r"control_wrong_pairs_accepted=(\d+)", at)
