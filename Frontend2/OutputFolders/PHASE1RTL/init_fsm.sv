@@ -21,6 +21,8 @@ module init_fsm #(
     localparam WAIT_CKE   = 100000;
     localparam WAIT_TXPR  = 34;
     localparam WAIT_ZQCL  = 128;
+    localparam WAIT_MRD   = 1;   // tMRD: MRS-to-MRS, JESD79-3 4 nCK
+    localparam WAIT_MOD   = 3;   // tMOD: MRS-to-non-MRS, max(12 nCK, 15 ns)
 
     localparam [DDR_ADDR_W-1:0] MR0_VAL   = 15'h1D34;
     localparam [DDR_ADDR_W-1:0] MR1_VAL   = 15'h0004;
@@ -43,6 +45,10 @@ module init_fsm #(
         S_MR0        = 4'd7,
         S_ZQCL       = 4'd8,
         S_ZQCL_WAIT  = 4'd9,   // wait WAIT_ZQCL cycles
+        S_MRD_WAIT1  = 4'd10,  // tMRD after MR2, before MR3
+        S_MRD_WAIT2  = 4'd11,  // tMRD after MR3, before MR1
+        S_MRD_WAIT3  = 4'd12,  // tMRD after MR1, before MR0
+        S_MOD_WAIT   = 4'd13,  // tMOD after MR0, before ZQCL
         S_DONE       = 4'd14  // init_done asserted ONLY here
     } state_t;
 
@@ -69,10 +75,14 @@ module init_fsm #(
             S_RESET_LOW:  next_state = (wait_cnt == WAIT_RESET-1) ? S_RESET_HIGH : S_RESET_LOW;
             S_RESET_HIGH: next_state = (wait_cnt == WAIT_CKE-1)   ? S_TXPR_WAIT  : S_RESET_HIGH;
             S_TXPR_WAIT:  next_state = (wait_cnt == WAIT_TXPR-1)  ? S_MR2        : S_TXPR_WAIT;
-            S_MR2:        next_state = S_MR3;
-            S_MR3:        next_state = S_MR1;
-            S_MR1:        next_state = S_MR0;
-            S_MR0:        next_state = S_ZQCL;
+            S_MR2:        next_state = S_MRD_WAIT1;
+            S_MRD_WAIT1:  next_state = (wait_cnt == WAIT_MRD-1)   ? S_MR3       : S_MRD_WAIT1;
+            S_MR3:        next_state = S_MRD_WAIT2;
+            S_MRD_WAIT2:  next_state = (wait_cnt == WAIT_MRD-1)   ? S_MR1       : S_MRD_WAIT2;
+            S_MR1:        next_state = S_MRD_WAIT3;
+            S_MRD_WAIT3:  next_state = (wait_cnt == WAIT_MRD-1)   ? S_MR0       : S_MRD_WAIT3;
+            S_MR0:        next_state = S_MOD_WAIT;
+            S_MOD_WAIT:   next_state = (wait_cnt == WAIT_MOD-1)   ? S_ZQCL      : S_MOD_WAIT;
             S_ZQCL:       next_state = S_ZQCL_WAIT;
             S_ZQCL_WAIT:  next_state = (wait_cnt == WAIT_ZQCL-1)  ? S_DONE : S_ZQCL_WAIT;
             S_DONE:       next_state = S_DONE;

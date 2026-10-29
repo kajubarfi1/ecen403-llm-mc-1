@@ -47,6 +47,7 @@ class InitFsmGenerator:
         self.init_seq = self.spec["initialization_sequence"]
         self.clocking = self.spec["clocking_model"]
         self.geometry = self.spec["memory_geometry"]
+        self.timing   = self.spec.get("timing_model", {})
 
         self.p = self._derive_parameters()
 
@@ -68,7 +69,25 @@ class InitFsmGenerator:
         p["WAIT_TXPR"] = math.ceil(tXPR_ns / ctrl_period_ns)
         p["WAIT_ZQCL"] = math.ceil(tZQ_ns / ctrl_period_ns)
 
-        max_wait = max(p["WAIT_RESET"], p["WAIT_CKE"], p["WAIT_TXPR"], p["WAIT_ZQCL"])
+        # tMRD (MRS-to-MRS, 4 nCK) and tMOD (MRS-to-any-non-MRS command,
+        # max(12 nCK, 15 ns)) -- JESD79-3. Nothing previously waited for
+        # either: the FSM went state-to-state on a plain one-controller-
+        # cycle transition, which happened to satisfy tMRD only because
+        # the golden spec's 4:1 clock ratio makes one controller cycle
+        # exactly 4 nCK, and violated tMOD outright (MR0 -> ZQCL with no
+        # wait at all -- Validation addendum 8, 2026-10-27, init_fsm/
+        # TIMING_014). Deriving both from timing_model and the clock
+        # period, like WAIT_TXPR/WAIT_ZQCL above, keeps this correct at
+        # any clock ratio, not just this spec's -- the fallback formulas
+        # match microarch_compiler.py's own tMRD/tMOD defaults for a spec
+        # that predates those fields.
+        tMRD_ns = self.timing.get("tMRD", round(4 * tCK_ns, 6))
+        tMOD_ns = self.timing.get("tMOD", round(max(12 * tCK_ns, 15.0), 6))
+        p["WAIT_MRD"] = max(1, math.ceil(tMRD_ns / ctrl_period_ns))
+        p["WAIT_MOD"] = max(1, math.ceil(tMOD_ns / ctrl_period_ns))
+
+        max_wait = max(p["WAIT_RESET"], p["WAIT_CKE"], p["WAIT_TXPR"], p["WAIT_ZQCL"],
+                        p["WAIT_MRD"], p["WAIT_MOD"])
         p["CTR_WIDTH"] = max(1, max_wait.bit_length())
         p["DDR_ADDR_W"] = max(self.geometry["row_bits"], self.geometry["column_bits"])
         p["DDR_BANK_W"] = self.geometry["bank_bits"]
@@ -159,6 +178,8 @@ class InitFsmGenerator:
     localparam WAIT_CKE   = {p['WAIT_CKE']};
     localparam WAIT_TXPR  = {p['WAIT_TXPR']};
     localparam WAIT_ZQCL  = {p['WAIT_ZQCL']};
+    localparam WAIT_MRD   = {p['WAIT_MRD']};   // tMRD: MRS-to-MRS, JESD79-3 4 nCK
+    localparam WAIT_MOD   = {p['WAIT_MOD']};   // tMOD: MRS-to-non-MRS, max(12 nCK, 15 ns)
 
     localparam [DDR_ADDR_W-1:0] MR0_VAL   = {aw}'h{p['MR0_HEX']};
     localparam [DDR_ADDR_W-1:0] MR1_VAL   = {aw}'h{p['MR1_HEX']};
@@ -181,6 +202,10 @@ class InitFsmGenerator:
         S_MR0        = 4'd7,
         S_ZQCL       = 4'd8,
         S_ZQCL_WAIT  = 4'd9,   // wait WAIT_ZQCL cycles
+        S_MRD_WAIT1  = 4'd10,  // tMRD after MR2, before MR3
+        S_MRD_WAIT2  = 4'd11,  // tMRD after MR3, before MR1
+        S_MRD_WAIT3  = 4'd12,  // tMRD after MR1, before MR0
+        S_MOD_WAIT   = 4'd13,  // tMOD after MR0, before ZQCL
         S_DONE       = 4'd14  // init_done asserted ONLY here
     }} state_t;
 
@@ -207,10 +232,14 @@ class InitFsmGenerator:
             S_RESET_LOW:  next_state = (wait_cnt == WAIT_RESET-1) ? S_RESET_HIGH : S_RESET_LOW;
             S_RESET_HIGH: next_state = (wait_cnt == WAIT_CKE-1)   ? S_TXPR_WAIT  : S_RESET_HIGH;
             S_TXPR_WAIT:  next_state = (wait_cnt == WAIT_TXPR-1)  ? S_MR2        : S_TXPR_WAIT;
-            S_MR2:        next_state = S_MR3;
-            S_MR3:        next_state = S_MR1;
-            S_MR1:        next_state = S_MR0;
-            S_MR0:        next_state = S_ZQCL;
+            S_MR2:        next_state = S_MRD_WAIT1;
+            S_MRD_WAIT1:  next_state = (wait_cnt == WAIT_MRD-1)   ? S_MR3       : S_MRD_WAIT1;
+            S_MR3:        next_state = S_MRD_WAIT2;
+            S_MRD_WAIT2:  next_state = (wait_cnt == WAIT_MRD-1)   ? S_MR1       : S_MRD_WAIT2;
+            S_MR1:        next_state = S_MRD_WAIT3;
+            S_MRD_WAIT3:  next_state = (wait_cnt == WAIT_MRD-1)   ? S_MR0       : S_MRD_WAIT3;
+            S_MR0:        next_state = S_MOD_WAIT;
+            S_MOD_WAIT:   next_state = (wait_cnt == WAIT_MOD-1)   ? S_ZQCL      : S_MOD_WAIT;
             S_ZQCL:       next_state = S_ZQCL_WAIT;
             S_ZQCL_WAIT:  next_state = (wait_cnt == WAIT_ZQCL-1)  ? S_DONE : S_ZQCL_WAIT;
             S_DONE:       next_state = S_DONE;
@@ -266,6 +295,8 @@ endmodule
                 "WAIT_CKE": p["WAIT_CKE"],
                 "WAIT_TXPR": p["WAIT_TXPR"],
                 "WAIT_ZQCL": p["WAIT_ZQCL"],
+                "WAIT_MRD": p["WAIT_MRD"],
+                "WAIT_MOD": p["WAIT_MOD"],
             },
             "ports": {
                 "clock_reset": [
