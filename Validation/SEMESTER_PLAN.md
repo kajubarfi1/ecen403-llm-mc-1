@@ -923,6 +923,72 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   ref_002 exercised bin fell to partial under the lost traffic).
   Findings route to her Phase 1 (wb_port) and Phase 4 (data_path)
   agents on the next flow run; reply addendum 9.
+  Evening: her push (drop 99f72da45a32: data_path read fix, pipelined
+  scheduler) confirmed the read-capture fix (path_03 PASS), 86.8 % code
+  coverage, same three open modules. Re-proof on the new scheduler:
+  TIMING_008 proven, PROTO_001/002 undetermined at depth 49 in 20 min
+  (awaiting a longer run), **HOST_001 cex at 24 cycles with no
+  abstraction** -- the ack collision is real, filed as the third
+  wb_port finding (`formal_host_port_findings.json`). The assumed-config
+  run had "bounded-proved" PROTO_001/002 and HOST_001 to 8245 cycles
+  with their covers unreached (that configuration never issues a CAS
+  or answers a read): `run_formal.py` now records such results as
+  `bounded_vacuous` / `proven_vacuous` (SIGNOFF §6), `--reclassify`
+  re-derives archived reports, and an unabstracted cex on the design
+  under judgement overrules any abstracted bound (`formal_proof_sets`).
+- *2026-10-29 — HOST_001 witnessed in simulation; the loop and a longer
+  proof started.* A directed sequence (`ack_collision.py`: one read to an
+  open row, then a write beat d+1 cycles later for every d in the
+  spec-derived latency window, the gap an idle *inside* a pipelined run,
+  new `within_run` idle in the sequence contract and driver) fires
+  `a_HOST_001` at d = 40 on 99f72da45a32 with every request conserved
+  and one beat never acknowledged: the shared pulse. Kept as
+  `path_23_host_ack_collision` (23 paths: 20 runnable, 3 derived). The
+  flow loop on the drop (`runs/oct29_loop`) halted inside her Phase 3:
+  the regenerated pipelined scheduler fails her own gate (T36/T37, REF
+  expected after a forced PRE, WR seen); her Phase 3 agent blamed the
+  testbench's expectation at low confidence and exited without a fix,
+  so the gate-failure route worked and the round stopped before our
+  validation. Our own checks on the regenerated Phase 1-3 drop
+  (run-local outbox): 8/8 runnable paths PASS, TIMING_014 resolved
+  (the tMOD fix regenerates cleanly); the regenerated scheduler is
+  byte-identical to the pushed one, on which every scheduler/refresh
+  check of ours passes, so T36/T37 is her testbench's fixed-cycle
+  expectation, not the design (reply). The conservation check crashed
+  on a partial drop (absent block's interfaces not in the schemas) and
+  now steps aside instead. Decisions: exclusions X-001/002/003 approved
+  (adjusted cmd_queue 93.6, scheduler 95.1); W-003 approved as a pending
+  waiver, W-002 withdrawn because the spec now defines the DM polarity.
+  Afternoon: uncovered-item review of the four blocks under 90 % split
+  the gap into reachable (read data, FIFO depth, tag entries: gated on
+  the two open defects) and spec-unreachable (counter high bits above
+  the spec's nCK values, CL/CWL countdowns, reserved RO register bits,
+  status inputs no block drives). 16 more exclusions, each with its
+  spec clause and bits computed from the spec, new code E-ABSENT;
+  approved by Jacob. Adjusted design coverage 94.8 % (86.8 measured);
+  bank_tracker 99.6, config_regs 98.0. 100 % is not a target: the
+  rest is parameterised width for other specs or other blocks. Jacob
+  asked whether this holds under a changing spec: the measured side
+  did, the exclusions did not (bit lists frozen from the golden
+  values). Converted the same day to rules resolved per spec
+  (`exclusion_rules.py`: `above_max`, `low_bits`, `reserved_of`,
+  `address_bits_unused`, `undriven_inputs_of`); literal lists are
+  rejected; the report records the spec the bits were derived under.
+  Lehana pushed fixes for all three findings plus the scheduler (b)
+  revert: the drop (5994bb667dba) does not compile (`sel_bank_eff_r`
+  used before its wire declaration; Xcelium UNDIDN), so 12 paths had no
+  verdict. A compile error inside the drop's RTL is now a critical
+  finding on its block, anchored at the lines (`compile_findings.json`,
+  routed to Phase 3), and the findings on its paths are carried
+  untested instead of "resolved" (the emitter had resolved 11 findings
+  on paths that never judged anything). Judged on a hybrid with the
+  last compiling scheduler: wb_port fix holds (0 lost beats, handshake
+  clean); data_path fix removes the drops but its pending queue starts
+  the CL countdown a cycle late, so every read's word is shifted one
+  beat (regression of 65dbb0f; path_03 0/19); 1 of 600 writes still
+  slips. The data-bus occupancy vs tCCD question is a spec gap (intake
+  finding to file). tMOD resolved. Reply addendum 10.
+  The 60-minute concrete re-proof for PROTO_001/002 is still running.
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the
@@ -1303,4 +1369,4 @@ Exit criterion for each phase is stated so progress is measurable.
 9. ~~Integration map is hand-written → derive from `source`.~~ Done; 21 edges still carried as overrides until phase-1/2 manifests declare them.
 10. ~~Don't-care fields (PRE address) counted as mismatches → declared masks + intake rule.~~ Done: `interface_catalog.json` `dont_care`, applied by the scoreboard before alignment.
 11. ~~Only one spec ever run → second preset spec.~~ Lehana's compiled DDR3-1333/x16/1-lane spec (`VALIDATION_SPEC=Frontend2/OutputFolders/generated_spec.json`): Phase-1 paths 3/3 pass, the 7 Phase-1 seeded faults 7/7 killed by checkers derived from that spec (register map with its reset values, init SVA at its clock), JEDEC 25/25. Phases 2–4 wait for RTL from the same spec; the fault matrix now records the spec revision per row.
-12. Waivers W-002/W-003 undecided → human decision.
+12. ~~Waivers W-002/W-003 undecided → human decision.~~ Decided 2026-10-29: W-003 approved (read byte enables, spec-silent, pending); W-002 withdrawn (the spec defines ddr_dm_polarity; the check is live).

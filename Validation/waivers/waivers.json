@@ -19,6 +19,25 @@
       ],
       "pending_spec_change": true,
       "resolves_when": "The spec states the read data for an unmapped address \u2014 either a defined value, or an explicit 'undefined', which would make this waiver permanent rather than pending."
+    },
+    {
+      "id": "W-003",
+      "scope": "wb_port",
+      "iface": "req",
+      "kind": "request",
+      "field_name": "mask",
+      "reason": "The specification does not define the byte enables (wb_sel_i) on a READ request: host_interface says enable_data_mask and data_path_mapping fixes byte_enable_semantics = wishbone_sel_per_byte for WRITES, and no clause says what a read's sel means or whether the port must forward it. The port forwards whatever the host presented; a spec-derived model predicts 0. Comparing the field would assert a requirement the specification never states. The same catalog rule (req dont_care when we = 0) covers req.data on a read, which carries no write data. Byte enables on WRITES are compared on every occurrence and agree.",
+      "approved_by": "Jacob Zatopek",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "approved_utc": "2026-10-29T16:46:14.974926+00:00",
+      "when": {
+        "we": 0
+      },
+      "vplan_items": [],
+      "pending_spec_change": true,
+      "resolves_when": "The spec states what a read request's byte enables mean (a read mask the data path must honour, or explicitly 'ignored on reads'); either retires this waiver, the first as a live check.",
+      "$implemented_by": "Validation/txn/interface_catalog.json interfaces.req.dont_care (when we = 0: mask, data)",
+      "$decision_note": "Approved 2026-10-29. W-002 (DRAM data-mask polarity on write beats) was proposed with it and is WITHDRAWN, not approved: the spec now defines data_path_mapping.ddr_dm_polarity = active_high_mask, so the ddr_wr_beat.mask comparison is a live check (it passes on drop 99f72da45a32)."
     }
   ]
 }

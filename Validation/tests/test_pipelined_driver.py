@@ -61,3 +61,41 @@ class TestPipelinedRun(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestGapInsideRun(unittest.TestCase):
+    """An idle marked within_run is a gap between two beats of one pipelined
+    run: the run does not end before it and does not restart after it."""
+
+    def _seq(self):
+        sys.path.insert(0, os.path.join(ROOT, "Validation", "sequences"))
+        import ack_collision as AC
+        spec = json.load(open(AC.SPEC)); schemas = json.load(open(AC.SCHEMAS))["interfaces"]
+        catalog = json.load(open(AC.CATALOG))["interfaces"]
+        return AC.generate(spec, schemas, catalog, 1), schemas, catalog
+
+    def test_sequence_validates_and_gap_is_inside_the_run(self):
+        seq, schemas, catalog = self._seq()
+        import sequence_contract as SC
+        drivable = {i for i, d in catalog.items() if d.get("drive")}
+        self.assertEqual(SC.validate(seq, schemas, drivable), [])
+        import driver_gen as DG
+        src = DG.generate(seq, schemas, catalog) if hasattr(DG, "generate") else DG.generate_driver(seq, schemas, catalog)
+        text = src if isinstance(src, str) else src[1]
+        # the read before a within_run gap does not wait for its ack; the write after it
+        # does not open a new run (no negedge wait before its beat)
+        i = text.index("gap inside a pipelined run")
+        before = text[:i].rsplit("// wb.read", 1)[1]
+        self.assertNotIn("wait_all_wb", before)
+        after = text[i:].split("// wb.write", 1)[1].split("\n", 2)
+        self.assertNotIn("@(negedge clk);", after[1])
+        self.assertIn("wait_all_wb", text[i:])
+
+    def test_within_run_idle_outside_a_run_is_rejected(self):
+        seq, schemas, catalog = self._seq()
+        import sequence_contract as SC
+        bad = dict(seq, steps=[{"op": "reset"}, {"op": "idle", "cycles": 3, "within_run": True},
+                               {"op": "drive", "iface": "wb", "kind": "read", "fields": seq["steps"][1]["fields"]}])
+        drivable = {i for i, d in catalog.items() if d.get("drive")}
+        errs = SC.validate(bad, schemas, drivable, require_targets=False)
+        self.assertTrue(any("within_run" in e for e in errs), errs)

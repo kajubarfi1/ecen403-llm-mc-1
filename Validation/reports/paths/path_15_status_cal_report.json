@@ -2,8 +2,8 @@
   "$schema": "validation-path-run/1",
   "path": "path_15_status_cal",
   "strategy": "composed",
-  "verdict": "fail",
-  "timestamp": "2026-10-28T14:20:19.126474",
+  "verdict": "pass",
+  "timestamp": "2026-10-29T12:17:17.092598",
   "blocks": [
     "calibration",
     "config_regs",
@@ -15,19 +15,19 @@
   "window_cycles": 64,
   "coverage_collected": true,
   "rtl_drop": {
-    "git_head": "99f72da45a32",
-    "drop_id": "99f72da45a32",
-    "design_id": "a2b204453edc",
+    "git_head": "5994bb667dba",
+    "drop_id": "5994bb667dba",
+    "design_id": "2ed70e31cb84",
     "blocks_used": [
       "calibration",
       "config_regs",
       "init_fsm"
     ],
-    "validated_at": "17274ce",
+    "validated_at": "1aefeb0",
     "frontend_commits": {
       "calibration": "f37ce49d323151a6118ae7765aa766918c816383",
       "config_regs": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc",
-      "init_fsm": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc"
+      "init_fsm": "bdf1b5ca9ba3818f1706b71dc92310baa51c41b4"
     },
     "roots": [
       "Frontend2/OutputFolders"
@@ -73,17 +73,6 @@
       "summary": "scope=config_regs  strategy=exact  status=pass  matched=180/180  (180 output transaction(s) matched)",
       "detail": [],
       "rule_counts": {}
-    },
-    {
-      "stage": "init_fsm (support)",
-      "kind": "sva",
-      "scope": "init_fsm",
-      "model": null,
-      "verdict": "fail",
-      "summary": "SVA fired: a_TIMING_014 x1",
-      "detail": [
-        "a_TIMING_014 fired 1x (assertion bound to init_fsm, not a judged stage)"
-      ]
     }
   ],
   "log": "Validation/reports/paths/path_15_status_cal_sim.log",

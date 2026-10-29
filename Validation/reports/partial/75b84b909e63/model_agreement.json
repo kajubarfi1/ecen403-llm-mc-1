@@ -1,0 +1,172 @@
+{
+  "$schema": "validation-model-agreement/1",
+  "generated_utc": "2026-10-29T16:42:23.339092Z",
+  "traces": 8,
+  "rows": [
+    {
+      "scope": "addr_decoder",
+      "kind": "predictor",
+      "traces": 1,
+      "agree": 1,
+      "disagree": 0,
+      "attribution_only": 0,
+      "disagreements": [],
+      "attribution": []
+    },
+    {
+      "scope": "bank_tracker_scheduler",
+      "kind": "checker",
+      "traces": 3,
+      "agree": 3,
+      "disagree": 0,
+      "attribution_only": 0,
+      "disagreements": [],
+      "attribution": []
+    },
+    {
+      "scope": "cmd_gen",
+      "kind": "predictor",
+      "traces": 0,
+      "agree": 0,
+      "disagree": 0,
+      "attribution_only": 0,
+      "disagreements": [],
+      "attribution": []
+    },
+    {
+      "scope": "cmd_queue_scheduler",
+      "kind": "checker",
+      "traces": 2,
+      "agree": 2,
+      "disagree": 0,
+      "attribution_only": 0,
+      "disagreements": [],
+      "attribution": []
+    },
+    {
+      "scope": "config_regs",
+      "kind": "predictor",
+      "traces": 6,
+      "agree": 6,
+      "disagree": 0,
+      "attribution_only": 0,
+      "disagreements": [],
+      "attribution": []
+    },
+    {
+      "scope": "data_path",
+      "kind": "predictor",
+      "traces": 0,
+      "agree": 0,
+      "disagree": 0,
+      "attribution_only": 0,
+      "disagreements": [],
+      "attribution": []
+    },
+    {
+      "scope": "path_04_scheduler_bank_loop",
+      "kind": "checker",
+      "traces": 0,
+      "agree": 0,
+      "disagree": 0,
+      "attribution_only": 0,
+      "disagreements": [],
+      "attribution": []
+    },
+    {
+      "scope": "path_05_scheduler_refresh_loop",
+      "kind": "checker",
+      "traces": 2,
+      "agree": 2,
+      "disagree": 0,
+      "attribution_only": 2,
+      "disagreements": [],
+      "attribution": [
+        {
+          "trace": "Validation/reports/partial/75b84b909e63/path_09_init_to_refresh_observed.jsonl",
+          "diffs": [
+            {
+              "id": "SCHED_003",
+              "attribution_differs": true,
+              "count": 1,
+              "primary_example": "SCHED_003 (refresh_never_serviced): refresh request was observed but no REFRESH command was ever issued",
+              "second_example": "SCHED_003 (refresh_never_serviced): refresh request seen but no REFRESH command was ever issued @ [refresh_req.request pending=0x1 starve=0x0 urgent=0x0]"
+            }
+          ]
+        },
+        {
+          "trace": "Validation/reports/partial/75b84b909e63/path_16_status_refresh_observed.jsonl",
+          "diffs": [
+            {
+              "id": "SCHED_003",
+              "attribution_differs": true,
+              "count": 1,
+              "primary_example": "SCHED_003 (refresh_never_serviced): refresh request was observed but no REFRESH command was ever issued",
+              "second_example": "SCHED_003 (refresh_never_serviced): refresh request seen but no REFRESH command was ever issued @ [refresh_req.request pending=0x1 starve=0x0 urgent=0x0]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scope": "path_08_init_to_cal",
+      "kind": "checker",
+      "traces": 5,
+      "agree": 5,
+      "disagree": 0,
+      "attribution_only": 0,
+      "disagreements": [],
+      "attribution": []
+    },
+    {
+      "scope": "path_09_init_to_refresh",
+      "kind": "checker",
+      "traces": 5,
+      "agree": 5,
+      "disagree": 0,
+      "attribution_only": 0,
+      "disagreements": [],
+      "attribution": []
+    },
+    {
+      "scope": "path_19_row_conflict",
+      "kind": "checker",
+      "traces": 0,
+      "agree": 0,
+      "disagree": 0,
+      "attribution_only": 0,
+      "disagreements": [],
+      "attribution": []
+    },
+    {
+      "scope": "path_20_refresh_preempt",
+      "kind": "checker",
+      "traces": 2,
+      "agree": 2,
+      "disagree": 0,
+      "attribution_only": 0,
+      "disagreements": [],
+      "attribution": []
+    },
+    {
+      "scope": "scheduler",
+      "kind": "checker",
+      "traces": 2,
+      "agree": 2,
+      "disagree": 0,
+      "attribution_only": 0,
+      "disagreements": [],
+      "attribution": []
+    },
+    {
+      "scope": "wb_port",
+      "kind": "predictor",
+      "traces": 1,
+      "agree": 1,
+      "disagree": 0,
+      "attribution_only": 0,
+      "disagreements": [],
+      "attribution": []
+    }
+  ]
+}

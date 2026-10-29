@@ -1,6 +1,32 @@
 {
   "$schema": "validation-findings/1",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "finding_count": 0,
-  "findings": []
+  "finding_count": 1,
+  "findings": [
+    {
+      "source": "validation",
+      "target": "spec",
+      "kind": "spec_gap",
+      "scope": "phy_interface",
+      "severity": "major",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "[intake] How many controller cycles does one CAS occupy the data bus for in the abstract PHY model, and must the scheduler space CAS commands by it? data_path_mapping implies host_width_bits / ddr_channel_width_bits beats at one beat per controller cycle (2 here), while timing_model.tCCD (4 nCK = 1 controller cycle) lets the scheduler issue a CAS every cycle: two reads one cycle apart cannot both be captured on one bus.",
+      "detail": "phy_interface.data_bus_cycles_per_cas is not stated. With the spec silent, the data path and the DRAM model both assume one beat per controller cycle and the scheduler assumes JEDEC tCCD; back-to-back CAS then overrun the data bus, whatever the data path does (drops before 65dbb0f, shifted/zero words after it). Either the scheduler enforces tCCD_eff = max(tCCD, beats) or the beat model moves to the real rate (a word per nCK, BEATS_PER_CYC = 2 x clock_ratio); until decided the scheduler spacing is the safe reading. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: Frontend HANDOFF_VALIDATION_2026-10-29 (BEATS_PER_CYC question) and Validation's hybrid judgement of 65dbb0f: data_path stage 0/19 on path_03, conservation clean (2026-10-29).",
+      "evidence": {
+        "rule": "PHY_DATA_BUS_OCCUPANCY",
+        "status": "gap",
+        "proposed_patch": {
+          "phy_interface": {
+            "data_bus_cycles_per_cas": "<one of ['host_word_beats', 'one_controller_cycle', '<integer controller cycles>']>"
+          }
+        },
+        "options": [
+          "host_word_beats",
+          "one_controller_cycle",
+          "<integer controller cycles>"
+        ]
+      },
+      "status": "open"
+    }
+  ]
 }

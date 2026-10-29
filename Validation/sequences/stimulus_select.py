@@ -132,6 +132,8 @@ def generate_sequence(pdef, entry, out, seed=1, drives=19, override=None,
     elif gen == "saturate":
         cmd = (f"python3 Validation/sequences/saturate.py --seed {seed} "
                f"--drives {max(drives, 240)} --out {out}")
+    elif gen == "ack_collision":
+        cmd = f"python3 Validation/sequences/ack_collision.py --seed {seed} --out {out}"
     elif gen == "write_read":
         cmd = (f"python3 Validation/sequences/write_read.py --seed {seed} "
                f"--pairs {max(drives // 2, 12)} --out {out}")

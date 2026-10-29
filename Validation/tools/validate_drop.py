@@ -578,8 +578,46 @@ def main() -> int:
     n_fail = sum(1 for v in verdicts.values() if v == "FAIL")
     n_err = len(verdicts) - n_pass - n_fail
     print(f"    pass={n_pass} fail={n_fail} error={n_err}")
+    # RTL that does not compile is a finding against its block (run_path
+    # writes a failing report with `compile_errors`), one per block, with
+    # every offending line; written every run so a stale one never lingers
+    by_block = {}
+    for p in verdicts:
+        rp = os.path.join(report_dir, f"{p}_report.json")
+        if not os.path.exists(rp):
+            continue
+        for ce in (json.load(open(rp)).get("compile_errors") or []):
+            b = by_block.setdefault(ce["block"], {"errors": {}, "paths": set()})
+            b["errors"][(ce["file"], ce["line"], ce["message"])] = ce
+            b["paths"].add(p)
+    cfinds = []
+    for blk, b in sorted(by_block.items()):
+        errs = sorted(b["errors"].values(), key=lambda c: c["line"])
+        cfinds.append({"source": "validation", "target": "frontend", "kind": "compile_error",
+                       "scope": blk, "owner_candidates": [blk], "status": "open", "severity": "critical",
+                       "spec_revision": val_rev, "drop": head,
+                       "title": f"{blk}.sv does not compile: " + "; ".join(f"line {c['line']}: {c['message']}" for c in errs[:3]),
+                       "detail": (f"xmvlog rejects {blk}.sv as shipped in this drop ({len(errs)} error(s)); every path "
+                                  f"that instantiates it ({len(b['paths'])}) has no verdict and every finding on those "
+                                  f"paths is carried untested. The Frontend's lint/sim gate did not run on this drop "
+                                  f"(regenerated with --no-lint): a compile error is a Phase defect, not an environment one."),
+                       "evidence": {"errors": errs, "paths": sorted(b["paths"]),
+                                    "tool": "xmvlog (Xcelium) on Olympus"},
+                       "expected": f"{blk}.sv compiles under IEEE 1800 (the Frontend lint gate passes on the shipped drop)",
+                       "actual": "; ".join(f"{c['file']}:{c['line']}: {c['message']}" for c in errs[:4])})
+        print(f"    COMPILE ERROR {blk}: {len(errs)} error(s), {len(b['paths'])} path(s) without a verdict")
+    with open(os.path.join(OUTBOX_DIR, "compile_findings.json"), "w") as f:
+        json.dump({"$schema": "validation-findings/1", "generated_by": "validate_drop.py step 4 (xmvlog errors inside the drop's RTL)",
+                   "drop": head, "findings": cfinds}, f, indent=2)
     errored = [p for p, v in verdicts.items() if v not in ("PASS", "FAIL")]
-    if errored:
+    # A path whose RTL did not compile has a report (the compile finding) but
+    # no judgement: the findings it carried are untested, never resolved
+    # (11 findings "resolved" by a scheduler that did not compile, 2026-10-29)
+    uncompiled = {}
+    for blk, b in by_block.items():
+        for p in b["paths"]:
+            uncompiled[p] = f"compile error in {blk}.sv: no verdict on this drop; findings carried untested"
+    if errored or uncompiled:
         # A path that did not run has no report for this drop. Its old one
         # (from the previous drop, in the shared reports dir) must not be
         # judged, compared or snapshotted as this drop's, and the findings it
@@ -593,8 +631,14 @@ def main() -> int:
                 for f in glob.glob(os.path.join(report_dir, f"{q}_*")):
                     os.remove(f)
                 blocked[q] = [f"run error ({verdicts[p]}): see {os.path.relpath(LOGS, ROOT)}/{head}_{p}.txt"]
-        print(f"    {len(errored)} path(s) did not run; their stale reports were removed and "
-              f"their findings are carried untested")
+        for p, why in uncompiled.items():
+            for q in [p] + derived.get(p, []):
+                blocked.setdefault(q, [why])
+        if errored:
+            print(f"    {len(errored)} path(s) did not run; their stale reports were removed and "
+                  f"their findings are carried untested")
+        if uncompiled:
+            print(f"    {len(uncompiled)} path(s) have no verdict (RTL did not compile); their findings are carried untested")
         if drop_status is None:
             drop_status = {"$schema": "validation-drop-status/1", "drop": head,
                            "partial": False, "blocks_present": present,
@@ -602,7 +646,7 @@ def main() -> int:
                            "inconsistent_edges": bad_edges,
                            "validation_spec_revision": val_rev,
                            "foreign_spec_blocks": foreign,
-                           "paths_run": [p for p in paths if p not in errored],
+                           "paths_run": [p for p in paths if p not in errored and p not in uncompiled],
                            "paths_blocked": blocked,
                            "note": "Paths listed as blocked with a run error did not simulate "
                                    "on this drop (infrastructure, not design); nothing is "

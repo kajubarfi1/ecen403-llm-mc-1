@@ -860,9 +860,10 @@ def repair_findings(head, rep_stage_root=None):
 
 
 STRUCTURAL_FILES = ("spec_revision_findings.json", "width_findings.json",
-                    "integration_map_findings.json")
+                    "integration_map_findings.json", "compile_findings.json")
 STRUCTURAL_KINDS = {"spec_mismatch": "critical", "width_mismatch": "critical", "rtl_bug": None,
-                    "manifest_wrong_source": None, "manifest_gap": None}
+                    "manifest_wrong_source": None, "manifest_gap": None,
+                    "compile_error": "critical"}      # the drop's RTL does not compile (validate_drop step 4)
 
 
 def structural_findings(spec_rev, head):
@@ -887,7 +888,17 @@ def structural_findings(spec_rev, head):
                 port = ev.get("block_spec_revision")
             check_id = f"{kind.upper()}/{port}" if port else kind.upper()
             anchor = []
-            for blk in [owner] + [c for c in x.get("owner_candidates", []) if c != owner]:
+            if kind == "compile_error":
+                # the anchor IS the offending line in the shipped RTL
+                try:
+                    import rtl_drop as RD
+                    rtl = os.path.relpath(RD.rtl_file(owner), ROOT)
+                except Exception:
+                    rtl = f"{owner}.sv"
+                anchor = [{"file": rtl, "line": c["line"], "signal": None, "text": c["message"]}
+                          for c in ev.get("errors", [])]
+            for blk in ([] if kind == "compile_error" else
+                        [owner] + [c for c in x.get("owner_candidates", []) if c != owner]):
                 try:
                     import rtl_drop as RD
                     anchor.append({"file": os.path.relpath(RD.manifest_file(blk), ROOT),
@@ -897,7 +908,7 @@ def structural_findings(spec_rev, head):
             out.append({
                 "schema": "validation-findings/2",
                 "id": f"structural/{owner}/{check_id}",
-                "kind": "rtl_defect" if kind in ("width_mismatch", "rtl_bug") else "manifest_defect",
+                "kind": "rtl_defect" if kind in ("width_mismatch", "rtl_bug", "compile_error") else "manifest_defect",
                 "check_id": check_id, "taxonomy_id": kind.upper(),
                 "detectors": [f"structural:{name[:-5]}"],
                 "owner_module": owner,
@@ -906,10 +917,12 @@ def structural_findings(spec_rev, head):
                 "confidence": "confirmed",
                 "title": x.get("title", ""), "requirement": x.get("detail", "")[:300],
                 "spec_ref": x.get("spec_ref") or ev.get("spec_path"),
-                "expected": (f"spec revision {ev.get('validation_spec_revision')}" if kind == "spec_mismatch"
+                "expected": (x.get("expected") if kind == "compile_error"
+                             else f"spec revision {ev.get('validation_spec_revision')}" if kind == "spec_mismatch"
                              else f"{ev.get('spec_path')} = {ev.get('spec_value')}"
                              if ev.get("spec_path") else x.get("title", "")),
-                "actual": (f"generated from spec revision {ev.get('block_spec_revision')}" if kind == "spec_mismatch"
+                "actual": (x.get("actual") if kind == "compile_error"
+                           else f"generated from spec revision {ev.get('block_spec_revision')}" if kind == "spec_mismatch"
                            else f"{ev.get('from', '')} {ev.get('from_width', '')} -> "
                            f"{ev.get('to', '')} {ev.get('to_width', '')}".strip()
                            if "from_width" in ev else
@@ -918,8 +931,10 @@ def structural_findings(spec_rev, head):
                 "detector": f"structural:{name[:-5]}",
                 "anchor": anchor[:3],
                 "mechanism": x.get("detail", ""),
-                "paths": ["structural"], "occurrences": 1,
-                "repro": {"cmd": "python3 Validation/structural/width_conformance.py"
+                "paths": ev.get("paths") or ["structural"], "occurrences": max(1, len(ev.get("errors", []))),
+                "repro": {"cmd": f"python3 Validation/tools/run_path.py --path {(ev.get('paths') or ['path_01_write_cmd'])[0]}"
+                          if kind == "compile_error" else
+                          "python3 Validation/structural/width_conformance.py"
                           if name.startswith("width") else
                           "python3 Validation/structural/integration_map_gen.py --findings /dev/stdout"},
                 "drop": {"git_head": head, "spec_revision": spec_rev},
@@ -946,6 +961,33 @@ def formal_report_applies(rep, head, cur_design, block_design):
     return False
 
 
+def formal_proof_sets(reports, applies):
+    """(proven_now, proven_before, cex_now) over JasperGold reports.
+    proven_now: proven or bounded_proven in a report that applies to the
+    design under judgement (bounded_vacuous / proven_vacuous never count:
+    the rule's trigger was not reached). proven_before: proven on SOME
+    design. cex_now: a counterexample in an applying report with NO
+    abstraction. A counterexample found with everything free is a witness
+    in the real design; a bounded proof under an assumed configuration holds
+    for that configuration only and cannot overrule it, so cex_now is
+    removed from proven_now (2026-10-28: HOST_001, cex at 24 cycles with
+    everything free, no cex to 8245 under the assumed refresh/timing
+    registers that keep the design from ever answering a read)."""
+    proven_now, proven_before, cex_now = set(), set(), set()
+    for rep in reports:
+        ok = applies(rep)
+        abstracted = bool(rep.get("abstractions"))
+        for r in rep.get("results", []):
+            tid = r.get("short", "").replace("a_", "", 1)
+            if r.get("status") in ("proven", "bounded_proven"):
+                proven_before.add(tid)
+                if ok:
+                    proven_now.add(tid)
+            elif r.get("status") == "cex" and ok and not abstracted:
+                cex_now.add(tid)
+    return proven_now - cex_now, proven_before, cex_now
+
+
 def formal_findings(spec_rev, head):
     """v2 records for the formal-triage files of this spec revision whose
     `drop` is this drop (or unstated)."""
@@ -969,18 +1011,9 @@ def formal_findings(spec_rev, head):
             return RD.design_id(blocks)
         except Exception:
             return None
-    proven_before = set()       # proven on SOME design, not necessarily this one
-    for rp in glob.glob(os.path.join(ROOT, "Validation", "reports", "formal", "jg_*.json")):
-        rep = load(rp, {})
-        applies = formal_report_applies(rep, head, cur_design, block_design)
-        for r in rep.get("results", []):
-            # bounded_proven: no counterexample to a depth at or past the
-            # signoff bar (SIGNOFF §6), recorded by run_formal.py
-            if r.get("status") in ("proven", "bounded_proven"):
-                tid = r.get("short", "").replace("a_", "", 1)
-                proven_before.add(tid)
-                if applies:
-                    proven_now.add(tid)
+    reports = [load(rp, {}) for rp in glob.glob(os.path.join(ROOT, "Validation", "reports", "formal", "jg_*.json"))]
+    proven_now, proven_before, cex_now = formal_proof_sets(
+        reports, lambda rep: formal_report_applies(rep, head, cur_design, block_design))
     for f in glob.glob(os.path.join(OUTBOX_SHARED, spec_rev, "formal_*_findings.json")):
         d = load(f, {})
         for x in d.get("findings", []):
@@ -991,7 +1024,7 @@ def formal_findings(spec_rev, head):
                 continue                         # formal cleared it on this drop
             owner = x.get("scope", "unknown")
             awaiting = bool(x.get("drop")) and x["drop"] != head
-            status, confidence = formal_status(tid, proven_now, proven_before)
+            status, confidence = formal_status(tid, proven_now, proven_before, cex_now)
             out.append({
                 "schema": "validation-findings/2",
                 "id": x.get("id") or f"formal/{owner}/{tid}",
@@ -1018,16 +1051,21 @@ def formal_findings(spec_rev, head):
     return out
 
 
-def formal_status(tid, proven_now, proven_before):
+def formal_status(tid, proven_now, proven_before, cex_now=()):
     """(status, confidence) of a formal counterexample on the current drop.
     Proven here: the caller drops it. Proven on an earlier design but with no
     result yet on this one: `awaiting_formal`, unverified -- a changed design
     needs its own JasperGold run, and until then there is no counterexample
     on this drop for an agent to act on (two stale scheduler findings routed
     to the Phase 3 agent on 4bf921ce1833, Frontend handoff 2026-10-15).
-    Never proven anywhere: the counterexample stands, open and confirmed."""
+    Never proven anywhere: the counterexample stands, open and confirmed.
+    A counterexample with no abstraction on THIS design (cex_now) stands
+    whatever an abstracted run bounded before: it is a witness in the real
+    design (HOST_001, 2026-10-28)."""
     if tid in proven_now:
         return "resolved", "confirmed"
+    if tid in cex_now:
+        return "open", "confirmed"
     if tid in proven_before:
         return "awaiting_formal", "unverified"
     return "open", "confirmed"

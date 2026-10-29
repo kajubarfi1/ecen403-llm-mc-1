@@ -364,9 +364,10 @@
         {
           "id": "HOST_001",
           "never": "$past(wb_cyc_i && wb_stb_i && !wb_stall_o && wb_we_i) && rsp_valid",
-          "cover": "wb_cyc_i && wb_stb_i && !wb_stall_o && wb_we_i",
+          "cover": "rsp_valid && $past(wb_cyc_i && wb_stb_i && !wb_stall_o)",
           "requirement": "Host acknowledge collision: a write beat accepted in the previous cycle (its acknowledge is due now) and a read response arriving now would be two completions on one ack line. The port must hold one of them so every accepted beat is acknowledged exactly once.",
-          "spec_ref": "host_interface.interface_type (wishbone_pipelined: one acknowledge per accepted beat)"
+          "spec_ref": "host_interface.interface_type (wishbone_pipelined: one acknowledge per accepted beat)",
+          "$cover_note": "The near miss: a read response arriving the cycle after ANY accepted beat. A cover of the write beat alone was reached in a run whose assumed configuration never answered a read, so the bounded proof under it looked non-vacuous while the trigger (a response) never occurred (2026-10-28)."
         }
       ]
     }

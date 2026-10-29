@@ -1,0 +1,653 @@
+
+==============================================================
+    Jasper Verification Results
+==============================================================
+    2024.09 FCS 64 bits for Linux64 4.18.0-372.26.1.el8_6.x86_64
+    Host Name: n01-zeus.olympus.ece.tamu.edu
+    User Name: jacobz
+    Printed on: Wednesday, Oct28, 2026 02:43:04 PM CDT
+    Working Directory: /home/ugrads/j/jacobz/formal/auto/pkg
+
+
+==============================================================
+DESIGN INFO
+==============================================================
+    Top Level Module     : chain_formal
+    Clocks               : clk
+    Resets               : !rst_n
+    Global Stopats       :     <none>
+    Global Assumptions   :     <none>
+
+==============================================================
+SUMMARY
+==============================================================
+    Total Tasks           : 1
+    Total Properties      : 45
+          assumptions     : 0                   
+           - approved     : 0                   
+           - temporary    : 0                   
+          assertions      : 16                  
+           - proven       : 11                  ( 68.8% )
+           - marked_proven: 0                   ( 0.0% )
+           - cex          : 1                   ( 6.2% )
+           - ar_cex       : 0                   ( 0.0% )
+           - undetermined : 4                   ( 25.0% )
+           - unprocessed  : 0                   ( 0.0% )
+           - error        : 0                   ( 0.0% )
+          covers          : 29                  
+           - unreachable  : 0                   ( 0.0% )
+           - covered      : 29                  ( 100.0% )
+           - ar_covered   : 0                   ( 0.0% )
+           - undetermined : 0                   ( 0.0% )
+           - unprocessed  : 0                   ( 0.0% )
+           - error        : 0                   ( 0.0% )
+
+==============================================================
+RESULTS
+==============================================================
+
+-----------------------------------------------------------------------------------------------------------------------------------
+       Name                                                                       |    Result    |  Engine  |  Bound  |  Time    
+-----------------------------------------------------------------------------------------------------------------------------------
+
+---[ <embedded> ]------------------------------------------------------------------------------------------------------------------
+[1]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_001                                proven          Hp     Infinite    68.626 s     
+[2]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_001:precondition1                  covered         Ht            6    0.087 s      
+[3]   chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_001                                covered         Ht            8    0.247 s      
+[4]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_002                                proven          Hp     Infinite    68.626 s     
+[5]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_002:precondition1                  covered         Bm           38    153.027 s    
+[6]   chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_002                                covered         Ht           40    226.043 s    
+[7]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_003                                proven          Hp     Infinite    241.251 s    
+[8]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_003:precondition1                  covered         Ht            6    0.112 s      
+[9]   chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_003                                covered         Ht           12    0.263 s      
+[10]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004                                proven          AM     Infinite    6.530 s      
+[11]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004:precondition1                  covered         Ht            6    0.141 s      
+[12]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_004                                covered         Ht           15    0.345 s      
+[13]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005                                proven          Mpcustom2  Infinite  13.639 s   
+[14]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005:precondition1                  covered         Ht            6    0.176 s      
+[15]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_005                                covered         Ht            7    0.215 s      
+[16]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_007                                proven          Mpcustom2  Infinite  13.640 s   
+[17]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_007:precondition1                  covered         Ht           21    10.543 s     
+[18]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_007                                covered         Ht           22    14.243 s     
+[19]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_008                                proven          Hp     Infinite    68.627 s     
+[20]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_008:precondition1                  covered         Ht           21    10.561 s     
+[21]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_008                                covered         Ht           23    20.611 s     
+[22]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_009                                proven          Hp     Infinite    68.627 s     
+[23]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_009:precondition1                  covered         Bm           21    10.658 s     
+[24]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_009                                covered         Bm           22    14.639 s     
+[25]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011                                proven          AM     Infinite    17.224 s     
+[26]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011:precondition1                  covered         Ht            6    0.198 s      
+[27]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_011                                covered         L       36 - 37    6.793 s      
+[28]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_006                                proven          Hp     Infinite    20.195 s     
+[29]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_006:precondition1                  covered         Ht            6    0.087 s      
+[30]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_006                                covered         Ht            6    0.087 s      
+[31]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_012                                undetermined    Oh     14044 -     5.532 s      
+[32]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_012                                covered         J      59 - 9403   16.551 s     
+[33]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_001                                 undetermined    Bm        49 -     629.678 s    
+[34]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_001:precondition1                   covered         Ht           21    10.543 s     
+[35]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_001                                 covered         Ht           21    10.561 s     
+[36]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_002                                 undetermined    Bm        49 -     672.265 s    
+[37]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_002:precondition1                   covered         Ht            6    0.087 s      
+[38]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_002                                 covered         Ht            6    0.087 s      
+[39]  chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_002                         proven          Hp     Infinite    35.264 s     
+[40]  chain_formal.u_scheduler.u_scheduler_order_sva.c_REF_002                         covered         J      157 - 7803  8.887 s      
+[41]  chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_001                         undetermined    Hts      616 -     63.954 s     
+[42]  chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_001:precondition1           covered         J      127 - 7803  8.887 s      
+[43]  chain_formal.u_scheduler.u_scheduler_order_sva.c_REF_001                         covered         J      127 - 7803  8.887 s      
+[44]  chain_formal.u_wb_port.u_wb_port_order_sva.a_HOST_001                            cex             L      24 - 160    19.201 s     
+[45]  chain_formal.u_wb_port.u_wb_port_order_sva.c_HOST_001                            covered         PRE           1    0.000 s      
+
+==============================================================
+ASSUMPTIONS
+==============================================================
+
+-------------------------------------------------------------------------------
+       Name    |  Expression  |  Location     |  Status      |  Dependencies                  
+-------------------------------------------------------------------------------
+
+==============================================================
+DETAILED RESULTS
+==============================================================
+
+---[ <embedded> ]--------------------------------------------------------------
+[1]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_001
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_001
+    Type       : assert
+    Location   : cmd_gen_sva.sv, 37
+
+    Result     : proven
+    Bound      : Infinite
+    Time       : 68.626 s
+    Engine     : Hp
+
+
+[2]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_001:precondition1
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_001_precondition1
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 37
+
+    Result     : covered
+    Bound      : 6
+    Time       : 0.087 s
+    Engine     : Ht
+
+
+[3]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_001
+    Expression : u_cmd_gen.u_cmd_gen_sva.c_TIMING_001
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 39
+
+    Result     : covered
+    Bound      : 8
+    Time       : 0.247 s
+    Engine     : Ht
+
+
+[4]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_002
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_002
+    Type       : assert
+    Location   : cmd_gen_sva.sv, 52
+
+    Result     : proven
+    Bound      : Infinite
+    Time       : 68.626 s
+    Engine     : Hp
+
+
+[5]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_002:precondition1
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_002_precondition1
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 52
+
+    Result     : covered
+    Bound      : 38
+    Time       : 153.027 s
+    Engine     : Bm
+
+
+[6]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_002
+    Expression : u_cmd_gen.u_cmd_gen_sva.c_TIMING_002
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 54
+
+    Result     : covered
+    Bound      : 40
+    Time       : 226.043 s
+    Engine     : Ht
+
+
+[7]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_003
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_003
+    Type       : assert
+    Location   : cmd_gen_sva.sv, 67
+
+    Result     : proven
+    Bound      : Infinite
+    Time       : 241.251 s
+    Engine     : Hp
+
+
+[8]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_003:precondition1
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_003_precondition1
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 67
+
+    Result     : covered
+    Bound      : 6
+    Time       : 0.112 s
+    Engine     : Ht
+
+
+[9]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_003
+    Expression : u_cmd_gen.u_cmd_gen_sva.c_TIMING_003
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 69
+
+    Result     : covered
+    Bound      : 12
+    Time       : 0.263 s
+    Engine     : Ht
+
+
+[10]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_004
+    Type       : assert
+    Location   : cmd_gen_sva.sv, 82
+
+    Result     : proven
+    Bound      : Infinite
+    Time       : 6.530 s
+    Engine     : AM
+
+
+[11]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004:precondition1
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_004_precondition1
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 82
+
+    Result     : covered
+    Bound      : 6
+    Time       : 0.141 s
+    Engine     : Ht
+
+
+[12]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_004
+    Expression : u_cmd_gen.u_cmd_gen_sva.c_TIMING_004
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 84
+
+    Result     : covered
+    Bound      : 15
+    Time       : 0.345 s
+    Engine     : Ht
+
+
+[13]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_005
+    Type       : assert
+    Location   : cmd_gen_sva.sv, 97
+
+    Result     : proven
+    Bound      : Infinite
+    Time       : 13.639 s
+    Engine     : Mpcustom2
+
+
+[14]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005:precondition1
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_005_precondition1
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 97
+
+    Result     : covered
+    Bound      : 6
+    Time       : 0.176 s
+    Engine     : Ht
+
+
+[15]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_005
+    Expression : u_cmd_gen.u_cmd_gen_sva.c_TIMING_005
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 99
+
+    Result     : covered
+    Bound      : 7
+    Time       : 0.215 s
+    Engine     : Ht
+
+
+[16]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_007
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_007
+    Type       : assert
+    Location   : cmd_gen_sva.sv, 111
+
+    Result     : proven
+    Bound      : Infinite
+    Time       : 13.640 s
+    Engine     : Mpcustom2
+
+
+[17]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_007:precondition1
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_007_precondition1
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 111
+
+    Result     : covered
+    Bound      : 21
+    Time       : 10.543 s
+    Engine     : Ht
+
+
+[18]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_007
+    Expression : u_cmd_gen.u_cmd_gen_sva.c_TIMING_007
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 113
+
+    Result     : covered
+    Bound      : 22
+    Time       : 14.243 s
+    Engine     : Ht
+
+
+[19]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_008
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_008
+    Type       : assert
+    Location   : cmd_gen_sva.sv, 126
+
+    Result     : proven
+    Bound      : Infinite
+    Time       : 68.627 s
+    Engine     : Hp
+
+
+[20]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_008:precondition1
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_008_precondition1
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 126
+
+    Result     : covered
+    Bound      : 21
+    Time       : 10.561 s
+    Engine     : Ht
+
+
+[21]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_008
+    Expression : u_cmd_gen.u_cmd_gen_sva.c_TIMING_008
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 128
+
+    Result     : covered
+    Bound      : 23
+    Time       : 20.611 s
+    Engine     : Ht
+
+
+[22]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_009
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_009
+    Type       : assert
+    Location   : cmd_gen_sva.sv, 141
+
+    Result     : proven
+    Bound      : Infinite
+    Time       : 68.627 s
+    Engine     : Hp
+
+
+[23]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_009:precondition1
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_009_precondition1
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 141
+
+    Result     : covered
+    Bound      : 21
+    Time       : 10.658 s
+    Engine     : Bm
+
+
+[24]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_009
+    Expression : u_cmd_gen.u_cmd_gen_sva.c_TIMING_009
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 143
+
+    Result     : covered
+    Bound      : 22
+    Time       : 14.639 s
+    Engine     : Bm
+
+
+[25]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_011
+    Type       : assert
+    Location   : cmd_gen_sva.sv, 158
+
+    Result     : proven
+    Bound      : Infinite
+    Time       : 17.224 s
+    Engine     : AM
+
+
+[26]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011:precondition1
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_011_precondition1
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 158
+
+    Result     : covered
+    Bound      : 6
+    Time       : 0.198 s
+    Engine     : Ht
+
+
+[27]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_011
+    Expression : u_cmd_gen.u_cmd_gen_sva.c_TIMING_011
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 160
+
+    Result     : covered
+    Bound      : 36 - 37
+    Time       : 6.793 s
+    Engine     : L
+
+
+[28]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_006
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_006
+    Type       : assert
+    Location   : cmd_gen_sva.sv, 178
+
+    Result     : proven
+    Bound      : Infinite
+    Time       : 20.195 s
+    Engine     : Hp
+
+
+[29]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_006:precondition1
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_006_precondition1
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 178
+
+    Result     : covered
+    Bound      : 6
+    Time       : 0.087 s
+    Engine     : Ht
+
+
+[30]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_006
+    Expression : u_cmd_gen.u_cmd_gen_sva.c_TIMING_006
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 180
+
+    Result     : covered
+    Bound      : 6
+    Time       : 0.087 s
+    Engine     : Ht
+
+
+[31]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_012
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_TIMING_012
+    Type       : assert
+    Location   : cmd_gen_sva.sv, 214
+
+    Result     : undetermined
+    Bound      : 14044 - 
+    Time       : 5.532 s
+    Engine     : Oh
+
+
+[32]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_012
+    Expression : u_cmd_gen.u_cmd_gen_sva.c_TIMING_012
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 217
+
+    Result     : covered
+    Bound      : 59 - 9403
+    Time       : 16.551 s
+    Engine     : J
+
+
+[33]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_001
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_PROTO_001
+    Type       : assert
+    Location   : cmd_gen_sva.sv, 257
+
+    Result     : undetermined
+    Bound      : 49 - 
+    Time       : 629.678 s
+    Engine     : Bm
+
+
+[34]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_001:precondition1
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_PROTO_001_precondition1
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 257
+
+    Result     : covered
+    Bound      : 21
+    Time       : 10.543 s
+    Engine     : Ht
+
+
+[35]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_001
+    Expression : u_cmd_gen.u_cmd_gen_sva.c_PROTO_001
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 259
+
+    Result     : covered
+    Bound      : 21
+    Time       : 10.561 s
+    Engine     : Ht
+
+
+[36]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_002
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_PROTO_002
+    Type       : assert
+    Location   : cmd_gen_sva.sv, 270
+
+    Result     : undetermined
+    Bound      : 49 - 
+    Time       : 672.265 s
+    Engine     : Bm
+
+
+[37]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_002:precondition1
+    Expression : u_cmd_gen.u_cmd_gen_sva.a_PROTO_002_precondition1
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 270
+
+    Result     : covered
+    Bound      : 6
+    Time       : 0.087 s
+    Engine     : Ht
+
+
+[38]
+    Name       : chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_002
+    Expression : u_cmd_gen.u_cmd_gen_sva.c_PROTO_002
+    Type       : cover
+    Location   : cmd_gen_sva.sv, 272
+
+    Result     : covered
+    Bound      : 6
+    Time       : 0.087 s
+    Engine     : Ht
+
+
+[39]
+    Name       : chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_002
+    Expression : u_scheduler.u_scheduler_order_sva.a_REF_002
+    Type       : assert
+    Location   : scheduler_order_sva.sv, 24
+
+    Result     : proven
+    Bound      : Infinite
+    Time       : 35.264 s
+    Engine     : Hp
+
+
+[40]
+    Name       : chain_formal.u_scheduler.u_scheduler_order_sva.c_REF_002
+    Expression : u_scheduler.u_scheduler_order_sva.c_REF_002
+    Type       : cover
+    Location   : scheduler_order_sva.sv, 27
+
+    Result     : covered
+    Bound      : 157 - 7803
+    Time       : 8.887 s
+    Engine     : J
+
+
+[41]
+    Name       : chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_001
+    Expression : u_scheduler.u_scheduler_order_sva.a_REF_001
+    Type       : assert
+    Location   : scheduler_order_sva.sv, 37
+
+    Result     : undetermined
+    Bound      : 616 - 
+    Time       : 63.954 s
+    Engine     : Hts
+
+
+[42]
+    Name       : chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_001:precondition1
+    Expression : u_scheduler.u_scheduler_order_sva.a_REF_001_precondition1
+    Type       : cover
+    Location   : scheduler_order_sva.sv, 37
+
+    Result     : covered
+    Bound      : 127 - 7803
+    Time       : 8.887 s
+    Engine     : J
+
+
+[43]
+    Name       : chain_formal.u_scheduler.u_scheduler_order_sva.c_REF_001
+    Expression : u_scheduler.u_scheduler_order_sva.c_REF_001
+    Type       : cover
+    Location   : scheduler_order_sva.sv, 39
+
+    Result     : covered
+    Bound      : 127 - 7803
+    Time       : 8.887 s
+    Engine     : J
+
+
+[44]
+    Name       : chain_formal.u_wb_port.u_wb_port_order_sva.a_HOST_001
+    Expression : u_wb_port.u_wb_port_order_sva.a_HOST_001
+    Type       : assert
+    Location   : wb_port_order_sva.sv, 22
+
+    Result     : cex
+    Bound      : 24 - 160
+    Time       : 19.201 s
+    Engine     : L
+
+
+[45]
+    Name       : chain_formal.u_wb_port.u_wb_port_order_sva.c_HOST_001
+    Expression : u_wb_port.u_wb_port_order_sva.c_HOST_001
+    Type       : cover
+    Location   : wb_port_order_sva.sv, 25
+
+    Result     : covered
+    Bound      : 1
+    Time       : 0.000 s
+    Engine     : PRE
+
+
+-------------------------------------------------------------------------------

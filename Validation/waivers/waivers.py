@@ -107,7 +107,9 @@ class WaiverSet:
             raw = json.load(f)
         ws = []
         for entry in raw.get("waivers", []):
-            w = Waiver(**entry)
+            # "$"-prefixed keys are documentation (decision notes, what
+            # implements the waiver), the repo's convention; not fields
+            w = Waiver(**{k: v for k, v in entry.items() if not k.startswith("$")})
             w.validate()
             ws.append(w)
         return cls(ws, scope, spec_revision)

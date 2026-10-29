@@ -1,5 +1,5 @@
 {
-  "$comment": "DDR3-1600 Memory Controller — Path Definitions v2. Updated to match actual frontend-generated manifests.",
+  "$comment": "DDR3-1600 Memory Controller \u2014 Path Definitions v2. Updated to match actual frontend-generated manifests.",
   "schema_version": "2.0.0",
   "source": "ddr3_block_diagram_v2.html + actual frontend manifests (Phase1/2/3)",
   "spec_reference": "llmmc_microarchitecturespec_filled.json",
@@ -55,7 +55,7 @@
     "data_path": {
       "label": "Data Path & Alignment",
       "file": "data_path.sv",
-      "$note": "No manifest found in frontend output — ports unverified"
+      "$note": "No manifest found in frontend output \u2014 ports unverified"
     },
     "init_fsm": {
       "label": "Init / Reset FSM",
@@ -356,7 +356,7 @@
       "from": "data_path",
       "to": "wb_port",
       "category": "data_path",
-      "$note": "data_path manifest missing — cannot verify",
+      "$note": "data_path manifest missing \u2014 cannot verify",
       "signals": [
         {
           "source_port": "rsp_valid",
@@ -720,7 +720,7 @@
     },
     {
       "id": "path_04_scheduler_bank_loop",
-      "name": "Scheduler → cmd_gen → Bank Tracker → Scheduler Feedback Loop",
+      "name": "Scheduler \u2192 cmd_gen \u2192 Bank Tracker \u2192 Scheduler Feedback Loop",
       "category": "feedback_loop",
       "blocks": [
         "scheduler",
@@ -747,7 +747,7 @@
     },
     {
       "id": "path_05_scheduler_refresh_loop",
-      "name": "Scheduler ↔ Refresh Controller Feedback Loop",
+      "name": "Scheduler \u2194 Refresh Controller Feedback Loop",
       "category": "feedback_loop",
       "blocks": [
         "scheduler",
@@ -768,11 +768,11 @@
       ],
       "stimulus_generator": "refresh_stress",
       "settle_cycles": 6000,
-      "stimulus_reason": "CSR programs a short tREFI and a small postpone budget, then sustained writes keep the scheduler busy so refresh is postponed to the urgent threshold — the REF_001 / TIMING_012 antecedents."
+      "stimulus_reason": "CSR programs a short tREFI and a small postpone budget, then sustained writes keep the scheduler busy so refresh is postponed to the urgent threshold \u2014 the REF_001 / TIMING_012 antecedents."
     },
     {
       "id": "path_06_scheduler_dequeue",
-      "name": "Scheduler → Command Queue Dequeue",
+      "name": "Scheduler \u2192 Command Queue Dequeue",
       "category": "scheduling",
       "blocks": [
         "scheduler",
@@ -797,7 +797,7 @@
     },
     {
       "id": "path_07_backpressure",
-      "name": "Command Queue → Wishbone Backpressure",
+      "name": "Command Queue \u2192 Wishbone Backpressure",
       "category": "flow_control",
       "blocks": [
         "wb_port",
@@ -841,7 +841,7 @@
     {
       "id": "path_08_init_to_cal",
       "mode": "event",
-      "name": "Init FSM → Calibration",
+      "name": "Init FSM \u2192 Calibration",
       "category": "init",
       "blocks": [
         "init_fsm",
@@ -861,7 +861,7 @@
     {
       "id": "path_09_init_to_refresh",
       "mode": "event",
-      "name": "Init FSM → Refresh Controller",
+      "name": "Init FSM \u2192 Refresh Controller",
       "category": "init",
       "blocks": [
         "init_fsm",
@@ -880,7 +880,7 @@
     },
     {
       "id": "path_10_csr_to_timing",
-      "name": "CSR → Bank Tracker Timing Configuration",
+      "name": "CSR \u2192 Bank Tracker Timing Configuration",
       "category": "config",
       "blocks": [
         "config_regs",
@@ -923,7 +923,7 @@
     },
     {
       "id": "path_11_csr_to_refresh",
-      "name": "CSR → Refresh Controller Configuration",
+      "name": "CSR \u2192 Refresh Controller Configuration",
       "category": "config",
       "blocks": [
         "config_regs",
@@ -966,7 +966,7 @@
     },
     {
       "id": "path_12_csr_timing_to_scheduling",
-      "name": "CSR → Bank Tracker → Scheduler (Transitive Config)",
+      "name": "CSR \u2192 Bank Tracker \u2192 Scheduler (Transitive Config)",
       "category": "config",
       "blocks": [
         "config_regs",
@@ -992,7 +992,7 @@
     },
     {
       "id": "path_13_csr_refresh_to_scheduling",
-      "name": "CSR → Refresh Ctrl → Scheduler (Transitive Config)",
+      "name": "CSR \u2192 Refresh Ctrl \u2192 Scheduler (Transitive Config)",
       "category": "config",
       "blocks": [
         "config_regs",
@@ -1019,7 +1019,7 @@
     {
       "id": "path_14_status_init",
       "mode": "event",
-      "name": "Init FSM → CSR Status Reporting",
+      "name": "Init FSM \u2192 CSR Status Reporting",
       "category": "status",
       "blocks": [
         "init_fsm",
@@ -1043,7 +1043,7 @@
     {
       "id": "path_15_status_cal",
       "mode": "event",
-      "name": "Calibration → CSR Status Reporting",
+      "name": "Calibration \u2192 CSR Status Reporting",
       "category": "status",
       "blocks": [
         "calibration",
@@ -1066,7 +1066,7 @@
     },
     {
       "id": "path_16_status_refresh",
-      "name": "Refresh Ctrl → CSR Status Reporting",
+      "name": "Refresh Ctrl \u2192 CSR Status Reporting",
       "category": "status",
       "blocks": [
         "refresh_ctrl",
@@ -1080,7 +1080,7 @@
         "config_regs.sv"
       ],
       "check_strategy": "composed",
-      "check_strategy_reason": "refresh_ctrl is an autonomous stage; with no scheduler to acknowledge, pending refreshes climb to the postpone limit and the starvation flag must surface in the CSR — the REF_001 antecedent, observed at the register interface.",
+      "check_strategy_reason": "refresh_ctrl is an autonomous stage; with no scheduler to acknowledge, pending refreshes climb to the postpone limit and the starvation flag must surface in the CSR \u2014 the REF_001 antecedent, observed at the register interface.",
       "stimulus_generator": "status_poll",
       "stimulus_kinds": [
         "read"
@@ -1090,7 +1090,7 @@
     {
       "id": "path_17_full_boot",
       "mode": "event",
-      "name": "Full Init → Cal → Status Path",
+      "name": "Full Init \u2192 Cal \u2192 Status Path",
       "category": "init",
       "blocks": [
         "init_fsm",
@@ -1176,7 +1176,7 @@
     },
     {
       "id": "path_19_row_conflict",
-      "name": "Row Conflict Resolution (PRE → ACT → RD/WR)",
+      "name": "Row Conflict Resolution (PRE \u2192 ACT \u2192 RD/WR)",
       "category": "end_to_end",
       "blocks": [
         "wb_port",
@@ -1247,7 +1247,7 @@
       ],
       "stimulus_generator": "refresh_stress",
       "settle_cycles": 6000,
-      "stimulus_reason": "CSR programs a short tREFI and a small postpone budget, then sustained writes keep the scheduler busy so refresh is postponed to the urgent threshold — the REF_001 / TIMING_012 antecedents."
+      "stimulus_reason": "CSR programs a short tREFI and a small postpone budget, then sustained writes keep the scheduler busy so refresh is postponed to the urgent threshold \u2014 the REF_001 / TIMING_012 antecedents."
     },
     {
       "id": "path_21_wb_port_standalone",
@@ -1302,15 +1302,57 @@
         "read"
       ],
       "settle_cycles": 64
+    },
+    {
+      "id": "path_23_host_ack_collision",
+      "name": "Host Acknowledge Collision (HOST_001 witness)",
+      "category": "flow_control",
+      "blocks": [
+        "data_path",
+        "wb_port"
+      ],
+      "connections_used": [
+        "conn_11"
+      ],
+      "rtl_files": [
+        "data_path.sv",
+        "wb_port.sv"
+      ],
+      "entry_boundary": {
+        "type": "external",
+        "entity": "HOST",
+        "signals": [
+          "wb_cyc_i",
+          "wb_stb_i",
+          "wb_we_i"
+        ]
+      },
+      "exit_boundary": {
+        "type": "external",
+        "entity": "HOST",
+        "signals": [
+          "wb_ack_o",
+          "wb_dat_o"
+        ]
+      },
+      "check_strategy": "composed",
+      "check_strategy_reason": "same chain as path_03; judged on the port's single ack line under a directed collision sweep",
+      "stimulus_kinds": [
+        "read",
+        "write"
+      ],
+      "stimulus_generator": "ack_collision",
+      "settle_cycles": 300,
+      "$stimulus_note": "2026-10-29: HOST_001 (formal counterexample 2026-10-28) reproduced in simulation: a read to an open row, then a write beat d+1 cycles later for every d in the spec-derived latency window (ack_collision.py, an idle inside one pipelined run). On drop 99f72da45a32 the collision lands at d = 40: the write's acknowledge and the read's response share one wb_ack_o pulse, the host handshake stage counts one beat never acknowledged while every request and response is conserved. The path exists so the fix has a test and so the collision is judged on every drop."
     }
   ],
   "validation_summary": {
     "total_blocks": 11,
     "total_direct_connections": 19,
-    "total_paths": 20,
+    "total_paths": 23,
     "data_path_manifest_missing": true
   },
-  "$comment_check_strategy": "check_strategy selects how a scope is verified: exact (one predictor, exact comparison), composed (chained predictors down a feed-forward path), invariant (legality rules — used where many orderings are legal, so prediction would fail against correct RTL), observe (autonomous DUT; monitors and SVA carry the check). Read as data by the orchestrator; never inferred from a scope name.",
+  "$comment_check_strategy": "check_strategy selects how a scope is verified: exact (one predictor, exact comparison), composed (chained predictors down a feed-forward path), invariant (legality rules \u2014 used where many orderings are legal, so prediction would fail against correct RTL), observe (autonomous DUT; monitors and SVA carry the check). Read as data by the orchestrator; never inferred from a scope name.",
   "$comment_stimulus": "stimulus_generator names the directed generator for the path (register_walk, status_poll, refresh_stress); absent means constrained-random on the entry stream (register_walk for a CSR entry at seed 1). window_cycles is the observation window for a path with no driver; settle_cycles the drain after the driver finishes.",
   "$comment_judged_in": "judged_in: a single-hop path whose check is exactly one stage of a longer path's run. run_path.py writes a derived report for it whenever the host path is judged, so every path has a report and every downstream tool (compare_drops, the fault matrix, the cockpit) sees all of them as first-class.",
   "$comment_standalone": "standalone: the harness instantiates ONLY the listed blocks (no support closure); every edge that cuts must be in integration_overrides.json standalone_ties or generation refuses. These are the paths a phase-partial drop can run; they also run on complete drops."

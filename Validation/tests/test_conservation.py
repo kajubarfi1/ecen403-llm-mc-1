@@ -11,7 +11,11 @@ sys.path.insert(0, os.path.join(ROOT, "Validation", "txn"))
 import conservation as C  # noqa: E402
 
 CATALOG = json.load(open(os.path.join(ROOT, "Validation", "txn", "interface_catalog.json")))
-SCHEMAS = json.load(open(os.path.join(ROOT, "Validation", "txn", "generated", "schemas.json")))["interfaces"]
+# resolved in memory from the declared drop, not read from the generated
+# file: a flow run on a partial drop regenerates that file for its own drop
+# (2026-10-29, every rule's interfaces "missing" after runs/oct29_loop)
+import schema_gen as SG  # noqa: E402
+SCHEMAS = SG.resolve()["interfaces"]
 SPEC = json.load(open(C.SPEC_PATH))
 
 
@@ -122,3 +126,29 @@ class TestEmitterParsesTheLines(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPartialDrop(unittest.TestCase):
+    def test_interfaces_of_absent_blocks_make_the_rule_not_applicable(self):
+        """A partial drop's schemas lack the absent blocks' interfaces; the
+        rule must step aside, not crash (every Phase 1-3 path came back
+        INCOMPLETE on runs/oct29_loop, 2026-10-29)."""
+        partial = {k: v for k, v in SCHEMAS.items() if v["block"] != "data_path"}
+        t = _trace([("wb", "read", {}), ("req", "request", {"we": "0"}), ("cq_enq", "enqueue", {})])
+        status, rows = C.check(t, ["wb_port", "cmd_queue"], CATALOG, partial, SPEC)
+        self.assertEqual(status, "pass")
+        by = {r["id"]: r for r in rows}
+        self.assertEqual(by["READ_CMD_TO_RESPONSE"]["status"], "not_applicable")
+        self.assertIn("dp_cmd", by["READ_CMD_TO_RESPONSE"]["why"])
+        self.assertEqual(by["HOST_BEAT_TO_REQUEST"]["status"], "checked")
+
+
+class TestWaiverFileLoads(unittest.TestCase):
+    def test_documentation_keys_do_not_break_the_loader(self):
+        """A '$'-prefixed key in waivers.json is a note, not a field: the
+        W-003 entry's notes broke every scoreboard run on 2026-10-29."""
+        sys.path.insert(0, os.path.join(ROOT, "Validation", "waivers"))
+        import waivers as W
+        ws = W.WaiverSet.load()
+        ids = {w.id for w in (ws.waivers if hasattr(ws, "waivers") else [])}
+        self.assertIn("W-003", ids)

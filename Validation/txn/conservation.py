@@ -100,10 +100,18 @@ def check(trace, blocks, catalog=None, schemas=None, spec=None):
     rows = []
     for rule in catalog.get("conservation", {}).get("rules", []):
         fr, to = rule["from"], rule["to"]
-        need = {schemas[fr["iface"]]["block"], schemas[to["iface"]]["block"]}
         row = {"id": rule["id"], "owner": rule["owner"], "from": _sel_label(fr),
                "to": _sel_label(to), "requirement": rule["requirement"],
                "taxonomy": rule.get("taxonomy"), "spec_ref": rule.get("spec_ref")}
+        absent = [i for i in (fr["iface"], to["iface"]) if i not in schemas]
+        if absent:
+            # a partial drop: the schemas are generated from the blocks the
+            # drop has, so an interface of an absent block is simply not there
+            row.update(status="not_applicable",
+                       why=f"interface(s) {absent} not in this drop's schemas (block absent)")
+            rows.append(row)
+            continue
+        need = {schemas[fr["iface"]]["block"], schemas[to["iface"]]["block"]}
         if not need <= blocks:
             row.update(status="not_applicable",
                        why=f"block(s) {sorted(need - blocks)} not in the harness")

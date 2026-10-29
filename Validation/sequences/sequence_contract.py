@@ -127,6 +127,21 @@ def stimulus_ports(iface, catalog, schemas):
     return {"outputs": outs, "inputs": ins}
 
 
+_CAT = None
+
+
+def _catalog():
+    """The interface catalog's `interfaces` (drive blocks), loaded once."""
+    global _CAT
+    if _CAT is None:
+        try:
+            with open(os.path.join(HERE, "..", "txn", "interface_catalog.json")) as f:
+                _CAT = json.load(f).get("interfaces", {})
+        except OSError:
+            _CAT = {}
+    return _CAT
+
+
 def validate(seq, schemas, drivable_ifaces, require_targets=True):
     """Structural gate. Returns a list of actionable failure strings.
 
@@ -166,6 +181,21 @@ def validate(seq, schemas, drivable_ifaces, require_targets=True):
                         f"{list(VALID_OPS)}.")
             continue
 
+        if op == "idle" and st.get("within_run"):
+            # a gap inside a pipelined run: both neighbours (across other
+            # such gaps) must be drives of the same pipelined interface
+            def _nb(j, step):
+                k = j
+                while 0 <= k < len(steps) and steps[k].get("op") == "idle" and steps[k].get("within_run"):
+                    k += step
+                return steps[k] if 0 <= k < len(steps) else None
+            a, b = _nb(i - 1, -1), _nb(i + 1, +1)
+            ok = (a and b and a.get("op") == "drive" and b.get("op") == "drive"
+                  and a.get("iface") == b.get("iface")
+                  and _catalog().get(a.get("iface"), {}).get("drive", {}).get("pipelined"))
+            if not ok:
+                errs.append(f"{where}: 'within_run' idle must sit between two drives of one "
+                            f"pipelined interface (catalog drive.pipelined)")
         if op == "idle":
             n = st.get("cycles")
             if not isinstance(n, int) or n < 1:

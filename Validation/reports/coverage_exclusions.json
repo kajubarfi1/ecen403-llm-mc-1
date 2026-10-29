@@ -1,61 +1,688 @@
 {
-  "$schema": "validation-coverage-exclusions-report/1",
+  "$schema": "validation-coverage-exclusions-report/2",
   "instances": {
+    "u_bank_tracker": {
+      "uncovered_toggle_bits": 199,
+      "excluded_approved": 198,
+      "excluded_proposed": 0,
+      "measured_percent": 80.8,
+      "adjusted_percent": 99.6,
+      "adjusted_if_proposed_approved_percent": 99.6
+    },
     "u_cmd_queue": {
       "uncovered_toggle_bits": 360,
-      "excluded_approved": 0,
-      "excluded_proposed": 100,
-      "measured_percent": 85.8,
-      "adjusted_percent": 85.8,
-      "adjusted_if_proposed_approved_percent": 93.6
+      "excluded_approved": 100,
+      "excluded_proposed": 0,
+      "measured_percent": 85.6,
+      "adjusted_percent": 93.4,
+      "adjusted_if_proposed_approved_percent": 93.4
+    },
+    "u_config_regs": {
+      "uncovered_toggle_bits": 129,
+      "excluded_approved": 120,
+      "excluded_proposed": 0,
+      "measured_percent": 85.1,
+      "adjusted_percent": 98.0,
+      "adjusted_if_proposed_approved_percent": 98.0
+    },
+    "u_data_path": {
+      "uncovered_toggle_bits": 39,
+      "excluded_approved": 16,
+      "excluded_proposed": 0,
+      "measured_percent": 89.4,
+      "adjusted_percent": 92.8,
+      "adjusted_if_proposed_approved_percent": 92.8
     },
     "u_scheduler": {
       "uncovered_toggle_bits": 186,
-      "excluded_approved": 0,
-      "excluded_proposed": 52,
-      "measured_percent": 90.3,
-      "adjusted_percent": 90.3,
-      "adjusted_if_proposed_approved_percent": 95.1
+      "excluded_approved": 52,
+      "excluded_proposed": 0,
+      "measured_percent": 91.0,
+      "adjusted_percent": 95.4,
+      "adjusted_if_proposed_approved_percent": 95.4
     },
     "u_wb_port": {
-      "uncovered_toggle_bits": 140,
-      "excluded_approved": 0,
-      "excluded_proposed": 1,
-      "measured_percent": 84.3,
-      "adjusted_percent": 84.3,
-      "adjusted_if_proposed_approved_percent": 84.4
+      "uncovered_toggle_bits": 54,
+      "excluded_approved": 1,
+      "excluded_proposed": 0,
+      "measured_percent": 88.4,
+      "adjusted_percent": 88.6,
+      "adjusted_if_proposed_approved_percent": 88.6
     }
   },
   "exclusions": [
     {
       "id": "X-001",
       "code": "E-SPEC",
-      "status": "proposed",
-      "approved_by": null,
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
       "matched_bits": {
-        "approved": 0,
-        "proposed": 99
+        "approved": 99,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "entry_col",
+          "mem_col",
+          "enq_col"
+        ],
+        "bits": {
+          "low_bits": "log2(memory_geometry.burst_length)"
+        }
+      },
+      "derived": {
+        "signals": [
+          "entry_col",
+          "mem_col",
+          "enq_col"
+        ],
+        "bits": [
+          0,
+          1,
+          2
+        ]
       }
     },
     {
       "id": "X-002",
       "code": "E-SPEC",
-      "status": "proposed",
-      "approved_by": null,
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
       "matched_bits": {
-        "approved": 0,
-        "proposed": 51
+        "approved": 51,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "q_col",
+          "cmd_col"
+        ],
+        "bits": {
+          "low_bits": "log2(memory_geometry.burst_length)"
+        }
+      },
+      "derived": {
+        "signals": [
+          "q_col",
+          "cmd_col"
+        ],
+        "bits": [
+          0,
+          1,
+          2
+        ]
       }
     },
     {
       "id": "X-003",
       "code": "E-RESET",
-      "status": "proposed",
-      "approved_by": null,
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
       "matched_bits": {
-        "approved": 0,
-        "proposed": 3
+        "approved": 6,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "rst_n"
+        ],
+        "bits": "all"
+      },
+      "derived": {
+        "signals": [
+          "rst_n"
+        ],
+        "bits": "all"
+      }
+    },
+    {
+      "id": "X-004",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 64,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "ctr_rcd",
+          "ctr_rp"
+        ],
+        "bits": {
+          "above_max": "timing_model.$derived_cycles.tRCD_nCK",
+          "width": 8
+        }
+      },
+      "derived": {
+        "signals": [
+          "ctr_rcd",
+          "ctr_rp"
+        ],
+        "bits": [
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "id": "X-005",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 32,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "ctr_wr"
+        ],
+        "bits": {
+          "above_max": "timing_model.$derived_cycles.tWR_nCK",
+          "width": 8
+        }
+      },
+      "derived": {
+        "signals": [
+          "ctr_wr"
+        ],
+        "bits": [
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "id": "X-006",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 50,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "ctr_rrd",
+          "ctr_rtp",
+          "ctr_ccd"
+        ],
+        "bits": {
+          "above_max": "ceil(0 + timing_model.$derived_cycles.tRRD_nCK)",
+          "width": 8
+        }
+      },
+      "derived": {
+        "signals": [
+          "ctr_rrd",
+          "ctr_rtp",
+          "ctr_ccd"
+        ],
+        "bits": [
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "id": "X-007",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 24,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "ctr_ras"
+        ],
+        "bits": {
+          "above_max": "timing_model.$derived_cycles.tRAS_nCK",
+          "width": 8
+        }
+      },
+      "derived": {
+        "signals": [
+          "ctr_ras"
+        ],
+        "bits": [
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "id": "X-008",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 3,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "ctr_wtr"
+        ],
+        "bits": {
+          "above_max": "timing_model.$derived_cycles.tWTR_nCK + timing_model.CWL_cycles + 4",
+          "width": 8
+        }
+      },
+      "derived": {
+        "signals": [
+          "ctr_wtr"
+        ],
+        "bits": [
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "id": "X-009",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 16,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "ctr_rc"
+        ],
+        "bits": {
+          "above_max": "timing_model.$derived_cycles.tRC_nCK",
+          "width": 8
+        }
+      },
+      "derived": {
+        "signals": [
+          "ctr_rc"
+        ],
+        "bits": [
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "id": "X-010",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 8,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "faw_pipe"
+        ],
+        "bits": {
+          "above_max": "timing_model.$derived_cycles.tFAW_nCK",
+          "width": 8
+        }
+      },
+      "derived": {
+        "signals": [
+          "faw_pipe"
+        ],
+        "bits": [
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "id": "X-011",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 6,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "rd_lat_ctr"
+        ],
+        "bits": {
+          "above_max": "ceil(timing_model.CL_cycles / clocking_model.clock_ratio_ddr_to_controller) - 1",
+          "width": 8
+        }
+      },
+      "derived": {
+        "signals": [
+          "rd_lat_ctr"
+        ],
+        "bits": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "id": "X-012",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 7,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "wr_lat_ctr"
+        ],
+        "bits": {
+          "above_max": "ceil(timing_model.CWL_cycles / clocking_model.clock_ratio_ddr_to_controller) - 1",
+          "width": 8
+        }
+      },
+      "derived": {
+        "signals": [
+          "wr_lat_ctr"
+        ],
+        "bits": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "id": "X-013",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 2,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "rd_burst_ctr",
+          "wr_burst_ctr"
+        ],
+        "bits": {
+          "above_max": "data_path_mapping.host_width_bits / data_path_mapping.ddr_channel_width_bits - 1",
+          "width": 2
+        }
+      },
+      "derived": {
+        "signals": [
+          "rd_burst_ctr",
+          "wr_burst_ctr"
+        ],
+        "bits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "X-014",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 24,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "reg_ctrl_config"
+        ],
+        "bits": {
+          "reserved_of": "CTRL_CONFIG"
+        }
+      },
+      "derived": {
+        "signals": [
+          "reg_ctrl_config"
+        ],
+        "bits": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ]
+      }
+    },
+    {
+      "id": "X-015",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 23,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "reg_refresh_config"
+        ],
+        "bits": {
+          "reserved_of": "REFRESH_CONFIG"
+        }
+      },
+      "derived": {
+        "signals": [
+          "reg_refresh_config"
+        ],
+        "bits": [
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ]
+      }
+    },
+    {
+      "id": "X-016",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 28,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "reg_bist_config"
+        ],
+        "bits": {
+          "reserved_of": "BIST_CONFIG"
+        }
+      },
+      "derived": {
+        "signals": [
+          "reg_bist_config"
+        ],
+        "bits": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ]
+      }
+    },
+    {
+      "id": "X-017",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 6,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "reg_bist_addr_start",
+          "reg_bist_addr_end"
+        ],
+        "bits": {
+          "reserved_of": "BIST_ADDR_START"
+        }
+      },
+      "derived": {
+        "signals": [
+          "reg_bist_addr_start",
+          "reg_bist_addr_end"
+        ],
+        "bits": [
+          29,
+          30,
+          31
+        ]
+      }
+    },
+    {
+      "id": "X-018",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 4,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "csr_adr_i"
+        ],
+        "bits": {
+          "address_bits_unused": true
+        }
+      },
+      "derived": {
+        "signals": [
+          "csr_adr_i"
+        ],
+        "bits": [
+          0,
+          1,
+          6,
+          7
+        ]
+      }
+    },
+    {
+      "id": "X-019",
+      "code": "E-ABSENT",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 34,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": {
+          "undriven_inputs_of": "config_regs",
+          "plus": [
+            "ecc_ue_flag_r"
+          ]
+        },
+        "bits": "all"
+      },
+      "derived": {
+        "signals": [
+          "sts_bist_done",
+          "sts_bist_fail",
+          "sts_bist_fail_addr",
+          "sts_ecc_ce_count",
+          "sts_ecc_ue_event",
+          "sts_self_refresh_active",
+          "ecc_ue_flag_r"
+        ],
+        "bits": "all"
       }
     }
-  ]
+  ],
+  "derived_under": {
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "spec_design_id": "ddr3_mc_core_v2"
+  }
 }

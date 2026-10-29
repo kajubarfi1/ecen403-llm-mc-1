@@ -3,7 +3,7 @@
   "path": "path_18_full_write",
   "strategy": "composed",
   "verdict": "fail",
-  "timestamp": "2026-10-28T14:20:25.359638",
+  "timestamp": "2026-10-29T12:17:17.851313",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -15,15 +15,15 @@
     "scheduler",
     "wb_port"
   ],
-  "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
+  "sequence": null,
   "stimulus_generator": "write_read",
   "autonomous": false,
   "window_cycles": 2000,
-  "coverage_collected": true,
+  "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "99f72da45a32",
-    "drop_id": "99f72da45a32",
-    "design_id": "a2b204453edc",
+    "git_head": "5994bb667dba",
+    "drop_id": "5994bb667dba",
+    "design_id": "2ed70e31cb84",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -35,17 +35,17 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "17274ce",
+    "validated_at": "1aefeb0",
     "frontend_commits": {
       "addr_decoder": "f37ce49d323151a6118ae7765aa766918c816383",
       "bank_tracker": "f37ce49d323151a6118ae7765aa766918c816383",
       "cmd_gen": "f37ce49d323151a6118ae7765aa766918c816383",
       "cmd_queue": "f37ce49d323151a6118ae7765aa766918c816383",
       "config_regs": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc",
-      "data_path": "f37ce49d323151a6118ae7765aa766918c816383",
+      "data_path": "90c01f641e38c739b30366c69df7046ae9f21972",
       "refresh_ctrl": "f37ce49d323151a6118ae7765aa766918c816383",
-      "scheduler": "1bc0ce7e4655061d5017f4bab90690a52a9a563f",
-      "wb_port": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc"
+      "scheduler": "5e784e2af679c5f1dec45750a8ce70f2714b6cdd",
+      "wb_port": "65dbb0ff530a6fe7c387b0c8f87a9330c3340b8a"
     },
     "roots": [
       "Frontend2/OutputFolders"
@@ -100,101 +100,23 @@
     "shipped_spec": {
       "path": "Frontend2/OutputFolders/generated_spec.json",
       "revision": "golden_ddr3_1600k_x8_2lane_1rank"
-    },
-    "netlists": {}
+    }
   },
-  "stages": [
+  "stages": [],
+  "compile_errors": [
     {
-      "stage": "wb_port",
-      "kind": "exact",
-      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
-      "scope": "wb_port",
-      "verdict": "fail",
-      "summary": "scope=wb_port  strategy=exact  status=fail  matched=27/31  missing=4",
-      "detail": [
-        "scope=wb_port  strategy=exact  status=fail  matched=27/31  missing=4",
-        "  req[16] missing: predicted [req.request addr=0x1ff58c45 data=0x815a47c5 mask=0xf we=0x1] but the design produced nothing",
-        "  req[18] missing: predicted [req.request addr=0xf890d38 data=0x677f6cbd mask=0xf we=0x1] but the design produced nothing",
-        "  req[20] missing: predicted [req.request addr=0x17fb2263 data=0x1622bd79 mask=0xf we=0x1] but the design produced nothing",
-        "  req[22] missing: predicted [req.request addr=0x192b176e data=0x5eda92d8 mask=0xf we=0x1] but the design produced nothing"
-      ],
-      "rule_counts": {}
+      "block": "scheduler",
+      "file": "scheduler.sv",
+      "line": 178,
+      "message": "'sel_bank_eff_r': undeclared identifier [12.5(IEEE)]."
     },
     {
-      "stage": "addr_decoder",
-      "kind": "exact",
-      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
-      "scope": "addr_decoder",
-      "verdict": "pass",
-      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=20/20  (20 output transaction(s) matched)",
-      "detail": [],
-      "rule_counts": {}
-    },
-    {
-      "stage": "cmd_queue+scheduler",
-      "kind": "invariant",
-      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
-      "scope": "cmd_queue_scheduler",
-      "verdict": "pass",
-      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (387 transactions, no rule broken)",
-      "detail": [],
-      "rule_counts": {}
-    },
-    {
-      "stage": "cmd_gen",
-      "kind": "exact",
-      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
-      "scope": "cmd_gen",
-      "verdict": "pass",
-      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=55/55  (55 output transaction(s) matched)",
-      "detail": [],
-      "rule_counts": {}
-    },
-    {
-      "stage": "data_path",
-      "kind": "exact",
-      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/data_path_predictor.py",
-      "scope": "data_path",
-      "verdict": "fail",
-      "summary": "scope=data_path  strategy=exact  status=fail  matched=17/25  missing=3 unexpected=1 value=5",
-      "detail": [
-        "scope=data_path  strategy=exact  status=fail  matched=17/25  missing=3 unexpected=1 value=5",
-        "  dp_rd_rsp[1] value: predicted [dp_rd_rsp.response aux=0x1 data=0xc5b6fecf] but observed [dp_rd_rsp.response aux=0x1 data=0x1587fddf]",
-        "  dp_rd_rsp[2] value: predicted [dp_rd_rsp.response aux=0x5 data=0xc59efc4f] but observed [dp_rd_rsp.response aux=0x5 data=0xc5b6fecf]",
-        "  dp_rd_rsp[3] value: predicted [dp_rd_rsp.response aux=0x7 data=0x1587fddf] but observed [dp_rd_rsp.response aux=0x7 data=0xc59efc4f]",
-        "  dp_rd_rsp[4] value: predicted [dp_rd_rsp.response aux=0x3 data=0x7d435bf] but observed [dp_rd_rsp.response aux=0x3 data=0x858cfd67]",
-        "  dp_rd_rsp[5] value: predicted [dp_rd_rsp.response aux=0xb data=0xab990580] but observed [dp_rd_rsp.response aux=0xb data=0xafbd67f9]",
-        "  dp_rd_rsp[6] unexpected: the design produced [dp_rd_rsp.response aux=0x9 data=0x5805975] with nothing predicted",
-        "  dp_rd_rsp[-1] missing: predicted [dp_rd_rsp.response aux=0x3 data=0x67f97204] but the design produced nothing",
-        "  dp_rd_rsp[-1] missing: predicted [dp_rd_rsp.response aux=0x7 data=0x858cfd67] but the design produced nothing",
-        "  dp_rd_rsp[-1] missing: predicted [dp_rd_rsp.response aux=0x5 data=0x5975afbd] but the design produced nothing"
-      ],
-      "rule_counts": {}
-    },
-    {
-      "stage": "(conservation)",
-      "kind": "conservation",
-      "scope": "(conservation)",
-      "model": null,
-      "verdict": "fail",
-      "summary": "scope=(conservation)  strategy=conservation  status=fail  rules=6 checked, 2 broken, 0 not applicable",
-      "detail": [
-        "CONSERVE HOST_BEAT_TO_REQUEST owner=wb_port lost=4 of=24 from=wb to=req observed=20 | Every host beat the port accepts (wb_cyc_i && wb_stb_i && !wb_stall_o) becomes exactly one request presented to and taken by the command queue (req_valid && req_ready). A port that accepts a beat it cannot deliver has lost a host access: a write is acknowledged and lost, a read is never answered. The port must either stall the beat or hold the request until the queue takes it.",
-        "CONSERVE READ_CMD_TO_RESPONSE owner=data_path lost=5 of=12 from=dp_cmd.read to=dp_rd_rsp observed=7 | Every RD command the data path is told about (cmd_rd_valid) yields exactly one read response (rd_rsp_valid), whatever the spacing between RD commands: the spec allows CAS-to-CAS at tCCD, so the capture must pipeline or the command generator must be held, not the command dropped."
-      ]
-    },
-    {
-      "stage": "(host handshake)",
-      "kind": "handshake",
-      "scope": "(host handshake)",
-      "model": null,
-      "verdict": "fail",
-      "summary": "1 driver completion timeout(s): the slave never acknowledged every beat it accepted",
-      "detail": [
-        "DRIVER_STALL: wb \u2014 5 of 24 pipelined beat(s) never acknowledged (wb_ack_o)"
-      ]
+      "block": "scheduler",
+      "file": "scheduler.sv",
+      "line": 179,
+      "message": "'sel_bank_eff_r': undeclared identifier [12.5(IEEE)]."
     }
   ],
   "log": "Validation/reports/paths/path_18_full_write_sim.log",
-  "observed_trace": "Validation/reports/paths/path_18_full_write_observed.jsonl"
+  "observed_trace": null
 }

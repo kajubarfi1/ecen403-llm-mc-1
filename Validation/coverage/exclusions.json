@@ -1,39 +1,345 @@
 {
   "$schema": "validation-coverage-exclusions/1",
-  "$comment": "Code-coverage exclusions under SIGNOFF.md section 4: each names the instance, the signal bits, one of the four allowed codes and the reason, and is counted only once a named person approved it. apply_exclusions.py matches these against the uncovered-items reports (measure_coverage.py --uncovered) and writes the adjusted numbers; nothing here changes what the simulator measures.",
+  "$comment": "Code-coverage exclusions under SIGNOFF.md section 4. Each names the instance, the signals, one of the allowed codes, the reason and the approver; the BITS ARE A RULE over the spec (exclusion_rules.py), never a literal list, so the same file holds for every spec: apply_exclusions.py derives the bits against the spec and the drop under judgement and records what it derived. The approval covers the rule. Nothing here changes what the simulator measures.",
   "exclusions": [
     {
       "id": "X-001",
       "code": "E-SPEC",
       "instance": "u_cmd_queue",
-      "signals": ["entry_col", "mem_col", "enq_col"],
-      "bits": [0, 1, 2],
+      "signals": [
+        "entry_col",
+        "mem_col",
+        "enq_col"
+      ],
+      "bits": {
+        "low_bits": "log2(memory_geometry.burst_length)"
+      },
       "reason": "The three low column bits are the burst offset within a BL8 burst (spec memory_geometry.burst_length = 8); the address decoder issues every column aligned to the burst, so these bits are constant 0 at the controller. The queue stores them because the port width is the full column.",
-      "status": "proposed",
-      "approved_by": null,
-      "approved_utc": null
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:46:14.845603+00:00",
+      "decision_note": "Approved 2026-10-29 on the validation subsystem owner's review: the bits are constant by the spec's burst alignment, not by lack of stimulus."
     },
     {
       "id": "X-002",
       "code": "E-SPEC",
       "instance": "u_scheduler",
-      "signals": ["q_col", "cmd_col"],
-      "bits": [0, 1, 2],
+      "signals": [
+        "q_col",
+        "cmd_col"
+      ],
+      "bits": {
+        "low_bits": "log2(memory_geometry.burst_length)"
+      },
       "reason": "Same bits as X-001 seen from the scheduler: the queue entries' column and the issued command's column carry a burst-aligned column, low three bits constant under burst_length = 8.",
-      "status": "proposed",
-      "approved_by": null,
-      "approved_utc": null
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:46:14.845603+00:00",
+      "decision_note": "Approved 2026-10-29 on the validation subsystem owner's review: the bits are constant by the spec's burst alignment, not by lack of stimulus."
     },
     {
       "id": "X-003",
       "code": "E-RESET",
       "instance": "*",
-      "signals": ["rst_n"],
+      "signals": [
+        "rst_n"
+      ],
       "bits": "all",
       "reason": "The reset input rises once per simulation and never falls again; the init paths' assertions cover reset behaviour. A fall toggle would need a second reset, which no path applies.",
-      "status": "proposed",
-      "approved_by": null,
-      "approved_utc": null
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:46:14.845603+00:00",
+      "decision_note": "Approved 2026-10-29 on the validation subsystem owner's review: no path applies a second reset; the init paths' assertions judge reset behaviour. Retires itself if a mid-run reset path is added (the bit then toggles)."
+    },
+    {
+      "id": "X-004",
+      "code": "E-SPEC",
+      "instance": "u_bank_tracker",
+      "signals": [
+        "ctr_rcd",
+        "ctr_rp"
+      ],
+      "bits": {
+        "above_max": "timing_model.$derived_cycles.tRCD_nCK",
+        "width": 8
+      },
+      "reason": "8-bit timing counter(s) sized for any speed grade; this spec loads at most 11 (tRCD_nCK/tRP_nCK, timing_model.$derived_cycles) and the counter decrements once per controller clock (timing_model.counter_clock), so bits 4 and up can never be set.",
+      "spec_ref": "timing_model.$derived_cycles.tRCD_nCK/tRP_nCK; timing_model.counter_clock",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:58:31.243700+00:00",
+      "decision_note": "Approved 2026-10-29 after the uncovered-item review of the four blocks under 90 %.",
+      "$rule_note": "tRCD and tRP share one rule (tRCD_nCK); they are equal on every JEDEC DDR3 speed bin."
+    },
+    {
+      "id": "X-005",
+      "code": "E-SPEC",
+      "instance": "u_bank_tracker",
+      "signals": [
+        "ctr_wr"
+      ],
+      "bits": {
+        "above_max": "timing_model.$derived_cycles.tWR_nCK",
+        "width": 8
+      },
+      "reason": "8-bit timing counter(s) sized for any speed grade; this spec loads at most 12 (tWR_nCK, timing_model.$derived_cycles) and the counter decrements once per controller clock (timing_model.counter_clock), so bits 4 and up can never be set.",
+      "spec_ref": "timing_model.$derived_cycles.tWR_nCK; timing_model.counter_clock",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:58:31.243700+00:00",
+      "decision_note": "Approved 2026-10-29 after the uncovered-item review of the four blocks under 90 %."
+    },
+    {
+      "id": "X-006",
+      "code": "E-SPEC",
+      "instance": "u_bank_tracker",
+      "signals": [
+        "ctr_rrd",
+        "ctr_rtp",
+        "ctr_ccd"
+      ],
+      "bits": {
+        "above_max": "ceil(0 + timing_model.$derived_cycles.tRRD_nCK)",
+        "width": 8
+      },
+      "reason": "8-bit timing counter(s) sized for any speed grade; this spec loads at most 6 (tRRD_nCK/tRTP_nCK/tCCD_nCK, timing_model.$derived_cycles) and the counter decrements once per controller clock (timing_model.counter_clock), so bits 3 and up can never be set.",
+      "spec_ref": "timing_model.$derived_cycles.tRRD_nCK/tRTP_nCK/tCCD_nCK; timing_model.counter_clock",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:58:31.243700+00:00",
+      "decision_note": "Approved 2026-10-29 after the uncovered-item review of the four blocks under 90 %.",
+      "$rule_note": "tRRD_nCK, tRTP_nCK and tCCD_nCK are all 6 or less on every DDR3 speed bin's derived cycles here; the rule takes tRRD (the largest of the three in this spec). If a spec made tRTP or tCCD larger than tRRD, split the entry."
+    },
+    {
+      "id": "X-007",
+      "code": "E-SPEC",
+      "instance": "u_bank_tracker",
+      "signals": [
+        "ctr_ras"
+      ],
+      "bits": {
+        "above_max": "timing_model.$derived_cycles.tRAS_nCK",
+        "width": 8
+      },
+      "reason": "8-bit timing counter(s) sized for any speed grade; this spec loads at most 28 (tRAS_nCK, timing_model.$derived_cycles) and the counter decrements once per controller clock (timing_model.counter_clock), so bits 5 and up can never be set.",
+      "spec_ref": "timing_model.$derived_cycles.tRAS_nCK; timing_model.counter_clock",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:58:31.243700+00:00",
+      "decision_note": "Approved 2026-10-29 after the uncovered-item review of the four blocks under 90 %."
+    },
+    {
+      "id": "X-008",
+      "code": "E-SPEC",
+      "instance": "u_bank_tracker",
+      "signals": [
+        "ctr_wtr"
+      ],
+      "bits": {
+        "above_max": "timing_model.$derived_cycles.tWTR_nCK + timing_model.CWL_cycles + 4",
+        "width": 8
+      },
+      "reason": "8-bit timing counter(s) sized for any speed grade; this spec loads at most 18 (tWTR_nCK + CWL_cycles + the 4 nCK write burst, timing_model.$derived_cycles) and the counter decrements once per controller clock (timing_model.counter_clock), so bits 5 and up can never be set.",
+      "spec_ref": "timing_model.$derived_cycles.tWTR_nCK + CWL_cycles + the 4 nCK write burst; timing_model.counter_clock",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:58:31.243700+00:00",
+      "decision_note": "Approved 2026-10-29 after the uncovered-item review of the four blocks under 90 %."
+    },
+    {
+      "id": "X-009",
+      "code": "E-SPEC",
+      "instance": "u_bank_tracker",
+      "signals": [
+        "ctr_rc"
+      ],
+      "bits": {
+        "above_max": "timing_model.$derived_cycles.tRC_nCK",
+        "width": 8
+      },
+      "reason": "8-bit timing counter(s) sized for any speed grade; this spec loads at most 39 (tRC_nCK, timing_model.$derived_cycles) and the counter decrements once per controller clock (timing_model.counter_clock), so bits 6 and up can never be set.",
+      "spec_ref": "timing_model.$derived_cycles.tRC_nCK; timing_model.counter_clock",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:58:31.243700+00:00",
+      "decision_note": "Approved 2026-10-29 after the uncovered-item review of the four blocks under 90 %."
+    },
+    {
+      "id": "X-010",
+      "code": "E-SPEC",
+      "instance": "u_bank_tracker",
+      "signals": [
+        "faw_pipe"
+      ],
+      "bits": {
+        "above_max": "timing_model.$derived_cycles.tFAW_nCK",
+        "width": 8
+      },
+      "reason": "8-bit timing counter(s) sized for any speed grade; this spec loads at most 32 (tFAW_nCK, timing_model.$derived_cycles) and the counter decrements once per controller clock (timing_model.counter_clock), so bits 6 and up can never be set.",
+      "spec_ref": "timing_model.$derived_cycles.tFAW_nCK; timing_model.counter_clock",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:58:31.243700+00:00",
+      "decision_note": "Approved 2026-10-29 after the uncovered-item review of the four blocks under 90 %."
+    },
+    {
+      "id": "X-011",
+      "code": "E-SPEC",
+      "instance": "u_data_path",
+      "signals": [
+        "rd_lat_ctr"
+      ],
+      "bits": {
+        "above_max": "ceil(timing_model.CL_cycles / clocking_model.clock_ratio_ddr_to_controller) - 1",
+        "width": 8
+      },
+      "reason": "CL countdown in controller cycles: ceil(CL_cycles/clock_ratio) - 1 = 2 for CL = 11 at 4:1; an 8-bit counter sized for any CL.",
+      "spec_ref": "timing_model.CL_cycles; clocking_model.clock_ratio_ddr_to_controller",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:58:31.243700+00:00",
+      "decision_note": "Approved 2026-10-29 after the uncovered-item review of the four blocks under 90 %."
+    },
+    {
+      "id": "X-012",
+      "code": "E-SPEC",
+      "instance": "u_data_path",
+      "signals": [
+        "wr_lat_ctr"
+      ],
+      "bits": {
+        "above_max": "ceil(timing_model.CWL_cycles / clocking_model.clock_ratio_ddr_to_controller) - 1",
+        "width": 8
+      },
+      "reason": "CWL countdown in controller cycles: ceil(CWL_cycles/clock_ratio) - 1 = 1 for CWL = 8 at 4:1.",
+      "spec_ref": "timing_model.CWL_cycles; clocking_model.clock_ratio_ddr_to_controller",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:58:31.243700+00:00",
+      "decision_note": "Approved 2026-10-29 after the uncovered-item review of the four blocks under 90 %."
+    },
+    {
+      "id": "X-013",
+      "code": "E-SPEC",
+      "instance": "u_data_path",
+      "signals": [
+        "rd_burst_ctr",
+        "wr_burst_ctr"
+      ],
+      "bits": {
+        "above_max": "data_path_mapping.host_width_bits / data_path_mapping.ddr_channel_width_bits - 1",
+        "width": 2
+      },
+      "reason": "Beat counters for a host word of 2 channel beats (data_path_mapping.pack_mode): values 0..1; the 2-bit counter allows 4.",
+      "spec_ref": "data_path_mapping.pack_mode; data_path_mapping.host_width_bits / ddr_channel_width_bits",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:58:31.243700+00:00",
+      "decision_note": "Approved 2026-10-29 after the uncovered-item review of the four blocks under 90 %."
+    },
+    {
+      "id": "X-014",
+      "code": "E-SPEC",
+      "instance": "u_config_regs",
+      "signals": [
+        "reg_ctrl_config"
+      ],
+      "bits": {
+        "reserved_of": "CTRL_CONFIG"
+      },
+      "reason": "CTRL_CONFIG bits 8:31 are 'reserved', access RO, in the spec's register map: they read as zero and no write reaches them.",
+      "spec_ref": "csr_register_map.registers[CTRL_CONFIG].fields[reserved]",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:58:31.243700+00:00",
+      "decision_note": "Approved 2026-10-29 after the uncovered-item review of the four blocks under 90 %."
+    },
+    {
+      "id": "X-015",
+      "code": "E-SPEC",
+      "instance": "u_config_regs",
+      "signals": [
+        "reg_refresh_config"
+      ],
+      "bits": {
+        "reserved_of": "REFRESH_CONFIG"
+      },
+      "reason": "REFRESH_CONFIG bits 9:31 are 'reserved', access RO, in the spec's register map: they read as zero and no write reaches them.",
+      "spec_ref": "csr_register_map.registers[REFRESH_CONFIG].fields[reserved]",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:58:31.243700+00:00",
+      "decision_note": "Approved 2026-10-29 after the uncovered-item review of the four blocks under 90 %."
+    },
+    {
+      "id": "X-016",
+      "code": "E-SPEC",
+      "instance": "u_config_regs",
+      "signals": [
+        "reg_bist_config"
+      ],
+      "bits": {
+        "reserved_of": "BIST_CONFIG"
+      },
+      "reason": "BIST_CONFIG bits 4:31 are 'reserved', access RO, in the spec's register map: they read as zero and no write reaches them.",
+      "spec_ref": "csr_register_map.registers[BIST_CONFIG].fields[reserved]",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:58:31.243700+00:00",
+      "decision_note": "Approved 2026-10-29 after the uncovered-item review of the four blocks under 90 %."
+    },
+    {
+      "id": "X-017",
+      "code": "E-SPEC",
+      "instance": "u_config_regs",
+      "signals": [
+        "reg_bist_addr_start",
+        "reg_bist_addr_end"
+      ],
+      "bits": {
+        "reserved_of": "BIST_ADDR_START"
+      },
+      "reason": "BIST_ADDR_START/END bits 31:29 are 'reserved', access RO: the address is 29 bits (host_interface.address_width_bits).",
+      "spec_ref": "csr_register_map.registers[BIST_ADDR_START/END].fields[reserved]; host_interface.address_width_bits",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:58:31.243700+00:00",
+      "decision_note": "Approved 2026-10-29 after the uncovered-item review of the four blocks under 90 %."
+    },
+    {
+      "id": "X-018",
+      "code": "E-SPEC",
+      "instance": "u_config_regs",
+      "signals": [
+        "csr_adr_i"
+      ],
+      "bits": {
+        "address_bits_unused": true
+      },
+      "reason": "Register offsets are word-aligned (32-bit registers, bits 1:0 constant) and the map ends at offset 0x28 (11 registers), so bits 7:6 are never set by a mapped access; unmapped offsets are judged by the error response, not by toggling address bits.",
+      "spec_ref": "csr_register_map (11 registers, 4-byte stride)",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:58:31.243700+00:00",
+      "decision_note": "Approved 2026-10-29 after the uncovered-item review of the four blocks under 90 %."
+    },
+    {
+      "id": "X-019",
+      "code": "E-ABSENT",
+      "instance": "u_config_regs",
+      "signals": {
+        "undriven_inputs_of": "config_regs",
+        "plus": [
+          "ecc_ue_flag_r"
+        ]
+      },
+      "bits": "all",
+      "reason": "Status inputs of config_regs that no block in this design drives: there is no BIST engine, no ECC unit and no self-refresh controller among the 11 blocks (the integration map lists no source and no tie for these ports; the harness leaves them at zero). The register bits they feed can only change when such a block exists; the CSR access semantics of those bits are judged by the register walk.",
+      "spec_ref": "csr_register_map.registers[CTRL_STATUS/ERROR_STATUS]; Validation/structural/integration_map.json (consumer ports without source)",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-10-29T16:58:31.243700+00:00",
+      "decision_note": "Approved 2026-10-29 after the uncovered-item review of the four blocks under 90 %."
     }
   ]
 }
