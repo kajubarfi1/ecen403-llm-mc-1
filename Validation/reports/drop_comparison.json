@@ -1,30 +1,30 @@
 {
   "$schema": "validation-drop-comparison/1",
   "a": {
-    "dir": "Validation/reports/drops/99f72da45a32",
-    "drop_head": "99f72da45a32"
+    "dir": "Validation/reports/drops/5994bb667dba",
+    "drop_head": "5994bb667dba"
   },
   "b": {
     "dir": "Validation/reports/paths",
-    "drop_head": "5994bb667dba"
+    "drop_head": "e5ec723f495e"
   },
   "strict": false,
-  "generated_utc": "2026-10-29T17:17:19.643085Z",
+  "generated_utc": "2026-10-29T17:56:36.551779Z",
   "rows": [
     {
       "path": "path_01_write_cmd",
       "kind": "changed",
-      "new": {},
-      "gone": {
+      "new": {
         "assert:p_sel_nonzero_write": 3
       },
+      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "pass",
-        "fail"
+        "fail",
+        "pass"
       ],
       "notes": [
         "coverage collected on one side only; illegal-bin hits ignored"
@@ -32,23 +32,18 @@
     },
     {
       "path": "path_02_read_cmd",
-      "kind": "fixed",
-      "new": {},
-      "gone": {
-        "assert:p_tag": 30,
-        "assert:p_wr_no_overflow": 8,
-        "id:DRIVER_STALL": 10,
-        "log:DRIVER_STALL": 10,
-        "stage:(conservation)": 1,
-        "stage:(host handshake)": 1
+      "kind": "changed",
+      "new": {
+        "assert:p_tag": 33
       },
+      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
         "fail",
-        "fail"
+        "pass"
       ],
       "notes": [
         "coverage collected on one side only; illegal-bin hits ignored"
@@ -56,7 +51,7 @@
     },
     {
       "path": "path_03_read_return",
-      "kind": "regression",
+      "kind": "fixed",
       "new": {},
       "gone": {},
       "grew": {},
@@ -64,8 +59,8 @@
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "pass",
-        "fail"
+        "fail",
+        "pass"
       ],
       "notes": [
         "coverage collected on one side only; illegal-bin hits ignored"
@@ -74,17 +69,17 @@
     {
       "path": "path_04_scheduler_bank_loop",
       "kind": "changed",
-      "new": {},
-      "gone": {
+      "new": {
         "assert:p_sel_nonzero_write": 3
       },
+      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "pass",
-        "fail"
+        "fail",
+        "pass"
       ],
       "notes": [
         "coverage collected on one side only; illegal-bin hits ignored"
@@ -92,11 +87,12 @@
     },
     {
       "path": "path_05_scheduler_refresh_loop",
-      "kind": "fixed",
-      "new": {},
-      "gone": {
+      "kind": "regression",
+      "new": {
+        "assert:p_wr_no_overflow": 1,
         "stage:(conservation)": 1
       },
+      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
@@ -110,25 +106,24 @@
       ]
     },
     {
+      "path": "path_06_scheduler_dequeue",
+      "kind": "missing",
+      "side": "a"
+    },
+    {
       "path": "path_07_backpressure",
-      "kind": "fixed",
-      "new": {},
-      "gone": {
-        "assert:p_tag": 54,
-        "assert:p_wr_no_overflow": 39,
-        "id:DRIVER_STALL": 1,
-        "log:DRIVER_STALL": 1,
-        "stage:(conservation)": 1,
-        "stage:(host handshake)": 1,
-        "stage:wb_port": 1
+      "kind": "changed",
+      "new": {
+        "assert:p_tag": 108
       },
+      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
         "fail",
-        "fail"
+        "pass"
       ],
       "notes": [
         "coverage collected on one side only; illegal-bin hits ignored"
@@ -136,41 +131,7 @@
     },
     {
       "path": "path_08_init_to_cal",
-      "kind": "fixed",
-      "new": {},
-      "gone": {
-        "assert:a_TIMING_014": 1,
-        "stage:init_fsm": 1
-      },
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "fail",
-        "pass"
-      ]
-    },
-    {
-      "path": "path_09_init_to_refresh",
-      "kind": "fixed",
-      "new": {},
-      "gone": {
-        "assert:a_TIMING_014": 1,
-        "stage:init_fsm": 1
-      },
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "fail",
-        "pass"
-      ]
-    },
-    {
-      "path": "path_12_csr_timing_to_scheduling",
-      "kind": "regression",
+      "kind": "same",
       "new": {},
       "gone": {},
       "grew": {},
@@ -179,7 +140,45 @@
       "matched_up": {},
       "verdict": [
         "pass",
-        "fail"
+        "pass"
+      ]
+    },
+    {
+      "path": "path_09_init_to_refresh",
+      "kind": "same",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "pass",
+        "pass"
+      ]
+    },
+    {
+      "path": "path_10_csr_to_timing",
+      "kind": "missing",
+      "side": "a"
+    },
+    {
+      "path": "path_11_csr_to_refresh",
+      "kind": "missing",
+      "side": "a"
+    },
+    {
+      "path": "path_12_csr_timing_to_scheduling",
+      "kind": "fixed",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "fail",
+        "pass"
       ],
       "notes": [
         "coverage collected on one side only; illegal-bin hits ignored"
@@ -187,7 +186,24 @@
     },
     {
       "path": "path_13_csr_refresh_to_scheduling",
-      "kind": "regression",
+      "kind": "fixed",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "fail",
+        "pass"
+      ],
+      "notes": [
+        "coverage collected on one side only; illegal-bin hits ignored"
+      ]
+    },
+    {
+      "path": "path_14_status_init",
+      "kind": "same",
       "new": {},
       "gone": {},
       "grew": {},
@@ -196,43 +212,20 @@
       "matched_up": {},
       "verdict": [
         "pass",
-        "fail"
-      ],
-      "notes": [
-        "coverage collected on one side only; illegal-bin hits ignored"
-      ]
-    },
-    {
-      "path": "path_14_status_init",
-      "kind": "fixed",
-      "new": {},
-      "gone": {
-        "assert:a_TIMING_014": 1,
-        "stage:init_fsm": 1
-      },
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "fail",
         "pass"
       ]
     },
     {
       "path": "path_15_status_cal",
-      "kind": "fixed",
+      "kind": "same",
       "new": {},
-      "gone": {
-        "assert:a_TIMING_014": 1,
-        "stage:init_fsm (support)": 1
-      },
+      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "fail",
+        "pass",
         "pass"
       ]
     },
@@ -252,12 +245,25 @@
     },
     {
       "path": "path_17_full_boot",
-      "kind": "fixed",
+      "kind": "same",
       "new": {},
-      "gone": {
-        "assert:a_TIMING_014": 1,
-        "stage:init_fsm": 1
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "pass",
+        "pass"
+      ]
+    },
+    {
+      "path": "path_18_full_write",
+      "kind": "changed",
+      "new": {
+        "assert:p_tag": 9
       },
+      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
@@ -265,28 +271,6 @@
       "verdict": [
         "fail",
         "pass"
-      ]
-    },
-    {
-      "path": "path_18_full_write",
-      "kind": "fixed",
-      "new": {},
-      "gone": {
-        "assert:p_tag": 3,
-        "id:DRIVER_STALL": 1,
-        "log:DRIVER_STALL": 1,
-        "stage:(conservation)": 1,
-        "stage:(host handshake)": 1,
-        "stage:data_path": 1,
-        "stage:wb_port": 1
-      },
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "fail",
-        "fail"
       ],
       "notes": [
         "coverage collected on one side only; illegal-bin hits ignored"
@@ -295,17 +279,17 @@
     {
       "path": "path_19_row_conflict",
       "kind": "changed",
-      "new": {},
-      "gone": {
+      "new": {
         "assert:p_sel_nonzero_write": 3
       },
+      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "pass",
-        "fail"
+        "fail",
+        "pass"
       ],
       "notes": [
         "coverage collected on one side only; illegal-bin hits ignored"
@@ -313,12 +297,12 @@
     },
     {
       "path": "path_20_refresh_preempt",
-      "kind": "fixed",
-      "new": {},
-      "gone": {
-        "stage:(conservation)": 1,
-        "stage:wb_port": 1
+      "kind": "regression",
+      "new": {
+        "assert:p_wr_no_overflow": 1,
+        "stage:(conservation)": 1
       },
+      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
@@ -361,15 +345,15 @@
     },
     {
       "path": "path_23_host_ack_collision",
-      "kind": "fixed",
-      "new": {},
-      "gone": {
+      "kind": "regression",
+      "new": {
         "assert:a_HOST_001": 1,
         "id:DRIVER_STALL": 4,
         "log:DRIVER_STALL": 4,
         "stage:(host handshake)": 1,
         "stage:wb_port": 1
       },
+      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},

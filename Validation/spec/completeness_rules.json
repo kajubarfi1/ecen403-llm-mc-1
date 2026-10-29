@@ -197,6 +197,20 @@
       "question": "How many controller cycles does one CAS occupy the data bus for in the abstract PHY model, and must the scheduler space CAS commands by it? data_path_mapping implies host_width_bits / ddr_channel_width_bits beats at one beat per controller cycle (2 here), while timing_model.tCCD (4 nCK = 1 controller cycle) lets the scheduler issue a CAS every cycle: two reads one cycle apart cannot both be captured on one bus.",
       "consequence": "With the spec silent, the data path and the DRAM model both assume one beat per controller cycle and the scheduler assumes JEDEC tCCD; back-to-back CAS then overrun the data bus, whatever the data path does (drops before 65dbb0f, shifted/zero words after it). Either the scheduler enforces tCCD_eff = max(tCCD, beats) or the beat model moves to the real rate (a word per nCK, BEATS_PER_CYC = 2 x clock_ratio); until decided the scheduler spacing is the safe reading.",
       "discovered_by": "Frontend HANDOFF_VALIDATION_2026-10-29 (BEATS_PER_CYC question) and Validation's hybrid judgement of 65dbb0f: data_path stage 0/19 on path_03, conservation clean (2026-10-29)"
+    },
+    {
+      "id": "HOST_WRITE_BUFFER_BACKPRESSURE",
+      "kind": "required_field",
+      "when_present": "host_interface",
+      "require": "host_interface.write_buffer_backpressure",
+      "options": [
+        "port_stalls_on_full",
+        "buffer_sized_for_queue_plus_inflight"
+      ],
+      "disposition": "decision",
+      "question": "When the data path's write buffer is full, does the host port stall writes (wr_data_ready reaches wb_stall_o), or is the buffer sized so that it can never be full while the queue has room (write_buffer_depth >= command_queue_depth + writes in flight)?",
+      "consequence": "Today write_buffer_depth = command_queue_depth = 16 and wr_data_ready has no consumer: a write word is dropped whenever the buffer is full in the cycle the queue accepts another write (1 of 600 on the refresh paths, drop e5ec723f495e, 2026-10-29). Either answer closes it; the first needs a new edge in the Phase 1/4 manifests.",
+      "discovered_by": "CONSERVE/WRITE_REQUEST_TO_DATA on path_05/path_20, drop e5ec723f495e (2026-10-29)"
     }
   ]
 }

@@ -1,0 +1,661 @@
+{
+  "schema": "validation-findings/2",
+  "drop": "e5ec723f495e",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "spec_id": "00d082c3f72d1b34",
+  "generated_utc": "2026-10-29T17:56:36.474578Z",
+  "reports": "Validation/reports/paths",
+  "finding_count": 7,
+  "findings": [
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/CONSERVE/WRITE_CMD_TO_BEATS",
+      "kind": "rtl_defect",
+      "check_id": "CONSERVE/WRITE_CMD_TO_BEATS",
+      "taxonomy_id": "DATA_001",
+      "detectors": [
+        "conservation:WRITE_CMD_TO_BEATS"
+      ],
+      "owner_module": "data_path",
+      "owner_candidates": [
+        "data_path"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "data_path: CONSERVE/WRITE_CMD_TO_BEATS",
+      "requirement": "Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR command issued to the DRAM without its data writes garbage to the array.",
+      "spec_ref": "data_path_mapping.pack_mode; timing_model.tCCD_nCK",
+      "expected": "Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR command issued to the DRAM without its data writes garbage to the array.",
+      "actual": "2 of 1200 dp_cmd.write transaction(s) never produced a ddr_wr_beat by the end of the run (1198 observed, 2 per source)",
+      "detector": "conservation:WRITE_CMD_TO_BEATS",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 257,
+          "signal": "ddr_dq_o",
+          "text": "ddr_dq_o = wr_dat_r[DQ_WIDTH-1:0];"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 260,
+          "signal": "ddr_dq_o",
+          "text": "ddr_dq_o = wr_dat_r[(wb+1)*DQ_WIDTH-1 -: DQ_WIDTH];"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+          "line": 274,
+          "signal": "ddr_dm_o",
+          "text": "assign ddr_dm_o   = (wr_state == WR_DRIVE) ? ~dm_beat : '0;  // DM active-high masks"
+        }
+      ],
+      "context": null,
+      "mechanism": null,
+      "paths": [
+        "path_05_scheduler_refresh_loop",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 4,
+      "repro": {
+        "path": "path_05_scheduler_refresh_loop",
+        "command": "python3 Validation/tools/run_path.py --path path_05_scheduler_refresh_loop",
+        "sequence": "Validation/sequences/generated/path_05_scheduler_refresh_loop_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_05_scheduler_refresh_loop",
+        "log": "Validation/reports/paths/path_05_scheduler_refresh_loop_sim.log",
+        "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "CONSERVE WRITE_CMD_TO_BEATS owner=data_path lost=2 of=1200 from=dp_cmd.write to=ddr_wr_beat observed=1198 per_source=2 | Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR command issued to the DRAM without its data writes garbage to the array."
+        }
+      },
+      "drop": {
+        "git_head": "e5ec723f495e",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv"
+      },
+      "introduced_in": "99f72da45a32",
+      "first_seen": "efece348d04e",
+      "last_seen": "e5ec723f495e",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_read_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_width_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/CONSERVE/WRITE_REQUEST_TO_DATA",
+      "kind": "rtl_defect",
+      "check_id": "CONSERVE/WRITE_REQUEST_TO_DATA",
+      "taxonomy_id": "DATA_001",
+      "detectors": [
+        "conservation:WRITE_REQUEST_TO_DATA"
+      ],
+      "owner_module": "data_path",
+      "owner_candidates": [
+        "data_path"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "data_path: CONSERVE/WRITE_REQUEST_TO_DATA",
+      "requirement": "Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_buffer_depth words and must drain one per WR command issued, so it never refuses a word the queue has already accepted.",
+      "spec_ref": "host_interface.write_buffer_depth; controller_architecture.command_queue_depth",
+      "expected": "Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_buffer_depth words and must drain one per WR command issued, so it never refuses a word the queue has already accepted.",
+      "actual": "1 of 600 req[we=1] transaction(s) never produced a dp_wr by the end of the run (599 observed)",
+      "detector": "conservation:WRITE_REQUEST_TO_DATA",
+      "anchor": [],
+      "context": null,
+      "mechanism": null,
+      "paths": [
+        "path_05_scheduler_refresh_loop",
+        "path_20_refresh_preempt"
+      ],
+      "occurrences": 2,
+      "repro": {
+        "path": "path_05_scheduler_refresh_loop",
+        "command": "python3 Validation/tools/run_path.py --path path_05_scheduler_refresh_loop",
+        "sequence": "Validation/sequences/generated/path_05_scheduler_refresh_loop_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_05_scheduler_refresh_loop",
+        "log": "Validation/reports/paths/path_05_scheduler_refresh_loop_sim.log",
+        "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "CONSERVE WRITE_REQUEST_TO_DATA owner=data_path lost=1 of=600 from=req[we=1] to=dp_wr observed=599 | Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_buffer_depth words and must drain one per WR command issued, so it never refuses a word the queue has already accepted."
+        }
+      },
+      "drop": {
+        "git_head": "e5ec723f495e",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv"
+      },
+      "introduced_in": "99f72da45a32",
+      "first_seen": "efece348d04e",
+      "last_seen": "e5ec723f495e",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_read_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_width_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "formal/scheduler/PROTO_001",
+      "kind": "rtl_defect",
+      "check_id": "PROTO_001",
+      "taxonomy_id": "PROTO_001",
+      "detectors": [
+        "formal:jaspergold"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "unverified",
+      "title": "READ issued to a bank one cycle after that bank was PRECHARGEd (no ACTIVATE between)",
+      "requirement": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+      "spec_ref": null,
+      "expected": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+      "actual": "PRE b=1 at cycle 183, RD b=1 at cycle 184.",
+      "detector": "formal:jaspergold",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "cmd_valid/cmd_type/cmd_bank"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "signal": "bank_rd_allowed"
+        }
+      ],
+      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 183 PRE bank 1 (A10=0), cycle 184 RD bank 1 col 0. The generated PROTO_001 tracker (row-open state from the observed ACT/PRE stream) shows bank 1 closed when the READ is issued. Never observed in simulation (no path stimulus reaches this interleaving); the scheduler or its bank_tracker gating lets a CAS follow its own precharge. Likely the same root as the open scheduler re-grant defect (commands are also held for 2-3 consecutive cycles in the trace, i.e. re-issued). [found on drop 1fea117; awaiting formal re-prove on e5ec723f495e]",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+      },
+      "drop": {
+        "git_head": "e5ec723f495e",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "1fea117",
+      "last_seen": "e5ec723f495e",
+      "resolved_in": null,
+      "status": "awaiting_formal",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "formal/scheduler/TIMING_008",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_008",
+      "taxonomy_id": "TIMING_008",
+      "detectors": [
+        "formal:jaspergold"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "unverified",
+      "title": "PRECHARGE issued one cycle after a WRITE to the same bank (tWR violated; write data lost)",
+      "requirement": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+      "spec_ref": null,
+      "expected": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+      "actual": "WR b=4 at cycle 173, PRE b=4 at cycle 174.",
+      "detector": "formal:jaspergold",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "signal": "bank_pre_allowed / ctr_wr"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "precharge decision"
+        }
+      ],
+      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 173 WR bank 4, cycle 174 PRE bank 4. tWR = 15 ns = 3 controller cycles, so 2 cycles must separate the last write beat from the precharge. Not observed in simulation. bank_tracker's write-recovery timer (cfg_tWR_nCK) does not gate bank_pre_allowed for the cycle after a write, or the scheduler ignores it on the row-conflict path. [found on drop 1fea117; awaiting formal re-prove on e5ec723f495e]",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+      },
+      "drop": {
+        "git_head": "e5ec723f495e",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "1fea117",
+      "last_seen": "e5ec723f495e",
+      "resolved_in": null,
+      "status": "awaiting_formal",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/HANDSHAKE/wb",
+      "kind": "rtl_defect",
+      "check_id": "HANDSHAKE/wb",
+      "taxonomy_id": "SCHED_001",
+      "detectors": [
+        "handshake:wb"
+      ],
+      "owner_module": "wb_port",
+      "owner_candidates": [
+        "wb_port"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "wb_port: HANDSHAKE/wb",
+      "requirement": "every wb beat the slave accepts is acknowledged exactly once (wb_ack_o), in a pipelined run as in a single access",
+      "spec_ref": "host_interface.interface_type",
+      "expected": "every wb beat the slave accepts is acknowledged exactly once (wb_ack_o), in a pipelined run as in a single access",
+      "actual": "1 of 79 pipelined beat(s) never acknowledged (wb_ack_o)",
+      "detector": "handshake:wb",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 168,
+          "signal": "req_we",
+          "text": "req_we    <= wb_we_i;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 169,
+          "signal": "req_addr",
+          "text": "req_addr  <= wb_adr_i;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 170,
+          "signal": "req_wdata",
+          "text": "req_wdata <= wb_dat_i;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 171,
+          "signal": "req_wmask",
+          "text": "req_wmask <= wb_sel_i;"
+        }
+      ],
+      "context": null,
+      "mechanism": null,
+      "paths": [
+        "path_23_host_ack_collision"
+      ],
+      "occurrences": 4,
+      "repro": {
+        "path": "path_23_host_ack_collision",
+        "command": "python3 Validation/tools/run_path.py --path path_23_host_ack_collision",
+        "sequence": "Validation/sequences/generated/path_23_host_ack_collision_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_23_host_ack_collision",
+        "log": "Validation/reports/paths/path_23_host_ack_collision_sim.log",
+        "trace": "Validation/reports/paths/path_23_host_ack_collision_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "DRIVER_STALL: wb \u2014 1 of 79 pipelined beat(s) never acknowledged (wb_ack_o)"
+        }
+      },
+      "drop": {
+        "git_head": "e5ec723f495e",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv"
+      },
+      "introduced_in": "99f72da45a32",
+      "first_seen": "efece348d04e",
+      "last_seen": "e5ec723f495e",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_host_port_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "formal/wb_port/HOST_001",
+      "kind": "rtl_defect",
+      "check_id": "HOST_001",
+      "taxonomy_id": "HOST_001",
+      "detectors": [
+        "formal:jaspergold"
+      ],
+      "owner_module": "wb_port",
+      "owner_candidates": [
+        "wb_port"
+      ],
+      "severity": "critical",
+      "confidence": "unverified",
+      "title": "Write acknowledge and read response complete in the same cycle on the one Wishbone ack line",
+      "requirement": "One acknowledge per accepted beat (host_interface.interface_type = wishbone_pipelined). When a write acknowledge and a read response are due in the same cycle the port must hold one of them (a one-entry response or write-ack holding register) so each completes in its own cycle.",
+      "spec_ref": "host_interface.interface_type",
+      "expected": "One acknowledge per accepted beat (host_interface.interface_type = wishbone_pipelined). When a write acknowledge and a read response are due in the same cycle the port must hold one of them (a one-entry response or write-ack holding register) so each completes in its own cycle.",
+      "actual": "cex at bound 24: $past(wb_cyc_i && wb_stb_i && !wb_stall_o && wb_we_i) && rsp_valid is reachable",
+      "detector": "formal:jaspergold",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "signal": "wb_ack_o",
+          "text": "assign wb_ack_o = wr_ack_r | rd_ack;",
+          "line": 158
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "signal": "wr_ack_r",
+          "text": "else        wr_ack_r <= wb_beat & wb_we_i;",
+          "line": 155
+        }
+      ],
+      "mechanism": "JasperGold counterexample 24 cycles from reset, engine L, no abstraction (cover c_HOST_001, a write beat accepted, reached at cycle 1). wb_port.sv: wr_ack_r <= wb_beat & wb_we_i (the write acknowledge, one cycle after the beat) and assign wb_ack_o = wr_ack_r | rd_ack with rd_ack = rsp_valid. A read response arriving the cycle after a write beat is accepted gives one wb_ack_o pulse for two completions; the host counts one acknowledge, waits for the other forever (a pipelined master) or mis-attributes the read data to the write (a classic one). Any legal host reaches it: issue a read, then present a write beat the cycle before the read data returns. Not seen in simulation on 2026-10-28 only because no sequence placed a write beat on that cycle (243 pipelined beats on path_07). SIMULATION WITNESS (2026-10-29, path_23_host_ack_collision, ack_collision.py): a read to an open row and a write beat accepted 41 cycles later (gap d = 40) -- the write acknowledge and the read response fall in the same cycle at t = 35.37 us; a_HOST_001 fires once, every request and response is conserved, and the host handshake stage counts 1 of 79 beats never acknowledged: the one ack pulse the two completions shared. [found on drop 99f72da45a32; awaiting formal re-prove on e5ec723f495e]",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "command": "python3 Validation/tools/run_formal.py --path path_01_write_cmd --time 20m",
+        "assumptions": "none: host Wishbone inputs and configuration registers free",
+        "simulation": "python3 Validation/tools/run_path.py --path path_23_host_ack_collision"
+      },
+      "drop": {
+        "git_head": "e5ec723f495e",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "99f72da45a32",
+      "last_seen": "e5ec723f495e",
+      "resolved_in": null,
+      "status": "awaiting_formal",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_host_port_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/HOST_001",
+      "kind": "rtl_defect",
+      "check_id": "HOST_001",
+      "taxonomy_id": "HOST_001",
+      "detectors": [
+        "assertion:a_HOST_001"
+      ],
+      "owner_module": "wb_port",
+      "owner_candidates": [
+        "wb_port"
+      ],
+      "severity": "major",
+      "confidence": "confirmed",
+      "title": "wb_port: HOST_001",
+      "requirement": "",
+      "spec_ref": null,
+      "expected": "",
+      "actual": "fired 1x; first: xmsim: *E,ASRTST (./wb_port_order_sva.sv,23): (time 35372500 PS) Assertion chain_harness.u_wb_port.u_wb_port_order_sva.a_HOST_001 has failed",
+      "detector": "assertion:a_HOST_001",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 168,
+          "signal": "req_we",
+          "text": "req_we    <= wb_we_i;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 169,
+          "signal": "req_addr",
+          "text": "req_addr  <= wb_adr_i;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 170,
+          "signal": "req_wdata",
+          "text": "req_wdata <= wb_dat_i;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 171,
+          "signal": "req_wmask",
+          "text": "req_wmask <= wb_sel_i;"
+        }
+      ],
+      "context": null,
+      "mechanism": null,
+      "paths": [
+        "path_23_host_ack_collision"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "path": "path_23_host_ack_collision",
+        "command": "python3 Validation/tools/run_path.py --path path_23_host_ack_collision",
+        "sequence": "Validation/sequences/generated/path_23_host_ack_collision_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_23_host_ack_collision",
+        "log": "Validation/reports/paths/path_23_host_ack_collision_sim.log",
+        "trace": "Validation/reports/paths/path_23_host_ack_collision_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "xmsim: *E,ASRTST (./wb_port_order_sva.sv,23): (time 35372500 PS) Assertion chain_harness.u_wb_port.u_wb_port_order_sva.a_HOST_001 has failed"
+        }
+      },
+      "drop": {
+        "git_head": "e5ec723f495e",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv"
+      },
+      "introduced_in": "99f72da45a32",
+      "first_seen": "99f72da45a32",
+      "last_seen": "e5ec723f495e",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_host_port_findings.json"
+      ]
+    }
+  ],
+  "resolved": [
+    {
+      "schema": "validation-findings/2",
+      "id": "structural/scheduler/COMPILE_ERROR",
+      "kind": "rtl_defect",
+      "check_id": "COMPILE_ERROR",
+      "taxonomy_id": "COMPILE_ERROR",
+      "owner_module": "scheduler",
+      "severity": "critical",
+      "title": "scheduler.sv does not compile: line 178: 'sel_bank_eff_r': undeclared identifier [12.5(IEEE)].; line 179: 'sel_bank_eff_r': undeclared identifier [12.5(IEEE)].",
+      "paths": [
+        "path_01_write_cmd",
+        "path_02_read_cmd",
+        "path_03_read_return",
+        "path_04_scheduler_bank_loop",
+        "path_05_scheduler_refresh_loop",
+        "path_07_backpressure",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt",
+        "path_23_host_ack_collision"
+      ],
+      "status": "resolved",
+      "resolved_in": "e5ec723f495e",
+      "last_seen": "5994bb667dba",
+      "first_seen": "5994bb667dba",
+      "note": "open in drop 5994bb667dba, not raised by drop e5ec723f495e"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/CONSERVE/READ_CMD_TO_RESPONSE",
+      "kind": "rtl_defect",
+      "check_id": "CONSERVE/READ_CMD_TO_RESPONSE",
+      "taxonomy_id": "DATA_001",
+      "owner_module": "data_path",
+      "severity": "critical",
+      "title": "data_path: CONSERVE/READ_CMD_TO_RESPONSE",
+      "paths": [
+        "path_02_read_cmd",
+        "path_07_backpressure",
+        "path_18_full_write"
+      ],
+      "status": "resolved",
+      "resolved_in": "e5ec723f495e",
+      "last_seen": "5994bb667dba",
+      "first_seen": "efece348d04e",
+      "note": "open in drop 5994bb667dba, not raised by drop e5ec723f495e"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/MISMATCH/dp_rd_rsp[aux,data]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/dp_rd_rsp[aux,data]",
+      "taxonomy_id": "DATA_001",
+      "owner_module": "data_path",
+      "severity": "critical",
+      "title": "data_path: MISMATCH/dp_rd_rsp[aux,data]",
+      "paths": [
+        "path_18_full_write"
+      ],
+      "status": "resolved",
+      "resolved_in": "e5ec723f495e",
+      "last_seen": "5994bb667dba",
+      "first_seen": "99f72da45a32",
+      "note": "open in drop 5994bb667dba, not raised by drop e5ec723f495e"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/MISMATCH/dp_rd_rsp[data]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/dp_rd_rsp[data]",
+      "taxonomy_id": "DATA_001",
+      "owner_module": "data_path",
+      "severity": "critical",
+      "title": "data_path: MISMATCH/dp_rd_rsp[data]",
+      "paths": [
+        "path_18_full_write"
+      ],
+      "status": "resolved",
+      "resolved_in": "e5ec723f495e",
+      "last_seen": "5994bb667dba",
+      "first_seen": "99f72da45a32",
+      "note": "open in drop 5994bb667dba, not raised by drop e5ec723f495e"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/CONSERVE/HOST_BEAT_TO_REQUEST",
+      "kind": "rtl_defect",
+      "check_id": "CONSERVE/HOST_BEAT_TO_REQUEST",
+      "taxonomy_id": "SCHED_001",
+      "owner_module": "wb_port",
+      "severity": "critical",
+      "title": "wb_port: CONSERVE/HOST_BEAT_TO_REQUEST",
+      "paths": [
+        "path_05_scheduler_refresh_loop",
+        "path_07_backpressure",
+        "path_18_full_write",
+        "path_20_refresh_preempt"
+      ],
+      "status": "resolved",
+      "resolved_in": "e5ec723f495e",
+      "last_seen": "5994bb667dba",
+      "first_seen": "efece348d04e",
+      "note": "open in drop 5994bb667dba, not raised by drop e5ec723f495e"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/MISMATCH/req[addr,data,mask,we]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/req[addr,data,mask,we]",
+      "taxonomy_id": "DATA_001",
+      "owner_module": "wb_port",
+      "severity": "critical",
+      "title": "wb_port: MISMATCH/req[addr,data,mask,we]",
+      "paths": [
+        "path_07_backpressure",
+        "path_18_full_write",
+        "path_20_refresh_preempt"
+      ],
+      "status": "resolved",
+      "resolved_in": "e5ec723f495e",
+      "last_seen": "5994bb667dba",
+      "first_seen": "99f72da45a32",
+      "note": "open in drop 5994bb667dba, not raised by drop e5ec723f495e"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/MISMATCH/req[addr,data,we]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/req[addr,data,we]",
+      "taxonomy_id": "DATA_001",
+      "owner_module": "wb_port",
+      "severity": "critical",
+      "title": "wb_port: MISMATCH/req[addr,data,we]",
+      "paths": [
+        "path_07_backpressure"
+      ],
+      "status": "resolved",
+      "resolved_in": "e5ec723f495e",
+      "last_seen": "5994bb667dba",
+      "first_seen": "99f72da45a32",
+      "note": "open in drop 5994bb667dba, not raised by drop e5ec723f495e"
+    }
+  ],
+  "drop_status": {
+    "$schema": "validation-drop-status/1",
+    "drop": "e5ec723f495e",
+    "partial": false,
+    "blocks_present": [
+      "addr_decoder",
+      "bank_tracker",
+      "calibration",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "init_fsm",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "blocks_absent": [],
+    "inconsistent_edges": [],
+    "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "foreign_spec_blocks": {},
+    "paths_run": [
+      "path_01_write_cmd",
+      "path_02_read_cmd",
+      "path_03_read_return",
+      "path_04_scheduler_bank_loop",
+      "path_05_scheduler_refresh_loop",
+      "path_07_backpressure",
+      "path_08_init_to_cal",
+      "path_09_init_to_refresh",
+      "path_12_csr_timing_to_scheduling",
+      "path_13_csr_refresh_to_scheduling",
+      "path_14_status_init",
+      "path_15_status_cal",
+      "path_16_status_refresh",
+      "path_17_full_boot",
+      "path_18_full_write",
+      "path_19_row_conflict",
+      "path_20_refresh_preempt",
+      "path_21_wb_port_standalone",
+      "path_22_csr_standalone",
+      "path_23_host_ack_collision"
+    ],
+    "paths_blocked": {},
+    "note": "Complete run: every runnable path simulated on this drop."
+  }
+}

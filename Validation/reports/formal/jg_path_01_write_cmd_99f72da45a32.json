@@ -1,10 +1,10 @@
 {
   "$schema": "validation-formal/1",
-  "generated_utc": "2026-10-28T19:43:06.578450+00:00",
+  "generated_utc": "2026-10-29T17:31:04.702604+00:00",
   "tool": "JasperGold (Olympus)",
   "drop": "99f72da45a32",
-  "design_id": "a2b204453edc",
-  "blocks_design_id": "7bedc351ac45",
+  "design_id": "2ed70e31cb84",
+  "blocks_design_id": "51b2e56cedc6",
   "path": "path_01_write_cmd",
   "blocks": [
     "addr_decoder",
@@ -27,7 +27,7 @@
     "Validation/sva/generated/wb_port_order_sva_bind.sv"
   ],
   "abstractions": [],
-  "prove_time_limit": "20m",
+  "prove_time_limit": "60m",
   "max_trace_length": null,
   "bounded_bar_cycles": 28080,
   "bounded_bars": {
@@ -48,9 +48,9 @@
   },
   "summary": {
     "assertions": 16,
-    "proven": 11,
+    "proven": 12,
     "cex": 1,
-    "undetermined": 3,
+    "undetermined": 2,
     "bounded_proven": 1,
     "bounded_vacuous": 0,
     "proven_vacuous": 0,
@@ -64,7 +64,7 @@
       "status": "proven",
       "engine": "Hp",
       "bound": "Infinite",
-      "time": "68.626 s"
+      "time": "75.186 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_002",
@@ -72,7 +72,7 @@
       "status": "proven",
       "engine": "Hp",
       "bound": "Infinite",
-      "time": "68.626 s"
+      "time": "75.186 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_003",
@@ -80,7 +80,7 @@
       "status": "proven",
       "engine": "Hp",
       "bound": "Infinite",
-      "time": "241.251 s"
+      "time": "239.981 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004",
@@ -88,7 +88,7 @@
       "status": "proven",
       "engine": "AM",
       "bound": "Infinite",
-      "time": "6.530 s"
+      "time": "6.932 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005",
@@ -96,7 +96,7 @@
       "status": "proven",
       "engine": "Mpcustom2",
       "bound": "Infinite",
-      "time": "13.639 s"
+      "time": "13.783 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_007",
@@ -104,7 +104,7 @@
       "status": "proven",
       "engine": "Mpcustom2",
       "bound": "Infinite",
-      "time": "13.640 s"
+      "time": "13.783 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_008",
@@ -112,7 +112,7 @@
       "status": "proven",
       "engine": "Hp",
       "bound": "Infinite",
-      "time": "68.627 s"
+      "time": "75.186 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_009",
@@ -120,23 +120,23 @@
       "status": "proven",
       "engine": "Hp",
       "bound": "Infinite",
-      "time": "68.627 s"
+      "time": "75.186 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011",
       "short": "a_TIMING_011",
       "status": "proven",
-      "engine": "AM",
+      "engine": "Mpcustom2",
       "bound": "Infinite",
-      "time": "17.224 s"
+      "time": "1100.798 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_006",
       "short": "a_TIMING_006",
       "status": "proven",
-      "engine": "Hp",
+      "engine": "Mpcustom2",
       "bound": "Infinite",
-      "time": "20.195 s"
+      "time": "28.819 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_012",
@@ -150,17 +150,17 @@
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_001",
       "short": "a_PROTO_001",
       "status": "undetermined",
-      "engine": "Bm",
-      "bound": "49",
+      "engine": "Ht",
+      "bound": "76",
       "time": null
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_002",
       "short": "a_PROTO_002",
-      "status": "undetermined",
-      "engine": "Bm",
-      "bound": "49",
-      "time": null
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "1149.163 s"
     },
     {
       "property": "chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_002",
@@ -168,25 +168,25 @@
       "status": "proven",
       "engine": "Hp",
       "bound": "Infinite",
-      "time": "35.264 s"
+      "time": "38.403 s"
     },
     {
       "property": "chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_001",
       "short": "a_REF_001",
       "status": "bounded_proven",
-      "engine": "Hts",
-      "bound": "616",
+      "engine": "AMcustom15",
+      "bound": "4026",
       "time": null,
       "bounded_bar": 368,
-      "note": "bounded proof: no counterexample to depth 616, signoff bar 368 (2 x this property's bound under these parameters)"
+      "note": "bounded proof: no counterexample to depth 4026, signoff bar 368 (2 x this property's bound under these parameters)"
     },
     {
       "property": "chain_formal.u_wb_port.u_wb_port_order_sva.a_HOST_001",
       "short": "a_HOST_001",
       "status": "cex",
-      "engine": "L",
-      "bound": "24 - 160",
-      "time": "19.201 s"
+      "engine": "Bm",
+      "bound": "28",
+      "time": "60.010 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_001",
@@ -194,15 +194,15 @@
       "status": "covered",
       "engine": "Ht",
       "bound": "8",
-      "time": "0.247 s"
+      "time": "0.631 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_002",
       "short": "c_TIMING_002",
       "status": "covered",
-      "engine": "Ht",
+      "engine": "Bm",
       "bound": "40",
-      "time": "226.043 s"
+      "time": "311.622 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_003",
@@ -210,7 +210,7 @@
       "status": "covered",
       "engine": "Ht",
       "bound": "12",
-      "time": "0.263 s"
+      "time": "0.656 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_004",
@@ -218,7 +218,7 @@
       "status": "covered",
       "engine": "Ht",
       "bound": "15",
-      "time": "0.345 s"
+      "time": "0.811 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_005",
@@ -226,7 +226,7 @@
       "status": "covered",
       "engine": "Ht",
       "bound": "7",
-      "time": "0.215 s"
+      "time": "0.582 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_007",
@@ -234,7 +234,7 @@
       "status": "covered",
       "engine": "Ht",
       "bound": "22",
-      "time": "14.243 s"
+      "time": "14.946 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_008",
@@ -242,7 +242,7 @@
       "status": "covered",
       "engine": "Ht",
       "bound": "23",
-      "time": "20.611 s"
+      "time": "21.348 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_009",
@@ -250,7 +250,7 @@
       "status": "covered",
       "engine": "Bm",
       "bound": "22",
-      "time": "14.639 s"
+      "time": "15.366 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_011",
@@ -258,23 +258,23 @@
       "status": "covered",
       "engine": "L",
       "bound": "36 - 37",
-      "time": "6.793 s"
+      "time": "7.296 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_006",
       "short": "c_TIMING_006",
       "status": "covered",
-      "engine": "Ht",
+      "engine": "Bm",
       "bound": "6",
-      "time": "0.087 s"
+      "time": "0.292 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_012",
       "short": "c_TIMING_012",
       "status": "covered",
       "engine": "J",
-      "bound": "59 - 9403",
-      "time": "16.551 s"
+      "bound": "62 - 9403",
+      "time": "15.943 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_001",
@@ -282,41 +282,41 @@
       "status": "covered",
       "engine": "Ht",
       "bound": "21",
-      "time": "10.561 s"
+      "time": "11.253 s"
     },
     {
       "property": "chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_002",
       "short": "c_PROTO_002",
       "status": "covered",
-      "engine": "Ht",
+      "engine": "Bm",
       "bound": "6",
-      "time": "0.087 s"
+      "time": "0.292 s"
     },
     {
       "property": "chain_formal.u_scheduler.u_scheduler_order_sva.c_REF_002",
       "short": "c_REF_002",
       "status": "covered",
       "engine": "J",
-      "bound": "157 - 7803",
-      "time": "8.887 s"
+      "bound": "263 - 7803",
+      "time": "9.085 s"
     },
     {
       "property": "chain_formal.u_scheduler.u_scheduler_order_sva.c_REF_001",
       "short": "c_REF_001",
       "status": "covered",
       "engine": "J",
-      "bound": "127 - 7803",
-      "time": "8.887 s"
+      "bound": "141 - 7803",
+      "time": "9.085 s"
     },
     {
       "property": "chain_formal.u_wb_port.u_wb_port_order_sva.c_HOST_001",
       "short": "c_HOST_001",
       "status": "covered",
-      "engine": "PRE",
-      "bound": "1",
-      "time": "0.000 s"
+      "engine": "Bm",
+      "bound": "28",
+      "time": "60.010 s"
     }
   ],
   "raw_report": "Validation/reports/formal/jg_path_01_write_cmd_99f72da45a32_report.txt",
-  "reclassified_utc": "2026-10-28T20:16:54.436382+00:00"
+  "reclassified_utc": "2026-10-29T17:33:11.075396+00:00"
 }

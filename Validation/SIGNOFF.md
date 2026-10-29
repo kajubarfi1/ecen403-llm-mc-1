@@ -260,13 +260,17 @@ design under judgement, with the options of its last report, so a design
 change never leaves `awaiting_formal` findings for a person to remember.
 
 Current (99f72da45a32, 2026-10-28, pipelined scheduler):
-- command path, concrete, 20 min: 11 proven at infinite bound, REF_001
-  bounded-proven to 616 (bar 368), **HOST_001 counterexample at 24 cycles**
-  (filed: `formal_host_port_findings.json`, the port's write acknowledge
-  and read response share one ack line), 3 undetermined: tREFI (as
-  before) and PROTO_001/002, which the old scheduler proved in 14 min and
-  the pipelined one did not reach in 20; PROTO_001 is `awaiting_formal`
-  until a longer run. Covers 16/16.
+- command path, concrete, 60 min (supersedes the 20-min run): 12 proven at
+  infinite bound including PROTO_002, REF_001 bounded-proven to 4026 (bar
+  368), **HOST_001 counterexample at 28 cycles** (filed:
+  `formal_host_port_findings.json`, the port's write acknowledge and read
+  response share one ack line), 2 undetermined: tREFI (as before) and
+  PROTO_001, which the old scheduler proved in 14 min and the pipelined
+  one left at depth 76 after 60; PROTO_001 stays `awaiting_formal`.
+  Covers 16/16. The 60-min run's report was first downloaded from a
+  shared remote directory that still held the assumed-configuration run's
+  results; the runner now uses one remote directory per run and refuses a
+  report whose stopat/assumption header does not match the run.
 - command path, assumed configuration: 10 proven, 4 bounded-proven to 8245
   (tREFI, tRFC, REF_001, HOST_001), **2 bounded-vacuous** (PROTO_001/002:
   that configuration never issues a CAS, their covers were never reached,

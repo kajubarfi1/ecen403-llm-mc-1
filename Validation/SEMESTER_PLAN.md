@@ -988,7 +988,22 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   beat (regression of 65dbb0f; path_03 0/19); 1 of 600 writes still
   slips. The data-bus occupancy vs tCCD question is a spec gap (intake
   finding to file). tMOD resolved. Reply addendum 10.
-  The 60-minute concrete re-proof for PROTO_001/002 is still running.
+  The 60-minute concrete re-proof: PROTO_002 proven, PROTO_001 still
+  undetermined at depth 76, HOST_001 cex at 28, REF_001 bounded 4026.
+  Its first download was the assumed-config run's report (both runs
+  shared `~/formal/auto`; the queued Slurm job finished after the
+  download): `run_formal.py` now uses a per-run remote directory and
+  checks the report's stopat/assumption header against the run.
+- *2026-10-29, evening — her redesign holds.* Drop e5ec723f495e (data
+  path with per-command deadlines and chaining, global CAS spacing of
+  WORD_BEATS, compile fix, tMOD + tMRD guards): 17/20 PASS. Every read
+  path passes including back-to-back; min CAS gap measured 2 cycles;
+  7 findings resolved. Left: one write word in 600 lost when wr_buf is
+  full in the same cycle it pops (and wr_data_ready has no consumer),
+  and HOST_001 (hers to fix). data_path code coverage fell to 29.7 %
+  (1018 bits of 32-bit deadline storage that cannot toggle); told her
+  8 bits would do. Formal replays on the new scheduler launched
+  (per-run remote dirs, concurrent). Reply addendum 11.
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

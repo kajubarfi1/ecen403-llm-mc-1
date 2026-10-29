@@ -5,7 +5,7 @@
     2024.09 FCS 64 bits for Linux64 4.18.0-372.26.1.el8_6.x86_64
     Host Name: n01-zeus.olympus.ece.tamu.edu
     User Name: jacobz
-    Printed on: Wednesday, Oct28, 2026 02:43:04 PM CDT
+    Printed on: Thursday, Oct29, 2026 12:31:11 PM CDT
     Working Directory: /home/ugrads/j/jacobz/formal/auto/pkg
 
 
@@ -27,11 +27,11 @@ SUMMARY
            - approved     : 0                   
            - temporary    : 0                   
           assertions      : 16                  
-           - proven       : 11                  ( 68.8% )
+           - proven       : 12                  ( 75.0% )
            - marked_proven: 0                   ( 0.0% )
            - cex          : 1                   ( 6.2% )
            - ar_cex       : 0                   ( 0.0% )
-           - undetermined : 4                   ( 25.0% )
+           - undetermined : 3                   ( 18.8% )
            - unprocessed  : 0                   ( 0.0% )
            - error        : 0                   ( 0.0% )
           covers          : 29                  
@@ -51,51 +51,51 @@ RESULTS
 -----------------------------------------------------------------------------------------------------------------------------------
 
 ---[ <embedded> ]------------------------------------------------------------------------------------------------------------------
-[1]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_001                                proven          Hp     Infinite    68.626 s     
-[2]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_001:precondition1                  covered         Ht            6    0.087 s      
-[3]   chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_001                                covered         Ht            8    0.247 s      
-[4]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_002                                proven          Hp     Infinite    68.626 s     
-[5]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_002:precondition1                  covered         Bm           38    153.027 s    
-[6]   chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_002                                covered         Ht           40    226.043 s    
-[7]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_003                                proven          Hp     Infinite    241.251 s    
-[8]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_003:precondition1                  covered         Ht            6    0.112 s      
-[9]   chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_003                                covered         Ht           12    0.263 s      
-[10]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004                                proven          AM     Infinite    6.530 s      
-[11]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004:precondition1                  covered         Ht            6    0.141 s      
-[12]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_004                                covered         Ht           15    0.345 s      
-[13]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005                                proven          Mpcustom2  Infinite  13.639 s   
-[14]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005:precondition1                  covered         Ht            6    0.176 s      
-[15]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_005                                covered         Ht            7    0.215 s      
-[16]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_007                                proven          Mpcustom2  Infinite  13.640 s   
-[17]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_007:precondition1                  covered         Ht           21    10.543 s     
-[18]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_007                                covered         Ht           22    14.243 s     
-[19]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_008                                proven          Hp     Infinite    68.627 s     
-[20]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_008:precondition1                  covered         Ht           21    10.561 s     
-[21]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_008                                covered         Ht           23    20.611 s     
-[22]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_009                                proven          Hp     Infinite    68.627 s     
-[23]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_009:precondition1                  covered         Bm           21    10.658 s     
-[24]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_009                                covered         Bm           22    14.639 s     
-[25]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011                                proven          AM     Infinite    17.224 s     
-[26]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011:precondition1                  covered         Ht            6    0.198 s      
-[27]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_011                                covered         L       36 - 37    6.793 s      
-[28]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_006                                proven          Hp     Infinite    20.195 s     
-[29]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_006:precondition1                  covered         Ht            6    0.087 s      
-[30]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_006                                covered         Ht            6    0.087 s      
-[31]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_012                                undetermined    Oh     14044 -     5.532 s      
-[32]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_012                                covered         J      59 - 9403   16.551 s     
-[33]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_001                                 undetermined    Bm        49 -     629.678 s    
-[34]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_001:precondition1                   covered         Ht           21    10.543 s     
-[35]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_001                                 covered         Ht           21    10.561 s     
-[36]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_002                                 undetermined    Bm        49 -     672.265 s    
-[37]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_002:precondition1                   covered         Ht            6    0.087 s      
-[38]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_002                                 covered         Ht            6    0.087 s      
-[39]  chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_002                         proven          Hp     Infinite    35.264 s     
-[40]  chain_formal.u_scheduler.u_scheduler_order_sva.c_REF_002                         covered         J      157 - 7803  8.887 s      
-[41]  chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_001                         undetermined    Hts      616 -     63.954 s     
-[42]  chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_001:precondition1           covered         J      127 - 7803  8.887 s      
-[43]  chain_formal.u_scheduler.u_scheduler_order_sva.c_REF_001                         covered         J      127 - 7803  8.887 s      
-[44]  chain_formal.u_wb_port.u_wb_port_order_sva.a_HOST_001                            cex             L      24 - 160    19.201 s     
-[45]  chain_formal.u_wb_port.u_wb_port_order_sva.c_HOST_001                            covered         PRE           1    0.000 s      
+[1]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_001                                proven          Hp     Infinite    75.186 s     
+[2]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_001:precondition1                  covered         Bm            6    0.338 s      
+[3]   chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_001                                covered         Ht            8    0.631 s      
+[4]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_002                                proven          Hp     Infinite    75.186 s     
+[5]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_002:precondition1                  covered         Ht           38    172.622 s    
+[6]   chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_002                                covered         Bm           40    311.622 s    
+[7]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_003                                proven          Hp     Infinite    239.981 s    
+[8]   chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_003:precondition1                  covered         Bm            6    0.355 s      
+[9]   chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_003                                covered         Ht           12    0.656 s      
+[10]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004                                proven          AM     Infinite    6.932 s      
+[11]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_004:precondition1                  covered         Bm            6    0.378 s      
+[12]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_004                                covered         Ht           15    0.811 s      
+[13]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005                                proven          Mpcustom2  Infinite  13.783 s   
+[14]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_005:precondition1                  covered         Bm            6    0.450 s      
+[15]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_005                                covered         Ht            7    0.582 s      
+[16]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_007                                proven          Mpcustom2  Infinite  13.783 s   
+[17]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_007:precondition1                  covered         Ht           21    11.085 s     
+[18]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_007                                covered         Ht           22    14.946 s     
+[19]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_008                                proven          Hp     Infinite    75.186 s     
+[20]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_008:precondition1                  covered         Ht           21    11.253 s     
+[21]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_008                                covered         Ht           23    21.348 s     
+[22]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_009                                proven          Hp     Infinite    75.186 s     
+[23]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_009:precondition1                  covered         Ht           21    11.294 s     
+[24]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_009                                covered         Bm           22    15.366 s     
+[25]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011                                proven          Mpcustom2  Infinite  1100.798 s 
+[26]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_011:precondition1                  covered         Bm            6    0.258 s      
+[27]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_011                                covered         L       36 - 37    7.296 s      
+[28]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_006                                proven          Mpcustom2  Infinite  28.819 s   
+[29]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_006:precondition1                  covered         Bm            6    0.292 s      
+[30]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_006                                covered         Bm            6    0.292 s      
+[31]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_TIMING_012                                undetermined    Oh     14044 -     5.164 s      
+[32]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_TIMING_012                                covered         J      62 - 9403   15.943 s     
+[33]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_001                                 undetermined    Ht        76 -     2312.061 s   
+[34]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_001:precondition1                   covered         Ht           21    11.085 s     
+[35]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_001                                 covered         Ht           21    11.253 s     
+[36]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_002                                 proven          Hp     Infinite    1149.163 s   
+[37]  chain_formal.u_cmd_gen.u_cmd_gen_sva.a_PROTO_002:precondition1                   covered         Bm            6    0.292 s      
+[38]  chain_formal.u_cmd_gen.u_cmd_gen_sva.c_PROTO_002                                 covered         Bm            6    0.292 s      
+[39]  chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_002                         proven          Hp     Infinite    38.403 s     
+[40]  chain_formal.u_scheduler.u_scheduler_order_sva.c_REF_002                         covered         J      263 - 7803  9.085 s      
+[41]  chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_001                         undetermined    AMcustom15   4026 -   727.969 s 
+[42]  chain_formal.u_scheduler.u_scheduler_order_sva.a_REF_001:precondition1           covered         J      141 - 7803  9.085 s      
+[43]  chain_formal.u_scheduler.u_scheduler_order_sva.c_REF_001                         covered         J      141 - 7803  9.085 s      
+[44]  chain_formal.u_wb_port.u_wb_port_order_sva.a_HOST_001                            cex             Bm           28    60.010 s     
+[45]  chain_formal.u_wb_port.u_wb_port_order_sva.c_HOST_001                            covered         Bm           28    60.010 s     
 
 ==============================================================
 ASSUMPTIONS
@@ -118,7 +118,7 @@ DETAILED RESULTS
 
     Result     : proven
     Bound      : Infinite
-    Time       : 68.626 s
+    Time       : 75.186 s
     Engine     : Hp
 
 
@@ -130,8 +130,8 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 6
-    Time       : 0.087 s
-    Engine     : Ht
+    Time       : 0.338 s
+    Engine     : Bm
 
 
 [3]
@@ -142,7 +142,7 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 8
-    Time       : 0.247 s
+    Time       : 0.631 s
     Engine     : Ht
 
 
@@ -154,7 +154,7 @@ DETAILED RESULTS
 
     Result     : proven
     Bound      : Infinite
-    Time       : 68.626 s
+    Time       : 75.186 s
     Engine     : Hp
 
 
@@ -166,8 +166,8 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 38
-    Time       : 153.027 s
-    Engine     : Bm
+    Time       : 172.622 s
+    Engine     : Ht
 
 
 [6]
@@ -178,8 +178,8 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 40
-    Time       : 226.043 s
-    Engine     : Ht
+    Time       : 311.622 s
+    Engine     : Bm
 
 
 [7]
@@ -190,7 +190,7 @@ DETAILED RESULTS
 
     Result     : proven
     Bound      : Infinite
-    Time       : 241.251 s
+    Time       : 239.981 s
     Engine     : Hp
 
 
@@ -202,8 +202,8 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 6
-    Time       : 0.112 s
-    Engine     : Ht
+    Time       : 0.355 s
+    Engine     : Bm
 
 
 [9]
@@ -214,7 +214,7 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 12
-    Time       : 0.263 s
+    Time       : 0.656 s
     Engine     : Ht
 
 
@@ -226,7 +226,7 @@ DETAILED RESULTS
 
     Result     : proven
     Bound      : Infinite
-    Time       : 6.530 s
+    Time       : 6.932 s
     Engine     : AM
 
 
@@ -238,8 +238,8 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 6
-    Time       : 0.141 s
-    Engine     : Ht
+    Time       : 0.378 s
+    Engine     : Bm
 
 
 [12]
@@ -250,7 +250,7 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 15
-    Time       : 0.345 s
+    Time       : 0.811 s
     Engine     : Ht
 
 
@@ -262,7 +262,7 @@ DETAILED RESULTS
 
     Result     : proven
     Bound      : Infinite
-    Time       : 13.639 s
+    Time       : 13.783 s
     Engine     : Mpcustom2
 
 
@@ -274,8 +274,8 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 6
-    Time       : 0.176 s
-    Engine     : Ht
+    Time       : 0.450 s
+    Engine     : Bm
 
 
 [15]
@@ -286,7 +286,7 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 7
-    Time       : 0.215 s
+    Time       : 0.582 s
     Engine     : Ht
 
 
@@ -298,7 +298,7 @@ DETAILED RESULTS
 
     Result     : proven
     Bound      : Infinite
-    Time       : 13.640 s
+    Time       : 13.783 s
     Engine     : Mpcustom2
 
 
@@ -310,7 +310,7 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 21
-    Time       : 10.543 s
+    Time       : 11.085 s
     Engine     : Ht
 
 
@@ -322,7 +322,7 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 22
-    Time       : 14.243 s
+    Time       : 14.946 s
     Engine     : Ht
 
 
@@ -334,7 +334,7 @@ DETAILED RESULTS
 
     Result     : proven
     Bound      : Infinite
-    Time       : 68.627 s
+    Time       : 75.186 s
     Engine     : Hp
 
 
@@ -346,7 +346,7 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 21
-    Time       : 10.561 s
+    Time       : 11.253 s
     Engine     : Ht
 
 
@@ -358,7 +358,7 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 23
-    Time       : 20.611 s
+    Time       : 21.348 s
     Engine     : Ht
 
 
@@ -370,7 +370,7 @@ DETAILED RESULTS
 
     Result     : proven
     Bound      : Infinite
-    Time       : 68.627 s
+    Time       : 75.186 s
     Engine     : Hp
 
 
@@ -382,8 +382,8 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 21
-    Time       : 10.658 s
-    Engine     : Bm
+    Time       : 11.294 s
+    Engine     : Ht
 
 
 [24]
@@ -394,7 +394,7 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 22
-    Time       : 14.639 s
+    Time       : 15.366 s
     Engine     : Bm
 
 
@@ -406,8 +406,8 @@ DETAILED RESULTS
 
     Result     : proven
     Bound      : Infinite
-    Time       : 17.224 s
-    Engine     : AM
+    Time       : 1100.798 s
+    Engine     : Mpcustom2
 
 
 [26]
@@ -418,8 +418,8 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 6
-    Time       : 0.198 s
-    Engine     : Ht
+    Time       : 0.258 s
+    Engine     : Bm
 
 
 [27]
@@ -430,7 +430,7 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 36 - 37
-    Time       : 6.793 s
+    Time       : 7.296 s
     Engine     : L
 
 
@@ -442,8 +442,8 @@ DETAILED RESULTS
 
     Result     : proven
     Bound      : Infinite
-    Time       : 20.195 s
-    Engine     : Hp
+    Time       : 28.819 s
+    Engine     : Mpcustom2
 
 
 [29]
@@ -454,8 +454,8 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 6
-    Time       : 0.087 s
-    Engine     : Ht
+    Time       : 0.292 s
+    Engine     : Bm
 
 
 [30]
@@ -466,8 +466,8 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 6
-    Time       : 0.087 s
-    Engine     : Ht
+    Time       : 0.292 s
+    Engine     : Bm
 
 
 [31]
@@ -478,7 +478,7 @@ DETAILED RESULTS
 
     Result     : undetermined
     Bound      : 14044 - 
-    Time       : 5.532 s
+    Time       : 5.164 s
     Engine     : Oh
 
 
@@ -489,8 +489,8 @@ DETAILED RESULTS
     Location   : cmd_gen_sva.sv, 217
 
     Result     : covered
-    Bound      : 59 - 9403
-    Time       : 16.551 s
+    Bound      : 62 - 9403
+    Time       : 15.943 s
     Engine     : J
 
 
@@ -501,9 +501,9 @@ DETAILED RESULTS
     Location   : cmd_gen_sva.sv, 257
 
     Result     : undetermined
-    Bound      : 49 - 
-    Time       : 629.678 s
-    Engine     : Bm
+    Bound      : 76 - 
+    Time       : 2312.061 s
+    Engine     : Ht
 
 
 [34]
@@ -514,7 +514,7 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 21
-    Time       : 10.543 s
+    Time       : 11.085 s
     Engine     : Ht
 
 
@@ -526,7 +526,7 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 21
-    Time       : 10.561 s
+    Time       : 11.253 s
     Engine     : Ht
 
 
@@ -536,10 +536,10 @@ DETAILED RESULTS
     Type       : assert
     Location   : cmd_gen_sva.sv, 270
 
-    Result     : undetermined
-    Bound      : 49 - 
-    Time       : 672.265 s
-    Engine     : Bm
+    Result     : proven
+    Bound      : Infinite
+    Time       : 1149.163 s
+    Engine     : Hp
 
 
 [37]
@@ -550,8 +550,8 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 6
-    Time       : 0.087 s
-    Engine     : Ht
+    Time       : 0.292 s
+    Engine     : Bm
 
 
 [38]
@@ -562,8 +562,8 @@ DETAILED RESULTS
 
     Result     : covered
     Bound      : 6
-    Time       : 0.087 s
-    Engine     : Ht
+    Time       : 0.292 s
+    Engine     : Bm
 
 
 [39]
@@ -574,7 +574,7 @@ DETAILED RESULTS
 
     Result     : proven
     Bound      : Infinite
-    Time       : 35.264 s
+    Time       : 38.403 s
     Engine     : Hp
 
 
@@ -585,8 +585,8 @@ DETAILED RESULTS
     Location   : scheduler_order_sva.sv, 27
 
     Result     : covered
-    Bound      : 157 - 7803
-    Time       : 8.887 s
+    Bound      : 263 - 7803
+    Time       : 9.085 s
     Engine     : J
 
 
@@ -597,9 +597,9 @@ DETAILED RESULTS
     Location   : scheduler_order_sva.sv, 37
 
     Result     : undetermined
-    Bound      : 616 - 
-    Time       : 63.954 s
-    Engine     : Hts
+    Bound      : 4026 - 
+    Time       : 727.969 s
+    Engine     : AMcustom15
 
 
 [42]
@@ -609,8 +609,8 @@ DETAILED RESULTS
     Location   : scheduler_order_sva.sv, 37
 
     Result     : covered
-    Bound      : 127 - 7803
-    Time       : 8.887 s
+    Bound      : 141 - 7803
+    Time       : 9.085 s
     Engine     : J
 
 
@@ -621,8 +621,8 @@ DETAILED RESULTS
     Location   : scheduler_order_sva.sv, 39
 
     Result     : covered
-    Bound      : 127 - 7803
-    Time       : 8.887 s
+    Bound      : 141 - 7803
+    Time       : 9.085 s
     Engine     : J
 
 
@@ -633,9 +633,9 @@ DETAILED RESULTS
     Location   : wb_port_order_sva.sv, 22
 
     Result     : cex
-    Bound      : 24 - 160
-    Time       : 19.201 s
-    Engine     : L
+    Bound      : 28
+    Time       : 60.010 s
+    Engine     : Bm
 
 
 [45]
@@ -645,9 +645,9 @@ DETAILED RESULTS
     Location   : wb_port_order_sva.sv, 25
 
     Result     : covered
-    Bound      : 1
-    Time       : 0.000 s
-    Engine     : PRE
+    Bound      : 28
+    Time       : 60.010 s
+    Engine     : Bm
 
 
 -------------------------------------------------------------------------------

@@ -1,165 +1,383 @@
 {
   "$schema": "validation-retry-instructions/1",
-  "untested_in_this_drop": [
-    {
-      "finding_id": "data_path/CONSERVE/READ_CMD_TO_RESPONSE",
-      "module": "data_path",
-      "check_id": "CONSERVE/READ_CMD_TO_RESPONSE",
-      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
-    },
-    {
-      "finding_id": "data_path/CONSERVE/WRITE_CMD_TO_BEATS",
-      "module": "data_path",
-      "check_id": "CONSERVE/WRITE_CMD_TO_BEATS",
-      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
-    },
-    {
-      "finding_id": "data_path/CONSERVE/WRITE_REQUEST_TO_DATA",
-      "module": "data_path",
-      "check_id": "CONSERVE/WRITE_REQUEST_TO_DATA",
-      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
-    },
-    {
-      "finding_id": "data_path/MISMATCH/dp_rd_rsp[aux,data]",
-      "module": "data_path",
-      "check_id": "MISMATCH/dp_rd_rsp[aux,data]",
-      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
-    },
-    {
-      "finding_id": "data_path/MISMATCH/dp_rd_rsp[data]",
-      "module": "data_path",
-      "check_id": "MISMATCH/dp_rd_rsp[data]",
-      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
-    },
-    {
-      "finding_id": "wb_port/CONSERVE/HOST_BEAT_TO_REQUEST",
-      "module": "wb_port",
-      "check_id": "CONSERVE/HOST_BEAT_TO_REQUEST",
-      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
-    },
-    {
-      "finding_id": "wb_port/HANDSHAKE/wb",
-      "module": "wb_port",
-      "check_id": "HANDSHAKE/wb",
-      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
-    },
-    {
-      "finding_id": "wb_port/MISMATCH/req[addr,data,mask,we]",
-      "module": "wb_port",
-      "check_id": "MISMATCH/req[addr,data,mask,we]",
-      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
-    },
-    {
-      "finding_id": "wb_port/MISMATCH/req[addr,data,we]",
-      "module": "wb_port",
-      "check_id": "MISMATCH/req[addr,data,we]",
-      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
-    },
-    {
-      "finding_id": "wb_port/HOST_001",
-      "module": "wb_port",
-      "check_id": "HOST_001",
-      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
-    }
-  ],
   "status": "FAIL",
   "pipeline": "validation",
-  "drop": "5994bb667dba",
+  "drop": "e5ec723f495e",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "spec_id": "00d082c3f72d1b34",
-  "generated_utc": "2026-10-29T17:17:19.590893Z",
+  "generated_utc": "2026-10-29T17:56:36.499381Z",
   "failed_modules": [
-    "scheduler"
+    "data_path",
+    "wb_port"
   ],
   "retry_instructions": {
-    "scheduler": {
-      "module": "scheduler",
+    "data_path": {
+      "module": "data_path",
       "attempt": null,
-      "drop": "5994bb667dba",
+      "drop": "e5ec723f495e",
       "failed_checks": [
         {
-          "id": "COMPILE_ERROR",
-          "name": "xmvlog rejects scheduler.sv as shipped in this drop (2 error(s)); every path that instantiates it (12) has no verdict and every finding on those paths is carrie",
+          "id": "CONSERVE/WRITE_CMD_TO_BEATS",
+          "name": "Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR comma",
           "pass": false,
-          "expected": "scheduler.sv compiles under IEEE 1800 (the Frontend lint gate passes on the shipped drop)",
-          "actual": "scheduler.sv:178: 'sel_bank_eff_r': undeclared identifier [12.5(IEEE)].; scheduler.sv:179: 'sel_bank_eff_r': undeclared identifier [12.5(IEEE)].",
+          "expected": "Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR command issued to the DRAM without its data writes garbage to the array.",
+          "actual": "2 of 1200 dp_cmd.write transaction(s) never produced a ddr_wr_beat by the end of the run (1198 observed, 2 per source)",
           "severity": "critical",
           "confidence": "confirmed",
-          "spec_ref": null,
+          "spec_ref": "data_path_mapping.pack_mode; timing_model.tCCD_nCK",
           "anchor": [
             {
-              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
-              "line": 178,
-              "signal": null,
-              "text": "'sel_bank_eff_r': undeclared identifier [12.5(IEEE)]."
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 257,
+              "signal": "ddr_dq_o",
+              "text": "ddr_dq_o = wr_dat_r[DQ_WIDTH-1:0];"
             },
             {
-              "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
-              "line": 179,
-              "signal": null,
-              "text": "'sel_bank_eff_r': undeclared identifier [12.5(IEEE)]."
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 260,
+              "signal": "ddr_dq_o",
+              "text": "ddr_dq_o = wr_dat_r[(wb+1)*DQ_WIDTH-1 -: DQ_WIDTH];"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+              "line": 274,
+              "signal": "ddr_dm_o",
+              "text": "assign ddr_dm_o   = (wr_state == WR_DRIVE) ? ~dm_beat : '0;  // DM active-high masks"
             }
           ],
           "context": null,
           "owner_candidates": [
-            "scheduler"
+            "data_path"
+          ],
+          "occurrences": 4,
+          "paths": [
+            "path_05_scheduler_refresh_loop",
+            "path_20_refresh_preempt"
+          ],
+          "repro": {
+            "path": "path_05_scheduler_refresh_loop",
+            "command": "python3 Validation/tools/run_path.py --path path_05_scheduler_refresh_loop",
+            "sequence": "Validation/sequences/generated/path_05_scheduler_refresh_loop_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_05_scheduler_refresh_loop",
+            "log": "Validation/reports/paths/path_05_scheduler_refresh_loop_sim.log",
+            "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "CONSERVE WRITE_CMD_TO_BEATS owner=data_path lost=2 of=1200 from=dp_cmd.write to=ddr_wr_beat observed=1198 per_source=2 | Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR command issued to the DRAM without its data writes garbage to the array."
+            }
+          },
+          "introduced_in": "99f72da45a32",
+          "repair": null,
+          "fix": null,
+          "finding_id": "data_path/CONSERVE/WRITE_CMD_TO_BEATS"
+        },
+        {
+          "id": "CONSERVE/WRITE_REQUEST_TO_DATA",
+          "name": "Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_bu",
+          "pass": false,
+          "expected": "Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_buffer_depth words and must drain one per WR command issued, so it never refuses a word the queue has already accepted.",
+          "actual": "1 of 600 req[we=1] transaction(s) never produced a dp_wr by the end of the run (599 observed)",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": "host_interface.write_buffer_depth; controller_architecture.command_queue_depth",
+          "anchor": [],
+          "context": null,
+          "owner_candidates": [
+            "data_path"
           ],
           "occurrences": 2,
           "paths": [
-            "path_01_write_cmd",
-            "path_02_read_cmd",
-            "path_03_read_return",
-            "path_04_scheduler_bank_loop",
             "path_05_scheduler_refresh_loop",
-            "path_07_backpressure",
-            "path_12_csr_timing_to_scheduling",
-            "path_13_csr_refresh_to_scheduling",
-            "path_18_full_write",
-            "path_19_row_conflict",
-            "path_20_refresh_preempt",
+            "path_20_refresh_preempt"
+          ],
+          "repro": {
+            "path": "path_05_scheduler_refresh_loop",
+            "command": "python3 Validation/tools/run_path.py --path path_05_scheduler_refresh_loop",
+            "sequence": "Validation/sequences/generated/path_05_scheduler_refresh_loop_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_05_scheduler_refresh_loop",
+            "log": "Validation/reports/paths/path_05_scheduler_refresh_loop_sim.log",
+            "trace": "Validation/reports/paths/path_05_scheduler_refresh_loop_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "CONSERVE WRITE_REQUEST_TO_DATA owner=data_path lost=1 of=600 from=req[we=1] to=dp_wr observed=599 | Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_buffer_depth words and must drain one per WR command issued, so it never refuses a word the queue has already accepted."
+            }
+          },
+          "introduced_in": "99f72da45a32",
+          "repair": null,
+          "fix": null,
+          "finding_id": "data_path/CONSERVE/WRITE_REQUEST_TO_DATA"
+        }
+      ],
+      "message": "2 check(s) failed on drop e5ec723f495e; 2 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+    },
+    "wb_port": {
+      "module": "wb_port",
+      "attempt": null,
+      "drop": "e5ec723f495e",
+      "failed_checks": [
+        {
+          "id": "HANDSHAKE/wb",
+          "name": "every wb beat the slave accepts is acknowledged exactly once (wb_ack_o), in a pipelined run as in a single access",
+          "pass": false,
+          "expected": "every wb beat the slave accepts is acknowledged exactly once (wb_ack_o), in a pipelined run as in a single access",
+          "actual": "1 of 79 pipelined beat(s) never acknowledged (wb_ack_o)",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": "host_interface.interface_type",
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 168,
+              "signal": "req_we",
+              "text": "req_we    <= wb_we_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 169,
+              "signal": "req_addr",
+              "text": "req_addr  <= wb_adr_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 170,
+              "signal": "req_wdata",
+              "text": "req_wdata <= wb_dat_i;"
+            }
+          ],
+          "context": null,
+          "owner_candidates": [
+            "wb_port"
+          ],
+          "occurrences": 4,
+          "paths": [
             "path_23_host_ack_collision"
           ],
           "repro": {
-            "cmd": "python3 Validation/tools/run_path.py --path path_01_write_cmd"
+            "path": "path_23_host_ack_collision",
+            "command": "python3 Validation/tools/run_path.py --path path_23_host_ack_collision",
+            "sequence": "Validation/sequences/generated/path_23_host_ack_collision_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_23_host_ack_collision",
+            "log": "Validation/reports/paths/path_23_host_ack_collision_sim.log",
+            "trace": "Validation/reports/paths/path_23_host_ack_collision_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "DRIVER_STALL: wb \u2014 1 of 79 pipelined beat(s) never acknowledged (wb_ack_o)"
+            }
           },
-          "introduced_in": null,
+          "introduced_in": "99f72da45a32",
           "repair": null,
           "fix": null,
-          "finding_id": "structural/scheduler/COMPILE_ERROR"
+          "finding_id": "wb_port/HANDSHAKE/wb"
+        },
+        {
+          "id": "HOST_001",
+          "name": "wb_port: HOST_001",
+          "pass": false,
+          "expected": "",
+          "actual": "fired 1x; first: xmsim: *E,ASRTST (./wb_port_order_sva.sv,23): (time 35372500 PS) Assertion chain_harness.u_wb_port.u_wb_port_order_sva.a_HOST_001 has failed",
+          "severity": "major",
+          "confidence": "confirmed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 168,
+              "signal": "req_we",
+              "text": "req_we    <= wb_we_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 169,
+              "signal": "req_addr",
+              "text": "req_addr  <= wb_adr_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 170,
+              "signal": "req_wdata",
+              "text": "req_wdata <= wb_dat_i;"
+            }
+          ],
+          "context": null,
+          "owner_candidates": [
+            "wb_port"
+          ],
+          "occurrences": 1,
+          "paths": [
+            "path_23_host_ack_collision"
+          ],
+          "repro": {
+            "path": "path_23_host_ack_collision",
+            "command": "python3 Validation/tools/run_path.py --path path_23_host_ack_collision",
+            "sequence": "Validation/sequences/generated/path_23_host_ack_collision_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_23_host_ack_collision",
+            "log": "Validation/reports/paths/path_23_host_ack_collision_sim.log",
+            "trace": "Validation/reports/paths/path_23_host_ack_collision_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "xmsim: *E,ASRTST (./wb_port_order_sva.sv,23): (time 35372500 PS) Assertion chain_harness.u_wb_port.u_wb_port_order_sva.a_HOST_001 has failed"
+            }
+          },
+          "introduced_in": "99f72da45a32",
+          "repair": null,
+          "fix": null,
+          "finding_id": "wb_port/HOST_001"
         }
       ],
-      "message": "1 check(s) failed on drop 5994bb667dba; 1 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+      "message": "2 check(s) failed on drop e5ec723f495e; 2 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
     }
   },
   "resolved_since_previous_drop": [
     {
       "schema": "validation-findings/2",
-      "id": "init_fsm/TIMING_014",
+      "id": "structural/scheduler/COMPILE_ERROR",
       "kind": "rtl_defect",
-      "check_id": "TIMING_014",
-      "taxonomy_id": "TIMING_014",
-      "owner_module": "init_fsm",
-      "severity": "major",
-      "title": "init_fsm: TIMING_014",
+      "check_id": "COMPILE_ERROR",
+      "taxonomy_id": "COMPILE_ERROR",
+      "owner_module": "scheduler",
+      "severity": "critical",
+      "title": "scheduler.sv does not compile: line 178: 'sel_bank_eff_r': undeclared identifier [12.5(IEEE)].; line 179: 'sel_bank_eff_r': undeclared identifier [12.5(IEEE)].",
       "paths": [
-        "path_08_init_to_cal",
-        "path_09_init_to_refresh",
-        "path_14_status_init",
-        "path_15_status_cal",
-        "path_17_full_boot"
+        "path_01_write_cmd",
+        "path_02_read_cmd",
+        "path_03_read_return",
+        "path_04_scheduler_bank_loop",
+        "path_05_scheduler_refresh_loop",
+        "path_07_backpressure",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt",
+        "path_23_host_ack_collision"
       ],
       "status": "resolved",
-      "resolved_in": "5994bb667dba",
-      "last_seen": "99f72da45a32",
-      "first_seen": "36d3929e5f09",
-      "note": "open in drop 99f72da45a32, not raised by drop 5994bb667dba"
+      "resolved_in": "e5ec723f495e",
+      "last_seen": "5994bb667dba",
+      "first_seen": "5994bb667dba",
+      "note": "open in drop 5994bb667dba, not raised by drop e5ec723f495e"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/CONSERVE/READ_CMD_TO_RESPONSE",
+      "kind": "rtl_defect",
+      "check_id": "CONSERVE/READ_CMD_TO_RESPONSE",
+      "taxonomy_id": "DATA_001",
+      "owner_module": "data_path",
+      "severity": "critical",
+      "title": "data_path: CONSERVE/READ_CMD_TO_RESPONSE",
+      "paths": [
+        "path_02_read_cmd",
+        "path_07_backpressure",
+        "path_18_full_write"
+      ],
+      "status": "resolved",
+      "resolved_in": "e5ec723f495e",
+      "last_seen": "5994bb667dba",
+      "first_seen": "efece348d04e",
+      "note": "open in drop 5994bb667dba, not raised by drop e5ec723f495e"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/MISMATCH/dp_rd_rsp[aux,data]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/dp_rd_rsp[aux,data]",
+      "taxonomy_id": "DATA_001",
+      "owner_module": "data_path",
+      "severity": "critical",
+      "title": "data_path: MISMATCH/dp_rd_rsp[aux,data]",
+      "paths": [
+        "path_18_full_write"
+      ],
+      "status": "resolved",
+      "resolved_in": "e5ec723f495e",
+      "last_seen": "5994bb667dba",
+      "first_seen": "99f72da45a32",
+      "note": "open in drop 5994bb667dba, not raised by drop e5ec723f495e"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/MISMATCH/dp_rd_rsp[data]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/dp_rd_rsp[data]",
+      "taxonomy_id": "DATA_001",
+      "owner_module": "data_path",
+      "severity": "critical",
+      "title": "data_path: MISMATCH/dp_rd_rsp[data]",
+      "paths": [
+        "path_18_full_write"
+      ],
+      "status": "resolved",
+      "resolved_in": "e5ec723f495e",
+      "last_seen": "5994bb667dba",
+      "first_seen": "99f72da45a32",
+      "note": "open in drop 5994bb667dba, not raised by drop e5ec723f495e"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/CONSERVE/HOST_BEAT_TO_REQUEST",
+      "kind": "rtl_defect",
+      "check_id": "CONSERVE/HOST_BEAT_TO_REQUEST",
+      "taxonomy_id": "SCHED_001",
+      "owner_module": "wb_port",
+      "severity": "critical",
+      "title": "wb_port: CONSERVE/HOST_BEAT_TO_REQUEST",
+      "paths": [
+        "path_05_scheduler_refresh_loop",
+        "path_07_backpressure",
+        "path_18_full_write",
+        "path_20_refresh_preempt"
+      ],
+      "status": "resolved",
+      "resolved_in": "e5ec723f495e",
+      "last_seen": "5994bb667dba",
+      "first_seen": "efece348d04e",
+      "note": "open in drop 5994bb667dba, not raised by drop e5ec723f495e"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/MISMATCH/req[addr,data,mask,we]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/req[addr,data,mask,we]",
+      "taxonomy_id": "DATA_001",
+      "owner_module": "wb_port",
+      "severity": "critical",
+      "title": "wb_port: MISMATCH/req[addr,data,mask,we]",
+      "paths": [
+        "path_07_backpressure",
+        "path_18_full_write",
+        "path_20_refresh_preempt"
+      ],
+      "status": "resolved",
+      "resolved_in": "e5ec723f495e",
+      "last_seen": "5994bb667dba",
+      "first_seen": "99f72da45a32",
+      "note": "open in drop 5994bb667dba, not raised by drop e5ec723f495e"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/MISMATCH/req[addr,data,we]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/req[addr,data,we]",
+      "taxonomy_id": "DATA_001",
+      "owner_module": "wb_port",
+      "severity": "critical",
+      "title": "wb_port: MISMATCH/req[addr,data,we]",
+      "paths": [
+        "path_07_backpressure"
+      ],
+      "status": "resolved",
+      "resolved_in": "e5ec723f495e",
+      "last_seen": "5994bb667dba",
+      "first_seen": "99f72da45a32",
+      "note": "open in drop 5994bb667dba, not raised by drop e5ec723f495e"
     }
   ],
   "requires_human_review": false,
   "source": "Validation/findings/emit_findings.py -> retry_adapter.py",
   "drop_status": {
     "$schema": "validation-drop-status/1",
-    "drop": "5994bb667dba",
+    "drop": "e5ec723f495e",
     "partial": false,
     "blocks_present": [
       "addr_decoder",
@@ -179,62 +397,28 @@
     "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
     "foreign_spec_blocks": {},
     "paths_run": [
+      "path_01_write_cmd",
+      "path_02_read_cmd",
+      "path_03_read_return",
+      "path_04_scheduler_bank_loop",
+      "path_05_scheduler_refresh_loop",
+      "path_07_backpressure",
       "path_08_init_to_cal",
       "path_09_init_to_refresh",
+      "path_12_csr_timing_to_scheduling",
+      "path_13_csr_refresh_to_scheduling",
       "path_14_status_init",
       "path_15_status_cal",
       "path_16_status_refresh",
       "path_17_full_boot",
+      "path_18_full_write",
+      "path_19_row_conflict",
+      "path_20_refresh_preempt",
       "path_21_wb_port_standalone",
-      "path_22_csr_standalone"
+      "path_22_csr_standalone",
+      "path_23_host_ack_collision"
     ],
-    "paths_blocked": {
-      "path_04_scheduler_bank_loop": [
-        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
-      ],
-      "path_07_backpressure": [
-        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
-      ],
-      "path_12_csr_timing_to_scheduling": [
-        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
-      ],
-      "path_10_csr_to_timing": [
-        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
-      ],
-      "path_23_host_ack_collision": [
-        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
-      ],
-      "path_02_read_cmd": [
-        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
-      ],
-      "path_20_refresh_preempt": [
-        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
-      ],
-      "path_05_scheduler_refresh_loop": [
-        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
-      ],
-      "path_03_read_return": [
-        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
-      ],
-      "path_13_csr_refresh_to_scheduling": [
-        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
-      ],
-      "path_11_csr_to_refresh": [
-        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
-      ],
-      "path_19_row_conflict": [
-        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
-      ],
-      "path_01_write_cmd": [
-        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
-      ],
-      "path_06_scheduler_dequeue": [
-        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
-      ],
-      "path_18_full_write": [
-        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
-      ]
-    },
-    "note": "Paths listed as blocked with a run error did not simulate on this drop (infrastructure, not design); nothing is known about them from this run."
+    "paths_blocked": {},
+    "note": "Complete run: every runnable path simulated on this drop."
   }
 }

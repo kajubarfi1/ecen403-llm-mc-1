@@ -78,3 +78,16 @@ class Vacuity(unittest.TestCase):
         src = inspect.getsource(E.formal_proof_sets)
         self.assertIn('("proven", "bounded_proven")', src)
         self.assertNotIn('"bounded_vacuous"', src)      # a vacuous result never closes a finding
+
+
+class ReportBelongsToRun(unittest.TestCase):
+    HDR_PLAIN = "    Global Stopats       :     <none>\n          assumptions     : 0\n"
+    HDR_ABS = "    Global Stopats       :     2\n          assumptions     : 2\n"
+
+    def test_matching_header_passes(self):
+        self.assertIsNone(R.report_mismatch(self.HDR_PLAIN, [], []))
+        self.assertIsNone(R.report_mismatch(self.HDR_ABS, ["a", "b"], ["x", "y"]))
+
+    def test_another_runs_report_is_refused(self):
+        self.assertIn("2 assumption", R.report_mismatch(self.HDR_ABS, [], []))
+        self.assertIn("no stopats", R.report_mismatch(self.HDR_PLAIN, ["a"], []))

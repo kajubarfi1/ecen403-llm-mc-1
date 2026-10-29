@@ -669,9 +669,99 @@ pulse for two beats, one beat never acknowledged). It is in the package
 as `wb_port/HOST_001`, critical, confirmed, with the skid you just built
 being the natural place to hold the loser.
 
+### 3b. Scheduler formal, for the record
+
+The 60-minute concrete run on the (a)+(b) scheduler of 99f72da45a32:
+PROTO_002 proven, PROTO_001 still undetermined at depth 76, HOST_001
+counterexample again at 28 cycles. The scheduler in your new drop is
+(a) without (b), a different design, so its proofs start over once it
+compiles; PROTO_001 stays `awaiting_formal` until then.
+
 ### 4. What the next round needs
 
 Phase 3 fixes the declaration order (one line); then the full drop can
 be judged. Expect: wb_port clean except HOST_001; data_path failing
 every read until the countdown moves to command issue; the scheduler
 spacing or spec decision above.
+
+## Addendum 11 (2026-10-29, evening): drop e5ec723f495e, 17 of 20
+
+Replies to your handoffs 3 to 6. The redesign holds: every read path
+passes, back-to-back reads and writes included, the compile error is
+gone, tMOD and tMRD are clean, and the port is clean. Three paths fail,
+two of them on one remaining data_path case and one on HOST_001.
+
+| path | before (5994bb, hybrid) | now |
+|---|---|---|
+| 01, 02, 07 (host → command) | pass / pass / pass | pass |
+| 03 (single read) | data_path 0/19 | **pass** |
+| 18 (write then read back) | data_path 24/33 | **pass** |
+| 05, 20 (refresh stress, 600 beats) | 1 write word lost | 1 write word lost |
+| 23 (ack collision) | HOST_001 fires | HOST_001 fires |
+| 08/09/14/15/17 (init) | pass | pass, TIMING_013/014 silent |
+
+**CAS spacing**: the minimum gap between CAS commands on the traces is
+now exactly 2 controller cycles (`WORD_BEATS`), 24 of 76 gaps on path_02
+sit at it, and no read's word is shifted. Your reasoning on the
+bank_tracker tCCD question was right to stop where it did: `ctr_ccd`
+does load 4 nCK and count controller cycles, so it would enforce ~4
+cycles, but it is loaded from cmd_gen's registered feedback, and a
+second CAS was being selected before the first had loaded it. At this
+ratio the spec's tCCD is one controller cycle, so TIMING_010 never had
+a violation to report; your guard, loaded the cycle a CAS is selected,
+is what actually spaces the bus. The tMRD guard was the right call: the
+clock ratio is a Tier-2 choice, and a guard derived from the spec that
+is a no-op at 4:1 is exactly how a dormant violation should be handled.
+TIMING_013 and TIMING_014 are both silent on the five init paths.
+
+### The remaining data_path case: a full write buffer refusing a word in the cycle it pops
+
+On both refresh paths, one of 600 write words is never accepted, and
+one WR command later drives nothing (`CONSERVE/WRITE_REQUEST_TO_DATA`,
+`CONSERVE/WRITE_CMD_TO_BEATS`). The trace at t = 779 000 ps on path_05:
+16 words already in `wr_buf`, zero WR commands issued yet (the sequence
+front-loads 600 pipelined beats and the scheduler is still activating),
+and in the same cycle the first `cmd_wr_valid` fires, so the engine pops
+`wr_buf`, the 17th write request is enqueued (the queue had room) and
+its word arrives at `wr_data_valid`. `wr_full` is still true that cycle,
+so `wr_data_ready` is low and the word is dropped; the pop frees the
+slot one cycle too late. Two things to fix, the first in data_path:
+
+1. `wr_data_ready` must allow a push in the cycle a pop happens
+   (`~wr_full || wr_pop_this_cycle`, with the count updated for both),
+   the standard full-FIFO same-cycle case.
+2. `wr_data_ready` has no consumer: the manifest lists it as an output
+   and nothing in the integration map reads it, so the port never stalls
+   a write for a full write buffer; `host_interface.write_buffer_depth`
+   = `command_queue_depth` = 16 is what makes that survivable, and only
+   up to this same-cycle corner. Either wb_port honours `wr_data_ready`
+   in `wb_stall_o` for writes (a new edge, Phase 1 and the manifests) or
+   the spec states that the write buffer must hold queue depth plus the
+   writes in flight. We will raise the second as an intake question; the
+   first fix closes the finding on its own.
+
+### Coverage note, not a finding
+
+Design code coverage on this drop reads 72.0 %, down from 86.8 %, all of
+it in data_path (29.7 %). The cause is 1 018 toggle bits of
+`rd_pend_deadline`/`wr_pend_deadline`: 16 entries × 32 bits × 2, holding
+a free-running cycle count whose high bits can never move in any run we
+can simulate. The deadline only needs to span CL in controller cycles
+plus the queue's worth of beats, 8 bits is generous; a modulo counter of
+that width (compared modulo as well) would give the same behaviour, a
+smaller block for Dawson, and the coverage back. Your call; the
+measured number stays honest until then.
+
+### HOST_001
+
+Still the one open port item, by design on your side. Formal finds it
+again on this scheduler (re-proof running), path_23 reproduces it. The
+skid you built is the natural place to hold the loser.
+
+### Your other questions
+
+Handoff 4 and 5 (the testbench): the `rd_capture_valid` level trigger is
+the right line, and the scan result (one instance, isolated) matches
+what we would expect from the Phase 2/3 generators. The low-cost preset
+run of that testbench is yours (it is your gate); on our side the
+preset drop will be re-judged the next time the flow runs that preset.

@@ -3,7 +3,7 @@
   "path": "path_23_host_ack_collision",
   "strategy": "composed",
   "verdict": "fail",
-  "timestamp": "2026-10-29T12:17:19.028782",
+  "timestamp": "2026-10-29T12:56:17.632027",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -15,15 +15,15 @@
     "scheduler",
     "wb_port"
   ],
-  "sequence": null,
+  "sequence": "Validation/sequences/generated/path_23_host_ack_collision_seed1.json",
   "stimulus_generator": "ack_collision",
   "autonomous": false,
   "window_cycles": 300,
-  "coverage_collected": false,
+  "coverage_collected": true,
   "rtl_drop": {
-    "git_head": "5994bb667dba",
-    "drop_id": "5994bb667dba",
-    "design_id": "2ed70e31cb84",
+    "git_head": "e5ec723f495e",
+    "drop_id": "e5ec723f495e",
+    "design_id": "3581af72cba4",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -35,16 +35,16 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "1aefeb0",
+    "validated_at": "2e8a52a",
     "frontend_commits": {
       "addr_decoder": "f37ce49d323151a6118ae7765aa766918c816383",
       "bank_tracker": "f37ce49d323151a6118ae7765aa766918c816383",
       "cmd_gen": "f37ce49d323151a6118ae7765aa766918c816383",
       "cmd_queue": "f37ce49d323151a6118ae7765aa766918c816383",
       "config_regs": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc",
-      "data_path": "90c01f641e38c739b30366c69df7046ae9f21972",
+      "data_path": "522cec250a9ec1c6c4ecbd306c7f7278ecf845ae",
       "refresh_ctrl": "f37ce49d323151a6118ae7765aa766918c816383",
-      "scheduler": "5e784e2af679c5f1dec45750a8ce70f2714b6cdd",
+      "scheduler": "b2f04916b59b96fd417ec1ac8185357cd278d5ae",
       "wb_port": "65dbb0ff530a6fe7c387b0c8f87a9330c3340b8a"
     },
     "roots": [
@@ -100,23 +100,56 @@
     "shipped_spec": {
       "path": "Frontend2/OutputFolders/generated_spec.json",
       "revision": "golden_ddr3_1600k_x8_2lane_1rank"
-    }
+    },
+    "netlists": {}
   },
-  "stages": [],
-  "compile_errors": [
+  "stages": [
     {
-      "block": "scheduler",
-      "file": "scheduler.sv",
-      "line": 178,
-      "message": "'sel_bank_eff_r': undeclared identifier [12.5(IEEE)]."
+      "stage": "data_path",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/data_path_predictor.py",
+      "scope": "data_path",
+      "verdict": "pass",
+      "summary": "scope=data_path  strategy=exact  status=pass  matched=127/127  (127 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
     },
     {
-      "block": "scheduler",
-      "file": "scheduler.sv",
-      "line": 179,
-      "message": "'sel_bank_eff_r': undeclared identifier [12.5(IEEE)]."
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "fail",
+      "summary": "scope=wb_port  strategy=exact  status=pass  matched=128/128  WAIVED=43 field comparison(s)  (128 output transaction(s) matched)  SVA fired: a_HOST_001 x1",
+      "detail": [
+        "a_HOST_001 fired 1x (assertion bound to wb_port)"
+      ],
+      "rule_counts": {}
+    },
+    {
+      "stage": "(conservation)",
+      "kind": "conservation",
+      "scope": "(conservation)",
+      "model": null,
+      "verdict": "pass",
+      "summary": "scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable",
+      "detail": []
+    },
+    {
+      "stage": "(host handshake)",
+      "kind": "handshake",
+      "scope": "(host handshake)",
+      "model": null,
+      "verdict": "fail",
+      "summary": "4 driver completion timeout(s): the slave never acknowledged every beat it accepted",
+      "detail": [
+        "DRIVER_STALL: wb \u2014 1 of 79 pipelined beat(s) never acknowledged (wb_ack_o)",
+        "DRIVER_STALL: wb \u2014 1 of 81 pipelined beat(s) never acknowledged (wb_ack_o)",
+        "DRIVER_STALL: wb \u2014 1 of 83 pipelined beat(s) never acknowledged (wb_ack_o)",
+        "DRIVER_STALL: wb \u2014 1 of 85 pipelined beat(s) never acknowledged (wb_ack_o)"
+      ]
     }
   ],
   "log": "Validation/reports/paths/path_23_host_ack_collision_sim.log",
-  "observed_trace": null
+  "observed_trace": "Validation/reports/paths/path_23_host_ack_collision_observed.jsonl"
 }

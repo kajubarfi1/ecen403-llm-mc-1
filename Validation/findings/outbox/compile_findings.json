@@ -1,55 +1,6 @@
 {
   "$schema": "validation-findings/1",
   "generated_by": "validate_drop.py step 4 (xmvlog errors inside the drop's RTL)",
-  "drop": "5994bb667dba",
-  "findings": [
-    {
-      "source": "validation",
-      "target": "frontend",
-      "kind": "compile_error",
-      "scope": "scheduler",
-      "owner_candidates": [
-        "scheduler"
-      ],
-      "status": "open",
-      "severity": "critical",
-      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-      "drop": "5994bb667dba",
-      "title": "scheduler.sv does not compile: line 178: 'sel_bank_eff_r': undeclared identifier [12.5(IEEE)].; line 179: 'sel_bank_eff_r': undeclared identifier [12.5(IEEE)].",
-      "detail": "xmvlog rejects scheduler.sv as shipped in this drop (2 error(s)); every path that instantiates it (12) has no verdict and every finding on those paths is carried untested. The Frontend's lint/sim gate did not run on this drop (regenerated with --no-lint): a compile error is a Phase defect, not an environment one.",
-      "evidence": {
-        "errors": [
-          {
-            "block": "scheduler",
-            "file": "scheduler.sv",
-            "line": 178,
-            "message": "'sel_bank_eff_r': undeclared identifier [12.5(IEEE)]."
-          },
-          {
-            "block": "scheduler",
-            "file": "scheduler.sv",
-            "line": 179,
-            "message": "'sel_bank_eff_r': undeclared identifier [12.5(IEEE)]."
-          }
-        ],
-        "paths": [
-          "path_01_write_cmd",
-          "path_02_read_cmd",
-          "path_03_read_return",
-          "path_04_scheduler_bank_loop",
-          "path_05_scheduler_refresh_loop",
-          "path_07_backpressure",
-          "path_12_csr_timing_to_scheduling",
-          "path_13_csr_refresh_to_scheduling",
-          "path_18_full_write",
-          "path_19_row_conflict",
-          "path_20_refresh_preempt",
-          "path_23_host_ack_collision"
-        ],
-        "tool": "xmvlog (Xcelium) on Olympus"
-      },
-      "expected": "scheduler.sv compiles under IEEE 1800 (the Frontend lint gate passes on the shipped drop)",
-      "actual": "scheduler.sv:178: 'sel_bank_eff_r': undeclared identifier [12.5(IEEE)].; scheduler.sv:179: 'sel_bank_eff_r': undeclared identifier [12.5(IEEE)]."
-    }
-  ]
+  "drop": "e5ec723f495e",
+  "findings": []
 }

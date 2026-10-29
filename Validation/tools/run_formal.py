@@ -217,6 +217,24 @@ def reclassify(report_path, spec_path=None):
     return rep
 
 
+def report_mismatch(text, stopats, assumes):
+    """None when the RESULTS report's header matches the run's abstraction
+    options, else what differs. A shared remote directory once handed back
+    the assumed-configuration run's report as the concrete 60-minute run's
+    (2026-10-29): two assumptions where none were given."""
+    m = re.search(r"assumptions\s*:\s*(\d+)", text)
+    n_asm = int(m.group(1)) if m else None
+    m2 = re.search(r"Global Stopats\s*:\s*(.*)", text)
+    stop_none = bool(m2) and "<none>" in m2.group(1)
+    if n_asm is not None and n_asm != len(assumes):
+        return f"report lists {n_asm} assumption(s), this run gave {len(assumes)}"
+    if m2 and stopats and stop_none:
+        return f"report lists no stopats, this run gave {len(stopats)}"
+    if m2 and not stopats and not stop_none:
+        return "report lists stopats, this run gave none"
+    return None
+
+
 def parse_results(text):
     """Rows of the RESULTS table: name, result, engine, bound, time."""
     rows = []
@@ -239,7 +257,9 @@ def main() -> int:
                          "engine reaches it (2026-10-20: 300 stopped after 12 s, 2000 after "
                          "2 min, every open property undetermined at that bound), so the "
                          "time limit governs unless a cap is asked for")
-    ap.add_argument("--remote-dir", default="~/formal/auto")
+    ap.add_argument("--remote-dir", default=None,
+                    help="Olympus directory for this run; default a fresh ~/formal/auto/<utc>_<pid> "
+                         "(two runs sharing one directory handed back each other's report, 2026-10-29)")
     ap.add_argument("--assume", action="append", default=[], metavar="EXPR",
                     help="constrain a signal (JasperGold assume), e.g. a configuration "
                          "register cut free with --stopat and assumed at a scaled value "
@@ -318,8 +338,10 @@ def main() -> int:
     a.connect()
     try:
         a.upload_file(tgz, "formal_pkg.tgz")
-        rd = args.remote_dir
-        a._head_exec(f"mkdir -p {rd} && rm -rf {rd}/pkg && tar xzf ~/cadence_agent_work/formal_pkg.tgz -C {rd}")
+        stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S") + f"_{os.getpid()}"
+        rd = args.remote_dir or f"~/formal/auto/{stamp}"
+        a.upload_file(tgz, f"formal_pkg_{stamp}.tgz")
+        a._head_exec(f"mkdir -p {rd} && rm -rf {rd}/pkg && tar xzf ~/cadence_agent_work/formal_pkg_{stamp}.tgz -C {rd}")
         script = (f"export PATH={JG_BIN}:$PATH; cd {rd}/pkg && rm -rf jgproj && "
                   f"jg -batch -tcl run.tcl -proj jgproj -allow_unsupported_OS > jg.log 2>&1; "
                   f"echo jg_exit_$?; grep -c '' report_all.txt 2>/dev/null")
@@ -327,7 +349,7 @@ def main() -> int:
         print(f"  JasperGold on Olympus ({args.time} limit, trace {args.trace or 'unlimited'}) ...")
         r = a.srun(f"bash {rd}/run.sh", timeout=3600)
         print("  " + r["stdout"].strip().splitlines()[-1] if r["stdout"].strip() else "  (no output)")
-        a._head_exec(f"cp {rd}/pkg/report_all.txt ~/cadence_agent_work/jg_report_all.txt")
+        a._head_exec(f"cp {rd}/pkg/report_all.txt ~/cadence_agent_work/jg_report_all_{stamp}.txt")
         # what JasperGold said about the cuts and assumptions: a stopat on a
         # name it cannot resolve, or an assume it rejects, is silent in the
         # results table (the scaled tREFI run of 2026-10-20 ran 48 s with
@@ -339,9 +361,16 @@ def main() -> int:
                 print("    jg: " + l.strip()[:150])
         os.makedirs(REPORTS, exist_ok=True)
         raw = os.path.join(REPORTS, f"jg_{args.path}_{head}{'_abs' if args.stopat else ''}_report.txt")
-        a.download_file("jg_report_all.txt", raw)
+        a.download_file(f"jg_report_all_{stamp}.txt", raw + ".new")
     finally:
         a.disconnect()
+    # the report must be THIS run's: its header counts the stopats and
+    # assumptions JasperGold applied
+    problem = report_mismatch(open(raw + ".new", errors="replace").read(), args.stopat, args.assume)
+    if problem:
+        print(f"  REFUSED: the downloaded report is not this run's ({problem}); kept as {os.path.relpath(raw + '.new', ROOT)}")
+        return 3
+    os.replace(raw + ".new", raw)
 
     # 4. report
     text = open(raw, errors="replace").read()
