@@ -75,19 +75,38 @@ module data_path_tb;
     logic ddr_dqs_o, ddr_dqs_oe, ddr_dqs_i;
 
     // ddr_dq_i is DQ_WIDTH-wide -- a host word takes WORD_BEATS
-    // beats to arrive (low half first, pack_32_to_16). Rather than
-    // hand-computing the exact capture-edge cycle count for each
-    // beat (fragile -- that exact class of arithmetic is what
-    // caused a real bug earlier this session), drive ddr_dq_i
-    // straight off the DUT's own beat counter via hierarchical
-    // reference: whichever cycle the DUT is actually sampling,
-    // the right half is already present. test_rd_word is what
+    // beats to arrive (low half first, pack_32_to_16). Hand-
+    // computing the exact capture-edge cycle count is fragile
+    // (that exact class of arithmetic caused a real bug earlier
+    // this session), so timing still comes from the DUT -- but
+    // only a window-open LEVEL (rd_capture_valid, derived from
+    // rd_state), not the beat COUNT itself. tb_rd_beat is this
+    // testbench's own counter, reset and incremented purely off
+    // that level, independent of the DUT's rd_burst_ctr -- and
+    // a 2-way choice no longer hardwired to WORD_BEATS==2
+    // (Validation addendum 9, 2026-10-27, ask 9: the previous
+    // version drove beats off dut.rd_burst_ctr directly with a
+    // 2-way ternary, so every WORD_BEATS>2 config got the same
+    // value for every beat past the first -- read it from the
+    // design's own internal state and a wrong count in that
+    // state couldn't be caught; this can still catch one, since
+    // a miscounting rd_burst_ctr desyncs from tb_rd_beat and the
+    // assembled word comes out wrong). test_rd_word is what
     // issue_rd_cmd_data()/hw_reset() set.
     logic [DATA_WIDTH-1:0] test_rd_word;
-    logic [DQ_WIDTH-1:0]   ddr_dq_i;
-    assign ddr_dq_i = (dut.rd_burst_ctr == 2'd0)
-                      ? test_rd_word[DQ_WIDTH-1:0]
-                      : test_rd_word[DATA_WIDTH-1:DQ_WIDTH];
+    logic [1:0]            tb_rd_beat;
+    always_ff @(posedge clk or negedge rst_n)
+        if (!rst_n)                  tb_rd_beat <= '0;
+        else if (dut.rd_capture_valid) tb_rd_beat <= tb_rd_beat + 1'b1;
+        else                          tb_rd_beat <= '0;
+
+    logic [DQ_WIDTH-1:0] ddr_dq_i;
+    always_comb begin
+        ddr_dq_i = test_rd_word[DQ_WIDTH-1:0];
+        for (int wb = 0; wb < WORD_BEATS; wb++)
+            if (tb_rd_beat == wb[1:0])
+                ddr_dq_i = test_rd_word[(wb+1)*DQ_WIDTH-1 -: DQ_WIDTH];
+    end
 
     // Monitors -- capture every driven write beat / DM beat so
     // Section B/F can check real per-beat values instead of a
