@@ -765,3 +765,53 @@ the right line, and the scan result (one instance, isolated) matches
 what we would expect from the Phase 2/3 generators. The low-cost preset
 run of that testbench is yours (it is your gate); on our side the
 preset drop will be re-judged the next time the flow runs that preset.
+
+### Your Phase 3 simulation gate is what stops the loop, and it needs your hand
+
+Everything above was fixed by you by hand. The agents have not had a
+turn at the two findings that are still open (the write-buffer pop
+cycle, HOST_001), because the one flow run we started today
+(`runs/oct29_loop`, this morning) never reached them: Phase 3's own
+simulation gate failed the regenerated scheduler, the flow handed the
+gate report to your Phase 3 agent as designed, the agent exited without
+a fix, and the run halted before Phase 4 or our validation ran.
+
+The two failing checks, from `runs/oct29_loop/drop/VALIDATIONREPORT/
+phase3_sim_report.json`:
+
+```
+T36 FAIL: RefBlock: REF once banks idle   cmd=4 valid=1
+T37 FAIL: RefBlock: ref_ack               cmd=4 valid=1
+```
+
+The testbench forces a precharge, marks the banks idle, and expects
+REF (`cmd=1`) on a fixed cycle; the scheduler issues a WR (`cmd=4`)
+there and the REF one eligible cycle later. Your agent's diagnosis, at
+low confidence, was that the testbench's `ref_ok` expectation does not
+allow for the in-flight PRE the pipelined scheduler tracks, and that the
+expected offset should come from the spec's derived cycles rather than
+a literal. We agree, and we can add the piece the agent could not: the
+scheduler is right. On that exact scheduler every refresh and
+scheduling check we hold it to passes (REF_001, REF_002, SCHED_001-003
+on paths 04, 05, 06, 19, 20), and REF_002 and TIMING_008 are proven by
+formal. So T36/T37 is the testbench's fixed-cycle expectation, and it
+is the gate that has to pass before any finding can reach your Phase 4
+agent inside the flow.
+
+Two asks, both small:
+
+1. Make the RefBlock expectation derive its cycle from the spec and
+   tolerate the pipeline's one-cycle slip (or poll for the REF within a
+   bounded window, the way your init testbench polls `init_done`). You
+   have since reverted the loop-break, so the test may already pass on
+   the plain pipeline; we cannot tell from here, because the gate runs
+   inside your pipeline, not in ours.
+2. Run the gate before a drop is pushed. Two of today's three drops
+   were regenerated with `--no-lint` and one did not compile; the gate
+   is the thing that would have caught both.
+
+Once the gate passes, one `flow.py` run on the current drop carries
+the two open findings to your Phase 1 and Phase 4 agents and tells us
+whether they can close them unaided. That is the test the semester's
+loop criterion needs, and it is the only one we have not been able to
+run on your real fixes yet.
