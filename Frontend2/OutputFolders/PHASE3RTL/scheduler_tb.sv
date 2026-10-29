@@ -257,13 +257,35 @@ module scheduler_tb;
         begin
             logic got; logic [3:0] ctype; logic [BANK_BITS-1:0] cbank;
             logic cdeq; logic [IDX_BITS-1:0] cidx;
+            int attempt;
+            logic ref_seen;
             wait_cmd(got, ctype, cbank, cdeq, cidx, 8);
             check("RefBlock: PRE not REF while active", got && ctype===CMD_PRE);
             check("RefBlock: PRE targets active bank",  got && cbank===3'd3);
             set_bank_idle();  // simulate bank_tracker clearing the bank post-PRE
-            wait_cmd(got, ctype, cbank, cdeq, cidx, 8);
-            check("RefBlock: REF once banks idle",  got && ctype===CMD_REF);
-            check("RefBlock: ref_ack",              got && ref_ack===1);
+            // Poll for REF within a bounded window instead of expecting it on
+            // the very next command: the pipelined scheduler can have a
+            // second forced-PRE already decided (in sel_*_r / cmd_* between
+            // selection and cmd_valid) before this set_bank_idle() takes
+            // effect, so one or more PRE observations ahead of REF is
+            // real pipeline latency, not a bug (Validation, 2026-10-29,
+            // addendum 11 on runs/oct29_loop: "the scheduler is right ...
+            // this is the testbench's fixed-cycle expectation"). Each extra
+            // PRE gets the same idempotent set_bank_idle() and another
+            // bounded wait, the way wait_init_done polls above.
+            ref_seen = 0;
+            for (attempt = 0; attempt < 4 && !ref_seen; attempt++) begin
+                wait_cmd(got, ctype, cbank, cdeq, cidx, 8);
+                if (got && ctype===CMD_REF) begin
+                    ref_seen = 1;
+                end else if (got && ctype===CMD_PRE) begin
+                    set_bank_idle();
+                end else begin
+                    attempt = 4;  // neither PRE nor REF -- stop polling, fail below
+                end
+            end
+            check("RefBlock: REF once banks idle",  ref_seen && ctype===CMD_REF);
+            check("RefBlock: ref_ack",              ref_seen && ref_ack===1);
         end
         ref_urgent=0; wc(2);
 

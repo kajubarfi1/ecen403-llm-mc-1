@@ -89,16 +89,10 @@ module data_path #(
     wire                  wr_full  = (wr_count == RD_FIFO_DEPTH[FIFO_PTR_W:0]);
     wire                  wr_empty = (wr_count == 0);
 
-    assign wr_data_ready = ~wr_full;
-
-    // Write buffer push
-    always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n)
-            wr_wptr <= '0;
-        else if (wr_data_valid && ~wr_full) begin
-            wr_buf[wr_wptr[FIFO_PTR_W-1:0]] <= '{data: wr_data, mask: wr_mask};
-            wr_wptr <= wr_wptr + 1'b1;
-        end
+    // wr_data_ready and the push below are completed further down,
+    // after the write FSM -- both need to know whether a pop is
+    // happening this very cycle, which only the FSM's own state can
+    // say (see wr_pop_this_cycle).
 
     // ================================================================
     // Write serialization FSM
@@ -248,6 +242,37 @@ module data_path #(
             endcase
         end
     end
+
+    // wr_data_ready must allow a new push in the same cycle a pop
+    // happens, not only when wr_full (a REGISTERED count, this
+    // cycle's wr_wptr/wr_rptr) already reads not-full -- without
+    // this, a write arriving the instant the buffer is full and also
+    // draining this cycle gets refused, because the slot frees up a
+    // cycle later than wr_data_ready said no (Validation, 2026-10-29,
+    // addendum 11: 1 of 600 write words lost this exact way on
+    // refresh-stress traffic). wr_pop_this_cycle mirrors the three
+    // places WR_IDLE/WR_DRIVE above pop wr_buf -- the standard
+    // full-FIFO same-cycle case, one accept and one release landing
+    // together.
+    wire wr_pop_this_cycle =
+        ((wr_state == WR_IDLE) &&
+         ((!wr_pend_empty && !wr_empty &&
+           (wr_cycle_ctr >= wr_pend_deadline[wr_pend_rptr[FIFO_PTR_W-1:0]]))
+          || wr_bypass))
+        || ((wr_state == WR_DRIVE) && (wr_burst_ctr == WORD_BEATS[1:0] - 1'b1) &&
+            !wr_pend_empty && !wr_empty &&
+            (wr_cycle_ctr + 32'd1 >= wr_pend_deadline[wr_pend_rptr[FIFO_PTR_W-1:0]]));
+
+    assign wr_data_ready = ~wr_full || wr_pop_this_cycle;
+
+    // Write buffer push
+    always_ff @(posedge clk or negedge rst_n)
+        if (!rst_n)
+            wr_wptr <= '0;
+        else if (wr_data_valid && (~wr_full || wr_pop_this_cycle)) begin
+            wr_buf[wr_wptr[FIFO_PTR_W-1:0]] <= '{data: wr_data, mask: wr_mask};
+            wr_wptr <= wr_wptr + 1'b1;
+        end
 
     // Write data to DDR pins -- wr_dat_r is DATA_WIDTH-wide (one
     // host word); drive it onto the DQ_WIDTH-wide channel over
@@ -512,10 +537,14 @@ module data_path #(
     // synopsys translate_off
     // synthesis translate_off
 
-    // DP-001: Write buffer never overflows
+    // DP-001: Write buffer never overflows. wr_data_valid && wr_full
+    // is allowed for exactly one reason: wr_pop_this_cycle, the same
+    // cycle a slot is also freed (Validation, 2026-10-29, addendum
+    // 11) -- that is a push into the slot the pop just vacated, not
+    // an overflow. Anything else at wr_full is the real thing.
     property p_wr_no_overflow;
         @(posedge clk) disable iff (!rst_n)
-        (wr_data_valid && wr_full) |-> 1'b0;
+        (wr_data_valid && wr_full && !wr_pop_this_cycle) |-> 1'b0;
     endproperty
     assert property (p_wr_no_overflow)
         else $error("[DP-001] Write buffer overflow");
