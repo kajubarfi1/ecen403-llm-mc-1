@@ -101,14 +101,24 @@ PRESETS = {
         byte_lanes=2, ecc_mode=0, scheduler_policy="fr_fcfs",
         row_policy="open_page", command_queue_depth=16, lookahead_depth=8,
     ),
+    # high-performance and server-grade used to carry ranks=2/4 and
+    # byte_lanes=4/8 -- neither has ever actually compiled: ranks>1 is
+    # flatly unimplemented (no RTL agent has a rank dimension), and
+    # ecc_mode>0 requires byte_lanes-1 to be a power of 2 (one lane is
+    # dedicated to ECC), which 4 and 8 are not. Found generating every
+    # preset through compile_spec() (2026-10-29) -- both failed outright.
+    # ranks forced to 1 (the only value any RTL agent supports); byte_lanes
+    # moved to the nearest ECC-compatible values that keep the two presets
+    # distinct from each other and from "balanced" (byte_lanes=2): 3 and 5,
+    # the largest pair <= the Tier-1 cap of 8 with byte_lanes-1 a power of 2.
     "high-performance": dict(
-        speed_grade="DDR3-1600", density="4Gb", device_width="x8", ranks=2,
-        byte_lanes=4, ecc_mode=1, scheduler_policy="fr_fcfs",
+        speed_grade="DDR3-1600", density="4Gb", device_width="x8", ranks=1,
+        byte_lanes=3, ecc_mode=1, scheduler_policy="fr_fcfs",
         row_policy="open_page", command_queue_depth=32, lookahead_depth=16,
     ),
     "server-grade": dict(
-        speed_grade="DDR3-1600", density="4Gb", device_width="x8", ranks=4,
-        byte_lanes=8, ecc_mode=1, scheduler_policy="fr_fcfs",
+        speed_grade="DDR3-1600", density="4Gb", device_width="x8", ranks=1,
+        byte_lanes=5, ecc_mode=1, scheduler_policy="fr_fcfs",
         row_policy="open_page", command_queue_depth=32, lookahead_depth=16,
     ),
 }
