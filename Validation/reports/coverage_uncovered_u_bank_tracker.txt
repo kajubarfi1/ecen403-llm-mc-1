@@ -1,0 +1,342 @@
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<> User: jacobz
+
+Host: n01-zeus.olympus.ece.tamu.edu
+
+Report date: Thu 29 Oct 2026 11:52:25 CDT
+
+Report options: -detail -metrics block:expression:toggle:fsm -out /home/ugrads/j/jacobz/cov_uncov_u_bank_tracker.txt -inst chain_harness.u_bank_tracker -uncovered -source on -overwrite
+
+Coverage database path: /home/ugrads/j/jacobz/cov_merged_paths
+
+Coverage model files: /home/ugrads/j/jacobz/cov_merged_paths/icc_0760043a_097ec634.ucm
+
+Coverage data files: /home/ugrads/j/jacobz/cov_merged_paths/icc_0760043a_097ec634.ucd
+
+CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_conf.ccf
+    // Xcelium coverage configuration for the DDR3 validation subsystem.
+    //
+    // Fed to xrun via:  -coverage A -covoverwrite -covfile <this file>
+    
+    // --- What to collect -------------------------------------------------------
+    select_coverage -all
+    select_functional                       // covergroups: the vplan's 42 items
+    
+    // --- What NOT to count -----------------------------------------------------
+    // Testbench code is not the design. With everything selected, the harness,
+    // the generated driver, the passive monitors and the DRAM stub all land in
+    // the headline number and dilute it (22.4% reported vs ~25% design-only on
+    // the first merged sweep). Code coverage of a monitor says nothing about the
+    // controller. Covergroup modules (*_coverage) are deliberately NOT excluded:
+    // they carry the vplan's functional coverage.
+    deselect_coverage -all -module chain_harness
+    deselect_coverage -all -module *_txn_harness
+    deselect_coverage -all -module seq_driver
+    deselect_coverage -all -module dram_stub
+    deselect_coverage -all -module *_monitor
+    deselect_coverage -all -module *_tb
+    // Covergroup carriers: drop their CODE coverage only. '-all' would also
+    // drop functional coverage and silence the very covergroups they exist
+    // to hold (which is exactly what happened on the first try: 0% on every
+    // new coverpoint while the design merged fine).
+    deselect_coverage -block -expr -toggle -fsm -module *_fcov
+    
+    // --- Covergroups -----------------------------------------------------------
+    set_covergroup -new_instance_reporting  // per-instance scoping and naming
+    set_optimize -prune_covergroup
+    
+    // --- Block / statement / branch --------------------------------------------
+    // The course disables implicit and explicit block scoring and relies on
+    // statement + branch instead; keeping that identical for comparability.
+    set_implicit_block_scoring -off
+    set_explicit_block_scoring -off
+    set_statement_scoring
+    set_branch_scoring
+    set_code_fine_grained_merging
+    
+    // --- Expression ------------------------------------------------------------
+    set_expr_scoring -max_expr_terms 2048
+    set_expr_coverable_operators -bitwise -relational -reduction -logical_not
+    set_expr_coverable_statements -all
+    set_optimize -top_expr_non_scorable
+    
+    // --- Toggle ----------------------------------------------------------------
+    set_toggle_includez
+    set_toggle_scoring -sv_enum
+    set_toggle_scoring -sv_mda 16 -regeot
+    
+    // --- FSM -------------------------------------------------------------------
+    // Matters for this design: init_fsm and calibration are the autonomous blocks
+    // behind the five deferred paths, and the spec's INIT_001/INIT_002 failure
+    // categories are ordering properties over their states.
+    set_fsm_scoring -hold_transition on
+    
+    // --- Misc ------------------------------------------------------------------
+    set_parameterized_module_coverage
+    set_libcell_scoring -enable_vy
+    set_subprogram_scoring -all -svpackage
+    set_refinement_resilience
+    
+
+
+Coverage database date: Thu 29 Oct 2026 11:47:00 CDT
+
+*** There were no refinement files applied ***
+
+ <>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Coverage Table Legend
+---------------------
+  EXCL       excluded using refinement rule
+  P-EXCL     excluded from parent
+  U-EXCL     excluded and unreachable by IEV
+  T-EXCL     excluded from type
+  S-EXCL     smart excluded using refinement rule
+  EXCL(S)    smart indirect excluded
+  EMPTY      all children are excluded
+  CONST      marked constant during simulation
+  IGN        marked ignored during simulation
+  UNG        marked ungradeable during simulation
+  DES        marked deselected during simulation
+  UNR        marked unreachable by IEV
+  UNG-Expr   expression marked ungradeable during simulation
+  UNG-Toggle toggle marked ungradeable during simulation
+
+
+Uncovered Block Detail Report, Instance Based
+=============================================
+
+Uncovered Expression Detail Report, Instance Based
+==================================================
+
+Expression coverage Table Legend
+---------------------
+  -      don't care
+  e      event for event-or expressions
+  O (odd), E (even), B (both), X (not scored),
+         I (marked ignore) for parity trees
+  Y (covered), N (not covered), C (constant), 
+  P (one or more inputs for this bit have been padded) for vector scoring, 
+  d=== , b=== shows which bit differs in vector scoring 
+  rval   Resulting value of the expression for coverage purposes given
+         the input values
+  <-n->  Shows the n-th term composition
+
+
+Uncovered Toggle Detail Report, Instance Based
+==============================================
+
+Instance name: chain_harness.u_bank_tracker
+Type name: bank_tracker#(32'h00000008,32'h00000003,32'h0000000f,32'h00000008,32'h0000000c,4)
+File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/bank_tracker.sv
+Number of uncovered signal bits: 199 of 855
+Number of unreachable signal bits: 0
+Number of signal bits partially toggled(rise): 1 of 855
+Number of signal bits partially toggled(fall): 0 of 855
+
+Hit(Full)  Hit(Rise)  Hit(Fall)  Signal                    
+-----------------------------------------------------------
+0          1          0          rst_n                     
+0          0          0          cmd_pre_all               
+0          0          0          ctr_rcd[7][4]             
+0          0          0          ctr_rcd[7][5]             
+0          0          0          ctr_rcd[7][6]             
+0          0          0          ctr_rcd[7][7]             
+0          0          0          ctr_rcd[6][4]             
+0          0          0          ctr_rcd[6][5]             
+0          0          0          ctr_rcd[6][6]             
+0          0          0          ctr_rcd[6][7]             
+0          0          0          ctr_rcd[5][4]             
+0          0          0          ctr_rcd[5][5]             
+0          0          0          ctr_rcd[5][6]             
+0          0          0          ctr_rcd[5][7]             
+0          0          0          ctr_rcd[4][4]             
+0          0          0          ctr_rcd[4][5]             
+0          0          0          ctr_rcd[4][6]             
+0          0          0          ctr_rcd[4][7]             
+0          0          0          ctr_rcd[3][4]             
+0          0          0          ctr_rcd[3][5]             
+0          0          0          ctr_rcd[3][6]             
+0          0          0          ctr_rcd[3][7]             
+0          0          0          ctr_rcd[2][4]             
+0          0          0          ctr_rcd[2][5]             
+0          0          0          ctr_rcd[2][6]             
+0          0          0          ctr_rcd[2][7]             
+0          0          0          ctr_rcd[1][4]             
+0          0          0          ctr_rcd[1][5]             
+0          0          0          ctr_rcd[1][6]             
+0          0          0          ctr_rcd[1][7]             
+0          0          0          ctr_rcd[0][4]             
+0          0          0          ctr_rcd[0][5]             
+0          0          0          ctr_rcd[0][6]             
+0          0          0          ctr_rcd[0][7]             
+0          0          0          ctr_rp[7][4]              
+0          0          0          ctr_rp[7][5]              
+0          0          0          ctr_rp[7][6]              
+0          0          0          ctr_rp[7][7]              
+0          0          0          ctr_rp[6][4]              
+0          0          0          ctr_rp[6][5]              
+0          0          0          ctr_rp[6][6]              
+0          0          0          ctr_rp[6][7]              
+0          0          0          ctr_rp[5][4]              
+0          0          0          ctr_rp[5][5]              
+0          0          0          ctr_rp[5][6]              
+0          0          0          ctr_rp[5][7]              
+0          0          0          ctr_rp[4][4]              
+0          0          0          ctr_rp[4][5]              
+0          0          0          ctr_rp[4][6]              
+0          0          0          ctr_rp[4][7]              
+0          0          0          ctr_rp[3][4]              
+0          0          0          ctr_rp[3][5]              
+0          0          0          ctr_rp[3][6]              
+0          0          0          ctr_rp[3][7]              
+0          0          0          ctr_rp[2][4]              
+0          0          0          ctr_rp[2][5]              
+0          0          0          ctr_rp[2][6]              
+0          0          0          ctr_rp[2][7]              
+0          0          0          ctr_rp[1][4]              
+0          0          0          ctr_rp[1][5]              
+0          0          0          ctr_rp[1][6]              
+0          0          0          ctr_rp[1][7]              
+0          0          0          ctr_rp[0][4]              
+0          0          0          ctr_rp[0][5]              
+0          0          0          ctr_rp[0][6]              
+0          0          0          ctr_rp[0][7]              
+0          0          0          ctr_ras[7][5]             
+0          0          0          ctr_ras[7][6]             
+0          0          0          ctr_ras[7][7]             
+0          0          0          ctr_ras[6][5]             
+0          0          0          ctr_ras[6][6]             
+0          0          0          ctr_ras[6][7]             
+0          0          0          ctr_ras[5][5]             
+0          0          0          ctr_ras[5][6]             
+0          0          0          ctr_ras[5][7]             
+0          0          0          ctr_ras[4][5]             
+0          0          0          ctr_ras[4][6]             
+0          0          0          ctr_ras[4][7]             
+0          0          0          ctr_ras[3][5]             
+0          0          0          ctr_ras[3][6]             
+0          0          0          ctr_ras[3][7]             
+0          0          0          ctr_ras[2][5]             
+0          0          0          ctr_ras[2][6]             
+0          0          0          ctr_ras[2][7]             
+0          0          0          ctr_ras[1][5]             
+0          0          0          ctr_ras[1][6]             
+0          0          0          ctr_ras[1][7]             
+0          0          0          ctr_ras[0][5]             
+0          0          0          ctr_ras[0][6]             
+0          0          0          ctr_ras[0][7]             
+0          0          0          ctr_rc[7][6]              
+0          0          0          ctr_rc[7][7]              
+0          0          0          ctr_rc[6][6]              
+0          0          0          ctr_rc[6][7]              
+0          0          0          ctr_rc[5][6]              
+0          0          0          ctr_rc[5][7]              
+0          0          0          ctr_rc[4][6]              
+0          0          0          ctr_rc[4][7]              
+0          0          0          ctr_rc[3][6]              
+0          0          0          ctr_rc[3][7]              
+0          0          0          ctr_rc[2][6]              
+0          0          0          ctr_rc[2][7]              
+0          0          0          ctr_rc[1][6]              
+0          0          0          ctr_rc[1][7]              
+0          0          0          ctr_rc[0][6]              
+0          0          0          ctr_rc[0][7]              
+0          0          0          ctr_wtr[7]                
+0          0          0          ctr_wtr[6]                
+0          0          0          ctr_wtr[5]                
+0          0          0          ctr_wr[7][4]              
+0          0          0          ctr_wr[7][5]              
+0          0          0          ctr_wr[7][6]              
+0          0          0          ctr_wr[7][7]              
+0          0          0          ctr_wr[6][4]              
+0          0          0          ctr_wr[6][5]              
+0          0          0          ctr_wr[6][6]              
+0          0          0          ctr_wr[6][7]              
+0          0          0          ctr_wr[5][4]              
+0          0          0          ctr_wr[5][5]              
+0          0          0          ctr_wr[5][6]              
+0          0          0          ctr_wr[5][7]              
+0          0          0          ctr_wr[4][4]              
+0          0          0          ctr_wr[4][5]              
+0          0          0          ctr_wr[4][6]              
+0          0          0          ctr_wr[4][7]              
+0          0          0          ctr_wr[3][4]              
+0          0          0          ctr_wr[3][5]              
+0          0          0          ctr_wr[3][6]              
+0          0          0          ctr_wr[3][7]              
+0          0          0          ctr_wr[2][4]              
+0          0          0          ctr_wr[2][5]              
+0          0          0          ctr_wr[2][6]              
+0          0          0          ctr_wr[2][7]              
+0          0          0          ctr_wr[1][4]              
+0          0          0          ctr_wr[1][5]              
+0          0          0          ctr_wr[1][6]              
+0          0          0          ctr_wr[1][7]              
+0          0          0          ctr_wr[0][4]              
+0          0          0          ctr_wr[0][5]              
+0          0          0          ctr_wr[0][6]              
+0          0          0          ctr_wr[0][7]              
+0          0          0          ctr_rtp[7][3]             
+0          0          0          ctr_rtp[7][4]             
+0          0          0          ctr_rtp[7][5]             
+0          0          0          ctr_rtp[7][6]             
+0          0          0          ctr_rtp[7][7]             
+0          0          0          ctr_rtp[6][3]             
+0          0          0          ctr_rtp[6][4]             
+0          0          0          ctr_rtp[6][5]             
+0          0          0          ctr_rtp[6][6]             
+0          0          0          ctr_rtp[6][7]             
+0          0          0          ctr_rtp[5][3]             
+0          0          0          ctr_rtp[5][4]             
+0          0          0          ctr_rtp[5][5]             
+0          0          0          ctr_rtp[5][6]             
+0          0          0          ctr_rtp[5][7]             
+0          0          0          ctr_rtp[4][3]             
+0          0          0          ctr_rtp[4][4]             
+0          0          0          ctr_rtp[4][5]             
+0          0          0          ctr_rtp[4][6]             
+0          0          0          ctr_rtp[4][7]             
+0          0          0          ctr_rtp[3][3]             
+0          0          0          ctr_rtp[3][4]             
+0          0          0          ctr_rtp[3][5]             
+0          0          0          ctr_rtp[3][6]             
+0          0          0          ctr_rtp[3][7]             
+0          0          0          ctr_rtp[2][3]             
+0          0          0          ctr_rtp[2][4]             
+0          0          0          ctr_rtp[2][5]             
+0          0          0          ctr_rtp[2][6]             
+0          0          0          ctr_rtp[2][7]             
+0          0          0          ctr_rtp[1][3]             
+0          0          0          ctr_rtp[1][4]             
+0          0          0          ctr_rtp[1][5]             
+0          0          0          ctr_rtp[1][6]             
+0          0          0          ctr_rtp[1][7]             
+0          0          0          ctr_rtp[0][3]             
+0          0          0          ctr_rtp[0][4]             
+0          0          0          ctr_rtp[0][5]             
+0          0          0          ctr_rtp[0][6]             
+0          0          0          ctr_rtp[0][7]             
+0          0          0          ctr_rrd[7]                
+0          0          0          ctr_rrd[6]                
+0          0          0          ctr_rrd[5]                
+0          0          0          ctr_rrd[4]                
+0          0          0          ctr_rrd[3]                
+0          0          0          ctr_ccd[7]                
+0          0          0          ctr_ccd[6]                
+0          0          0          ctr_ccd[5]                
+0          0          0          ctr_ccd[4]                
+0          0          0          ctr_ccd[3]                
+0          0          0          faw_pipe[3][6]            
+0          0          0          faw_pipe[3][7]            
+0          0          0          faw_pipe[2][6]            
+0          0          0          faw_pipe[2][7]            
+0          0          0          faw_pipe[1][6]            
+0          0          0          faw_pipe[1][7]            
+0          0          0          faw_pipe[0][6]            
+0          0          0          faw_pipe[0][7]            
+
+Uncovered Fsm Detail Report, Instance Based
+===========================================
+

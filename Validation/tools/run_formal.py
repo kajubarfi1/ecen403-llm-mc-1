@@ -149,6 +149,74 @@ def classify_bounded(asserts, bars):
     return asserts
 
 
+def apply_vacuity(asserts, covers):
+    """A proof whose trigger never happens proves nothing about the rule.
+    Every generated assertion a_<ID> has a cover c_<ID> for the situation it
+    is tested under. A `bounded_proven` whose cover was not reached within
+    the explored depth is `bounded_vacuous`: no counterexample to depth N
+    says nothing when the trigger first occurs past N (the assumed-config
+    run of 2026-10-28 reached 8245 cycles with the command-path covers
+    undetermined -- the assumed registers hold the design short of its first
+    CAS -- and would have closed PROTO_001/002 on that). A full `proven`
+    whose cover JasperGold calls unreachable is `proven_vacuous`; a proven
+    with an undetermined cover stays proven (sound for every trace) and is
+    noted. emit_findings counts only proven and bounded_proven."""
+    cov = {c["short"][2:]: c for c in covers if c.get("short", "").startswith("c_")}
+    for r in asserts:
+        rid = r.get("short", "").replace("a_", "", 1)
+        c = cov.get(rid)
+        if c is None:
+            continue
+        cs = c.get("status")
+        if r.get("status") == "bounded_proven" and cs != "covered":
+            r["status"] = "bounded_vacuous"
+            r["note"] = (r.get("note", "") + f" VACUOUS: cover c_{rid} {cs} within the explored depth; "
+                         f"the trigger never occurred, so the bound proves nothing").strip()
+        elif r.get("status") == "proven" and cs == "unreachable":
+            r["status"] = "proven_vacuous"
+            r["note"] = (r.get("note", "") + f" VACUOUS: cover c_{rid} unreachable; the rule's trigger "
+                         f"cannot occur in this environment").strip()
+        elif r.get("status") == "proven" and cs != "covered":
+            r["note"] = (r.get("note", "") + f" cover c_{rid} {cs}: proof is sound but the trigger was "
+                         f"not witnessed within the explored depth").strip()
+    return asserts
+
+
+STATUSES = ("proven", "cex", "undetermined", "bounded_proven", "bounded_vacuous", "proven_vacuous")
+
+
+def reclassify(report_path, spec_path=None):
+    """Re-derive a report's statuses from its archived RESULTS text with the
+    current rules (bounded bar, vacuity), without JasperGold."""
+    with open(report_path) as f:
+        rep = json.load(f)
+    text = open(os.path.join(ROOT, rep["raw_report"]), errors="replace").read()
+    rows = parse_results(text)
+    asserts = [r for r in rows if r["short"].startswith("a_") and ":" not in r["short"]]
+    covers = [r for r in rows if r["short"].startswith("c_")]
+    params = {}
+    for a in rep.get("abstractions", []):
+        if "sva_param" in a:
+            k, _, v = a["sva_param"].partition("=")
+            params[k] = v
+    with open(spec_path or os.environ.get("VALIDATION_SPEC", os.path.join(
+            ROOT, "Validation", "spec", "llmmc_microarchitecturespec_filled.json"))) as f:
+        bars = signoff_bars(json.load(f), params)
+    classify_bounded(asserts, bars)
+    apply_vacuity(asserts, covers)
+    if any("stopat" in a for a in rep.get("abstractions", [])):
+        for r in asserts:
+            if r["status"] == "cex":
+                r["note"] = "cex found under abstraction; may be spurious"
+    rep["results"] = asserts + covers
+    rep["summary"] = {"assertions": len(asserts), **{s: sum(1 for r in asserts if r["status"] == s) for s in STATUSES},
+                      "covers": len(covers), "covered": sum(1 for r in covers if r["status"] == "covered")}
+    rep["reclassified_utc"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    with open(report_path, "w") as f:
+        json.dump(rep, f, indent=2)
+    return rep
+
+
 def parse_results(text):
     """Rows of the RESULTS table: name, result, engine, bound, time."""
     rows = []
@@ -180,12 +248,25 @@ def main() -> int:
                     help="override a parameter of the generated assertion modules in the "
                          "bind (e.g. TIMING_012_BOUND=258 beside an assumed tREFI); the "
                          "report records it as an abstraction")
+    ap.add_argument("--reclassify", metavar="REPORT.json",
+                    help="re-derive an existing report's statuses from its archived RESULTS "
+                         "text with the current rules (bounded bar, vacuity); no JasperGold run")
     ap.add_argument("--stopat", action="append", default=[], metavar="HIER.SIG",
                     help="cut this signal free (JasperGold stopat) -- e.g. a wait counter "
                          "whose 100k-cycle spans no bounded engine can cross. Proofs under "
                          "a cut are sound (over-approximation); a cex may be spurious and "
                          "is marked so in the report")
     args = ap.parse_args()
+    if args.reclassify:
+        rep = reclassify(args.reclassify)
+        summ = rep["summary"]
+        print(f"  reclassified {os.path.relpath(args.reclassify, ROOT)}: "
+              + " ".join(f"{k}={summ.get(k, 0)}" for k in STATUSES) + f"  covers {summ['covered']}/{summ['covers']}")
+        for r in rep["results"]:
+            if r["short"].startswith("a_") and ":" not in r["short"]:
+                print(f"    {r['short']:22} {r['status']:15} bound={r['bound']}"
+                      + ("   (VACUOUS: trigger never reached)" if "VACUOUS" in r.get("note", "") else ""))
+        return 0
     import rtl_drop as RD
     head = RD.drop_id()
 
@@ -272,7 +353,8 @@ def main() -> int:
         bars = signoff_bars(json.load(f), params)
     bar = bars["*"]
     classify_bounded(asserts, bars)
-    summ = {s: sum(1 for r in asserts if r["status"] == s) for s in ("proven", "cex", "undetermined", "bounded_proven")}
+    apply_vacuity(asserts, covers)
+    summ = {s: sum(1 for r in asserts if r["status"] == s) for s in STATUSES}
     abstracted = bool(args.stopat or args.assume or args.sva_param)
     if abstracted:
         what = ", ".join(args.stopat + [f"assume {e}" for e in args.assume] + args.sva_param)
@@ -306,11 +388,14 @@ def main() -> int:
     with open(out, "w") as f:
         json.dump(rep, f, indent=2)
     print(f"  assertions: {len(asserts)}  proven={summ['proven']} bounded={summ['bounded_proven']} "
-          f"cex={summ['cex']} undetermined={summ['undetermined']}  | covers {rep['summary']['covered']}/{len(covers)}"
+          f"cex={summ['cex']} undetermined={summ['undetermined']}"
+          + (f" vacuous={summ['bounded_vacuous'] + summ['proven_vacuous']}" if summ['bounded_vacuous'] + summ['proven_vacuous'] else "")
+          + f"  | covers {rep['summary']['covered']}/{len(covers)}"
           f"  (bounded bars: per property, longest {bar} cycles)")
     for r in asserts:
-        print(f"    {r['short']:22} {r['status']:12} bound={r['bound']}"
-              + ("   (may be spurious under stopat)" if r.get("note") else ""))
+        print(f"    {r['short']:22} {r['status']:15} bound={r['bound']}"
+              + ("   (VACUOUS: trigger never reached)" if "VACUOUS" in r.get("note", "")
+                 else "   (may be spurious under stopat)" if r.get("note") and abstracted else ""))
     print(f"  wrote {os.path.relpath(out, ROOT)}")
     return 0
 

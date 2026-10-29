@@ -37,3 +37,44 @@ class Parser(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Vacuity(unittest.TestCase):
+    """A bounded proof whose trigger was never reached proves nothing."""
+
+    def rows(self, cover_status):
+        asserts = [{"short": "a_PROTO_001", "status": "undetermined", "bound": "8245"},
+                   {"short": "a_TIMING_001", "status": "proven", "bound": "Infinite"},
+                   {"short": "a_REF_001", "status": "undetermined", "bound": "8245"}]
+        covers = [{"short": "c_PROTO_001", "status": cover_status},
+                  {"short": "c_TIMING_001", "status": cover_status},
+                  {"short": "c_REF_001", "status": "covered"}]
+        R.classify_bounded(asserts, {"PROTO_001": 100, "REF_001": 100, "*": 100})
+        R.apply_vacuity(asserts, covers)
+        return {r["short"]: r for r in asserts}
+
+    def test_bounded_with_unreached_cover_is_vacuous(self):
+        by = self.rows("undetermined")
+        self.assertEqual(by["a_PROTO_001"]["status"], "bounded_vacuous")
+        self.assertIn("VACUOUS", by["a_PROTO_001"]["note"])
+        self.assertEqual(by["a_REF_001"]["status"], "bounded_proven")   # its cover was reached
+        self.assertEqual(by["a_TIMING_001"]["status"], "proven")        # sound; noted only
+        self.assertIn("not witnessed", by["a_TIMING_001"]["note"])
+
+    def test_bounded_with_reached_cover_counts(self):
+        by = self.rows("covered")
+        self.assertEqual(by["a_PROTO_001"]["status"], "bounded_proven")
+        self.assertNotIn("note", by["a_TIMING_001"])
+
+    def test_proven_with_unreachable_cover_is_vacuous(self):
+        by = self.rows("unreachable")
+        self.assertEqual(by["a_TIMING_001"]["status"], "proven_vacuous")
+        self.assertEqual(by["a_PROTO_001"]["status"], "bounded_vacuous")
+
+    def test_emitter_counts_only_real_proofs(self):
+        sys.path.insert(0, os.path.join(HERE, "..", "findings"))
+        import inspect
+        import emit_findings as E
+        src = inspect.getsource(E.formal_proof_sets)
+        self.assertIn('("proven", "bounded_proven")', src)
+        self.assertNotIn('"bounded_vacuous"', src)      # a vacuous result never closes a finding

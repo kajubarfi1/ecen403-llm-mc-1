@@ -1,0 +1,56 @@
+{
+  "$schema": "validation-findings/1",
+  "generated_utc": "2026-10-28T20:16:23.095258+00:00",
+  "generated_by": "formal triage of Validation/reports/formal/jg_path_01_write_cmd_99f72da45a32.json (JasperGold RESULTS; no abstraction, no VCD exported -- the mechanism is structural and read from the RTL)",
+  "findings": [
+    {
+      "source": "validation",
+      "target": "frontend",
+      "kind": "rtl_defect",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "drop": "99f72da45a32",
+      "status": "open",
+      "detector": "formal:jaspergold",
+      "evidence_files": [
+        "Validation/reports/formal/jg_path_01_write_cmd_99f72da45a32.json",
+        "Validation/reports/formal/jg_path_01_write_cmd_99f72da45a32_report.txt",
+        "Validation/sva/generated/wb_port_order_sva.sv",
+        "Validation/reports/paths/path_23_host_ack_collision_sim.log"
+      ],
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "command": "python3 Validation/tools/run_formal.py --path path_01_write_cmd --time 20m",
+        "assumptions": "none: host Wishbone inputs and configuration registers free",
+        "simulation": "python3 Validation/tools/run_path.py --path path_23_host_ack_collision"
+      },
+      "id": "formal/wb_port/HOST_001",
+      "scope": "wb_port",
+      "severity": "critical",
+      "taxonomy_id": "HOST_001",
+      "title": "Write acknowledge and read response complete in the same cycle on the one Wishbone ack line",
+      "detail": "JasperGold counterexample 24 cycles from reset, engine L, no abstraction (cover c_HOST_001, a write beat accepted, reached at cycle 1). wb_port.sv: wr_ack_r <= wb_beat & wb_we_i (the write acknowledge, one cycle after the beat) and assign wb_ack_o = wr_ack_r | rd_ack with rd_ack = rsp_valid. A read response arriving the cycle after a write beat is accepted gives one wb_ack_o pulse for two completions; the host counts one acknowledge, waits for the other forever (a pipelined master) or mis-attributes the read data to the write (a classic one). Any legal host reaches it: issue a read, then present a write beat the cycle before the read data returns. Not seen in simulation on 2026-10-28 only because no sequence placed a write beat on that cycle (243 pipelined beats on path_07). SIMULATION WITNESS (2026-10-29, path_23_host_ack_collision, ack_collision.py): a read to an open row and a write beat accepted 41 cycles later (gap d = 40) -- the write acknowledge and the read response fall in the same cycle at t = 35.37 us; a_HOST_001 fires once, every request and response is conserved, and the host handshake stage counts 1 of 79 beats never acknowledged: the one ack pulse the two completions shared.",
+      "expected": "One acknowledge per accepted beat (host_interface.interface_type = wishbone_pipelined). When a write acknowledge and a read response are due in the same cycle the port must hold one of them (a one-entry response or write-ack holding register) so each completes in its own cycle.",
+      "actual": "cex at bound 24: $past(wb_cyc_i && wb_stb_i && !wb_stall_o && wb_we_i) && rsp_valid is reachable",
+      "spec_ref": "host_interface.interface_type",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "signal": "wb_ack_o",
+          "text": "assign wb_ack_o = wr_ack_r | rd_ack;",
+          "line": 158
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "signal": "wr_ack_r",
+          "text": "else        wr_ack_r <= wb_beat & wb_we_i;",
+          "line": 155
+        }
+      ],
+      "fix_hint": "Same change as the lost-beat fix (CONSERVE/HOST_BEAT_TO_REQUEST): a holding stage on the host side. Register the read response (or the write ack) and present it the next cycle when both are due, and stall the host while the holding register is occupied so acknowledges stay in beat order.",
+      "related": [
+        "wb_port/CONSERVE/HOST_BEAT_TO_REQUEST",
+        "wb_port/HANDSHAKE/wb"
+      ]
+    }
+  ]
+}

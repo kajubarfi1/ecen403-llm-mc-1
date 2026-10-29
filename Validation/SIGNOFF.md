@@ -28,11 +28,11 @@ A drop failing A1 or A3 is returned to the Frontend without simulation.
 | Path FAIL | otherwise; the failing stage and first failing check are recorded, and a finding is emitted (or re-attached to an open one) |
 | Block PASS | every path that instantiates the block passes, **and** every formal property owned by the block is proven or bounded-proven to the agreed depth |
 | Block PASS-with-waivers | as above, except failures that are covered by an approved waiver (§5) |
-| Drop PASS | all 20 paths PASS or PASS-with-waivers, and no critical finding is open |
+| Drop PASS | every path in `spec/path_definitions.json` PASS or PASS-with-waivers, and no critical finding is open |
 
-The 20 paths in `spec/path_definitions.json` are all mandatory. The 17 runnable
-ones must simulate; the 3 derived single-hop paths take their verdict from
-their host run. No path may be excluded from a drop verdict.
+Every path in `spec/path_definitions.json` is mandatory (23 on 2026-10-29: 20
+runnable, which must simulate, and 3 derived single-hop paths that take their
+verdict from their host run). No path may be excluded from a drop verdict.
 
 ## 3. Coverage targets
 
@@ -72,13 +72,35 @@ drops half the pipelined traffic; it returns with the wb_port fix).
 ## 4. Exclusion rules
 
 An uncovered item may be excluded from the target only for one of these
-reasons, recorded in `coverage/exclusions.json` with the item, the reason code
-and the approver. An entry with `status: proposed` and `approved_by: null` is
+reasons, recorded in `coverage/exclusions.json` with the instance, the
+signals, the reason code and the approver. The excluded bits are never a
+literal list: each entry carries a RULE over the spec (`coverage/
+exclusion_rules.py`: a counter's maximum as a spec expression, a register's
+reserved field, the address bits a register map never sets, the inputs the
+integration map leaves undriven), and `apply_exclusions.py` derives the bits
+against the spec and the drop under judgement every time it runs, recording
+what it derived and under which spec. A literal list would freeze one spec's
+values into the file and hide bits that another spec makes reachable; the
+approval therefore covers the rule, and an entry that resolves to no bits
+under some spec excludes nothing there. An entry with `status: proposed` and `approved_by: null` is
 a proposal: `coverage/apply_exclusions.py` reports the adjusted percentage it
 would give but the raw number stands until a named approver sets
-`status: approved`. Three proposals are on file (2026-10-28): the constant
-column bits [2:0] of the queue and scheduler entry storage (E-SPEC, the
-burst-aligned address mapping fixes them) and the reset defaults (E-RESET).
+`status: approved`. Nineteen exclusions are approved (Jacob Zatopek, 2026-10-29), 487 toggle
+bits on drop 99f72da45a32, every one derived from a spec value: the constant
+column bits [2:0] of the queue and scheduler entry storage (X-001/002, the
+burst-aligned mapping); the reset input's falling toggle (X-003, E-RESET);
+the high bits of bank_tracker's 8-bit timing counters above what the spec's
+`$derived_cycles` can load (X-004..010; the bit index is
+ceil(log2(value + 1))); data_path's CL/CWL countdowns and beat counters
+above ceil(CL/ratio) - 1 and the 2-beat word (X-011..013); the register
+map's reserved RO bits and the address bits a word-aligned 11-register map
+never sets (X-014..018); and the BIST/ECC/self-refresh status inputs no
+block drives (X-019, E-ABSENT). Adjusted (`apply_exclusions.py`): design
+94.8 % (86.8 measured); bank_tracker 99.6, config_regs 98.0, scheduler
+95.4, cmd_queue 93.4, data_path 92.8, wb_port 88.6. What remains is
+reachable and gated on the two open defects: read data bits, the response
+FIFO depth and the tag entries need back-to-back reads the data path
+currently drops, and the port's stall path under a full tag FIFO.
 
 | Code | Reason | Example |
 |---|---|---|
@@ -87,6 +109,7 @@ burst-aligned address mapping fixes them) and the reset defaults (E-RESET).
 | E-SPEC (automatic) | a timing-boundary bin the spec's own `timing_model.counter_clock.window_scale` places inside the design's enforced window: the exact-minimum spacing cannot occur while the design is declared to hold every command `window_scale` times longer than the JEDEC value. `coverage_rollup.py` reports these as `unreachable_by_spec`, citing the declaration; no entry in `exclusions.json` and no approver, because the spec is the approver, and they return to `partial` when the declaration goes | `cg_timing.cp_trcd_spacing.at_minimum` (3 cycles) on a design that issues ACT→CAS at 14 (2026-10-15) |
 | E-DEAD | provably unreachable (formal `unreachable` on the corresponding cover, or a constant-propagation argument cited in the entry) | a case arm under a fixed parameter |
 | E-TOOL | tool artefact (IMC counts an item that is not design logic) | |
+| E-ABSENT | an input of a present block that no block in this design drives (the integration map lists no source and no tie), so the logic it feeds cannot change until that block exists; its CSR access semantics are still judged | config_regs BIST/ECC/self-refresh status inputs (2026-10-29) |
 
 Not allowed: "hard to hit", "would need a longer run", "not in this phase".
 
@@ -106,8 +129,11 @@ or ONE assertion for ONE reason, with `approved_by`, `approved_utc`,
 4. The approver is a named person (today: Jacob Zatopek); a waiver that
    changes a block from FAIL to PASS-with-waivers is listed in the drop report.
 
-Open: W-001 (unmapped CSR read data). Pending decisions W-002/W-003 (see plan
-§6 item 12) are not waivers until approved.
+Open: W-001 (unmapped CSR read data) and W-003 (byte enables on a read
+request; approved 2026-10-29, pending the spec defining them). W-002 (DRAM
+data-mask polarity) was withdrawn the same day: the spec now defines
+`data_path_mapping.ddr_dm_polarity`, so the write-beat mask comparison is a
+live check, not a waiver.
 
 ## 5b. Phase-partial drops
 
@@ -194,6 +220,19 @@ timing/protocol assertion must be:
 
 An `undetermined` result is a signoff blocker until one of the above holds.
 
+A proof counts only if its trigger was witnessed. Every generated assertion
+`a_<ID>` has a cover `c_<ID>` for the situation the rule is tested under. A
+bounded proof whose cover was not reached within the explored depth is
+recorded `bounded_vacuous` and does not count: no counterexample to depth N
+says nothing about a rule whose trigger first occurs past N (2026-10-28: the
+assumed-configuration run reached 8245 cycles with every command-path cover
+undetermined, because the assumed registers hold the design short of its
+first CAS; it would otherwise have closed PROTO_001/002 on the pipelined
+scheduler). A full proof whose cover is `unreachable` is `proven_vacuous`
+and does not count either; a full proof with an undetermined cover is sound
+for every trace and counts, with the cover noted. `run_formal.py
+--reclassify <report>` re-derives an archived report under these rules.
+
 Abstractions are allowed only as named on the `run_formal.py` command
 line, and the report records every one under `abstractions`:
 
@@ -220,7 +259,21 @@ path that has ever been proved and has no report that applies to the
 design under judgement, with the options of its last report, so a design
 change never leaves `awaiting_formal` findings for a person to remember.
 
-Current (efece348d04e, 2026-10-20):
+Current (99f72da45a32, 2026-10-28, pipelined scheduler):
+- command path, concrete, 20 min: 11 proven at infinite bound, REF_001
+  bounded-proven to 616 (bar 368), **HOST_001 counterexample at 24 cycles**
+  (filed: `formal_host_port_findings.json`, the port's write acknowledge
+  and read response share one ack line), 3 undetermined: tREFI (as
+  before) and PROTO_001/002, which the old scheduler proved in 14 min and
+  the pipelined one did not reach in 20; PROTO_001 is `awaiting_formal`
+  until a longer run. Covers 16/16.
+- command path, assumed configuration: 10 proven, 4 bounded-proven to 8245
+  (tREFI, tRFC, REF_001, HOST_001), **2 bounded-vacuous** (PROTO_001/002:
+  that configuration never issues a CAS, their covers were never reached,
+  and the bound proves nothing about them). The HOST_001 bound here is
+  overruled by the concrete counterexample, see the rule above.
+
+Previous (efece348d04e, 2026-10-20):
 - command path (`path_01`), concrete: 13 proven at infinite bound
   (the 12 timing/protocol properties and, since 2026-10-22, REF_002: never
   REFRESH with a bank open), REF_001 (an urgent refresh acknowledged

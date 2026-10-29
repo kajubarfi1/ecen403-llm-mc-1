@@ -2,8 +2,8 @@
   "$schema": "validation-path-run/1",
   "path": "path_09_init_to_refresh",
   "strategy": "invariant",
-  "verdict": "fail",
-  "timestamp": "2026-10-28T14:20:14.815217",
+  "verdict": "pass",
+  "timestamp": "2026-10-29T12:17:16.115758",
   "blocks": [
     "config_regs",
     "init_fsm",
@@ -15,18 +15,18 @@
   "window_cycles": 180000,
   "coverage_collected": true,
   "rtl_drop": {
-    "git_head": "99f72da45a32",
-    "drop_id": "99f72da45a32",
-    "design_id": "a2b204453edc",
+    "git_head": "5994bb667dba",
+    "drop_id": "5994bb667dba",
+    "design_id": "2ed70e31cb84",
     "blocks_used": [
       "config_regs",
       "init_fsm",
       "refresh_ctrl"
     ],
-    "validated_at": "17274ce",
+    "validated_at": "1aefeb0",
     "frontend_commits": {
       "config_regs": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc",
-      "init_fsm": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc",
+      "init_fsm": "bdf1b5ca9ba3818f1706b71dc92310baa51c41b4",
       "refresh_ctrl": "f37ce49d323151a6118ae7765aa766918c816383"
     },
     "roots": [
@@ -61,11 +61,8 @@
       "kind": "autonomous",
       "model": null,
       "scope": "init_fsm",
-      "verdict": "fail",
-      "summary": "SVA fired: a_TIMING_014 x1",
-      "detail": [
-        "a_TIMING_014 fired 1x (see the sim log)"
-      ]
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
     },
     {
       "stage": "refresh_ctrl",

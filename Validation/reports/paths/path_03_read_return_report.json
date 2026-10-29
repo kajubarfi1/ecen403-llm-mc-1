@@ -2,8 +2,8 @@
   "$schema": "validation-path-run/1",
   "path": "path_03_read_return",
   "strategy": "composed",
-  "verdict": "pass",
-  "timestamp": "2026-10-28T14:19:59.376722",
+  "verdict": "fail",
+  "timestamp": "2026-10-29T12:17:15.023919",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -15,15 +15,15 @@
     "scheduler",
     "wb_port"
   ],
-  "sequence": "Validation/sequences/generated/path_03_read_return_seed1.json",
+  "sequence": null,
   "stimulus_generator": "random",
   "autonomous": false,
   "window_cycles": 400,
-  "coverage_collected": true,
+  "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "99f72da45a32",
-    "drop_id": "99f72da45a32",
-    "design_id": "a2b204453edc",
+    "git_head": "5994bb667dba",
+    "drop_id": "5994bb667dba",
+    "design_id": "2ed70e31cb84",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -35,17 +35,17 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "17274ce",
+    "validated_at": "1aefeb0",
     "frontend_commits": {
       "addr_decoder": "f37ce49d323151a6118ae7765aa766918c816383",
       "bank_tracker": "f37ce49d323151a6118ae7765aa766918c816383",
       "cmd_gen": "f37ce49d323151a6118ae7765aa766918c816383",
       "cmd_queue": "f37ce49d323151a6118ae7765aa766918c816383",
       "config_regs": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc",
-      "data_path": "f37ce49d323151a6118ae7765aa766918c816383",
+      "data_path": "90c01f641e38c739b30366c69df7046ae9f21972",
       "refresh_ctrl": "f37ce49d323151a6118ae7765aa766918c816383",
-      "scheduler": "1bc0ce7e4655061d5017f4bab90690a52a9a563f",
-      "wb_port": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc"
+      "scheduler": "5e784e2af679c5f1dec45750a8ce70f2714b6cdd",
+      "wb_port": "65dbb0ff530a6fe7c387b0c8f87a9330c3340b8a"
     },
     "roots": [
       "Frontend2/OutputFolders"
@@ -100,40 +100,23 @@
     "shipped_spec": {
       "path": "Frontend2/OutputFolders/generated_spec.json",
       "revision": "golden_ddr3_1600k_x8_2lane_1rank"
-    },
-    "netlists": {}
+    }
   },
-  "stages": [
+  "stages": [],
+  "compile_errors": [
     {
-      "stage": "data_path",
-      "kind": "exact",
-      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/data_path_predictor.py",
-      "scope": "data_path",
-      "verdict": "pass",
-      "summary": "scope=data_path  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)",
-      "detail": [],
-      "rule_counts": {}
+      "block": "scheduler",
+      "file": "scheduler.sv",
+      "line": 178,
+      "message": "'sel_bank_eff_r': undeclared identifier [12.5(IEEE)]."
     },
     {
-      "stage": "wb_port",
-      "kind": "exact",
-      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
-      "scope": "wb_port",
-      "verdict": "pass",
-      "summary": "scope=wb_port  strategy=exact  status=pass  matched=38/38  (38 output transaction(s) matched)",
-      "detail": [],
-      "rule_counts": {}
-    },
-    {
-      "stage": "(conservation)",
-      "kind": "conservation",
-      "scope": "(conservation)",
-      "model": null,
-      "verdict": "pass",
-      "summary": "scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable",
-      "detail": []
+      "block": "scheduler",
+      "file": "scheduler.sv",
+      "line": 179,
+      "message": "'sel_bank_eff_r': undeclared identifier [12.5(IEEE)]."
     }
   ],
   "log": "Validation/reports/paths/path_03_read_return_sim.log",
-  "observed_trace": "Validation/reports/paths/path_03_read_return_observed.jsonl"
+  "observed_trace": null
 }

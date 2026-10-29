@@ -182,6 +182,21 @@
       "question": "May the scheduler open a row that no pending request has asked for yet (look-ahead / speculative ACTIVATE)?",
       "consequence": "A checker that forbids it fires on a correct look-ahead controller; one that allows it cannot flag a wasted ACTIVATE. Validation assumes 'allowed' until the spec says otherwise.",
       "discovered_by": "SCHED_004 fired 314x on the known-good UberDDR3 reference (2026-09-29)"
+    },
+    {
+      "id": "PHY_DATA_BUS_OCCUPANCY",
+      "kind": "required_field",
+      "when_present": "phy_interface",
+      "require": "phy_interface.data_bus_cycles_per_cas",
+      "options": [
+        "host_word_beats",
+        "one_controller_cycle",
+        "<integer controller cycles>"
+      ],
+      "disposition": "decision",
+      "question": "How many controller cycles does one CAS occupy the data bus for in the abstract PHY model, and must the scheduler space CAS commands by it? data_path_mapping implies host_width_bits / ddr_channel_width_bits beats at one beat per controller cycle (2 here), while timing_model.tCCD (4 nCK = 1 controller cycle) lets the scheduler issue a CAS every cycle: two reads one cycle apart cannot both be captured on one bus.",
+      "consequence": "With the spec silent, the data path and the DRAM model both assume one beat per controller cycle and the scheduler assumes JEDEC tCCD; back-to-back CAS then overrun the data bus, whatever the data path does (drops before 65dbb0f, shifted/zero words after it). Either the scheduler enforces tCCD_eff = max(tCCD, beats) or the beat model moves to the real rate (a word per nCK, BEATS_PER_CYC = 2 x clock_ratio); until decided the scheduler spacing is the safe reading.",
+      "discovered_by": "Frontend HANDOFF_VALIDATION_2026-10-29 (BEATS_PER_CYC question) and Validation's hybrid judgement of 65dbb0f: data_path stage 0/19 on path_03, conservation clean (2026-10-29)"
     }
   ]
 }

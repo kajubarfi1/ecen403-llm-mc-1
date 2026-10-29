@@ -155,7 +155,7 @@ def generate(seq, schemas, catalog):
             body.append("      do_reset();")
             continue
         if op == "idle":
-            body.append(f"      idle({st['cycles']});")
+            body.append(f"      idle({st['cycles']});" + ("   // gap inside a pipelined run" if st.get("within_run") else ""))
             continue
 
         iface, kind = st["iface"], st["kind"]
@@ -176,9 +176,20 @@ def generate(seq, schemas, catalog):
             # a Wishbone burst is back to back and reads pile up without
             # waiting for their acks; signals in hold_across_run (cyc) stay
             # high for the run; the run ends by waiting for every ack.
-            prev = steps[i - 1] if i else None
+            # An idle marked within_run is a gap between two beats of one run
+            # (cyc held, stb low for the gap): the run neither ends before it
+            # nor restarts after it. That is how a directed sequence lands a
+            # beat on a chosen cycle relative to an earlier one (HOST_001
+            # witness, 2026-10-29).
+            def _drive_across(j, step):
+                k = j
+                while 0 <= k < len(steps) and steps[k].get("op") == "idle" and steps[k].get("within_run"):
+                    k += step
+                return steps[k] if 0 <= k < len(steps) else None
+            prev = _drive_across(i - 1, -1)
+            nxt_d = _drive_across(i + 1, +1)
             in_run = bool(prev and prev.get("op") == "drive" and prev.get("iface") == iface)
-            continues = bool(nxt and nxt.get("op") == "drive" and nxt.get("iface") == iface)
+            continues = bool(nxt_d and nxt_d.get("op") == "drive" and nxt_d.get("iface") == iface)
             req = list(drv.get("assert", [])) + list(drv.get("assert_by_kind", {}).get(kind, []))
             for sig, val in drv.get("hold", {}).items():
                 assigns.append(f"{sig} = {val}")

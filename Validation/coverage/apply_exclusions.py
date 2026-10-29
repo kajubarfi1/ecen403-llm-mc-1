@@ -2,8 +2,8 @@
 """
 apply_exclusions.py — adjusted code coverage under the signoff's exclusion rules
 =================================================================================
-Reads coverage/exclusions.json (SIGNOFF §4: instance, signal bits, one of the
-four codes, a reason, an approver) and the per-instance uncovered-items
+Reads coverage/exclusions.json (SIGNOFF §4: instance, signals, a BITS RULE over
+the spec resolved by exclusion_rules.py, one of the codes, a reason, an approver) and the per-instance uncovered-items
 reports that `measure_coverage.py --uncovered` wrote, matches each exclusion
 against the uncovered toggle bits, and writes reports/coverage_exclusions.json:
 per instance, how many uncovered items the approved exclusions remove and the
@@ -25,7 +25,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 EXCL = os.path.join(HERE, "exclusions.json")
 REPORTS = os.path.join(ROOT, "Validation", "reports")
-CODES = {"E-RESET", "E-SPEC", "E-DEAD", "E-TOOL"}
+CODES = {"E-RESET", "E-SPEC", "E-DEAD", "E-TOOL", "E-ABSENT"}
 
 
 def uncovered_toggle_bits(inst):
@@ -43,6 +43,17 @@ def uncovered_toggle_bits(inst):
         if m:
             rows.append((m.group(1), [int(x) for x in re.findall(r"\[(\d+)\]", m.group(2))]))
     return rows
+
+
+def resolve_all(doc, spec=None, imap=None):
+    """Concrete exclusions for this spec and drop (exclusion_rules.py)."""
+    sys.path.insert(0, HERE)
+    import exclusion_rules as XR
+    spec = spec or json.load(open(XR.SPEC_PATH))
+    out = []
+    for e in doc["exclusions"]:
+        out.append(XR.resolve(e, spec, imap))
+    return out, spec
 
 
 def matches(excl, inst, sig, idx):
@@ -63,13 +74,20 @@ def main() -> int:
     if bad:
         print(f"exclusions without a valid code or a reason: {bad}")
         return 1
+    try:
+        resolved, spec = resolve_all(doc)
+    except Exception as ex:          # a rule that does not resolve is a file error, not a number
+        print(f"exclusion rules did not resolve against the spec: {ex}")
+        return 1
+    spec_id = (spec.get("revision"), spec.get("design_id"))
     code_cov = {}
     cc = os.path.join(REPORTS, "coverage_code.json")
     if os.path.exists(cc):
         code_cov = json.load(open(cc)).get("per_module", {})
     insts = sorted({e["instance"] for e in doc["exclusions"] if e["instance"] != "*"}
                    | {f"u_{m}" for m in code_cov})
-    out = {"$schema": "validation-coverage-exclusions-report/1", "instances": {}, "exclusions": []}
+    out = {"$schema": "validation-coverage-exclusions-report/2", "instances": {}, "exclusions": [],
+           "derived_under": {"spec_revision": spec_id[0], "spec_design_id": spec_id[1]}}
     counts = {e["id"]: {"approved": 0, "proposed": 0} for e in doc["exclusions"]}
     for inst in insts:
         rows = uncovered_toggle_bits(inst)
@@ -77,7 +95,7 @@ def main() -> int:
             continue
         approved = proposed = 0
         for sig, idx in rows:
-            for e in doc["exclusions"]:
+            for e in resolved:
                 if matches(e, inst, sig, idx):
                     if e.get("approved_by"):
                         approved += 1
@@ -96,9 +114,11 @@ def main() -> int:
             entry["adjusted_percent"] = round(100.0 * cov / max(tot - approved, 1), 1)
             entry["adjusted_if_proposed_approved_percent"] = round(100.0 * cov / max(tot - approved - proposed, 1), 1)
         out["instances"][inst] = entry
-    for e in doc["exclusions"]:
+    for e, r in zip(doc["exclusions"], resolved):
         out["exclusions"].append({"id": e["id"], "code": e["code"], "status": "approved" if e.get("approved_by") else "proposed",
-                                  "approved_by": e.get("approved_by"), "matched_bits": counts[e["id"]]})
+                                  "approved_by": e.get("approved_by"), "matched_bits": counts[e["id"]],
+                                  "rule": {"signals": e["signals"], "bits": e.get("bits", "all")},
+                                  "derived": {"signals": r["signals"], "bits": r["bits"]}})
     with open(os.path.join(REPORTS, "coverage_exclusions.json"), "w") as f:
         json.dump(out, f, indent=2)
     print(f"  {'instance':14} {'uncov':>6} {'appr':>5} {'prop':>5} {'measured':>9} {'adjusted':>9} {'if approved':>12}")
@@ -107,7 +127,10 @@ def main() -> int:
               f"{str(e.get('measured_percent', '')):>9} {str(e.get('adjusted_percent', '')):>9} "
               f"{str(e.get('adjusted_if_proposed_approved_percent', '')):>12}")
     for x in out["exclusions"]:
-        print(f"  {x['id']} {x['code']:8} {x['status']:9} matched {x['matched_bits']}")
+        b = x["derived"]["bits"]
+        bl = "all" if b == "all" else (f"[{b[0]}..{b[-1]}]" if b and b == list(range(b[0], b[-1] + 1)) else str(b))
+        print(f"  {x['id']} {x['code']:8} {x['status']:9} matched {x['matched_bits']}  bits {bl} "
+              f"({len(x['derived']['signals'])} signal(s))")
     print(f"  wrote {os.path.relpath(os.path.join(REPORTS, 'coverage_exclusions.json'), ROOT)}")
     return 0
 

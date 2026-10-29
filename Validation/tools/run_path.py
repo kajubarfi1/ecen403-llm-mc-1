@@ -297,7 +297,7 @@ def main() -> int:
                          "path's settle_cycles / window_cycles")
     ap.add_argument("--stimulus", default=None,
                     choices=["random", "random_v2", "register_walk", "status_poll",
-                             "refresh_stress", "burst", "write_read", "wb_burst", "saturate"],
+                             "refresh_stress", "burst", "write_read", "wb_burst", "saturate", "ack_collision"],
                     help="override the path's stimulus_generator")
     ap.add_argument("--no-coverage", action="store_true")
     ap.add_argument("--prep-only", action="store_true")
@@ -572,6 +572,35 @@ def main() -> int:
         print("\n  COMPILE/ELABORATION ERRORS — no verdict is possible:")
         for e in errors[:12]:
             print(f"    {e[:160]}")
+        # An error INSIDE one of the drop's RTL files is a defect of the drop,
+        # not of the environment: the Frontend's lint gate did not run on it
+        # (scheduler.sv used a wire before its declaration, 2026-10-29, every
+        # scheduler path "did not simulate" and the finding went nowhere).
+        # Written as a failing report that validate_drop turns into a
+        # structural finding for the block's phase; harness/monitor errors
+        # stay rc=2 (infrastructure).
+        import re as _re
+        dut = {f"{b}.sv": b for b in blocks}
+        cerrs = []
+        for e in errors:
+            m = _re.search(r"\(([\w./-]+\.sv),(\d+)(?:\|\d+)?\):\s*(.*)", e)
+            if m and os.path.basename(m.group(1)) in dut:
+                cerrs.append({"block": dut[os.path.basename(m.group(1))], "file": os.path.basename(m.group(1)),
+                              "line": int(m.group(2)), "message": m.group(3).strip()[:240]})
+        if cerrs:
+            report = {"$schema": "validation-path-run/1", "path": args.path,
+                      "strategy": pdef["check_strategy"], "verdict": "fail",
+                      "timestamp": datetime.now().isoformat(), "blocks": blocks,
+                      "sequence": None, "stimulus_generator": generator, "autonomous": autonomous,
+                      "window_cycles": args.settle, "coverage_collected": False,
+                      "rtl_drop": __import__("rtl_drop").stamp(blocks),
+                      "stages": [], "compile_errors": cerrs,
+                      "log": os.path.relpath(log_path, ROOT), "observed_trace": None}
+            with open(os.path.join(rep_dir, f"{args.path}_report.json"), "w") as f:
+                json.dump(report, f, indent=2)
+            blks = sorted({c["block"] for c in cerrs})
+            print(f"\n  path verdict : FAIL  (the drop's RTL does not compile: {', '.join(blks)})")
+            return 1
         return 2
     fired_by_block = {}
     if asserts:

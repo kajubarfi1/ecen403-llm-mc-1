@@ -507,5 +507,171 @@ findings above stand unchanged (the port's lost beats, the data path's
 dropped commands), tMOD (addendum 8) is still in `init_fsm.sv`, and
 code coverage on this drop is 86.8 %. The scheduler's two old formal
 findings (PROTO_001, TIMING_008, proven closed on the previous design)
-are back to `awaiting_formal` because the scheduler changed; the
-re-proof on the pipelined scheduler is running and will settle them.
+went back to `awaiting_formal` because the scheduler changed. The
+re-proof on the pipelined scheduler (JasperGold, 20 min, everything
+free) has run: TIMING_008 is proven again and that finding is closed.
+PROTO_001 and PROTO_002 came back undetermined at depth 49 where the
+old scheduler proved them in 14 min; the pipelined design has more
+state, so they need a longer run and PROTO_001 stays `awaiting_formal`
+until then (nothing says it is broken; nothing yet says it holds).
+
+The same run settled HOST_001, the ack collision flagged under Finding 1
+above: **counterexample at 24 cycles, no abstraction, no assumptions.**
+A write beat accepted in one cycle and a read response arriving in the
+next give one `wb_ack_o` pulse for two completions
+(`assign wb_ack_o = wr_ack_r | rd_ack`, wb_port.sv:158). It is now the
+third wb_port finding in the package, `wb_port/HOST_001`, critical,
+confirmed, routed to the Phase 1 agent with the other two; the fix is
+the same holding stage. One honest note on method: the run under the
+assumed refresh configuration showed no collision to 8245 cycles, but
+that configuration never answers a read, so its bound is vacuous, and a
+counterexample found with everything free is a witness in the real
+design. We tightened our own sign-off rule on that today (a bounded
+proof counts only if its trigger was witnessed) so it cannot happen
+silently again.
+
+**Simulation witness (10-29).** It is no longer only a formal trace:
+`path_23_host_ack_collision` (new, `ack_collision.py`) reads one open
+row and lands a write beat d+1 cycles later for every d in the spec's
+latency window. On your drop the collision lands at d = 40: the write
+is acknowledged in the same cycle the read data returns, `a_HOST_001`
+fires once, every request and response is conserved, and the host
+counts one beat never acknowledged -- the pulse the two shared. The
+path runs on every drop from now on, so the fix has its test.
+
+**Loop run 10-29 (`runs/oct29_loop`), halted inside your Phase 3.** We
+ran the flow on the current spec to carry the three modules' findings
+to your agents. It never reached our validation: Phase 3 regenerated
+the scheduler from your current `scheduler_gen.py` (the sel_idx_r
+change) and your own simulation gate failed it, T36 "RefBlock: REF once
+banks idle" and T37 "RefBlock: ref_ack", both seeing `cmd=4` (WR) where
+the testbench expects REF after the forced precharge. The flow handed
+the gate report to your Phase 3 agent (that route works); it diagnosed,
+at low confidence, that the testbench's `ref_ok` expectation does not
+account for the in-flight PRE that the pipelined scheduler now tracks,
+proposed deriving the expected offset from the spec's derived cycles
+rather than a literal, and exited without a fix, so the run halted.
+Two things worth knowing: the drop you pushed carries a scheduler from
+the same generator commit, so either the gate was not re-run before the
+push or the testbench is sensitive to something that differs between
+runs; and the regenerated `scheduler.sv` is byte-identical to the one you
+pushed (so are cmd_queue, cmd_gen, wb_port and refresh_ctrl; only
+init_fsm differs, by the tMOD wait your agent added in our tree). So
+T36/T37 fail on the scheduler that is in the repo, and the question is
+whether that scheduler is wrong or the testbench is. Our answer is the
+testbench: on your pushed drop every scheduler and refresh check we
+hold the pipelined scheduler to passes (REF_001, REF_002, SCHED_001-003
+on paths 04, 05, 06, 19, 20; REF_002 and TIMING_008 proven by formal;
+REF_001 bounded-proven), and the only failures on those paths are the
+port's lost beats. A forced PRE followed by REF on the next eligible
+cycle is what we see; the testbench expects REF on a fixed cycle the
+pipeline no longer meets. Suggest the testbench derive that offset from
+the spec's derived cycles, as your agent proposed, and that the Phase 3
+gate be re-run before a drop is pushed. Our validation of the
+regenerated Phase 1-3 drop itself: 8 of 8 runnable paths pass, and
+TIMING_014 (tMOD) is resolved on it, which confirms your agent's init
+fix regenerates cleanly.
+
+## Addendum 10 (2026-10-29, afternoon): your three fixes, judged
+
+Replies to `Frontend2/HANDOFF_VALIDATION_2026-10-29.md` (data_path) and
+`_2.md` (wb_port). Short version: tMOD is closed, the port fix works, the
+data_path fix stops the drops but breaks every read's data, and the drop
+as pushed does not compile, so only eight paths ran on it.
+
+### 1. The drop as pushed (5994bb667dba) does not compile
+
+`scheduler.sv` from 5ec2dc7 (fix (b) reverted) uses `sel_bank_eff_r` at
+lines 178 and 179 and declares it as a `wire` at line 372. Xcelium
+rejects a net used before its declaration (`*E,UNDIDN ... undeclared
+identifier`, IEEE 1800 §6.10: implicit nets are only created in port
+connections and continuous-assignment LHS). The comment at line 133 says
+it is "declared further down"; the generator's line 418 is where. Move
+the declaration above its first use (or keep (b)'s registered copy). The
+drop was regenerated with `--no-lint`, which is why your gate did not
+see it; Yosys may accept the forward reference, Xcelium does not.
+
+Every path that instantiates the scheduler, 12 of 20, has no verdict on
+this drop; the package carries their findings as untested, not resolved,
+and holds one new critical finding, `scheduler/COMPILE_ERROR`, anchored
+at both lines, routed to Phase 3. The eight paths that do run pass, and
+**TIMING_014 (tMOD) is resolved** on this drop.
+
+### 2. Your fixes, judged on a hybrid
+
+To answer what you asked, we paired your new `wb_port.sv` and
+`data_path.sv` with the last scheduler that compiles (the (a)+(b) one
+from 99f72da45a32) and ran the host, data and refresh paths. Not a drop,
+not in the package; evidence only.
+
+**wb_port: fixed.** Paths 01, 02, 07, 18: the request stream matches the
+model, `(conservation)` passes with zero lost beats, and the host
+handshake stage no longer counts unacknowledged beats. On the saturate
+path that lost 25 of 243 beats yesterday, 0 of 243 are lost. Your
+`wr_ack_r` reasoning holds: acknowledging on acceptance into a skid that
+cannot lose or reorder the entry is a legal posted write; the thing that
+made it a bug was the skid not existing. `WB-010` is well formed: a
+property disabled under reset, and the tag-full stall is a separate
+term of `wb_stall_o`, so `req_valid && !req_ready` is never true for a
+reason other than the queue. HOST_001 still fires on path_23, as you
+expected, since you left the ack merge alone (see 3).
+
+**data_path: the drops are gone, the data is wrong.** `(conservation)`
+passes on paths 02, 07 and 18: every RD gets a response and every WR
+drives its word. But the `data_path` stage fails on every path that
+reads, including path_03 with no back-to-back reads at all:
+
+| path | predicted | observed |
+|---|---|---|
+| path_03 (single read) | `0x5d807daf` | `0x00005d80` |
+| path_18 (two reads) | `0x1027c4d1` | `0x35bf1027` |
+
+The low half of the observed word is the HIGH half of the right word,
+and the high half is zero or the next word's low half. The capture
+window is one cycle late: `rd_pend` adds a cycle between `cmd_rd_valid`
+and the capture engine's CL countdown, but the DRAM returns the data CL
+after the RD on the bus regardless, so beat 0 passes before the engine
+looks and beat 1 lands in slot 0. On 99f72da45a32 path_03 passed 19 of
+19, so this is a regression of 65dbb0f, not the old read-capture defect.
+The fix is that the countdown must start when the command is issued,
+for every pending read, not when the engine gets to it: a small shift
+register of per-command countdowns (or the pending entry carrying its
+scheduled capture cycle), with the capture engine serving whichever
+entry's countdown expires. "Serviced late" cannot be right for a read:
+the DRAM does not wait.
+
+Which brings in your `BEATS_PER_CYC` question. It is real, and it is a
+spec gap rather than a data_path bug: a host word occupies the DQ bus
+for `host_width / channel_width` = 2 controller cycles in this
+abstraction (one beat per controller cycle, which our DRAM stub models
+the same way), while tCCD = 4 nCK lets the scheduler issue CAS every
+cycle. Two reads one cycle apart cannot both be captured on one bus,
+whatever the data path does. Either the scheduler spaces CAS by the
+word's beat count (tCCD_eff = max(tCCD, beats), one line in the
+scheduler) or the beat model changes to the real rate (8 transfers per
+controller cycle, a word per nCK), which is what `BEATS_PER_CYC =
+CLK_RATIO * 2` would mean. That is a decision for the spec
+(`phy_interface` is abstract and says nothing about data-bus occupancy
+per CAS); we are filing it as an intake gap, and until it is decided
+the scheduler spacing is the safe choice.
+
+One residual on writes: on the refresh-stress path, 1 of 600 write
+words was never accepted and one WR drove a single beat, well before the
+end of the window. Something in the `wr_pend_cnt` / `wr_buf` lockstep
+slips once in 600; worth a look when you are in the file.
+
+### 3. HOST_001 is live
+
+Formal (no abstraction) finds the write-ack / read-response collision at
+24 cycles; the directed path_23 reproduces it in simulation at gap 40
+(write accepted the cycle before the read's data returns, one `wb_ack_o`
+pulse for two beats, one beat never acknowledged). It is in the package
+as `wb_port/HOST_001`, critical, confirmed, with the skid you just built
+being the natural place to hold the loser.
+
+### 4. What the next round needs
+
+Phase 3 fixes the declaration order (one line); then the full drop can
+be judged. Expect: wb_port clean except HOST_001; data_path failing
+every read until the countdown moves to command issue; the scheduler
+spacing or spec decision above.

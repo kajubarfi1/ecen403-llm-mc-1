@@ -74,6 +74,8 @@ class TestFormalStatus(unittest.TestCase):
         self.assertEqual(EF.formal_status("PROTO_001", {"PROTO_001"}, {"PROTO_001"}), ("resolved", "confirmed"))
         self.assertEqual(EF.formal_status("PROTO_001", set(), {"PROTO_001"}), ("awaiting_formal", "unverified"))
         self.assertEqual(EF.formal_status("PROTO_001", set(), set()), ("open", "confirmed"))
+        # a cex with no abstraction on this design stands over an earlier abstracted bound
+        self.assertEqual(EF.formal_status("HOST_001", set(), {"HOST_001"}, {"HOST_001"}), ("open", "confirmed"))
 
 
 class TestMismatchContext(unittest.TestCase):
@@ -232,3 +234,61 @@ class TestAdapter(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FormalProofSets(unittest.TestCase):
+    """What closes a formal finding: a real proof on this design, never a
+    vacuous one, and never an abstracted bound against an unabstracted cex."""
+
+    def test_cex_without_abstraction_overrules_abstracted_bound(self):
+        plain = {"abstractions": [], "results": [{"short": "a_HOST_001", "status": "cex"},
+                                                  {"short": "a_TIMING_008", "status": "proven"}]}
+        abs_ = {"abstractions": [{"stopat": "x"}], "results": [{"short": "a_HOST_001", "status": "bounded_proven"},
+                                                               {"short": "a_PROTO_001", "status": "bounded_vacuous"},
+                                                               {"short": "a_REF_001", "status": "bounded_proven"}]}
+        now, before, cex = EF.formal_proof_sets([plain, abs_], lambda rep: True)
+        self.assertEqual(cex, {"HOST_001"})
+        self.assertNotIn("HOST_001", now)
+        self.assertIn("TIMING_008", now)
+        self.assertIn("REF_001", now)
+        self.assertNotIn("PROTO_001", now)          # vacuous never counts
+        self.assertNotIn("PROTO_001", before)
+
+    def test_abstracted_cex_does_not_count_as_a_witness(self):
+        abs_ = {"abstractions": [{"stopat": "x"}], "results": [{"short": "a_TIMING_004", "status": "cex"}]}
+        now, before, cex = EF.formal_proof_sets([abs_], lambda rep: True)
+        self.assertEqual(cex, set())
+
+    def test_proof_on_another_design_is_before_not_now(self):
+        old = {"abstractions": [], "results": [{"short": "a_PROTO_001", "status": "proven"}]}
+        now, before, cex = EF.formal_proof_sets([old], lambda rep: False)
+        self.assertEqual((now, before), (set(), {"PROTO_001"}))
+
+
+class CompileErrorFinding(unittest.TestCase):
+    """RTL that does not compile is a critical finding on its block, anchored
+    at the offending lines, not an 'infrastructure' non-run (2026-10-29)."""
+
+    def test_compile_error_record_becomes_an_anchored_finding(self):
+        import tempfile, json as _json
+        rec = {"source": "validation", "target": "frontend", "kind": "compile_error", "scope": "scheduler",
+               "owner_candidates": ["scheduler"], "status": "open", "severity": "critical", "title": "scheduler.sv does not compile",
+               "detail": "xmvlog rejects it", "expected": "compiles", "actual": "scheduler.sv:178: 'sel_bank_eff_r': undeclared identifier",
+               "evidence": {"errors": [{"block": "scheduler", "file": "scheduler.sv", "line": 178, "message": "'sel_bank_eff_r': undeclared identifier"},
+                                       {"block": "scheduler", "file": "scheduler.sv", "line": 179, "message": "'sel_bank_eff_r': undeclared identifier"}],
+                            "paths": ["path_01_write_cmd", "path_02_read_cmd"]}}
+        d = tempfile.mkdtemp()
+        with open(os.path.join(d, "compile_findings.json"), "w") as f:
+            _json.dump({"findings": [rec]}, f)
+        old = EF.OUTBOX
+        try:
+            EF.OUTBOX = d
+            out = [x for x in EF.structural_findings("rev", "h") if x["taxonomy_id"] == "COMPILE_ERROR"]
+        finally:
+            EF.OUTBOX = old
+        self.assertEqual(len(out), 1)
+        f = out[0]
+        self.assertEqual((f["owner_module"], f["severity"], f["kind"]), ("scheduler", "critical", "rtl_defect"))
+        self.assertEqual([a["line"] for a in f["anchor"]], [178, 179])
+        self.assertEqual(f["paths"], ["path_01_write_cmd", "path_02_read_cmd"])
+        self.assertIn("undeclared", f["actual"])

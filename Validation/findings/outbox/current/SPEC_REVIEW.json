@@ -5,9 +5,11 @@
   "spec": "Validation/spec/llmmc_microarchitecturespec_filled.json",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "design_id": "ddr3_mc_core_v2",
-  "generated_utc": "2026-10-28T19:19:53.180535+00:00",
+  "generated_utc": "2026-10-29T17:20:12.092532+00:00",
   "blocking": [],
-  "advisory": [],
+  "advisory": [
+    "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated"
+  ],
   "jedec": [
     {
       "id": "J-TIM-001",
@@ -185,7 +187,21 @@
       "detail": "MR2.cas_write_latency_cycles=8, timing_model.CWL_cycles=8"
     }
   ],
-  "intake_gaps": [],
-  "requires_human_review": false,
+  "intake_gaps": [
+    {
+      "id": "PHY_DATA_BUS_OCCUPANCY",
+      "status": "gap",
+      "disposition": "decision",
+      "question": "How many controller cycles does one CAS occupy the data bus for in the abstract PHY model, and must the scheduler space CAS commands by it? data_path_mapping implies host_width_bits / ddr_channel_width_bits beats at one beat per controller cycle (2 here), while timing_model.tCCD (4 nCK = 1 controller cycle) lets the scheduler issue a CAS every cycle: two reads one cycle apart cannot both be captured on one bus.",
+      "detail": "phy_interface.data_bus_cycles_per_cas is not stated",
+      "require": "phy_interface.data_bus_cycles_per_cas",
+      "options": [
+        "host_word_beats",
+        "one_controller_cycle",
+        "<integer controller cycles>"
+      ]
+    }
+  ],
+  "requires_human_review": true,
   "note": "FAIL stops the pipeline before Phase 1. A gap does not: validation judges the RTL under a pinned convention and the question is carried here until the spec answers it (the synthesis agent can answer most of them)."
 }

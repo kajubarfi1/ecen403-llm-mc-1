@@ -22,6 +22,6 @@ module wb_port_order_sva (
   a_HOST_001: assert property (p_HOST_001)
     else $error("[HOST_001] Host acknowledge collision: a write beat accepted in the previous cycle (its acknowledge is due now) and a read response arriving now would be two completions on one ack line");
   // the situation the rule is tested under; an assertion that never sees it proved nothing
-  c_HOST_001: cover property (@(posedge clk) disable iff (!rst_n) wb_cyc_i && wb_stb_i && !wb_stall_o && wb_we_i);
+  c_HOST_001: cover property (@(posedge clk) disable iff (!rst_n) rsp_valid && $past(wb_cyc_i && wb_stb_i && !wb_stall_o));
 
 endmodule

@@ -3,7 +3,7 @@
   "path": "path_18_full_write",
   "strategy": "composed",
   "verdict": "fail",
-  "timestamp": "2026-10-28T14:20:25.359638",
+  "timestamp": "2026-10-29T11:49:41.100474",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -35,7 +35,7 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "17274ce",
+    "validated_at": "595496a",
     "frontend_commits": {
       "addr_decoder": "f37ce49d323151a6118ae7765aa766918c816383",
       "bank_tracker": "f37ce49d323151a6118ae7765aa766918c816383",
@@ -110,9 +110,9 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
       "scope": "wb_port",
       "verdict": "fail",
-      "summary": "scope=wb_port  strategy=exact  status=fail  matched=27/31  missing=4",
+      "summary": "scope=wb_port  strategy=exact  status=fail  matched=27/31  WAIVED=12 field comparison(s)  missing=4",
       "detail": [
-        "scope=wb_port  strategy=exact  status=fail  matched=27/31  missing=4",
+        "scope=wb_port  strategy=exact  status=fail  matched=27/31  WAIVED=12 field comparison(s)  missing=4",
         "  req[16] missing: predicted [req.request addr=0x1ff58c45 data=0x815a47c5 mask=0xf we=0x1] but the design produced nothing",
         "  req[18] missing: predicted [req.request addr=0xf890d38 data=0x677f6cbd mask=0xf we=0x1] but the design produced nothing",
         "  req[20] missing: predicted [req.request addr=0x17fb2263 data=0x1622bd79 mask=0xf we=0x1] but the design produced nothing",

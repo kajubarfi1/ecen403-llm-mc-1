@@ -1,12 +1,246 @@
 {
   "schema": "validation-findings/2",
-  "drop": "99f72da45a32",
+  "drop": "5994bb667dba",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "spec_id": "00d082c3f72d1b34",
-  "generated_utc": "2026-10-28T19:21:30.686596Z",
+  "generated_utc": "2026-10-29T17:17:19.565304Z",
   "reports": "Validation/reports/paths",
-  "finding_count": 11,
+  "finding_count": 4,
   "findings": [
+    {
+      "schema": "validation-findings/2",
+      "id": "structural/scheduler/COMPILE_ERROR",
+      "kind": "rtl_defect",
+      "check_id": "COMPILE_ERROR",
+      "taxonomy_id": "COMPILE_ERROR",
+      "detectors": [
+        "structural:compile_findings"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "scheduler.sv does not compile: line 178: 'sel_bank_eff_r': undeclared identifier [12.5(IEEE)].; line 179: 'sel_bank_eff_r': undeclared identifier [12.5(IEEE)].",
+      "requirement": "xmvlog rejects scheduler.sv as shipped in this drop (2 error(s)); every path that instantiates it (12) has no verdict and every finding on those paths is carried untested. The Frontend's lint/sim gate did not run on this drop (regenerated with --no-lint): a compile error is a Phase defect, not an en",
+      "spec_ref": null,
+      "expected": "scheduler.sv compiles under IEEE 1800 (the Frontend lint gate passes on the shipped drop)",
+      "actual": "scheduler.sv:178: 'sel_bank_eff_r': undeclared identifier [12.5(IEEE)].; scheduler.sv:179: 'sel_bank_eff_r': undeclared identifier [12.5(IEEE)].",
+      "detector": "structural:compile_findings",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 178,
+          "signal": null,
+          "text": "'sel_bank_eff_r': undeclared identifier [12.5(IEEE)]."
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "line": 179,
+          "signal": null,
+          "text": "'sel_bank_eff_r': undeclared identifier [12.5(IEEE)]."
+        }
+      ],
+      "mechanism": "xmvlog rejects scheduler.sv as shipped in this drop (2 error(s)); every path that instantiates it (12) has no verdict and every finding on those paths is carried untested. The Frontend's lint/sim gate did not run on this drop (regenerated with --no-lint): a compile error is a Phase defect, not an environment one.",
+      "paths": [
+        "path_01_write_cmd",
+        "path_02_read_cmd",
+        "path_03_read_return",
+        "path_04_scheduler_bank_loop",
+        "path_05_scheduler_refresh_loop",
+        "path_07_backpressure",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt",
+        "path_23_host_ack_collision"
+      ],
+      "occurrences": 2,
+      "repro": {
+        "cmd": "python3 Validation/tools/run_path.py --path path_01_write_cmd"
+      },
+      "drop": {
+        "git_head": "5994bb667dba",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "5994bb667dba",
+      "last_seen": "5994bb667dba",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/compile_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "formal/scheduler/PROTO_001",
+      "kind": "rtl_defect",
+      "check_id": "PROTO_001",
+      "taxonomy_id": "PROTO_001",
+      "detectors": [
+        "formal:jaspergold"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "unverified",
+      "title": "READ issued to a bank one cycle after that bank was PRECHARGEd (no ACTIVATE between)",
+      "requirement": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+      "spec_ref": null,
+      "expected": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
+      "actual": "PRE b=1 at cycle 183, RD b=1 at cycle 184.",
+      "detector": "formal:jaspergold",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "cmd_valid/cmd_type/cmd_bank"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "signal": "bank_rd_allowed"
+        }
+      ],
+      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 183 PRE bank 1 (A10=0), cycle 184 RD bank 1 col 0. The generated PROTO_001 tracker (row-open state from the observed ACT/PRE stream) shows bank 1 closed when the READ is issued. Never observed in simulation (no path stimulus reaches this interleaving); the scheduler or its bank_tracker gating lets a CAS follow its own precharge. Likely the same root as the open scheduler re-grant defect (commands are also held for 2-3 consecutive cycles in the trace, i.e. re-issued). [found on drop 1fea117; awaiting formal re-prove on 5994bb667dba]",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+      },
+      "drop": {
+        "git_head": "5994bb667dba",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "1fea117",
+      "last_seen": "5994bb667dba",
+      "resolved_in": null,
+      "status": "awaiting_formal",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "formal/scheduler/TIMING_008",
+      "kind": "rtl_defect",
+      "check_id": "TIMING_008",
+      "taxonomy_id": "TIMING_008",
+      "detectors": [
+        "formal:jaspergold"
+      ],
+      "owner_module": "scheduler",
+      "owner_candidates": [
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "unverified",
+      "title": "PRECHARGE issued one cycle after a WRITE to the same bank (tWR violated; write data lost)",
+      "requirement": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+      "spec_ref": null,
+      "expected": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
+      "actual": "WR b=4 at cycle 173, PRE b=4 at cycle 174.",
+      "detector": "formal:jaspergold",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+          "signal": "bank_pre_allowed / ctr_wr"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+          "signal": "precharge decision"
+        }
+      ],
+      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 173 WR bank 4, cycle 174 PRE bank 4. tWR = 15 ns = 3 controller cycles, so 2 cycles must separate the last write beat from the precharge. Not observed in simulation. bank_tracker's write-recovery timer (cfg_tWR_nCK) does not gate bank_pre_allowed for the cycle after a write, or the scheduler ignores it on the row-conflict path. [found on drop 1fea117; awaiting formal re-prove on 5994bb667dba]",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
+        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
+      },
+      "drop": {
+        "git_head": "5994bb667dba",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "1fea117",
+      "last_seen": "5994bb667dba",
+      "resolved_in": null,
+      "status": "awaiting_formal",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "formal/wb_port/HOST_001",
+      "kind": "rtl_defect",
+      "check_id": "HOST_001",
+      "taxonomy_id": "HOST_001",
+      "detectors": [
+        "formal:jaspergold"
+      ],
+      "owner_module": "wb_port",
+      "owner_candidates": [
+        "wb_port"
+      ],
+      "severity": "critical",
+      "confidence": "unverified",
+      "title": "Write acknowledge and read response complete in the same cycle on the one Wishbone ack line",
+      "requirement": "One acknowledge per accepted beat (host_interface.interface_type = wishbone_pipelined). When a write acknowledge and a read response are due in the same cycle the port must hold one of them (a one-entry response or write-ack holding register) so each completes in its own cycle.",
+      "spec_ref": "host_interface.interface_type",
+      "expected": "One acknowledge per accepted beat (host_interface.interface_type = wishbone_pipelined). When a write acknowledge and a read response are due in the same cycle the port must hold one of them (a one-entry response or write-ack holding register) so each completes in its own cycle.",
+      "actual": "cex at bound 24: $past(wb_cyc_i && wb_stb_i && !wb_stall_o && wb_we_i) && rsp_valid is reachable",
+      "detector": "formal:jaspergold",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "signal": "wb_ack_o",
+          "text": "assign wb_ack_o = wr_ack_r | rd_ack;",
+          "line": 158
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "signal": "wr_ack_r",
+          "text": "else        wr_ack_r <= wb_beat & wb_we_i;",
+          "line": 155
+        }
+      ],
+      "mechanism": "JasperGold counterexample 24 cycles from reset, engine L, no abstraction (cover c_HOST_001, a write beat accepted, reached at cycle 1). wb_port.sv: wr_ack_r <= wb_beat & wb_we_i (the write acknowledge, one cycle after the beat) and assign wb_ack_o = wr_ack_r | rd_ack with rd_ack = rsp_valid. A read response arriving the cycle after a write beat is accepted gives one wb_ack_o pulse for two completions; the host counts one acknowledge, waits for the other forever (a pipelined master) or mis-attributes the read data to the write (a classic one). Any legal host reaches it: issue a read, then present a write beat the cycle before the read data returns. Not seen in simulation on 2026-10-28 only because no sequence placed a write beat on that cycle (243 pipelined beats on path_07). SIMULATION WITNESS (2026-10-29, path_23_host_ack_collision, ack_collision.py): a read to an open row and a write beat accepted 41 cycles later (gap d = 40) -- the write acknowledge and the read response fall in the same cycle at t = 35.37 us; a_HOST_001 fires once, every request and response is conserved, and the host handshake stage counts 1 of 79 beats never acknowledged: the one ack pulse the two completions shared. [found on drop 99f72da45a32; awaiting formal re-prove on 5994bb667dba]",
+      "paths": [
+        "formal:chain_formal"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
+        "command": "python3 Validation/tools/run_formal.py --path path_01_write_cmd --time 20m",
+        "assumptions": "none: host Wishbone inputs and configuration registers free",
+        "simulation": "python3 Validation/tools/run_path.py --path path_23_host_ack_collision"
+      },
+      "drop": {
+        "git_head": "5994bb667dba",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "99f72da45a32",
+      "last_seen": "5994bb667dba",
+      "resolved_in": null,
+      "status": "awaiting_formal",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_host_port_findings.json"
+      ]
+    },
     {
       "schema": "validation-findings/2",
       "id": "data_path/CONSERVE/READ_CMD_TO_RESPONSE",
@@ -67,16 +301,17 @@
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
         "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv"
       },
-      "introduced_in": "efece348d04e",
+      "introduced_in": "99f72da45a32",
       "first_seen": "efece348d04e",
       "last_seen": "99f72da45a32",
       "resolved_in": null,
-      "status": "open",
+      "status": "untested",
       "related_manual_findings": [
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_read_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_width_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
-      ]
+      ],
+      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
     },
     {
       "schema": "validation-findings/2",
@@ -143,16 +378,17 @@
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
         "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv"
       },
-      "introduced_in": "efece348d04e",
+      "introduced_in": "99f72da45a32",
       "first_seen": "efece348d04e",
       "last_seen": "99f72da45a32",
       "resolved_in": null,
-      "status": "open",
+      "status": "untested",
       "related_manual_findings": [
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_read_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_width_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
-      ]
+      ],
+      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
     },
     {
       "schema": "validation-findings/2",
@@ -200,16 +436,17 @@
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
         "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv"
       },
-      "introduced_in": "efece348d04e",
+      "introduced_in": "99f72da45a32",
       "first_seen": "efece348d04e",
       "last_seen": "99f72da45a32",
       "resolved_in": null,
-      "status": "open",
+      "status": "untested",
       "related_manual_findings": [
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_read_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_width_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
-      ]
+      ],
+      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
     },
     {
       "schema": "validation-findings/2",
@@ -303,12 +540,13 @@
       "first_seen": "99f72da45a32",
       "last_seen": "99f72da45a32",
       "resolved_in": null,
-      "status": "open",
+      "status": "untested",
       "related_manual_findings": [
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_read_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_width_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
-      ]
+      ],
+      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
     },
     {
       "schema": "validation-findings/2",
@@ -394,120 +632,13 @@
       "first_seen": "99f72da45a32",
       "last_seen": "99f72da45a32",
       "resolved_in": null,
-      "status": "open",
+      "status": "untested",
       "related_manual_findings": [
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_read_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_width_findings.json",
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
-      ]
-    },
-    {
-      "schema": "validation-findings/2",
-      "id": "formal/scheduler/PROTO_001",
-      "kind": "rtl_defect",
-      "check_id": "PROTO_001",
-      "taxonomy_id": "PROTO_001",
-      "detectors": [
-        "formal:jaspergold"
       ],
-      "owner_module": "scheduler",
-      "owner_candidates": [
-        "scheduler"
-      ],
-      "severity": "critical",
-      "confidence": "unverified",
-      "title": "READ issued to a bank one cycle after that bank was PRECHARGEd (no ACTIVATE between)",
-      "requirement": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
-      "spec_ref": null,
-      "expected": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
-      "actual": "PRE b=1 at cycle 183, RD b=1 at cycle 184.",
-      "detector": "formal:jaspergold",
-      "anchor": [
-        {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
-          "signal": "cmd_valid/cmd_type/cmd_bank"
-        },
-        {
-          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
-          "signal": "bank_rd_allowed"
-        }
-      ],
-      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 183 PRE bank 1 (A10=0), cycle 184 RD bank 1 col 0. The generated PROTO_001 tracker (row-open state from the observed ACT/PRE stream) shows bank 1 closed when the READ is issued. Never observed in simulation (no path stimulus reaches this interleaving); the scheduler or its bank_tracker gating lets a CAS follow its own precharge. Likely the same root as the open scheduler re-grant defect (commands are also held for 2-3 consecutive cycles in the trace, i.e. re-issued). [found on drop 1fea117; awaiting formal re-prove on 99f72da45a32]",
-      "paths": [
-        "formal:chain_formal"
-      ],
-      "occurrences": 1,
-      "repro": {
-        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
-        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
-        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
-      },
-      "drop": {
-        "git_head": "99f72da45a32",
-        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
-      },
-      "introduced_in": null,
-      "first_seen": "1fea117",
-      "last_seen": "99f72da45a32",
-      "resolved_in": null,
-      "status": "awaiting_formal",
-      "related_manual_findings": [
-        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
-      ]
-    },
-    {
-      "schema": "validation-findings/2",
-      "id": "formal/scheduler/TIMING_008",
-      "kind": "rtl_defect",
-      "check_id": "TIMING_008",
-      "taxonomy_id": "TIMING_008",
-      "detectors": [
-        "formal:jaspergold"
-      ],
-      "owner_module": "scheduler",
-      "owner_candidates": [
-        "scheduler"
-      ],
-      "severity": "critical",
-      "confidence": "unverified",
-      "title": "PRECHARGE issued one cycle after a WRITE to the same bank (tWR violated; write data lost)",
-      "requirement": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
-      "spec_ref": null,
-      "expected": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
-      "actual": "WR b=4 at cycle 173, PRE b=4 at cycle 174.",
-      "detector": "formal:jaspergold",
-      "anchor": [
-        {
-          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
-          "signal": "bank_pre_allowed / ctr_wr"
-        },
-        {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
-          "signal": "precharge decision"
-        }
-      ],
-      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 173 WR bank 4, cycle 174 PRE bank 4. tWR = 15 ns = 3 controller cycles, so 2 cycles must separate the last write beat from the precharge. Not observed in simulation. bank_tracker's write-recovery timer (cfg_tWR_nCK) does not gate bank_pre_allowed for the cycle after a write, or the scheduler ignores it on the row-conflict path. [found on drop 1fea117; awaiting formal re-prove on 99f72da45a32]",
-      "paths": [
-        "formal:chain_formal"
-      ],
-      "occurrences": 1,
-      "repro": {
-        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
-        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
-        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
-      },
-      "drop": {
-        "git_head": "99f72da45a32",
-        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
-      },
-      "introduced_in": null,
-      "first_seen": "1fea117",
-      "last_seen": "99f72da45a32",
-      "resolved_in": null,
-      "status": "awaiting_formal",
-      "related_manual_findings": [
-        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
-      ]
+      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
     },
     {
       "schema": "validation-findings/2",
@@ -582,12 +713,15 @@
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
         "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv"
       },
-      "introduced_in": "efece348d04e",
+      "introduced_in": "99f72da45a32",
       "first_seen": "efece348d04e",
       "last_seen": "99f72da45a32",
       "resolved_in": null,
-      "status": "open",
-      "related_manual_findings": []
+      "status": "untested",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_host_port_findings.json"
+      ],
+      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
     },
     {
       "schema": "validation-findings/2",
@@ -641,9 +775,10 @@
       "paths": [
         "path_02_read_cmd",
         "path_07_backpressure",
-        "path_18_full_write"
+        "path_18_full_write",
+        "path_23_host_ack_collision"
       ],
-      "occurrences": 85,
+      "occurrences": 89,
       "repro": {
         "path": "path_02_read_cmd",
         "command": "python3 Validation/tools/run_path.py --path path_02_read_cmd",
@@ -661,12 +796,15 @@
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
         "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv"
       },
-      "introduced_in": "efece348d04e",
+      "introduced_in": "99f72da45a32",
       "first_seen": "efece348d04e",
       "last_seen": "99f72da45a32",
       "resolved_in": null,
-      "status": "open",
-      "related_manual_findings": []
+      "status": "untested",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_host_port_findings.json"
+      ],
+      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
     },
     {
       "schema": "validation-findings/2",
@@ -740,7 +878,7 @@
         "path_18_full_write",
         "path_20_refresh_preempt"
       ],
-      "occurrences": 44,
+      "occurrences": 37,
       "repro": {
         "path": "path_07_backpressure",
         "command": "python3 Validation/tools/run_path.py --path path_07_backpressure",
@@ -762,60 +900,203 @@
       "first_seen": "99f72da45a32",
       "last_seen": "99f72da45a32",
       "resolved_in": null,
-      "status": "open",
+      "status": "untested",
       "related_manual_findings": [
-        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json"
-      ]
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_host_port_findings.json"
+      ],
+      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
     },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/MISMATCH/req[addr,data,we]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/req[addr,data,we]",
+      "taxonomy_id": "DATA_001",
+      "detectors": [
+        "exact:wb_port:missing",
+        "twin:wb_port"
+      ],
+      "owner_module": "wb_port",
+      "owner_candidates": [
+        "wb_port"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "wb_port: MISMATCH/req[addr,data,we]",
+      "requirement": "wb_port must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "transaction predicted on req",
+      "actual": "predicted [req.request addr=0xd26aba4 data=0x0 we=0x0] but the design produced nothing",
+      "detector": "exact:wb_port:missing",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 142,
+          "signal": "req_we",
+          "text": "req_we    <= wb_we_i;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 143,
+          "signal": "req_addr",
+          "text": "req_addr  <= wb_adr_i;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 144,
+          "signal": "req_wdata",
+          "text": "req_wdata <= wb_dat_i;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 145,
+          "signal": "req_wmask",
+          "text": "req_wmask <= wb_sel_i;"
+        }
+      ],
+      "context": {
+        "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
+        "events": [
+          "t-871000 wb.write addr=0x1a841edc bte=0x0 cti=0x0 data=0xaa2ca1af sel=0xf",
+          "t-866000 wb.write addr=0x588af5c bte=0x0 cti=0x0 data=0x82283d15 sel=0x9",
+          "t-201000 wb.write addr=0x17b6a4b4 bte=0x0 cti=0x0 data=0x7923986 sel=0xf",
+          "t-196000 wb.write addr=0xae70050 bte=0x0 cti=0x0 data=0x8c5fe8f8 sel=0xf",
+          "t-170000 wb_rsp.read_data addr=0x409f134 data=0x9dac7f67",
+          "t-151000 wb.write addr=0x169c0b3c bte=0x0 cti=0x0 data=0x1762741 sel=0xe",
+          "t-146000 wb.read addr=0xd26aba4 bte=0x0 cti=0x0",
+          "t-101000 wb.write addr=0x397862c bte=0x0 cti=0x0 data=0x8ded3c96 sel=0x7",
+          "t-96000 wb.write addr=0x16d5a590 bte=0x0 cti=0x0 data=0x6a17b9af sel=0xf",
+          "t-51000 wb.write addr=0x1d5246f0 bte=0x0 cti=0x0 data=0x99901c04 sel=0xb",
+          "t-46000 wb.read addr=0xb91f700 bte=0x0 cti=0x0",
+          "t-1000 wb.read addr=0x1056bcd0 bte=0x0 cti=0x0",
+          "t+0 req.request (observed, wrong) addr=0x1056bcd0 data=0x99901c04 mask=0xb we=0x0"
+        ]
+      },
+      "mechanism": null,
+      "paths": [
+        "path_07_backpressure"
+      ],
+      "occurrences": 7,
+      "repro": {
+        "path": "path_07_backpressure",
+        "command": "python3 Validation/tools/run_path.py --path path_07_backpressure",
+        "sequence": "Validation/sequences/generated/path_07_backpressure_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_07_backpressure",
+        "log": "Validation/reports/paths/path_07_backpressure_sim.log",
+        "trace": "Validation/reports/paths/path_07_backpressure_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "req[20] missing: predicted [req.request addr=0xd26aba4 data=0x0 we=0x0] but the design produced nothing"
+        }
+      },
+      "drop": {
+        "git_head": "99f72da45a32",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "99f72da45a32",
+      "last_seen": "99f72da45a32",
+      "resolved_in": null,
+      "status": "untested",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_host_port_findings.json"
+      ],
+      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/HOST_001",
+      "kind": "rtl_defect",
+      "check_id": "HOST_001",
+      "taxonomy_id": "HOST_001",
+      "detectors": [
+        "assertion:a_HOST_001"
+      ],
+      "owner_module": "wb_port",
+      "owner_candidates": [
+        "wb_port"
+      ],
+      "severity": "major",
+      "confidence": "confirmed",
+      "title": "wb_port: HOST_001",
+      "requirement": "",
+      "spec_ref": null,
+      "expected": "",
+      "actual": "fired 1x; first: xmsim: *E,ASRTST (./wb_port_order_sva.sv,23): (time 35372500 PS) Assertion chain_harness.u_wb_port.u_wb_port_order_sva.a_HOST_001 has failed",
+      "detector": "assertion:a_HOST_001",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 142,
+          "signal": "req_we",
+          "text": "req_we    <= wb_we_i;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 143,
+          "signal": "req_addr",
+          "text": "req_addr  <= wb_adr_i;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 144,
+          "signal": "req_wdata",
+          "text": "req_wdata <= wb_dat_i;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 145,
+          "signal": "req_wmask",
+          "text": "req_wmask <= wb_sel_i;"
+        }
+      ],
+      "context": null,
+      "mechanism": null,
+      "paths": [
+        "path_23_host_ack_collision"
+      ],
+      "occurrences": 1,
+      "repro": {
+        "path": "path_23_host_ack_collision",
+        "command": "python3 Validation/tools/run_path.py --path path_23_host_ack_collision",
+        "sequence": "Validation/sequences/generated/path_23_host_ack_collision_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_23_host_ack_collision",
+        "log": "Validation/reports/paths/path_23_host_ack_collision_sim.log",
+        "trace": "Validation/reports/paths/path_23_host_ack_collision_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "xmsim: *E,ASRTST (./wb_port_order_sva.sv,23): (time 35372500 PS) Assertion chain_harness.u_wb_port.u_wb_port_order_sva.a_HOST_001 has failed"
+        }
+      },
+      "drop": {
+        "git_head": "99f72da45a32",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv"
+      },
+      "introduced_in": "99f72da45a32",
+      "first_seen": "99f72da45a32",
+      "last_seen": "99f72da45a32",
+      "resolved_in": null,
+      "status": "untested",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_host_port_findings.json"
+      ],
+      "note": "open in drop 99f72da45a32; drop 5994bb667dba is partial and did not test it (block absent or every path blocked). Still open."
+    }
+  ],
+  "resolved": [
     {
       "schema": "validation-findings/2",
       "id": "init_fsm/TIMING_014",
       "kind": "rtl_defect",
       "check_id": "TIMING_014",
       "taxonomy_id": "TIMING_014",
-      "detectors": [
-        "assertion:a_TIMING_014"
-      ],
       "owner_module": "init_fsm",
-      "owner_candidates": [
-        "init_fsm"
-      ],
       "severity": "major",
-      "confidence": "confirmed",
       "title": "init_fsm: TIMING_014",
-      "requirement": "A non-MRS command issued before tMOD elapsed after an MRS command.",
-      "spec_ref": "timing_model.tMOD",
-      "expected": "A non-MRS command issued before tMOD elapsed after an MRS command.",
-      "actual": "fired 1x; first: xmsim: *E,ASRTST (./init_fsm_sva.sv,52): (time 700217500 PS) Assertion chain_harness.u_init_fsm.u_init_fsm_sva.a_TIMING_014 has failed",
-      "detector": "assertion:a_TIMING_014",
-      "anchor": [
-        {
-          "file": "Frontend2/OutputFolders/PHASE1RTL/init_fsm.sv",
-          "line": 88,
-          "signal": "init_cmd",
-          "text": "init_cmd  = CMD_NOP;"
-        },
-        {
-          "file": "Frontend2/OutputFolders/PHASE1RTL/init_fsm.sv",
-          "line": 92,
-          "signal": "init_addr",
-          "text": "S_MR2:  begin init_cmd_valid = 1'b1; init_cmd = CMD_MRS;  init_addr = MR2_VAL;   init_bank = 2; end"
-        },
-        {
-          "file": "Frontend2/OutputFolders/PHASE1RTL/init_fsm.sv",
-          "line": 92,
-          "signal": "init_bank",
-          "text": "S_MR2:  begin init_cmd_valid = 1'b1; init_cmd = CMD_MRS;  init_addr = MR2_VAL;   init_bank = 2; end"
-        },
-        {
-          "file": "Frontend2/OutputFolders/PHASE1RTL/init_fsm.sv",
-          "line": 92,
-          "signal": "init_cmd",
-          "text": "S_MR2:  begin init_cmd_valid = 1'b1; init_cmd = CMD_MRS;  init_addr = MR2_VAL;   init_bank = 2; end"
-        }
-      ],
-      "context": null,
-      "mechanism": null,
       "paths": [
         "path_08_init_to_cal",
         "path_09_init_to_refresh",
@@ -823,36 +1104,16 @@
         "path_15_status_cal",
         "path_17_full_boot"
       ],
-      "occurrences": 5,
-      "repro": {
-        "path": "path_08_init_to_cal",
-        "command": "python3 Validation/tools/run_path.py --path path_08_init_to_cal",
-        "sequence": null,
-        "work_dir": "Validation/sequences/generated/runs/path_08_init_to_cal",
-        "log": "Validation/reports/paths/path_08_init_to_cal_sim.log",
-        "trace": "Validation/reports/paths/path_08_init_to_cal_observed.jsonl",
-        "first_failure": {
-          "seq": null,
-          "line": "xmsim: *E,ASRTST (./init_fsm_sva.sv,52): (time 700217500 PS) Assertion chain_harness.u_init_fsm.u_init_fsm_sva.a_TIMING_014 has failed"
-        }
-      },
-      "drop": {
-        "git_head": "99f72da45a32",
-        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-        "rtl": "Frontend2/OutputFolders/PHASE1RTL/init_fsm.sv"
-      },
-      "introduced_in": "efece348d04e",
-      "first_seen": "36d3929e5f09",
+      "status": "resolved",
+      "resolved_in": "5994bb667dba",
       "last_seen": "99f72da45a32",
-      "resolved_in": null,
-      "status": "open",
-      "related_manual_findings": []
+      "first_seen": "36d3929e5f09",
+      "note": "open in drop 99f72da45a32, not raised by drop 5994bb667dba"
     }
   ],
-  "resolved": [],
   "drop_status": {
     "$schema": "validation-drop-status/1",
-    "drop": "99f72da45a32",
+    "drop": "5994bb667dba",
     "partial": false,
     "blocks_present": [
       "addr_decoder",
@@ -872,27 +1133,62 @@
     "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
     "foreign_spec_blocks": {},
     "paths_run": [
-      "path_01_write_cmd",
-      "path_02_read_cmd",
-      "path_03_read_return",
-      "path_04_scheduler_bank_loop",
-      "path_05_scheduler_refresh_loop",
-      "path_07_backpressure",
       "path_08_init_to_cal",
       "path_09_init_to_refresh",
-      "path_12_csr_timing_to_scheduling",
-      "path_13_csr_refresh_to_scheduling",
       "path_14_status_init",
       "path_15_status_cal",
       "path_16_status_refresh",
       "path_17_full_boot",
-      "path_18_full_write",
-      "path_19_row_conflict",
-      "path_20_refresh_preempt",
       "path_21_wb_port_standalone",
       "path_22_csr_standalone"
     ],
-    "paths_blocked": {},
-    "note": "Complete run: every runnable path simulated on this drop."
+    "paths_blocked": {
+      "path_04_scheduler_bank_loop": [
+        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_07_backpressure": [
+        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_12_csr_timing_to_scheduling": [
+        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_10_csr_to_timing": [
+        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_23_host_ack_collision": [
+        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_02_read_cmd": [
+        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_20_refresh_preempt": [
+        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_05_scheduler_refresh_loop": [
+        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_03_read_return": [
+        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_13_csr_refresh_to_scheduling": [
+        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_11_csr_to_refresh": [
+        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_19_row_conflict": [
+        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_01_write_cmd": [
+        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_06_scheduler_dequeue": [
+        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_18_full_write": [
+        "compile error in scheduler.sv: no verdict on this drop; findings carried untested"
+      ]
+    },
+    "note": "Paths listed as blocked with a run error did not simulate on this drop (infrastructure, not design); nothing is known about them from this run."
   }
 }

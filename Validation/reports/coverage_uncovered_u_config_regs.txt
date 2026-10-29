@@ -1,0 +1,349 @@
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<> User: jacobz
+
+Host: n01-zeus.olympus.ece.tamu.edu
+
+Report date: Thu 29 Oct 2026 11:52:25 CDT
+
+Report options: -detail -metrics block:expression:toggle:fsm -out /home/ugrads/j/jacobz/cov_uncov_u_config_regs.txt -inst chain_harness.u_config_regs -uncovered -source on -overwrite
+
+Coverage database path: /home/ugrads/j/jacobz/cov_merged_paths
+
+Coverage model files: /home/ugrads/j/jacobz/cov_merged_paths/icc_0760043a_097ec634.ucm
+
+Coverage data files: /home/ugrads/j/jacobz/cov_merged_paths/icc_0760043a_097ec634.ucd
+
+CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_conf.ccf
+    // Xcelium coverage configuration for the DDR3 validation subsystem.
+    //
+    // Fed to xrun via:  -coverage A -covoverwrite -covfile <this file>
+    
+    // --- What to collect -------------------------------------------------------
+    select_coverage -all
+    select_functional                       // covergroups: the vplan's 42 items
+    
+    // --- What NOT to count -----------------------------------------------------
+    // Testbench code is not the design. With everything selected, the harness,
+    // the generated driver, the passive monitors and the DRAM stub all land in
+    // the headline number and dilute it (22.4% reported vs ~25% design-only on
+    // the first merged sweep). Code coverage of a monitor says nothing about the
+    // controller. Covergroup modules (*_coverage) are deliberately NOT excluded:
+    // they carry the vplan's functional coverage.
+    deselect_coverage -all -module chain_harness
+    deselect_coverage -all -module *_txn_harness
+    deselect_coverage -all -module seq_driver
+    deselect_coverage -all -module dram_stub
+    deselect_coverage -all -module *_monitor
+    deselect_coverage -all -module *_tb
+    // Covergroup carriers: drop their CODE coverage only. '-all' would also
+    // drop functional coverage and silence the very covergroups they exist
+    // to hold (which is exactly what happened on the first try: 0% on every
+    // new coverpoint while the design merged fine).
+    deselect_coverage -block -expr -toggle -fsm -module *_fcov
+    
+    // --- Covergroups -----------------------------------------------------------
+    set_covergroup -new_instance_reporting  // per-instance scoping and naming
+    set_optimize -prune_covergroup
+    
+    // --- Block / statement / branch --------------------------------------------
+    // The course disables implicit and explicit block scoring and relies on
+    // statement + branch instead; keeping that identical for comparability.
+    set_implicit_block_scoring -off
+    set_explicit_block_scoring -off
+    set_statement_scoring
+    set_branch_scoring
+    set_code_fine_grained_merging
+    
+    // --- Expression ------------------------------------------------------------
+    set_expr_scoring -max_expr_terms 2048
+    set_expr_coverable_operators -bitwise -relational -reduction -logical_not
+    set_expr_coverable_statements -all
+    set_optimize -top_expr_non_scorable
+    
+    // --- Toggle ----------------------------------------------------------------
+    set_toggle_includez
+    set_toggle_scoring -sv_enum
+    set_toggle_scoring -sv_mda 16 -regeot
+    
+    // --- FSM -------------------------------------------------------------------
+    // Matters for this design: init_fsm and calibration are the autonomous blocks
+    // behind the five deferred paths, and the spec's INIT_001/INIT_002 failure
+    // categories are ordering properties over their states.
+    set_fsm_scoring -hold_transition on
+    
+    // --- Misc ------------------------------------------------------------------
+    set_parameterized_module_coverage
+    set_libcell_scoring -enable_vy
+    set_subprogram_scoring -all -svpackage
+    set_refinement_resilience
+    
+
+
+Coverage database date: Thu 29 Oct 2026 11:47:00 CDT
+
+*** There were no refinement files applied ***
+
+ <>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Coverage Table Legend
+---------------------
+  EXCL       excluded using refinement rule
+  P-EXCL     excluded from parent
+  U-EXCL     excluded and unreachable by IEV
+  T-EXCL     excluded from type
+  S-EXCL     smart excluded using refinement rule
+  EXCL(S)    smart indirect excluded
+  EMPTY      all children are excluded
+  CONST      marked constant during simulation
+  IGN        marked ignored during simulation
+  UNG        marked ungradeable during simulation
+  DES        marked deselected during simulation
+  UNR        marked unreachable by IEV
+  UNG-Expr   expression marked ungradeable during simulation
+  UNG-Toggle toggle marked ungradeable during simulation
+
+
+Uncovered Block Detail Report, Instance Based
+=============================================
+
+Instance name: chain_harness.u_config_regs
+Type name: config_regs#(32'h00000008,32'h00000020,8'h00,8'h04,8'h08,8'h0c,8'h10,8'h14,8'h18,8'h1c,8'h20,8'h24,8'h28)
+File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/config_regs.sv
+Number of uncovered blocks: 2 of 77
+Number of unreachable blocks: 0
+Number of uncovered branches: 2 of 61
+Number of unreachable branches: 0
+Number of uncovered statements: 2 of 79
+Number of unreachable statements: 0
+
+Count  Block #Stmt Line  Kind                 Origin Source Code                    
+------------------------------------------------------------------------------------
+0      47    1     156   true part of    *    156    else if (sts_ecc_ue_event) ecc_ue_flag_r <= 1'b1; 
+0      59    1     166   true part of    *    166    else if (sts_init_fail_event) init_fail_flag_r <= 1'b1; 
+
+(*) indicates a branch
+
+Uncovered Expression Detail Report, Instance Based
+==================================================
+
+Expression coverage Table Legend
+---------------------
+  -      don't care
+  e      event for event-or expressions
+  O (odd), E (even), B (both), X (not scored),
+         I (marked ignore) for parity trees
+  Y (covered), N (not covered), C (constant), 
+  P (one or more inputs for this bit have been padded) for vector scoring, 
+  d=== , b=== shows which bit differs in vector scoring 
+  rval   Resulting value of the expression for coverage purposes given
+         the input values
+  <-n->  Shows the n-th term composition
+
+
+Instance name: chain_harness.u_config_regs
+Type name: config_regs#(32'h00000008,32'h00000020,8'h00,8'h04,8'h08,8'h0c,8'h10,8'h14,8'h18,8'h1c,8'h20,8'h24,8'h28)
+File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/config_regs.sv
+Number of uncovered expressions: 5 of 170
+Number of unreachable expressions: 0
+
+index  | grade         | line   | expression                                         
+-------------------------------------------------------------------------------------
+19.1   | 66.67% (2/3)  | 120    | (csr_dat_i & 32'h000001ff) | (reg_refresh_config & 32'hfffffe00) 
+22.1   | 66.67% (2/3)  | 126    | (csr_dat_i & 32'h0000000f) | (reg_bist_config & 32'hfffffff0) 
+25.1   | 66.67% (2/3)  | 132    | (csr_dat_i & 32'h1fffffff) | (reg_bist_addr_start & 32'he0000000) 
+28.1   | 66.67% (2/3)  | 138    | (csr_dat_i & 32'h1fffffff) | (reg_bist_addr_end & 32'he0000000) 
+31.1   | 66.67% (2/3)  | 144    | (csr_dat_i & 32'h000000ff) | (reg_ctrl_config & 32'hffffff00) 
+
+index: 19.1 grade: 66.67% (2/3) line: 120 source: reg_refresh_config <= (csr_dat_i & 32'h000001FF) | (reg_refresh_config & 32'hFFFFFE00);  // reserved bits pinned
+
+(csr_dat_i & 32'h000001ff) | (reg_refresh_config & 32'hfffffe00)
+ <---1--->                    <-------3-------->
+
+index     | hit   | rval | <1> <3> 
+-----------------------------------
+19.1.3    | 0     | 0    | 0   0   
+
+index: 22.1 grade: 66.67% (2/3) line: 126 source: reg_bist_config <= (csr_dat_i & 32'h0000000F) | (reg_bist_config & 32'hFFFFFFF0);  // reserved bits pinned
+
+(csr_dat_i & 32'h0000000f) | (reg_bist_config & 32'hfffffff0)
+ <---1--->                    <------3------>
+
+index     | hit   | rval | <1> <3> 
+-----------------------------------
+22.1.3    | 0     | 0    | 0   0   
+
+index: 25.1 grade: 66.67% (2/3) line: 132 source: reg_bist_addr_start <= (csr_dat_i & 32'h1FFFFFFF) | (reg_bist_addr_start & 32'hE0000000);  // reserved bits pinned
+
+(csr_dat_i & 32'h1fffffff) | (reg_bist_addr_start & 32'he0000000)
+ <---1--->                    <--------3-------->
+
+index     | hit   | rval | <1> <3> 
+-----------------------------------
+25.1.3    | 0     | 0    | 0   0   
+
+index: 28.1 grade: 66.67% (2/3) line: 138 source: reg_bist_addr_end <= (csr_dat_i & 32'h1FFFFFFF) | (reg_bist_addr_end & 32'hE0000000);  // reserved bits pinned
+
+(csr_dat_i & 32'h1fffffff) | (reg_bist_addr_end & 32'he0000000)
+ <---1--->                    <-------3------->
+
+index     | hit   | rval | <1> <3> 
+-----------------------------------
+28.1.3    | 0     | 0    | 0   0   
+
+index: 31.1 grade: 66.67% (2/3) line: 144 source: reg_ctrl_config <= (csr_dat_i & 32'h000000FF) | (reg_ctrl_config & 32'hFFFFFF00);  // reserved bits pinned
+
+(csr_dat_i & 32'h000000ff) | (reg_ctrl_config & 32'hffffff00)
+ <---1--->                    <------3------>
+
+index     | hit   | rval | <1> <3> 
+-----------------------------------
+31.1.3    | 0     | 0    | 0   0   
+
+
+Uncovered Toggle Detail Report, Instance Based
+==============================================
+
+Instance name: chain_harness.u_config_regs
+Type name: config_regs#(32'h00000008,32'h00000020,8'h00,8'h04,8'h08,8'h0c,8'h10,8'h14,8'h18,8'h1c,8'h20,8'h24,8'h28)
+File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/config_regs.sv
+Number of uncovered signal bits: 129 of 661
+Number of unreachable signal bits: 0
+Number of signal bits partially toggled(rise): 8 of 661
+Number of signal bits partially toggled(fall): 1 of 661
+
+Hit(Full)  Hit(Rise)  Hit(Fall)  Signal                    
+-----------------------------------------------------------
+0          1          0          rst_n                     
+0          1          0          csr_adr_i[7]              
+0          1          0          csr_adr_i[6]              
+0          1          0          csr_adr_i[5]              
+0          0          0          csr_adr_i[1]              
+0          0          0          csr_adr_i[0]              
+0          1          0          sts_init_done             
+0          1          0          sts_cal_done              
+0          0          0          sts_cal_fail              
+0          0          0          sts_bist_done             
+0          0          0          sts_bist_fail             
+0          1          0          sts_ref_pending_cnt[3]    
+0          0          0          sts_self_refresh_active   
+0          0          0          sts_ecc_ce_count[15]      
+0          0          0          sts_ecc_ce_count[14]      
+0          0          0          sts_ecc_ce_count[13]      
+0          0          0          sts_ecc_ce_count[12]      
+0          0          0          sts_ecc_ce_count[11]      
+0          0          0          sts_ecc_ce_count[10]      
+0          0          0          sts_ecc_ce_count[9]       
+0          0          0          sts_ecc_ce_count[8]       
+0          0          0          sts_ecc_ce_count[7]       
+0          0          0          sts_ecc_ce_count[6]       
+0          0          0          sts_ecc_ce_count[5]       
+0          0          0          sts_ecc_ce_count[4]       
+0          0          0          sts_ecc_ce_count[3]       
+0          0          0          sts_ecc_ce_count[2]       
+0          0          0          sts_ecc_ce_count[1]       
+0          0          0          sts_ecc_ce_count[0]       
+0          0          0          sts_ecc_ue_event          
+0          0          0          sts_init_fail_event       
+0          0          0          sts_bist_fail_addr[12]    
+0          0          0          sts_bist_fail_addr[11]    
+0          0          0          sts_bist_fail_addr[10]    
+0          0          0          sts_bist_fail_addr[9]     
+0          0          0          sts_bist_fail_addr[8]     
+0          0          0          sts_bist_fail_addr[7]     
+0          0          0          sts_bist_fail_addr[6]     
+0          0          0          sts_bist_fail_addr[5]     
+0          0          0          sts_bist_fail_addr[4]     
+0          0          0          sts_bist_fail_addr[3]     
+0          0          0          sts_bist_fail_addr[2]     
+0          0          0          sts_bist_fail_addr[1]     
+0          0          0          sts_bist_fail_addr[0]     
+0          0          1          addr_valid                
+0          0          0          reg_refresh_config[31]    
+0          0          0          reg_refresh_config[30]    
+0          0          0          reg_refresh_config[29]    
+0          0          0          reg_refresh_config[28]    
+0          0          0          reg_refresh_config[27]    
+0          0          0          reg_refresh_config[26]    
+0          0          0          reg_refresh_config[25]    
+0          0          0          reg_refresh_config[24]    
+0          0          0          reg_refresh_config[23]    
+0          0          0          reg_refresh_config[22]    
+0          0          0          reg_refresh_config[21]    
+0          0          0          reg_refresh_config[20]    
+0          0          0          reg_refresh_config[19]    
+0          0          0          reg_refresh_config[18]    
+0          0          0          reg_refresh_config[17]    
+0          0          0          reg_refresh_config[16]    
+0          0          0          reg_refresh_config[15]    
+0          0          0          reg_refresh_config[14]    
+0          0          0          reg_refresh_config[13]    
+0          0          0          reg_refresh_config[12]    
+0          0          0          reg_refresh_config[11]    
+0          0          0          reg_refresh_config[10]    
+0          0          0          reg_refresh_config[9]     
+0          0          0          reg_bist_config[31]       
+0          0          0          reg_bist_config[30]       
+0          0          0          reg_bist_config[29]       
+0          0          0          reg_bist_config[28]       
+0          0          0          reg_bist_config[27]       
+0          0          0          reg_bist_config[26]       
+0          0          0          reg_bist_config[25]       
+0          0          0          reg_bist_config[24]       
+0          0          0          reg_bist_config[23]       
+0          0          0          reg_bist_config[22]       
+0          0          0          reg_bist_config[21]       
+0          0          0          reg_bist_config[20]       
+0          0          0          reg_bist_config[19]       
+0          0          0          reg_bist_config[18]       
+0          0          0          reg_bist_config[17]       
+0          0          0          reg_bist_config[16]       
+0          0          0          reg_bist_config[15]       
+0          0          0          reg_bist_config[14]       
+0          0          0          reg_bist_config[13]       
+0          0          0          reg_bist_config[12]       
+0          0          0          reg_bist_config[11]       
+0          0          0          reg_bist_config[10]       
+0          0          0          reg_bist_config[9]        
+0          0          0          reg_bist_config[8]        
+0          0          0          reg_bist_config[7]        
+0          0          0          reg_bist_config[6]        
+0          0          0          reg_bist_config[5]        
+0          0          0          reg_bist_config[4]        
+0          0          0          reg_bist_addr_start[31]   
+0          0          0          reg_bist_addr_start[30]   
+0          0          0          reg_bist_addr_start[29]   
+0          0          0          reg_bist_addr_end[31]     
+0          0          0          reg_bist_addr_end[30]     
+0          0          0          reg_bist_addr_end[29]     
+0          0          0          reg_ctrl_config[31]       
+0          0          0          reg_ctrl_config[30]       
+0          0          0          reg_ctrl_config[29]       
+0          0          0          reg_ctrl_config[28]       
+0          0          0          reg_ctrl_config[27]       
+0          0          0          reg_ctrl_config[26]       
+0          0          0          reg_ctrl_config[25]       
+0          0          0          reg_ctrl_config[24]       
+0          0          0          reg_ctrl_config[23]       
+0          0          0          reg_ctrl_config[22]       
+0          0          0          reg_ctrl_config[21]       
+0          0          0          reg_ctrl_config[20]       
+0          0          0          reg_ctrl_config[19]       
+0          0          0          reg_ctrl_config[18]       
+0          0          0          reg_ctrl_config[17]       
+0          0          0          reg_ctrl_config[16]       
+0          0          0          reg_ctrl_config[15]       
+0          0          0          reg_ctrl_config[14]       
+0          0          0          reg_ctrl_config[13]       
+0          0          0          reg_ctrl_config[12]       
+0          0          0          reg_ctrl_config[11]       
+0          0          0          reg_ctrl_config[10]       
+0          0          0          reg_ctrl_config[9]        
+0          0          0          reg_ctrl_config[8]        
+0          0          0          ecc_ue_flag_r             
+0          1          0          ref_starve_flag_r         
+0          0          0          init_fail_flag_r          
+
+Uncovered Fsm Detail Report, Instance Based
+===========================================
+

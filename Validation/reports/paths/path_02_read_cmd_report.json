@@ -3,7 +3,7 @@
   "path": "path_02_read_cmd",
   "strategy": "composed",
   "verdict": "fail",
-  "timestamp": "2026-10-28T14:19:59.708251",
+  "timestamp": "2026-10-29T12:17:14.826742",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -15,15 +15,15 @@
     "scheduler",
     "wb_port"
   ],
-  "sequence": "Validation/sequences/generated/path_02_read_cmd_seed1.json",
+  "sequence": null,
   "stimulus_generator": "wb_burst",
   "autonomous": false,
   "window_cycles": 600,
-  "coverage_collected": true,
+  "coverage_collected": false,
   "rtl_drop": {
-    "git_head": "99f72da45a32",
-    "drop_id": "99f72da45a32",
-    "design_id": "a2b204453edc",
+    "git_head": "5994bb667dba",
+    "drop_id": "5994bb667dba",
+    "design_id": "2ed70e31cb84",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -35,17 +35,17 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "17274ce",
+    "validated_at": "1aefeb0",
     "frontend_commits": {
       "addr_decoder": "f37ce49d323151a6118ae7765aa766918c816383",
       "bank_tracker": "f37ce49d323151a6118ae7765aa766918c816383",
       "cmd_gen": "f37ce49d323151a6118ae7765aa766918c816383",
       "cmd_queue": "f37ce49d323151a6118ae7765aa766918c816383",
       "config_regs": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc",
-      "data_path": "f37ce49d323151a6118ae7765aa766918c816383",
+      "data_path": "90c01f641e38c739b30366c69df7046ae9f21972",
       "refresh_ctrl": "f37ce49d323151a6118ae7765aa766918c816383",
-      "scheduler": "1bc0ce7e4655061d5017f4bab90690a52a9a563f",
-      "wb_port": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc"
+      "scheduler": "5e784e2af679c5f1dec45750a8ce70f2714b6cdd",
+      "wb_port": "65dbb0ff530a6fe7c387b0c8f87a9330c3340b8a"
     },
     "roots": [
       "Frontend2/OutputFolders"
@@ -100,84 +100,23 @@
     "shipped_spec": {
       "path": "Frontend2/OutputFolders/generated_spec.json",
       "revision": "golden_ddr3_1600k_x8_2lane_1rank"
-    },
-    "netlists": {}
+    }
   },
-  "stages": [
+  "stages": [],
+  "compile_errors": [
     {
-      "stage": "wb_port",
-      "kind": "exact",
-      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
-      "scope": "wb_port",
-      "verdict": "pass",
-      "summary": "scope=wb_port  strategy=exact  status=pass  matched=108/108  (108 output transaction(s) matched)",
-      "detail": [],
-      "rule_counts": {}
+      "block": "scheduler",
+      "file": "scheduler.sv",
+      "line": 178,
+      "message": "'sel_bank_eff_r': undeclared identifier [12.5(IEEE)]."
     },
     {
-      "stage": "addr_decoder",
-      "kind": "exact",
-      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
-      "scope": "addr_decoder",
-      "verdict": "pass",
-      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=77/77  (77 output transaction(s) matched)",
-      "detail": [],
-      "rule_counts": {}
-    },
-    {
-      "stage": "cmd_queue+scheduler",
-      "kind": "invariant",
-      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
-      "scope": "cmd_queue_scheduler",
-      "verdict": "pass",
-      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (1235 transactions, no rule broken)",
-      "detail": [],
-      "rule_counts": {}
-    },
-    {
-      "stage": "cmd_gen",
-      "kind": "exact",
-      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
-      "scope": "cmd_gen",
-      "verdict": "pass",
-      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=160/160  (160 output transaction(s) matched)",
-      "detail": [],
-      "rule_counts": {}
-    },
-    {
-      "stage": "(conservation)",
-      "kind": "conservation",
-      "scope": "(conservation)",
-      "model": null,
-      "verdict": "fail",
-      "summary": "scope=(conservation)  strategy=conservation  status=fail  rules=6 checked, 3 broken, 0 not applicable",
-      "detail": [
-        "CONSERVE READ_CMD_TO_RESPONSE owner=data_path lost=15 of=46 from=dp_cmd.read to=dp_rd_rsp observed=31 | Every RD command the data path is told about (cmd_rd_valid) yields exactly one read response (rd_rsp_valid), whatever the spacing between RD commands: the spec allows CAS-to-CAS at tCCD, so the capture must pipeline or the command generator must be held, not the command dropped.",
-        "CONSERVE WRITE_REQUEST_TO_DATA owner=data_path lost=8 of=31 from=req[we=1] to=dp_wr observed=23 | Every write request the queue takes has its data word accepted by the data path (wr_data_valid && wr_data_ready): the write buffer holds host_interface.write_buffer_depth words and must drain one per WR command issued, so it never refuses a word the queue has already accepted.",
-        "CONSERVE WRITE_CMD_TO_BEATS owner=data_path lost=44 of=62 from=dp_cmd.write to=ddr_wr_beat observed=18 per_source=2 | Every WR command drives one full host word onto DQ (host_width_bits / ddr_channel_width_bits beats), whatever the spacing between WR commands (tCCD). A WR command issued to the DRAM without its data writes garbage to the array."
-      ]
-    },
-    {
-      "stage": "(host handshake)",
-      "kind": "handshake",
-      "scope": "(host handshake)",
-      "model": null,
-      "verdict": "fail",
-      "summary": "10 driver completion timeout(s): the slave never acknowledged every beat it accepted",
-      "detail": [
-        "DRIVER_STALL: wb \u2014 1 of 5 pipelined beat(s) never acknowledged (wb_ack_o)",
-        "DRIVER_STALL: wb \u2014 1 of 13 pipelined beat(s) never acknowledged (wb_ack_o)",
-        "DRIVER_STALL: wb \u2014 1 of 18 pipelined beat(s) never acknowledged (wb_ack_o)",
-        "DRIVER_STALL: wb \u2014 4 of 23 pipelined beat(s) never acknowledged (wb_ack_o)",
-        "DRIVER_STALL: wb \u2014 6 of 26 pipelined beat(s) never acknowledged (wb_ack_o)",
-        "DRIVER_STALL: wb \u2014 9 of 30 pipelined beat(s) never acknowledged (wb_ack_o)",
-        "DRIVER_STALL: wb \u2014 9 of 37 pipelined beat(s) never acknowledged (wb_ack_o)",
-        "DRIVER_STALL: wb \u2014 9 of 45 pipelined beat(s) never acknowledged (wb_ack_o)",
-        "DRIVER_STALL: wb \u2014 15 of 53 pipelined beat(s) never acknowledged (wb_ack_o)",
-        "DRIVER_STALL: wb \u2014 15 of 77 pipelined beat(s) never acknowledged (wb_ack_o)"
-      ]
+      "block": "scheduler",
+      "file": "scheduler.sv",
+      "line": 179,
+      "message": "'sel_bank_eff_r': undeclared identifier [12.5(IEEE)]."
     }
   ],
   "log": "Validation/reports/paths/path_02_read_cmd_sim.log",
-  "observed_trace": "Validation/reports/paths/path_02_read_cmd_observed.jsonl"
+  "observed_trace": null
 }
