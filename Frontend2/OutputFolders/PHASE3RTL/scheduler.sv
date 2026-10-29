@@ -130,16 +130,23 @@ module scheduler #(
     // not re-derived from the registered index) removes that structure
     // from the loop; see sel_onehot below.
     logic [DEPTH-1:0]        sel_onehot_r;      // one bit per entry, set iff that entry is the pending CAS pick
-    // sel_bank_eff_r (the pending decision's bank) is declared further
-    // down as a wire, re-muxed from q_bank[sel_idx_r] each cycle -- this
-    // module used to also register it directly (2026-10-27, same fix as
-    // sel_onehot_r above), which left the feedback loop but moved the
-    // 16-way BANK_BITS mux out of it and into series with the whole
-    // priority-selection chain instead, costing the chip's worst path
-    // >=0.10ns (Backend, 2026-10-29: "fix (a) [the one-hot above] worked
-    // completely... fix (b) [this] cost more than it bought"). Reverted
-    // to measure "(a) without (b)" against the residual loop through this
-    // mux, at Backend's request -- not yet known which is cheaper.
+    // sel_bank_eff_r (the pending decision's bank): a wire, re-muxed from
+    // q_bank[sel_idx_r] each cycle -- declared here, not where it's first
+    // meaningful to read (after the pipeline register block below), since
+    // Xcelium rejects a net read before its own declaration even though
+    // every signal on its right-hand side (sel_from_queue_r, sel_bank_r,
+    // sel_idx_r -- all declared above) is already in scope; Yosys silently
+    // accepted the forward reference, which is how 5ec2dc7 passed --no-lint
+    // and still didn't compile (Validation, 2026-10-29). This module used
+    // to also register it directly (2026-10-27, same fix as sel_onehot_r
+    // above), which left the feedback loop but moved the 16-way BANK_BITS
+    // mux out of it and into series with the whole priority-selection
+    // chain instead, costing the chip's worst path >=0.10ns (Backend,
+    // 2026-10-29: "fix (a) [the one-hot above] worked completely... fix
+    // (b) [this] cost more than it bought"). Reverted to measure "(a)
+    // without (b)" against the residual loop through this mux, at
+    // Backend's request -- not yet known which is cheaper.
+    wire [BANK_BITS-1:0] sel_bank_eff_r = sel_from_queue_r ? q_bank[sel_idx_r] : sel_bank_r;
 
     logic [NUM_BANKS-1:0] inflight_any;    // any command to this bank in flight
     logic [NUM_BANKS-1:0] inflight_state;  // an ACT or PRE to this bank in flight
@@ -365,11 +372,6 @@ module scheduler #(
             sel_bank_r       <= sel_bank;
         end
     end
-
-    // Reverted to a re-mux (not registered -- see the comment by
-    // sel_onehot_r's declaration above): the pending decision's bank,
-    // read from the queue by the now-registered sel_idx_r each cycle.
-    wire [BANK_BITS-1:0] sel_bank_eff_r = sel_from_queue_r ? q_bank[sel_idx_r] : sel_bank_r;
 
     // ════════════════════════════════════════════════════
     // Output registration (reads the registered sel_*_r, not sel_*)
