@@ -10,7 +10,7 @@
 //   byte-lane masking, error signalling, auxiliary tag propagation.
 //
 // Derived: DATA=32 ADDR=29 SEL=4 AUX=4 BURST=8 QUEUE=16
-// Validation: WB-001 .. WB-009
+// Validation: WB-001 .. WB-010
 ////////////////////////////////////////////////////////////////////////////////
 
 module wb_port #(
@@ -91,9 +91,22 @@ module wb_port #(
         else if (rsp_valid) tag_rd <= tag_rd + 1'b1;
 
     // Stall generation (WB-005)
+    //
+    // Stalls on req_valid && !req_ready, not on !req_ready alone: a
+    // beat accepted into the (now-held) req_* skid register below is
+    // safe to accept even if the queue isn't ready yet this same
+    // cycle, because the skid holds it unchanged until it is. Gating
+    // on !req_ready alone (the old condition) ignored whether the
+    // skid was already occupied: a beat accepted while req_ready was
+    // momentarily high got registered into req_*, and if the queue
+    // filled before that registered req_valid was ever re-checked,
+    // the next beat's data silently overwrote it on the following
+    // cycle -- a write the host already got acked for, or a read
+    // that never comes back (Validation addendum 9, 2026-10-28,
+    // finding 1).
     always_comb begin
         wb_stall_o = 1'b0;
-        if (!req_ready)                        wb_stall_o = 1'b1;
+        if (req_valid && !req_ready)           wb_stall_o = 1'b1;
         if (!wb_we_i && tag_full && wb_stb_i)  wb_stall_o = 1'b1;
     end
 
@@ -131,21 +144,46 @@ module wb_port #(
     end
 
     // Request output (WB-001, WB-002)
+    //
+    // One-entry skid register, not a bare one-cycle pulse: req_valid
+    // now holds and req_* stays unchanged across cycles where
+    // req_ready is low, instead of unconditionally clearing/
+    // overwriting one cycle after wb_beat regardless of whether the
+    // queue actually took it (Validation addendum 9, 2026-10-28,
+    // finding 1 -- the drop this fixes). wb_stall_o above keeps a new
+    // wb_beat from landing while the skid is occupied and not about
+    // to clear, so this can never have two different requests'
+    // data racing for the same slot: a new beat is only ever
+    // latched when the skid is empty, or in the same cycle the
+    // entry it holds is actually consumed (req_valid && req_ready),
+    // which pipelines straight through with no bubble.
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             req_valid <= 1'b0; req_we <= 1'b0; req_addr <= '0;
             req_wdata <= '0; req_wmask <= '0; req_aux <= '0;
-        end else begin
-            req_valid <= 1'b0;
+        end else if (req_valid && req_ready) begin
+            // Consumed this cycle: load the next beat straight
+            // through if one is arriving, else go empty.
             if (wb_beat) begin
-                req_valid <= 1'b1;
                 req_we    <= wb_we_i;
                 req_addr  <= wb_adr_i;
                 req_wdata <= wb_dat_i;
                 req_wmask <= wb_sel_i;
                 req_aux   <= aux_ctr;
+            end else begin
+                req_valid <= 1'b0;
             end
+        end else if (!req_valid && wb_beat) begin
+            // Skid was empty; latch the new beat.
+            req_valid <= 1'b1;
+            req_we    <= wb_we_i;
+            req_addr  <= wb_adr_i;
+            req_wdata <= wb_dat_i;
+            req_wmask <= wb_sel_i;
+            req_aux   <= aux_ctr;
         end
+        // else: req_valid && !req_ready -- hold everything; wb_stall_o
+        // guarantees no wb_beat landed this cycle to race it.
     end
 
     // Write acknowledge (WB-002, WB-008)
@@ -210,6 +248,18 @@ module wb_port #(
     endproperty
     assert property (p_sel_nonzero_write)
         else $warning("[WB-006] write with zero sel");
+
+    // WB-010: an accepted request held by backpressure never changes
+    // or disappears before the queue takes it (VP_FLOW_001 -- no
+    // accepted request may be lost while back-pressure is asserted)
+    property p_req_held_stable;
+        @(posedge clk) disable iff (!rst_n)
+        (req_valid && !req_ready) |=> (req_valid && $stable(req_we) &&
+            $stable(req_addr) && $stable(req_wdata) &&
+            $stable(req_wmask) && $stable(req_aux));
+    endproperty
+    assert property (p_req_held_stable)
+        else $error("[WB-010] accepted request changed or dropped while queue wasn't ready");
 
     covergroup cg_wb @(posedge clk);
         option.per_instance = 1;

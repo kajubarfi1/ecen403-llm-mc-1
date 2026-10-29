@@ -24,7 +24,7 @@
 |    G: Tag FIFO stress          H: Reset mid-transaction              |
 |    I: Edge cases                                                     |
 |                                                                      |
-|  Validation checks: WB-001 through WB-009                            |
+|  Validation checks: WB-001 through WB-010                            |
 +======================================================================+
 """
 
@@ -145,7 +145,7 @@ class WishbonePortGenerator:
         L(f"//")
         L(f"// Derived: DATA={p['DATA_WIDTH']} ADDR={p['ADDR_WIDTH']} SEL={p['SEL_WIDTH']}"
           f" AUX={p['AUX_WIDTH']} BURST={p['MAX_BURST_LEN']} QUEUE={p['QUEUE_DEPTH']}")
-        L(f"// Validation: WB-001 .. WB-009")
+        L(f"// Validation: WB-001 .. WB-010")
         L(f"////////////////////////////////////////////////////////////////////////////////")
         L(f"")
         L(f"module wb_port #(")
@@ -232,9 +232,22 @@ class WishbonePortGenerator:
 
         # Stall
         L(f"    // Stall generation (WB-005)")
+        L(f"    //")
+        L(f"    // Stalls on req_valid && !req_ready, not on !req_ready alone: a")
+        L(f"    // beat accepted into the (now-held) req_* skid register below is")
+        L(f"    // safe to accept even if the queue isn't ready yet this same")
+        L(f"    // cycle, because the skid holds it unchanged until it is. Gating")
+        L(f"    // on !req_ready alone (the old condition) ignored whether the")
+        L(f"    // skid was already occupied: a beat accepted while req_ready was")
+        L(f"    // momentarily high got registered into req_*, and if the queue")
+        L(f"    // filled before that registered req_valid was ever re-checked,")
+        L(f"    // the next beat's data silently overwrote it on the following")
+        L(f"    // cycle -- a write the host already got acked for, or a read")
+        L(f"    // that never comes back (Validation addendum 9, 2026-10-28,")
+        L(f"    // finding 1).")
         L(f"    always_comb begin")
         L(f"        wb_stall_o = 1'b0;")
-        L(f"        if (!req_ready)                        wb_stall_o = 1'b1;")
+        L(f"        if (req_valid && !req_ready)           wb_stall_o = 1'b1;")
         L(f"        if (!wb_we_i && tag_full && wb_stb_i)  wb_stall_o = 1'b1;")
         L(f"    end")
         L(f"")
@@ -276,21 +289,46 @@ class WishbonePortGenerator:
 
         # Request output
         L(f"    // Request output (WB-001, WB-002)")
+        L(f"    //")
+        L(f"    // One-entry skid register, not a bare one-cycle pulse: req_valid")
+        L(f"    // now holds and req_* stays unchanged across cycles where")
+        L(f"    // req_ready is low, instead of unconditionally clearing/")
+        L(f"    // overwriting one cycle after wb_beat regardless of whether the")
+        L(f"    // queue actually took it (Validation addendum 9, 2026-10-28,")
+        L(f"    // finding 1 -- the drop this fixes). wb_stall_o above keeps a new")
+        L(f"    // wb_beat from landing while the skid is occupied and not about")
+        L(f"    // to clear, so this can never have two different requests'")
+        L(f"    // data racing for the same slot: a new beat is only ever")
+        L(f"    // latched when the skid is empty, or in the same cycle the")
+        L(f"    // entry it holds is actually consumed (req_valid && req_ready),")
+        L(f"    // which pipelines straight through with no bubble.")
         L(f"    always_ff @(posedge clk or negedge rst_n) begin")
         L(f"        if (!rst_n) begin")
         L(f"            req_valid <= 1'b0; req_we <= 1'b0; req_addr <= '0;")
         L(f"            req_wdata <= '0; req_wmask <= '0; req_aux <= '0;")
-        L(f"        end else begin")
-        L(f"            req_valid <= 1'b0;")
+        L(f"        end else if (req_valid && req_ready) begin")
+        L(f"            // Consumed this cycle: load the next beat straight")
+        L(f"            // through if one is arriving, else go empty.")
         L(f"            if (wb_beat) begin")
-        L(f"                req_valid <= 1'b1;")
         L(f"                req_we    <= wb_we_i;")
         L(f"                req_addr  <= wb_adr_i;")
         L(f"                req_wdata <= wb_dat_i;")
         L(f"                req_wmask <= wb_sel_i;")
         L(f"                req_aux   <= aux_ctr;")
+        L(f"            end else begin")
+        L(f"                req_valid <= 1'b0;")
         L(f"            end")
+        L(f"        end else if (!req_valid && wb_beat) begin")
+        L(f"            // Skid was empty; latch the new beat.")
+        L(f"            req_valid <= 1'b1;")
+        L(f"            req_we    <= wb_we_i;")
+        L(f"            req_addr  <= wb_adr_i;")
+        L(f"            req_wdata <= wb_dat_i;")
+        L(f"            req_wmask <= wb_sel_i;")
+        L(f"            req_aux   <= aux_ctr;")
         L(f"        end")
+        L(f"        // else: req_valid && !req_ready -- hold everything; wb_stall_o")
+        L(f"        // guarantees no wb_beat landed this cycle to race it.")
         L(f"    end")
         L(f"")
 
@@ -361,6 +399,18 @@ class WishbonePortGenerator:
         L(f"    endproperty")
         L(f"    assert property (p_sel_nonzero_write)")
         L(f"        else $warning(\"[WB-006] write with zero sel\");")
+        L(f"")
+        L(f"    // WB-010: an accepted request held by backpressure never changes")
+        L(f"    // or disappears before the queue takes it (VP_FLOW_001 -- no")
+        L(f"    // accepted request may be lost while back-pressure is asserted)")
+        L(f"    property p_req_held_stable;")
+        L(f"        @(posedge clk) disable iff (!rst_n)")
+        L(f"        (req_valid && !req_ready) |=> (req_valid && $stable(req_we) &&")
+        L(f"            $stable(req_addr) && $stable(req_wdata) &&")
+        L(f"            $stable(req_wmask) && $stable(req_aux));")
+        L(f"    endproperty")
+        L(f"    assert property (p_req_held_stable)")
+        L(f"        else $error(\"[WB-010] accepted request changed or dropped while queue wasn't ready\");")
         L(f"")
         L(f"    covergroup cg_wb @(posedge clk);")
         L(f"        option.per_instance = 1;")
@@ -862,6 +912,7 @@ class WishbonePortGenerator:
                 {"name": "p_burst_len",         "check": "WB-003/004"},
                 {"name": "p_tag_no_overflow",   "check": "WB-005"},
                 {"name": "p_sel_nonzero_write", "check": "WB-006"},
+                {"name": "p_req_held_stable",   "check": "WB-010"},
             ],
             "coverage_points": [
                 "cp_single_rd", "cp_single_wr", "cp_burst_rd", "cp_burst_wr",
