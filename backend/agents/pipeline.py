@@ -370,6 +370,10 @@ def runner_node(state: PipelineState) -> PipelineState:
     orfs_dir    = packager_resolved.get("orfs_dir") or os.environ.get("ORFS_DIR", "").strip()
     platform    = packager_resolved.get("platform", os.environ.get("PLATFORM", "sky130hd"))
     design_name = packager_resolved.get("design_name", "design")
+    # Where ORFS writes results, which is DESIGN_NAME (the module), not the
+    # design directory. Older packager reports have no results_name, so fall
+    # back to the directory name — for every block they are the same string.
+    results_name = packager_resolved.get("results_name") or design_name
 
     runner_out = out_root / "runner" / design_name
     runner_out.mkdir(parents=True, exist_ok=True)
@@ -481,7 +485,7 @@ def runner_node(state: PipelineState) -> PipelineState:
     # an EARLIER run proves nothing: on 2026-09-17 make died at 3_1_place, the GDS
     # merge never ran, and 10 of 11 blocks were signed off against week-old
     # geometry because this check only asked whether the file existed.
-    results_base = orfs_dir_path / "flow" / "results" / platform / design_name / "base"
+    results_base = orfs_dir_path / "flow" / "results" / platform / results_name / "base"
     gds_path = results_base / "6_final.gds"
     gds_override: Optional[Dict[str, Any]] = None
     # Only a mode that runs the whole flow can be rescued by a finished GDS. In
@@ -502,7 +506,7 @@ def runner_node(state: PipelineState) -> PipelineState:
     failed_stage = _detect_failed_stage(combined_log) if exit_code != 0 else None
 
     # Copy artifacts
-    artifacts = _collect_artifacts(orfs_dir_path, platform, design_name, runner_out, run_started)
+    artifacts = _collect_artifacts(orfs_dir_path, platform, results_name, runner_out, run_started)
 
     runner_result = {
         "exit_code":    exit_code,
@@ -514,6 +518,7 @@ def runner_node(state: PipelineState) -> PipelineState:
         "orfs_dir":     str(orfs_dir_path),
         "platform":     platform,
         "design_name":  design_name,
+        "results_name": results_name,
         # Records a non-zero make exit that a this-run GDS overrode, so a run that
         # "passed" this way is never silently indistinguishable from a clean one.
         "gds_exit_override": gds_override,
@@ -523,12 +528,30 @@ def runner_node(state: PipelineState) -> PipelineState:
     msg = f"[runner] exit_code={exit_code}  failed_stage={failed_stage}  artifacts={list(artifacts.keys())}"
     print(msg)
 
+    # A build that ran the flow and produced none of the files the flow produces
+    # did not succeed, whatever make returned. This is how the 2026-10-27 chip
+    # looked: exit 0, every artifact missing, and only the validator two stages
+    # later noticed. An empty artifact list is the runner's own evidence that it
+    # has nothing to hand on, so fail here rather than pass the emptiness along.
+    if pipeline_ok and mode_of(state)["runs_orfs"] and not artifacts:
+        pipeline_ok = False
+        failed_stage = failed_stage or "artifacts"
+        msg = (f"[runner] exit_code=0 but no artifacts were produced — treating as a failed run. "
+               f"Looked under results/reports/logs for '{results_name}' (design dir "
+               f"'{design_name}'); if those names disagree the flow wrote elsewhere.")
+        print(msg)
+        runner_result["exit_code"] = exit_code
+        runner_result["failed_stage"] = failed_stage
+        runner_result["no_artifacts"] = True
+
     return {
         **state,
         "runner_result":   runner_result,
         "current_node":    "runner",
         "pipeline_status": "RUNNING",  # reporter/validator decide final status
-        "error_message":   None if pipeline_ok else f"Runner exit_code={exit_code}, stage={failed_stage}",
+        "error_message":   None if pipeline_ok else
+                           (msg if runner_result.get("no_artifacts")
+                            else f"Runner exit_code={exit_code}, stage={failed_stage}"),
         "messages":        [msg],
     }
 
@@ -579,9 +602,12 @@ def _detect_failed_stage(log: str) -> Optional[str]:
     return "unknown"
 
 
-def _collect_artifacts(orfs_dir: Path, platform: str, design_name: str, out_dir: Path,
+def _collect_artifacts(orfs_dir: Path, platform: str, results_name: str, out_dir: Path,
                        newer_than: Optional[float] = None) -> Dict[str, str]:
     """Copy key ORFS output artifacts to runner_out directory.
+
+    `results_name` is DESIGN_NAME, the module — the name ORFS files its output
+    under — which is not always the design directory's name (see the packager).
 
     `newer_than` restricts the list to files this run actually wrote. Without it
     the ORFS tree hands back whatever is lying there: a synth-tier run on
@@ -591,9 +617,9 @@ def _collect_artifacts(orfs_dir: Path, platform: str, design_name: str, out_dir:
     """
     artifacts: Dict[str, str] = {}
     cutoff = None if newer_than is None else newer_than - GDS_CLOCK_SKEW_S
-    results_base = orfs_dir / "flow" / "results" / platform / design_name / "base"
-    reports_base = orfs_dir / "flow" / "reports" / platform / design_name / "base"
-    logs_base    = orfs_dir / "flow" / "logs"    / platform / design_name / "base"
+    results_base = orfs_dir / "flow" / "results" / platform / results_name / "base"
+    reports_base = orfs_dir / "flow" / "reports" / platform / results_name / "base"
+    logs_base    = orfs_dir / "flow" / "logs"    / platform / results_name / "base"
 
     artifact_map = {
         "gds":        results_base / "6_final.gds",
@@ -1091,6 +1117,8 @@ def validator_node(state: PipelineState) -> PipelineState:
     packager_resolved = packaged_manifest.get("packager", {}).get("resolved", {})
 
     design_name = runner_result.get("design_name") or packager_resolved.get("design_name", "design")
+    results_name = (runner_result.get("results_name")
+                    or packager_resolved.get("results_name") or design_name)
     platform    = runner_result.get("platform")    or packager_resolved.get("platform", "sky130hd")
     orfs_dir    = runner_result.get("orfs_dir")    or packager_resolved.get("orfs_dir", "")
     artifacts   = runner_result.get("artifacts", {})
@@ -1144,7 +1172,7 @@ def validator_node(state: PipelineState) -> PipelineState:
         }
 
     # ── Sign-off: DRC + LVS + pin audit, run once in the ORFS container ────────
-    signoff = _run_signoff(orfs_dir, platform, design_name, validator_out)
+    signoff = _run_signoff(orfs_dir, platform, design_name, validator_out, results_name)
 
     # ── 1. DRC ────────────────────────────────────────────────────────────────
     print("[validator] Running DRC check...")
@@ -1352,7 +1380,8 @@ SIGNOFF_TIMEOUT_S = 3 * 3600
 RUNNER_TIMEOUT_S = int(os.environ.get("ORFS_RUN_TIMEOUT_S") or 4 * 3600)
 
 
-def _run_signoff(orfs_dir: str, platform: str, design_name: str, out_dir: Path) -> Dict[str, Any]:
+def _run_signoff(orfs_dir: str, platform: str, design_name: str, out_dir: Path,
+                 results_name: Optional[str] = None) -> Dict[str, Any]:
     """
     Run DRC + LVS + pin audit once in the ORFS container and return the parsed result.
 
@@ -1392,7 +1421,8 @@ def _run_signoff(orfs_dir: str, platform: str, design_name: str, out_dir: Path) 
         "-w", ctr,
         os.environ.get("ORFS_DOCKER_IMAGE", "openroad/orfs:latest"),
         "python3", "/signoff/signoff_runner.py",
-        "--design", design_name, "--platform", platform, "--out", "/signoff_out",
+        "--design", design_name, "--results-name", results_name or design_name,
+        "--platform", platform, "--out", "/signoff_out",
     ]
     print(f"[validator] Running sign-off (DRC + LVS + pin audit) for {design_name}...")
     try:

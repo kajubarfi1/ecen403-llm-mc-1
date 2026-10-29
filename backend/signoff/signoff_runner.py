@@ -116,7 +116,12 @@ def count_blackboxed(deck: Path, ref: Path) -> int:
 
 def signoff(a, res: dict) -> None:
     d, p, flow, so, out = a.design, a.platform, a.flow, a.signoff, a.out
-    base = flow / "results" / p / d / "base"
+    # `d` names the design DIRECTORY (designs/<p>/<d>/config.mk); `r` names what
+    # ORFS filed the results under, which is DESIGN_NAME. They differ whenever
+    # the bundle directory is not named after the module, as for the assembled
+    # top (TOPRTL holding ddr3_controller).
+    r = getattr(a, "results_name", None) or d
+    base = flow / "results" / p / r / "base"
     gds, netv, cdl = base / "6_final.gds", base / "6_final.v", base / "6_final.cdl"
     deck = so / "lvs" / f"{p}_fixed.lylvs"
     drc_deck = flow / "platforms" / p / "drc" / f"{p}.lydrc"
@@ -268,7 +273,10 @@ def signoff(a, res: dict) -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="DRC + LVS + pin audit for one ORFS design (run in the ORFS container)")
-    ap.add_argument("--design", required=True)
+    ap.add_argument("--design", required=True,
+                    help="design DIRECTORY name (designs/<platform>/<design>/config.mk)")
+    ap.add_argument("--results-name", dest="results_name", default=None,
+                    help="DESIGN_NAME, i.e. what ORFS filed results under; defaults to --design")
     ap.add_argument("--platform", required=True)
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--flow", default=Path("/OpenROAD-flow-scripts/flow"), type=Path)
