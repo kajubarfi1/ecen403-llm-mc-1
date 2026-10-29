@@ -106,41 +106,75 @@ module data_path #(
     // When cmd_wr_valid fires, we wait CWL controller cycles, then
     // drive DQ for BURST_CTRL_CYC cycles (2 cycles for BL8 @ 4:1).
     //
-    // cmd_wr_valid is counted in wr_pend_cnt the cycle it fires,
-    // independent of wr_state -- a WR command issued while the drive
-    // engine is still busy with a previous one used to be dropped
-    // outright (the engine only looked at cmd_wr_valid from WR_IDLE),
-    // which at CWL latency > 1 controller cycle means any command
-    // issued at the scheduler's own tCCD rate while the engine was
-    // mid-wait or mid-drive drove nothing onto DQ for a command the
-    // DRAM still received -- a WRITE with no data (Validation addendum
-    // 9, 2026-10-28, finding 2). The engine now drains wr_pend_cnt one
-    // command at a time instead of requiring cmd_wr_valid to coincide
-    // with WR_IDLE; wr_buf (already FIFO-ordered by acceptance) and
-    // wr_pend_cnt (incremented in issue order) stay in lockstep, so a
-    // queued command is serviced late rather than lost.
+    // Mirrors the read side exactly (see the comment above Read
+    // capture and deserialization below for the full reasoning):
+    // the DRAM expects write data CWL cycles after the WR command
+    // was issued, not CWL cycles after our engine gets around to
+    // it, so a queued command's wait is anchored to wr_cycle_ctr AT
+    // ISSUE (Validation addendum 9, 2026-10-28, finding 2, plus the
+    // same one-cycle regression addendum 10 found on the read side,
+    // 2026-10-29 -- a bare wr_pend_cnt counter has the identical
+    // one-cycle-late problem a registered FIFO does). Three paths:
+    //  - BYPASS (wr_bypass): engine idle, nothing queued -- same
+    //    cycle, zero added latency, matching the original design.
+    //  - QUEUED (WR_IDLE): arrived while busy; its deadline has
+    //    arrived -- drive now, no WR_WAIT needed.
+    //  - CHAINED (WR_DRIVE's own exit): the next queued write's
+    //    deadline arrives right as this one's last beat drives --
+    //    go straight into its drive instead of detouring through
+    //    WR_IDLE, which would cost the one cycle neither this nor
+    //    the read side's capture window can spare. The scheduler's
+    //    CAS spacing (cas_spacing_ctr, scheduler_gen.py) keeps
+    //    deadlines from arriving faster than the engine can drain
+    //    them, so chaining is the common case for back-to-back
+    //    writes, not an edge case.
 
     typedef enum logic [1:0] {
         WR_IDLE   = 2'd0,
-        WR_WAIT   = 2'd1,   // waiting CWL latency
+        WR_WAIT   = 2'd1,   // waiting CWL latency -- bypass path only
         WR_DRIVE  = 2'd2    // driving DQ pins
     } wr_state_t;
 
     wr_state_t wr_state;
-    logic [7:0] wr_lat_ctr;        // CWL countdown
+    logic [7:0] wr_lat_ctr;        // CWL countdown -- bypass path only
     logic [1:0] wr_burst_ctr;       // burst beat counter
     logic [DATA_WIDTH-1:0] wr_dat_r; // latched write data
     logic [SEL_WIDTH-1:0]  wr_msk_r; // latched mask
-    logic [7:0] wr_pend_cnt;        // WR commands issued, not yet serviced
 
-    wire wr_pend_dequeue = (wr_state == WR_IDLE) && (wr_pend_cnt != 0) && !wr_empty;
+    // Free-running cycle counter, same role as the read side's
+    // rd_cycle_ctr.
+    logic [31:0] wr_cycle_ctr;
+    always_ff @(posedge clk or negedge rst_n)
+        if (!rst_n) wr_cycle_ctr <= '0;
+        else        wr_cycle_ctr <= wr_cycle_ctr + 1'b1;
+
+    // Controller cycles from issue to the first drive cycle -- same
+    // CWL formula the bypass path below uses.
+    wire [31:0] wr_wait_cycles = (cfg_CWL_nCK <= CLK_RATIO[7:0])
+        ? 32'd1
+        : 32'(((cfg_CWL_nCK + CLK_RATIO[7:0] - 1'b1) / CLK_RATIO[7:0])) + 32'd1;
+
+    // Pending-write-command queue: overflow only (a bypassed write
+    // never enters it), tracks each queued WR command's deadline.
+    // A SEPARATE queue from wr_buf (the write DATA, pushed on
+    // wr_data_valid from wb_port, a different event stream) --
+    // wr_buf stays the data source, popped in the same order these
+    // deadlines are, since both are issue-ordered.
+    logic [31:0] wr_pend_deadline [0:RD_FIFO_DEPTH-1];
+    logic [FIFO_PTR_W:0] wr_pend_wptr, wr_pend_rptr;
+    wire  [FIFO_PTR_W:0] wr_pend_count = wr_pend_wptr - wr_pend_rptr;
+    wire                  wr_pend_full  = (wr_pend_count == RD_FIFO_DEPTH[FIFO_PTR_W:0]);
+    wire                  wr_pend_empty = (wr_pend_count == 0);
+
+    wire wr_bypass = (wr_state == WR_IDLE) && wr_pend_empty && cmd_wr_valid && !wr_empty;
 
     always_ff @(posedge clk or negedge rst_n)
         if (!rst_n)
-            wr_pend_cnt <= '0;
-        else
-            wr_pend_cnt <= wr_pend_cnt + (cmd_wr_valid ? 8'd1 : 8'd0)
-                                        - (wr_pend_dequeue ? 8'd1 : 8'd0);
+            wr_pend_wptr <= '0;
+        else if (cmd_wr_valid && !wr_pend_full && !wr_bypass) begin
+            wr_pend_deadline[wr_pend_wptr[FIFO_PTR_W-1:0]] <= wr_cycle_ctr + wr_wait_cycles - 32'd1;
+            wr_pend_wptr <= wr_pend_wptr + 1'b1;
+        end
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -150,10 +184,21 @@ module data_path #(
             wr_rptr      <= '0;
             wr_dat_r     <= '0;
             wr_msk_r     <= '0;
+            wr_pend_rptr <= '0;
         end else begin
             case (wr_state)
                 WR_IDLE: begin
-                    if (wr_pend_dequeue) begin
+                    if (!wr_pend_empty && !wr_empty &&
+                        (wr_cycle_ctr >= wr_pend_deadline[wr_pend_rptr[FIFO_PTR_W-1:0]])) begin
+                        // Queued while busy; its deadline has arrived --
+                        // drive now, no separate wait state needed.
+                        wr_dat_r     <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].data;
+                        wr_msk_r     <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].mask;
+                        wr_rptr      <= wr_rptr + 1'b1;
+                        wr_pend_rptr <= wr_pend_rptr + 1'b1;
+                        wr_state     <= WR_DRIVE;
+                        wr_burst_ctr <= '0;
+                    end else if (wr_bypass) begin
                         // Latch data from write buffer
                         wr_dat_r <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].data;
                         wr_msk_r <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].mask;
@@ -181,9 +226,22 @@ module data_path #(
                     wr_burst_ctr <= '0;
                 end
                 WR_DRIVE: begin
-                    if (wr_burst_ctr == WORD_BEATS[1:0] - 1'b1)
-                        wr_state <= WR_IDLE;
-                    else
+                    if (wr_burst_ctr == WORD_BEATS[1:0] - 1'b1) begin
+                        // Last beat -- chain straight into the next queued
+                        // write if its deadline has (or is about to) arrive,
+                        // same reasoning as the read side's RD_CAPTURE exit.
+                        if (!wr_pend_empty && !wr_empty &&
+                            (wr_cycle_ctr + 32'd1 >= wr_pend_deadline[wr_pend_rptr[FIFO_PTR_W-1:0]])) begin
+                            wr_dat_r     <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].data;
+                            wr_msk_r     <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].mask;
+                            wr_rptr      <= wr_rptr + 1'b1;
+                            wr_pend_rptr <= wr_pend_rptr + 1'b1;
+                            wr_state     <= WR_DRIVE;
+                            wr_burst_ctr <= '0;
+                        end else begin
+                            wr_state <= WR_IDLE;
+                        end
+                    end else
                         wr_burst_ctr <= wr_burst_ctr + 1'b1;
                 end
                 default: wr_state <= WR_IDLE;
@@ -220,23 +278,38 @@ module data_path #(
     // ================================================================
     // Read capture and deserialization
     // ================================================================
-    // cmd_rd_valid is queued into rd_pend the cycle it fires, not
-    // read by the capture engine directly -- a RD command issued while
-    // the engine was still mid-wait or mid-capture for a previous one
-    // used to vanish outright (RD_IDLE was the only state that looked
-    // at cmd_rd_valid), which at CL latency > 1 controller cycle means
-    // any read issued at the scheduler's own tCCD rate while busy was
-    // silently lost: no response, no FIFO entry, the host's tag
-    // tracking goes out of step (Validation addendum 9, 2026-10-28,
-    // finding 2). The engine now drains rd_pend one entry at a time
-    // -- queued late rather than lost -- instead of requiring
-    // cmd_rd_valid to coincide with RD_IDLE; the DQ bus can only
-    // capture one read's data at a time regardless, so this keeps
-    // captures serialized the way the single physical bus requires.
+    // A queue that always adds a cycle before the engine can act is
+    // wrong for a read, full stop: the DRAM drives data CL cycles
+    // after the RD command was issued, not CL cycles after our
+    // internal engine happens to notice the command. The previous
+    // version (65dbb0f) routed every read through rd_pend unconditionally,
+    // which fixed the drop (Validation addendum 9, finding 2) but
+    // shifted every single read's capture window one cycle late --
+    // including isolated reads with no contention at all, since a
+    // registered FIFO's content isn't visible to its own reader until
+    // the cycle after it's pushed (Validation addendum 10, 2026-10-29:
+    // 'the capture window is one cycle late ... beat 0 passes before
+    // the engine looks and beat 1 lands in slot 0').
+    //
+    // Two paths now, chosen the moment cmd_rd_valid fires:
+    //  - BYPASS (rd_bypass): engine idle, nothing already queued --
+    //    handled the same cycle, the same way this design worked
+    //    before rd_pend existed. Zero added latency; this is the
+    //    common case and where the regression above actually lived.
+    //  - QUEUED: engine busy with an earlier read. rd_pend stores
+    //    each entry's own deadline -- the absolute cycle (on a
+    //    free-running counter) its CL wait elapses, computed from
+    //    rd_cycle_ctr AT THE CYCLE IT WAS ISSUED, not recomputed
+    //    later. The engine captures once that deadline arrives,
+    //    with no separate wait state -- the deadline already prices
+    //    in the full CL. The scheduler's CAS spacing (tCCD_eff,
+    //    see scheduler_gen.py) keeps the engine from ever actually
+    //    falling behind a queued entry's deadline in practice, so
+    //    this never needs to 'catch up' across a real burst.
 
     typedef enum logic [1:0] {
         RD_IDLE    = 2'd0,
-        RD_WAIT    = 2'd1,   // waiting CL latency
+        RD_WAIT    = 2'd1,   // waiting CL latency -- bypass path only
         RD_CAPTURE = 2'd2    // capturing DQ data
     } rd_state_t;
 
@@ -245,21 +318,40 @@ module data_path #(
     logic [1:0] rd_burst_ctr;
     logic [AUX_WIDTH-1:0] rd_aux_r;  // latched aux tag for this read
 
-    // Pending-read queue: decouples command accept from the capture
-    // engine, same RD_FIFO_DEPTH/FIFO_PTR_W sizing as the response FIFO
+    // Free-running cycle counter -- never reset mid-run, wide enough
+    // that wraparound is not a practical concern -- used only to
+    // compute and compare queued-entry deadlines.
+    logic [31:0] rd_cycle_ctr;
+    always_ff @(posedge clk or negedge rst_n)
+        if (!rst_n) rd_cycle_ctr <= '0;
+        else        rd_cycle_ctr <= rd_cycle_ctr + 1'b1;
+
+    // Controller cycles from issue to the first capture cycle -- the
+    // same CL formula the bypass path below uses, computed once per
+    // command at the moment it's queued.
+    wire [31:0] rd_wait_cycles = (cfg_CL_nCK <= CLK_RATIO[7:0])
+        ? 32'd1
+        : 32'(((cfg_CL_nCK + CLK_RATIO[7:0] - 1'b1) / CLK_RATIO[7:0])) + 32'd1;
+
+    // Pending-read queue: overflow only (a bypassed read never enters
+    // it), same RD_FIFO_DEPTH/FIFO_PTR_W sizing as the response FIFO
     // below (an outstanding read can't queue past what the response
     // FIFO could later hold anyway).
-    logic [AUX_WIDTH-1:0] rd_pend [0:RD_FIFO_DEPTH-1];
+    logic [AUX_WIDTH-1:0] rd_pend_aux      [0:RD_FIFO_DEPTH-1];
+    logic [31:0]          rd_pend_deadline [0:RD_FIFO_DEPTH-1];
     logic [FIFO_PTR_W:0] rd_pend_wptr, rd_pend_rptr;
     wire  [FIFO_PTR_W:0] rd_pend_count = rd_pend_wptr - rd_pend_rptr;
     wire                  rd_pend_full  = (rd_pend_count == RD_FIFO_DEPTH[FIFO_PTR_W:0]);
     wire                  rd_pend_empty = (rd_pend_count == 0);
 
+    wire rd_bypass = (rd_state == RD_IDLE) && rd_pend_empty && cmd_rd_valid;
+
     always_ff @(posedge clk or negedge rst_n)
         if (!rst_n)
             rd_pend_wptr <= '0;
-        else if (cmd_rd_valid && !rd_pend_full) begin
-            rd_pend[rd_pend_wptr[FIFO_PTR_W-1:0]] <= cmd_aux;
+        else if (cmd_rd_valid && !rd_pend_full && !rd_bypass) begin
+            rd_pend_aux[rd_pend_wptr[FIFO_PTR_W-1:0]]      <= cmd_aux;
+            rd_pend_deadline[rd_pend_wptr[FIFO_PTR_W-1:0]] <= rd_cycle_ctr + rd_wait_cycles - 32'd1;
             rd_pend_wptr <= rd_pend_wptr + 1'b1;
         end
 
@@ -273,9 +365,17 @@ module data_path #(
         end else begin
             case (rd_state)
                 RD_IDLE: begin
-                    if (!rd_pend_empty) begin
-                        rd_aux_r     <= rd_pend[rd_pend_rptr[FIFO_PTR_W-1:0]];
+                    if (!rd_pend_empty &&
+                        (rd_cycle_ctr >= rd_pend_deadline[rd_pend_rptr[FIFO_PTR_W-1:0]])) begin
+                        // Queued while busy; its deadline (CL counted from
+                        // when IT was issued) has arrived -- capture now,
+                        // no separate wait state needed.
+                        rd_aux_r     <= rd_pend_aux[rd_pend_rptr[FIFO_PTR_W-1:0]];
                         rd_pend_rptr <= rd_pend_rptr + 1'b1;
+                        rd_state     <= RD_CAPTURE;
+                        rd_burst_ctr <= '0;
+                    end else if (rd_bypass) begin
+                        rd_aux_r <= cmd_aux;
                         if (cfg_CL_nCK <= CLK_RATIO[7:0]) begin
                             rd_state     <= RD_CAPTURE;
                             rd_burst_ctr <= '0;
@@ -298,9 +398,30 @@ module data_path #(
                     rd_burst_ctr <= '0;
                 end
                 RD_CAPTURE: begin
-                    if (rd_burst_ctr == WORD_BEATS[1:0] - 1'b1)
-                        rd_state <= RD_IDLE;
-                    else
+                    if (rd_burst_ctr == WORD_BEATS[1:0] - 1'b1) begin
+                        // Last beat. A real DRAM doesn't pause between back-
+                        // to-back bursts, so if the next queued read's deadline
+                        // has arrived (or arrives the very next cycle), chain
+                        // straight into its capture instead of detouring
+                        // through RD_IDLE -- a detour costs a cycle neither
+                        // RD_IDLE's own check nor this read's deadline accounts
+                        // for, which would silently capture the FOLLOWING
+                        // read's beat 1 as if it were this one's, the same
+                        // wrong-data shape addendum 10 reported. The +1 looks
+                        // one cycle ahead of RD_IDLE's own (unshifted) check
+                        // since this decision is made the cycle before the
+                        // transition lands, same as every other state change
+                        // here.
+                        if (!rd_pend_empty &&
+                            (rd_cycle_ctr + 32'd1 >= rd_pend_deadline[rd_pend_rptr[FIFO_PTR_W-1:0]])) begin
+                            rd_aux_r     <= rd_pend_aux[rd_pend_rptr[FIFO_PTR_W-1:0]];
+                            rd_pend_rptr <= rd_pend_rptr + 1'b1;
+                            rd_state     <= RD_CAPTURE;
+                            rd_burst_ctr <= '0;
+                        end else begin
+                            rd_state <= RD_IDLE;
+                        end
+                    end else
                         rd_burst_ctr <= rd_burst_ctr + 1'b1;
                 end
                 default: rd_state <= RD_IDLE;
@@ -423,13 +544,13 @@ module data_path #(
     assert property (p_rd_pend_no_overflow)
         else $error("[DP-013] Pending-read queue overflow -- a RD command was dropped");
 
-    // DP-014: Pending-write counter never wraps (cmd_wr_valid always counted)
-    property p_wr_pend_no_wrap;
+    // DP-014: Pending-write queue never overflows (cmd_wr_valid always accepted)
+    property p_wr_pend_no_overflow;
         @(posedge clk) disable iff (!rst_n)
-        (cmd_wr_valid && (wr_pend_cnt == 8'hFF) && !wr_pend_dequeue) |-> 1'b0;
+        (cmd_wr_valid && wr_pend_full) |-> 1'b0;
     endproperty
-    assert property (p_wr_pend_no_wrap)
-        else $error("[DP-014] Pending-write counter would wrap -- a WR command was dropped");
+    assert property (p_wr_pend_no_overflow)
+        else $error("[DP-014] Pending-write queue overflow -- a WR command was dropped");
 
     // Coverage
     covergroup cg_dp @(posedge clk);

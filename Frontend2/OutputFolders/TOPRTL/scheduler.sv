@@ -16,7 +16,8 @@ module scheduler #(
     parameter COL_BITS  = 10,
     parameter BANK_BITS = 3,
     parameter NUM_BANKS = 8,
-    parameter AUX_WIDTH = 4
+    parameter AUX_WIDTH = 4,
+    parameter WORD_BEATS = 2
 ) (
     input  logic                    clk,
     input  logic                    rst_n,
@@ -122,30 +123,17 @@ module scheduler #(
     logic                    sel_is_ref_r;
     logic                    sel_from_queue_r;
     logic [BANK_BITS-1:0]    sel_bank_r;
-    // 2026-10-27 (backend timing finding scheduler/TIMING/sel_idx_r): this
-    // used to be derived FROM sel_idx_r every cycle (one-hot-by-comparison
-    // in recently_granted), which put sel_idx_r's own fanout back into the
-    // cone that computes the next sel_idx_r -- a 32-level loop. Registering
-    // a one-hot decode directly (as of the SAME cycle sel_idx is computed,
-    // not re-derived from the registered index) removes that structure
-    // from the loop; see sel_onehot below.
-    logic [DEPTH-1:0]        sel_onehot_r;      // one bit per entry, set iff that entry is the pending CAS pick
-    // sel_bank_eff_r (the pending decision's bank): a wire, re-muxed from
-    // q_bank[sel_idx_r] each cycle -- declared here, not where it's first
-    // meaningful to read (after the pipeline register block below), since
-    // Xcelium rejects a net read before its own declaration even though
-    // every signal on its right-hand side (sel_from_queue_r, sel_bank_r,
-    // sel_idx_r -- all declared above) is already in scope; Yosys silently
-    // accepted the forward reference, which is how 5ec2dc7 passed --no-lint
-    // and still didn't compile (Validation, 2026-10-29). This module used
-    // to also register it directly (2026-10-27, same fix as sel_onehot_r
-    // above), which left the feedback loop but moved the 16-way BANK_BITS
-    // mux out of it and into series with the whole priority-selection
-    // chain instead, costing the chip's worst path >=0.10ns (Backend,
-    // 2026-10-29: "fix (a) [the one-hot above] worked completely... fix
-    // (b) [this] cost more than it bought"). Reverted to measure "(a)
-    // without (b)" against the residual loop through this mux, at
-    // Backend's request -- not yet known which is cheaper.
+    // 2026-10-29 (Backend measurement, backend/handoff/
+    // HANDOFF_FRONTEND_2026-10-29_2.md): both the one-hot-register form
+    // (df70fa8) and this re-mux form without it (5ec2dc7) measured WORSE
+    // at chip level than this plain pipeline stage with neither -- fix (a)
+    // genuinely removed the sel_idx_r self-loop (zero occurrences in the
+    // chip timing report), but the chip got slower anyway, because the
+    // path the loop was hiding (bank_tracker.ctr_rtp -> scheduler's
+    // selection cone, 38 levels) is worse than the loop was. Backend's own
+    // recommendation: stop optimizing the scheduler, the chip's limiter no
+    // longer lives here. Reverted to the measured-best form; the pending
+    // decision's bank, re-muxed from q_bank[sel_idx_r] each cycle.
     wire [BANK_BITS-1:0] sel_bank_eff_r = sel_from_queue_r ? q_bank[sel_idx_r] : sel_bank_r;
 
     logic [NUM_BANKS-1:0] inflight_any;    // any command to this bank in flight
@@ -194,6 +182,24 @@ module scheduler #(
     // already folds those counters in), and no ACT/REF still in flight.
     wire ref_ok = all_banks_idle && (&bank_act_allowed) && !inflight_act && !inflight_ref;
 
+    // Global CAS (RD/WR) issue spacing, independent of bank: at least
+    // WORD_BEATS controller cycles between any two selected CAS commands,
+    // because the DQ bus takes that many cycles to deliver one word no
+    // matter which bank it came from. bank_tracker's own tCCD counter is
+    // per-spec timing gated through cmd_gen's feedback path, which may or
+    // may not land tight enough on its own; this is deliberately local and
+    // self-contained instead -- loaded the same cycle a CAS is selected
+    // (sel_valid/sel_type, not the registered sel_*_r, so there's no
+    // pipeline lag of its own to go wrong), with nothing between it and
+    // the decision it gates. (Validation, 2026-10-29, addendum 10: "Two
+    // reads one cycle apart cannot both be captured on one bus, whatever
+    // the data path does... until [the beat-rate model] is decided the
+    // scheduler spacing is the safe choice.") Declared here, before
+    // is_cas_ready reads it below; driven by an always_ff further down,
+    // after sel_valid/sel_type exist to be read.
+    logic [7:0] cas_spacing_ctr;
+    wire        cas_spacing_active = (cas_spacing_ctr != 0);
+
     always_comb begin
         for (int i = 0; i < DEPTH; i++) begin
             logic [BANK_BITS-1:0] b;
@@ -217,19 +223,21 @@ module scheduler #(
             // the bank-level inflight_any/inflight_act mask above, which the
             // sel_*_r contribution covers -- this guard only needs CAS.
             //
-            // sel_onehot_r[i], not (sel_idx_r == i[IDX_BITS-1:0]) (2026-10-27,
-            // finding scheduler/TIMING/sel_idx_r): the equality form put 16
-            // four-bit comparators against sel_idx_r in the same cone that
-            // computes the next sel_idx_r, closing a feedback loop through
-            // the register the pipeline stage was supposed to cut. A single
-            // registered bit read has no such dependency.
+            // 2026-10-29 (Backend measurement): this used to read
+            // sel_onehot_r[i] instead of comparing sel_idx_r directly --
+            // that removed a real 32-level feedback loop through sel_idx_r,
+            // confirmed (zero occurrences in the chip timing report), but
+            // measured WORSE at chip level anyway, because the loop was
+            // hiding a worse path elsewhere (bank_tracker -> scheduler).
+            // Reverted along with sel_bank_eff_r above to the
+            // measured-best form -- see its comment for the numbers.
             recently_granted = (deq_grant && (deq_idx == i[IDX_BITS-1:0]))
                                || (sel_valid_r && sel_from_queue_r
                                    && (sel_type_r == CMD_RD || sel_type_r == CMD_WR)
-                                   && sel_onehot_r[i]);
+                                   && (sel_idx_r == i[IDX_BITS-1:0]));
             is_row_hit[i]   = q_valid[i] && bank_is_active[b] &&
                                (bank_open_row[b] == q_row[i]);
-            is_cas_ready[i] = is_row_hit[i] && !recently_granted &&
+            is_cas_ready[i] = is_row_hit[i] && !recently_granted && !cas_spacing_active &&
                                !inflight_state[b] && !inflight_ref &&
                                (q_we[i] ? bank_wr_allowed[b] : (bank_rd_allowed[b] && !inflight_wr));
             is_act_needed[i] = q_valid[i] && (!bank_is_active[b] ||
@@ -242,7 +250,6 @@ module scheduler #(
     // ════════════════════════════════════════════════════
     logic                    sel_valid;
     logic [IDX_BITS-1:0]     sel_idx;
-    logic [DEPTH-1:0]        sel_onehot;   // sel_idx, decoded -- see sel_onehot_r above
     logic [3:0]              sel_type;
     logic                    sel_is_ref;
     // Most commands source row/col/bank/we/aux from the winning queue entry
@@ -255,7 +262,6 @@ module scheduler #(
     always_comb begin
         sel_valid      = 1'b0;
         sel_idx        = '0;
-        sel_onehot     = '0;
         sel_type       = CMD_NOP;
         sel_is_ref     = 1'b0;
         sel_from_queue = 1'b1;
@@ -291,7 +297,6 @@ module scheduler #(
                 if (is_cas_ready[i] && !sel_valid) begin
                     sel_valid      = 1'b1;
                     sel_idx        = i[IDX_BITS-1:0];
-                    sel_onehot[i]  = 1'b1;
                     sel_type       = q_we[i] ? CMD_WR : CMD_RD;
                 end
             end
@@ -305,13 +310,11 @@ module scheduler #(
                             // Need PRE first
                             sel_valid     = 1'b1;
                             sel_idx       = i[IDX_BITS-1:0];
-                            sel_onehot[i] = 1'b1;
                             sel_type      = CMD_PRE;
                         end else if (!bank_is_active[b] && bank_act_allowed[b] && !inflight_any[b] && !inflight_act && !inflight_ref) begin
                             // Bank idle, can ACT
                             sel_valid     = 1'b1;
                             sel_idx       = i[IDX_BITS-1:0];
-                            sel_onehot[i] = 1'b1;
                             sel_type      = CMD_ACT;
                         end
                     end
@@ -338,6 +341,16 @@ module scheduler #(
         end
     end
 
+    // cas_spacing_ctr's own update, now that sel_valid/sel_type above
+    // exist to read -- see its declaration by is_cas_ready for why.
+    always_ff @(posedge clk or negedge rst_n)
+        if (!rst_n)
+            cas_spacing_ctr <= '0;
+        else if (sel_valid && (sel_type == CMD_RD || sel_type == CMD_WR))
+            cas_spacing_ctr <= WORD_BEATS[7:0] - 8'd1;
+        else if (cas_spacing_ctr != 0)
+            cas_spacing_ctr <= cas_spacing_ctr - 1'b1;
+
     // ════════════════════════════════════════════════════
     // Pipeline stage: register the selection (timing fix, 2026-10-27)
     // ════════════════════════════════════════════════════
@@ -357,7 +370,6 @@ module scheduler #(
         if (!rst_n) begin
             sel_valid_r      <= 1'b0;
             sel_idx_r        <= '0;
-            sel_onehot_r     <= '0;
             sel_type_r       <= CMD_NOP;
             sel_is_ref_r     <= 1'b0;
             sel_from_queue_r <= 1'b1;
@@ -365,7 +377,6 @@ module scheduler #(
         end else begin
             sel_valid_r      <= sel_valid;
             sel_idx_r        <= sel_idx;
-            sel_onehot_r     <= sel_onehot;
             sel_type_r       <= sel_type;
             sel_is_ref_r     <= sel_is_ref;
             sel_from_queue_r <= sel_from_queue;
