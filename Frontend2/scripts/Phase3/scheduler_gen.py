@@ -183,18 +183,27 @@ module scheduler #(
     logic                    sel_is_ref_r;
     logic                    sel_from_queue_r;
     logic [BANK_BITS-1:0]    sel_bank_r;
-    // 2026-10-29 (Backend measurement, backend/handoff/
-    // HANDOFF_FRONTEND_2026-10-29_2.md): both the one-hot-register form
-    // (df70fa8) and this re-mux form without it (5ec2dc7) measured WORSE
-    // at chip level than this plain pipeline stage with neither -- fix (a)
-    // genuinely removed the sel_idx_r self-loop (zero occurrences in the
-    // chip timing report), but the chip got slower anyway, because the
-    // path the loop was hiding (bank_tracker.ctr_rtp -> scheduler's
-    // selection cone, 38 levels) is worse than the loop was. Backend's own
-    // recommendation: stop optimizing the scheduler, the chip's limiter no
-    // longer lives here. Reverted to the measured-best form; the pending
-    // decision's bank, re-muxed from q_bank[sel_idx_r] each cycle.
+    // 2026-10-29 (Backend, backend/handoff/HANDOFF_FRONTEND_2026-10-29_3.md,
+    // correcting _2.md which you're reading the trace of if you diff this
+    // against the previous commit): fix (a) -- the registered one-hot decode
+    // below, sel_onehot_r -- is restored. The block-level measurement that
+    // said to drop it was inverted relative to the chip: the block's
+    // critical path starts at an input port carrying a 1ns I/O budget that
+    // doesn't exist once this is assembled into the real chip, which hid
+    // what (a) actually does. At chip level (a) alone is the best scheduler
+    // this project has measured (186.8MHz, c32b44871f22), 0.43ns better than
+    // this file with neither (a) nor (b). Fix (b) -- registering this bank
+    // directly instead of re-muxing it -- stays reverted; a bare wire,
+    // re-muxed from q_bank[sel_idx_r] each cycle, is still the better half
+    // of the pair.
     wire [BANK_BITS-1:0] sel_bank_eff_r = sel_from_queue_r ? q_bank[sel_idx_r] : sel_bank_r;
+    // sel_onehot_r: a one-hot decode of the pending CAS pick, registered
+    // alongside sel_idx_r so recently_granted (below) can read a single bit
+    // instead of comparing against sel_idx_r -- that comparison put 16
+    // four-bit comparators in the same cone that computes the next
+    // sel_idx_r, closing a 32-level feedback loop through the register the
+    // pipeline stage was supposed to cut. This is fix (a).
+    logic [DEPTH-1:0]        sel_onehot_r;
 
     logic [NUM_BANKS-1:0] inflight_any;    // any command to this bank in flight
     logic [NUM_BANKS-1:0] inflight_state;  // an ACT or PRE to this bank in flight
@@ -283,18 +292,17 @@ module scheduler #(
             // the bank-level inflight_any/inflight_act mask above, which the
             // sel_*_r contribution covers -- this guard only needs CAS.
             //
-            // 2026-10-29 (Backend measurement): this used to read
-            // sel_onehot_r[i] instead of comparing sel_idx_r directly --
-            // that removed a real 32-level feedback loop through sel_idx_r,
-            // confirmed (zero occurrences in the chip timing report), but
-            // measured WORSE at chip level anyway, because the loop was
-            // hiding a worse path elsewhere (bank_tracker -> scheduler).
-            // Reverted along with sel_bank_eff_r above to the
-            // measured-best form -- see its comment for the numbers.
+            // sel_onehot_r[i], not (sel_idx_r == i[IDX_BITS-1:0]) -- fix (a),
+            // restored (see sel_onehot_r's declaration above). The equality
+            // form puts 16 four-bit comparators against sel_idx_r in the
+            // same cone that computes the next sel_idx_r, closing a
+            // feedback loop through the register the pipeline stage was
+            // supposed to cut. A single registered bit read has no such
+            // dependency.
             recently_granted = (deq_grant && (deq_idx == i[IDX_BITS-1:0]))
                                || (sel_valid_r && sel_from_queue_r
                                    && (sel_type_r == CMD_RD || sel_type_r == CMD_WR)
-                                   && (sel_idx_r == i[IDX_BITS-1:0]));
+                                   && sel_onehot_r[i]);
             is_row_hit[i]   = q_valid[i] && bank_is_active[b] &&
                                (bank_open_row[b] == q_row[i]);
             is_cas_ready[i] = is_row_hit[i] && !recently_granted && !cas_spacing_active &&
@@ -310,6 +318,7 @@ module scheduler #(
     // ════════════════════════════════════════════════════
     logic                    sel_valid;
     logic [IDX_BITS-1:0]     sel_idx;
+    logic [DEPTH-1:0]        sel_onehot;   // sel_idx, decoded -- see sel_onehot_r above
     logic [3:0]              sel_type;
     logic                    sel_is_ref;
     // Most commands source row/col/bank/we/aux from the winning queue entry
@@ -322,6 +331,7 @@ module scheduler #(
     always_comb begin
         sel_valid      = 1'b0;
         sel_idx        = '0;
+        sel_onehot     = '0;
         sel_type       = CMD_NOP;
         sel_is_ref     = 1'b0;
         sel_from_queue = 1'b1;
@@ -357,6 +367,7 @@ module scheduler #(
                 if (is_cas_ready[i] && !sel_valid) begin
                     sel_valid      = 1'b1;
                     sel_idx        = i[IDX_BITS-1:0];
+                    sel_onehot[i]  = 1'b1;
                     sel_type       = q_we[i] ? CMD_WR : CMD_RD;
                 end
             end
@@ -370,11 +381,13 @@ module scheduler #(
                             // Need PRE first
                             sel_valid     = 1'b1;
                             sel_idx       = i[IDX_BITS-1:0];
+                            sel_onehot[i] = 1'b1;
                             sel_type      = CMD_PRE;
                         end else if (!bank_is_active[b] && bank_act_allowed[b] && !inflight_any[b] && !inflight_act && !inflight_ref) begin
                             // Bank idle, can ACT
                             sel_valid     = 1'b1;
                             sel_idx       = i[IDX_BITS-1:0];
+                            sel_onehot[i] = 1'b1;
                             sel_type      = CMD_ACT;
                         end
                     end
@@ -430,6 +443,7 @@ module scheduler #(
         if (!rst_n) begin
             sel_valid_r      <= 1'b0;
             sel_idx_r        <= '0;
+            sel_onehot_r     <= '0;
             sel_type_r       <= CMD_NOP;
             sel_is_ref_r     <= 1'b0;
             sel_from_queue_r <= 1'b1;
@@ -437,6 +451,7 @@ module scheduler #(
         end else begin
             sel_valid_r      <= sel_valid;
             sel_idx_r        <= sel_idx;
+            sel_onehot_r     <= sel_onehot;
             sel_type_r       <= sel_type;
             sel_is_ref_r     <= sel_is_ref;
             sel_from_queue_r <= sel_from_queue;
