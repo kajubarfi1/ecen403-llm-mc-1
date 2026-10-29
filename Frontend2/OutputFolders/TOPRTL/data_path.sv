@@ -17,7 +17,7 @@
 //   CL=11 nCK (3 ctrl), CWL=8 nCK (2 ctrl)
 //   AUX_WIDTH=4, RD_FIFO_DEPTH=16
 //
-// Validation: DP-001 .. DP-012
+// Validation: DP-001 .. DP-014
 ////////////////////////////////////////////////////////////////////////////////
 
 module data_path #(
@@ -105,6 +105,20 @@ module data_path #(
     // ================================================================
     // When cmd_wr_valid fires, we wait CWL controller cycles, then
     // drive DQ for BURST_CTRL_CYC cycles (2 cycles for BL8 @ 4:1).
+    //
+    // cmd_wr_valid is counted in wr_pend_cnt the cycle it fires,
+    // independent of wr_state -- a WR command issued while the drive
+    // engine is still busy with a previous one used to be dropped
+    // outright (the engine only looked at cmd_wr_valid from WR_IDLE),
+    // which at CWL latency > 1 controller cycle means any command
+    // issued at the scheduler's own tCCD rate while the engine was
+    // mid-wait or mid-drive drove nothing onto DQ for a command the
+    // DRAM still received -- a WRITE with no data (Validation addendum
+    // 9, 2026-10-28, finding 2). The engine now drains wr_pend_cnt one
+    // command at a time instead of requiring cmd_wr_valid to coincide
+    // with WR_IDLE; wr_buf (already FIFO-ordered by acceptance) and
+    // wr_pend_cnt (incremented in issue order) stay in lockstep, so a
+    // queued command is serviced late rather than lost.
 
     typedef enum logic [1:0] {
         WR_IDLE   = 2'd0,
@@ -117,6 +131,16 @@ module data_path #(
     logic [1:0] wr_burst_ctr;       // burst beat counter
     logic [DATA_WIDTH-1:0] wr_dat_r; // latched write data
     logic [SEL_WIDTH-1:0]  wr_msk_r; // latched mask
+    logic [7:0] wr_pend_cnt;        // WR commands issued, not yet serviced
+
+    wire wr_pend_dequeue = (wr_state == WR_IDLE) && (wr_pend_cnt != 0) && !wr_empty;
+
+    always_ff @(posedge clk or negedge rst_n)
+        if (!rst_n)
+            wr_pend_cnt <= '0;
+        else
+            wr_pend_cnt <= wr_pend_cnt + (cmd_wr_valid ? 8'd1 : 8'd0)
+                                        - (wr_pend_dequeue ? 8'd1 : 8'd0);
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -129,7 +153,7 @@ module data_path #(
         end else begin
             case (wr_state)
                 WR_IDLE: begin
-                    if (cmd_wr_valid && !wr_empty) begin
+                    if (wr_pend_dequeue) begin
                         // Latch data from write buffer
                         wr_dat_r <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].data;
                         wr_msk_r <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].mask;
@@ -196,9 +220,19 @@ module data_path #(
     // ================================================================
     // Read capture and deserialization
     // ================================================================
-    // When cmd_rd_valid fires, we start a CL countdown. After CL,
-    // we capture DQ data for BURST_CTRL_CYC cycles and push to
-    // the read response FIFO with the aux tag.
+    // cmd_rd_valid is queued into rd_pend the cycle it fires, not
+    // read by the capture engine directly -- a RD command issued while
+    // the engine was still mid-wait or mid-capture for a previous one
+    // used to vanish outright (RD_IDLE was the only state that looked
+    // at cmd_rd_valid), which at CL latency > 1 controller cycle means
+    // any read issued at the scheduler's own tCCD rate while busy was
+    // silently lost: no response, no FIFO entry, the host's tag
+    // tracking goes out of step (Validation addendum 9, 2026-10-28,
+    // finding 2). The engine now drains rd_pend one entry at a time
+    // -- queued late rather than lost -- instead of requiring
+    // cmd_rd_valid to coincide with RD_IDLE; the DQ bus can only
+    // capture one read's data at a time regardless, so this keeps
+    // captures serialized the way the single physical bus requires.
 
     typedef enum logic [1:0] {
         RD_IDLE    = 2'd0,
@@ -211,17 +245,37 @@ module data_path #(
     logic [1:0] rd_burst_ctr;
     logic [AUX_WIDTH-1:0] rd_aux_r;  // latched aux tag for this read
 
+    // Pending-read queue: decouples command accept from the capture
+    // engine, same RD_FIFO_DEPTH/FIFO_PTR_W sizing as the response FIFO
+    // below (an outstanding read can't queue past what the response
+    // FIFO could later hold anyway).
+    logic [AUX_WIDTH-1:0] rd_pend [0:RD_FIFO_DEPTH-1];
+    logic [FIFO_PTR_W:0] rd_pend_wptr, rd_pend_rptr;
+    wire  [FIFO_PTR_W:0] rd_pend_count = rd_pend_wptr - rd_pend_rptr;
+    wire                  rd_pend_full  = (rd_pend_count == RD_FIFO_DEPTH[FIFO_PTR_W:0]);
+    wire                  rd_pend_empty = (rd_pend_count == 0);
+
+    always_ff @(posedge clk or negedge rst_n)
+        if (!rst_n)
+            rd_pend_wptr <= '0;
+        else if (cmd_rd_valid && !rd_pend_full) begin
+            rd_pend[rd_pend_wptr[FIFO_PTR_W-1:0]] <= cmd_aux;
+            rd_pend_wptr <= rd_pend_wptr + 1'b1;
+        end
+
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             rd_state     <= RD_IDLE;
             rd_lat_ctr   <= '0;
             rd_burst_ctr <= '0;
             rd_aux_r     <= '0;
+            rd_pend_rptr <= '0;
         end else begin
             case (rd_state)
                 RD_IDLE: begin
-                    if (cmd_rd_valid) begin
-                        rd_aux_r <= cmd_aux;
+                    if (!rd_pend_empty) begin
+                        rd_aux_r     <= rd_pend[rd_pend_rptr[FIFO_PTR_W-1:0]];
+                        rd_pend_rptr <= rd_pend_rptr + 1'b1;
                         if (cfg_CL_nCK <= CLK_RATIO[7:0]) begin
                             rd_state     <= RD_CAPTURE;
                             rd_burst_ctr <= '0;
@@ -360,6 +414,22 @@ module data_path #(
     endproperty
     assert property (p_rd_rsp_valid)
         else $error("[DP-005] Read response valid with empty FIFO");
+
+    // DP-013: Pending-read queue never overflows (cmd_rd_valid always accepted)
+    property p_rd_pend_no_overflow;
+        @(posedge clk) disable iff (!rst_n)
+        (cmd_rd_valid && rd_pend_full) |-> 1'b0;
+    endproperty
+    assert property (p_rd_pend_no_overflow)
+        else $error("[DP-013] Pending-read queue overflow -- a RD command was dropped");
+
+    // DP-014: Pending-write counter never wraps (cmd_wr_valid always counted)
+    property p_wr_pend_no_wrap;
+        @(posedge clk) disable iff (!rst_n)
+        (cmd_wr_valid && (wr_pend_cnt == 8'hFF) && !wr_pend_dequeue) |-> 1'b0;
+    endproperty
+    assert property (p_wr_pend_no_wrap)
+        else $error("[DP-014] Pending-write counter would wrap -- a WR command was dropped");
 
     // Coverage
     covergroup cg_dp @(posedge clk);

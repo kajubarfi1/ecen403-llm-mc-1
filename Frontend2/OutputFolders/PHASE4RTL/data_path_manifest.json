@@ -1,7 +1,7 @@
 {
-  "git_commit": "f37ce49d323151a6118ae7765aa766918c816383",
+  "git_commit": "90c01f641e38c739b30366c69df7046ae9f21972",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "generated_utc": "2026-10-27T20:37:52.664092+00:00",
+  "generated_utc": "2026-10-29T16:41:40.288000+00:00",
   "clock_period_ns": 5.0,
   "module_name": "data_path",
   "file": "data_path.sv",
@@ -171,6 +171,14 @@
     {
       "name": "p_rd_rsp_valid",
       "check": "DP-005"
+    },
+    {
+      "name": "p_rd_pend_no_overflow",
+      "check": "DP-013"
+    },
+    {
+      "name": "p_wr_pend_no_wrap",
+      "check": "DP-014"
     }
   ],
   "coverage_points": [

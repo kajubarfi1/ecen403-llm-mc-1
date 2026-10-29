@@ -1,19 +1,24 @@
 {
+  "git_commit": "90c01f641e38c739b30366c69df7046ae9f21972",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "generated_utc": "2026-10-29T16:41:40.288000+00:00",
+  "clock_period_ns": 5.0,
   "module_name": "data_path",
   "file": "data_path.sv",
-  "phase": 3,
-  "agent": "data_path_agent",
+  "phase": 4,
+  "generator": "data_path_gen",
   "spec_version": "2.0.0",
   "design_id": "ddr3_mc_core_v2",
   "parameters": {
     "DATA_WIDTH": 32,
-    "DQ_WIDTH": 8,
-    "DM_WIDTH": 4,
+    "DQ_WIDTH": 16,
+    "DM_WIDTH": 2,
     "SEL_WIDTH": 4,
     "AUX_WIDTH": 4,
     "BURST_LEN": 8,
     "CLK_RATIO": 4,
     "BURST_CTRL_CYC": 2,
+    "WORD_BEATS": 2,
     "RD_FIFO_DEPTH": 16,
     "CL": 11,
     "CWL": 8
@@ -48,7 +53,7 @@
         "name": "cmd_aux",
         "width": 4,
         "dir": "input",
-        "source": "scheduler.cmd_aux"
+        "source": "cmd_gen.cmd_out_aux"
       }
     ],
     "wr_data_in": [
@@ -56,7 +61,8 @@
         "name": "wr_data_valid",
         "width": 1,
         "dir": "input",
-        "source": "wb_port.req_valid"
+        "source": "wb_port.req_valid",
+        "source_expr": "wb_port.req_valid && wb_port.req_we && cmd_queue.enq_ready"
       },
       {
         "name": "wr_data",
@@ -112,7 +118,7 @@
     "ddr_phy": [
       {
         "name": "ddr_dq_o",
-        "width": 32,
+        "width": 16,
         "dir": "output"
       },
       {
@@ -122,12 +128,12 @@
       },
       {
         "name": "ddr_dq_i",
-        "width": 32,
+        "width": 16,
         "dir": "input"
       },
       {
         "name": "ddr_dm_o",
-        "width": 4,
+        "width": 2,
         "dir": "output"
       },
       {
@@ -165,6 +171,14 @@
     {
       "name": "p_rd_rsp_valid",
       "check": "DP-005"
+    },
+    {
+      "name": "p_rd_pend_no_overflow",
+      "check": "DP-013"
+    },
+    {
+      "name": "p_wr_pend_no_wrap",
+      "check": "DP-014"
     }
   ],
   "coverage_points": [

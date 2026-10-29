@@ -1,8 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Module:    data_path
 // File:      data_path.sv
-// Generated: 2026-04-03 13:22:58
-// Agent:     Data Path / Alignment Agent (Phase 3)
+// Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)
+// Generator:     Data Path / Alignment Generator (Phase 3)
 // Spec:      ddr3_mc_core_v2 rev golden_ddr3_1600k_x8_2lane_1rank
 //
 // Description:
@@ -13,24 +13,25 @@
 //   Alignment: 4:1 ratio, 2 ctrl cycles per BL8 burst.
 //
 // Key parameters:
-//   DATA_WIDTH=32, DQ_WIDTH=8, BL=8
+//   DATA_WIDTH=32, DQ_WIDTH=16, BL=8
 //   CL=11 nCK (3 ctrl), CWL=8 nCK (2 ctrl)
 //   AUX_WIDTH=4, RD_FIFO_DEPTH=16
 //
-// Validation: DP-001 .. DP-012
+// Validation: DP-001 .. DP-014
 ////////////////////////////////////////////////////////////////////////////////
 
 module data_path #(
     parameter DATA_WIDTH       = 32,
-    parameter DQ_WIDTH         = 8,
-    parameter DM_WIDTH         = 4,
+    parameter DQ_WIDTH         = 16,
+    parameter DM_WIDTH         = 2,
     parameter SEL_WIDTH        = 4,
     parameter AUX_WIDTH        = 4,
     parameter BURST_LEN        = 8,
     parameter CLK_RATIO        = 4,
     parameter BURST_CTRL_CYC   = 2,
+    parameter WORD_BEATS       = 2,
     parameter RD_FIFO_DEPTH    = 16,
-    parameter FIFO_PTR_W       = 5,
+    parameter FIFO_PTR_W       = 4,
     parameter CL_CTRL_DEFAULT  = 3,
     parameter CWL_CTRL_DEFAULT = 2
 ) (
@@ -58,10 +59,13 @@ module data_path #(
     input  logic [7:0]              cfg_CL_nCK,       // CAS read latency
     input  logic [7:0]              cfg_CWL_nCK,      // CAS write latency
 
-    // DDR3 PHY interface (directly to DRAM pins)
-    output logic [DATA_WIDTH-1:0]   ddr_dq_o,         // write data to DRAM
+    // DDR3 PHY interface (directly to DRAM pins) -- DQ_WIDTH-wide,
+    // the real physical channel width, NOT DATA_WIDTH (the host word
+    // width). A host word packs onto the channel over WORD_BEATS
+    // cycles (32-bit host word / 16-bit channel = 2 beats).
+    output logic [DQ_WIDTH-1:0]     ddr_dq_o,         // write data to DRAM
     output logic                    ddr_dq_oe,        // DQ output enable
-    input  logic [DATA_WIDTH-1:0]   ddr_dq_i,         // read data from DRAM
+    input  logic [DQ_WIDTH-1:0]     ddr_dq_i,         // read data from DRAM
     output logic [DM_WIDTH-1:0]     ddr_dm_o,         // data mask
     output logic                    ddr_dqs_o,        // DQS strobe out
     output logic                    ddr_dqs_oe,       // DQS output enable
@@ -101,6 +105,20 @@ module data_path #(
     // ================================================================
     // When cmd_wr_valid fires, we wait CWL controller cycles, then
     // drive DQ for BURST_CTRL_CYC cycles (2 cycles for BL8 @ 4:1).
+    //
+    // cmd_wr_valid is counted in wr_pend_cnt the cycle it fires,
+    // independent of wr_state -- a WR command issued while the drive
+    // engine is still busy with a previous one used to be dropped
+    // outright (the engine only looked at cmd_wr_valid from WR_IDLE),
+    // which at CWL latency > 1 controller cycle means any command
+    // issued at the scheduler's own tCCD rate while the engine was
+    // mid-wait or mid-drive drove nothing onto DQ for a command the
+    // DRAM still received -- a WRITE with no data (Validation addendum
+    // 9, 2026-10-28, finding 2). The engine now drains wr_pend_cnt one
+    // command at a time instead of requiring cmd_wr_valid to coincide
+    // with WR_IDLE; wr_buf (already FIFO-ordered by acceptance) and
+    // wr_pend_cnt (incremented in issue order) stay in lockstep, so a
+    // queued command is serviced late rather than lost.
 
     typedef enum logic [1:0] {
         WR_IDLE   = 2'd0,
@@ -113,6 +131,16 @@ module data_path #(
     logic [1:0] wr_burst_ctr;       // burst beat counter
     logic [DATA_WIDTH-1:0] wr_dat_r; // latched write data
     logic [SEL_WIDTH-1:0]  wr_msk_r; // latched mask
+    logic [7:0] wr_pend_cnt;        // WR commands issued, not yet serviced
+
+    wire wr_pend_dequeue = (wr_state == WR_IDLE) && (wr_pend_cnt != 0) && !wr_empty;
+
+    always_ff @(posedge clk or negedge rst_n)
+        if (!rst_n)
+            wr_pend_cnt <= '0;
+        else
+            wr_pend_cnt <= wr_pend_cnt + (cmd_wr_valid ? 8'd1 : 8'd0)
+                                        - (wr_pend_dequeue ? 8'd1 : 8'd0);
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -125,7 +153,7 @@ module data_path #(
         end else begin
             case (wr_state)
                 WR_IDLE: begin
-                    if (cmd_wr_valid && !wr_empty) begin
+                    if (wr_pend_dequeue) begin
                         // Latch data from write buffer
                         wr_dat_r <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].data;
                         wr_msk_r <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].mask;
@@ -136,7 +164,12 @@ module data_path #(
                             wr_burst_ctr <= '0;
                         end else begin
                             wr_state   <= WR_WAIT;
-                            wr_lat_ctr <= (cfg_CWL_nCK >> 2) - 1'b1; // nCK to ctrl cycles
+                            // same fix as the read side's rd_lat_ctr (addendum
+                            // 4/5, Validation, 2026-10-22/27): ceil(CWL /
+                            // CLK_RATIO) - 1, not a hardcoded >> 2 -- the latter
+                            // assumed a fixed 4:1 ratio and, like the read side
+                            // before its fix, was one cycle off besides.
+                            wr_lat_ctr <= (cfg_CWL_nCK + CLK_RATIO[7:0] - 1'b1) / CLK_RATIO[7:0] - 1'b1;
                         end
                     end
                 end
@@ -148,7 +181,7 @@ module data_path #(
                     wr_burst_ctr <= '0;
                 end
                 WR_DRIVE: begin
-                    if (wr_burst_ctr == BURST_CTRL_CYC[1:0] - 1'b1)
+                    if (wr_burst_ctr == WORD_BEATS[1:0] - 1'b1)
                         wr_state <= WR_IDLE;
                     else
                         wr_burst_ctr <= wr_burst_ctr + 1'b1;
@@ -158,19 +191,48 @@ module data_path #(
         end
     end
 
-    // Write data to DDR pins
-    assign ddr_dq_o   = wr_dat_r;
+    // Write data to DDR pins -- wr_dat_r is DATA_WIDTH-wide (one
+    // host word); drive it onto the DQ_WIDTH-wide channel over
+    // WORD_BEATS beats, low beat first (pack_32_to_16, little-
+    // endian: low half of the word goes out first).
+    always_comb begin
+        ddr_dq_o = wr_dat_r[DQ_WIDTH-1:0];
+        for (int wb = 0; wb < WORD_BEATS; wb++)
+            if (wr_burst_ctr == wb[1:0])
+                ddr_dq_o = wr_dat_r[(wb+1)*DQ_WIDTH-1 -: DQ_WIDTH];
+    end
     assign ddr_dq_oe  = (wr_state == WR_DRIVE);
-    assign ddr_dm_o   = (wr_state == WR_DRIVE) ? ~wr_msk_r : '0;  // DM active-high masks
+
+    // Data mask, sliced the same way -- BYTES_PER_BEAT host-side
+    // sel bits per channel beat.
+    localparam int BYTES_PER_BEAT = DQ_WIDTH / 8;
+    logic [BYTES_PER_BEAT-1:0] dm_beat;
+    always_comb begin
+        dm_beat = wr_msk_r[BYTES_PER_BEAT-1:0];
+        for (int wb = 0; wb < WORD_BEATS; wb++)
+            if (wr_burst_ctr == wb[1:0])
+                dm_beat = wr_msk_r[(wb+1)*BYTES_PER_BEAT-1 -: BYTES_PER_BEAT];
+    end
+    assign ddr_dm_o   = (wr_state == WR_DRIVE) ? ~dm_beat : '0;  // DM active-high masks
     assign ddr_dqs_o  = (wr_state == WR_DRIVE);  // simplified: DQS toggles during drive
     assign ddr_dqs_oe = (wr_state == WR_DRIVE);
 
     // ================================================================
     // Read capture and deserialization
     // ================================================================
-    // When cmd_rd_valid fires, we start a CL countdown. After CL,
-    // we capture DQ data for BURST_CTRL_CYC cycles and push to
-    // the read response FIFO with the aux tag.
+    // cmd_rd_valid is queued into rd_pend the cycle it fires, not
+    // read by the capture engine directly -- a RD command issued while
+    // the engine was still mid-wait or mid-capture for a previous one
+    // used to vanish outright (RD_IDLE was the only state that looked
+    // at cmd_rd_valid), which at CL latency > 1 controller cycle means
+    // any read issued at the scheduler's own tCCD rate while busy was
+    // silently lost: no response, no FIFO entry, the host's tag
+    // tracking goes out of step (Validation addendum 9, 2026-10-28,
+    // finding 2). The engine now drains rd_pend one entry at a time
+    // -- queued late rather than lost -- instead of requiring
+    // cmd_rd_valid to coincide with RD_IDLE; the DQ bus can only
+    // capture one read's data at a time regardless, so this keeps
+    // captures serialized the way the single physical bus requires.
 
     typedef enum logic [1:0] {
         RD_IDLE    = 2'd0,
@@ -183,23 +245,48 @@ module data_path #(
     logic [1:0] rd_burst_ctr;
     logic [AUX_WIDTH-1:0] rd_aux_r;  // latched aux tag for this read
 
+    // Pending-read queue: decouples command accept from the capture
+    // engine, same RD_FIFO_DEPTH/FIFO_PTR_W sizing as the response FIFO
+    // below (an outstanding read can't queue past what the response
+    // FIFO could later hold anyway).
+    logic [AUX_WIDTH-1:0] rd_pend [0:RD_FIFO_DEPTH-1];
+    logic [FIFO_PTR_W:0] rd_pend_wptr, rd_pend_rptr;
+    wire  [FIFO_PTR_W:0] rd_pend_count = rd_pend_wptr - rd_pend_rptr;
+    wire                  rd_pend_full  = (rd_pend_count == RD_FIFO_DEPTH[FIFO_PTR_W:0]);
+    wire                  rd_pend_empty = (rd_pend_count == 0);
+
+    always_ff @(posedge clk or negedge rst_n)
+        if (!rst_n)
+            rd_pend_wptr <= '0;
+        else if (cmd_rd_valid && !rd_pend_full) begin
+            rd_pend[rd_pend_wptr[FIFO_PTR_W-1:0]] <= cmd_aux;
+            rd_pend_wptr <= rd_pend_wptr + 1'b1;
+        end
+
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             rd_state     <= RD_IDLE;
             rd_lat_ctr   <= '0;
             rd_burst_ctr <= '0;
             rd_aux_r     <= '0;
+            rd_pend_rptr <= '0;
         end else begin
             case (rd_state)
                 RD_IDLE: begin
-                    if (cmd_rd_valid) begin
-                        rd_aux_r <= cmd_aux;
+                    if (!rd_pend_empty) begin
+                        rd_aux_r     <= rd_pend[rd_pend_rptr[FIFO_PTR_W-1:0]];
+                        rd_pend_rptr <= rd_pend_rptr + 1'b1;
                         if (cfg_CL_nCK <= CLK_RATIO[7:0]) begin
                             rd_state     <= RD_CAPTURE;
                             rd_burst_ctr <= '0;
                         end else begin
                             rd_state   <= RD_WAIT;
-                            rd_lat_ctr <= (cfg_CL_nCK >> 2) - 1'b1;
+                            // addendum 4/5 (Validation, 2026-10-22/27): ceil(CL /
+                            // CLK_RATIO) alone waited one cycle too long -- the
+                            // RD_IDLE -> RD_WAIT transition already spends the cycle
+                            // in which the registered command is seen, so the wait
+                            // count is one less than the ceiling.
+                            rd_lat_ctr <= (cfg_CL_nCK + CLK_RATIO[7:0] - 1'b1) / CLK_RATIO[7:0] - 1'b1;
                         end
                     end
                 end
@@ -211,7 +298,7 @@ module data_path #(
                     rd_burst_ctr <= '0;
                 end
                 RD_CAPTURE: begin
-                    if (rd_burst_ctr == BURST_CTRL_CYC[1:0] - 1'b1)
+                    if (rd_burst_ctr == WORD_BEATS[1:0] - 1'b1)
                         rd_state <= RD_IDLE;
                     else
                         rd_burst_ctr <= rd_burst_ctr + 1'b1;
@@ -234,14 +321,56 @@ module data_path #(
     wire  [FIFO_PTR_W:0] rd_count = rd_wptr - rd_rptr;
     wire                  rd_empty = (rd_count == 0);
 
-    // Push captured read data
+    // Assemble WORD_BEATS channel-width captures into one
+    // DATA_WIDTH host word before pushing -- pushing per beat
+    // (the old behavior) put WORD_BEATS separate, each only
+    // partially-real entries into the FIFO per read, which is
+    // what showed up downstream as duplicate/X-valued read
+    // responses (see Defect 2, Frontend2/VALIDATION_INTEGRATION_
+    // PLAN.md). Low beat first (pack_32_to_16, little-endian):
+    // beat 0 (first captured) goes to the LOW DQ_WIDTH bits of
+    // the assembled word, matching the write-side packing
+    // (wr_dat_r[(wb+1)*DQ_WIDTH-1 -: DQ_WIDTH] with wb=0 driving
+    // the low half first). Every beat -- including the final
+    // one -- is captured into its own DQ_WIDTH-wide slot at bit
+    // position beat_index*DQ_WIDTH, the same positional scheme
+    // the write path uses, instead of special-casing the final
+    // beat into a fixed top slot via concatenation (which
+    // silently assumed WORD_BEATS==2 and got the beat order
+    // backwards for the final beat).
     wire rd_capture_valid = (rd_state == RD_CAPTURE);
+    wire rd_word_complete = rd_capture_valid && (rd_burst_ctr == WORD_BEATS[1:0] - 1'b1);
+
+    logic [DATA_WIDTH-1:0] rd_shift_r;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n)
+            rd_shift_r <= '0;
+        else if (rd_capture_valid)
+            rd_shift_r[rd_burst_ctr*DQ_WIDTH +: DQ_WIDTH] <= ddr_dq_i;
+    end
+
+    // The word is pushed to the FIFO the cycle AFTER the final
+    // beat is latched into rd_shift_r (rd_word_complete fires on
+    // the final-beat capture cycle itself, but rd_shift_r only
+    // updates on the next edge), so delay rd_word_complete and
+    // rd_aux_r by one cycle to push the fully-assembled word.
+    logic rd_word_complete_d;
+    logic [AUX_WIDTH-1:0] rd_aux_push;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            rd_word_complete_d <= 1'b0;
+            rd_aux_push        <= '0;
+        end else begin
+            rd_word_complete_d <= rd_word_complete;
+            rd_aux_push        <= rd_aux_r;
+        end
+    end
 
     always_ff @(posedge clk or negedge rst_n)
         if (!rst_n)
             rd_wptr <= '0;
-        else if (rd_capture_valid) begin
-            rd_fifo[rd_wptr[FIFO_PTR_W-1:0]] <= '{data: ddr_dq_i, aux: rd_aux_r};
+        else if (rd_word_complete_d) begin
+            rd_fifo[rd_wptr[FIFO_PTR_W-1:0]] <= '{data: rd_shift_r, aux: rd_aux_push};
             rd_wptr <= rd_wptr + 1'b1;
         end
 
@@ -285,6 +414,22 @@ module data_path #(
     endproperty
     assert property (p_rd_rsp_valid)
         else $error("[DP-005] Read response valid with empty FIFO");
+
+    // DP-013: Pending-read queue never overflows (cmd_rd_valid always accepted)
+    property p_rd_pend_no_overflow;
+        @(posedge clk) disable iff (!rst_n)
+        (cmd_rd_valid && rd_pend_full) |-> 1'b0;
+    endproperty
+    assert property (p_rd_pend_no_overflow)
+        else $error("[DP-013] Pending-read queue overflow -- a RD command was dropped");
+
+    // DP-014: Pending-write counter never wraps (cmd_wr_valid always counted)
+    property p_wr_pend_no_wrap;
+        @(posedge clk) disable iff (!rst_n)
+        (cmd_wr_valid && (wr_pend_cnt == 8'hFF) && !wr_pend_dequeue) |-> 1'b0;
+    endproperty
+    assert property (p_wr_pend_no_wrap)
+        else $error("[DP-014] Pending-write counter would wrap -- a WR command was dropped");
 
     // Coverage
     covergroup cg_dp @(posedge clk);
