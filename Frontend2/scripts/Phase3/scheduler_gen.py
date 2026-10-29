@@ -168,16 +168,24 @@ module scheduler #(
     logic                    sel_is_ref_r;
     logic                    sel_from_queue_r;
     logic [BANK_BITS-1:0]    sel_bank_r;
-    // 2026-10-27 (backend timing finding scheduler/TIMING/sel_idx_r): both of
-    // these used to be derived FROM sel_idx_r every cycle (one-hot-by-
-    // comparison in recently_granted, a q_bank[sel_idx_r] mux here), which
-    // put sel_idx_r's own fanout back into the cone that computes the next
-    // sel_idx_r -- a 32-level loop, not two cut stages. Registering them
-    // directly (as of the SAME cycle sel_idx/sel_bank are computed, not
-    // re-derived from the registered index) removes both structures from
-    // the loop entirely; see sel_onehot and sel_bank_eff below.
+    // 2026-10-27 (backend timing finding scheduler/TIMING/sel_idx_r): this
+    // used to be derived FROM sel_idx_r every cycle (one-hot-by-comparison
+    // in recently_granted), which put sel_idx_r's own fanout back into the
+    // cone that computes the next sel_idx_r -- a 32-level loop. Registering
+    // a one-hot decode directly (as of the SAME cycle sel_idx is computed,
+    // not re-derived from the registered index) removes that structure
+    // from the loop; see sel_onehot below.
     logic [DEPTH-1:0]        sel_onehot_r;      // one bit per entry, set iff that entry is the pending CAS pick
-    logic [BANK_BITS-1:0]    sel_bank_eff_r;    // the pending decision's bank, captured at selection time
+    // sel_bank_eff_r (the pending decision's bank) is declared further
+    // down as a wire, re-muxed from q_bank[sel_idx_r] each cycle -- this
+    // module used to also register it directly (2026-10-27, same fix as
+    // sel_onehot_r above), which left the feedback loop but moved the
+    // 16-way BANK_BITS mux out of it and into series with the whole
+    // priority-selection chain instead, costing the chip's worst path
+    // >=0.10ns (Backend, 2026-10-29: "fix (a) [the one-hot above] worked
+    // completely... fix (b) [this] cost more than it bought"). Reverted
+    // to measure "(a) without (b)" against the residual loop through this
+    // mux, at Backend's request -- not yet known which is cheaper.
 
     logic [NUM_BANKS-1:0] inflight_any;    // any command to this bank in flight
     logic [NUM_BANKS-1:0] inflight_state;  // an ACT or PRE to this bank in flight
@@ -369,13 +377,6 @@ module scheduler #(
         end
     end
 
-    // The pending decision's bank, computed once here (from the UN-registered
-    // sel_idx/sel_bank, same cycle as the rest of selection) and captured as
-    // sel_bank_eff_r below -- not re-derived from q_bank[sel_idx_r] every
-    // cycle, which put a 16-way mux back in the feedback loop (2026-10-27,
-    // finding scheduler/TIMING/sel_idx_r).
-    wire [BANK_BITS-1:0] sel_bank_eff = sel_from_queue ? q_bank[sel_idx] : sel_bank;
-
     // ════════════════════════════════════════════════════
     // Pipeline stage: register the selection (timing fix, 2026-10-27)
     // ════════════════════════════════════════════════════
@@ -400,7 +401,6 @@ module scheduler #(
             sel_is_ref_r     <= 1'b0;
             sel_from_queue_r <= 1'b1;
             sel_bank_r       <= '0;
-            sel_bank_eff_r   <= '0;
         end else begin
             sel_valid_r      <= sel_valid;
             sel_idx_r        <= sel_idx;
@@ -409,9 +409,13 @@ module scheduler #(
             sel_is_ref_r     <= sel_is_ref;
             sel_from_queue_r <= sel_from_queue;
             sel_bank_r       <= sel_bank;
-            sel_bank_eff_r   <= sel_bank_eff;
         end
     end
+
+    // Reverted to a re-mux (not registered -- see the comment by
+    // sel_onehot_r's declaration above): the pending decision's bank,
+    // read from the queue by the now-registered sel_idx_r each cycle.
+    wire [BANK_BITS-1:0] sel_bank_eff_r = sel_from_queue_r ? q_bank[sel_idx_r] : sel_bank_r;
 
     // ════════════════════════════════════════════════════
     // Output registration (reads the registered sel_*_r, not sel_*)
