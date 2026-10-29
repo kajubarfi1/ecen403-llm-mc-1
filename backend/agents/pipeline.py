@@ -1535,9 +1535,31 @@ def _check_sta(
         shutil.copy2(timing_rpt, out_dir / "6_finish_sta.rpt")
         text = Path(timing_rpt).read_text(errors="ignore")
 
-        # Extract worst N paths (lines containing "slack" with a value)
-        slack_lines = re.findall(r".*(?:slack|WNS|TNS).*?([-]?\d+\.\d+).*", text, re.IGNORECASE)
-        path_summary = slack_lines[:10]
+        # Per-path entries only, each named by its endpoint.
+        #
+        # This used to match any line mentioning slack, WNS or TNS and keep the
+        # bare numbers, so the design-wide TNS landed first in a list called
+        # path_summary. On the 2026-10-27 chip that read ["-7.47", "-0.89",
+        # "-0.89"], and the report written from it told the reader to go and
+        # investigate "the -7.47 ns path", which does not exist - there was one
+        # failing endpoint at -0.886 and -7.47 was the sum over the design.
+        # Numbers that do not say what they are get read as whatever the
+        # surrounding key implies.
+        seen: set = set()
+        paths: List[tuple] = []
+        for blk in re.split(r"^Startpoint:", text, flags=re.MULTILINE)[1:]:
+            ep = re.search(r"^Endpoint:\s*(\S+)", blk, re.MULTILINE)
+            sl = re.search(r"([-]?\d+\.\d+)\s+slack\s*\((MET|VIOLATED)\)", blk)
+            if not (ep and sl):
+                continue
+            entry = f"{ep.group(1)}: {sl.group(1)} ns ({sl.group(2)})"
+            if entry not in seen:          # the same path is reported per group
+                seen.add(entry)
+                paths.append((float(sl.group(1)), entry))
+        # Worst first: the report lists groups in its own order, and a summary
+        # that opens with three paths that MET invites the reader to skim past
+        # the one that did not.
+        path_summary = [e for _, e in sorted(paths)][:10]
 
         # Fallback WNS/TNS extraction if reporter didn't get them
         if wns is None:

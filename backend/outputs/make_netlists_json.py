@@ -143,6 +143,33 @@ def metrics_for(block: str) -> Dict[str, Any]:
     return out
 
 
+_FMAX_LEGEND = ("     * estimated - 1000/(period - wns), a frequency no build ran at\n"
+                "     ! estimated from a build that MISSED timing - not a frequency "
+                "this block has ever closed\n"
+                "     unmarked figures are demonstrated: a period a build actually met")
+
+
+def _fmax_cell(blk: Dict[str, Any]) -> str:
+    """The Fmax column, marked with how the number was arrived at.
+
+    Printed side by side, a demonstrated figure and an extrapolated one look
+    identical, and the column gets quoted as though every entry were measured.
+    One did reach a slide that way: scheduler's 177.93 is 1000/(5 + 0.620) from
+    a build whose WNS was negative, under a bullet saying each figure was a
+    clock the block had been demonstrated to close.
+    """
+    fmax = blk.get("fmax_mhz")
+    if fmax is None:
+        mark = " "
+    elif blk.get("fmax_is_demonstrated"):
+        mark = " "
+    elif blk.get("sta") == "FAIL":
+        mark = "!"
+    else:
+        mark = "*"
+    return f"{str(fmax):>8}{mark} MHz"
+
+
 def resolve_orfs(explicit: Optional[str]) -> Optional[Path]:
     """The ORFS flow directory, which holds the preserved synthesis inputs."""
     val = explicit
@@ -220,8 +247,10 @@ def main() -> int:
             **metrics_for(b),
         }
         flag = {True: "current", False: "STALE", None: "unknown"}[cur]
-        fmax = doc["blocks"][b].get("fmax_mhz")
-        print(f"  {b:14} {str(fmax):>8} MHz  design={per_block.get(b)}  rtl={flag}")
+        print(f"  {b:14} {_fmax_cell(doc['blocks'][b])}  "
+              f"design={per_block.get(b)}  rtl={flag}")
+
+    print(_FMAX_LEGEND)
 
     if not a.dry_run:
         (HERE / "NETLISTS.json").write_bytes(
