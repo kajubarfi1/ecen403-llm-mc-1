@@ -48,8 +48,22 @@ class AddrDecoderGenerator:
         p["DATA_WIDTH"] = self.host["data_width_bits"]     # 32
         p["MAPPING"]    = self.geo["address_mapping"]      # row-bank-column
 
-        # Burst byte offset: BL8 × channel_width_bytes = 8 × 2 = 16 bytes → 4 bits
-        channel_bytes = (self.geo["byte_lanes"] * self.geo["device_width_bits"]) // 8
+        # Burst byte offset: BL8 x channel_width_bytes = 8 x 2 = 16 bytes -> 4 bits.
+        # channel_width_bytes must be the DATA-carrying lanes only, not every
+        # physical byte lane -- with ecc_mode>0 one lane is dedicated to ECC
+        # (memory_geometry.$derived.ecc_byte_lanes) and never carries
+        # addressable data, so it must not count toward the burst's byte
+        # footprint. Using the raw lane count here double-counted that lane,
+        # computing a 1-bit-too-wide BURST_OFFSET and overflowing ADDR_WIDTH
+        # by exactly 1 on every ECC-enabled config where host_interface.
+        # address_width_bits (microarch_compiler.py's own address_width_bits
+        # == log2(channel_capacity_bytes), ECC-excluded by construction)
+        # already accounted for the narrower data channel correctly -- found
+        # by a 1,728-combination Tier-1 sweep, 2026-10-29: every
+        # "Address bits overflow" failure was exactly 1 bit over, always with
+        # ecc_mode > 0.
+        data_lanes = self.geo.get("$derived", {}).get("data_byte_lanes", self.geo["byte_lanes"])
+        channel_bytes = (data_lanes * self.geo["device_width_bits"]) // 8
         p["BURST_OFFSET"] = int(math.log2(p["BL"] * channel_bytes))  # 4
         # Column bits A[2:0] are consumed by BL8 burst (implicit in DDR3)
         p["COL_LOW_SKIP"] = int(math.log2(p["BL"]))  # 3
