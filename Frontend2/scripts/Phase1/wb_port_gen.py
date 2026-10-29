@@ -24,7 +24,7 @@
 |    G: Tag FIFO stress          H: Reset mid-transaction              |
 |    I: Edge cases                                                     |
 |                                                                      |
-|  Validation checks: WB-001 through WB-010                            |
+|  Validation checks: WB-001 through WB-011                            |
 +======================================================================+
 """
 
@@ -145,7 +145,7 @@ class WishbonePortGenerator:
         L(f"//")
         L(f"// Derived: DATA={p['DATA_WIDTH']} ADDR={p['ADDR_WIDTH']} SEL={p['SEL_WIDTH']}"
           f" AUX={p['AUX_WIDTH']} BURST={p['MAX_BURST_LEN']} QUEUE={p['QUEUE_DEPTH']}")
-        L(f"// Validation: WB-001 .. WB-010")
+        L(f"// Validation: WB-001 .. WB-011")
         L(f"////////////////////////////////////////////////////////////////////////////////")
         L(f"")
         L(f"module wb_port #(")
@@ -334,13 +334,37 @@ class WishbonePortGenerator:
 
         # Write ACK
         L(f"    // Write acknowledge (WB-002, WB-008)")
-        L(f"    logic wr_ack_r;")
-        L(f"    always_ff @(posedge clk or negedge rst_n)")
-        L(f"        if (!rst_n) wr_ack_r <= 1'b0;")
-        L(f"        else        wr_ack_r <= wb_beat & wb_we_i;")
-        L(f"")
+        L(f"    //")
+        L(f"    // wb_ack_o is a single bit: a write-ack and a same-cycle read-ack")
+        L(f"    // (rsp_valid) can't both be signaled, and the old code -- a bare")
+        L(f"    // one-cycle pulse, unconditionally overwritten every cycle --")
+        L(f"    // simply lost whichever one didn't win (HOST_001: Validation,")
+        L(f"    // 2026-10-29, addendum 11, formal counterexample at 24 cycles,")
+        L(f"    // path_23 reproduces it in simulation). A single hold bit isn't")
+        L(f"    // enough to fix this: write beats keep being accepted into the")
+        L(f"    // skid (Finding 1) independent of whether an earlier write's ack")
+        L(f"    // is still waiting its turn, so more than one ack can be owed at")
+        L(f"    // once. wr_ack_pending is a small counter instead -- counts up on")
+        L(f"    // every accepted write beat, counts down exactly once per cycle")
+        L(f"    // it actually delivers (reads always win the bit on a collision;")
+        L(f"    // a pending write's ack waits for the first cycle that isn't")
+        L(f"    // one). Verified against sustained collisions and random traffic")
+        L(f"    // in a Python model before writing this: every accepted beat gets")
+        L(f"    // exactly one delivery, none lost, and an isolated write with no")
+        L(f"    // collision still acks exactly one cycle after acceptance, same")
+        L(f"    // as before.")
+        L(f"    logic [7:0] wr_ack_pending;")
         L(f"    wire rd_ack = rsp_valid;")
-        L(f"    assign wb_ack_o = wr_ack_r | rd_ack;")
+        L(f"    wire wr_ack_deliver = (wr_ack_pending != 0) && !rd_ack;")
+        L(f"")
+        L(f"    always_ff @(posedge clk or negedge rst_n)")
+        L(f"        if (!rst_n)")
+        L(f"            wr_ack_pending <= '0;")
+        L(f"        else")
+        L(f"            wr_ack_pending <= wr_ack_pending + ((wb_beat & wb_we_i) ? 8'd1 : 8'd0)")
+        L(f"                                              - (wr_ack_deliver ? 8'd1 : 8'd0);")
+        L(f"")
+        L(f"    assign wb_ack_o = wr_ack_deliver | rd_ack;")
         L(f"    assign wb_dat_o = rsp_rdata;")
         L(f"")
 
@@ -411,6 +435,16 @@ class WishbonePortGenerator:
         L(f"    endproperty")
         L(f"    assert property (p_req_held_stable)")
         L(f"        else $error(\"[WB-010] accepted request changed or dropped while queue wasn't ready\");")
+        L(f"")
+        L(f"    // WB-011: every accepted write beat eventually gets exactly one")
+        L(f"    // ack -- wr_ack_pending never wraps (would mean a beat's ack was")
+        L(f"    // silently dropped rather than held through a collision)")
+        L(f"    property p_wr_ack_no_wrap;")
+        L(f"        @(posedge clk) disable iff (!rst_n)")
+        L(f"        ((wb_beat && wb_we_i) && (wr_ack_pending == 8'hFF) && !wr_ack_deliver) |-> 1'b0;")
+        L(f"    endproperty")
+        L(f"    assert property (p_wr_ack_no_wrap)")
+        L(f"        else $error(\"[WB-011] wr_ack_pending would wrap -- a write ack was dropped\");")
         L(f"")
         L(f"    covergroup cg_wb @(posedge clk);")
         L(f"        option.per_instance = 1;")
@@ -913,6 +947,7 @@ class WishbonePortGenerator:
                 {"name": "p_tag_no_overflow",   "check": "WB-005"},
                 {"name": "p_sel_nonzero_write", "check": "WB-006"},
                 {"name": "p_req_held_stable",   "check": "WB-010"},
+                {"name": "p_wr_ack_no_wrap",    "check": "WB-011"},
             ],
             "coverage_points": [
                 "cp_single_rd", "cp_single_wr", "cp_burst_rd", "cp_burst_wr",

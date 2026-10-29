@@ -503,9 +503,9 @@ module wb_port_tb;
     logic [DATA_WIDTH-1:0] req_wdata;
     // Response-path inputs from the (unmodeled) memory backend. Must be
     // driven -- left unconnected, rsp_valid floats X, and since
-    // wb_ack_o = wr_ack_r | rsp_valid, that X poisons wb_ack_o back to X
-    // any time the write-ack path is 0, failing every "ack deasserted"
-    // check even though the RTL itself is correct.
+    // wb_ack_o = wr_ack_deliver | rsp_valid, that X poisons wb_ack_o back
+    // to X any time the write-ack path is 0, failing every "ack
+    // deasserted" check even though the RTL itself is correct.
     logic rsp_valid;
     logic [DATA_WIDTH-1:0] rsp_rdata;
     logic [AUX_WIDTH-1:0] rsp_aux;

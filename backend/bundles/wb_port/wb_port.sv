@@ -10,7 +10,7 @@
 //   byte-lane masking, error signalling, auxiliary tag propagation.
 //
 // Derived: DATA=32 ADDR=29 SEL=4 AUX=4 BURST=8 QUEUE=16
-// Validation: WB-001 .. WB-010
+// Validation: WB-001 .. WB-011
 ////////////////////////////////////////////////////////////////////////////////
 
 module wb_port #(
@@ -187,13 +187,37 @@ module wb_port #(
     end
 
     // Write acknowledge (WB-002, WB-008)
-    logic wr_ack_r;
-    always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n) wr_ack_r <= 1'b0;
-        else        wr_ack_r <= wb_beat & wb_we_i;
-
+    //
+    // wb_ack_o is a single bit: a write-ack and a same-cycle read-ack
+    // (rsp_valid) can't both be signaled, and the old code -- a bare
+    // one-cycle pulse, unconditionally overwritten every cycle --
+    // simply lost whichever one didn't win (HOST_001: Validation,
+    // 2026-10-29, addendum 11, formal counterexample at 24 cycles,
+    // path_23 reproduces it in simulation). A single hold bit isn't
+    // enough to fix this: write beats keep being accepted into the
+    // skid (Finding 1) independent of whether an earlier write's ack
+    // is still waiting its turn, so more than one ack can be owed at
+    // once. wr_ack_pending is a small counter instead -- counts up on
+    // every accepted write beat, counts down exactly once per cycle
+    // it actually delivers (reads always win the bit on a collision;
+    // a pending write's ack waits for the first cycle that isn't
+    // one). Verified against sustained collisions and random traffic
+    // in a Python model before writing this: every accepted beat gets
+    // exactly one delivery, none lost, and an isolated write with no
+    // collision still acks exactly one cycle after acceptance, same
+    // as before.
+    logic [7:0] wr_ack_pending;
     wire rd_ack = rsp_valid;
-    assign wb_ack_o = wr_ack_r | rd_ack;
+    wire wr_ack_deliver = (wr_ack_pending != 0) && !rd_ack;
+
+    always_ff @(posedge clk or negedge rst_n)
+        if (!rst_n)
+            wr_ack_pending <= '0;
+        else
+            wr_ack_pending <= wr_ack_pending + ((wb_beat & wb_we_i) ? 8'd1 : 8'd0)
+                                              - (wr_ack_deliver ? 8'd1 : 8'd0);
+
+    assign wb_ack_o = wr_ack_deliver | rd_ack;
     assign wb_dat_o = rsp_rdata;
 
     // Error detection (WB-007)
@@ -260,6 +284,16 @@ module wb_port #(
     endproperty
     assert property (p_req_held_stable)
         else $error("[WB-010] accepted request changed or dropped while queue wasn't ready");
+
+    // WB-011: every accepted write beat eventually gets exactly one
+    // ack -- wr_ack_pending never wraps (would mean a beat's ack was
+    // silently dropped rather than held through a collision)
+    property p_wr_ack_no_wrap;
+        @(posedge clk) disable iff (!rst_n)
+        ((wb_beat && wb_we_i) && (wr_ack_pending == 8'hFF) && !wr_ack_deliver) |-> 1'b0;
+    endproperty
+    assert property (p_wr_ack_no_wrap)
+        else $error("[WB-011] wr_ack_pending would wrap -- a write ack was dropped");
 
     covergroup cg_wb @(posedge clk);
         option.per_instance = 1;
