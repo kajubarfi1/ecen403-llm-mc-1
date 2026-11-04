@@ -268,6 +268,167 @@ module scheduler #(
     logic                    sel_from_queue;
     logic [BANK_BITS-1:0]    sel_bank;
 
+    // ────────────────────────────────────────────────────────────────
+    // Priority 2/3 arbitration as a tree, not a ripple (2026-11-03,
+    // backend/handoff/HANDOFF_FRONTEND_2026-11-03.md). The old code
+    // chained two 16-deep first-match loops through `if (!sel_valid)`
+    // -- 32 serial decision levels, and every failing endpoint on the
+    // best chip built so far traced back through exactly this chain to
+    // u_cmd_queue.entry_bank. Each entry's eligibility for a tier never
+    // depended on any OTHER entry (is_cas_ready/is_act_needed above
+    // already compute all DEPTH entries in parallel) or on the OTHER
+    // tier (eligible3 below reads only bank state and inflight, never
+    // tier 2's result) -- only "which entry wins" was serial. So both
+    // tiers' winners are found by their own balanced reduction tree
+    // (log2(DEPTH) levels instead of DEPTH), computed concurrently
+    // rather than one gated behind the other, and only the final
+    // "tier 2 beats tier 3" choice below is still a priority mux -- one
+    // level, not sixteen.
+    // ────────────────────────────────────────────────────────────────
+
+    // Priority 3's per-entry eligibility, spelled out the same way
+    // is_cas_ready is above: each i's PRE-first-vs-ACT-now resolution
+    // reads only q_bank[i] and bank/inflight state, independent of
+    // every other i.
+    logic [DEPTH-1:0] act_cond_pre;   // bank active, wrong row, ready to PRE
+    logic [DEPTH-1:0] act_cond_act;   // bank idle, ready to ACT
+    logic [DEPTH-1:0] eligible3;
+    always_comb begin
+        for (int i = 0; i < DEPTH; i++) begin
+            logic [BANK_BITS-1:0] b;
+            b = q_bank[i];
+            act_cond_pre[i] = is_act_needed[i] && bank_is_active[b] && bank_pre_allowed[b] &&
+                               !inflight_any[b] && !inflight_ref;
+            act_cond_act[i] = is_act_needed[i] && !bank_is_active[b] && bank_act_allowed[b] &&
+                               !inflight_any[b] && !inflight_act && !inflight_ref;
+            eligible3[i]    = act_cond_pre[i] || act_cond_act[i];
+        end
+    end
+
+    logic                  t2_v_L1   [8];
+    logic [3:0]   t2_idx_L1 [8];
+    logic [3:0]            t2_type_L1[8];
+    logic                  t2_v_L2   [4];
+    logic [3:0]   t2_idx_L2 [4];
+    logic [3:0]            t2_type_L2[4];
+    logic                  t2_v_L3   [2];
+    logic [3:0]   t2_idx_L3 [2];
+    logic [3:0]            t2_type_L3[2];
+    logic                  t2_v_L4   [1];
+    logic [3:0]   t2_idx_L4 [1];
+    logic [3:0]            t2_type_L4[1];
+
+    assign t2_v_L1[0]    = is_cas_ready[0] | is_cas_ready[1];
+    assign t2_idx_L1[0]  = is_cas_ready[0] ? 4'd0 : 4'd1;
+    assign t2_type_L1[0] = is_cas_ready[0] ? (q_we[0] ? CMD_WR : CMD_RD) : (q_we[1] ? CMD_WR : CMD_RD);
+    assign t2_v_L1[1]    = is_cas_ready[2] | is_cas_ready[3];
+    assign t2_idx_L1[1]  = is_cas_ready[2] ? 4'd2 : 4'd3;
+    assign t2_type_L1[1] = is_cas_ready[2] ? (q_we[2] ? CMD_WR : CMD_RD) : (q_we[3] ? CMD_WR : CMD_RD);
+    assign t2_v_L1[2]    = is_cas_ready[4] | is_cas_ready[5];
+    assign t2_idx_L1[2]  = is_cas_ready[4] ? 4'd4 : 4'd5;
+    assign t2_type_L1[2] = is_cas_ready[4] ? (q_we[4] ? CMD_WR : CMD_RD) : (q_we[5] ? CMD_WR : CMD_RD);
+    assign t2_v_L1[3]    = is_cas_ready[6] | is_cas_ready[7];
+    assign t2_idx_L1[3]  = is_cas_ready[6] ? 4'd6 : 4'd7;
+    assign t2_type_L1[3] = is_cas_ready[6] ? (q_we[6] ? CMD_WR : CMD_RD) : (q_we[7] ? CMD_WR : CMD_RD);
+    assign t2_v_L1[4]    = is_cas_ready[8] | is_cas_ready[9];
+    assign t2_idx_L1[4]  = is_cas_ready[8] ? 4'd8 : 4'd9;
+    assign t2_type_L1[4] = is_cas_ready[8] ? (q_we[8] ? CMD_WR : CMD_RD) : (q_we[9] ? CMD_WR : CMD_RD);
+    assign t2_v_L1[5]    = is_cas_ready[10] | is_cas_ready[11];
+    assign t2_idx_L1[5]  = is_cas_ready[10] ? 4'd10 : 4'd11;
+    assign t2_type_L1[5] = is_cas_ready[10] ? (q_we[10] ? CMD_WR : CMD_RD) : (q_we[11] ? CMD_WR : CMD_RD);
+    assign t2_v_L1[6]    = is_cas_ready[12] | is_cas_ready[13];
+    assign t2_idx_L1[6]  = is_cas_ready[12] ? 4'd12 : 4'd13;
+    assign t2_type_L1[6] = is_cas_ready[12] ? (q_we[12] ? CMD_WR : CMD_RD) : (q_we[13] ? CMD_WR : CMD_RD);
+    assign t2_v_L1[7]    = is_cas_ready[14] | is_cas_ready[15];
+    assign t2_idx_L1[7]  = is_cas_ready[14] ? 4'd14 : 4'd15;
+    assign t2_type_L1[7] = is_cas_ready[14] ? (q_we[14] ? CMD_WR : CMD_RD) : (q_we[15] ? CMD_WR : CMD_RD);
+    assign t2_v_L2[0]    = t2_v_L1[0] | t2_v_L1[1];
+    assign t2_idx_L2[0]  = t2_v_L1[0] ? t2_idx_L1[0] : t2_idx_L1[1];
+    assign t2_type_L2[0] = t2_v_L1[0] ? t2_type_L1[0] : t2_type_L1[1];
+    assign t2_v_L2[1]    = t2_v_L1[2] | t2_v_L1[3];
+    assign t2_idx_L2[1]  = t2_v_L1[2] ? t2_idx_L1[2] : t2_idx_L1[3];
+    assign t2_type_L2[1] = t2_v_L1[2] ? t2_type_L1[2] : t2_type_L1[3];
+    assign t2_v_L2[2]    = t2_v_L1[4] | t2_v_L1[5];
+    assign t2_idx_L2[2]  = t2_v_L1[4] ? t2_idx_L1[4] : t2_idx_L1[5];
+    assign t2_type_L2[2] = t2_v_L1[4] ? t2_type_L1[4] : t2_type_L1[5];
+    assign t2_v_L2[3]    = t2_v_L1[6] | t2_v_L1[7];
+    assign t2_idx_L2[3]  = t2_v_L1[6] ? t2_idx_L1[6] : t2_idx_L1[7];
+    assign t2_type_L2[3] = t2_v_L1[6] ? t2_type_L1[6] : t2_type_L1[7];
+    assign t2_v_L3[0]    = t2_v_L2[0] | t2_v_L2[1];
+    assign t2_idx_L3[0]  = t2_v_L2[0] ? t2_idx_L2[0] : t2_idx_L2[1];
+    assign t2_type_L3[0] = t2_v_L2[0] ? t2_type_L2[0] : t2_type_L2[1];
+    assign t2_v_L3[1]    = t2_v_L2[2] | t2_v_L2[3];
+    assign t2_idx_L3[1]  = t2_v_L2[2] ? t2_idx_L2[2] : t2_idx_L2[3];
+    assign t2_type_L3[1] = t2_v_L2[2] ? t2_type_L2[2] : t2_type_L2[3];
+    assign t2_v_L4[0]    = t2_v_L3[0] | t2_v_L3[1];
+    assign t2_idx_L4[0]  = t2_v_L3[0] ? t2_idx_L3[0] : t2_idx_L3[1];
+    assign t2_type_L4[0] = t2_v_L3[0] ? t2_type_L3[0] : t2_type_L3[1];
+    wire                t2_valid = t2_v_L4[0];
+    wire [IDX_BITS-1:0] t2_idx   = t2_idx_L4[0];
+    wire [3:0]          t2_type  = t2_type_L4[0];
+
+    logic                  t3_v_L1   [8];
+    logic [3:0]   t3_idx_L1 [8];
+    logic [3:0]            t3_type_L1[8];
+    logic                  t3_v_L2   [4];
+    logic [3:0]   t3_idx_L2 [4];
+    logic [3:0]            t3_type_L2[4];
+    logic                  t3_v_L3   [2];
+    logic [3:0]   t3_idx_L3 [2];
+    logic [3:0]            t3_type_L3[2];
+    logic                  t3_v_L4   [1];
+    logic [3:0]   t3_idx_L4 [1];
+    logic [3:0]            t3_type_L4[1];
+
+    assign t3_v_L1[0]    = eligible3[0] | eligible3[1];
+    assign t3_idx_L1[0]  = eligible3[0] ? 4'd0 : 4'd1;
+    assign t3_type_L1[0] = eligible3[0] ? (act_cond_pre[0] ? CMD_PRE : CMD_ACT) : (act_cond_pre[1] ? CMD_PRE : CMD_ACT);
+    assign t3_v_L1[1]    = eligible3[2] | eligible3[3];
+    assign t3_idx_L1[1]  = eligible3[2] ? 4'd2 : 4'd3;
+    assign t3_type_L1[1] = eligible3[2] ? (act_cond_pre[2] ? CMD_PRE : CMD_ACT) : (act_cond_pre[3] ? CMD_PRE : CMD_ACT);
+    assign t3_v_L1[2]    = eligible3[4] | eligible3[5];
+    assign t3_idx_L1[2]  = eligible3[4] ? 4'd4 : 4'd5;
+    assign t3_type_L1[2] = eligible3[4] ? (act_cond_pre[4] ? CMD_PRE : CMD_ACT) : (act_cond_pre[5] ? CMD_PRE : CMD_ACT);
+    assign t3_v_L1[3]    = eligible3[6] | eligible3[7];
+    assign t3_idx_L1[3]  = eligible3[6] ? 4'd6 : 4'd7;
+    assign t3_type_L1[3] = eligible3[6] ? (act_cond_pre[6] ? CMD_PRE : CMD_ACT) : (act_cond_pre[7] ? CMD_PRE : CMD_ACT);
+    assign t3_v_L1[4]    = eligible3[8] | eligible3[9];
+    assign t3_idx_L1[4]  = eligible3[8] ? 4'd8 : 4'd9;
+    assign t3_type_L1[4] = eligible3[8] ? (act_cond_pre[8] ? CMD_PRE : CMD_ACT) : (act_cond_pre[9] ? CMD_PRE : CMD_ACT);
+    assign t3_v_L1[5]    = eligible3[10] | eligible3[11];
+    assign t3_idx_L1[5]  = eligible3[10] ? 4'd10 : 4'd11;
+    assign t3_type_L1[5] = eligible3[10] ? (act_cond_pre[10] ? CMD_PRE : CMD_ACT) : (act_cond_pre[11] ? CMD_PRE : CMD_ACT);
+    assign t3_v_L1[6]    = eligible3[12] | eligible3[13];
+    assign t3_idx_L1[6]  = eligible3[12] ? 4'd12 : 4'd13;
+    assign t3_type_L1[6] = eligible3[12] ? (act_cond_pre[12] ? CMD_PRE : CMD_ACT) : (act_cond_pre[13] ? CMD_PRE : CMD_ACT);
+    assign t3_v_L1[7]    = eligible3[14] | eligible3[15];
+    assign t3_idx_L1[7]  = eligible3[14] ? 4'd14 : 4'd15;
+    assign t3_type_L1[7] = eligible3[14] ? (act_cond_pre[14] ? CMD_PRE : CMD_ACT) : (act_cond_pre[15] ? CMD_PRE : CMD_ACT);
+    assign t3_v_L2[0]    = t3_v_L1[0] | t3_v_L1[1];
+    assign t3_idx_L2[0]  = t3_v_L1[0] ? t3_idx_L1[0] : t3_idx_L1[1];
+    assign t3_type_L2[0] = t3_v_L1[0] ? t3_type_L1[0] : t3_type_L1[1];
+    assign t3_v_L2[1]    = t3_v_L1[2] | t3_v_L1[3];
+    assign t3_idx_L2[1]  = t3_v_L1[2] ? t3_idx_L1[2] : t3_idx_L1[3];
+    assign t3_type_L2[1] = t3_v_L1[2] ? t3_type_L1[2] : t3_type_L1[3];
+    assign t3_v_L2[2]    = t3_v_L1[4] | t3_v_L1[5];
+    assign t3_idx_L2[2]  = t3_v_L1[4] ? t3_idx_L1[4] : t3_idx_L1[5];
+    assign t3_type_L2[2] = t3_v_L1[4] ? t3_type_L1[4] : t3_type_L1[5];
+    assign t3_v_L2[3]    = t3_v_L1[6] | t3_v_L1[7];
+    assign t3_idx_L2[3]  = t3_v_L1[6] ? t3_idx_L1[6] : t3_idx_L1[7];
+    assign t3_type_L2[3] = t3_v_L1[6] ? t3_type_L1[6] : t3_type_L1[7];
+    assign t3_v_L3[0]    = t3_v_L2[0] | t3_v_L2[1];
+    assign t3_idx_L3[0]  = t3_v_L2[0] ? t3_idx_L2[0] : t3_idx_L2[1];
+    assign t3_type_L3[0] = t3_v_L2[0] ? t3_type_L2[0] : t3_type_L2[1];
+    assign t3_v_L3[1]    = t3_v_L2[2] | t3_v_L2[3];
+    assign t3_idx_L3[1]  = t3_v_L2[2] ? t3_idx_L2[2] : t3_idx_L2[3];
+    assign t3_type_L3[1] = t3_v_L2[2] ? t3_type_L2[2] : t3_type_L2[3];
+    assign t3_v_L4[0]    = t3_v_L3[0] | t3_v_L3[1];
+    assign t3_idx_L4[0]  = t3_v_L3[0] ? t3_idx_L3[0] : t3_idx_L3[1];
+    assign t3_type_L4[0] = t3_v_L3[0] ? t3_type_L3[0] : t3_type_L3[1];
+    wire                t3_valid = t3_v_L4[0];
+    wire [IDX_BITS-1:0] t3_idx   = t3_idx_L4[0];
+    wire [3:0]          t3_type  = t3_type_L4[0];
+
     always_comb begin
         sel_valid      = 1'b0;
         sel_idx        = '0;
@@ -301,37 +462,20 @@ module scheduler #(
                 end
             end
         end
-        // Priority 2: Row-hit CAS (first-come = lowest index)
+        // Priority 2: Row-hit CAS (first-come = lowest index), priority 3:
+        // ACT for row-miss -- both resolved above by their own tree, run
+        // concurrently; this is just "which tier wins."
         else begin
-            for (int i = 0; i < DEPTH; i++) begin
-                if (is_cas_ready[i] && !sel_valid) begin
-                    sel_valid      = 1'b1;
-                    sel_idx        = i[IDX_BITS-1:0];
-                    sel_onehot[i]  = 1'b1;
-                    sel_type       = q_we[i] ? CMD_WR : CMD_RD;
-                end
-            end
-            // Priority 3: ACT for row-miss (need PRE first if bank active with wrong row)
-            if (!sel_valid) begin
-                for (int i = 0; i < DEPTH; i++) begin
-                    if (is_act_needed[i] && !sel_valid) begin
-                        logic [BANK_BITS-1:0] b;
-                        b = q_bank[i];
-                        if (bank_is_active[b] && bank_pre_allowed[b] && !inflight_any[b] && !inflight_ref) begin
-                            // Need PRE first
-                            sel_valid     = 1'b1;
-                            sel_idx       = i[IDX_BITS-1:0];
-                            sel_onehot[i] = 1'b1;
-                            sel_type      = CMD_PRE;
-                        end else if (!bank_is_active[b] && bank_act_allowed[b] && !inflight_any[b] && !inflight_act && !inflight_ref) begin
-                            // Bank idle, can ACT
-                            sel_valid     = 1'b1;
-                            sel_idx       = i[IDX_BITS-1:0];
-                            sel_onehot[i] = 1'b1;
-                            sel_type      = CMD_ACT;
-                        end
-                    end
-                end
+            if (t2_valid) begin
+                sel_valid            = 1'b1;
+                sel_idx               = t2_idx;
+                sel_onehot[t2_idx]    = 1'b1;
+                sel_type              = t2_type;
+            end else if (t3_valid) begin
+                sel_valid            = 1'b1;
+                sel_idx               = t3_idx;
+                sel_onehot[t3_idx]    = 1'b1;
+                sel_type              = t3_type;
             end
             // Priority 4: Normal refresh (when no other work) -- same
             // idle-gate / force-precharge-first behavior as urgent refresh.

@@ -56,8 +56,51 @@ class SchedulerGenerator:
         p["WORD_BEATS"] = (host_width // dq_width) if (dq_width and host_width % dq_width == 0) else 1
         return p
 
+    def _priority_tree(self, name, depth, idx_bits, eligible_expr, leaf_type_expr):
+        """Emit a balanced binary reduction tree that finds the lowest index
+        i with eligible_expr(i) set, carrying leaf_type_expr(i)'s 4-bit
+        command type to the winner -- log2(depth) levels instead of a
+        depth-deep ripple. microarch_compiler.py enforces command_queue_depth
+        is a power of 2 in [4, 32], so every level pairs evenly; no odd-leaf
+        passthrough case can occur.
+        Returns (sv_text, valid_wire, idx_wire, type_wire).
+        """
+        nlevels = int(round(math.log2(depth)))
+        counts = [depth // (2 ** k) for k in range(1, nlevels + 1)]
+        lines = []
+        for k, c in enumerate(counts, start=1):
+            lines.append(f"    logic                  {name}_v_L{k}   [{c}];")
+            lines.append(f"    logic [{idx_bits-1}:0]{'' if idx_bits >= 10 else ' '}  {name}_idx_L{k} [{c}];")
+            lines.append(f"    logic [3:0]            {name}_type_L{k}[{c}];")
+        lines.append("")
+        for k, c in enumerate(counts, start=1):
+            for j in range(c):
+                lo, hi = 2 * j, 2 * j + 1
+                if k == 1:
+                    lo_v, lo_idx, lo_t = eligible_expr(lo), f"{idx_bits}'d{lo}", leaf_type_expr(lo)
+                    hi_v, hi_idx, hi_t = eligible_expr(hi), f"{idx_bits}'d{hi}", leaf_type_expr(hi)
+                else:
+                    lo_v, lo_idx, lo_t = (f"{name}_v_L{k-1}[{lo}]", f"{name}_idx_L{k-1}[{lo}]",
+                                          f"{name}_type_L{k-1}[{lo}]")
+                    hi_v, hi_idx, hi_t = (f"{name}_v_L{k-1}[{hi}]", f"{name}_idx_L{k-1}[{hi}]",
+                                          f"{name}_type_L{k-1}[{hi}]")
+                lines.append(f"    assign {name}_v_L{k}[{j}]    = {lo_v} | {hi_v};")
+                lines.append(f"    assign {name}_idx_L{k}[{j}]  = {lo_v} ? {lo_idx} : {hi_idx};")
+                lines.append(f"    assign {name}_type_L{k}[{j}] = {lo_v} ? {lo_t} : {hi_t};")
+        top = nlevels
+        return "\n".join(lines), f"{name}_v_L{top}[0]", f"{name}_idx_L{top}[0]", f"{name}_type_L{top}[0]"
+
     def generate_rtl(self):
         p = self.p
+        depth, idx_bits = p["DEPTH"], p["IDX_BITS"]
+        t2_tree, t2_valid_w, t2_idx_w, t2_type_w = self._priority_tree(
+            "t2", depth, idx_bits,
+            eligible_expr=lambda i: f"is_cas_ready[{i}]",
+            leaf_type_expr=lambda i: f"(q_we[{i}] ? CMD_WR : CMD_RD)")
+        t3_tree, t3_valid_w, t3_idx_w, t3_type_w = self._priority_tree(
+            "t3", depth, idx_bits,
+            eligible_expr=lambda i: f"eligible3[{i}]",
+            leaf_type_expr=lambda i: f"(act_cond_pre[{i}] ? CMD_PRE : CMD_ACT)")
         return f"""////////////////////////////////////////////////////////////////////////////////
 // Module:    scheduler
 // Generated: see the manifest's generated_utc (no timestamp here, so identical RTL is byte-identical)
@@ -328,6 +371,53 @@ module scheduler #(
     logic                    sel_from_queue;
     logic [BANK_BITS-1:0]    sel_bank;
 
+    // ────────────────────────────────────────────────────────────────
+    // Priority 2/3 arbitration as a tree, not a ripple (2026-11-03,
+    // backend/handoff/HANDOFF_FRONTEND_2026-11-03.md). The old code
+    // chained two 16-deep first-match loops through `if (!sel_valid)`
+    // -- 32 serial decision levels, and every failing endpoint on the
+    // best chip built so far traced back through exactly this chain to
+    // u_cmd_queue.entry_bank. Each entry's eligibility for a tier never
+    // depended on any OTHER entry (is_cas_ready/is_act_needed above
+    // already compute all DEPTH entries in parallel) or on the OTHER
+    // tier (eligible3 below reads only bank state and inflight, never
+    // tier 2's result) -- only "which entry wins" was serial. So both
+    // tiers' winners are found by their own balanced reduction tree
+    // (log2(DEPTH) levels instead of DEPTH), computed concurrently
+    // rather than one gated behind the other, and only the final
+    // "tier 2 beats tier 3" choice below is still a priority mux -- one
+    // level, not sixteen.
+    // ────────────────────────────────────────────────────────────────
+
+    // Priority 3's per-entry eligibility, spelled out the same way
+    // is_cas_ready is above: each i's PRE-first-vs-ACT-now resolution
+    // reads only q_bank[i] and bank/inflight state, independent of
+    // every other i.
+    logic [DEPTH-1:0] act_cond_pre;   // bank active, wrong row, ready to PRE
+    logic [DEPTH-1:0] act_cond_act;   // bank idle, ready to ACT
+    logic [DEPTH-1:0] eligible3;
+    always_comb begin
+        for (int i = 0; i < DEPTH; i++) begin
+            logic [BANK_BITS-1:0] b;
+            b = q_bank[i];
+            act_cond_pre[i] = is_act_needed[i] && bank_is_active[b] && bank_pre_allowed[b] &&
+                               !inflight_any[b] && !inflight_ref;
+            act_cond_act[i] = is_act_needed[i] && !bank_is_active[b] && bank_act_allowed[b] &&
+                               !inflight_any[b] && !inflight_act && !inflight_ref;
+            eligible3[i]    = act_cond_pre[i] || act_cond_act[i];
+        end
+    end
+
+{t2_tree}
+    wire                t2_valid = {t2_valid_w};
+    wire [IDX_BITS-1:0] t2_idx   = {t2_idx_w};
+    wire [3:0]          t2_type  = {t2_type_w};
+
+{t3_tree}
+    wire                t3_valid = {t3_valid_w};
+    wire [IDX_BITS-1:0] t3_idx   = {t3_idx_w};
+    wire [3:0]          t3_type  = {t3_type_w};
+
     always_comb begin
         sel_valid      = 1'b0;
         sel_idx        = '0;
@@ -361,37 +451,20 @@ module scheduler #(
                 end
             end
         end
-        // Priority 2: Row-hit CAS (first-come = lowest index)
+        // Priority 2: Row-hit CAS (first-come = lowest index), priority 3:
+        // ACT for row-miss -- both resolved above by their own tree, run
+        // concurrently; this is just "which tier wins."
         else begin
-            for (int i = 0; i < DEPTH; i++) begin
-                if (is_cas_ready[i] && !sel_valid) begin
-                    sel_valid      = 1'b1;
-                    sel_idx        = i[IDX_BITS-1:0];
-                    sel_onehot[i]  = 1'b1;
-                    sel_type       = q_we[i] ? CMD_WR : CMD_RD;
-                end
-            end
-            // Priority 3: ACT for row-miss (need PRE first if bank active with wrong row)
-            if (!sel_valid) begin
-                for (int i = 0; i < DEPTH; i++) begin
-                    if (is_act_needed[i] && !sel_valid) begin
-                        logic [BANK_BITS-1:0] b;
-                        b = q_bank[i];
-                        if (bank_is_active[b] && bank_pre_allowed[b] && !inflight_any[b] && !inflight_ref) begin
-                            // Need PRE first
-                            sel_valid     = 1'b1;
-                            sel_idx       = i[IDX_BITS-1:0];
-                            sel_onehot[i] = 1'b1;
-                            sel_type      = CMD_PRE;
-                        end else if (!bank_is_active[b] && bank_act_allowed[b] && !inflight_any[b] && !inflight_act && !inflight_ref) begin
-                            // Bank idle, can ACT
-                            sel_valid     = 1'b1;
-                            sel_idx       = i[IDX_BITS-1:0];
-                            sel_onehot[i] = 1'b1;
-                            sel_type      = CMD_ACT;
-                        end
-                    end
-                end
+            if (t2_valid) begin
+                sel_valid            = 1'b1;
+                sel_idx               = t2_idx;
+                sel_onehot[t2_idx]    = 1'b1;
+                sel_type              = t2_type;
+            end else if (t3_valid) begin
+                sel_valid            = 1'b1;
+                sel_idx               = t3_idx;
+                sel_onehot[t3_idx]    = 1'b1;
+                sel_type              = t3_type;
             end
             // Priority 4: Normal refresh (when no other work) -- same
             // idle-gate / force-precharge-first behavior as urgent refresh.
