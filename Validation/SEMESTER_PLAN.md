@@ -1120,6 +1120,20 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   keyed by the aux tag she already has. Addendum 17. ECC presets after
   her testbench fix: high-performance generates and validates;
   server-grade (5 lanes) still halts on the same message.
+- *2026-11-05, late — the goal is the five presets through the whole
+  system.* Jacob set the priority: the five presets end to end, backend
+  included; English-intake stress deferred. State: default, balanced
+  and low-cost-embedded complete the RTL half with no finding and are
+  ready for the backend stage; high-performance (ECC) carried the two
+  port-ordering findings plus ECC-specific data-path losses to her
+  agents, which fixed nothing (its package committed under its spec
+  revision in the shared outbox, addendum 18); server-grade halts in
+  her Phase 4 testbench generator. The backend stage needs Docker and
+  ORFS, which this machine lacks; Dawson's runbook and launcher
+  (docs/RUNNING_THE_FLOW.md, run_flow.ps1) run the whole flow from his
+  machine, and `spec_matrix.py --level 3` runs the presets with the
+  backend on (backend reply addendum 7). The matrix's levels now map
+  to the plan: 1 review, 2 RTL half, 3 whole flow.
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

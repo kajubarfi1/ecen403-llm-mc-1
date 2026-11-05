@@ -4,7 +4,7 @@
 //
 // Interface : init_status   (Initialisation completion event)
 // Block     : init_fsm
-// Manifest  : runs/matrix/preset_high-performance/drop/PHASE1RTL/init_fsm_manifest.json
+// Manifest  : runs/matrix/preset_server-grade/drop/PHASE1RTL/init_fsm_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

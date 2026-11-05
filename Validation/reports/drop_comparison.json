@@ -5,11 +5,11 @@
     "drop_head": "e6e1ab286a8f"
   },
   "b": {
-    "dir": "runs/matrix/preset_high-performance/validation/reports",
-    "drop_head": "c3135943228e"
+    "dir": "runs/matrix/preset_server-grade/validation/reports",
+    "drop_head": "9a7390bdce1e"
   },
   "strict": false,
-  "generated_utc": "2026-11-05T18:08:03.263592Z",
+  "generated_utc": "2026-11-05T18:38:20.533805Z",
   "rows": [
     {
       "path": "path_01_write_cmd",
@@ -46,8 +46,10 @@
     },
     {
       "path": "path_02_read_cmd",
-      "kind": "fixed",
-      "new": {},
+      "kind": "changed",
+      "new": {
+        "illegal:cp_tccd_spacing": 37
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
@@ -55,7 +57,7 @@
       "matched_up": {
         "matched:cmd_gen": [
           138,
-          147
+          146
         ]
       },
       "verdict": [
@@ -135,8 +137,9 @@
       "path": "path_07_backpressure",
       "kind": "changed",
       "new": {
-        "assert:a_HOST_002": 126,
-        "assert:p_wr_no_overflow": 5,
+        "assert:a_HOST_002": 128,
+        "assert:p_wr_no_overflow": 4,
+        "illegal:cp_tccd_spacing": 16,
         "stage:(conservation)": 1,
         "stage:wb_port": 1
       },
@@ -147,11 +150,11 @@
       "matched_up": {
         "matched:addr_decoder": [
           240,
-          252
+          244
         ],
         "matched:wb_port": [
           354,
-          362
+          356
         ]
       },
       "verdict": [
@@ -304,16 +307,20 @@
       "kind": "regression",
       "new": {
         "assert:a_HOST_002": 12,
-        "stage:(host memory)": 1,
         "stage:wb_port": 1
       },
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
+      "matched_down": {
+        "matched:data_path": [
+          36,
+          24
+        ]
+      },
       "matched_up": {},
       "verdict": [
-        "pass",
+        "fail",
         "fail"
       ]
     },
@@ -401,12 +408,21 @@
     },
     {
       "path": "path_23_host_ack_collision",
-      "kind": "same",
+      "kind": "regression",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
+      "matched_down": {
+        "matched:data_path": [
+          127,
+          83
+        ],
+        "matched:wb_port": [
+          128,
+          125
+        ]
+      },
       "matched_up": {},
       "verdict": [
         "fail",

@@ -1,0 +1,189 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_18_full_write",
+  "strategy": "composed",
+  "verdict": "fail",
+  "timestamp": "2026-11-05T12:37:04.515418",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
+  "stimulus_generator": "write_read",
+  "autonomous": false,
+  "window_cycles": 2000,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "9a7390bdce1e",
+    "drop_id": "9a7390bdce1e",
+    "design_id": "d041f7d2e9e4",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "a2cdd65",
+    "frontend_commits": {
+      "addr_decoder": "a2cdd65159222d86af3848c14ccd8401e6e22496",
+      "bank_tracker": "a2cdd65159222d86af3848c14ccd8401e6e22496",
+      "cmd_gen": "a2cdd65159222d86af3848c14ccd8401e6e22496",
+      "cmd_queue": "a2cdd65159222d86af3848c14ccd8401e6e22496",
+      "config_regs": "a2cdd65159222d86af3848c14ccd8401e6e22496",
+      "data_path": "a2cdd65159222d86af3848c14ccd8401e6e22496",
+      "refresh_ctrl": "a2cdd65159222d86af3848c14ccd8401e6e22496",
+      "scheduler": "a2cdd65159222d86af3848c14ccd8401e6e22496",
+      "wb_port": "a2cdd65159222d86af3848c14ccd8401e6e22496"
+    },
+    "roots": [
+      "runs/matrix/preset_server-grade/drop"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE2RTL/addr_decoder.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      },
+      "bank_tracker": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE2RTL/bank_tracker.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      },
+      "cmd_gen": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE3RTL/cmd_gen.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      },
+      "cmd_queue": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE3RTL/cmd_queue.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      },
+      "config_regs": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      },
+      "data_path": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE4RTL/data_path.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      },
+      "refresh_ctrl": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      },
+      "scheduler": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE3RTL/scheduler.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      },
+      "wb_port": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE1RTL/wb_port.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/matrix/preset_server-grade/drop/generated_spec.json",
+      "revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "fail",
+      "summary": "scope=wb_port  strategy=exact  status=pass  matched=36/36  (36 output transaction(s) matched)  SVA fired: a_HOST_002 x12",
+      "detail": [
+        "a_HOST_002 fired 12x (assertion bound to wb_port)"
+      ],
+      "rule_counts": {}
+    },
+    {
+      "stage": "addr_decoder",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
+      "scope": "addr_decoder",
+      "verdict": "pass",
+      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=24/24  (24 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "cmd_queue+scheduler",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
+      "scope": "cmd_queue_scheduler",
+      "verdict": "pass",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (431 transactions, no rule broken)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "cmd_gen",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
+      "scope": "cmd_gen",
+      "verdict": "pass",
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=64/64  (64 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "data_path",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/data_path_predictor.py",
+      "scope": "data_path",
+      "verdict": "pass",
+      "summary": "scope=data_path  strategy=exact  status=pass  matched=24/24  (24 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "(conservation)",
+      "kind": "conservation",
+      "scope": "(conservation)",
+      "model": null,
+      "verdict": "pass",
+      "summary": "scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable",
+      "detail": []
+    },
+    {
+      "stage": "(host memory)",
+      "kind": "host_memory",
+      "scope": "(host memory)",
+      "model": null,
+      "verdict": "fail",
+      "summary": "scope=(host memory)  strategy=host_memory  status=fail  checked=12 skipped_unwritten=0 mismatches=8 outstanding_at_end=0",
+      "detail": [
+        "HOSTMEM wb_rsp[2] addr=0x63ca828c expected=0x7204e52d observed=0xafbd67f9 (the data the host wrote at 0x619699cc) read accepted t=63000 answered t=1689000",
+        "HOSTMEM wb_rsp[3] addr=0x51431190 expected=0x7d4bedc observed=0x7204e52d (the data the host wrote at 0x63ca828c) read accepted t=73000 answered t=1729000",
+        "HOSTMEM wb_rsp[4] addr=0x619699cc expected=0xafbd67f9 observed=0x7d4bedc (the data the host wrote at 0x51431190) read accepted t=83000 answered t=1769000",
+        "HOSTMEM wb_rsp[5] addr=0x38c0c8fc expected=0xc381e88f observed=0x815a47c5 (the data the host wrote at 0x7fd63114) read accepted t=93000 answered t=2144000",
+        "HOSTMEM wb_rsp[6] addr=0x587fd280 expected=0x5805975 observed=0xc381e88f (the data the host wrote at 0x38c0c8fc) read accepted t=103000 answered t=2149000",
+        "HOSTMEM wb_rsp[8] addr=0x7fd63114 expected=0x815a47c5 observed=0x5805975 (the data the host wrote at 0x587fd280) read accepted t=123000 answered t=2194000",
+        "HOSTMEM wb_rsp[9] addr=0x3e2434e0 expected=0x677f6cbd observed=0x1622bd79 (the data the host wrote at 0x5fec898c) read accepted t=133000 answered t=2514000",
+        "HOSTMEM wb_rsp[10] addr=0x5fec898c expected=0x1622bd79 observed=0x677f6cbd (the data the host wrote at 0x3e2434e0) read accepted t=143000 answered t=2594000"
+      ]
+    }
+  ],
+  "log": "runs/matrix/preset_server-grade/validation/reports/path_18_full_write_sim.log",
+  "observed_trace": "runs/matrix/preset_server-grade/validation/reports/path_18_full_write_observed.jsonl"
+}

@@ -201,15 +201,20 @@ def level1(entry, out_dir):
 
 
 # ---------------------------------------------------------------- level 2
-def level2(entry, out_dir, timeout=5400):
+def level2(entry, out_dir, timeout=5400, backend=False):
     """The flow's RTL half on this spec: one generation, our validation, one
     fix round. Reads the run state and the run-local package."""
     choices_path = os.path.join(out_dir, "choices.json")
     with open(choices_path, "w") as f:
         json.dump(entry["choices"], f, indent=2)
     run_dir = os.path.join(RUNS, entry["name"])
-    cmd = [sys.executable, "flow.py", "--choices", choices_path, "--skip-backend",
+    cmd = [sys.executable, "flow.py", "--choices", choices_path,
            "--run-dir", os.path.relpath(run_dir, ROOT), "--max-rtl-rounds", "2"]
+    if not backend:
+        cmd.append("--skip-backend")
+    elif os.environ.get("USE_DOCKER") != "1":
+        return {"flow_rc": None, "run_dir": os.path.relpath(run_dir, ROOT),
+                "infrastructure": "level 3 needs USE_DOCKER=1 and the ORFS image (docs/RUNNING_THE_FLOW.md)"}
     # the matrix judges generation and simulation per spec; the formal
     # replays (20-60 min each) belong to the golden sign-off, not to a sweep
     env = dict(os.environ, VALIDATION_SKIP_FORMAL="1")
@@ -320,7 +325,10 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--build", action="store_true", help="(re)build the matrix file")
     ap.add_argument("--seed", type=int, default=1)
-    ap.add_argument("--level", type=int, choices=(1, 2), default=1)
+    ap.add_argument("--level", type=int, choices=(1, 2, 3), default=1,
+                    help="1 compile + review; 2 the flow's RTL half; 3 the whole flow, backend included "
+                         "(needs USE_DOCKER=1, the ORFS image and backend/agents/.env: Dawson's machine, "
+                         "docs/RUNNING_THE_FLOW.md)")
     ap.add_argument("--only", nargs="*", default=None, help="entry names to run")
     ap.add_argument("--origin", choices=("preset", "pairwise", "tier2_edge"), default=None)
     ap.add_argument("--skip-done", action="store_true", help="keep entries already in summary.json at this level")
@@ -355,10 +363,10 @@ def main() -> int:
                "utc": datetime.datetime.now(datetime.timezone.utc).isoformat()}
         res["level1"] = level1(e, out_dir)
         line = f"  {e['name']:26} L1 {res['level1']['status']:4} blocking={len(res['level1']['blocking'])} advisory={len(res['level1']['advisory'])}"
-        if args.level == 2 and res["level1"]["status"] == "PASS":
-            res["level2"] = level2(e, out_dir, args.timeout)
+        if args.level >= 2 and res["level1"]["status"] == "PASS":
+            res["level2"] = level2(e, out_dir, args.timeout, backend=(args.level == 3))
             l2 = res["level2"]
-            line += (f" | L2 {'INFRA ' if l2.get('infrastructure') else ''}flow={l2.get('flow_status')} phases={l2.get('phases_passed')} "
+            line += (f" | L{args.level} {'INFRA ' if l2.get('infrastructure') else ''}flow={l2.get('flow_status')} phases={l2.get('phases_passed')} "
                      f"validation={l2.get('validation_status')} failed={l2.get('failed_modules')}"
                      + (f" halt={str(l2.get('halt'))[:70]}" if l2.get("halt") else ""))
         print(line)

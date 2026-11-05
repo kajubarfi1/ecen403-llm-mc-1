@@ -70,8 +70,8 @@
         "command_queue_depth": 32,
         "lookahead_depth": 16
       },
-      "level": 1,
-      "utc": "2026-11-05T17:54:41.585047+00:00",
+      "level": 2,
+      "utc": "2026-11-05T18:00:55.916897+00:00",
       "level1": {
         "revision": "compiled_ddr31600_x8_3lane_1rank_305910af",
         "blocking": [],
@@ -80,6 +80,67 @@
         "gaps": [],
         "spec_path": "Validation/reports/spec_matrix/preset_high-performance/microarch_spec.json",
         "status": "PASS"
+      },
+      "level2": {
+        "flow_rc": 2,
+        "run_dir": "runs/matrix/preset_high-performance",
+        "flow_status": "halted",
+        "halt": {
+          "stage": "frontend_regeneration",
+          "why": "every phase agent fixed nothing (phase 1 agent exited 1: ############################################################## | wb_port: unresolved | wrote /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase1_fix_report; phase 4 agent exited 1: ############################################################## | data_path: unresolved | wrote /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase4_fix_report). Package: runs/matrix/preset_high-performance/validation/round_1",
+          "utc": "2026-11-05T18:35:36.289213+00:00",
+          "package": "/Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/validation/round_1"
+        },
+        "phases_passed": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "stages": {
+          "spec_synthesis": "PASS",
+          "spec_review": "PASS",
+          "rtl_generation": "PASS",
+          "rtl_validation": "FAIL",
+          "frontend_regeneration": "HALT"
+        },
+        "rtl_validation": "FAIL; failed modules: data_path, wb_port; package: runs/matrix/preset_high-performance/validation/round_1",
+        "drop": "c3135943228e",
+        "design_id": "4d572024849e",
+        "validation_status": "FAIL",
+        "failed_modules": [
+          "data_path",
+          "wb_port"
+        ],
+        "findings": [
+          {
+            "owner": "data_path",
+            "check_id": "CONSERVE/WRITE_CMD_TO_BEATS",
+            "status": "open"
+          },
+          {
+            "owner": "data_path",
+            "check_id": "CONSERVE/WRITE_REQUEST_TO_DATA",
+            "status": "open"
+          },
+          {
+            "owner": "wb_port",
+            "check_id": "HANDSHAKE/wb",
+            "status": "open"
+          },
+          {
+            "owner": "wb_port",
+            "check_id": "HOSTMEM/wb_rsp",
+            "status": "open"
+          },
+          {
+            "owner": "wb_port",
+            "check_id": "HOST_002",
+            "status": "open"
+          }
+        ],
+        "paths_run": 20,
+        "paths_blocked": 0
       }
     },
     "preset_low-cost-embedded": {

@@ -1,0 +1,159 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_02_read_cmd",
+  "strategy": "composed",
+  "verdict": "pass",
+  "timestamp": "2026-11-05T12:36:48.712982",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_02_read_cmd_seed1.json",
+  "stimulus_generator": "wb_burst",
+  "autonomous": false,
+  "window_cycles": 600,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "9a7390bdce1e",
+    "drop_id": "9a7390bdce1e",
+    "design_id": "d041f7d2e9e4",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "a2cdd65",
+    "frontend_commits": {
+      "addr_decoder": "a2cdd65159222d86af3848c14ccd8401e6e22496",
+      "bank_tracker": "a2cdd65159222d86af3848c14ccd8401e6e22496",
+      "cmd_gen": "a2cdd65159222d86af3848c14ccd8401e6e22496",
+      "cmd_queue": "a2cdd65159222d86af3848c14ccd8401e6e22496",
+      "config_regs": "a2cdd65159222d86af3848c14ccd8401e6e22496",
+      "data_path": "a2cdd65159222d86af3848c14ccd8401e6e22496",
+      "refresh_ctrl": "a2cdd65159222d86af3848c14ccd8401e6e22496",
+      "scheduler": "a2cdd65159222d86af3848c14ccd8401e6e22496",
+      "wb_port": "a2cdd65159222d86af3848c14ccd8401e6e22496"
+    },
+    "roots": [
+      "runs/matrix/preset_server-grade/drop"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE2RTL/addr_decoder.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      },
+      "bank_tracker": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE2RTL/bank_tracker.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      },
+      "cmd_gen": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE3RTL/cmd_gen.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      },
+      "cmd_queue": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE3RTL/cmd_queue.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      },
+      "config_regs": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      },
+      "data_path": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE4RTL/data_path.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      },
+      "refresh_ctrl": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      },
+      "scheduler": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE3RTL/scheduler.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      },
+      "wb_port": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE1RTL/wb_port.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/matrix/preset_server-grade/drop/generated_spec.json",
+      "revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "pass",
+      "summary": "scope=wb_port  strategy=exact  status=pass  matched=123/123  (123 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "addr_decoder",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
+      "scope": "addr_decoder",
+      "verdict": "pass",
+      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=77/77  (77 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "cmd_queue+scheduler",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
+      "scope": "cmd_queue_scheduler",
+      "verdict": "pass",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (1132 transactions, no rule broken)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "cmd_gen",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
+      "scope": "cmd_gen",
+      "verdict": "pass",
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=146/146  (146 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "(conservation)",
+      "kind": "conservation",
+      "scope": "(conservation)",
+      "model": null,
+      "verdict": "pass",
+      "summary": "scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable",
+      "detail": []
+    }
+  ],
+  "log": "runs/matrix/preset_server-grade/validation/reports/path_02_read_cmd_sim.log",
+  "observed_trace": "runs/matrix/preset_server-grade/validation/reports/path_02_read_cmd_observed.jsonl"
+}
