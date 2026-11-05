@@ -76,7 +76,12 @@ class VerilatorLint:
         all_clean = True
 
         try:
-            sim.connect()
+            # OLYMPUS_PASSWORD (self.ssh_config["password"]) was documented
+            # in USAGE.md as a key_path alternative but never actually read
+            # here -- sim.connect() took no password, so a password-only
+            # setup authenticated with nothing and failed every time
+            # (2026-11-05, hit live via flow.py --gui).
+            sim.connect(password=self.ssh_config.get("password"))
         except Exception as e:
             return {"status": "SKIPPED", "reason": f"SSH failed: {e}", "modules": {}}
 

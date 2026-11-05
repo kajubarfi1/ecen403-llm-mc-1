@@ -21,15 +21,23 @@ Usage:
   python3 gui/flow_gui.py --demo             fake a whole run (no ORFS needed)
   python3 flow.py --gui ...                  run the flow with this GUI attached
 
+Opened on its own, the page also has a terminal panel that starts flow.py
+and takes keyboard input (gui/flow_terminal.py; macOS/Linux). A run started
+there keeps going with the tab closed and stops when this server stops.
+--no-terminal makes the page watch-only.
+
 ORFS_DIR comes from --orfs-dir, the environment, or backend/agents/.env.
 """
 
 import argparse
+import base64
 import glob
+import hmac
 import json
 import math
 import os
 import re
+import secrets
 import sys
 import threading
 import time
@@ -707,10 +715,12 @@ class Watcher:
 # HTTP
 # --------------------------------------------------------------------------
 
-def make_handler(watcher):
+def make_handler(watcher, terminal=None, token="", off_reason=""):
     page_path = os.path.join(HERE, "index.html")
 
     class H(BaseHTTPRequestHandler):
+        protocol_version = "HTTP/1.1"
+
         def log_message(self, *a):
             pass
 
@@ -723,33 +733,116 @@ def make_handler(watcher):
             self.end_headers()
             self.wfile.write(data)
 
+        def _json(self, code, obj):
+            return self._send(code, json.dumps(obj, default=str), "application/json")
+
+        def _host_ok(self):
+            # only pages served from this machine (blocks DNS-rebinding sites)
+            host = (self.headers.get("Host") or "").rsplit(":", 1)[0].strip("[]")
+            return host in ("127.0.0.1", "localhost", "::1")
+
+        def _token_ok(self, q=None):
+            got = self.headers.get("X-Flow-Token") or ((q or {}).get("token") or [""])[0]
+            return bool(token) and hmac.compare_digest(got, token)
+
         def do_GET(self):
+            if not self._host_ok():
+                return self._send(403, "forbidden", "text/plain")
             u = urlparse(self.path)
+            q = parse_qs(u.query)
             if u.path in ("/", "/index.html"):
-                with open(page_path, "rb") as f:
-                    return self._send(200, f.read(), "text/html; charset=utf-8")
+                with open(page_path, encoding="utf-8") as f:
+                    page = f.read()
+                page = page.replace("__FLOW_GUI_TOKEN__", token if terminal else "")
+                return self._send(200, page, "text/html; charset=utf-8")
             if u.path == "/api/status":
-                q = parse_qs(u.query)
                 try:
-                    body = json.dumps(watcher.status((q.get("run") or [None])[0]), default=str)
+                    st = watcher.status((q.get("run") or [None])[0])
                 except Exception as e:   # a half-written file: say so, the page retries
-                    return self._send(500, json.dumps({"error": f"{type(e).__name__}: {e}"}), "application/json")
-                return self._send(200, body, "application/json")
+                    return self._json(500, {"error": f"{type(e).__name__}: {e}"})
+                st["terminal"] = terminal.state() if terminal else {"available": False, "reason": off_reason}
+                return self._json(200, st)
+            if u.path == "/api/term/stream":
+                if not (terminal and self._token_ok(q)):
+                    return self._send(403, "forbidden", "text/plain")
+                return self._stream(q)
             return self._send(404, "not found", "text/plain")
+
+        def do_POST(self):
+            if not self._host_ok():
+                return self._send(403, "forbidden", "text/plain")
+            u = urlparse(self.path)
+            n = int(self.headers.get("Content-Length") or 0)
+            body = self.rfile.read(n) if n else b""
+            if not (terminal and self._token_ok()):
+                return self._json(403, {"error": "forbidden"})
+            try:
+                if u.path == "/api/term/input":
+                    terminal.write(body)
+                    return self._json(200, {"ok": True})
+                req = json.loads(body or b"{}")
+                if u.path == "/api/term/start":
+                    return self._json(200, terminal.start(req.get("args", ""), req.get("cols"), req.get("rows")))
+                if u.path == "/api/term/resize":
+                    terminal.resize(req.get("cols", 120), req.get("rows", 36))
+                    return self._json(200, {"ok": True})
+                if u.path == "/api/term/interrupt":
+                    terminal.interrupt()
+                    return self._json(200, terminal.state())
+            except (RuntimeError, ValueError, OSError) as e:
+                return self._json(409, {"error": str(e)})
+            return self._json(404, {"error": "not found"})
+
+        def _stream(self, q):
+            """Server-sent events: terminal output, base64, from an offset
+            (the browser resends its last id when it reconnects)."""
+            try:
+                since = int(self.headers.get("Last-Event-ID") or (q.get("from") or ["0"])[0])
+            except ValueError:
+                since = 0
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Connection", "close")
+            self.end_headers()
+            self.close_connection = True
+            try:
+                while True:
+                    data, end, reset = terminal.read(since)
+                    if reset:
+                        self.wfile.write(b"event: reset\ndata: \n\n")
+                    if data or reset:
+                        payload = base64.b64encode(data).decode()
+                        self.wfile.write(f"id: {end}\ndata: {payload}\n\n".encode())
+                        self.wfile.flush()
+                        since = end
+                    elif not terminal.wait(since, 15):
+                        self.wfile.write(b": ping\n\n")
+                        self.wfile.flush()
+            except (BrokenPipeError, ConnectionResetError, OSError):
+                return
 
     return H
 
 
-def serve(watcher, port=8765, open_browser=True, host="127.0.0.1"):
-    """Start the server in a daemon thread; returns (server, url)."""
+OFF_FROM_FLOW = ("this page was opened by flow.py --gui; type into the terminal you started "
+                 "that run from")
+
+
+def serve(watcher, port=8765, open_browser=True, host="127.0.0.1", terminal=None,
+          off_reason=OFF_FROM_FLOW):
+    """Start the server in a daemon thread; returns (server, url). With a
+    FlowTerminal the page can start flow.py and type into it."""
+    token = secrets.token_urlsafe(24)
     for p in range(port, port + 20):
         try:
-            srv = ThreadingHTTPServer((host, p), make_handler(watcher))
+            srv = ThreadingHTTPServer((host, p), make_handler(watcher, terminal, token, off_reason))
             break
         except OSError:
             continue
     else:
         raise OSError(f"no free port in {port}..{port + 19}")
+    srv.daemon_threads = True
     url = f"http://{host}:{srv.server_address[1]}/"
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     if open_browser:
@@ -767,7 +860,12 @@ def main():
     ap.add_argument("--no-browser", action="store_true")
     ap.add_argument("--demo", action="store_true", help="simulate a whole run, no ORFS needed")
     ap.add_argument("--demo-minutes", type=float, default=4.0, help="length of the simulated run")
+    ap.add_argument("--no-terminal", action="store_true",
+                    help="watch only: no terminal panel that can start flow.py")
     args = ap.parse_args()
+    sys.path.insert(0, HERE)
+    import flow_terminal
+    terminal = None
 
     if args.demo:
         sys.path.insert(0, HERE)
@@ -782,12 +880,20 @@ def main():
                           orfs_dir=args.orfs_dir, platform=args.platform)
         if not watcher.orfs_dir:
             print("note: ORFS_DIR not found; backend steps will be estimated from elapsed time")
-    srv, url = serve(watcher, args.port, not args.no_browser)
-    print(f"flow GUI at {url}  (ctrl-c to stop)")
+        if not args.no_terminal:
+            terminal = flow_terminal.FlowTerminal(ROOT)
+    off = ("demo mode: the page only watches the simulated run" if args.demo else
+           "started with --no-terminal" if args.no_terminal else flow_terminal.WHY_NOT or "")
+    srv, url = serve(watcher, args.port, not args.no_browser, terminal=terminal, off_reason=off)
+    print(f"flow GUI at {url}  (ctrl-c to stop"
+          + (", which also stops a run started from the page)" if terminal else ")"))
     try:
         while True:
             time.sleep(3600)
     except KeyboardInterrupt:
+        if terminal and terminal.running():
+            print("stopping the run started from the page")
+            terminal.close()
         srv.shutdown()
     return 0
 

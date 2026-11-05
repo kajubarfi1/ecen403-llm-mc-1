@@ -24,6 +24,7 @@
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); }
 body { min-height: 100vh; }
 .wrap { max-width: 1480px; margin: 0 auto; padding: 18px 20px 30px; }
@@ -166,6 +167,28 @@ button:hover, select:hover { border-color: var(--faint); }
 .log .warn { color: var(--halt); }
 .log .bk { color: #d8b4fe; }
 label.chk { font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.tab { background: none; border: 0; border-radius: 6px; padding: 5px 9px; font-size: 13px; font-weight: 650;
+  letter-spacing: .4px; text-transform: uppercase; color: var(--muted); }
+.tab.on { background: var(--panel-2); color: var(--text); }
+.tab .live { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--pass);
+  margin-left: 6px; vertical-align: 1px; animation: ping 1.6s infinite; }
+.term-bar { display: flex; gap: 8px; align-items: center; padding: 10px 14px 6px; flex-wrap: wrap; }
+.term-bar .prompt { font: 13px var(--mono); color: #67e8f9; white-space: nowrap; }
+.term-bar input { flex: 1; min-width: 200px; background: #0b0f17; color: var(--text); border: 1px solid var(--line);
+  border-radius: 8px; padding: 7px 10px; font: 13px var(--mono); }
+.term-bar input:focus { outline: none; border-color: var(--accent); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #0a0d14; font-weight: 650; }
+button.primary:hover { filter: brightness(1.1); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+.chips { display: flex; gap: 6px; align-items: center; padding: 0 14px 10px; flex-wrap: wrap; }
+.chips button { font-size: 12px; padding: 4px 9px; border-radius: 999px; }
+.chips .meta { margin-left: auto; }
+#term { height: 460px; padding: 8px 4px 8px 12px; background: #0b0f17; border-top: 1px solid var(--line);
+  border-radius: 0 0 14px 14px; overflow: hidden; }
+.term-off { padding: 26px 18px; color: var(--muted); font-size: 13.5px; }
+.fb { margin: 0; height: 400px; overflow: auto; font: 12.5px/1.5 var(--mono); color: #d7deea; white-space: pre-wrap; }
+.fb-in { width: 100%; margin-top: 6px; background: #111723; color: var(--text); border: 1px solid var(--line);
+  border-radius: 6px; padding: 6px 8px; font: 13px var(--mono); }
 
 .empty { padding: 60px 20px; text-align: center; color: var(--muted); }
 
@@ -185,6 +208,7 @@ label.chk { font-size: 12.5px; color: var(--muted); display: flex; align-items: 
   select { max-width: 100%; }
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.css">
 </head>
 <body>
 <div class="wrap">
@@ -242,14 +266,43 @@ label.chk { font-size: 12.5px; color: var(--muted); display: flex; align-items: 
   </section>
 
   <section class="card log-card">
-    <div class="card-head"><h2>flow.log</h2><span class="meta" id="log-meta"></span><div class="spacer"></div>
-      <label class="chk"><input type="checkbox" id="follow-log" checked> follow</label></div>
-    <div class="log" id="log"></div>
+    <div class="card-head">
+      <button class="tab" data-tab="term" id="tab-term">Terminal</button>
+      <button class="tab" data-tab="log" id="tab-log">flow.log</button>
+      <span class="meta" id="log-meta"></span><div class="spacer"></div>
+      <label class="chk" id="follow-wrap"><input type="checkbox" id="follow-log" checked> follow</label>
+    </div>
+    <div id="pane-term" hidden>
+      <div id="term-ui">
+        <div class="term-bar">
+          <span class="prompt">$ python3 flow.py</span>
+          <input id="term-args" spellcheck="false" autocomplete="off"
+                 placeholder="arguments (none = interactive spec session)">
+          <button id="term-start" class="primary">Start run</button>
+          <button id="term-int" title="Send Ctrl-C to the run">Ctrl-C</button>
+        </div>
+        <div class="chips">
+          <button data-args="">Interactive</button>
+          <button data-args="--spec Spec/llmmc_microarchitecturespec_filled.json">Golden spec</button>
+          <button data-args="--preset balanced --dry-run">Dry run</button>
+          <button data-resume>Resume this run</button>
+          <span class="meta" id="term-state"></span>
+        </div>
+      </div>
+      <div class="term-off" id="term-off" hidden></div>
+      <div id="term"></div>
+    </div>
+    <div id="pane-log"><div class="log" id="log"></div></div>
   </section>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.js"></script>
 <script>
 "use strict";
+// filled in by the server when this page may drive a terminal
+const RAW_TOKEN = "__FLOW_GUI_TOKEN__";
+const TOKEN = RAW_TOKEN.includes("FLOW_GUI_TOKEN") ? "" : RAW_TOKEN;
 // ---------------------------------------------------------------- helpers
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -333,6 +386,7 @@ function render() {
 
   renderBackend();
   renderLog();
+  term.update(data.terminal || { available: false, reason: "" });
   chip.update(data);
 }
 
@@ -438,6 +492,146 @@ function renderLog() {
   if ($("follow-log").checked) el.scrollTop = el.scrollHeight;
   $("log-meta").textContent = data.run ? `${data.run.dir}/flow.log` : "";
 }
+
+// ================================================================ terminal
+// flow.py in a pseudo-terminal on the server (gui/flow_terminal.py): output
+// arrives as server-sent events, keystrokes go back as POSTs.
+const term = (() => {
+  let xt = null, fit = null, es = null, fb = null;
+  let st = { available: false }, sendQ = "", sendT = null, chain = Promise.resolve(), chosenTab = null;
+  const post = (path, body, raw) => fetch(path, {
+    method: "POST",
+    headers: { "X-Flow-Token": TOKEN, "Content-Type": raw ? "application/octet-stream" : "application/json" },
+    body: raw ? body : JSON.stringify(body || {}),
+  }).then((r) => r.json());
+
+  function send(s) {
+    if (!st.running) return;
+    sendQ += s;
+    if (!sendT) sendT = setTimeout(() => {
+      const chunk = new TextEncoder().encode(sendQ); sendQ = ""; sendT = null;
+      chain = chain.then(() => post("/api/term/input", chunk, true)).catch(() => {});
+    }, 8);
+  }
+
+  // ---- without xterm.js (offline): plain text, one line of input
+  const ANSI = /\x1b\[[0-9;?]*[ -\/]*[@-~]|\x1b\][^\x07]*\x07|\x1b[()][0-9A-B]/g;
+  function fbInit(el) {
+    el.innerHTML = `<pre class="fb"></pre><input class="fb-in" placeholder="type here, Enter sends (xterm.js did not load: basic mode)">`;
+    fb = { pre: el.querySelector(".fb"), text: "", dec: new TextDecoder() };
+    el.querySelector(".fb-in").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { send(e.target.value + "\r"); e.target.value = ""; }
+      if (e.key === "c" && e.ctrlKey) send("\x03");
+    });
+  }
+  function fbWrite(u8) {
+    let t = fb.dec.decode(u8, { stream: true }).replace(ANSI, "").replace(/\r\n/g, "\n").replace(/\r/g, "");
+    for (const ch of t) fb.text = ch === "\b" ? fb.text.slice(0, -1) : fb.text + ch;
+    if (fb.text.length > 400000) fb.text = fb.text.slice(-300000);
+    fb.pre.textContent = fb.text; fb.pre.scrollTop = fb.pre.scrollHeight;
+  }
+
+  function init() {
+    const el = $("term");
+    if (window.Terminal) {
+      xt = new Terminal({
+        fontFamily: getComputedStyle(document.documentElement).getPropertyValue("--mono"), fontSize: 13,
+        cursorBlink: true, scrollback: 20000, allowProposedApi: false,
+        theme: { background: "#0b0f17", foreground: "#d7deea", cursor: "#7c9cff", selectionBackground: "#7c9cff55" },
+      });
+      if (window.FitAddon) { fit = new FitAddon.FitAddon(); xt.loadAddon(fit); }
+      xt.open(el);
+      xt.onData(send);
+    } else fbInit(el);
+  }
+  function write(u8) { xt ? xt.write(u8) : fbWrite(u8); }
+
+  function connect() {
+    if (es || !TOKEN) return;
+    es = new EventSource(`/api/term/stream?token=${encodeURIComponent(TOKEN)}&from=0`);
+    es.onmessage = (e) => {
+      if (!e.data) return;
+      const bin = atob(e.data), u8 = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+      write(u8);
+    };
+    es.addEventListener("reset", () => { if (xt) xt.reset(); else if (fb) { fb.text = ""; fb.pre.textContent = ""; } });
+  }
+
+  function size() {
+    if (fit && !$("pane-term").hidden) { try { fit.fit(); } catch (e) {} }
+    return xt ? { cols: xt.cols, rows: xt.rows } : { cols: 110, rows: 30 };
+  }
+  function resized() {
+    const sz = size();
+    if (st.running) post("/api/term/resize", sz).catch(() => {});
+  }
+
+  function show(tab, remember) {
+    $("pane-term").hidden = tab !== "term";
+    $("pane-log").hidden = tab !== "log";
+    $("follow-wrap").hidden = tab !== "log";
+    $("tab-term").classList.toggle("on", tab === "term");
+    $("tab-log").classList.toggle("on", tab === "log");
+    if (remember) { chosenTab = tab; try { localStorage.setItem("flowgui.tab", tab); } catch (e) {} }
+    if (tab === "term") { resized(); xt && xt.focus(); }
+  }
+  try { chosenTab = localStorage.getItem("flowgui.tab"); } catch (e) {}
+  $("tab-term").addEventListener("click", () => show("term", true));
+  $("tab-log").addEventListener("click", () => show("log", true));
+  window.addEventListener("resize", () => { clearTimeout(window._trz); window._trz = setTimeout(resized, 120); });
+
+  $("term-start").addEventListener("click", async () => {
+    const r = await post("/api/term/start", { args: $("term-args").value, ...size() }).catch((e) => ({ error: String(e) }));
+    if (r.error) { $("term-state").textContent = r.error; return; }
+    st = r;
+    // the run this starts will be the newest: watch it
+    follow = true; selected = null; history.replaceState(null, "", location.pathname);
+    chip.reset(); setTimeout(poll, 1500);
+    paint(); xt && xt.focus();
+  });
+  $("term-int").addEventListener("click", () => { post("/api/term/interrupt").catch(() => {}); xt && xt.focus(); });
+  $("term-args").addEventListener("keydown", (e) => { if (e.key === "Enter" && !st.running) $("term-start").click(); });
+  document.querySelectorAll(".chips button").forEach((b) => b.addEventListener("click", () => {
+    if (st.running) return;
+    $("term-args").value = b.hasAttribute("data-resume")
+      ? (data && data.run ? `--resume ${data.run.dir}` : "") : b.dataset.args;
+    $("term-args").focus();
+  }));
+
+  function paint() {
+    const run = st.running;
+    $("term-start").disabled = run;
+    $("term-int").disabled = !run;
+    $("term-args").disabled = run;
+    if (run && st.args && document.activeElement !== $("term-args")) $("term-args").value = st.args.join(" ");
+    document.querySelectorAll(".chips button").forEach((b) => (b.disabled = run));
+    let txt = "";
+    if (run) txt = `running · pid ${st.pid} · ${dur(nowS() - st.started)}`;
+    else if (st.exit_code != null) txt = `last run exited with code ${st.exit_code}`;
+    else txt = "no run started from this page";
+    $("term-state").textContent = txt;
+    $("tab-term").innerHTML = "Terminal" + (run ? '<span class="live"></span>' : "");
+  }
+
+  return {
+    update(s) {
+      st = s;
+      const on = s.available && !!TOKEN;
+      $("term-ui").hidden = !on;
+      $("term").hidden = !on;
+      $("term-off").hidden = on;
+      if (!on) $("term-off").textContent = `Terminal unavailable: ${s.reason || "watch-only page"}. ` +
+        "Output still shows in the flow.log tab.";
+      if (on && !xt && !fb) { init(); connect(); }
+      if (!this._shown) {     // first status only: the remembered tab, else the terminal when there is one
+        show(!on ? "log" : (chosenTab || "term"), false);
+        this._shown = true;
+      }
+      if (on) paint();
+    },
+  };
+})();
 
 $("run-select").addEventListener("change", (e) => {
   const v = e.target.value;

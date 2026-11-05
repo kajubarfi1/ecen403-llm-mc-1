@@ -23,6 +23,7 @@ SSH_CONFIG = {
     "port": 22,
     "username": "lehanar57",
     "key_path": None,
+    "password": None,
 }
 
 SLURM_CONFIG = {

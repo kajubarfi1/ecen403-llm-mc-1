@@ -401,10 +401,11 @@ def run_lint(out_dir: Path, sv_names: list) -> dict:
     cfg = dict(SSH_CONFIG)
     cfg["username"] = os.environ.get("OLYMPUS_USER", cfg["username"])
     cfg["key_path"] = os.environ.get("OLYMPUS_KEY", cfg["key_path"])
+    cfg["password"] = os.environ.get("OLYMPUS_PASSWORD", cfg.get("password"))
 
     sim = XceliumSimulator(ssh_config=cfg)
     try:
-        sim.connect()
+        sim.connect(password=cfg.get("password"))
     except Exception as e:
         return {"status": "SKIPPED", "reason": f"SSH failed: {e}"}
 
