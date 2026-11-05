@@ -1,7 +1,7 @@
 {
-  "git_commit": "93e750db808f44eae5ae516978d484f33481aaa8",
+  "git_commit": "2f9311326430b7c35473a3cbc184b585fcd95640",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "generated_utc": "2026-11-02T23:06:19.274438+00:00",
+  "generated_utc": "2026-11-05T19:50:43.964291+00:00",
   "clock_period_ns": 5.0,
   "module_name": "data_path",
   "file": "data_path.sv",
@@ -75,6 +75,12 @@
         "width": 4,
         "dir": "input",
         "source": "wb_port.req_wmask"
+      },
+      {
+        "name": "wr_data_aux",
+        "width": 4,
+        "dir": "input",
+        "source": "wb_port.req_aux"
       }
     ],
     "wr_ctrl_out": [
@@ -179,6 +185,10 @@
     {
       "name": "p_wr_pend_no_wrap",
       "check": "DP-014"
+    },
+    {
+      "name": "p_wr_data_precedes_issue",
+      "check": "DP-015"
     }
   ],
   "coverage_points": [

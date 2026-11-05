@@ -25,7 +25,7 @@
 |    E: BL8 burst read            F: Write mask (DM) propagation       |
 |    G: Aux tag passthrough       H: Back-to-back / pipeline           |
 |                                                                      |
-|  Validation checks: DP-001 through DP-014                            |
+|  Validation checks: DP-001 through DP-015                            |
 +======================================================================+
 """
 
@@ -177,6 +177,13 @@ class DataPathGenerator:
             errors.append(f"CAS latency {p['CL']} out of DDR3 range [5,14]")
         if p["CWL"] < 5 or p["CWL"] > 12:
             errors.append(f"CAS write latency {p['CWL']} out of DDR3 range [5,12]")
+        # wr_buf is addressed directly by a write's own aux tag's low bits
+        # (CONSERVE/WRITE_CMD_TO_BEATS fix, Validation 2026-11-05) -- needs
+        # AUX_WIDTH wide enough to index it collision-free.
+        need = max(1, (p["RD_FIFO_DEPTH"] - 1).bit_length())
+        if p["AUX_WIDTH"] < need:
+            errors.append(f"AUX_WIDTH={p['AUX_WIDTH']} too narrow to index "
+                          f"RD_FIFO_DEPTH={p['RD_FIFO_DEPTH']} (need >= {need} bits)")
         return errors
 
     # ================================================================
@@ -207,7 +214,7 @@ class DataPathGenerator:
         L(f"//   CL={p['CL']} nCK ({p['CL_CTRL']} ctrl), CWL={p['CWL']} nCK ({p['CWL_CTRL']} ctrl)")
         L(f"//   AUX_WIDTH={p['AUX_WIDTH']}, RD_FIFO_DEPTH={p['RD_FIFO_DEPTH']}")
         L(f"//")
-        L(f"// Validation: DP-001 .. DP-014")
+        L(f"// Validation: DP-001 .. DP-015")
         L(f"////////////////////////////////////////////////////////////////////////////////")
         L(f"")
         L(f"module data_path #(")
@@ -238,6 +245,13 @@ class DataPathGenerator:
         L(f"    input  logic                    wr_data_valid,    // write data available")
         L(f"    input  logic [DATA_WIDTH-1:0]   wr_data,          // write data word")
         L(f"    input  logic [SEL_WIDTH-1:0]    wr_mask,          // byte lane mask")
+        L(f"    input  logic [AUX_WIDTH-1:0]    wr_data_aux,      // aux tag for this write's data --")
+        L(f"                                                      // addresses wr_buf directly, so a WR")
+        L(f"                                                      // command (cmd_aux) always fetches its")
+        L(f"                                                      // own write's data regardless of what")
+        L(f"                                                      // order the scheduler issues commands in")
+        L(f"                                                      // (CONSERVE/WRITE_CMD_TO_BEATS fix,")
+        L(f"                                                      // Validation 2026-11-05)")
         L(f"    output logic                    wr_data_ready,    // backpressure to wb_port")
         L(f"")
         L(f"    // To wb_port: read response")
@@ -275,7 +289,17 @@ class DataPathGenerator:
         L(f"        logic [SEL_WIDTH-1:0]   mask;")
         L(f"    }} wr_entry_t;")
         L(f"")
-        L(f"    wr_entry_t wr_buf [0:RD_FIFO_DEPTH-1];")
+        L(f"    // wr_buf is addressed by each write's own aux tag (low bits),")
+        L(f"    // not by wr_wptr/wr_rptr position -- a WR command can be")
+        L(f"    // issued out of the order its data was pushed (the FR-FCFS")
+        L(f"    // scheduler reorders writes exactly like it reorders reads),")
+        L(f"    // so cmd_aux is what actually says whose data to fetch")
+        L(f"    // (CONSERVE/WRITE_CMD_TO_BEATS, CONSERVE/WRITE_REQUEST_TO_DATA")
+        L(f"    // fix, Validation 2026-11-05). wr_wptr/wr_rptr stay as pure")
+        L(f"    // OCCUPANCY counters -- every existing backpressure invariant")
+        L(f"    // (wr_data_ready, WB-012, DP-001) is unchanged.")
+        L(f"    wr_entry_t wr_buf       [0:RD_FIFO_DEPTH-1];")
+        L(f"    logic      wr_buf_valid [0:RD_FIFO_DEPTH-1];")
         L(f"    logic [FIFO_PTR_W:0] wr_wptr, wr_rptr;")
         L(f"    wire  [FIFO_PTR_W:0] wr_count = wr_wptr - wr_rptr;")
         L(f"    wire                  wr_full  = (wr_count == RD_FIFO_DEPTH[FIFO_PTR_W:0]);")
@@ -353,10 +377,17 @@ class DataPathGenerator:
         L(f"    // Pending-write-command queue: overflow only (a bypassed write")
         L(f"    // never enters it), tracks each queued WR command's countdown.")
         L(f"    // A SEPARATE queue from wr_buf (the write DATA, pushed on")
-        L(f"    // wr_data_valid from wb_port, a different event stream) --")
-        L(f"    // wr_buf stays the data source, popped in the same order these")
-        L(f"    // countdowns are, since both are issue-ordered.")
+        L(f"    // wr_data_valid from wb_port, a different event stream). These")
+        L(f"    // two streams do NOT stay in lockstep -- the scheduler can issue")
+        L(f"    // a later-accepted write's command before an earlier one's (the")
+        L(f"    // same FR-FCFS row-hit reordering that affects reads), so")
+        L(f"    // wr_pend_aux carries each queued command's own tag (mirroring")
+        L(f"    // the read side's rd_pend_aux) and wr_buf is fetched BY that")
+        L(f"    // tag below, not by position (CONSERVE/WRITE_CMD_TO_BEATS fix,")
+        L(f"    // Validation 2026-11-05 -- this comment used to claim the two")
+        L(f"    // queues were issue-ordered together; that was the bug).")
         L(f"    logic [3:0] wr_pend_wait [0:RD_FIFO_DEPTH-1];  // saturating countdown, 0 = due")
+        L(f"    logic [AUX_WIDTH-1:0] wr_pend_aux [0:RD_FIFO_DEPTH-1];  // tag of the queued command")
         L(f"    logic [FIFO_PTR_W:0] wr_pend_wptr, wr_pend_rptr;")
         L(f"    wire  [FIFO_PTR_W:0] wr_pend_count = wr_pend_wptr - wr_pend_rptr;")
         L(f"    wire                  wr_pend_full  = (wr_pend_count == RD_FIFO_DEPTH[FIFO_PTR_W:0]);")
@@ -380,9 +411,10 @@ class DataPathGenerator:
         L(f"            for (int i = 0; i < RD_FIFO_DEPTH; i++) wr_pend_wait[i] <= '0;")
         L(f"        end else begin")
         L(f"            for (int i = 0; i < RD_FIFO_DEPTH; i++) begin")
-        L(f"                if (wr_pend_push && (i == wr_pend_wptr[FIFO_PTR_W-1:0]))")
+        L(f"                if (wr_pend_push && (i == wr_pend_wptr[FIFO_PTR_W-1:0])) begin")
         L(f"                    wr_pend_wait[i] <= wr_wait_init;")
-        L(f"                else if (wr_pend_wait[i] != 0)")
+        L(f"                    wr_pend_aux[i]  <= cmd_aux;")
+        L(f"                end else if (wr_pend_wait[i] != 0)")
         L(f"                    wr_pend_wait[i] <= wr_pend_wait[i] - 4'd1;")
         L(f"            end")
         L(f"        end")
@@ -402,17 +434,24 @@ class DataPathGenerator:
         L(f"                WR_IDLE: begin")
         L(f"                    if (!wr_pend_empty && !wr_empty && wr_head_due_r) begin")
         L(f"                        // Queued while busy; its countdown has reached 0 --")
-        L(f"                        // drive now, no separate wait state needed.")
-        L(f"                        wr_dat_r     <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].data;")
-        L(f"                        wr_msk_r     <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].mask;")
+        L(f"                        // drive now, no separate wait state needed. Fetch by")
+        L(f"                        // this entry's OWN tag (wr_pend_aux), not by wr_rptr")
+        L(f"                        // position -- it may not be the data pushed Nth.")
+        L(f"                        wr_dat_r     <= wr_buf[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]].data;")
+        L(f"                        wr_msk_r     <= wr_buf[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]].mask;")
+        L(f"                        wr_buf_valid[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]] <= 1'b0;")
         L(f"                        wr_rptr      <= wr_rptr + 1'b1;")
         L(f"                        wr_pend_rptr <= wr_pend_rptr + 1'b1;")
         L(f"                        wr_state     <= WR_DRIVE;")
         L(f"                        wr_burst_ctr <= '0;")
         L(f"                    end else if (wr_bypass) begin")
-        L(f"                        // Latch data from write buffer")
-        L(f"                        wr_dat_r <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].data;")
-        L(f"                        wr_msk_r <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].mask;")
+        L(f"                        // Latch data from write buffer. Bypass fires the SAME")
+        L(f"                        // cycle as cmd_wr_valid (nothing queued ahead of it),")
+        L(f"                        // so this write's own tag is simply this cycle's")
+        L(f"                        // cmd_aux -- no wr_pend_aux lookup needed.")
+        L(f"                        wr_dat_r <= wr_buf[cmd_aux[FIFO_PTR_W-1:0]].data;")
+        L(f"                        wr_msk_r <= wr_buf[cmd_aux[FIFO_PTR_W-1:0]].mask;")
+        L(f"                        wr_buf_valid[cmd_aux[FIFO_PTR_W-1:0]] <= 1'b0;")
         L(f"                        wr_rptr  <= wr_rptr + 1'b1;")
         L(f"                        if (cfg_CWL_nCK <= CLK_RATIO[7:0]) begin")
         L(f"                            // CWL fits in one ctrl cycle, go straight to drive")
@@ -448,8 +487,12 @@ class DataPathGenerator:
         L(f"                        // 32-bit one Backend measured.")
         L(f"                        if (!wr_pend_empty && !wr_empty &&")
         L(f"                            (wr_pend_wait[wr_pend_rptr[FIFO_PTR_W-1:0]] <= 4'd1)) begin")
-        L(f"                            wr_dat_r     <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].data;")
-        L(f"                            wr_msk_r     <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].mask;")
+        L(f"                            // Fetch by this entry's OWN tag, same as the WR_IDLE")
+        L(f"                            // queued path above -- it may not be the data")
+        L(f"                            // pushed Nth.")
+        L(f"                            wr_dat_r     <= wr_buf[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]].data;")
+        L(f"                            wr_msk_r     <= wr_buf[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]].mask;")
+        L(f"                            wr_buf_valid[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]] <= 1'b0;")
         L(f"                            wr_rptr      <= wr_rptr + 1'b1;")
         L(f"                            wr_pend_rptr <= wr_pend_rptr + 1'b1;")
         L(f"                            wr_state     <= WR_DRIVE;")
@@ -513,14 +556,18 @@ class DataPathGenerator:
         L(f"        else")
         L(f"            wr_head_due_r <= (wr_pend_head_wait_next == 4'd0);")
         L(f"")
-        L(f"    // Write buffer push")
-        L(f"    always_ff @(posedge clk or negedge rst_n)")
-        L(f"        if (!rst_n)")
+        L(f"    // Write buffer push -- stored BY TAG (wr_data_aux), not by")
+        L(f"    // wr_wptr position; wr_wptr itself only tracks occupancy now.")
+        L(f"    always_ff @(posedge clk or negedge rst_n) begin")
+        L(f"        if (!rst_n) begin")
         L(f"            wr_wptr <= '0;")
-        L(f"        else if (wr_data_valid && (~wr_full || wr_pop_this_cycle)) begin")
-        L(f"            wr_buf[wr_wptr[FIFO_PTR_W-1:0]] <= '{{data: wr_data, mask: wr_mask}};")
+        L(f"            for (int i = 0; i < RD_FIFO_DEPTH; i++) wr_buf_valid[i] <= 1'b0;")
+        L(f"        end else if (wr_data_valid && (~wr_full || wr_pop_this_cycle)) begin")
+        L(f"            wr_buf[wr_data_aux[FIFO_PTR_W-1:0]]       <= '{{data: wr_data, mask: wr_mask}};")
+        L(f"            wr_buf_valid[wr_data_aux[FIFO_PTR_W-1:0]] <= 1'b1;")
         L(f"            wr_wptr <= wr_wptr + 1'b1;")
         L(f"        end")
+        L(f"    end")
         L(f"")
 
         # ── DDR write outputs ──
@@ -878,6 +925,23 @@ class DataPathGenerator:
         L(f"    assert property (p_wr_pend_no_overflow)")
         L(f"        else $error(\"[DP-014] Pending-write queue overflow -- a WR command was dropped\");")
         L(f"")
+        L(f"    // DP-015: a WR command must never be issued before its own")
+        L(f"    // write's data has arrived in wr_buf -- the tag-indexed fetch")
+        L(f"    // above (CONSERVE/WRITE_CMD_TO_BEATS fix) relies on this: data")
+        L(f"    // push (wr_data_valid, host-acceptance order) and command")
+        L(f"    // issue (cmd_wr_valid, scheduler order) are independent")
+        L(f"    // streams, and by construction issue always lags push (a")
+        L(f"    // command can only be issued for an entry already enqueued,")
+        L(f"    // and enqueue happens together with the data push) -- checked")
+        L(f"    // at runtime rather than only argued, since a future cmd_gen/")
+        L(f"    // scheduler latency change could silently break it.")
+        L(f"    property p_wr_data_precedes_issue;")
+        L(f"        @(posedge clk) disable iff (!rst_n)")
+        L(f"        cmd_wr_valid |-> wr_buf_valid[cmd_aux[FIFO_PTR_W-1:0]];")
+        L(f"    endproperty")
+        L(f"    assert property (p_wr_data_precedes_issue)")
+        L(f"        else $error(\"[DP-015] WR command issued before its data arrived in wr_buf\");")
+        L(f"")
         L(f"    // Coverage")
         L(f"    covergroup cg_dp @(posedge clk);")
         L(f"        option.per_instance = 1;")
@@ -944,6 +1008,7 @@ class DataPathGenerator:
                      "source_expr": "wb_port.req_valid && wb_port.req_we && cmd_queue.enq_ready"},
                     {"name": "wr_data", "width": p["DATA_WIDTH"], "dir": "input", "source": "wb_port.req_wdata"},
                     {"name": "wr_mask", "width": p["SEL_WIDTH"], "dir": "input", "source": "wb_port.req_wmask"},
+                    {"name": "wr_data_aux", "width": p["AUX_WIDTH"], "dir": "input", "source": "wb_port.req_aux"},
                 ],
                 "wr_ctrl_out": [
                     {"name": "wr_data_ready", "width": 1, "dir": "output"},
@@ -974,6 +1039,7 @@ class DataPathGenerator:
                 {"name": "p_rd_rsp_valid", "check": "DP-005"},
                 {"name": "p_rd_pend_no_overflow", "check": "DP-013"},
                 {"name": "p_wr_pend_no_wrap", "check": "DP-014"},
+                {"name": "p_wr_data_precedes_issue", "check": "DP-015"},
             ],
             "coverage_points": [
                 "cp_wr_drive", "cp_rd_cap", "cp_wr_full", "cp_rd_empty",

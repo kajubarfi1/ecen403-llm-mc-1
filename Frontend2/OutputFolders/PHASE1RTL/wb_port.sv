@@ -22,7 +22,10 @@ module wb_port #(
     parameter QUEUE_DEPTH    = 16,
     parameter BURST_CTR_W    = 4,
     parameter TAG_FIFO_DEPTH = 16,
-    parameter TAG_PTR_W      = 4
+    parameter TAG_PTR_W      = 4,
+    parameter WR_TAG_PTR_W   = 4,
+    parameter ORD_DEPTH      = 32,
+    parameter ORD_PTR_W      = 5
 ) (
     input  logic                    clk,
     input  logic                    rst_n,
@@ -68,11 +71,25 @@ module wb_port #(
 
     wire wb_beat = wb_cyc_i & wb_stb_i & ~wb_stall_o;
 
-    // Aux-tag counter (WB-009) -- declared before tag FIFO
-    logic [AUX_WIDTH-1:0] aux_ctr;
+    // Aux-tag counters (WB-009), declared before tag FIFO --
+    // one per kind, not one shared counter. rd_data_buf/wr_buf
+    // (below) are addressed directly by a response's/command's own
+    // aux value's low bits (HOST_002/HOSTMEM fix, Validation
+    // 2026-11-05), which only stays collision-free if each kind's
+    // outstanding window has its own tag space: up to
+    // RD_BUFFER_DEPTH reads AND, independently, up to
+    // WR_BUFFER_DEPTH writes can be outstanding at once (separate
+    // backpressure on each side), so one shared counter wraps
+    // across both and aliases a read's tag onto a write's (or
+    // onto another read's) well before either side's own buffer
+    // is actually full.
+    logic [AUX_WIDTH-1:0] rd_aux_ctr, wr_aux_ctr;
     always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n)       aux_ctr <= '0;
-        else if (wb_beat) aux_ctr <= aux_ctr + 1'b1;
+        if (!rst_n)                  rd_aux_ctr <= '0;
+        else if (wb_beat && !wb_we_i) rd_aux_ctr <= rd_aux_ctr + 1'b1;
+    always_ff @(posedge clk or negedge rst_n)
+        if (!rst_n)                  wr_aux_ctr <= '0;
+        else if (wb_beat &&  wb_we_i) wr_aux_ctr <= wr_aux_ctr + 1'b1;
 
     // Tag FIFO -- tracks outstanding read requests
     logic [AUX_WIDTH-1:0] tag_mem [0:TAG_FIFO_DEPTH-1];
@@ -83,13 +100,56 @@ module wb_port #(
     always_ff @(posedge clk or negedge rst_n)
         if (!rst_n) tag_wr <= '0;
         else if (wb_beat && !wb_we_i) begin
-            tag_mem[tag_wr[TAG_PTR_W-1:0]] <= aux_ctr;
+            tag_mem[tag_wr[TAG_PTR_W-1:0]] <= rd_aux_ctr;
             tag_wr <= tag_wr + 1'b1;
         end
 
+    // tag_rd's own update is declared further down (Acknowledge),
+    // after rd_ack exists to gate it: tag_rd must now advance on
+    // DELIVERY (rd_ack), not on bare arrival (rsp_valid) -- it is
+    // the oldest-outstanding-read pointer, and that identity has
+    // to persist until the data is actually handed to the host,
+    // not just until some response (possibly a later read's)
+    // shows up (HOSTMEM fix, Validation 2026-11-05).
+
+    // Ack-ordering tracker (HOST_002: host_interface.
+    // ack_ordering = in_request_order) -- one entry per accepted
+    // beat, read(1) or write(0), in acceptance order. Sized
+    // RD_BUFFER_DEPTH+WR_BUFFER_DEPTH: it can never overflow,
+    // since each side's OWN backpressure (tag_full below,
+    // wr_data_ready/WB-012) already caps that side's own
+    // outstanding count before this would. ord_wr/ord_mem's push
+    // only needs wb_beat, defined here; ord_rd's pop needs
+    // ord_pop, which needs wr_ack_deliver/rd_ack -- declared
+    // here, updated in Acknowledge below.
+    logic               ord_mem [0:ORD_DEPTH-1];
+    logic [ORD_PTR_W:0] ord_wr, ord_rd;
+    wire  [ORD_PTR_W:0] ord_cnt     = ord_wr - ord_rd;
+    wire                 ord_empty   = (ord_cnt == 0);
+    wire                 ord_head_rd = ord_mem[ord_rd[ORD_PTR_W-1:0]];
+
     always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n) tag_rd <= '0;
-        else if (rsp_valid) tag_rd <= tag_rd + 1'b1;
+        if (!rst_n) ord_wr <= '0;
+        else if (wb_beat) begin
+            ord_mem[ord_wr[ORD_PTR_W-1:0]] <= ~wb_we_i;
+            ord_wr <= ord_wr + 1'b1;
+        end
+
+    // Direct-mapped read-response buffer, keyed by the response's
+    // OWN tag (rsp_aux), not arrival order: the DRAM-side
+    // scheduler can answer a later-accepted read before an
+    // earlier one (FR-FCFS row-hit priority), so a response's
+    // tag -- not the order it shows up in -- says whose slot it
+    // is (HOSTMEM fix, Validation 2026-11-05). Collision-free
+    // because rd_aux_ctr is now read-only (see above) and
+    // AUX_WIDTH is validated wide enough to index TAG_FIFO_DEPTH.
+    logic [DATA_WIDTH-1:0] rd_data_buf   [0:TAG_FIFO_DEPTH-1];
+    logic                  rd_data_valid [0:TAG_FIFO_DEPTH-1];
+
+    // No reset: gated entirely by rd_data_valid below, which does
+    // reset -- an unread stale value here is never observable.
+    always_ff @(posedge clk)
+        if (rsp_valid) rd_data_buf[rsp_aux[TAG_PTR_W-1:0]] <= rsp_rdata;
 
     // Stall generation (WB-005)
     //
@@ -180,7 +240,7 @@ module wb_port #(
                 req_addr  <= wb_adr_i;
                 req_wdata <= wb_dat_i;
                 req_wmask <= wb_sel_i;
-                req_aux   <= aux_ctr;
+                req_aux   <= wb_we_i ? wr_aux_ctr : rd_aux_ctr;
             end else begin
                 req_valid <= 1'b0;
             end
@@ -191,45 +251,62 @@ module wb_port #(
             req_addr  <= wb_adr_i;
             req_wdata <= wb_dat_i;
             req_wmask <= wb_sel_i;
-            req_aux   <= aux_ctr;
+            req_aux   <= wb_we_i ? wr_aux_ctr : rd_aux_ctr;
         end
         // else: req_valid && !req_ready -- hold everything; wb_stall_o
         // guarantees no wb_beat landed this cycle to race it.
     end
 
-    // Write acknowledge (WB-002, WB-008)
+    // Acknowledge (WB-002, WB-008: HOST_002, host_interface.
+    // ack_ordering = in_request_order)
     //
-    // wb_ack_o is a single bit: a write-ack and a same-cycle read-ack
-    // (rsp_valid) can't both be signaled, and the old code -- a bare
-    // one-cycle pulse, unconditionally overwritten every cycle --
-    // simply lost whichever one didn't win (HOST_001: Validation,
-    // 2026-10-29, addendum 11, formal counterexample at 24 cycles,
-    // path_23 reproduces it in simulation). A single hold bit isn't
-    // enough to fix this: write beats keep being accepted into the
-    // skid (Finding 1) independent of whether an earlier write's ack
-    // is still waiting its turn, so more than one ack can be owed at
-    // once. wr_ack_pending is a small counter instead -- counts up on
-    // every accepted write beat, counts down exactly once per cycle
-    // it actually delivers (reads always win the bit on a collision;
-    // a pending write's ack waits for the first cycle that isn't
-    // one). Verified against sustained collisions and random traffic
-    // in a Python model before writing this: every accepted beat gets
-    // exactly one delivery, none lost, and an isolated write with no
-    // collision still acks exactly one cycle after acceptance, same
-    // as before.
-    logic [7:0] wr_ack_pending;
-    wire rd_ack = rsp_valid;
-    wire wr_ack_deliver = (wr_ack_pending != 0) && !rd_ack;
+    // Acks are delivered strictly in request-acceptance order,
+    // kind included: only the head of ord_mem may ack. A write
+    // head acks immediately -- matches the original one-cycle-
+    // after-acceptance timing when nothing is ahead of it, same
+    // as the old wr_ack_pending design. A read head acks once
+    // its OWN tagged data is available in rd_data_buf, not
+    // whenever any response arrives -- that distinction is
+    // exactly what let a later-accepted read's data answer an
+    // earlier one's slot (HOSTMEM: Validation, 2026-11-05).
+    // This also folds in HOST_001 (Validation, 2026-10-29,
+    // addendum 11): a write below ord_mem's head simply cannot
+    // ack early, so the write-vs-read-ack collision that bug
+    // was about cannot recur structurally, not just by counting.
+    wire [TAG_PTR_W-1:0] rd_head_idx    = tag_mem[tag_rd[TAG_PTR_W-1:0]][TAG_PTR_W-1:0];
+    wire                 wr_ack_deliver = !ord_empty && !ord_head_rd;
+    wire                 rd_ack         = !ord_empty &&  ord_head_rd && rd_data_valid[rd_head_idx];
+    wire                 ord_pop        = wr_ack_deliver | rd_ack;
 
     always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n)
-            wr_ack_pending <= '0;
-        else
-            wr_ack_pending <= wr_ack_pending + ((wb_beat & wb_we_i) ? 8'd1 : 8'd0)
-                                              - (wr_ack_deliver ? 8'd1 : 8'd0);
+        if (!rst_n) ord_rd <= '0;
+        else if (ord_pop) ord_rd <= ord_rd + 1'b1;
+
+    // Deferred from the tag FIFO above: tag_rd now advances on
+    // DELIVERY (rd_ack), not bare arrival, so it keeps naming the
+    // oldest outstanding read until that read is actually answered.
+    always_ff @(posedge clk or negedge rst_n)
+        if (!rst_n) tag_rd <= '0;
+        else if (rd_ack) tag_rd <= tag_rd + 1'b1;
+
+    // rd_data_valid: set when a response for that tag arrives,
+    // cleared when that tag's slot is actually delivered. These
+    // two conditions targeting the same index in the same cycle
+    // would mean a second response landed for an already-
+    // delivered tag -- cannot happen in correct operation (WB-009
+    // below checks it), so the set/clear order here never matters
+    // in practice.
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            for (int i = 0; i < TAG_FIFO_DEPTH; i++) rd_data_valid[i] <= 1'b0;
+        end else begin
+            if (rsp_valid) rd_data_valid[rsp_aux[TAG_PTR_W-1:0]] <= 1'b1;
+            if (rd_ack)    rd_data_valid[rd_head_idx]           <= 1'b0;
+        end
+    end
 
     assign wb_ack_o = wr_ack_deliver | rd_ack;
-    assign wb_dat_o = rsp_rdata;
+    assign wb_dat_o = rd_data_buf[rd_head_idx];
 
     // Error detection (WB-007)
     logic err_r;
@@ -256,12 +333,19 @@ module wb_port #(
     assert property (p_stall_hold)
         else $error("[WB-005] master released request during stall");
 
+    // WB-009: a response must land on a tag whose slot isn't
+    // already holding an earlier, undelivered response -- the
+    // real invariant once out-of-order delivery is expected
+    // (Validation, 2026-11-05: the old 'responses arrive in
+    // acceptance order' version of this check fired 66 times in
+    // practice, because that assumption is false under FR-FCFS
+    // reordering -- this replaces it, not patches it).
     property p_tag;
         @(posedge clk) disable iff (!rst_n)
-        (rsp_valid && tag_cnt > 0) |-> (rsp_aux == tag_mem[tag_rd[TAG_PTR_W-1:0]]);
+        rsp_valid |-> !rd_data_valid[rsp_aux[TAG_PTR_W-1:0]];
     endproperty
     assert property (p_tag)
-        else $error("[WB-009] aux tag mismatch");
+        else $error("[WB-009] response landed on a tag already holding undelivered data");
 
     property p_burst_len;
         @(posedge clk) disable iff (!rst_n)
@@ -296,15 +380,18 @@ module wb_port #(
     assert property (p_req_held_stable)
         else $error("[WB-010] accepted request changed or dropped while queue wasn't ready");
 
-    // WB-011: every accepted write beat eventually gets exactly one
-    // ack -- wr_ack_pending never wraps (would mean a beat's ack was
-    // silently dropped rather than held through a collision)
+    // WB-011: the ack-ordering tracker can never overflow -- each
+    // side's own backpressure (tag_full, wr_data_ready) already
+    // caps that side's outstanding count below ORD_DEPTH's share
+    // for it, so this should be unreachable by construction; it
+    // is still checked at runtime (same shape as p_tag_no_overflow
+    // above, for ord_mem instead of tag_mem).
     property p_wr_ack_no_wrap;
         @(posedge clk) disable iff (!rst_n)
-        ((wb_beat && wb_we_i) && (wr_ack_pending == 8'hFF) && !wr_ack_deliver) |-> 1'b0;
+        1'b1 |-> (ord_cnt <= ORD_DEPTH[ORD_PTR_W:0]);
     endproperty
     assert property (p_wr_ack_no_wrap)
-        else $error("[WB-011] wr_ack_pending would wrap -- a write ack was dropped");
+        else $error("[WB-011] ack-ordering tracker overflow -- an ack would be dropped");
 
     // WB-012: a write beat is never accepted while the write buffer
     // isn't ready for it (HOST_WRITE_BUFFER_BACKPRESSURE)

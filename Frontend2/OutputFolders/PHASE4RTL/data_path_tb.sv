@@ -64,6 +64,15 @@ module data_path_tb;
     logic wr_data_valid;
     logic [DATA_WIDTH-1:0] wr_data;
     logic [SEL_WIDTH-1:0] wr_mask;
+    logic [AUX_WIDTH-1:0] wr_data_aux;
+    // Shadow of wb_port's wr_aux_ctr -- this testbench drives
+    // data_path directly (no real wb_port in the loop), so it has
+    // to assign each push its own tag itself. Auto-incrementing in
+    // push_wr_data (reset in hw_reset) means every existing call
+    // site needs no change: each section's first push after reset
+    // lands at tag 0, matching every hardcoded issue_wr_cmd(aux=0)
+    // already in this file.
+    logic [AUX_WIDTH-1:0] shadow_wr_aux_ctr;
     logic wr_data_ready;
     logic rd_rsp_valid;
     logic [DATA_WIDTH-1:0] rd_rsp_data;
@@ -122,6 +131,7 @@ module data_path_tb;
         .clk(clk), .rst_n(rst_n),
         .cmd_wr_valid(cmd_wr_valid), .cmd_rd_valid(cmd_rd_valid), .cmd_aux(cmd_aux),
         .wr_data_valid(wr_data_valid), .wr_data(wr_data), .wr_mask(wr_mask),
+        .wr_data_aux(wr_data_aux),
         .wr_data_ready(wr_data_ready),
         .rd_rsp_valid(rd_rsp_valid), .rd_rsp_data(rd_rsp_data), .rd_rsp_aux(rd_rsp_aux),
         .cfg_CL_nCK(cfg_CL_nCK), .cfg_CWL_nCK(cfg_CWL_nCK),
@@ -140,7 +150,8 @@ module data_path_tb;
     task automatic hw_reset();
         rst_n = 0;
         cmd_wr_valid = 0; cmd_rd_valid = 0; cmd_aux = 0;
-        wr_data_valid = 0; wr_data = 0; wr_mask = 0;
+        wr_data_valid = 0; wr_data = 0; wr_mask = 0; wr_data_aux = 0;
+        shadow_wr_aux_ctr = 0;
         test_rd_word = 0; ddr_dqs_i = 0;
         wr_beat_q.delete(); dm_beat_q.delete();
         cfg_CL_nCK = 8'd11; cfg_CWL_nCK = 8'd8;
@@ -151,7 +162,8 @@ module data_path_tb;
 
     task automatic push_wr_data(input [DATA_WIDTH-1:0] d, input [SEL_WIDTH-1:0] m);
         @(posedge clk);
-        wr_data_valid = 1; wr_data = d; wr_mask = m;
+        wr_data_valid = 1; wr_data = d; wr_mask = m; wr_data_aux = shadow_wr_aux_ctr;
+        shadow_wr_aux_ctr = shadow_wr_aux_ctr + 1'b1;
         @(posedge clk);
         wr_data_valid = 0;
     endtask

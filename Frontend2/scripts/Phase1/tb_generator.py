@@ -557,6 +557,40 @@ module wb_port_tb;
         check("Stall when backend busy", wb_stall_o===1'b1);
         req_ready=1; repeat(5) @(posedge clk); wb_idle();
 
+        // Out-of-order read delivery (HOSTMEM fix, Validation 2026-11-05):
+        // accept 2 reads back to back, then deliver their DRAM responses
+        // in REVERSED order -- the second read's data arrives first. The
+        // host must still see the FIRST read's data acked first, not
+        // whichever response showed up first; this is the literal shape
+        // of the bug the tag-indexed rd_data_buf fixes (a plain FIFO would
+        // deliver the second read's data for the first read's ack).
+        wb_idle(); repeat(2) @(posedge clk);
+        @(posedge clk); wb_cyc_i=1; wb_stb_i=1; wb_we_i=0; wb_adr_i={addr_w}'h500;
+        do @(posedge clk); while(wb_stall_o);
+        wb_adr_i={addr_w}'h504;
+        do @(posedge clk); while(wb_stall_o);
+        wb_stb_i=0; wb_cyc_i=0;
+        // second read's response arrives first -- must not jump the queue
+        rsp_valid=1; rsp_aux={aux_w}'d1; rsp_rdata=32'hBBBBBBBB;
+        @(posedge clk);
+        rsp_valid=0;
+        check("Out-of-order: early response does not ack yet", wb_ack_o===1'b0);
+        repeat(2) @(posedge clk);
+        check("Out-of-order: still not acked while first read is outstanding", wb_ack_o===1'b0);
+        // first read's response arrives -- must deliver now, with ITS data
+        rsp_valid=1; rsp_aux={aux_w}'d0; rsp_rdata=32'hAAAAAAAA;
+        @(posedge clk);
+        rsp_valid=0;
+        check("Out-of-order: first read acked first", wb_ack_o===1'b1);
+        check($sformatf("Out-of-order: first read's own data (got 0x%08X)", wb_dat_o),
+              wb_dat_o===32'hAAAAAAAA);
+        @(posedge clk);
+        // the buffered second response should deliver right after
+        check("Out-of-order: second read acked second", wb_ack_o===1'b1);
+        check($sformatf("Out-of-order: second read's own data (got 0x%08X)", wb_dat_o),
+              wb_dat_o===32'hBBBBBBBB);
+        @(posedge clk); wb_idle();
+
         if (fail_count==0) $display("ALL %0d TESTS PASSED", total_tests);
         else $display("%0d of %0d TESTS FAILED", fail_count, total_tests);
         $finish;

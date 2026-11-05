@@ -17,7 +17,7 @@
 //   CL=11 nCK (3 ctrl), CWL=8 nCK (2 ctrl)
 //   AUX_WIDTH=4, RD_FIFO_DEPTH=16
 //
-// Validation: DP-001 .. DP-014
+// Validation: DP-001 .. DP-015
 ////////////////////////////////////////////////////////////////////////////////
 
 module data_path #(
@@ -48,6 +48,13 @@ module data_path #(
     input  logic                    wr_data_valid,    // write data available
     input  logic [DATA_WIDTH-1:0]   wr_data,          // write data word
     input  logic [SEL_WIDTH-1:0]    wr_mask,          // byte lane mask
+    input  logic [AUX_WIDTH-1:0]    wr_data_aux,      // aux tag for this write's data --
+                                                      // addresses wr_buf directly, so a WR
+                                                      // command (cmd_aux) always fetches its
+                                                      // own write's data regardless of what
+                                                      // order the scheduler issues commands in
+                                                      // (CONSERVE/WRITE_CMD_TO_BEATS fix,
+                                                      // Validation 2026-11-05)
     output logic                    wr_data_ready,    // backpressure to wb_port
 
     // To wb_port: read response
@@ -83,7 +90,17 @@ module data_path #(
         logic [SEL_WIDTH-1:0]   mask;
     } wr_entry_t;
 
-    wr_entry_t wr_buf [0:RD_FIFO_DEPTH-1];
+    // wr_buf is addressed by each write's own aux tag (low bits),
+    // not by wr_wptr/wr_rptr position -- a WR command can be
+    // issued out of the order its data was pushed (the FR-FCFS
+    // scheduler reorders writes exactly like it reorders reads),
+    // so cmd_aux is what actually says whose data to fetch
+    // (CONSERVE/WRITE_CMD_TO_BEATS, CONSERVE/WRITE_REQUEST_TO_DATA
+    // fix, Validation 2026-11-05). wr_wptr/wr_rptr stay as pure
+    // OCCUPANCY counters -- every existing backpressure invariant
+    // (wr_data_ready, WB-012, DP-001) is unchanged.
+    wr_entry_t wr_buf       [0:RD_FIFO_DEPTH-1];
+    logic      wr_buf_valid [0:RD_FIFO_DEPTH-1];
     logic [FIFO_PTR_W:0] wr_wptr, wr_rptr;
     wire  [FIFO_PTR_W:0] wr_count = wr_wptr - wr_rptr;
     wire                  wr_full  = (wr_count == RD_FIFO_DEPTH[FIFO_PTR_W:0]);
@@ -159,10 +176,17 @@ module data_path #(
     // Pending-write-command queue: overflow only (a bypassed write
     // never enters it), tracks each queued WR command's countdown.
     // A SEPARATE queue from wr_buf (the write DATA, pushed on
-    // wr_data_valid from wb_port, a different event stream) --
-    // wr_buf stays the data source, popped in the same order these
-    // countdowns are, since both are issue-ordered.
+    // wr_data_valid from wb_port, a different event stream). These
+    // two streams do NOT stay in lockstep -- the scheduler can issue
+    // a later-accepted write's command before an earlier one's (the
+    // same FR-FCFS row-hit reordering that affects reads), so
+    // wr_pend_aux carries each queued command's own tag (mirroring
+    // the read side's rd_pend_aux) and wr_buf is fetched BY that
+    // tag below, not by position (CONSERVE/WRITE_CMD_TO_BEATS fix,
+    // Validation 2026-11-05 -- this comment used to claim the two
+    // queues were issue-ordered together; that was the bug).
     logic [3:0] wr_pend_wait [0:RD_FIFO_DEPTH-1];  // saturating countdown, 0 = due
+    logic [AUX_WIDTH-1:0] wr_pend_aux [0:RD_FIFO_DEPTH-1];  // tag of the queued command
     logic [FIFO_PTR_W:0] wr_pend_wptr, wr_pend_rptr;
     wire  [FIFO_PTR_W:0] wr_pend_count = wr_pend_wptr - wr_pend_rptr;
     wire                  wr_pend_full  = (wr_pend_count == RD_FIFO_DEPTH[FIFO_PTR_W:0]);
@@ -186,9 +210,10 @@ module data_path #(
             for (int i = 0; i < RD_FIFO_DEPTH; i++) wr_pend_wait[i] <= '0;
         end else begin
             for (int i = 0; i < RD_FIFO_DEPTH; i++) begin
-                if (wr_pend_push && (i == wr_pend_wptr[FIFO_PTR_W-1:0]))
+                if (wr_pend_push && (i == wr_pend_wptr[FIFO_PTR_W-1:0])) begin
                     wr_pend_wait[i] <= wr_wait_init;
-                else if (wr_pend_wait[i] != 0)
+                    wr_pend_aux[i]  <= cmd_aux;
+                end else if (wr_pend_wait[i] != 0)
                     wr_pend_wait[i] <= wr_pend_wait[i] - 4'd1;
             end
         end
@@ -208,17 +233,24 @@ module data_path #(
                 WR_IDLE: begin
                     if (!wr_pend_empty && !wr_empty && wr_head_due_r) begin
                         // Queued while busy; its countdown has reached 0 --
-                        // drive now, no separate wait state needed.
-                        wr_dat_r     <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].data;
-                        wr_msk_r     <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].mask;
+                        // drive now, no separate wait state needed. Fetch by
+                        // this entry's OWN tag (wr_pend_aux), not by wr_rptr
+                        // position -- it may not be the data pushed Nth.
+                        wr_dat_r     <= wr_buf[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]].data;
+                        wr_msk_r     <= wr_buf[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]].mask;
+                        wr_buf_valid[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]] <= 1'b0;
                         wr_rptr      <= wr_rptr + 1'b1;
                         wr_pend_rptr <= wr_pend_rptr + 1'b1;
                         wr_state     <= WR_DRIVE;
                         wr_burst_ctr <= '0;
                     end else if (wr_bypass) begin
-                        // Latch data from write buffer
-                        wr_dat_r <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].data;
-                        wr_msk_r <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].mask;
+                        // Latch data from write buffer. Bypass fires the SAME
+                        // cycle as cmd_wr_valid (nothing queued ahead of it),
+                        // so this write's own tag is simply this cycle's
+                        // cmd_aux -- no wr_pend_aux lookup needed.
+                        wr_dat_r <= wr_buf[cmd_aux[FIFO_PTR_W-1:0]].data;
+                        wr_msk_r <= wr_buf[cmd_aux[FIFO_PTR_W-1:0]].mask;
+                        wr_buf_valid[cmd_aux[FIFO_PTR_W-1:0]] <= 1'b0;
                         wr_rptr  <= wr_rptr + 1'b1;
                         if (cfg_CWL_nCK <= CLK_RATIO[7:0]) begin
                             // CWL fits in one ctrl cycle, go straight to drive
@@ -254,8 +286,12 @@ module data_path #(
                         // 32-bit one Backend measured.
                         if (!wr_pend_empty && !wr_empty &&
                             (wr_pend_wait[wr_pend_rptr[FIFO_PTR_W-1:0]] <= 4'd1)) begin
-                            wr_dat_r     <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].data;
-                            wr_msk_r     <= wr_buf[wr_rptr[FIFO_PTR_W-1:0]].mask;
+                            // Fetch by this entry's OWN tag, same as the WR_IDLE
+                            // queued path above -- it may not be the data
+                            // pushed Nth.
+                            wr_dat_r     <= wr_buf[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]].data;
+                            wr_msk_r     <= wr_buf[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]].mask;
+                            wr_buf_valid[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]] <= 1'b0;
                             wr_rptr      <= wr_rptr + 1'b1;
                             wr_pend_rptr <= wr_pend_rptr + 1'b1;
                             wr_state     <= WR_DRIVE;
@@ -319,14 +355,18 @@ module data_path #(
         else
             wr_head_due_r <= (wr_pend_head_wait_next == 4'd0);
 
-    // Write buffer push
-    always_ff @(posedge clk or negedge rst_n)
-        if (!rst_n)
+    // Write buffer push -- stored BY TAG (wr_data_aux), not by
+    // wr_wptr position; wr_wptr itself only tracks occupancy now.
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
             wr_wptr <= '0;
-        else if (wr_data_valid && (~wr_full || wr_pop_this_cycle)) begin
-            wr_buf[wr_wptr[FIFO_PTR_W-1:0]] <= '{data: wr_data, mask: wr_mask};
+            for (int i = 0; i < RD_FIFO_DEPTH; i++) wr_buf_valid[i] <= 1'b0;
+        end else if (wr_data_valid && (~wr_full || wr_pop_this_cycle)) begin
+            wr_buf[wr_data_aux[FIFO_PTR_W-1:0]]       <= '{data: wr_data, mask: wr_mask};
+            wr_buf_valid[wr_data_aux[FIFO_PTR_W-1:0]] <= 1'b1;
             wr_wptr <= wr_wptr + 1'b1;
         end
+    end
 
     // Write data to DDR pins -- wr_dat_r is DATA_WIDTH-wide (one
     // host word); drive it onto the DQ_WIDTH-wide channel over
@@ -675,6 +715,23 @@ module data_path #(
     endproperty
     assert property (p_wr_pend_no_overflow)
         else $error("[DP-014] Pending-write queue overflow -- a WR command was dropped");
+
+    // DP-015: a WR command must never be issued before its own
+    // write's data has arrived in wr_buf -- the tag-indexed fetch
+    // above (CONSERVE/WRITE_CMD_TO_BEATS fix) relies on this: data
+    // push (wr_data_valid, host-acceptance order) and command
+    // issue (cmd_wr_valid, scheduler order) are independent
+    // streams, and by construction issue always lags push (a
+    // command can only be issued for an entry already enqueued,
+    // and enqueue happens together with the data push) -- checked
+    // at runtime rather than only argued, since a future cmd_gen/
+    // scheduler latency change could silently break it.
+    property p_wr_data_precedes_issue;
+        @(posedge clk) disable iff (!rst_n)
+        cmd_wr_valid |-> wr_buf_valid[cmd_aux[FIFO_PTR_W-1:0]];
+    endproperty
+    assert property (p_wr_data_precedes_issue)
+        else $error("[DP-015] WR command issued before its data arrived in wr_buf");
 
     // Coverage
     covergroup cg_dp @(posedge clk);
