@@ -744,16 +744,20 @@ def _csr_map(dc: dict, geom: dict, choices: dict, host: dict,
              "reset_value": "0x00000000", "fields": [
                 {"name": "start_addr", "bits": f"{aw-1}:0", "access": "RW",
                  "reset_value": 0, "description": f"BIST start byte address ({aw} bits)"},
-                {"name": "reserved", "bits": f"31:{aw}", "access": "RO",
-                 "reset_value": 0, "description": "Reserved"},
+                # No reserved field when aw==32: the start/end address
+                # already fills the whole 32-bit word, and "31:32" is not
+                # a bit range (Validation, spec matrix level 1, 2026-11-05 --
+                # the twin of defect 2, one bit lower).
+                *([{"name": "reserved", "bits": f"31:{aw}", "access": "RO",
+                    "reset_value": 0, "description": "Reserved"}] if aw < 32 else []),
              ]},
             {"name": "BIST_ADDR_END", "offset": "0x28", "access": "RW",
              "reset_value": f"0x{end_addr:08X}", "fields": [
                 {"name": "end_addr", "bits": f"{aw-1}:0", "access": "RW",
                  "reset_value": end_addr,
                  "description": f"BIST end byte address ({aw} bits)"},
-                {"name": "reserved", "bits": f"31:{aw}", "access": "RO",
-                 "reset_value": 0, "description": "Reserved"},
+                *([{"name": "reserved", "bits": f"31:{aw}", "access": "RO",
+                    "reset_value": 0, "description": "Reserved"}] if aw < 32 else []),
              ]},
         ],
     }
