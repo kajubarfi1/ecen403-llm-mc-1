@@ -259,7 +259,33 @@ path that has ever been proved and has no report that applies to the
 design under judgement, with the options of its last report, so a design
 change never leaves `awaiting_formal` findings for a person to remember.
 
-Current (99f72da45a32, 2026-10-28, pipelined scheduler):
+Simulation status (56ca186bf893, 2026-11-04): 20 of 20 paths PASS, no open
+simulation finding; three formal obligations awaiting the re-proof on this
+design (PROTO_001, TIMING_008, HOST_001).
+
+Current (56ca186bf893, 2026-11-04, balanced priority tree, 4-bit deadlines,
+pending-ack counter in the port; 20 min each, fetched after the waiting SSH
+session died):
+- concrete: 10 proven at infinite bound (TIMING_001-009, 011 except as
+  below, REF_002, TIMING_008), 6 undetermined: tREFI (14 044, as always),
+  PROTO_001/002 at depth 42, REF_001 at 186 (bar 368), HOST_001 (acks never
+  exceed beats) at 41, and **HOST_001_progress counterexample at 254
+  cycles**: a beat owed an acknowledge for longer than the rule's first
+  bound (one read's service time, 252). Read as a long queue, not a lost
+  acknowledge: with 15 entries ahead of it a beat waits a row cycle per
+  entry. The bound is now tRC x queue depth + banks + slack = 968 cycles
+  (`scale` in the bound rule); the safety half, never an acknowledge no
+  beat is owed, is the property formal must prove, and progress is judged
+  by simulation (20 of 20 paths, every beat acknowledged) until a run
+  reaches the new bound. Covers 16/16.
+- assumed configuration: TIMING_011 and REF_001 bounded-proven (804, 1011),
+  TIMING_012 / PROTO_001 / PROTO_002 undetermined at 319 (8245 on the
+  previous design: the redesigned data path and port enlarge the state the
+  bounded engines explore), HOST_001_progress cex at 254 again. Covers
+  3/16. The engines need longer than 20 min on this design; a 60-min
+  concrete run is the next formal step.
+
+Previous (99f72da45a32, 2026-10-28, pipelined scheduler):
 - command path, concrete, 60 min (supersedes the 20-min run): 12 proven at
   infinite bound including PROTO_002, REF_001 bounded-proven to 4026 (bar
   368), **HOST_001 counterexample at 28 cycles** (filed:

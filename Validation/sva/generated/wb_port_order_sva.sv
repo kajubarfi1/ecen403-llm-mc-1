@@ -3,10 +3,13 @@
 // Ordering assertions for wb_port, from Validation/sva/sva_rules.json
 // signal_groups. Spec revision: golden_ddr3_1600k_x8_2lane_1rank. Covers: HOST_001.
 
-module wb_port_order_sva (
+module wb_port_order_sva #(
+    parameter int HOST_001_BOUND = 968
+) (
     input logic clk,
     input logic rst_n,
     input logic rsp_valid,
+    input logic wb_ack_o,
     input logic wb_cyc_i,
     input logic wb_stall_o,
     input logic wb_stb_i,
@@ -14,14 +17,24 @@ module wb_port_order_sva (
 );
 
   // ---- HOST_001 -------------------------------------------------------
-  // Host acknowledge collision: a write beat accepted in the previous cycle (its acknowledge is due now) and a read response arriving now would be two completions on one ack line. The port must hold one of them so every accepted beat is acknowledged exactly once.
+  // Host acknowledge accounting: every beat the port accepts (wb_cyc_i && wb_stb_i && !wb_stall_o) is acknowledged exactly once on wb_ack_o, whatever collides with it; never an acknowledge no beat is owed, and never a beat owed one for longer than a read's worst-case service time.
+  // Bound: 968 cycle(s) = (tRC 10) x 4 x controller_architecture.command_queue_depth (16) + 8 banks + 200 slack
+  logic signed [15:0] HOST_001_owed;   // wb_cyc_i && wb_stb_i && !wb_stall_o  minus  wb_ack_o  (16 bits: formal state, never more than a few outstanding)
+  always_ff @(posedge clk or negedge rst_n)
+    if (!rst_n) HOST_001_owed <= 0;
+    else HOST_001_owed <= HOST_001_owed + ((wb_cyc_i && wb_stb_i && !wb_stall_o) ? 16'sd1 : 16'sd0) - ((wb_ack_o) ? 16'sd1 : 16'sd0);
   property p_HOST_001;
     @(posedge clk) disable iff (!rst_n)
-    !($past(wb_cyc_i && wb_stb_i && !wb_stall_o && wb_we_i) && rsp_valid);
+    HOST_001_owed >= 16'sd0;
   endproperty
   a_HOST_001: assert property (p_HOST_001)
-    else $error("[HOST_001] Host acknowledge collision: a write beat accepted in the previous cycle (its acknowledge is due now) and a read response arriving now would be two completions on one ack line");
-  // the situation the rule is tested under; an assertion that never sees it proved nothing
-  c_HOST_001: cover property (@(posedge clk) disable iff (!rst_n) rsp_valid && $past(wb_cyc_i && wb_stb_i && !wb_stall_o));
+    else $error("[HOST_001] Host acknowledge accounting: an acknowledge no accepted beat is owed");
+  property p_HOST_001_progress;
+    @(posedge clk) disable iff (!rst_n)
+    (HOST_001_owed > 16'sd0) |-> ##[0:HOST_001_BOUND] (wb_ack_o);
+  endproperty
+  a_HOST_001_progress: assert property (p_HOST_001_progress)
+    else $error("[HOST_001] Host acknowledge accounting: a beat owed an acknowledge for more than HOST_001_BOUND cycles");
+  c_HOST_001: cover property (@(posedge clk) disable iff (!rst_n) rsp_valid && $past(wb_cyc_i && wb_stb_i && !wb_stall_o && wb_we_i));
 
 endmodule

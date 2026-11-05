@@ -604,6 +604,11 @@ def liveness_bound(spec, b):
             pass
     if b.get("plus_banks"):
         total += 1 << int(spec["memory_geometry"]["bank_bits"])
+    if b.get("scale"):
+        # the obligation is owed behind every entry ahead of it (a beat at the
+        # back of a full queue waits one worst-case service per entry): the
+        # window sum times a spec count, e.g. command_queue_depth
+        total *= int(spec_value(spec, b["scale"]))
     return total + int(b.get("slack", 0))
 
 
@@ -612,6 +617,8 @@ def describe_bound(spec, b):
     ws = cc.get("window_scale", 1) if b.get("enforced_window") else 1
     parts = [f"{prm} {cycles_for(spec, prm)[0]}" for prm in b.get("params", [])]
     s = "(" + " + ".join(parts) + f") x {ws}"
+    if b.get("scale"):
+        s += f" x {b['scale']} ({spec_value(spec, b['scale'])})"
     if b.get("plus_banks"):
         s += f" + {1 << int(spec['memory_geometry']['bank_bits'])} banks"
     if b.get("slack"):
@@ -705,6 +712,45 @@ def generate_signal_group(spec, grp, catalog=None, schemas=None):
   a_{r['id']}: assert property (p_{r['id']})
     else $error("[{r['id']}] {r['requirement'].split(':')[0]}: no {r['response']} within {r['id']}_BOUND cycles of {r['trigger']}");
   c_{r['id']}: cover property (@(posedge clk) disable iff (!rst_n) {trig});
+
+"""
+    for r in grp.get("counter_rules", []):
+        # A conservation obligation on one block's boundary: every `up` event
+        # (a beat accepted) is answered by exactly one `down` event (an
+        # acknowledge). Two assertions over a monitor-local count: the count
+        # never goes negative (never an acknowledge that no beat is owed),
+        # and while anything is owed an acknowledge arrives within the bound
+        # (progress). This is the black-box form of "one ack per beat"; a
+        # `never <collision>` rule was a proxy for one implementation and
+        # became a false alarm once the design held the colliding ack
+        # (HOST_001, 2026-10-29).
+        up, p1 = expand_expr(r["up"], block, catalog or {}, schemas or {})
+        down, p2 = expand_expr(r["down"], block, catalog or {}, schemas or {})
+        cover, p3 = expand_expr(r["cover"], block, catalog or {}, schemas or {})
+        sigs |= p1 | p2 | p3
+        bound = liveness_bound(spec, r["bound"])
+        ids.append(r["id"])
+        params += f",\n    parameter int {r['id']}_BOUND = {bound}"
+        body += f"""  // ---- {r['id']} -------------------------------------------------------
+  // {r['requirement']}
+  // Bound: {bound} cycle(s) = {describe_bound(spec, r['bound'])}
+  logic signed [15:0] {r['id']}_owed;   // {r['up']}  minus  {r['down']}  (16 bits: formal state, never more than a few outstanding)
+  always_ff @(posedge clk or negedge rst_n)
+    if (!rst_n) {r['id']}_owed <= 0;
+    else {r['id']}_owed <= {r['id']}_owed + (({up}) ? 16'sd1 : 16'sd0) - (({down}) ? 16'sd1 : 16'sd0);
+  property p_{r['id']};
+    @(posedge clk) disable iff (!rst_n)
+    {r['id']}_owed >= 16'sd0;
+  endproperty
+  a_{r['id']}: assert property (p_{r['id']})
+    else $error("[{r['id']}] {r['requirement'].split(':')[0]}: an acknowledge no accepted beat is owed");
+  property p_{r['id']}_progress;
+    @(posedge clk) disable iff (!rst_n)
+    ({r['id']}_owed > 16'sd0) |-> ##[0:{r['id']}_BOUND] ({down});
+  endproperty
+  a_{r['id']}_progress: assert property (p_{r['id']}_progress)
+    else $error("[{r['id']}] {r['requirement'].split(':')[0]}: a beat owed an acknowledge for more than {r['id']}_BOUND cycles");
+  c_{r['id']}: cover property (@(posedge clk) disable iff (!rst_n) {cover});
 
 """
     sigs = {x for x in sigs if not x.startswith("$")}

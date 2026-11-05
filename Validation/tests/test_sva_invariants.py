@@ -96,3 +96,26 @@ class TestPartialDrops(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CounterRules(unittest.TestCase):
+    """A counter rule states 'exactly one down per up' on a block boundary
+    (HOST_001 since 2026-10-29): a never-negative count and bounded progress."""
+
+    def test_counter_rule_generates_count_and_progress(self):
+        import json as _json
+        spec = _json.load(open(SG.SPEC_PATH)) if hasattr(SG, "SPEC_PATH") else None
+        if spec is None:
+            self.skipTest("no spec path on the generator")
+        grp = {"name": "host_port", "block": "wb_port", "counter_rules": [{
+            "id": "HOST_001", "up": "wb_cyc_i && wb_stb_i && !wb_stall_o", "down": "wb_ack_o",
+            "cover": "rsp_valid", "bound": {"params": ["tRCD"], "slack": 4},
+            "requirement": "Host acknowledge accounting: one ack per beat."}]}
+        mod, src, block, ids = SG.generate_signal_group(spec, grp, {}, {})
+        self.assertEqual(ids, ["HOST_001"])
+        self.assertIn("HOST_001_owed <= HOST_001_owed + ((wb_cyc_i && wb_stb_i && !wb_stall_o) ? 16'sd1 : 16'sd0) - ((wb_ack_o) ? 16'sd1 : 16'sd0)", src)
+        self.assertIn("a_HOST_001: assert property", src)
+        self.assertIn("HOST_001_owed >= 16'sd0", src)
+        self.assertIn("##[0:HOST_001_BOUND] (wb_ack_o)", src)
+        self.assertIn("parameter int HOST_001_BOUND", src)
+        self.assertIn("c_HOST_001: cover property", src)

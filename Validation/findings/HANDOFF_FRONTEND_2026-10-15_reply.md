@@ -815,3 +815,64 @@ the two open findings to your Phase 1 and Phase 4 agents and tells us
 whether they can close them unaided. That is the test the semester's
 loop criterion needs, and it is the only one we have not been able to
 run on your real fixes yet.
+
+## Addendum 12 (2026-10-29, night): 20 of 20 on 2bea54c5eac1
+
+Replies to your handoffs 7, 8 and 9. Every path passes on the drop as
+pushed. The package carries no open simulation finding for the first
+time since the loop began; the three entries left are formal
+obligations awaiting the re-proof on the new scheduler and port, which
+is running.
+
+- **Write-buffer pop/push race**: fixed. 600 of 600 write words
+  accepted and 1200 of 1200 beats driven on both refresh paths; the
+  DP-001 adjustment is right (a push into the slot a same-cycle pop
+  vacates is legitimate).
+- **Phase 3 gate**: your polling RefBlock test is the right shape; it
+  tolerates the pipeline's extra PRE observations and nothing else. The
+  flow run that proves it clears T36/T37 is the next thing we do.
+- **HOST_001**: fixed, and your Python model was right. Path_23 (the
+  directed collision at gap 40) now completes every one of 79 beats with
+  exactly one acknowledge; conservation and the handshake stage are
+  clean. One correction on our side: the HOST_001 property we had bound
+  into the port said "never a write beat followed by a read response",
+  which described the old implementation's hazard, not the requirement,
+  and it kept firing on your fixed port because the collision still
+  occurs and is now handled. It is restated as what the spec actually
+  demands: beats accepted minus acknowledges delivered is never negative
+  (never an ack no beat is owed), and while any beat is owed an ack
+  arrives within a read's worst-case service time (252 cycles here, from
+  the spec). The collision stays as the cover the rule is tested under.
+  Formal will prove the two parts on your port.
+- **Counter width**: deferring is fine; the measured coverage stays at
+  72 % with data_path at 30 % until the deadlines shrink, and the
+  sign-off says why. Modular comparison on an 8-bit deadline is the
+  standard shape when you get to it.
+- **Tier-1 sweep (handoff 9)**: yes, send the report. The
+  `data_byte_lanes` vs `byte_lanes` disagreement is exactly the kind of
+  thing our spec review should have caught at intake; we will add a
+  consistency rule for it so the next one is found before generation.
+
+Two intake questions came out of this round for the spec owner, both in
+`Validation/spec/completeness_rules.json` as decisions: whether the
+port must stall writes when the write buffer is full (the buffer's
+ready signal has no consumer today), and whether acknowledges must
+return in request order (your write ack now waits behind a colliding
+read ack, which is right, but a write accepted after a read is still
+acknowledged before it; a Wishbone B4 master counts acks in order).
+Neither is a finding until the spec decides.
+
+## Addendum 13 (2026-11-04): 56ca186bf893, 20 of 20, and the loop is running on it
+
+Your five commits since (saturating 4-bit deadlines, registered
+`wr_data_ready`, the balanced priority tree) judged: every path passes,
+no open simulation finding, code coverage back to 82.9 % measured and
+89.2 % adjusted with data_path at 70 % (from 30). One correction on our
+side: the standalone port path was driving reads that its tied-off
+response can never acknowledge, and the HOST_001 progress rule rightly
+objected; it drives writes only now, as its own note always said.
+
+The flow loop is running on this drop (`runs/nov04_loop`), the first
+round with your RefBlock polling in the gate and nothing of ours to
+carry. Its result, and the formal re-proof on this scheduler and port,
+follow in the next addendum.

@@ -65,7 +65,7 @@ class TestIntakeGate(unittest.TestCase):
         st = statuses(spec, rules, pdefs)
         for rid in ("CSR_UNMAPPED_READ_DATA", "CSR_READ_BYTE_ENABLES",
                     "CSR_STATUS_READ_SAMPLING", "DDR_DM_POLARITY", "PHY_DATA_BUS_OCCUPANCY",
-                    "HOST_WRITE_BUFFER_BACKPRESSURE",
+                    "HOST_WRITE_BUFFER_BACKPRESSURE", "HOST_ACK_ORDERING",
                     "TAXONOMY_SCHEDULER_FAMILY",
                     "TAXONOMY_NAMES_TIMING_PARAMS", "INIT_TMRD", "INIT_TMOD"):
             self.assertEqual(st[rid], "gap", rid)
@@ -90,6 +90,7 @@ class TestIntakeGate(unittest.TestCase):
         spec["data_path_mapping"]["ddr_dm_polarity"] = "active_high_mask"
         spec["phy_interface"]["data_bus_cycles_per_cas"] = "host_word_beats"   # PHY_DATA_BUS_OCCUPANCY (2026-10-29)
         spec["host_interface"]["write_buffer_backpressure"] = "port_stalls_on_full"   # HOST_WRITE_BUFFER_BACKPRESSURE
+        spec["host_interface"]["ack_ordering"] = "in_request_order"                   # HOST_ACK_ORDERING
         spec["controller_architecture"]["speculative_activate"] = "allowed"
         spec["failure_taxonomy"]["categories"].append(
             {"id": "SCHED_001", "name": "dropped request"})

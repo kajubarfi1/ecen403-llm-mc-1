@@ -222,16 +222,14 @@ def report_mismatch(text, stopats, assumes):
     options, else what differs. A shared remote directory once handed back
     the assumed-configuration run's report as the concrete 60-minute run's
     (2026-10-29): two assumptions where none were given."""
+    # Only the assumption count is checked: JasperGold's "Global Stopats"
+    # header reads <none> even when per-signal stopats are set (every
+    # assumed-configuration run since 2026-10-20 shows <none> with its two
+    # cuts applied), so it says nothing about this run's stopats.
     m = re.search(r"assumptions\s*:\s*(\d+)", text)
     n_asm = int(m.group(1)) if m else None
-    m2 = re.search(r"Global Stopats\s*:\s*(.*)", text)
-    stop_none = bool(m2) and "<none>" in m2.group(1)
     if n_asm is not None and n_asm != len(assumes):
         return f"report lists {n_asm} assumption(s), this run gave {len(assumes)}"
-    if m2 and stopats and stop_none:
-        return f"report lists no stopats, this run gave {len(stopats)}"
-    if m2 and not stopats and not stop_none:
-        return "report lists stopats, this run gave none"
     return None
 
 
@@ -257,6 +255,11 @@ def main() -> int:
                          "engine reaches it (2026-10-20: 300 stopped after 12 s, 2000 after "
                          "2 min, every open property undetermined at that bound), so the "
                          "time limit governs unless a cap is asked for")
+    ap.add_argument("--fetch", metavar="REMOTE_DIR",
+                    help="do not run: download report_all.txt from this finished run's Olympus directory "
+                         "and build the report for it (the SSH session that was waiting died while the "
+                         "Slurm job went on and finished, 2026-11-04). Give the same --path/--stopat/"
+                         "--assume/--sva-param/--time the run was launched with.")
     ap.add_argument("--remote-dir", default=None,
                     help="Olympus directory for this run; default a fresh ~/formal/auto/<utc>_<pid> "
                          "(two runs sharing one directory handed back each other's report, 2026-10-29)")
@@ -328,27 +331,63 @@ def main() -> int:
         stop += "".join(f"assume -name asm_{i} {{{e}}}\n" for i, e in enumerate(args.assume))
         trace_line = f"set_max_trace_length {args.trace}\n" if args.trace else ""
         f.write(TCL.format(time=args.time, trace_line=trace_line, stopat=stop))
-    tgz = os.path.join(tempfile.gettempdir(), "formal_pkg.tgz")
+    # the tarball is per run too: two runs launched in the same second shared
+    # one file and the abstraction run was packaged without its stopats
+    # (2026-10-29)
+    tgz = pkg.rstrip("/") + ".tgz"
     with tarfile.open(tgz, "w:gz") as t:
         t.add(pkg, arcname="pkg")
 
-    # 3. run
+    # 3. run (or fetch a finished run)
     from sim_runner import CadenceSSHAgent
     a = CadenceSSHAgent()
     a.connect()
     try:
-        a.upload_file(tgz, "formal_pkg.tgz")
         stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S") + f"_{os.getpid()}"
-        rd = args.remote_dir or f"~/formal/auto/{stamp}"
-        a.upload_file(tgz, f"formal_pkg_{stamp}.tgz")
-        a._head_exec(f"mkdir -p {rd} && rm -rf {rd}/pkg && tar xzf ~/cadence_agent_work/formal_pkg_{stamp}.tgz -C {rd}")
-        script = (f"export PATH={JG_BIN}:$PATH; cd {rd}/pkg && rm -rf jgproj && "
-                  f"jg -batch -tcl run.tcl -proj jgproj -allow_unsupported_OS > jg.log 2>&1; "
-                  f"echo jg_exit_$?; grep -c '' report_all.txt 2>/dev/null")
-        a._head_exec(f"cat > {rd}/run.sh << 'EOF'\n#!/bin/bash\n{script}\nEOF")
-        print(f"  JasperGold on Olympus ({args.time} limit, trace {args.trace or 'unlimited'}) ...")
-        r = a.srun(f"bash {rd}/run.sh", timeout=3600)
-        print("  " + r["stdout"].strip().splitlines()[-1] if r["stdout"].strip() else "  (no output)")
+        if args.fetch:
+            rd = args.fetch
+            print(f"  fetching the finished run in {rd}")
+        else:
+            rd = args.remote_dir or f"~/formal/auto/{stamp}"
+            a.upload_file(tgz, f"formal_pkg_{stamp}.tgz")
+            a._head_exec(f"mkdir -p {rd} && rm -rf {rd}/pkg && tar xzf ~/cadence_agent_work/formal_pkg_{stamp}.tgz -C {rd}")
+            script = (f"export PATH={JG_BIN}:$PATH; cd {rd}/pkg && rm -rf jgproj && "
+                      f"jg -batch -tcl run.tcl -proj jgproj -allow_unsupported_OS > jg.log 2>&1; "
+                      f"echo jg_exit_$? > {rd}/pkg/DONE")
+            a._head_exec(f"cat > {rd}/run.sh << 'EOF'\n#!/bin/bash\n{script}\nEOF")
+            print(f"  JasperGold on Olympus ({args.time} limit, trace {args.trace or 'unlimited'}), dir {rd} ...")
+            # Submit as a batch job and poll with fresh SSH sessions: a session
+            # held open across a 20-60 minute prove died on a laptop network
+            # change and took the result with it (2026-11-04); the job itself
+            # kept running, so the result only had to be fetched. If this
+            # process is lost too: --fetch <dir> with the same options.
+            job = a.submit_batch(f"bash {rd}/run.sh", job_name="jg", time_min=180)
+            if not job:
+                print("  sbatch refused the job; see Olympus")
+                return 2
+            print(f"  Slurm job {job}; polling every 60 s (run --fetch {rd} if this process is lost)")
+            a.disconnect()
+            import time as _time
+            waited = 0
+            while waited < 4 * 3600:
+                _time.sleep(60)
+                waited += 60
+                try:
+                    a = CadenceSSHAgent()
+                    a.connect()
+                    done = a._head_exec(f"cat {rd}/pkg/DONE 2>/dev/null")["stdout"].strip()
+                    a.disconnect()
+                except Exception as ex:          # the network, not the job: try again next minute
+                    print(f"    (poll failed: {str(ex)[:80]}; retrying)")
+                    continue
+                if done:
+                    print(f"  {done} after {waited // 60} min")
+                    break
+            else:
+                print("  gave up waiting after 4 h; the job may still be running: --fetch later")
+                return 2
+            a = CadenceSSHAgent()
+            a.connect()
         a._head_exec(f"cp {rd}/pkg/report_all.txt ~/cadence_agent_work/jg_report_all_{stamp}.txt")
         # what JasperGold said about the cuts and assumptions: a stopat on a
         # name it cannot resolve, or an assume it rejects, is silent in the

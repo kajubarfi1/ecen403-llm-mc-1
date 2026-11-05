@@ -166,7 +166,7 @@
   "proposed_taxonomy_extensions": {
     "$why": "The taxonomy bounds every timing parameter except tREFI. tREFI is a MAXIMUM interval, not a minimum separation, so it needs its own rule kind; JESD79-3 allows up to max_postpone_count refreshes to be deferred, so the observable bound is (max_postpone_count + 1) x tREFI between REFRESH commands.",
     "TIMING_012": "tREFI violation: no REFRESH issued within (max_postpone_count + 1) x tREFI of the previous REFRESH.",
-    "HOST_001": "Host acknowledge collision: a write acknowledge and a read response complete in the same cycle on a Wishbone port that has one ack line, so the host sees one ack for two beats and waits forever for the other. Code-reading on wb_port (wb_ack_o = wr_ack_r | rd_ack, 2026-10-28); not yet seen in simulation."
+    "HOST_001": "Host acknowledge accounting: an accepted beat is acknowledged other than exactly once (a write-ack and a read-ack merged on the one ack line, or an ack owed indefinitely). Found by formal and a directed sequence 2026-10-28/29 as the write/read ack collision; stated as a counting rule since the fix."
   },
   "max_interval_rules": [
     {
@@ -298,6 +298,9 @@
     ],
     "HOST_001": [
       "wb_port"
+    ],
+    "HOST_*": [
+      "wb_port"
     ]
   },
   "signal_groups": [
@@ -359,15 +362,25 @@
     {
       "name": "host_port",
       "block": "wb_port",
-      "$note": "The host side of the port, on its ports only. A pipelined Wishbone slave answers every accepted beat with exactly one ack; two completions in one cycle cannot both be seen. (2026-10-28) The design registers the write ack one cycle after the beat and ORs it with the read response; the collision is reachable whenever a read response lands the cycle after a write beat. Formal proves or refutes it on the command path; in simulation the assertion fires on the first collision.",
-      "invariant_rules": [
+      "$note": "The host side of the port, on its ports only. (2026-10-29) HOST_001 is a counter rule: beats accepted minus acknowledges delivered is never negative, and while any beat is owed an acknowledge arrives within the bound. It replaced `never (write beat then read response)`, which described one implementation's collision and kept firing after the port learned to hold the losing ack; the cover keeps the collision as the situation this rule is tested under.",
+      "counter_rules": [
         {
           "id": "HOST_001",
-          "never": "$past(wb_cyc_i && wb_stb_i && !wb_stall_o && wb_we_i) && rsp_valid",
-          "cover": "rsp_valid && $past(wb_cyc_i && wb_stb_i && !wb_stall_o)",
-          "requirement": "Host acknowledge collision: a write beat accepted in the previous cycle (its acknowledge is due now) and a read response arriving now would be two completions on one ack line. The port must hold one of them so every accepted beat is acknowledged exactly once.",
+          "up": "wb_cyc_i && wb_stb_i && !wb_stall_o",
+          "down": "wb_ack_o",
+          "cover": "rsp_valid && $past(wb_cyc_i && wb_stb_i && !wb_stall_o && wb_we_i)",
+          "bound": {
+            "params": [
+              "tRC"
+            ],
+            "enforced_window": true,
+            "scale": "controller_architecture.command_queue_depth",
+            "plus_banks": true,
+            "slack": 200
+          },
+          "requirement": "Host acknowledge accounting: every beat the port accepts (wb_cyc_i && wb_stb_i && !wb_stall_o) is acknowledged exactly once on wb_ack_o, whatever collides with it; never an acknowledge no beat is owed, and never a beat owed one for longer than a read's worst-case service time.",
           "spec_ref": "host_interface.interface_type (wishbone_pipelined: one acknowledge per accepted beat)",
-          "$cover_note": "The near miss: a read response arriving the cycle after ANY accepted beat. A cover of the write beat alone was reached in a run whose assumed configuration never answered a read, so the bounded proof under it looked non-vacuous while the trigger (a response) never occurred (2026-10-28)."
+          "$bound_note": "A beat at the back of a full command queue waits one worst-case row cycle (tRC in the design's enforced window) per entry ahead of it, plus a refresh and pipeline slack. The first bound (one read's service time, 252 cycles) produced a formal counterexample at 254 cycles that was a long queue, not a lost acknowledge (2026-11-04)."
         }
       ]
     }

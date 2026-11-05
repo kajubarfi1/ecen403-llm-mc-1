@@ -1,0 +1,135 @@
+{
+  "$schema": "validation-retry-instructions/1",
+  "status": "PASS",
+  "pipeline": "validation",
+  "drop": "2bea54c5eac1",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "spec_id": "00d082c3f72d1b34",
+  "generated_utc": "2026-10-29T19:00:21.025261Z",
+  "failed_modules": [],
+  "retry_instructions": {},
+  "resolved_since_previous_drop": [
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/CONSERVE/WRITE_CMD_TO_BEATS",
+      "kind": "rtl_defect",
+      "check_id": "CONSERVE/WRITE_CMD_TO_BEATS",
+      "taxonomy_id": "DATA_001",
+      "owner_module": "data_path",
+      "severity": "critical",
+      "title": "data_path: CONSERVE/WRITE_CMD_TO_BEATS",
+      "paths": [
+        "path_05_scheduler_refresh_loop",
+        "path_20_refresh_preempt"
+      ],
+      "status": "resolved",
+      "resolved_in": "2bea54c5eac1",
+      "last_seen": "e5ec723f495e",
+      "first_seen": "efece348d04e",
+      "note": "open in drop e5ec723f495e, not raised by drop 2bea54c5eac1"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/CONSERVE/WRITE_REQUEST_TO_DATA",
+      "kind": "rtl_defect",
+      "check_id": "CONSERVE/WRITE_REQUEST_TO_DATA",
+      "taxonomy_id": "DATA_001",
+      "owner_module": "data_path",
+      "severity": "critical",
+      "title": "data_path: CONSERVE/WRITE_REQUEST_TO_DATA",
+      "paths": [
+        "path_05_scheduler_refresh_loop",
+        "path_20_refresh_preempt"
+      ],
+      "status": "resolved",
+      "resolved_in": "2bea54c5eac1",
+      "last_seen": "e5ec723f495e",
+      "first_seen": "efece348d04e",
+      "note": "open in drop e5ec723f495e, not raised by drop 2bea54c5eac1"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/HANDSHAKE/wb",
+      "kind": "rtl_defect",
+      "check_id": "HANDSHAKE/wb",
+      "taxonomy_id": "SCHED_001",
+      "owner_module": "wb_port",
+      "severity": "critical",
+      "title": "wb_port: HANDSHAKE/wb",
+      "paths": [
+        "path_23_host_ack_collision"
+      ],
+      "status": "resolved",
+      "resolved_in": "2bea54c5eac1",
+      "last_seen": "e5ec723f495e",
+      "first_seen": "efece348d04e",
+      "note": "open in drop e5ec723f495e, not raised by drop 2bea54c5eac1"
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/HOST_001",
+      "kind": "rtl_defect",
+      "check_id": "HOST_001",
+      "taxonomy_id": "HOST_001",
+      "owner_module": "wb_port",
+      "severity": "major",
+      "title": "wb_port: HOST_001",
+      "paths": [
+        "path_23_host_ack_collision"
+      ],
+      "status": "resolved",
+      "resolved_in": "2bea54c5eac1",
+      "last_seen": "e5ec723f495e",
+      "first_seen": "99f72da45a32",
+      "note": "open in drop e5ec723f495e, not raised by drop 2bea54c5eac1"
+    }
+  ],
+  "requires_human_review": false,
+  "source": "Validation/findings/emit_findings.py -> retry_adapter.py",
+  "drop_status": {
+    "$schema": "validation-drop-status/1",
+    "drop": "2bea54c5eac1",
+    "partial": false,
+    "blocks_present": [
+      "addr_decoder",
+      "bank_tracker",
+      "calibration",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "init_fsm",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "blocks_absent": [],
+    "inconsistent_edges": [],
+    "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "foreign_spec_blocks": {},
+    "paths_run": [
+      "path_01_write_cmd",
+      "path_02_read_cmd",
+      "path_03_read_return",
+      "path_04_scheduler_bank_loop",
+      "path_05_scheduler_refresh_loop",
+      "path_07_backpressure",
+      "path_08_init_to_cal",
+      "path_09_init_to_refresh",
+      "path_12_csr_timing_to_scheduling",
+      "path_13_csr_refresh_to_scheduling",
+      "path_14_status_init",
+      "path_15_status_cal",
+      "path_16_status_refresh",
+      "path_17_full_boot",
+      "path_18_full_write",
+      "path_19_row_conflict",
+      "path_20_refresh_preempt",
+      "path_21_wb_port_standalone",
+      "path_22_csr_standalone",
+      "path_23_host_ack_collision"
+    ],
+    "paths_blocked": {},
+    "note": "Complete run: every runnable path simulated on this drop."
+  }
+}

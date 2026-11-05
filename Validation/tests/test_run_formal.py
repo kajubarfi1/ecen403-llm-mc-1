@@ -81,8 +81,10 @@ class Vacuity(unittest.TestCase):
 
 
 class ReportBelongsToRun(unittest.TestCase):
+    # JasperGold prints "Global Stopats: <none>" whether or not per-signal
+    # stopats are set; only the assumption count identifies a run
     HDR_PLAIN = "    Global Stopats       :     <none>\n          assumptions     : 0\n"
-    HDR_ABS = "    Global Stopats       :     2\n          assumptions     : 2\n"
+    HDR_ABS = "    Global Stopats       :     <none>\n          assumptions     : 2\n"
 
     def test_matching_header_passes(self):
         self.assertIsNone(R.report_mismatch(self.HDR_PLAIN, [], []))
@@ -90,4 +92,4 @@ class ReportBelongsToRun(unittest.TestCase):
 
     def test_another_runs_report_is_refused(self):
         self.assertIn("2 assumption", R.report_mismatch(self.HDR_ABS, [], []))
-        self.assertIn("no stopats", R.report_mismatch(self.HDR_PLAIN, ["a"], []))
+        self.assertIn("0 assumption", R.report_mismatch(self.HDR_PLAIN, ["a"], ["x"]))

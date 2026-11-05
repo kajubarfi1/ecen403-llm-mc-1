@@ -125,3 +125,31 @@ class TestCompiledSpec(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestDerivedIdentities(unittest.TestCase):
+    """The spec's $derived values must agree with its stated fields; a block
+    that derives a width its own way is caught at intake, not in RTL
+    (Tier-1 sweep, ECC lane counted into the address width, 2026-11-04)."""
+
+    def _spec(self):
+        import copy, json as _json
+        with open(VS.DEFAULT_SPEC if hasattr(VS, "DEFAULT_SPEC") else os.path.join(ROOT, "Spec", "llmmc_microarchitecturespec_filled.json")) as f:
+            return copy.deepcopy(_json.load(f))
+
+    def test_golden_identities_hold(self):
+        self.assertEqual(VS.check_derived(self._spec()), [])
+
+    def test_address_width_off_by_one_is_blocking(self):
+        spec = self._spec()
+        spec["host_interface"]["address_width_bits"] += 1
+        msgs = VS.check_derived(spec)
+        self.assertTrue(any("address_width_bits" in m for m in msgs), msgs)
+        self.assertTrue(any(b.startswith("derived:") for b in VS.review(spec)["blocking"]))
+
+    def test_ecc_without_a_check_lane_is_blocking(self):
+        spec = self._spec()
+        spec["controller_architecture"]["ecc_mode"] = 1
+        spec["memory_geometry"]["$derived"]["data_byte_lanes"] = spec["memory_geometry"]["byte_lanes"]
+        msgs = VS.check_derived(spec)
+        self.assertTrue(any("ECC" in m or "ecc" in m for m in msgs), msgs)

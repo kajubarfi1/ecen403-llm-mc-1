@@ -5,10 +5,12 @@
   "spec": "Validation/spec/llmmc_microarchitecturespec_filled.json",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "design_id": "ddr3_mc_core_v2",
-  "generated_utc": "2026-10-29T17:54:45.704805+00:00",
+  "generated_utc": "2026-11-05T00:32:12.472898+00:00",
   "blocking": [],
   "advisory": [
-    "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated"
+    "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+    "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+    "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
   ],
   "jedec": [
     {
@@ -199,6 +201,30 @@
         "host_word_beats",
         "one_controller_cycle",
         "<integer controller cycles>"
+      ]
+    },
+    {
+      "id": "HOST_WRITE_BUFFER_BACKPRESSURE",
+      "status": "gap",
+      "disposition": "decision",
+      "question": "When the data path's write buffer is full, does the host port stall writes (wr_data_ready reaches wb_stall_o), or is the buffer sized so that it can never be full while the queue has room (write_buffer_depth >= command_queue_depth + writes in flight)?",
+      "detail": "host_interface.write_buffer_backpressure is not stated",
+      "require": "host_interface.write_buffer_backpressure",
+      "options": [
+        "port_stalls_on_full",
+        "buffer_sized_for_queue_plus_inflight"
+      ]
+    },
+    {
+      "id": "HOST_ACK_ORDERING",
+      "status": "gap",
+      "disposition": "decision",
+      "question": "Must the host port return acknowledges in the order the beats were accepted (Wishbone B4 pipelined masters match acks to requests by order; a response carries no id), or may a write be acknowledged ahead of an earlier read that is still waiting for its data?",
+      "detail": "host_interface.ack_ordering is not stated",
+      "require": "host_interface.ack_ordering",
+      "options": [
+        "in_request_order",
+        "writes_may_complete_early"
       ]
     }
   ],
