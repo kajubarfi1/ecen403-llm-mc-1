@@ -42,7 +42,15 @@ class TestbenchGenerator:
         p["DATA_WIDTH"] = self.host["data_width_bits"]
         p["SEL_WIDTH"] = p["DATA_WIDTH"] // self.host["granularity_bits"]
         p["AUX_WIDTH"] = self.arch["aux_width"]
-        p["DQ_WIDTH"] = self.geo["device_width_bits"] * self.geo["byte_lanes"]
+        # byte_lanes is every physical lane, ECC included; the channel's
+        # DATA width (what a host word actually packs onto) excludes the
+        # ECC lane -- data_byte_lanes. Same two-formulas-for-one-quantity
+        # bug as addr_decoder_gen.py's (Frontend2/HANDOFF_VALIDATION_
+        # 2026-10-29_9.md): every ECC spec computed a channel width one
+        # lane too wide here and refused to generate at all (Validation,
+        # spec matrix level 2, 2026-11-05).
+        data_lanes = self.geo.get("$derived", {}).get("data_byte_lanes", self.geo["byte_lanes"])
+        p["DQ_WIDTH"] = self.geo["device_width_bits"] * data_lanes
         p["DM_WIDTH"] = max(1, p["DQ_WIDTH"] // 8)
         p["BURST_LEN"] = self.host["max_burst_length"]
         p["BURST_CTRL_CYCLES"] = p["BURST_LEN"] // p["CLK_RATIO"]
