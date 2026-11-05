@@ -1071,14 +1071,19 @@ def compile_spec(choices: dict) -> dict:
             "dqs_count": r["byte_lanes"],
             "dm_enabled": True,
             "ck_pair_present": True,
-            # Validation/spec/completeness_rules.json PHY_DATA_BUS_OCCUPANCY,
-            # answered "host_word_beats" (2026-11-05): one CAS occupies the
-            # data bus for host_data_width/channel_data_width controller
-            # cycles -- the same formula scheduler_gen.py's cas_spacing_ctr
-            # already independently re-derives and enforces as WORD_BEATS.
-            # Always an integer: validate_choices requires
-            # host_data_width % channel_data_width == 0.
-            "data_bus_cycles_per_cas": r["host_data_width"] // chan_w,
+            # Validation/spec/completeness_rules.json PHY_DATA_BUS_OCCUPANCY:
+            # spec_completeness.py's required_field check does a literal
+            # membership test against "options" ("val not in rule['options']"),
+            # so this field holds one of those three strings verbatim, not a
+            # computed value -- confirmed by Validation's own test fixture
+            # (tests/test_spec_completeness.py sets this field to exactly
+            # "host_word_beats"). Answered "host_word_beats": one CAS
+            # occupies the data bus for host_data_width/channel_data_width
+            # controller cycles -- the same formula scheduler_gen.py's
+            # cas_spacing_ctr already independently re-derives and enforces
+            # as WORD_BEATS (always an integer there: validate_choices
+            # requires host_data_width % channel_data_width == 0).
+            "data_bus_cycles_per_cas": "host_word_beats",
             "notes": "Abstracted DRAM boundary. Command/data semantics only.",
         },
         "csr_register_map": _csr_map(dc, geom, r, host,
