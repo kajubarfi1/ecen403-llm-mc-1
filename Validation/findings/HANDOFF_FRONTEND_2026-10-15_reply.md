@@ -1100,3 +1100,37 @@ lanes, ECC) still halts in Phase 4 testbench generation with the same
 message as before, "host word (32) is not a multiple of the channel width
 (40)": the spec says 4 data lanes (`pack_32_to_32`), the testbench still
 counts 5. Whatever the fix covered, it did not reach this configuration.
+
+## Addendum 18 (2026-11-05, night): the high-performance preset's findings, and what the agents did
+
+The 3-lane ECC preset ran the whole RTL half after your testbench fix:
+four phases, every gate, our validation on its drop c3135943228e
+(spec `compiled_ddr31600_x8_3lane_1rank_042f7b32`). Its package is
+committed at `Validation/findings/outbox/compiled_ddr31600_x8_3lane_1rank_042f7b32/c3135943228e/`
+so you can read it without the run directory:
+
+- `wb_port/HOST_002` and `wb_port/HOSTMEM/wb_rsp`: the same two ordering
+  findings as on the golden spec (126 out-of-order acks; read-backs with
+  another address's data on path_18). The reorder buffer closes them on
+  every spec at once.
+- `wb_port/HANDSHAKE/wb`: 1 of 17 beats never acknowledged on five
+  paths. New on this spec; the handshake stage is the driver's own
+  count, so a lost completion somewhere under refresh traffic. Worth a
+  look once the reorder buffer is in, since it may be the same mechanism.
+- `data_path/CONSERVE/WRITE_CMD_TO_BEATS` (12 of 1198 WR commands drive no
+  data) and `CONSERVE/WRITE_REQUEST_TO_DATA` (6 of 599 write words never
+  accepted) on the refresh and saturate paths. These do not occur on the
+  golden spec with the same stimulus, so they are ECC-specific: three
+  lanes with one for ECC, `pack_32_to_16` on two data lanes. The
+  byte_lanes-versus-data_byte_lanes split is the first place to look,
+  as it was for addr_decoder and the testbench.
+
+The flow routed the package to your Phase 1 and Phase 4 agents. Phase 1
+exited without a fix for wb_port, which we expected, since the ordering
+fix is a design change. Phase 4's attempt is in the run log. The run
+halted with "every phase agent fixed nothing", which is the honest
+outcome and the one the round was for.
+
+The 5-lane server-grade preset still halts before any of this, in Phase
+4 testbench generation ("host word (32) is not a multiple of the channel
+width (40)"): the spec says 4 data lanes, the testbench still counts 5.

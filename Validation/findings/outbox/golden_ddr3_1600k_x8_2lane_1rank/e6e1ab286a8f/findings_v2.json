@@ -3,9 +3,9 @@
   "drop": "e6e1ab286a8f",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "spec_id": "00d082c3f72d1b34",
-  "generated_utc": "2026-11-05T17:56:33.201172Z",
+  "generated_utc": "2026-11-05T18:23:26.900687Z",
   "reports": "Validation/reports/paths",
-  "finding_count": 4,
+  "finding_count": 5,
   "findings": [
     {
       "schema": "validation-findings/2",
@@ -113,6 +113,69 @@
       "status": "awaiting_formal",
       "related_manual_findings": [
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "wb_port/HOSTMEM/wb_rsp",
+      "kind": "rtl_defect",
+      "check_id": "HOSTMEM/wb_rsp",
+      "taxonomy_id": "DATA_001",
+      "detectors": [
+        "host_memory"
+      ],
+      "owner_module": "wb_port",
+      "owner_candidates": [
+        "wb_port",
+        "scheduler"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "wb_port: HOSTMEM/wb_rsp",
+      "requirement": "the host reads back, at each address, the data it last wrote there, and the responses arrive in the order the reads were accepted (host_interface.ack_ordering = in_request_order)",
+      "spec_ref": "host_interface.ack_ordering; failure_taxonomy DATA_001",
+      "expected": "the host reads back, at each address, the data it last wrote there, and the responses arrive in the order the reads were accepted (host_interface.ack_ordering = in_request_order)",
+      "actual": "addr=0x18f2a0a0 expected=0x7204e52d observed=0x5805975 (the data the host wrote at 0x161ff4a0) read accepted t=63000 answered t=1449000",
+      "detector": "host_memory",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+          "line": 232,
+          "signal": "wb_dat_o",
+          "text": "assign wb_dat_o = rsp_rdata;"
+        }
+      ],
+      "context": null,
+      "mechanism": null,
+      "paths": [
+        "path_18_full_write"
+      ],
+      "occurrences": 6,
+      "repro": {
+        "path": "path_18_full_write",
+        "command": "python3 Validation/tools/run_path.py --path path_18_full_write",
+        "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_18_full_write",
+        "log": "Validation/reports/paths/path_18_full_write_sim.log",
+        "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "HOSTMEM wb_rsp[2] addr=0x18f2a0a0 expected=0x7204e52d observed=0x5805975 (the data the host wrote at 0x161ff4a0) read accepted t=63000 answered t=1449000"
+        }
+      },
+      "drop": {
+        "git_head": "e6e1ab286a8f",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv"
+      },
+      "introduced_in": "c3135943228e",
+      "first_seen": "c3135943228e",
+      "last_seen": "e6e1ab286a8f",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/data_path_write_overflow_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_host_port_findings.json"
       ]
     },
     {
@@ -244,7 +307,7 @@
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
         "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv"
       },
-      "introduced_in": null,
+      "introduced_in": "e6e1ab286a8f",
       "first_seen": "e6e1ab286a8f",
       "last_seen": "e6e1ab286a8f",
       "resolved_in": null,

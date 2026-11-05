@@ -5,7 +5,7 @@
   "drop": "e6e1ab286a8f",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "spec_id": "00d082c3f72d1b34",
-  "generated_utc": "2026-11-05T17:56:33.227101Z",
+  "generated_utc": "2026-11-05T18:23:26.926929Z",
   "failed_modules": [
     "wb_port"
   ],
@@ -15,6 +15,49 @@
       "attempt": null,
       "drop": "e6e1ab286a8f",
       "failed_checks": [
+        {
+          "id": "HOSTMEM/wb_rsp",
+          "name": "the host reads back, at each address, the data it last wrote there, and the responses arrive in the order the reads were accepted (host_interface.ack_ordering =",
+          "pass": false,
+          "expected": "the host reads back, at each address, the data it last wrote there, and the responses arrive in the order the reads were accepted (host_interface.ack_ordering = in_request_order)",
+          "actual": "addr=0x18f2a0a0 expected=0x7204e52d observed=0x5805975 (the data the host wrote at 0x161ff4a0) read accepted t=63000 answered t=1449000",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": "host_interface.ack_ordering; failure_taxonomy DATA_001",
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 232,
+              "signal": "wb_dat_o",
+              "text": "assign wb_dat_o = rsp_rdata;"
+            }
+          ],
+          "context": null,
+          "owner_candidates": [
+            "wb_port",
+            "scheduler"
+          ],
+          "occurrences": 6,
+          "paths": [
+            "path_18_full_write"
+          ],
+          "repro": {
+            "path": "path_18_full_write",
+            "command": "python3 Validation/tools/run_path.py --path path_18_full_write",
+            "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_18_full_write",
+            "log": "Validation/reports/paths/path_18_full_write_sim.log",
+            "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "HOSTMEM wb_rsp[2] addr=0x18f2a0a0 expected=0x7204e52d observed=0x5805975 (the data the host wrote at 0x161ff4a0) read accepted t=63000 answered t=1449000"
+            }
+          },
+          "introduced_in": "c3135943228e",
+          "repair": null,
+          "fix": null,
+          "finding_id": "wb_port/HOSTMEM/wb_rsp"
+        },
         {
           "id": "HOST_002",
           "name": "wb_port: HOST_002",
@@ -64,13 +107,13 @@
               "line": "xmsim: *E,ASRTST (./wb_port_order_sva.sv,60): (time 2347500 PS) Assertion chain_harness.u_wb_port.u_wb_port_order_sva.a_HOST_002 has failed"
             }
           },
-          "introduced_in": null,
+          "introduced_in": "e6e1ab286a8f",
           "repair": null,
           "fix": null,
           "finding_id": "wb_port/HOST_002"
         }
       ],
-      "message": "1 check(s) failed on drop e6e1ab286a8f; 1 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+      "message": "2 check(s) failed on drop e6e1ab286a8f; 2 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
     }
   },
   "resolved_since_previous_drop": [],
