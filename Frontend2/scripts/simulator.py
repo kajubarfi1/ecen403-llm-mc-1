@@ -52,6 +52,15 @@ class XceliumSimulator:
         self.work_dir = None
 
     def connect(self, password=None):
+        # Set OLYMPUS_DISABLED=1 to skip every Olympus-dependent gate (lint,
+        # sim) across every phase instantly, instead of each one independently
+        # retrying a known-bad credential 6 times with backoff (up to ~2
+        # minutes each, once per phase) before giving up. Every call site
+        # already catches a connect() failure and reports SKIPPED with the
+        # reason, so this needs no other change -- it just fails fast instead
+        # of slow (2026-11-05, hit live: Olympus auth not yet working).
+        if os.environ.get("OLYMPUS_DISABLED", "").strip().lower() in ("1", "true", "yes"):
+            raise RuntimeError("OLYMPUS_DISABLED is set -- skipping without attempting SSH")
         kwargs = {
             "hostname": self.ssh["hostname"],
             "port": self.ssh["port"],

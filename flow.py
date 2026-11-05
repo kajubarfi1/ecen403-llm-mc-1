@@ -283,8 +283,10 @@ def prompt_olympus_credentials():
     what's typed here is never written to disk, only kept in this process's
     environment for the stages it launches (each builds its subprocess env
     from os.environ.copy() after this runs)."""
-    if not is_tty() or os.environ.get("OLYMPUS_USER") and (
-            os.environ.get("OLYMPUS_KEY") or os.environ.get("OLYMPUS_PASSWORD")):
+    if (not is_tty()
+            or os.environ.get("OLYMPUS_DISABLED", "").strip().lower() in ("1", "true", "yes")
+            or os.environ.get("OLYMPUS_USER") and (
+                os.environ.get("OLYMPUS_KEY") or os.environ.get("OLYMPUS_PASSWORD"))):
         return
     print("No Olympus credentials configured (OLYMPUS_USER + OLYMPUS_KEY or "
           "OLYMPUS_PASSWORD) -- stages that need it (lint, sim, backend, "
