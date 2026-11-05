@@ -136,6 +136,12 @@ Other useful forms:
 .\run_flow.ps1 --resume runs\RUN_ID
 ```
 
+To get all the way through stage 8, add `--per-block-netlists` (see 4.1):
+
+```powershell
+.\run_flow.ps1 --spec Spec\llmmc_microarchitecturespec_filled.json --per-block-netlists
+```
+
 Every run lives in `runs/<run_id>/` with `RUN_STATE.json` recording each
 stage's outcome. A halt is not a crash: deal with what stopped it and resume.
 Exit 2 means halted.
@@ -151,6 +157,7 @@ Exit 2 means halted.
 | 4b | `formal` (opt-in, `--formal`) | Olympus JasperGold | 20-60 min |
 | 5 | `frontend_regeneration` | local LLM agents | capped at 4 rounds |
 | 6 | `backend` | local Docker/ORFS | **~30-50 min** for the top |
+| 6b | `backend_per_block` (opt-in, `--per-block-netlists`) | local Docker/ORFS | **~1 h**, 11 blocks at 2 workers |
 | 7 | `backend_to_frontend` | local | edge; capped at 2 rounds |
 | 8 | `final_validation` | Olympus | see the caveat below |
 
@@ -158,7 +165,7 @@ Exit 2 means halted.
 (the default: full P&R plus DRC/LVS/STA sign-off) or `full` (build plus
 autotuners).
 
-## 4. Verified so far, and the one real gap
+## 4. What is verified, and what is not
 
 **Verified on this machine 2026-11-05**, through the launcher, with no Olympus
 key set:
@@ -169,41 +176,72 @@ spec_review      PASS   0 blocking, 3 advisory; JEDEC 25 pass / 0 fail
 rtl_generation   HALT   OLYMPUS_KEY unset  <-- expected, needs 1.2
 ```
 
-So the orchestrator, the venv and the credential loading all work. Stages 3
-onward are gated on the Olympus key and have **not** been run through
-`flow.py` yet.
+So the orchestrator, the venv and the credential loading all work. Stages 3, 4,
+5, 7 and 8 are gated on the Olympus key and have **not** been run through
+`flow.py` yet -- that is the honest state, and setting up 1.2 is what unblocks
+it.
 
-### The gap: stage 8 cannot judge a top-level netlist
+Stage 6b was exercised separately in `contract` mode (4.1). Stage 6 itself has
+run many times outside `flow.py`: that is how the 200 MHz sign-off was produced.
+What has never run is the whole chain in one command.
 
-A real architectural hole, not a configuration problem, and worth stating
-plainly because it sits exactly where "fully validated final chip" would land.
+### 4.1 Stage 8 and the top-level netlist: closed, behind a flag
 
-Stage 6 builds the **assembled top** (`drop/TOPRTL`), producing one top-level
-netlist. Stage 8 swaps **per-block** netlists into the validation paths, and
-`find_netlists()` explicitly excludes both `TOPRTL` and `ddr3_controller`. With
-a top-level-only build there is nothing to swap, so it halts with:
+Stage 6 builds the **assembled top**, which gives one top-level netlist. Stage 8
+swaps **per-block** netlists into the validation paths, and `find_netlists()`
+deliberately excludes `TOPRTL` and `ddr3_controller` because no top-level
+validation path exists yet. So a top-level-only build leaves stage 8 nothing to
+swap, and it halts.
 
-> the backend produced no per-block netlist to run ... A top-level netlist
-> needs a top-level path, not built yet.
+**`--per-block-netlists` closes that.** After the top-level build passes, it
+cuts a bundle for each block out of this run's own drop and builds them with
+`pipeline_batch.py` into the same `out_root`, so `runner/<block>/6_final.v`
+appears for stage 8 to swap in.
 
-The flow's author knew this; it is one of two edges documented up front as
-waiting on a counterpart. Closing it needs **one** of:
+Three design points worth knowing:
 
-1. **Per-block backend builds in addition to the top.** The drop already
-   carries the blocks (`drop/PHASE1RTL` through `drop/PHASE4RTL`), so bundles
-   can be cut from the run's own drop and built with `pipeline_batch.py`,
-   giving `runner/<block>/6_final.v` for stage 8 to swap in. Cost: 11 extra
-   builds, roughly 5-6 hours, plus a `flow.py` change.
-2. **A top-level validation path** that instantiates `ddr3_controller` whole.
-   That is Validation's to define, and it does not exist yet.
+- **Bundles come from the run's own drop**, not from `backend/bundles/`. A
+  per-block bundle is just `<block>.sv` plus `<block>_manifest.json`, which is
+  exactly what each `drop/PHASE*RTL` directory already holds. `backend/bundles/`
+  drifts and is written by the Frontend, so cutting from the drop is what keeps
+  the netlists provenance-matched to the RTL being judged -- which stage 8
+  enforces anyway, refusing netlists whose drop is not the one it is judging.
+- **It is non-fatal.** These builds exist to produce netlists, not verdicts; the
+  top-level build is the sign-off. A block that misses timing standalone still
+  routes and still writes `6_final.v` -- the scheduler has historically failed
+  standalone at 5 ns while the assembled top closed -- so an STA FAIL here does
+  not halt a run whose top passed.
+- **It needs `--backend-mode build` or `full`.** `contract` and `synth` do not
+  place and route, so they cannot produce a netlist; the stage says so rather
+  than reporting a failure.
 
-Until one of those lands, the defensible claim is:
+Cost is about an hour: 11 blocks at `SAFE_MAX_WORKERS = 2`. Off by default, so
+an ordinary run stays at the top-level build.
 
-> top-level GDSII with DRC 0, LVS match, and STA closed at 200 MHz (typical
-> corner), plus RTL-level functional validation across 23 paths
+**Verified 2026-11-05** in `contract` mode (seconds, no Docker): all 11 bundles
+cut from the drop, all 11 discovered by `pipeline_batch`, intake 10 PASS + 1
+PASS_WITH_WARNINGS and **0 FAIL**. The one warning is `addr_decoder`, which is
+purely combinational and has no clock port -- expected, not a defect. A full
+`build`-mode run of stage 6b has **not** been done yet.
 
-which is what the project has. What is **not** yet available is gate-level
-re-simulation of the assembled top.
+The alternative fix, still worth having, is a **top-level validation path** that
+instantiates `ddr3_controller` whole. That is Validation's to define and does
+not exist. Until it does, `--per-block-netlists` buys gate-level confidence
+block by block, not on the assembled top.
+
+### 4.2 A bug this flushed out
+
+Running stage 6b for real exposed a pre-existing crash in `flow.py`'s `sh()`,
+the helper every stage uses to run a subsystem. It used `text=True` with no
+encoding, so subprocess output was decoded with the Windows locale codec
+(cp1252). The backend's own status line contains a U+2192 arrow, so reading
+stage 6's output died with `UnicodeDecodeError` **before the stage could return
+a verdict** -- after the build had already run. Fixed by decoding UTF-8 with
+`errors="replace"`.
+
+This would have hit the first real end-to-end run on Windows at stage 6, an
+hour in, and it is the reason to run a new stage for real rather than trust that
+it reads correctly.
 
 ## 5. Standing caveats that travel with any result
 
