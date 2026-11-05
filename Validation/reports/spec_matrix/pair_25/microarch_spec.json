@@ -1,9 +1,9 @@
 {
-  "$comment": "Compiled by microarch_compiler from choices: DDR3-1066 / 8Gb / x8 / 1lane / 1rank",
+  "$comment": "Compiled by microarch_compiler from choices: DDR3-1066 / 4Gb / x8 / 4lane / 1rank",
   "$schema": "https://example.com/ddr3_microarchitecture.schema.json",
   "schema_version": "2.0.0",
-  "design_id": "ddr3_mc_1066_x8_1lane_1rank",
-  "revision": "compiled_ddr31066_x8_1lane_1rank_5fd4284f",
+  "design_id": "ddr3_mc_1066_x8_4lane_1rank",
+  "revision": "compiled_ddr31066_x8_4lane_1rank_1e1d1466",
   "conversion_rules": {
     "timing_ns_to_nCK": "ceil(param_ns / tCK_ns)",
     "conversion_owner": "microarchitecture_agent",
@@ -92,26 +92,26 @@
     }
   },
   "memory_geometry": {
-    "row_bits": 17,
+    "row_bits": 16,
     "column_bits": 10,
     "bank_bits": 3,
     "ranks": 1,
     "burst_length": 8,
     "device_width_bits": 8,
-    "byte_lanes": 1,
+    "byte_lanes": 4,
     "address_mapping": "row-bank-column",
     "$derived": {
-      "device_density_bits": 8589934592,
-      "device_density_label": "8Gb",
-      "channel_data_width_bits": 8,
-      "data_byte_lanes": 1,
+      "device_density_bits": 4294967296,
+      "device_density_label": "4Gb",
+      "channel_data_width_bits": 32,
+      "data_byte_lanes": 4,
       "ecc_byte_lanes": 0,
       "page_size_bytes_per_device": 1024,
-      "page_size_bytes_channel": 1024,
-      "channel_capacity_bytes": 1073741824,
-      "channel_capacity_MB": 1024,
-      "burst_transfer_bytes_on_dq": 8,
-      "peak_channel_bandwidth_MBps": 1066
+      "page_size_bytes_channel": 4096,
+      "channel_capacity_bytes": 2147483648,
+      "channel_capacity_MB": 2048,
+      "burst_transfer_bytes_on_dq": 32,
+      "peak_channel_bandwidth_MBps": 4264
     }
   },
   "clocking_model": {
@@ -135,7 +135,7 @@
     "tRP": 15.0,
     "tRAS": 37.5,
     "tRC": 52.5,
-    "tRFC": 350.0,
+    "tRFC": 300.0,
     "tFAW": 50.0,
     "tRRD": 7.5,
     "tWR": 15.0,
@@ -150,7 +150,7 @@
       "tRP_nCK": 8,
       "tRAS_nCK": 20,
       "tRC_nCK": 28,
-      "tRFC_nCK": 187,
+      "tRFC_nCK": 160,
       "tFAW_nCK": 27,
       "tRRD_nCK": 4,
       "tWR_nCK": 8,
@@ -181,8 +181,8 @@
   "controller_architecture": {
     "num_ports": 1,
     "arbiter_policy": "round_robin",
-    "scheduler_policy": "fr_fcfs",
-    "row_policy": "close_page",
+    "scheduler_policy": "in_order",
+    "row_policy": "open_page",
     "command_queue_depth": 16,
     "lookahead_depth": 8,
     "ecc_mode": 0,
@@ -198,7 +198,7 @@
       "address_mode": "sequential",
       "address_range": {
         "start": 0,
-        "end": 1073741823
+        "end": 2147483647
       }
     },
     "error_handling": {
@@ -219,7 +219,7 @@
   "initialization_sequence": {
     "reset_hold_us": 200,
     "cke_delay_us": 500,
-    "tXPR_ns": 360.0,
+    "tXPR_ns": 310.0,
     "zq_calibration_on_init": true,
     "tZQinit_ns": 960.0,
     "mode_registers": {
@@ -249,9 +249,9 @@
       }
     },
     "$derived": {
-      "tXPR_reason": "max(5*tCK, tRFC+10ns) = max(9.375, 360.0) = 360.0ns",
+      "tXPR_reason": "max(5*tCK, tRFC+10ns) = max(9.375, 310.0) = 310.0ns",
       "tZQinit_reason": "512*tCK = 512*1.875 = 960.0ns",
-      "tXPR_nCK": 192,
+      "tXPR_nCK": 166,
       "tZQinit_nCK": 512,
       "init_sequence_order": "RESET# low -> wait 200us -> RESET# high -> wait 500us -> CKE high -> wait tXPR -> MR2 -> MR3 -> MR1 -> MR0(DLL reset) -> ZQCL -> init_done"
     }
@@ -272,35 +272,38 @@
     "interface_type": "wishbone_pipelined",
     "addressing": "byte",
     "data_width_bits": 32,
-    "address_width_bits": 30,
+    "address_width_bits": 31,
     "granularity_bits": 8,
     "burst_type": "linear",
     "max_burst_length": 8,
     "read_buffer_depth": 16,
     "write_buffer_depth": 16,
+    "write_buffer_backpressure": "port_stalls_on_full",
+    "ack_ordering": "in_request_order",
     "enable_data_mask": true,
     "$derived": {
-      "addressable_space_bytes": 1073741824,
-      "addressable_space_MB": 1024,
+      "addressable_space_bytes": 2147483648,
+      "addressable_space_MB": 2048,
       "host_burst_transfer_bytes": 32,
       "sel_width_bits": 4
     }
   },
   "data_path_mapping": {
-    "ddr_channel_width_bits": 8,
+    "ddr_channel_width_bits": 32,
     "host_width_bits": 32,
-    "pack_mode": "pack_32_to_8",
-    "alignment_bytes_required": 1,
+    "pack_mode": "pack_32_to_32",
+    "alignment_bytes_required": 4,
     "endianness": "little",
     "byte_enable_semantics": "wishbone_sel_per_byte",
     "ddr_dm_polarity": "active_high_mask"
   },
   "phy_interface": {
     "mode": "abstract",
-    "dq_width_bits": 8,
-    "dqs_count": 1,
+    "dq_width_bits": 32,
+    "dqs_count": 4,
     "dm_enabled": true,
     "ck_pair_present": true,
+    "data_bus_cycles_per_cas": 1,
     "notes": "Abstracted DRAM boundary. Command/data semantics only."
   },
   "csr_register_map": {
@@ -376,20 +379,20 @@
         "name": "CTRL_CONFIG",
         "offset": "0x04",
         "access": "RW",
-        "reset_value": "0x0000000B",
+        "reset_value": "0x00000008",
         "fields": [
           {
             "name": "sched_policy",
             "bits": "0",
             "access": "RW",
-            "reset_value": 1,
+            "reset_value": 0,
             "description": "0=in_order, 1=fr_fcfs"
           },
           {
             "name": "row_policy",
             "bits": "1",
             "access": "RW",
-            "reset_value": 1,
+            "reset_value": 0,
             "description": "0=open_page, 1=close_page"
           },
           {
@@ -476,7 +479,7 @@
         "name": "TIMING_1",
         "offset": "0x0C",
         "access": "RW",
-        "reset_value": "0xBB1B0404",
+        "reset_value": "0xA01B0404",
         "fields": [
           {
             "name": "tRRD_nCK",
@@ -503,7 +506,7 @@
             "name": "tRFC_nCK",
             "bits": "31:24",
             "access": "RW",
-            "reset_value": 187,
+            "reset_value": 160,
             "description": "Refresh cycle time"
           }
         ]
@@ -682,14 +685,14 @@
         "fields": [
           {
             "name": "start_addr",
-            "bits": "29:0",
+            "bits": "30:0",
             "access": "RW",
             "reset_value": 0,
-            "description": "BIST start byte address (30 bits)"
+            "description": "BIST start byte address (31 bits)"
           },
           {
             "name": "reserved",
-            "bits": "31:30",
+            "bits": "31:31",
             "access": "RO",
             "reset_value": 0,
             "description": "Reserved"
@@ -700,18 +703,18 @@
         "name": "BIST_ADDR_END",
         "offset": "0x28",
         "access": "RW",
-        "reset_value": "0x3FFFFFFF",
+        "reset_value": "0x7FFFFFFF",
         "fields": [
           {
             "name": "end_addr",
-            "bits": "29:0",
+            "bits": "30:0",
             "access": "RW",
-            "reset_value": 1073741823,
-            "description": "BIST end byte address (30 bits)"
+            "reset_value": 2147483647,
+            "description": "BIST end byte address (31 bits)"
           },
           {
             "name": "reserved",
-            "bits": "31:30",
+            "bits": "31:31",
             "access": "RO",
             "reset_value": 0,
             "description": "Reserved"

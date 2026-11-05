@@ -524,7 +524,11 @@ transaction a block was handed produced the one it owes downstream by the end
 of the run; the rules are the `conservation` section of
 `Validation/txn/interface_catalog.json`, attributed to the block that must
 deliver) and, when the driver's own count disagrees, a `(host handshake)` row
-(beats the host presented that were never acknowledged). The last line is the
+(beats the host presented that were never acknowledged), and on paths with
+the host streams and a data path a `(host memory)` row: the memory image the
+host built with its own writes against every read response, in the order
+the reads were accepted (a read of an address the host never wrote is
+skipped). The last line is the
 verdict:
 
 ```

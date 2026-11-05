@@ -202,6 +202,17 @@ def stage_netlist(block, src, work):
     return [staged, wrap]
 
 
+def spec_host_width():
+    """host_interface.data_width_bits of the spec under judgement."""
+    try:
+        sp = os.environ.get("VALIDATION_SPEC") or os.path.join(ROOT, "Validation", "spec",
+                                                                "llmmc_microarchitecturespec_filled.json")
+        with open(sp) as f:
+            return int(json.load(f)["host_interface"]["data_width_bits"])
+    except Exception:
+        return 32
+
+
 def judge(trace, jobs, path_id, rep_dir, fired_by_block=None):
     """Stage verdicts. `fired_by_block` is {block: {assertion: count}} from
     the simulation log: an assertion bound to a stage's block that fired is
@@ -683,6 +694,22 @@ def main() -> int:
                             "scope": "(conservation)", "model": None,
                             "verdict": c_verdict, "summary": c_first.strip() or out_c.strip()[-200:],
                             "detail": [l.strip() for l in c_lines if l.strip().startswith("CONSERVE")]})
+    # The host's own memory: what it wrote at an address is what it reads
+    # back there, in the order it asked. Model-free, and the only check that
+    # sees a read answered with another read's data (FR-FCFS reordering
+    # reaching the host, 2026-11-05). Needs the host streams and a data path.
+    if not observe and "data_path" in blocks and pdef.get("standalone") is None:
+        rc_h, out_h = run_local(
+            f"python3 Validation/txn/host_memory.py --trace {trace} "
+            f"--data-bits {spec_host_width()}")
+        h_lines = out_h.strip().splitlines()
+        h_first = next((l for l in h_lines if "status=" in l), "")
+        if rc_h == 0 and h_first and "status=not_applicable" not in h_first:
+            results.append({"stage": "(host memory)", "kind": "host_memory",
+                            "scope": "(host memory)", "model": None,
+                            "verdict": "pass" if "status=pass" in h_first else "fail",
+                            "summary": h_first.strip(),
+                            "detail": [l.strip() for l in h_lines if l.strip().startswith("HOSTMEM")]})
     # The host handshake: the driver counted every beat the slave accepted
     # and every acknowledge it returned. A beat never acknowledged is a
     # host access the controller lost, whichever block lost it (the

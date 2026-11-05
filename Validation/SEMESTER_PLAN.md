@@ -1094,6 +1094,32 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   and was spending an hour in formal replays before the switch. A flow
   run's path reports are now run-local like its outbox (they had
   overwritten the golden drop's); the shared package re-validated.
+- *2026-11-05, afternoon — her fixes land, the whole Tier-1 space is
+  reviewed, and ack ordering becomes a check.* Her push: the five
+  compiler defects fixed, the three decisions answered in the compiler,
+  WB-012 (port stalls on a full write buffer), SSH retries and honest
+  skipped-gate reporting in flow.py, and the full Tier-1 sweep export.
+  Matrix rebuilt: 40/42 pass review; the sweep through level 1
+  (`--from-sweep`): 1152/1200, one blocking message left (BIST_ADDR
+  reserved 31:32 at a 32-bit address space, defect 6). Our intake rule
+  now accepts an integer answer. New generator rule kind `order_rules`:
+  HOST_002, acknowledges in request order (the decided value) — fires
+  76x on path_23, filed on wb_port. Standalone tie for the port's new
+  wr_data_ready input. Drop e6e1ab286a8f: 19/20 (HOST_002). Addendum 16.
+- *2026-11-05, evening — the blind spot.* Her question "do reads ever
+  complete out of order?" Mapping responses to requests through the
+  aux tag: yes, 28/46 on path_02, 108/114 under saturation; her own
+  WB-009 fired 66x and our emitter treats a design's assertion as
+  corroboration only; our port monitor and predictor both attribute
+  responses in order, so they agreed with each other. New model-free
+  stage `(host memory)` (`txn/host_memory.py`): the host's own write
+  image vs every read-back, in acceptance order. path_18: **6 of 12
+  read-backs return another address's data**, the first host-level
+  data-integrity finding (`wb_port/HOSTMEM/wb_rsp`, scheduler as
+  candidate owner). Fix shape: a completion reorder buffer at the port
+  keyed by the aux tag she already has. Addendum 17. ECC presets after
+  her testbench fix: high-performance generates and validates;
+  server-grade (5 lanes) still halts on the same message.
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

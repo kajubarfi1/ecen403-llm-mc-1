@@ -261,6 +261,60 @@ def level2(entry, out_dir, timeout=5400):
     return res
 
 
+# ---------------------------------------------------------------- the whole sweep, level 1
+def sweep_level1(path):
+    """Level 1 over the Frontend's full Tier-1 sweep export: every
+    combination its compiler accepts, compiled and reviewed here. Minutes,
+    no Olympus; the digest groups every blocking message with the specs
+    that hit it, like the matrix's."""
+    import re
+    from collections import defaultdict
+    doc = json.load(open(path))
+    entries = doc["entries"]
+    out_root = os.path.join(REPORTS, "sweep")
+    os.makedirs(out_root, exist_ok=True)
+    results, groups = {}, defaultdict(list)
+    t0 = datetime.datetime.now()
+    for i, e in enumerate(entries, 1):
+        try:
+            r = level1({"name": e["name"], "choices": e["choices"]}, os.path.join(out_root, "specs", e["name"]))
+        except Exception as ex:       # the compiler threw: that is a finding too
+            r = {"status": "ERROR", "blocking": [f"compiler raised {type(ex).__name__}: {str(ex)[:160]}"], "advisory": []}
+        results[e["name"]] = {"choices": e["choices"], "status": r["status"], "blocking": r["blocking"],
+                              "advisory_count": len(r["advisory"])}
+        for b in r["blocking"]:
+            groups[re.sub(r"\d+(\.\d+)?", "N", b)[:90]].append((e["name"], b))
+        if i % 200 == 0:
+            print(f"  {i}/{len(entries)} ...")
+    n_pass = sum(1 for r in results.values() if r["status"] == "PASS")
+    summ = {"$schema": "validation-spec-sweep-summary/1", "source": os.path.relpath(path, ROOT),
+            "total_combinations": doc.get("total_combinations"), "rejected_by_compiler": doc.get("rejected"),
+            "entries": len(entries), "review_pass": n_pass,
+            "utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "seconds": (datetime.datetime.now() - t0).seconds, "results": results}
+    with open(os.path.join(out_root, "summary.json"), "w") as f:
+        json.dump(summ, f, indent=2)
+    lines = [f"# Tier-1 sweep, level 1 ({summ['utc'][:10]})", "",
+             f"{len(entries)} of {doc.get('total_combinations')} combinations compile ({doc.get('rejected')} rejected by the "
+             f"compiler's own rules); {n_pass} pass the spec review, {len(entries) - n_pass} are blocked:", ""]
+    for k, items in sorted(groups.items(), key=lambda kv: -len(kv[1])):
+        names = sorted({n for n, _ in items})
+        lines.append(f"## {len(names)} spec(s): `{items[0][1][:150]}`")
+        lines.append("")
+        for n in names[:6]:
+            lines.append(f"- {n}")
+        if len(names) > 6:
+            lines.append(f"- ... and {len(names) - 6} more")
+        lines.append("")
+    with open(os.path.join(out_root, "level1_findings.md"), "w") as f:
+        f.write("\n".join(lines))
+    print(f"  sweep: {len(entries)} spec(s) reviewed in {summ['seconds']} s; PASS {n_pass}/{len(entries)}; "
+          f"{len(groups)} distinct blocking message(s) -> {os.path.relpath(out_root, ROOT)}/")
+    for k, items in sorted(groups.items(), key=lambda kv: -len(kv[1]))[:8]:
+        print(f"    {len({n for n, _ in items}):5}  {items[0][1][:120]}")
+    return 0
+
+
 # ---------------------------------------------------------------- driver
 def main() -> int:
     ap = argparse.ArgumentParser()
@@ -271,9 +325,15 @@ def main() -> int:
     ap.add_argument("--origin", choices=("preset", "pairwise", "tier2_edge"), default=None)
     ap.add_argument("--skip-done", action="store_true", help="keep entries already in summary.json at this level")
     ap.add_argument("--timeout", type=int, default=5400, help="per spec at level 2, seconds")
+    ap.add_argument("--from-sweep", metavar="FILE",
+                    help="level 1 over every entry of the Frontend's Tier-1 sweep export "
+                         "(Spec/tier1_sweep_choices.json: {entries: [{name, choices}]}) instead of the matrix; "
+                         "summary and digest go to reports/spec_matrix/sweep/")
     args = ap.parse_args()
     if args.build:
         return build(args.seed)
+    if args.from_sweep:
+        return sweep_level1(args.from_sweep)
     if not os.path.exists(MATRIX):
         print("no matrix: run --build first")
         return 2
@@ -281,6 +341,9 @@ def main() -> int:
     os.makedirs(REPORTS, exist_ok=True)
     sp = os.path.join(REPORTS, "summary.json")
     summary = json.load(open(sp)) if os.path.exists(sp) else {"$schema": "validation-spec-matrix-summary/1", "results": {}}
+    # a rebuilt matrix drops specs the compiler now rejects: their old results go too
+    names = {e["name"] for e in doc["entries"]}
+    summary["results"] = {k: v for k, v in summary["results"].items() if k in names}
     entries = [e for e in doc["entries"]
                if (not args.only or e["name"] in args.only) and (not args.origin or e["origin"] == args.origin)]
     for e in entries:

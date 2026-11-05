@@ -1,12 +1,13 @@
 {
   "$schema": "validation-coverage-rollup/1",
-  "generated_utc": "2026-11-05T17:45:25.198770+00:00",
-  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "generated_utc": "2026-11-05T18:08:02.062907+00:00",
+  "spec_revision": "compiled_ddr31600_x8_3lane_1rank_042f7b32",
   "vplan_items": 45,
   "coverpoints_measured": 66,
   "window_scale": 4,
   "summary": {
-    "covered": 34,
+    "covered": 33,
+    "partial": 1,
     "unreachable_by_spec": 11
   },
   "items": [
@@ -257,17 +258,19 @@
       "method": "assertion",
       "priority": "major",
       "prior_status": "not_started",
-      "status": "covered",
+      "status": "partial",
       "coverage": [
         {
           "name": "cg_refresh.cp_ref_002_exercised",
           "goal": 100,
-          "measured": 100.0,
-          "bins": "1/1",
-          "state": "met"
+          "measured": 0.0,
+          "bins": "0/1",
+          "state": "short"
         }
       ],
-      "short_of_goal": [],
+      "short_of_goal": [
+        "cg_refresh.cp_ref_002_exercised 0.0% of 100%"
+      ],
       "not_measured": []
     },
     {
@@ -849,19 +852,18 @@
         {
           "name": "cg_timing.cp_trfc_spacing",
           "goal": 100,
-          "measured": 33.33,
-          "bins": "1/3",
+          "measured": 66.67,
+          "bins": "2/3",
           "state": "unreachable_by_spec",
           "unhit_bins": [
-            "at_minimum",
-            "within_enforced_window"
+            "at_minimum"
           ]
         }
       ],
       "short_of_goal": [],
       "not_measured": [],
       "unreachable_by_spec": [
-        "cg_timing.cp_trfc_spacing ['at_minimum', 'within_enforced_window']"
+        "cg_timing.cp_trfc_spacing ['at_minimum']"
       ],
       "reason": "timing_model.counter_clock.window_scale = 4: the spec declares the design enforces 4 x this parameter, so the exact-minimum spacing cannot occur while that declaration stands; stimulus cannot close it. Reverts to partial when the declaration goes."
     },

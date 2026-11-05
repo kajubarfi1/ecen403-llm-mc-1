@@ -122,6 +122,10 @@
     "config_regs.sts_init_fail_event": {
       "value": "1'b0",
       "why": "init_fsm absent (see sts_init_done)"
+    },
+    "wb_port.wr_data_ready": {
+      "value": "1'b1",
+      "why": "data_path absent: the write buffer the port would stall on does not exist, so the environment always has room (new edge 2026-11-05, WB-012: the port stalls a write while wr_data_ready is low; the stall itself is judged on the full drop by the conservation rules and path_07/18, not here)."
     }
   },
   "$history": [

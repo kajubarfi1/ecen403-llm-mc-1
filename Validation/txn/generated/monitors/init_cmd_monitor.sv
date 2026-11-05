@@ -4,7 +4,7 @@
 //
 // Interface : init_cmd   (DDR3 command stream issued by the initialisation FSM)
 // Block     : init_fsm
-// Manifest  : Frontend2/OutputFolders/PHASE1RTL/init_fsm_manifest.json
+// Manifest  : runs/matrix/preset_high-performance/drop/PHASE1RTL/init_fsm_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //
@@ -19,7 +19,7 @@ module init_cmd_monitor #(
 ) (
     input  logic clk,
     input  logic rst_n,
-    input  logic [14:0] init_addr,
+    input  logic [15:0] init_addr,
     input  logic [2:0] init_bank,
     input  logic [3:0] init_cmd,
     input  logic init_cmd_valid

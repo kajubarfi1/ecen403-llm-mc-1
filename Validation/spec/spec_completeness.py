@@ -84,7 +84,11 @@ def check_rule(rule, spec, pdefs):
         val, present = get(spec, rule["require"])
         if not present:
             return "gap", f"{rule['require']} is not stated"
-        if "options" in rule and val not in rule["options"]:
+        # an option written as "<integer ...>" admits any positive integer
+        # (data_bus_cycles_per_cas = 2, the compiler's answer, 2026-11-05)
+        int_ok = any(isinstance(o, str) and o.startswith("<integer") for o in rule.get("options", []))
+        if "options" in rule and val not in rule["options"] and not (
+                int_ok and isinstance(val, int) and not isinstance(val, bool) and val >= 1):
             return "invalid_value", (f"{rule['require']} = {val!r} is not one "
                                      f"of {rule['options']}")
         return "ok", f"{rule['require']} = {val!r}"

@@ -753,6 +753,46 @@ def generate_signal_group(spec, grp, catalog=None, schemas=None):
   c_{r['id']}: cover property (@(posedge clk) disable iff (!rst_n) {cover});
 
 """
+    for r in grp.get("order_rules", []):
+        # Completions must come back in the order their requests were
+        # accepted: the kind of each accepted beat is queued at `push`, and at
+        # every `pop` the oldest queued kind must equal the kind the design is
+        # completing (`observed_kind`). A fixed-depth ring, not a SystemVerilog
+        # queue, so JasperGold can take it. Spec decision
+        # host_interface.ack_ordering = in_request_order (2026-11-05): a B4
+        # pipelined master has no transaction id and matches by order.
+        push, p1 = expand_expr(r["push"], block, catalog or {}, schemas or {})
+        kind, p2 = expand_expr(r["kind"], block, catalog or {}, schemas or {})
+        pop, p3 = expand_expr(r["pop"], block, catalog or {}, schemas or {})
+        obs, p4 = expand_expr(r["observed_kind"], block, catalog or {}, schemas or {})
+        cover, p5 = expand_expr(r["cover"], block, catalog or {}, schemas or {})
+        sigs |= p1 | p2 | p3 | p4 | p5
+        depth = int(r.get("depth", 64))
+        ids.append(r["id"])
+        params += f",\n    parameter int {r['id']}_DEPTH = {depth}"
+        body += f"""  // ---- {r['id']} -------------------------------------------------------
+  // {r['requirement']}
+  logic {r['id']}_kind [0:{r['id']}_DEPTH-1];   // kind of each accepted beat, in order ({r['kind']})
+  int {r['id']}_wp, {r['id']}_rp;
+  always_ff @(posedge clk or negedge rst_n)
+    if (!rst_n) begin
+      {r['id']}_wp <= 0; {r['id']}_rp <= 0;
+    end else begin
+      if ({push}) begin
+        {r['id']}_kind[{r['id']}_wp % {r['id']}_DEPTH] <= ({kind});
+        {r['id']}_wp <= {r['id']}_wp + 1;
+      end
+      if ({pop}) {r['id']}_rp <= {r['id']}_rp + 1;
+    end
+  property p_{r['id']};
+    @(posedge clk) disable iff (!rst_n)
+    (({pop}) && {r['id']}_rp < {r['id']}_wp) |-> ({r['id']}_kind[{r['id']}_rp % {r['id']}_DEPTH] == ({obs}));
+  endproperty
+  a_{r['id']}: assert property (p_{r['id']})
+    else $error("[{r['id']}] {r['requirement'].split(':')[0]}: the completion is not for the oldest outstanding beat");
+  c_{r['id']}: cover property (@(posedge clk) disable iff (!rst_n) {cover});
+
+"""
     sigs = {x for x in sigs if not x.startswith("$")}
     ports = "".join(f",\n    input logic {'[' + str(int(widths[x]) - 1) + ':0] ' if str(widths.get(x, 1)).isdigit() and int(widths.get(x, 1)) > 1 else ''}{x}"
                     for x in sorted(sigs))

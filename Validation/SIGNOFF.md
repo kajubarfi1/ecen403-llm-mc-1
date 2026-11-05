@@ -24,7 +24,7 @@ A drop failing A1 or A3 is returned to the Frontend without simulation.
 
 | Level | Criterion |
 |---|---|
-| Path PASS | every stage checker passes, no assertion failure, no illegal coverage bin, no harness timeout, no X on a checked field, every request conserved (`(conservation)` stage: each catalog `conservation` rule's `from` count produced its `to` count by the end of the run) and every accepted host beat acknowledged (`(host handshake)` stage from the driver's count; expected to fail only on a standalone path with responses tied off) |
+| Path PASS | every stage checker passes, no assertion failure, no illegal coverage bin, no harness timeout, no X on a checked field, the host reads back at every written address the data it last wrote there, in request order (`(host memory)` stage, model-free), every request conserved (`(conservation)` stage: each catalog `conservation` rule's `from` count produced its `to` count by the end of the run) and every accepted host beat acknowledged (`(host handshake)` stage from the driver's count; expected to fail only on a standalone path with responses tied off) |
 | Path FAIL | otherwise; the failing stage and first failing check are recorded, and a finding is emitted (or re-attached to an open one) |
 | Block PASS | every path that instantiates the block passes, **and** every formal property owned by the block is proven or bounded-proven to the agreed depth |
 | Block PASS-with-waivers | as above, except failures that are covered by an approved waiver (§5) |
@@ -276,9 +276,13 @@ path that has ever been proved and has no report that applies to the
 design under judgement, with the options of its last report, so a design
 change never leaves `awaiting_formal` findings for a person to remember.
 
-Simulation status (56ca186bf893, 2026-11-04): 20 of 20 paths PASS, no open
-simulation finding; three formal obligations awaiting the re-proof on this
-design (PROTO_001, TIMING_008, HOST_001).
+Simulation status (e6e1ab286a8f, 2026-11-05): 18 of 20 paths PASS; the open
+simulation findings are HOST_002 (acknowledges out of request order, a check
+since the spec owner decided `host_interface.ack_ordering =
+in_request_order`) and HOSTMEM (6 of 12 read-backs on path_18 return another
+address's data: FR-FCFS reordering reaching the host, invisible until the
+host-memory stage existed). Formal: HOST_001
+awaiting a longer run on this design.
 
 Current (56ca186bf893, 2026-11-04, balanced priority tree, 4-bit deadlines,
 pending-ack counter in the port; 20 min each, fetched after the waiting SSH

@@ -1,0 +1,128 @@
+{
+  "$schema": "validation-retry-instructions/1",
+  "status": "FAIL",
+  "pipeline": "validation",
+  "drop": "e6e1ab286a8f",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "spec_id": "00d082c3f72d1b34",
+  "generated_utc": "2026-11-05T17:56:33.227101Z",
+  "failed_modules": [
+    "wb_port"
+  ],
+  "retry_instructions": {
+    "wb_port": {
+      "module": "wb_port",
+      "attempt": null,
+      "drop": "e6e1ab286a8f",
+      "failed_checks": [
+        {
+          "id": "HOST_002",
+          "name": "wb_port: HOST_002",
+          "pass": false,
+          "expected": "",
+          "actual": "fired 76x; first: xmsim: *E,ASRTST (./wb_port_order_sva.sv,60): (time 2347500 PS) Assertion chain_harness.u_wb_port.u_wb_port_order_sva.a_HOST_002 has failed",
+          "severity": "major",
+          "confidence": "confirmed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 179,
+              "signal": "req_we",
+              "text": "req_we    <= wb_we_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 180,
+              "signal": "req_addr",
+              "text": "req_addr  <= wb_adr_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 181,
+              "signal": "req_wdata",
+              "text": "req_wdata <= wb_dat_i;"
+            }
+          ],
+          "context": null,
+          "owner_candidates": [
+            "wb_port"
+          ],
+          "occurrences": 76,
+          "paths": [
+            "path_23_host_ack_collision"
+          ],
+          "repro": {
+            "path": "path_23_host_ack_collision",
+            "command": "python3 Validation/tools/run_path.py --path path_23_host_ack_collision",
+            "sequence": "Validation/sequences/generated/path_23_host_ack_collision_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_23_host_ack_collision",
+            "log": "Validation/reports/paths/path_23_host_ack_collision_sim.log",
+            "trace": "Validation/reports/paths/path_23_host_ack_collision_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "xmsim: *E,ASRTST (./wb_port_order_sva.sv,60): (time 2347500 PS) Assertion chain_harness.u_wb_port.u_wb_port_order_sva.a_HOST_002 has failed"
+            }
+          },
+          "introduced_in": null,
+          "repair": null,
+          "fix": null,
+          "finding_id": "wb_port/HOST_002"
+        }
+      ],
+      "message": "1 check(s) failed on drop e6e1ab286a8f; 1 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+    }
+  },
+  "resolved_since_previous_drop": [],
+  "requires_human_review": false,
+  "source": "Validation/findings/emit_findings.py -> retry_adapter.py",
+  "drop_status": {
+    "$schema": "validation-drop-status/1",
+    "drop": "e6e1ab286a8f",
+    "partial": false,
+    "blocks_present": [
+      "addr_decoder",
+      "bank_tracker",
+      "calibration",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "init_fsm",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "blocks_absent": [],
+    "inconsistent_edges": [],
+    "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "foreign_spec_blocks": {},
+    "paths_run": [
+      "path_01_write_cmd",
+      "path_02_read_cmd",
+      "path_03_read_return",
+      "path_04_scheduler_bank_loop",
+      "path_05_scheduler_refresh_loop",
+      "path_07_backpressure",
+      "path_08_init_to_cal",
+      "path_09_init_to_refresh",
+      "path_12_csr_timing_to_scheduling",
+      "path_13_csr_refresh_to_scheduling",
+      "path_14_status_init",
+      "path_15_status_cal",
+      "path_16_status_refresh",
+      "path_17_full_boot",
+      "path_18_full_write",
+      "path_19_row_conflict",
+      "path_20_refresh_preempt",
+      "path_22_csr_standalone",
+      "path_23_host_ack_collision"
+    ],
+    "paths_blocked": {
+      "path_21_wb_port_standalone": [
+        "run error (rc=1): see Validation/reports/validate_drop/e6e1ab286a8f_path_21_wb_port_standalone.txt"
+      ]
+    },
+    "note": "Paths listed as blocked with a run error did not simulate on this drop (infrastructure, not design); nothing is known about them from this run."
+  }
+}
