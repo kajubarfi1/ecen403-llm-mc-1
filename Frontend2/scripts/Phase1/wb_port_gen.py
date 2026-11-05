@@ -24,7 +24,7 @@
 |    G: Tag FIFO stress          H: Reset mid-transaction              |
 |    I: Edge cases                                                     |
 |                                                                      |
-|  Validation checks: WB-001 through WB-011                            |
+|  Validation checks: WB-001 through WB-012                            |
 +======================================================================+
 """
 
@@ -145,7 +145,7 @@ class WishbonePortGenerator:
         L(f"//")
         L(f"// Derived: DATA={p['DATA_WIDTH']} ADDR={p['ADDR_WIDTH']} SEL={p['SEL_WIDTH']}"
           f" AUX={p['AUX_WIDTH']} BURST={p['MAX_BURST_LEN']} QUEUE={p['QUEUE_DEPTH']}")
-        L(f"// Validation: WB-001 .. WB-011")
+        L(f"// Validation: WB-001 .. WB-012")
         L(f"////////////////////////////////////////////////////////////////////////////////")
         L(f"")
         L(f"module wb_port #(")
@@ -189,7 +189,8 @@ class WishbonePortGenerator:
         L(f"    // Internal <- Data Path")
         L(f"    input  logic                    rsp_valid,")
         L(f"    input  logic [DATA_WIDTH-1:0]   rsp_rdata,")
-        L(f"    input  logic [AUX_WIDTH-1:0]    rsp_aux")
+        L(f"    input  logic [AUX_WIDTH-1:0]    rsp_aux,")
+        L(f"    input  logic                    wr_data_ready")
         L(f");")
         L(f"")
         L(f"    // CTI / BTE encodings")
@@ -249,6 +250,16 @@ class WishbonePortGenerator:
         L(f"        wb_stall_o = 1'b0;")
         L(f"        if (req_valid && !req_ready)           wb_stall_o = 1'b1;")
         L(f"        if (!wb_we_i && tag_full && wb_stb_i)  wb_stall_o = 1'b1;")
+        L(f"        // Validation/spec/completeness_rules.json")
+        L(f"        // HOST_WRITE_BUFFER_BACKPRESSURE, answered")
+        L(f"        // 'port_stalls_on_full' (2026-11-05): write_buffer_depth")
+        L(f"        // equals command_queue_depth with no margin for writes in")
+        L(f"        // flight, so data_path's write buffer can fill while the")
+        L(f"        // queue still has room -- without this, a write word is")
+        L(f"        // silently dropped the cycle the host is told its beat was")
+        L(f"        // accepted (same shape as Finding 1, in the buffer the")
+        L(f"        // queue skid sits in front of, not the skid itself).")
+        L(f"        if (wb_we_i && wb_stb_i && !wr_data_ready) wb_stall_o = 1'b1;")
         L(f"    end")
         L(f"")
 
@@ -445,6 +456,15 @@ class WishbonePortGenerator:
         L(f"    endproperty")
         L(f"    assert property (p_wr_ack_no_wrap)")
         L(f"        else $error(\"[WB-011] wr_ack_pending would wrap -- a write ack was dropped\");")
+        L(f"")
+        L(f"    // WB-012: a write beat is never accepted while the write buffer")
+        L(f"    // isn't ready for it (HOST_WRITE_BUFFER_BACKPRESSURE)")
+        L(f"    property p_wr_backpressure;")
+        L(f"        @(posedge clk) disable iff (!rst_n)")
+        L(f"        (wb_we_i && wb_stb_i && !wr_data_ready) |-> wb_stall_o;")
+        L(f"    endproperty")
+        L(f"    assert property (p_wr_backpressure)")
+        L(f"        else $error(\"[WB-012] write beat accepted (or not stalled) while wr_data_ready was low\");")
         L(f"")
         L(f"    covergroup cg_wb @(posedge clk);")
         L(f"        option.per_instance = 1;")
@@ -938,6 +958,8 @@ class WishbonePortGenerator:
                      "source": "data_path.rd_rsp_data"},
                     {"name": "rsp_aux",   "width": p["AUX_WIDTH"],  "dir": "input",
                      "source": "data_path.rd_rsp_aux"},
+                    {"name": "wr_data_ready", "width": 1,           "dir": "input",
+                     "source": "data_path.wr_data_ready"},
                 ],
             },
             "assertions": [
@@ -948,6 +970,7 @@ class WishbonePortGenerator:
                 {"name": "p_sel_nonzero_write", "check": "WB-006"},
                 {"name": "p_req_held_stable",   "check": "WB-010"},
                 {"name": "p_wr_ack_no_wrap",    "check": "WB-011"},
+                {"name": "p_wr_backpressure",   "check": "WB-012"},
             ],
             "coverage_points": [
                 "cp_single_rd", "cp_single_wr", "cp_burst_rd", "cp_burst_wr",

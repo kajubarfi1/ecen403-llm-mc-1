@@ -21,6 +21,11 @@ module wb_port_tb;
     logic rsp_valid;
     logic [DATA_WIDTH-1:0] rsp_rdata;
     logic [AUX_WIDTH-1:0] rsp_aux;
+    // Tied high: this testbench doesn't model data_path's write buffer, so
+    // it never exercises WB-012's backpressure path (same reasoning as
+    // req_ready above -- an unmodeled backend should look always-ready,
+    // not X).
+    logic wr_data_ready;
     logic rst_n;
     int pass_count=0, fail_count=0, total_tests=0;
 
@@ -36,7 +41,7 @@ module wb_port_tb;
 
     initial begin
         $dumpfile("wb_port_tb.vcd"); $dumpvars(0, wb_port_tb);
-        rst_n=0; req_ready=1; rsp_valid=0; rsp_rdata=0; rsp_aux=0; wb_idle();
+        rst_n=0; req_ready=1; rsp_valid=0; rsp_rdata=0; rsp_aux=0; wr_data_ready=1; wb_idle();
         repeat(5) @(posedge clk); rst_n=1; repeat(2) @(posedge clk);
 
         // Single write
