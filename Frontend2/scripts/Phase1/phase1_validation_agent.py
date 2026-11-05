@@ -395,6 +395,7 @@ def _reverify_module(rtl_dir: Path, module: str) -> dict:
     cfg = dict(SSH_CONFIG)
     cfg["username"] = os.environ.get("OLYMPUS_USER", cfg["username"])
     cfg["key_path"] = os.environ.get("OLYMPUS_KEY", cfg["key_path"])
+    cfg["password"] = os.environ.get("OLYMPUS_PASSWORD", cfg.get("password"))
 
     print(f"\n  re-linting {module}...")
     lint_result = VerilatorLint(cfg).run(str(rtl_dir), [module])
@@ -404,7 +405,7 @@ def _reverify_module(rtl_dir: Path, module: str) -> dict:
     print(f"  re-simulating {module} on Olympus...")
     sim = XceliumSimulator(ssh_config=cfg)
     try:
-        sim.connect()
+        sim.connect(password=cfg.get("password"))
     except Exception as e:
         print(f"    SKIP: SSH failed: {e}")
         return {"lint": lint_mod, "sim": {"status": "SKIPPED", "reason": f"SSH failed: {e}"}}
