@@ -1,65 +1,85 @@
-  stimulus: burst on wb_port
-burst_wb_port_seed1: 33 step(s) (32 drive, 0 idle covering 0 cycle(s)), targets ['VP_FLOW_001']
+  stimulus: saturate on wb_port
+saturate_wb_port_seed1: 241 step(s) (240 drive, 0 idle covering 0 cycle(s)), targets ['VP_FAIL_016', 'VP_FAIL_017', 'VP_FLOW_001']
   wrote Validation/sequences/generated/runs/netlist_data_path/path_07_backpressure/seq_driver.sv
 wrote Validation/sequences/generated/runs/netlist_data_path/path_07_backpressure/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
 
 Path    : path_07_backpressure  [composed]
 Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
-Window  : 3000 cycles settle after driver
+Window  : 6000 cycles settle after driver
 Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant)
 
-Running: xrun ... -top chain_harness  (53 file(s))
+Running: xrun ... -top chain_harness  (57 file(s))
   log -> Validation/reports/netlists/data_path/path_07_backpressure_sim.log
-626 transaction(s)
+
+  EMBEDDED RTL ASSERTIONS FIRED (7075 total) — the design's own checks disagree with its behavior:
+    a_HOST_001_progress      7014x
+    p_tag                    61x
+
+  DRIVER completion timeouts: 1 — see the log
+4330 transaction(s)
     cfg_refresh.reset        1
     cfg_timing.reset         1
-    cq_deq.dequeue           32
+    cq_deq.dequeue           244
     cq_deq.reset             1
-    cq_enq.enqueue           32
+    cq_enq.enqueue           244
     cq_enq.reset             1
     csr.reset                1
     csr_rsp.reset            1
     csr_sts.reset            1
     csr_sts_level.reset      1
-    csr_sts_level.state      6
-    ddr_cmd.command          99
+    csr_sts_level.state      16
+    ddr_cmd.command          706
     ddr_cmd.reset            1
+    ddr_rd_beat.beat         160
     ddr_rd_beat.reset        1
-    ddr_wr_beat.beat         64
+    ddr_wr_beat.beat         256
     ddr_wr_beat.reset        1
+    dp_cmd.read              80
     dp_cmd.reset             1
-    dp_cmd.write             32
+    dp_cmd.write             164
     dp_rd_rsp.reset          1
+    dp_rd_rsp.response       65
     dp_wr.reset              1
-    dp_wr.write              32
-    refresh_ack.ack          3
+    dp_wr.write              131
+    refresh_ack.ack          8
     refresh_ack.reset        1
     refresh_level.reset      1
-    refresh_level.state      6
-    refresh_req.request      3
+    refresh_level.state      16
+    refresh_req.request      8
     refresh_req.reset        1
-    req.request              32
+    req.request              244
     req.reset                1
-    sched_cmd.command        99
+    sched_cmd.command        706
     sched_cmd.reset          1
-    sched_deq.grant          32
+    sched_deq.grant          244
     sched_deq.reset          1
-    sched_in.command         99
+    sched_in.command         706
     sched_in.reset           1
+    wb.read                  80
     wb.reset                 1
-    wb.write                 32
+    wb.write                 164
+    wb_rsp.read_data         65
     wb_rsp.reset             1
-  time span: 0 .. 15643000
-wrote 626 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/data_path/path_07_backpressure_observed.jsonl
+  time span: 0 .. 54648000
+wrote 4330 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/data_path/path_07_backpressure_observed.jsonl
 
 ==================================================================
-  wb_port                      [exact     ]  PASS
-      scope=wb_port  strategy=exact  status=pass  matched=32/32  (32 output transaction(s) matched)
+  wb_port                      [exact     ]  FAIL
+      scope=wb_port  strategy=exact  status=pass  matched=309/309  WAIVED=80 field comparison(s)  (309 output transaction(s) m
+      a_HOST_001_progress fired 7014x (assertion bound to wb_port)
   addr_decoder                 [exact     ]  PASS
-      scope=addr_decoder  strategy=exact  status=pass  matched=32/32  (32 output transaction(s) matched)
+      scope=addr_decoder  strategy=exact  status=pass  matched=244/244  (244 output transaction(s) matched)
   cmd_queue+scheduler          [invariant ]  PASS
-      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (626 transactions, no rule broken)
+      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (4330 transactions, no rule broken)
+  (conservation)               [conservation]  FAIL
+      scope=(conservation)  strategy=conservation  status=fail  rules=6 checked, 3 broken, 0 not applicable
+      CONSERVE READ_CMD_TO_RESPONSE owner=data_path lost=15 of=80 from=dp_cmd.read to=dp_rd_rsp observed=65 | Every RD command the data path is to
+      CONSERVE WRITE_REQUEST_TO_DATA owner=data_path lost=33 of=164 from=req[we=1] to=dp_wr observed=131 | Every write request the queue takes has
+      CONSERVE WRITE_CMD_TO_BEATS owner=data_path lost=72 of=328 from=dp_cmd.write to=ddr_wr_beat observed=256 per_source=2 | Every WR command dri
+  (host handshake)             [handshake ]  FAIL
+      1 driver completion timeout(s): the slave never acknowledged every beat it accepted
+      DRIVER_STALL: wb — 11 of 240 pipelined beat(s) never acknowledged (wb_ack_o)
 ==================================================================
 
-  path verdict : PASS
+  path verdict : FAIL
   report -> Validation/reports/netlists/data_path/path_07_backpressure_report.json

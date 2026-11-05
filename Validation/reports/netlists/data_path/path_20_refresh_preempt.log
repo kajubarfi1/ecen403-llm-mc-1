@@ -1,5 +1,5 @@
   stimulus: refresh_stress on wb_port
-refresh_stress_seed1: 746 step(s) (602 drive, 143 idle covering 271 cycle(s)), targets ['VP_FAIL_012', 'VP_TIME_006']
+refresh_stress_seed1: 752 step(s) (602 drive, 149 idle covering 311 cycle(s)), targets ['VP_FAIL_012', 'VP_TIME_006']
   wrote Validation/sequences/generated/runs/netlist_data_path/path_20_refresh_preempt/seq_driver.sv
 wrote Validation/sequences/generated/runs/netlist_data_path/path_20_refresh_preempt/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
 
@@ -8,9 +8,9 @@ Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path
 Window  : 6000 cycles settle after driver
 Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant); refresh_ctrl(autonomous); cmd_gen(exact)
 
-Running: xrun ... -top chain_harness  (53 file(s))
+Running: xrun ... -top chain_harness  (57 file(s))
   log -> Validation/reports/netlists/data_path/path_20_refresh_preempt_sim.log
-11069 transaction(s)
+11089 transaction(s)
     cfg_refresh.reset        1
     cfg_refresh.update       1
     cfg_timing.reset         1
@@ -24,36 +24,36 @@ Running: xrun ... -top chain_harness  (53 file(s))
     csr_rsp.write_ack        2
     csr_sts.reset            1
     csr_sts_level.reset      1
-    csr_sts_level.state      44
-    ddr_cmd.command          1840
+    csr_sts_level.state      48
+    ddr_cmd.command          1844
     ddr_cmd.reset            1
     ddr_rd_beat.reset        1
-    ddr_wr_beat.beat         1200
+    ddr_wr_beat.beat         1198
     ddr_wr_beat.reset        1
     dp_cmd.reset             1
     dp_cmd.write             600
     dp_rd_rsp.reset          1
     dp_wr.reset              1
-    dp_wr.write              600
-    refresh_ack.ack          22
+    dp_wr.write              599
+    refresh_ack.ack          24
     refresh_ack.reset        1
     refresh_level.reset      1
-    refresh_level.state      44
-    refresh_req.request      11
+    refresh_level.state      48
+    refresh_req.request      12
     refresh_req.reset        1
     req.request              600
     req.reset                1
-    sched_cmd.command        1840
+    sched_cmd.command        1844
     sched_cmd.reset          1
     sched_deq.grant          600
     sched_deq.reset          1
-    sched_in.command         1840
+    sched_in.command         1844
     sched_in.reset           1
     wb.reset                 1
     wb.write                 600
     wb_rsp.reset             1
-  time span: 0 .. 59043000
-wrote 11069 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/data_path/path_20_refresh_preempt_observed.jsonl
+  time span: 0 .. 64168000
+wrote 11089 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/data_path/path_20_refresh_preempt_observed.jsonl
 
 ==================================================================
   wb_port                      [exact     ]  PASS
@@ -61,13 +61,17 @@ wrote 11069 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/
   addr_decoder                 [exact     ]  PASS
       scope=addr_decoder  strategy=exact  status=pass  matched=600/600  (600 output transaction(s) matched)
   cmd_queue+scheduler          [invariant ]  PASS
-      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (11069 transactions, no rule broken)
+      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (11089 transactions, no rule broken)
   refresh_ctrl                 [autonomous]  SVA-OWNED
   cmd_gen                      [exact     ]  PASS
-      scope=cmd_gen  strategy=exact  status=pass  matched=1840/1840  (1840 output transaction(s) matched)
+      scope=cmd_gen  strategy=exact  status=pass  matched=1844/1844  (1844 output transaction(s) matched)
   (path-level)                 [invariant ]  PASS
-      scope=path_20_refresh_preempt  strategy=invariant  status=pass  (11069 transactions, no rule broken)
+      scope=path_20_refresh_preempt  strategy=invariant  status=pass  (11089 transactions, no rule broken)
+  (conservation)               [conservation]  FAIL
+      scope=(conservation)  strategy=conservation  status=fail  rules=6 checked, 2 broken, 0 not applicable
+      CONSERVE WRITE_REQUEST_TO_DATA owner=data_path lost=1 of=600 from=req[we=1] to=dp_wr observed=599 | Every write request the queue takes has 
+      CONSERVE WRITE_CMD_TO_BEATS owner=data_path lost=2 of=1200 from=dp_cmd.write to=ddr_wr_beat observed=1198 per_source=2 | Every WR command dr
 ==================================================================
 
-  path verdict : PASS
+  path verdict : FAIL
   report -> Validation/reports/netlists/data_path/path_20_refresh_preempt_report.json

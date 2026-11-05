@@ -1,68 +1,92 @@
-  stimulus: random on wb_port
-random_seed1: 39 step(s) (19 drive, 19 idle covering 139 cycle(s)), targets []
+  stimulus: wb_burst on wb_port
+wb_burst_wb_port_seed1: 88 step(s) (77 drive, 10 idle covering 50 cycle(s)), targets ['VP_FAIL_018', 'VP_FAIL_019', 'VP_FLOW_001']
   wrote Validation/sequences/generated/runs/netlist_data_path/path_02_read_cmd/seq_driver.sv
 wrote Validation/sequences/generated/runs/netlist_data_path/path_02_read_cmd/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
 
 Path    : path_02_read_cmd  [composed]
 Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
-Window  : 400 cycles settle after driver
+Window  : 600 cycles settle after driver
 Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant); cmd_gen(exact)
 
-Running: xrun ... -top chain_harness  (53 file(s))
+Running: xrun ... -top chain_harness  (57 file(s))
   log -> Validation/reports/netlists/data_path/path_02_read_cmd_sim.log
-369 transaction(s)
+
+  EMBEDDED RTL ASSERTIONS FIRED (11234 total) — the design's own checks disagree with its behavior:
+    a_HOST_001_progress      11199x
+    p_tag                    35x
+
+  DRIVER completion timeouts: 10 — see the log
+1273 transaction(s)
     cfg_refresh.reset        1
     cfg_timing.reset         1
-    cq_deq.dequeue           19
+    cq_deq.dequeue           77
     cq_deq.reset             1
-    cq_enq.enqueue           19
+    cq_enq.enqueue           77
     cq_enq.reset             1
     csr.reset                1
     csr_rsp.reset            1
     csr_sts.reset            1
     csr_sts_level.reset      1
-    csr_sts_level.state      2
-    ddr_cmd.command          50
+    csr_sts_level.state      28
+    ddr_cmd.command          159
     ddr_cmd.reset            1
-    ddr_rd_beat.beat         38
+    ddr_rd_beat.beat         92
     ddr_rd_beat.reset        1
+    ddr_wr_beat.beat         34
     ddr_wr_beat.reset        1
-    dp_cmd.read              19
+    dp_cmd.read              46
     dp_cmd.reset             1
+    dp_cmd.write             31
     dp_rd_rsp.reset          1
-    dp_rd_rsp.response       19
+    dp_rd_rsp.response       36
     dp_wr.reset              1
-    refresh_ack.ack          1
+    dp_wr.write              29
+    refresh_ack.ack          14
     refresh_ack.reset        1
     refresh_level.reset      1
-    refresh_level.state      2
-    refresh_req.request      1
+    refresh_level.state      28
+    refresh_req.request      14
     refresh_req.reset        1
-    req.request              19
+    req.request              77
     req.reset                1
-    sched_cmd.command        50
+    sched_cmd.command        159
     sched_cmd.reset          1
-    sched_deq.grant          19
+    sched_deq.grant          77
     sched_deq.reset          1
-    sched_in.command         50
+    sched_in.command         159
     sched_in.reset           1
-    wb.read                  19
+    wb.read                  46
     wb.reset                 1
-    wb_rsp.read_data         19
+    wb.write                 31
+    wb_rsp.read_data         36
     wb_rsp.reset             1
-  time span: 0 .. 4374000
-wrote 369 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/data_path/path_02_read_cmd_observed.jsonl
+  time span: 0 .. 101448000
+wrote 1273 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/data_path/path_02_read_cmd_observed.jsonl
 
 ==================================================================
-  wb_port                      [exact     ]  PASS
-      scope=wb_port  strategy=exact  status=pass  matched=38/38  (38 output transaction(s) matched)
+  wb_port                      [exact     ]  FAIL
+      scope=wb_port  strategy=exact  status=pass  matched=113/113  WAIVED=46 field comparison(s)  (113 output transaction(s) m
+      a_HOST_001_progress fired 11199x (assertion bound to wb_port)
   addr_decoder                 [exact     ]  PASS
-      scope=addr_decoder  strategy=exact  status=pass  matched=19/19  (19 output transaction(s) matched)
+      scope=addr_decoder  strategy=exact  status=pass  matched=77/77  (77 output transaction(s) matched)
   cmd_queue+scheduler          [invariant ]  PASS
-      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (369 transactions, no rule broken)
+      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (1273 transactions, no rule broken)
   cmd_gen                      [exact     ]  PASS
-      scope=cmd_gen  strategy=exact  status=pass  matched=50/50  (50 output transaction(s) matched)
+      scope=cmd_gen  strategy=exact  status=pass  matched=159/159  (159 output transaction(s) matched)
+  (conservation)               [conservation]  FAIL
+      scope=(conservation)  strategy=conservation  status=fail  rules=6 checked, 3 broken, 0 not applicable
+      CONSERVE READ_CMD_TO_RESPONSE owner=data_path lost=10 of=46 from=dp_cmd.read to=dp_rd_rsp observed=36 | Every RD command the data path is to
+      CONSERVE WRITE_REQUEST_TO_DATA owner=data_path lost=2 of=31 from=req[we=1] to=dp_wr observed=29 | Every write request the queue takes has it
+      CONSERVE WRITE_CMD_TO_BEATS owner=data_path lost=28 of=62 from=dp_cmd.write to=ddr_wr_beat observed=34 per_source=2 | Every WR command drive
+  (host handshake)             [handshake ]  FAIL
+      10 driver completion timeout(s): the slave never acknowledged every beat it accepted
+      DRIVER_STALL: wb — 1 of 5 pipelined beat(s) never acknowledged (wb_ack_o)
+      DRIVER_STALL: wb — 1 of 13 pipelined beat(s) never acknowledged (wb_ack_o)
+      DRIVER_STALL: wb — 1 of 18 pipelined beat(s) never acknowledged (wb_ack_o)
+      DRIVER_STALL: wb — 3 of 23 pipelined beat(s) never acknowledged (wb_ack_o)
+      DRIVER_STALL: wb — 4 of 26 pipelined beat(s) never acknowledged (wb_ack_o)
+      DRIVER_STALL: wb — 6 of 30 pipelined beat(s) never acknowledged (wb_ack_o)
 ==================================================================
 
-  path verdict : PASS
+  path verdict : FAIL
   report -> Validation/reports/netlists/data_path/path_02_read_cmd_report.json

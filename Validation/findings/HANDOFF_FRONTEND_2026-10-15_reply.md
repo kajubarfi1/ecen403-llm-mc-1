@@ -876,3 +876,90 @@ The flow loop is running on this drop (`runs/nov04_loop`), the first
 round with your RefBlock polling in the gate and nothing of ours to
 carry. Its result, and the formal re-proof on this scheduler and port,
 follow in the next addendum.
+
+## Addendum 14 (2026-11-04): the spec matrix, level 1 — five defects the golden spec never shows
+
+We built the spec matrix (`Validation/tools/spec_matrix.py`,
+`Validation/spec/spec_matrix.json`): the five presets, a pairwise
+covering set over the Tier-1 choices (every value of every parameter and
+every pair of values in at least one spec the compiler accepts; 32
+specs), and 13 Tier-2 edges (clock ratios 1/2/8, 64- and 128-bit host
+words, queue depth 4 and 32, bank-row-column, BL4, x16 with one lane, ECC
+with its check lane, the largest address space, in-order with close
+page). Level 1 compiles each with your compiler and runs our spec review
+on the result; level 2 (the flow's RTL half) follows tonight on the ones
+that pass. 31 of 50 pass the review. The 19 that do not fall into five
+groups, all in the compiler or the schema, none visible on the golden
+spec. Full lists in `Validation/reports/spec_matrix/level1_findings.md`.
+
+1. **`pack_mode: unpack_32_to_64`** (14 specs: any channel wider than the
+   32-bit host word, x16 with 4+ lanes or x8 with 8). The compiler emits a
+   value the schema's enum does not have (`direct`, `pack_32_to_*`,
+   `pack_64_to_*`). Either the enum gains the unpack modes or the compiler
+   rejects a channel wider than the host word; the data path has no
+   generator path for it today either way.
+2. **Address wider than the 32-bit CSR** (7 specs: 4Gb/8Gb at 5+ lanes).
+   `address_width_bits` reaches 33, so `BIST_ADDR_START/END` fields end at
+   bit 32 and the reserved range becomes 31:33. `validate_choices` accepts
+   these; your sweep's `validate()` rejected them at generation, which is
+   the same limit one stage later. The compiler should reject them with
+   the real reason (address space exceeds the 32-bit register and host
+   address), or the spec should cap density x lanes.
+3. **`row_bits: 17`** (5 specs: every 8Gb x8). The schema caps row bits
+   at 16, which is JEDEC's 8Gb x8 (A0-A15). If the compiler derives 17
+   for 8Gb x8 that is a density table error; if 8Gb x8 really needs 17 in
+   your table, the schema cap is wrong. One of the two.
+4. **tRFC does not fit its register field** (pair_09: DDR3-1600 8Gb).
+   `TIMING_1.tRFC_nCK` is 8 bits; 8Gb tRFC is 350 ns = 280 nCK = 0x118.
+   The register map's field width is a golden-spec constant; 8Gb needs 9
+   bits, which moves the fields in TIMING_1.
+5. **MR0 `burst_length: on_the_fly`** (edge_bl4). The schema allows
+   `fixed_8` and `on_the_fly_4_8`; the compiler writes `on_the_fly` for
+   BL4. A spelling, but it blocks every BL4 spec at intake.
+
+Our review is the one that blocks these, so none of them can reach RTL
+generation through the flow; the fixes are yours (compiler or schema).
+Your sweep report would let us run level 1 over all 1280 generated
+configurations instead of 50; the matrix tool takes a choices file per
+spec, so the report's choice sets drop straight in.
+
+**Loop run 11-04 (`runs/nov04_loop`): COMPLETE.** Spec review, all four
+phases through your gates (RefBlock polling clears T36/T37), top-level
+assembled and linted, our validation 20 of 20 with no finding, backend
+skipped by flag. The first run of the semester in which nothing was
+repaired by anyone. The next one is the same with the backend stage on.
+
+**One small ask from the matrix's first level-2 pass (11-04).** Running
+the five presets through the flow while our netlist jobs held Olympus
+sessions, every run halted on "SSH protocol banner / connection reset
+by peer" inside your lint gate or `generate_top.py`'s lint, and your
+pipeline reports that as "phase 1 failed at LINT ()" or a top-level
+failure. The cluster was refusing connections, not rejecting RTL. Our
+SSH helper retries a refused connection six times with backoff before
+it gives up; yours connects once. Worth adopting the same retry (or
+calling ours, `Validation/agents/sim_runner.py: CadenceSSHAgent`), and
+worth having a skipped gate halt with "gate not run: SSH" rather than
+"failed at LINT", so the flow's halt reason tells the truth. The matrix
+tool now flags such runs as infrastructure and reruns them; the
+presets are rerunning serially tonight.
+
+### What we need from you now (2026-11-05), in one place
+
+1. The five compiler/schema defects of addendum 14 (`unpack_32_to_64`,
+   33-bit addresses accepted, `row_bits` 17 on 8Gb x8, 8Gb tRFC in an
+   8-bit field, MR0 `on_the_fly`). They block 19 of 50 matrix specs at
+   intake and nothing else will find them.
+2. Your gates' SSH client: retry a refused connection, and report a
+   skipped gate as "not run" rather than "failed at lint".
+3. Three spec decisions, carried as advisory on every review until
+   answered (`Validation/spec/completeness_rules.json`, each with its
+   options): `phy_interface.data_bus_cycles_per_cas` (how long a CAS
+   holds the data bus; your WORD_BEATS guard is the safe reading),
+   `host_interface.write_buffer_backpressure` (does the port stall on a
+   full write buffer, or is the buffer sized so it never is),
+   `host_interface.ack_ordering` (must acknowledges return in request
+   order, as a B4 master expects, or may a write complete ahead of an
+   earlier read). None blocks a drop; the last one decides whether your
+   port is correct for a real Wishbone master.
+4. The Tier-1 sweep's generated choice sets, so level 1 of the matrix
+   runs over all 1280 configurations instead of 50.

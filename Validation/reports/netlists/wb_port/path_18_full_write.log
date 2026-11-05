@@ -8,72 +8,74 @@ Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path
 Window  : 2000 cycles settle after driver
 Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant); cmd_gen(exact); data_path(exact)
 
-Running: xrun ... -top chain_harness  (53 file(s))
+Running: xrun ... -top chain_harness  (57 file(s))
   log -> Validation/reports/netlists/wb_port/path_18_full_write_sim.log
-413 transaction(s)
+393 transaction(s)
     cfg_refresh.reset        1
     cfg_timing.reset         1
-    cq_deq.dequeue           24
+    cq_deq.dequeue           20
     cq_deq.reset             1
-    cq_enq.enqueue           24
+    cq_enq.enqueue           20
     cq_enq.reset             1
     csr.reset                1
     csr_rsp.reset            1
     csr_sts.reset            1
     csr_sts_level.reset      1
     csr_sts_level.state      4
-    ddr_cmd.command          50
+    ddr_cmd.command          54
     ddr_cmd.reset            1
     ddr_rd_beat.beat         24
     ddr_rd_beat.reset        1
-    ddr_wr_beat.beat         24
+    ddr_wr_beat.beat         16
     ddr_wr_beat.reset        1
     dp_cmd.read              12
     dp_cmd.reset             1
-    dp_cmd.write             12
+    dp_cmd.write             8
     dp_rd_rsp.reset          1
     dp_rd_rsp.response       12
     dp_wr.reset              1
-    dp_wr.write              12
+    dp_wr.write              8
     refresh_ack.ack          2
     refresh_ack.reset        1
     refresh_level.reset      1
     refresh_level.state      4
     refresh_req.request      2
     refresh_req.reset        1
-    req.request              24
+    req.request              20
     req.reset                1
-    sched_cmd.command        50
+    sched_cmd.command        54
     sched_cmd.reset          1
-    sched_deq.grant          24
+    sched_deq.grant          20
     sched_deq.reset          1
-    sched_in.command         50
+    sched_in.command         54
     sched_in.reset           1
     wb.read                  12
     wb.reset                 1
     wb.write                 12
     wb_rsp.read_data         12
     wb_rsp.reset             1
-  time span: 0 .. 7938000
-wrote 413 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/wb_port/path_18_full_write_observed.jsonl
+  time span: 0 .. 7948000
+wrote 393 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/wb_port/path_18_full_write_observed.jsonl
 
 ==================================================================
-  wb_port                      [exact     ]  PASS
-      scope=wb_port  strategy=exact  status=pass  matched=36/36  (36 output transaction(s) matched)
+  wb_port                      [exact     ]  FAIL
+      scope=wb_port  strategy=exact  status=fail  matched=32/36  WAIVED=12 field comparison(s)  missing=4
+      scope=wb_port  strategy=exact  status=fail  matched=32/36  WAIVED=12 field comparison(s)  missing=4
+        req[16] missing: predicted [req.request addr=0x1ff58c45 data=0x815a47c5 mask=0xf we=0x1] but the design produced nothing
+        req[18] missing: predicted [req.request addr=0xf890d38 data=0x677f6cbd mask=0xf we=0x1] but the design produced nothing
+        req[20] missing: predicted [req.request addr=0x17fb2263 data=0x1622bd79 mask=0xf we=0x1] but the design produced nothing
+        req[22] missing: predicted [req.request addr=0x192b176e data=0x5eda92d8 mask=0xf we=0x1] but the design produced nothing
   addr_decoder                 [exact     ]  PASS
-      scope=addr_decoder  strategy=exact  status=pass  matched=24/24  (24 output transaction(s) matched)
+      scope=addr_decoder  strategy=exact  status=pass  matched=20/20  (20 output transaction(s) matched)
   cmd_queue+scheduler          [invariant ]  PASS
-      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (413 transactions, no rule broken)
+      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (393 transactions, no rule broken)
   cmd_gen                      [exact     ]  PASS
-      scope=cmd_gen  strategy=exact  status=pass  matched=50/50  (50 output transaction(s) matched)
-  data_path                    [exact     ]  FAIL
-      scope=data_path  strategy=exact  status=fail  matched=24/36  value=12
-        dp_rd_rsp[0] value: predicted [dp_rd_rsp.response aux=0x1 data=0x1027c4d1] but observed [dp_rd_rsp.response aux=0x1 data=0xc4d10000]
-        dp_rd_rsp[1] value: predicted [dp_rd_rsp.response aux=0x3 data=0x7311d8a3] but observed [dp_rd_rsp.response aux=0x3 data=0xd8a30000]
-        dp_rd_rsp[2] value: predicted [dp_rd_rsp.response aux=0x5 data=0xc9e9c616] but observed [dp_rd_rsp.response aux=0x5 data=0xc6160000]
-        dp_rd_rsp[3] value: predicted [dp_rd_rsp.response aux=0x7 data=0x7ce42c82] but observed [dp_rd_rsp.response aux=0x7 data=0x2c820000]
-        dp_rd_rsp[4] value: predicted [dp_rd_rsp.response aux=0x9 data=0x7204e52d] but observed [dp_rd_rsp.response aux=0x9 data=0xe52d0000]
-        dp_rd_rsp[5] value: predicted [dp_rd_rsp.response aux=0xb data=0x51431193] but observed [dp_rd_rsp.response aux=0xb data=0x11930000]
+      scope=cmd_gen  strategy=exact  status=pass  matched=54/54  (54 output transaction(s) matched)
+  data_path                    [exact     ]  PASS
+      scope=data_path  strategy=exact  status=pass  matched=28/28  (28 output transaction(s) matched)
+  (conservation)               [conservation]  FAIL
+      scope=(conservation)  strategy=conservation  status=fail  rules=6 checked, 1 broken, 0 not applicable
+      CONSERVE HOST_BEAT_TO_REQUEST owner=wb_port lost=4 of=24 from=wb to=req observed=20 | Every host beat the port accepts (wb_cyc_i && wb_stb_i
 ==================================================================
 
   path verdict : FAIL

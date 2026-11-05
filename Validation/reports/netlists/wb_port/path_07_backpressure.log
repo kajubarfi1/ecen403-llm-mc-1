@@ -1,65 +1,87 @@
-  stimulus: burst on wb_port
-burst_wb_port_seed1: 33 step(s) (32 drive, 0 idle covering 0 cycle(s)), targets ['VP_FLOW_001']
+  stimulus: saturate on wb_port
+saturate_wb_port_seed1: 241 step(s) (240 drive, 0 idle covering 0 cycle(s)), targets ['VP_FAIL_016', 'VP_FAIL_017', 'VP_FLOW_001']
   wrote Validation/sequences/generated/runs/netlist_wb_port/path_07_backpressure/seq_driver.sv
 wrote Validation/sequences/generated/runs/netlist_wb_port/path_07_backpressure/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
 
 Path    : path_07_backpressure  [composed]
 Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
-Window  : 3000 cycles settle after driver
+Window  : 6000 cycles settle after driver
 Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant)
 
-Running: xrun ... -top chain_harness  (53 file(s))
+Running: xrun ... -top chain_harness  (57 file(s))
   log -> Validation/reports/netlists/wb_port/path_07_backpressure_sim.log
-626 transaction(s)
+
+  EMBEDDED RTL ASSERTIONS FIRED (6944 total) — the design's own checks disagree with its behavior:
+    a_HOST_001_progress      6944x
+
+  DRIVER completion timeouts: 1 — see the log
+3928 transaction(s)
     cfg_refresh.reset        1
     cfg_timing.reset         1
-    cq_deq.dequeue           32
+    cq_deq.dequeue           207
     cq_deq.reset             1
-    cq_enq.enqueue           32
+    cq_enq.enqueue           207
     cq_enq.reset             1
     csr.reset                1
     csr_rsp.reset            1
     csr_sts.reset            1
     csr_sts_level.reset      1
-    csr_sts_level.state      6
-    ddr_cmd.command          99
+    csr_sts_level.state      14
+    ddr_cmd.command          628
     ddr_cmd.reset            1
+    ddr_rd_beat.beat         144
     ddr_rd_beat.reset        1
-    ddr_wr_beat.beat         64
+    ddr_wr_beat.beat         270
     ddr_wr_beat.reset        1
+    dp_cmd.read              72
     dp_cmd.reset             1
-    dp_cmd.write             32
+    dp_cmd.write             135
     dp_rd_rsp.reset          1
+    dp_rd_rsp.response       72
     dp_wr.reset              1
-    dp_wr.write              32
-    refresh_ack.ack          3
+    dp_wr.write              135
+    refresh_ack.ack          7
     refresh_ack.reset        1
     refresh_level.reset      1
-    refresh_level.state      6
-    refresh_req.request      3
+    refresh_level.state      14
+    refresh_req.request      7
     refresh_req.reset        1
-    req.request              32
+    req.request              207
     req.reset                1
-    sched_cmd.command        99
+    sched_cmd.command        628
     sched_cmd.reset          1
-    sched_deq.grant          32
+    sched_deq.grant          207
     sched_deq.reset          1
-    sched_in.command         99
+    sched_in.command         628
     sched_in.reset           1
+    wb.read                  85
     wb.reset                 1
-    wb.write                 32
+    wb.write                 166
+    wb_rsp.read_data         72
     wb_rsp.reset             1
-  time span: 0 .. 15643000
-wrote 626 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/wb_port/path_07_backpressure_observed.jsonl
+  time span: 0 .. 46848000
+wrote 3928 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/wb_port/path_07_backpressure_observed.jsonl
 
 ==================================================================
-  wb_port                      [exact     ]  PASS
-      scope=wb_port  strategy=exact  status=pass  matched=32/32  (32 output transaction(s) matched)
+  wb_port                      [exact     ]  FAIL
+      scope=wb_port  strategy=exact  status=fail  matched=279/323  WAIVED=72 field comparison(s)  missing=44  SVA fired: a_HOS
+      a_HOST_001_progress fired 6944x (assertion bound to wb_port)
+        req[35] missing: predicted [req.request addr=0x1038a880 data=0x0 we=0x0] but the design produced nothing
+        req[37] missing: predicted [req.request addr=0xe6c8724 data=0x0 we=0x0] but the design produced nothing
+        req[39] missing: predicted [req.request addr=0x242c82c data=0x0 we=0x0] but the design produced nothing
+        req[43] missing: predicted [req.request addr=0x148f4a94 data=0x6d21f4cd mask=0x3 we=0x1] but the design produced nothing
+        req[45] missing: predicted [req.request addr=0x486ca00 data=0xdbc799b0 mask=0xf we=0x1] but the design produced nothing
   addr_decoder                 [exact     ]  PASS
-      scope=addr_decoder  strategy=exact  status=pass  matched=32/32  (32 output transaction(s) matched)
+      scope=addr_decoder  strategy=exact  status=pass  matched=207/207  (207 output transaction(s) matched)
   cmd_queue+scheduler          [invariant ]  PASS
-      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (626 transactions, no rule broken)
+      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (3928 transactions, no rule broken)
+  (conservation)               [conservation]  FAIL
+      scope=(conservation)  strategy=conservation  status=fail  rules=6 checked, 1 broken, 0 not applicable
+      CONSERVE HOST_BEAT_TO_REQUEST owner=wb_port lost=44 of=251 from=wb to=req observed=207 | Every host beat the port accepts (wb_cyc_i && wb_st
+  (host handshake)             [handshake ]  FAIL
+      1 driver completion timeout(s): the slave never acknowledged every beat it accepted
+      DRIVER_STALL: wb — 3 of 240 pipelined beat(s) never acknowledged (wb_ack_o)
 ==================================================================
 
-  path verdict : PASS
+  path verdict : FAIL
   report -> Validation/reports/netlists/wb_port/path_07_backpressure_report.json

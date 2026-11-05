@@ -1,5 +1,5 @@
   stimulus: refresh_stress on wb_port
-refresh_stress_seed1: 746 step(s) (602 drive, 143 idle covering 271 cycle(s)), targets ['VP_FAIL_012', 'VP_TIME_006']
+refresh_stress_seed1: 752 step(s) (602 drive, 149 idle covering 311 cycle(s)), targets ['VP_FAIL_012', 'VP_TIME_006']
   wrote Validation/sequences/generated/runs/netlist_wb_port/path_05_scheduler_refresh_loop/seq_driver.sv
 wrote Validation/sequences/generated/runs/netlist_wb_port/path_05_scheduler_refresh_loop/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
 
@@ -8,15 +8,15 @@ Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path
 Window  : 6000 cycles settle after driver
 Stages  : scheduler(invariant); refresh_ctrl(autonomous)
 
-Running: xrun ... -top chain_harness  (53 file(s))
+Running: xrun ... -top chain_harness  (57 file(s))
   log -> Validation/reports/netlists/wb_port/path_05_scheduler_refresh_loop_sim.log
-11069 transaction(s)
+6726 transaction(s)
     cfg_refresh.reset        1
     cfg_refresh.update       1
     cfg_timing.reset         1
-    cq_deq.dequeue           600
+    cq_deq.dequeue           350
     cq_deq.reset             1
-    cq_enq.enqueue           600
+    cq_enq.enqueue           350
     cq_enq.reset             1
     csr.reset                1
     csr.write                2
@@ -24,44 +24,47 @@ Running: xrun ... -top chain_harness  (53 file(s))
     csr_rsp.write_ack        2
     csr_sts.reset            1
     csr_sts_level.reset      1
-    csr_sts_level.state      44
-    ddr_cmd.command          1840
+    csr_sts_level.state      34
+    ddr_cmd.command          1067
     ddr_cmd.reset            1
     ddr_rd_beat.reset        1
-    ddr_wr_beat.beat         1200
+    ddr_wr_beat.beat         700
     ddr_wr_beat.reset        1
     dp_cmd.reset             1
-    dp_cmd.write             600
+    dp_cmd.write             350
     dp_rd_rsp.reset          1
     dp_wr.reset              1
-    dp_wr.write              600
-    refresh_ack.ack          22
+    dp_wr.write              350
+    refresh_ack.ack          17
     refresh_ack.reset        1
     refresh_level.reset      1
-    refresh_level.state      44
-    refresh_req.request      11
+    refresh_level.state      34
+    refresh_req.request      12
     refresh_req.reset        1
-    req.request              600
+    req.request              350
     req.reset                1
-    sched_cmd.command        1840
+    sched_cmd.command        1067
     sched_cmd.reset          1
-    sched_deq.grant          600
+    sched_deq.grant          350
     sched_deq.reset          1
-    sched_in.command         1840
+    sched_in.command         1067
     sched_in.reset           1
     wb.reset                 1
     wb.write                 600
     wb_rsp.reset             1
-  time span: 0 .. 59043000
-wrote 11069 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/wb_port/path_05_scheduler_refresh_loop_observed.jsonl
+  time span: 0 .. 46248000
+wrote 6726 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/wb_port/path_05_scheduler_refresh_loop_observed.jsonl
 
 ==================================================================
   scheduler                    [invariant ]  PASS
-      scope=scheduler  strategy=invariant  status=pass  (11069 transactions, no rule broken)
+      scope=scheduler  strategy=invariant  status=pass  (6726 transactions, no rule broken)
   refresh_ctrl                 [autonomous]  SVA-OWNED
   (path-level)                 [invariant ]  PASS
-      scope=path_05_scheduler_refresh_loop  strategy=invariant  status=pass  (11069 transactions, no rule broken)
+      scope=path_05_scheduler_refresh_loop  strategy=invariant  status=pass  (6726 transactions, no rule broken)
+  (conservation)               [conservation]  FAIL
+      scope=(conservation)  strategy=conservation  status=fail  rules=6 checked, 1 broken, 0 not applicable
+      CONSERVE HOST_BEAT_TO_REQUEST owner=wb_port lost=250 of=600 from=wb to=req observed=350 | Every host beat the port accepts (wb_cyc_i && wb_s
 ==================================================================
 
-  path verdict : PASS
+  path verdict : FAIL
   report -> Validation/reports/netlists/wb_port/path_05_scheduler_refresh_loop_report.json

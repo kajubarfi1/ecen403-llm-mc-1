@@ -277,3 +277,40 @@ for a later drop that names the block can resolve it. When you do emit
 pass records, `status: resolved` on the same id is all the adapter
 needs.
 
+
+## Addendum 6 (2026-11-04): your netlists against the current drop
+
+Re-judged every block's netlist in `backend/outputs/NETLISTS.json` against
+drop 56ca186bf893 (the one that passes 20 of 20 paths), 125 netlist runs:
+
+| block | provenance | result |
+|---|---|---|
+| addr_decoder, bank_tracker, calibration, cmd_gen, cmd_queue, config_regs, refresh_ctrl | current for this drop | PASS, every path |
+| data_path | STALE (built from 5f56adc7b7f5) | 5 of 12 paths, reproduces the RTL defects since fixed |
+| init_fsm | STALE | 0 of 5: the tMOD wait is not in this netlist |
+| scheduler | STALE | 11 of 12 |
+| wb_port | STALE | 7 of 13: the lost beats and the ack collision, both fixed in RTL since |
+
+The four stale failures are what a correct netlist of an old block should
+do, so nothing here is a backend finding. Your measurement commits since
+10-29 describe netlists built from later drops (56ca186bf893 itself for
+the priority tree), but `NETLISTS.json` still points at the 10-22/10-27
+set; when you regenerate it with the current builds, one
+`run_netlists.py` pass judges them, and gate-level sign-off on this drop
+follows. The validation-side numbers: 7 of 11 current and passing; the
+other 4 wait for your rebuild.
+
+### What we need from you now (2026-11-05)
+
+1. `NETLISTS.json` regenerated from your current builds (above). One
+   `run_netlists.py` pass then closes gate-level sign-off on 56ca186bf893.
+2. **The backend stage inside the flow.** It is the last open row of the
+   validation plan and the only part of the system that has never run end
+   to end: `flow.py` on the current spec with `--skip-backend` dropped,
+   `USE_DOCKER` set and your ORFS container reachable, either from Jacob's
+   machine or run on yours against the same repo state. The RTL half runs
+   clean now (`runs/nov04_loop`, 20 of 20, nothing repaired), so whatever
+   that run halts on is backend integration and nothing else. Your STA
+   findings would then route to the Frontend through the same package
+   path for the first time live; the unit tests cover it, a live round
+   has not.

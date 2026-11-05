@@ -1,6 +1,6 @@
 {
   "$schema": "validation-model-agreement/1",
-  "generated_utc": "2026-11-05T00:32:20.044051Z",
+  "generated_utc": "2026-11-05T17:14:39.555799Z",
   "traces": 20,
   "rows": [
     {
@@ -152,10 +152,26 @@
       "scope": "scheduler",
       "kind": "checker",
       "traces": 14,
-      "agree": 14,
-      "disagree": 0,
+      "agree": 13,
+      "disagree": 1,
       "attribution_only": 0,
-      "disagreements": [],
+      "disagreements": [
+        {
+          "trace": "Validation/reports/paths/path_03_read_return_observed.jsonl",
+          "diffs": [
+            {
+              "id": "SCHED_003",
+              "primary_only": 0,
+              "second_only": 1,
+              "both": 0,
+              "primary_count": 0,
+              "second_count": 1,
+              "primary_example": null,
+              "second_example": "SCHED_003 (refresh_never_serviced): refresh request was observed but no REFRESH command was issued before end of trace @ [refresh_req.request pending=0x1 starve=0x0 urgent=0x0]"
+            }
+          ]
+        }
+      ],
       "attribution": []
     },
     {

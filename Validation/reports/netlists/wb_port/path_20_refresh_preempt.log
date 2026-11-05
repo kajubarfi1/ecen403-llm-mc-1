@@ -1,5 +1,5 @@
   stimulus: refresh_stress on wb_port
-refresh_stress_seed1: 746 step(s) (602 drive, 143 idle covering 271 cycle(s)), targets ['VP_FAIL_012', 'VP_TIME_006']
+refresh_stress_seed1: 752 step(s) (602 drive, 149 idle covering 311 cycle(s)), targets ['VP_FAIL_012', 'VP_TIME_006']
   wrote Validation/sequences/generated/runs/netlist_wb_port/path_20_refresh_preempt/seq_driver.sv
 wrote Validation/sequences/generated/runs/netlist_wb_port/path_20_refresh_preempt/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
 
@@ -7,18 +7,16 @@ Path    : path_20_refresh_preempt  [invariant]
 Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
 Window  : 6000 cycles settle after driver
 Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant); refresh_ctrl(autonomous); cmd_gen(exact)
-    ssh connect attempt 1 failed (SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer); retrying in 9s
-    ssh connect attempt 2 failed (SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer); retrying in 14s
 
-Running: xrun ... -top chain_harness  (53 file(s))
+Running: xrun ... -top chain_harness  (57 file(s))
   log -> Validation/reports/netlists/wb_port/path_20_refresh_preempt_sim.log
-11069 transaction(s)
+6726 transaction(s)
     cfg_refresh.reset        1
     cfg_refresh.update       1
     cfg_timing.reset         1
-    cq_deq.dequeue           600
+    cq_deq.dequeue           350
     cq_deq.reset             1
-    cq_enq.enqueue           600
+    cq_enq.enqueue           350
     cq_enq.reset             1
     csr.reset                1
     csr.write                2
@@ -26,88 +24,59 @@ Running: xrun ... -top chain_harness  (53 file(s))
     csr_rsp.write_ack        2
     csr_sts.reset            1
     csr_sts_level.reset      1
-    csr_sts_level.state      44
-    ddr_cmd.command          1840
+    csr_sts_level.state      34
+    ddr_cmd.command          1067
     ddr_cmd.reset            1
     ddr_rd_beat.reset        1
-    ddr_wr_beat.beat         1200
+    ddr_wr_beat.beat         700
     ddr_wr_beat.reset        1
     dp_cmd.reset             1
-    dp_cmd.write             600
+    dp_cmd.write             350
     dp_rd_rsp.reset          1
     dp_wr.reset              1
-    dp_wr.write              600
-    refresh_ack.ack          22
+    dp_wr.write              350
+    refresh_ack.ack          17
     refresh_ack.reset        1
     refresh_level.reset      1
-    refresh_level.state      44
-    refresh_req.request      11
+    refresh_level.state      34
+    refresh_req.request      12
     refresh_req.reset        1
-    req.request              600
+    req.request              350
     req.reset                1
-    sched_cmd.command        1840
+    sched_cmd.command        1067
     sched_cmd.reset          1
-    sched_deq.grant          600
+    sched_deq.grant          350
     sched_deq.reset          1
-    sched_in.command         1840
+    sched_in.command         1067
     sched_in.reset           1
     wb.reset                 1
     wb.write                 600
     wb_rsp.reset             1
-  time span: 0 .. 59043000
-wrote 11069 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/wb_port/path_20_refresh_preempt_observed.jsonl
+  time span: 0 .. 46248000
+wrote 6726 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/wb_port/path_20_refresh_preempt_observed.jsonl
 
 ==================================================================
-  wb_port                      [exact     ]  PASS
-      scope=wb_port  strategy=exact  status=pass  matched=600/600  (600 output transaction(s) matched)
+  wb_port                      [exact     ]  FAIL
+      scope=wb_port  strategy=exact  status=fail  matched=350/600  missing=250
+        req[39] missing: predicted [req.request addr=0x12ea557c data=0xecd1345e mask=0xf we=0x1] but the design produced nothing
+        req[43] missing: predicted [req.request addr=0x1e87555b data=0x50806f01 mask=0xf we=0x1] but the design produced nothing
+        req[45] missing: predicted [req.request addr=0x41bb8aa data=0xe9d40f2b mask=0xf we=0x1] but the design produced nothing
+        req[47] missing: predicted [req.request addr=0x13ab2635 data=0x32ffd03d mask=0xf we=0x1] but the design produced nothing
+        req[49] missing: predicted [req.request addr=0x13a25a99 data=0xa826695 mask=0xf we=0x1] but the design produced nothing
+        req[52] missing: predicted [req.request addr=0x1607c95 data=0xa2a866b4 mask=0xf we=0x1] but the design produced nothing
   addr_decoder                 [exact     ]  PASS
-      scope=addr_decoder  strategy=exact  status=pass  matched=600/600  (600 output transaction(s) matched)
+      scope=addr_decoder  strategy=exact  status=pass  matched=350/350  (350 output transaction(s) matched)
   cmd_queue+scheduler          [invariant ]  PASS
-      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (11069 transactions, no rule broken)
+      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (6726 transactions, no rule broken)
   refresh_ctrl                 [autonomous]  SVA-OWNED
   cmd_gen                      [exact     ]  PASS
-      scope=cmd_gen  strategy=exact  status=pass  matched=1840/1840  (1840 output transaction(s) matched)
+      scope=cmd_gen  strategy=exact  status=pass  matched=1067/1067  (1067 output transaction(s) matched)
   (path-level)                 [invariant ]  PASS
-      scope=path_20_refresh_preempt  strategy=invariant  status=pass  (11069 transactions, no rule broken)
+      scope=path_20_refresh_preempt  strategy=invariant  status=pass  (6726 transactions, no rule broken)
+  (conservation)               [conservation]  FAIL
+      scope=(conservation)  strategy=conservation  status=fail  rules=6 checked, 1 broken, 0 not applicable
+      CONSERVE HOST_BEAT_TO_REQUEST owner=wb_port lost=250 of=600 from=wb to=req observed=350 | Every host beat the port accepts (wb_cyc_i && wb_s
 ==================================================================
 
-  path verdict : PASS
+  path verdict : FAIL
   report -> Validation/reports/netlists/wb_port/path_20_refresh_preempt_report.json
-Exception (client): Error reading SSH protocol banner[Errno 54] Connection reset by peer
-Traceback (most recent call last):
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2363, in _check_banner
-    buf = self.packetizer.readline(timeout)
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 395, in readline
-    buf += self._read_timeout(timeout)
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 663, in _read_timeout
-    x = self.__socket.recv(128)
-ConnectionResetError: [Errno 54] Connection reset by peer
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2179, in run
-    self._check_banner()
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2367, in _check_banner
-    raise SSHException(
-paramiko.ssh_exception.SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer
-
-Exception (client): Error reading SSH protocol banner[Errno 54] Connection reset by peer
-Traceback (most recent call last):
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2363, in _check_banner
-    buf = self.packetizer.readline(timeout)
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 395, in readline
-    buf += self._read_timeout(timeout)
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 663, in _read_timeout
-    x = self.__socket.recv(128)
-ConnectionResetError: [Errno 54] Connection reset by peer
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2179, in run
-    self._check_banner()
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2367, in _check_banner
-    raise SSHException(
-paramiko.ssh_exception.SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer
-

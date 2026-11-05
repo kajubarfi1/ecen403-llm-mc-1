@@ -1,0 +1,1873 @@
+{
+  "$schema": "validation-spec-matrix-summary/1",
+  "results": {
+    "preset_balanced": {
+      "name": "preset_balanced",
+      "origin": "preset",
+      "choices": {
+        "speed_grade": "DDR3-1333",
+        "density": "2Gb",
+        "device_width": "x8",
+        "ranks": 1,
+        "byte_lanes": 2,
+        "ecc_mode": 0,
+        "scheduler_policy": "fr_fcfs",
+        "row_policy": "open_page",
+        "command_queue_depth": 16,
+        "lookahead_depth": 8
+      },
+      "level": 2,
+      "utc": "2026-11-05T02:13:58.730202+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/preset_balanced/microarch_spec.json",
+        "status": "PASS"
+      },
+      "level2": {
+        "flow_rc": 2,
+        "run_dir": "runs/matrix/preset_balanced",
+        "flow_status": "halted",
+        "halt": {
+          "stage": "rtl_generation",
+          "why": "generate_top.py exited 1 (top-level assembly or its lint failed); see flow.log",
+          "utc": "2026-11-05T02:15:21.897915+00:00"
+        },
+        "phases_passed": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "stages": {
+          "spec_synthesis": "PASS",
+          "spec_review": "PASS",
+          "rtl_generation": "HALT"
+        },
+        "rtl_validation": null
+      }
+    },
+    "preset_default": {
+      "name": "preset_default",
+      "origin": "preset",
+      "choices": {
+        "speed_grade": "DDR3-1600",
+        "density": "2Gb",
+        "device_width": "x8",
+        "ranks": 1,
+        "byte_lanes": 2,
+        "ecc_mode": 0,
+        "scheduler_policy": "fr_fcfs",
+        "row_policy": "open_page",
+        "command_queue_depth": 16,
+        "lookahead_depth": 8
+      },
+      "level": 2,
+      "utc": "2026-11-05T02:15:21.920784+00:00",
+      "level1": {
+        "revision": "compiled_ddr31600_x8_2lane_1rank_b2a65970",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/preset_default/microarch_spec.json",
+        "status": "PASS"
+      },
+      "level2": {
+        "flow_rc": 2,
+        "run_dir": "runs/matrix/preset_default",
+        "flow_status": "halted",
+        "halt": {
+          "stage": "rtl_generation",
+          "why": "phase 1 failed at LINT (). its fix agent (Frontend2/scripts/Phase1/phase1_validation_agent.py) ran 1 time(s) on the Frontend's own error report and did not clear it; fix by hand, then resume.",
+          "utc": "2026-11-05T02:15:22.431299+00:00",
+          "phase": 1,
+          "report": "runs/matrix/preset_default/drop/VALIDATIONREPORT/phase1_error_report.json"
+        },
+        "phases_passed": [],
+        "stages": {
+          "spec_synthesis": "PASS",
+          "spec_review": "PASS",
+          "rtl_generation": "HALT"
+        },
+        "rtl_validation": null
+      }
+    },
+    "preset_high-performance": {
+      "name": "preset_high-performance",
+      "origin": "preset",
+      "choices": {
+        "speed_grade": "DDR3-1600",
+        "density": "4Gb",
+        "device_width": "x8",
+        "ranks": 1,
+        "byte_lanes": 3,
+        "ecc_mode": 1,
+        "scheduler_policy": "fr_fcfs",
+        "row_policy": "open_page",
+        "command_queue_depth": 32,
+        "lookahead_depth": 16
+      },
+      "level": 2,
+      "utc": "2026-11-05T02:15:22.495191+00:00",
+      "level1": {
+        "revision": "compiled_ddr31600_x8_3lane_1rank_042f7b32",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/preset_high-performance/microarch_spec.json",
+        "status": "PASS"
+      },
+      "level2": {
+        "flow_rc": 2,
+        "run_dir": "runs/matrix/preset_high-performance",
+        "flow_status": "halted",
+        "halt": {
+          "stage": "rtl_generation",
+          "why": "phase 1 failed at LINT (). its fix agent (Frontend2/scripts/Phase1/phase1_validation_agent.py) ran 1 time(s) on the Frontend's own error report and did not clear it; fix by hand, then resume.",
+          "utc": "2026-11-05T02:15:22.994216+00:00",
+          "phase": 1,
+          "report": "runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase1_error_report.json"
+        },
+        "phases_passed": [],
+        "stages": {
+          "spec_synthesis": "PASS",
+          "spec_review": "PASS",
+          "rtl_generation": "HALT"
+        },
+        "rtl_validation": null
+      }
+    },
+    "preset_low-cost-embedded": {
+      "name": "preset_low-cost-embedded",
+      "origin": "preset",
+      "choices": {
+        "speed_grade": "DDR3-800",
+        "density": "2Gb",
+        "device_width": "x8",
+        "ranks": 1,
+        "byte_lanes": 1,
+        "ecc_mode": 0,
+        "scheduler_policy": "in_order",
+        "row_policy": "close_page",
+        "command_queue_depth": 4,
+        "lookahead_depth": 0
+      },
+      "level": 2,
+      "utc": "2026-11-05T02:15:23.053348+00:00",
+      "level1": {
+        "revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/preset_low-cost-embedded/microarch_spec.json",
+        "status": "PASS"
+      },
+      "level2": {
+        "flow_rc": 2,
+        "run_dir": "runs/matrix/preset_low-cost-embedded",
+        "flow_status": "halted",
+        "halt": {
+          "stage": "rtl_generation",
+          "why": "phase 1 failed at LINT (). its fix agent (Frontend2/scripts/Phase1/phase1_validation_agent.py) ran 1 time(s) on the Frontend's own error report and did not clear it; fix by hand, then resume.",
+          "utc": "2026-11-05T02:15:23.584085+00:00",
+          "phase": 1,
+          "report": "runs/matrix/preset_low-cost-embedded/drop/VALIDATIONREPORT/phase1_error_report.json"
+        },
+        "phases_passed": [],
+        "stages": {
+          "spec_synthesis": "PASS",
+          "spec_review": "PASS",
+          "rtl_generation": "HALT"
+        },
+        "rtl_validation": null
+      }
+    },
+    "preset_server-grade": {
+      "name": "preset_server-grade",
+      "origin": "preset",
+      "choices": {
+        "speed_grade": "DDR3-1600",
+        "density": "4Gb",
+        "device_width": "x8",
+        "ranks": 1,
+        "byte_lanes": 5,
+        "ecc_mode": 1,
+        "scheduler_policy": "fr_fcfs",
+        "row_policy": "open_page",
+        "command_queue_depth": 32,
+        "lookahead_depth": 16
+      },
+      "level": 2,
+      "utc": "2026-11-05T02:15:23.603354+00:00",
+      "level1": {
+        "revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/preset_server-grade/microarch_spec.json",
+        "status": "PASS"
+      },
+      "level2": {
+        "flow_rc": 2,
+        "run_dir": "runs/matrix/preset_server-grade",
+        "flow_status": "halted",
+        "halt": {
+          "stage": "rtl_generation",
+          "why": "phase 1 failed at LINT (). its fix agent (Frontend2/scripts/Phase1/phase1_validation_agent.py) ran 1 time(s) on the Frontend's own error report and did not clear it; fix by hand, then resume.",
+          "utc": "2026-11-05T02:15:24.121134+00:00",
+          "phase": 1,
+          "report": "runs/matrix/preset_server-grade/drop/VALIDATIONREPORT/phase1_error_report.json"
+        },
+        "phases_passed": [],
+        "stages": {
+          "spec_synthesis": "PASS",
+          "spec_review": "PASS",
+          "rtl_generation": "HALT"
+        },
+        "rtl_validation": null
+      }
+    },
+    "pair_01": {
+      "name": "pair_01",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 2,
+        "density": "4Gb",
+        "device_width": "x16",
+        "ecc_mode": 1,
+        "row_policy": "close_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-1600",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.700824+00:00",
+      "level1": {
+        "revision": "compiled_ddr31600_x16_2lane_1rank_f3f3337e",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_01/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "pair_02": {
+      "name": "pair_02",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 8,
+        "density": "8Gb",
+        "device_width": "x8",
+        "ecc_mode": 0,
+        "row_policy": "open_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-1066",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.704132+00:00",
+      "level1": {
+        "revision": "compiled_ddr31066_x8_8lane_1rank_1094624e",
+        "blocking": [
+          "schema: memory_geometry.row_bits: 17 is above maximum 16",
+          "schema: host_interface.address_width_bits: 33 is above maximum 32",
+          "schema: data_path_mapping.pack_mode: 'unpack_32_to_64' is not one of ['direct', 'pack_32_to_8', 'pack_32_to_16', 'pack_32_to_32', 'pack_32_to_64', 'pack_32_to_128', 'pack_64_to_8', 'pack_64_to_16', 'pack_64_to_32', 'pack_64_to_64', 'pack_64_to_128', 'pack_128_to_8', 'pack_128_to_16', 'pack_128_to_32', 'pack_128_to_64', 'pack_128_to_128']",
+          "registers: BIST_ADDR_START.start_addr: bits 32:0 exceed the 32-bit data width",
+          "registers: BIST_ADDR_START.reserved: bits 31:33 exceed the 32-bit data width",
+          "registers: BIST_ADDR_START.reserved: bits 31:33 overlap another field",
+          "registers: BIST_ADDR_END.end_addr: bits 32:0 exceed the 32-bit data width",
+          "registers: BIST_ADDR_END.reserved: bits 31:33 exceed the 32-bit data width",
+          "registers: BIST_ADDR_END.reserved: bits 31:33 overlap another field"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_02/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "pair_03": {
+      "name": "pair_03",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 5,
+        "density": "1Gb",
+        "device_width": "x16",
+        "ecc_mode": 3,
+        "row_policy": "open_page",
+        "scheduler_policy": "in_order",
+        "speed_grade": "DDR3-1333",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.707446+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x16_5lane_1rank_91439f6c",
+        "blocking": [
+          "schema: data_path_mapping.pack_mode: 'unpack_32_to_64' is not one of ['direct', 'pack_32_to_8', 'pack_32_to_16', 'pack_32_to_32', 'pack_32_to_64', 'pack_32_to_128', 'pack_64_to_8', 'pack_64_to_16', 'pack_64_to_32', 'pack_64_to_64', 'pack_64_to_128', 'pack_128_to_8', 'pack_128_to_16', 'pack_128_to_32', 'pack_128_to_64', 'pack_128_to_128']"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_03/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "pair_04": {
+      "name": "pair_04",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 1,
+        "density": "2Gb",
+        "device_width": "x8",
+        "ecc_mode": 0,
+        "row_policy": "close_page",
+        "scheduler_policy": "in_order",
+        "speed_grade": "DDR3-800",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.710679+00:00",
+      "level1": {
+        "revision": "compiled_ddr3800_x8_1lane_1rank_0f288c6b",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_04/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "pair_05": {
+      "name": "pair_05",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 3,
+        "density": "4Gb",
+        "device_width": "x8",
+        "ecc_mode": 2,
+        "row_policy": "open_page",
+        "scheduler_policy": "in_order",
+        "speed_grade": "DDR3-800",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.713951+00:00",
+      "level1": {
+        "revision": "compiled_ddr3800_x8_3lane_1rank_d8088268",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_05/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "pair_06": {
+      "name": "pair_06",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 5,
+        "density": "1Gb",
+        "device_width": "x16",
+        "ecc_mode": 2,
+        "row_policy": "close_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-1066",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.717239+00:00",
+      "level1": {
+        "revision": "compiled_ddr31066_x16_5lane_1rank_e60a78f1",
+        "blocking": [
+          "schema: data_path_mapping.pack_mode: 'unpack_32_to_64' is not one of ['direct', 'pack_32_to_8', 'pack_32_to_16', 'pack_32_to_32', 'pack_32_to_64', 'pack_32_to_128', 'pack_64_to_8', 'pack_64_to_16', 'pack_64_to_32', 'pack_64_to_64', 'pack_64_to_128', 'pack_128_to_8', 'pack_128_to_16', 'pack_128_to_32', 'pack_128_to_64', 'pack_128_to_128']"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_06/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "pair_07": {
+      "name": "pair_07",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 3,
+        "density": "2Gb",
+        "device_width": "x8",
+        "ecc_mode": 3,
+        "row_policy": "close_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-1600",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.720489+00:00",
+      "level1": {
+        "revision": "compiled_ddr31600_x8_3lane_1rank_e9f5a4d4",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_07/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "pair_08": {
+      "name": "pair_08",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 4,
+        "density": "8Gb",
+        "device_width": "x16",
+        "ecc_mode": 0,
+        "row_policy": "close_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-1333",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.723738+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x16_4lane_1rank_2b2c803d",
+        "blocking": [
+          "schema: data_path_mapping.pack_mode: 'unpack_32_to_64' is not one of ['direct', 'pack_32_to_8', 'pack_32_to_16', 'pack_32_to_32', 'pack_32_to_64', 'pack_32_to_128', 'pack_64_to_8', 'pack_64_to_16', 'pack_64_to_32', 'pack_64_to_64', 'pack_64_to_128', 'pack_128_to_8', 'pack_128_to_16', 'pack_128_to_32', 'pack_128_to_64', 'pack_128_to_128']",
+          "registers: BIST_ADDR_START.reserved: bits 31:32 exceed the 32-bit data width",
+          "registers: BIST_ADDR_START.reserved: bits 31:32 overlap another field",
+          "registers: BIST_ADDR_END.reserved: bits 31:32 exceed the 32-bit data width",
+          "registers: BIST_ADDR_END.reserved: bits 31:32 overlap another field"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_08/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "pair_09": {
+      "name": "pair_09",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 5,
+        "density": "8Gb",
+        "device_width": "x8",
+        "ecc_mode": 1,
+        "row_policy": "open_page",
+        "scheduler_policy": "in_order",
+        "speed_grade": "DDR3-1600",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.727038+00:00",
+      "level1": {
+        "revision": "compiled_ddr31600_x8_5lane_1rank_e22c8e53",
+        "blocking": [
+          "schema: memory_geometry.row_bits: 17 is above maximum 16",
+          "registers: TIMING_1.tRFC_nCK: reset_value 0x118 does not fit 8 bit(s)",
+          "registers: BIST_ADDR_START.reserved: bits 31:32 exceed the 32-bit data width",
+          "registers: BIST_ADDR_START.reserved: bits 31:32 overlap another field",
+          "registers: BIST_ADDR_END.reserved: bits 31:32 exceed the 32-bit data width",
+          "registers: BIST_ADDR_END.reserved: bits 31:32 overlap another field"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_09/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "pair_10": {
+      "name": "pair_10",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 6,
+        "density": "1Gb",
+        "device_width": "x16",
+        "ecc_mode": 0,
+        "row_policy": "open_page",
+        "scheduler_policy": "in_order",
+        "speed_grade": "DDR3-800",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.730386+00:00",
+      "level1": {
+        "revision": "compiled_ddr3800_x16_6lane_1rank_4f2f5f7b",
+        "blocking": [
+          "schema: data_path_mapping.pack_mode: 'unpack_32_to_96' is not one of ['direct', 'pack_32_to_8', 'pack_32_to_16', 'pack_32_to_32', 'pack_32_to_64', 'pack_32_to_128', 'pack_64_to_8', 'pack_64_to_16', 'pack_64_to_32', 'pack_64_to_64', 'pack_64_to_128', 'pack_128_to_8', 'pack_128_to_16', 'pack_128_to_32', 'pack_128_to_64', 'pack_128_to_128']"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_10/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "pair_11": {
+      "name": "pair_11",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 2,
+        "density": "2Gb",
+        "device_width": "x8",
+        "ecc_mode": 1,
+        "row_policy": "open_page",
+        "scheduler_policy": "in_order",
+        "speed_grade": "DDR3-1333",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.733620+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x8_2lane_1rank_c00748f5",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_11/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "pair_12": {
+      "name": "pair_12",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 8,
+        "density": "1Gb",
+        "device_width": "x16",
+        "ecc_mode": 0,
+        "row_policy": "close_page",
+        "scheduler_policy": "in_order",
+        "speed_grade": "DDR3-1600",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.736809+00:00",
+      "level1": {
+        "revision": "compiled_ddr31600_x16_8lane_1rank_bfb4ea10",
+        "blocking": [
+          "schema: data_path_mapping.pack_mode: 'unpack_32_to_128' is not one of ['direct', 'pack_32_to_8', 'pack_32_to_16', 'pack_32_to_32', 'pack_32_to_64', 'pack_32_to_128', 'pack_64_to_8', 'pack_64_to_16', 'pack_64_to_32', 'pack_64_to_64', 'pack_64_to_128', 'pack_128_to_8', 'pack_128_to_16', 'pack_128_to_32', 'pack_128_to_64', 'pack_128_to_128']"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_12/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "pair_13": {
+      "name": "pair_13",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 2,
+        "density": "8Gb",
+        "device_width": "x8",
+        "ecc_mode": 3,
+        "row_policy": "open_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-800",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.740032+00:00",
+      "level1": {
+        "revision": "compiled_ddr3800_x8_2lane_1rank_9d8b9b93",
+        "blocking": [
+          "schema: memory_geometry.row_bits: 17 is above maximum 16"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_13/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "pair_14": {
+      "name": "pair_14",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 4,
+        "density": "1Gb",
+        "device_width": "x8",
+        "ecc_mode": 0,
+        "row_policy": "open_page",
+        "scheduler_policy": "in_order",
+        "speed_grade": "DDR3-1066",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.743567+00:00",
+      "level1": {
+        "revision": "compiled_ddr31066_x8_4lane_1rank_b130fbed",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_14/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "pair_15": {
+      "name": "pair_15",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 6,
+        "density": "4Gb",
+        "device_width": "x16",
+        "ecc_mode": 0,
+        "row_policy": "close_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-1333",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.746939+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x16_6lane_1rank_888ee214",
+        "blocking": [
+          "schema: data_path_mapping.pack_mode: 'unpack_32_to_96' is not one of ['direct', 'pack_32_to_8', 'pack_32_to_16', 'pack_32_to_32', 'pack_32_to_64', 'pack_32_to_128', 'pack_64_to_8', 'pack_64_to_16', 'pack_64_to_32', 'pack_64_to_64', 'pack_64_to_128', 'pack_128_to_8', 'pack_128_to_16', 'pack_128_to_32', 'pack_128_to_64', 'pack_128_to_128']",
+          "registers: BIST_ADDR_START.reserved: bits 31:32 exceed the 32-bit data width",
+          "registers: BIST_ADDR_START.reserved: bits 31:32 overlap another field",
+          "registers: BIST_ADDR_END.reserved: bits 31:32 exceed the 32-bit data width",
+          "registers: BIST_ADDR_END.reserved: bits 31:32 overlap another field"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_15/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "pair_16": {
+      "name": "pair_16",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 3,
+        "density": "1Gb",
+        "device_width": "x16",
+        "ecc_mode": 1,
+        "row_policy": "close_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-1066",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.750344+00:00",
+      "level1": {
+        "revision": "compiled_ddr31066_x16_3lane_1rank_ca2d8493",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_16/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "pair_17": {
+      "name": "pair_17",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 1,
+        "density": "1Gb",
+        "device_width": "x16",
+        "ecc_mode": 0,
+        "row_policy": "open_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-1600",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.753641+00:00",
+      "level1": {
+        "revision": "compiled_ddr31600_x16_1lane_1rank_fc82e2cd",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_17/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "pair_18": {
+      "name": "pair_18",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 5,
+        "density": "2Gb",
+        "device_width": "x16",
+        "ecc_mode": 1,
+        "row_policy": "close_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-800",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.756906+00:00",
+      "level1": {
+        "revision": "compiled_ddr3800_x16_5lane_1rank_1cf6b919",
+        "blocking": [
+          "schema: data_path_mapping.pack_mode: 'unpack_32_to_64' is not one of ['direct', 'pack_32_to_8', 'pack_32_to_16', 'pack_32_to_32', 'pack_32_to_64', 'pack_32_to_128', 'pack_64_to_8', 'pack_64_to_16', 'pack_64_to_32', 'pack_64_to_64', 'pack_64_to_128', 'pack_128_to_8', 'pack_128_to_16', 'pack_128_to_32', 'pack_128_to_64', 'pack_128_to_128']"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_18/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "pair_19": {
+      "name": "pair_19",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 5,
+        "density": "4Gb",
+        "device_width": "x8",
+        "ecc_mode": 3,
+        "row_policy": "close_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-1066",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.760274+00:00",
+      "level1": {
+        "revision": "compiled_ddr31066_x8_5lane_1rank_4f101b01",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_19/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "pair_20": {
+      "name": "pair_20",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 3,
+        "density": "8Gb",
+        "device_width": "x8",
+        "ecc_mode": 2,
+        "row_policy": "open_page",
+        "scheduler_policy": "in_order",
+        "speed_grade": "DDR3-1333",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.763948+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x8_3lane_1rank_859a7997",
+        "blocking": [
+          "schema: memory_geometry.row_bits: 17 is above maximum 16"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_20/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "pair_21": {
+      "name": "pair_21",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 2,
+        "density": "2Gb",
+        "device_width": "x16",
+        "ecc_mode": 2,
+        "row_policy": "close_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-1066",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.767276+00:00",
+      "level1": {
+        "revision": "compiled_ddr31066_x16_2lane_1rank_34ccb60e",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_21/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "pair_22": {
+      "name": "pair_22",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 8,
+        "density": "2Gb",
+        "device_width": "x8",
+        "ecc_mode": 0,
+        "row_policy": "close_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-800",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.770808+00:00",
+      "level1": {
+        "revision": "compiled_ddr3800_x8_8lane_1rank_8eba99ef",
+        "blocking": [
+          "schema: data_path_mapping.pack_mode: 'unpack_32_to_64' is not one of ['direct', 'pack_32_to_8', 'pack_32_to_16', 'pack_32_to_32', 'pack_32_to_64', 'pack_32_to_128', 'pack_64_to_8', 'pack_64_to_16', 'pack_64_to_32', 'pack_64_to_64', 'pack_64_to_128', 'pack_128_to_8', 'pack_128_to_16', 'pack_128_to_32', 'pack_128_to_64', 'pack_128_to_128']"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_22/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "pair_23": {
+      "name": "pair_23",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 2,
+        "density": "1Gb",
+        "device_width": "x16",
+        "ecc_mode": 2,
+        "row_policy": "close_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-1600",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.774031+00:00",
+      "level1": {
+        "revision": "compiled_ddr31600_x16_2lane_1rank_5ef26ae8",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_23/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "pair_24": {
+      "name": "pair_24",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 6,
+        "density": "8Gb",
+        "device_width": "x16",
+        "ecc_mode": 0,
+        "row_policy": "close_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-1066",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.777283+00:00",
+      "level1": {
+        "revision": "compiled_ddr31066_x16_6lane_1rank_792108d6",
+        "blocking": [
+          "schema: host_interface.address_width_bits: 33 is above maximum 32",
+          "schema: data_path_mapping.pack_mode: 'unpack_32_to_96' is not one of ['direct', 'pack_32_to_8', 'pack_32_to_16', 'pack_32_to_32', 'pack_32_to_64', 'pack_32_to_128', 'pack_64_to_8', 'pack_64_to_16', 'pack_64_to_32', 'pack_64_to_64', 'pack_64_to_128', 'pack_128_to_8', 'pack_128_to_16', 'pack_128_to_32', 'pack_128_to_64', 'pack_128_to_128']",
+          "registers: BIST_ADDR_START.start_addr: bits 32:0 exceed the 32-bit data width",
+          "registers: BIST_ADDR_START.reserved: bits 31:33 exceed the 32-bit data width",
+          "registers: BIST_ADDR_START.reserved: bits 31:33 overlap another field",
+          "registers: BIST_ADDR_END.end_addr: bits 32:0 exceed the 32-bit data width",
+          "registers: BIST_ADDR_END.reserved: bits 31:33 exceed the 32-bit data width",
+          "registers: BIST_ADDR_END.reserved: bits 31:33 overlap another field"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_24/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "pair_25": {
+      "name": "pair_25",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 1,
+        "density": "8Gb",
+        "device_width": "x8",
+        "ecc_mode": 0,
+        "row_policy": "close_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-1066",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.780578+00:00",
+      "level1": {
+        "revision": "compiled_ddr31066_x8_1lane_1rank_5fd4284f",
+        "blocking": [
+          "schema: memory_geometry.row_bits: 17 is above maximum 16"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_25/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "pair_26": {
+      "name": "pair_26",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 8,
+        "density": "4Gb",
+        "device_width": "x8",
+        "ecc_mode": 0,
+        "row_policy": "open_page",
+        "scheduler_policy": "in_order",
+        "speed_grade": "DDR3-1333",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.783905+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x8_8lane_1rank_dd7da5e5",
+        "blocking": [
+          "schema: data_path_mapping.pack_mode: 'unpack_32_to_64' is not one of ['direct', 'pack_32_to_8', 'pack_32_to_16', 'pack_32_to_32', 'pack_32_to_64', 'pack_32_to_128', 'pack_64_to_8', 'pack_64_to_16', 'pack_64_to_32', 'pack_64_to_64', 'pack_64_to_128', 'pack_128_to_8', 'pack_128_to_16', 'pack_128_to_32', 'pack_128_to_64', 'pack_128_to_128']",
+          "registers: BIST_ADDR_START.reserved: bits 31:32 exceed the 32-bit data width",
+          "registers: BIST_ADDR_START.reserved: bits 31:32 overlap another field",
+          "registers: BIST_ADDR_END.reserved: bits 31:32 exceed the 32-bit data width",
+          "registers: BIST_ADDR_END.reserved: bits 31:32 overlap another field"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_26/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "pair_27": {
+      "name": "pair_27",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 4,
+        "density": "4Gb",
+        "device_width": "x8",
+        "ecc_mode": 0,
+        "row_policy": "close_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-1600",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.787212+00:00",
+      "level1": {
+        "revision": "compiled_ddr31600_x8_4lane_1rank_57e51414",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_27/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "pair_28": {
+      "name": "pair_28",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 4,
+        "density": "2Gb",
+        "device_width": "x16",
+        "ecc_mode": 0,
+        "row_policy": "open_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-800",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.790487+00:00",
+      "level1": {
+        "revision": "compiled_ddr3800_x16_4lane_1rank_a4ca8e25",
+        "blocking": [
+          "schema: data_path_mapping.pack_mode: 'unpack_32_to_64' is not one of ['direct', 'pack_32_to_8', 'pack_32_to_16', 'pack_32_to_32', 'pack_32_to_64', 'pack_32_to_128', 'pack_64_to_8', 'pack_64_to_16', 'pack_64_to_32', 'pack_64_to_64', 'pack_64_to_128', 'pack_128_to_8', 'pack_128_to_16', 'pack_128_to_32', 'pack_128_to_64', 'pack_128_to_128']"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_28/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "pair_29": {
+      "name": "pair_29",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 6,
+        "density": "2Gb",
+        "device_width": "x16",
+        "ecc_mode": 0,
+        "row_policy": "close_page",
+        "scheduler_policy": "in_order",
+        "speed_grade": "DDR3-1600",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.794098+00:00",
+      "level1": {
+        "revision": "compiled_ddr31600_x16_6lane_1rank_9021a118",
+        "blocking": [
+          "schema: data_path_mapping.pack_mode: 'unpack_32_to_96' is not one of ['direct', 'pack_32_to_8', 'pack_32_to_16', 'pack_32_to_32', 'pack_32_to_64', 'pack_32_to_128', 'pack_64_to_8', 'pack_64_to_16', 'pack_64_to_32', 'pack_64_to_64', 'pack_64_to_128', 'pack_128_to_8', 'pack_128_to_16', 'pack_128_to_32', 'pack_128_to_64', 'pack_128_to_128']"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_29/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "pair_30": {
+      "name": "pair_30",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 1,
+        "density": "4Gb",
+        "device_width": "x16",
+        "ecc_mode": 0,
+        "row_policy": "close_page",
+        "scheduler_policy": "in_order",
+        "speed_grade": "DDR3-1600",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.797437+00:00",
+      "level1": {
+        "revision": "compiled_ddr31600_x16_1lane_1rank_16ae69dd",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_30/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "pair_31": {
+      "name": "pair_31",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 2,
+        "density": "1Gb",
+        "device_width": "x8",
+        "ecc_mode": 0,
+        "row_policy": "open_page",
+        "scheduler_policy": "fr_fcfs",
+        "speed_grade": "DDR3-800",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.800888+00:00",
+      "level1": {
+        "revision": "compiled_ddr3800_x8_2lane_1rank_20d5c185",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_31/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "pair_32": {
+      "name": "pair_32",
+      "origin": "pairwise",
+      "choices": {
+        "byte_lanes": 1,
+        "density": "4Gb",
+        "device_width": "x16",
+        "ecc_mode": 0,
+        "row_policy": "close_page",
+        "scheduler_policy": "in_order",
+        "speed_grade": "DDR3-1333",
+        "ranks": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.804126+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x16_1lane_1rank_a704d73a",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/pair_32/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "edge_ratio1": {
+      "name": "edge_ratio1",
+      "origin": "tier2_edge",
+      "choices": {
+        "speed_grade": "DDR3-1333",
+        "density": "2Gb",
+        "device_width": "x8",
+        "ranks": 1,
+        "byte_lanes": 2,
+        "ecc_mode": 0,
+        "scheduler_policy": "fr_fcfs",
+        "row_policy": "open_page",
+        "command_queue_depth": 16,
+        "lookahead_depth": 8,
+        "clock_ratio_ddr_to_controller": 1
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.807379+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x8_2lane_1rank_c5d3ef78",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/edge_ratio1/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "edge_ratio2": {
+      "name": "edge_ratio2",
+      "origin": "tier2_edge",
+      "choices": {
+        "speed_grade": "DDR3-1333",
+        "density": "2Gb",
+        "device_width": "x8",
+        "ranks": 1,
+        "byte_lanes": 2,
+        "ecc_mode": 0,
+        "scheduler_policy": "fr_fcfs",
+        "row_policy": "open_page",
+        "command_queue_depth": 16,
+        "lookahead_depth": 8,
+        "clock_ratio_ddr_to_controller": 2
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.810660+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x8_2lane_1rank_14e65072",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/edge_ratio2/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "edge_ratio8": {
+      "name": "edge_ratio8",
+      "origin": "tier2_edge",
+      "choices": {
+        "speed_grade": "DDR3-1333",
+        "density": "2Gb",
+        "device_width": "x8",
+        "ranks": 1,
+        "byte_lanes": 2,
+        "ecc_mode": 0,
+        "scheduler_policy": "fr_fcfs",
+        "row_policy": "open_page",
+        "command_queue_depth": 16,
+        "lookahead_depth": 8,
+        "clock_ratio_ddr_to_controller": 8
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.813992+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x8_2lane_1rank_cd4b8678",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/edge_ratio8/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "edge_host64": {
+      "name": "edge_host64",
+      "origin": "tier2_edge",
+      "choices": {
+        "speed_grade": "DDR3-1333",
+        "density": "2Gb",
+        "device_width": "x8",
+        "ranks": 1,
+        "byte_lanes": 2,
+        "ecc_mode": 0,
+        "scheduler_policy": "fr_fcfs",
+        "row_policy": "open_page",
+        "command_queue_depth": 16,
+        "lookahead_depth": 8,
+        "host_data_width": 64
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.817214+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x8_2lane_1rank_f3dd9e35",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/edge_host64/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "edge_host128": {
+      "name": "edge_host128",
+      "origin": "tier2_edge",
+      "choices": {
+        "speed_grade": "DDR3-1333",
+        "density": "2Gb",
+        "device_width": "x8",
+        "ranks": 1,
+        "byte_lanes": 2,
+        "ecc_mode": 0,
+        "scheduler_policy": "fr_fcfs",
+        "row_policy": "open_page",
+        "command_queue_depth": 16,
+        "lookahead_depth": 8,
+        "host_data_width": 128
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.820419+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x8_2lane_1rank_a1f0fc54",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/edge_host128/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "edge_queue4": {
+      "name": "edge_queue4",
+      "origin": "tier2_edge",
+      "choices": {
+        "speed_grade": "DDR3-1333",
+        "density": "2Gb",
+        "device_width": "x8",
+        "ranks": 1,
+        "byte_lanes": 2,
+        "ecc_mode": 0,
+        "scheduler_policy": "fr_fcfs",
+        "row_policy": "open_page",
+        "command_queue_depth": 4,
+        "lookahead_depth": 4
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.823790+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x8_2lane_1rank_689d53ae",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/edge_queue4/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "edge_queue32": {
+      "name": "edge_queue32",
+      "origin": "tier2_edge",
+      "choices": {
+        "speed_grade": "DDR3-1333",
+        "density": "2Gb",
+        "device_width": "x8",
+        "ranks": 1,
+        "byte_lanes": 2,
+        "ecc_mode": 0,
+        "scheduler_policy": "fr_fcfs",
+        "row_policy": "open_page",
+        "command_queue_depth": 32,
+        "lookahead_depth": 16
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.826954+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x8_2lane_1rank_10d5df08",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/edge_queue32/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "edge_bank_row_column": {
+      "name": "edge_bank_row_column",
+      "origin": "tier2_edge",
+      "choices": {
+        "speed_grade": "DDR3-1333",
+        "density": "2Gb",
+        "device_width": "x8",
+        "ranks": 1,
+        "byte_lanes": 2,
+        "ecc_mode": 0,
+        "scheduler_policy": "fr_fcfs",
+        "row_policy": "open_page",
+        "command_queue_depth": 16,
+        "lookahead_depth": 8,
+        "address_mapping": "bank-row-column"
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.830199+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x8_2lane_1rank_0b0e7f1d",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/edge_bank_row_column/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "edge_bl4": {
+      "name": "edge_bl4",
+      "origin": "tier2_edge",
+      "choices": {
+        "speed_grade": "DDR3-1333",
+        "density": "2Gb",
+        "device_width": "x8",
+        "ranks": 1,
+        "byte_lanes": 2,
+        "ecc_mode": 0,
+        "scheduler_policy": "fr_fcfs",
+        "row_policy": "open_page",
+        "command_queue_depth": 16,
+        "lookahead_depth": 8,
+        "burst_length": 4
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.833387+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x8_2lane_1rank_7f3824d0",
+        "blocking": [
+          "schema: initialization_sequence.mode_registers.MR0.burst_length: 'on_the_fly' is not one of ['fixed_8', 'on_the_fly_4_8']"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/edge_bl4/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "edge_x16_one_lane": {
+      "name": "edge_x16_one_lane",
+      "origin": "tier2_edge",
+      "choices": {
+        "speed_grade": "DDR3-1333",
+        "density": "2Gb",
+        "device_width": "x16",
+        "ranks": 1,
+        "byte_lanes": 1,
+        "ecc_mode": 0,
+        "scheduler_policy": "fr_fcfs",
+        "row_policy": "open_page",
+        "command_queue_depth": 16,
+        "lookahead_depth": 8
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.836623+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x16_1lane_1rank_642ab497",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/edge_x16_one_lane/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "edge_ecc_sideband": {
+      "name": "edge_ecc_sideband",
+      "origin": "tier2_edge",
+      "choices": {
+        "speed_grade": "DDR3-1333",
+        "density": "2Gb",
+        "device_width": "x8",
+        "ranks": 1,
+        "byte_lanes": 3,
+        "ecc_mode": 1,
+        "scheduler_policy": "fr_fcfs",
+        "row_policy": "open_page",
+        "command_queue_depth": 16,
+        "lookahead_depth": 8
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.839744+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x8_3lane_1rank_cfeae73c",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/edge_ecc_sideband/microarch_spec.json",
+        "status": "PASS"
+      }
+    },
+    "edge_largest_space": {
+      "name": "edge_largest_space",
+      "origin": "tier2_edge",
+      "choices": {
+        "speed_grade": "DDR3-1333",
+        "density": "8Gb",
+        "device_width": "x16",
+        "ranks": 1,
+        "byte_lanes": 8,
+        "ecc_mode": 0,
+        "scheduler_policy": "fr_fcfs",
+        "row_policy": "open_page",
+        "command_queue_depth": 16,
+        "lookahead_depth": 8
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.843276+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x16_8lane_1rank_7b937983",
+        "blocking": [
+          "schema: host_interface.address_width_bits: 33 is above maximum 32",
+          "schema: data_path_mapping.pack_mode: 'unpack_32_to_128' is not one of ['direct', 'pack_32_to_8', 'pack_32_to_16', 'pack_32_to_32', 'pack_32_to_64', 'pack_32_to_128', 'pack_64_to_8', 'pack_64_to_16', 'pack_64_to_32', 'pack_64_to_64', 'pack_64_to_128', 'pack_128_to_8', 'pack_128_to_16', 'pack_128_to_32', 'pack_128_to_64', 'pack_128_to_128']",
+          "registers: BIST_ADDR_START.start_addr: bits 32:0 exceed the 32-bit data width",
+          "registers: BIST_ADDR_START.reserved: bits 31:33 exceed the 32-bit data width",
+          "registers: BIST_ADDR_START.reserved: bits 31:33 overlap another field",
+          "registers: BIST_ADDR_END.end_addr: bits 32:0 exceed the 32-bit data width",
+          "registers: BIST_ADDR_END.reserved: bits 31:33 exceed the 32-bit data width",
+          "registers: BIST_ADDR_END.reserved: bits 31:33 overlap another field"
+        ],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/edge_largest_space/microarch_spec.json",
+        "status": "FAIL"
+      }
+    },
+    "edge_in_order_close_page": {
+      "name": "edge_in_order_close_page",
+      "origin": "tier2_edge",
+      "choices": {
+        "speed_grade": "DDR3-1333",
+        "density": "2Gb",
+        "device_width": "x8",
+        "ranks": 1,
+        "byte_lanes": 2,
+        "ecc_mode": 0,
+        "scheduler_policy": "in_order",
+        "row_policy": "close_page",
+        "command_queue_depth": 16,
+        "lookahead_depth": 8
+      },
+      "level": 1,
+      "utc": "2026-11-05T02:10:13.846546+00:00",
+      "level1": {
+        "revision": "compiled_ddr31333_x8_2lane_1rank_ddadbb96",
+        "blocking": [],
+        "advisory": [
+          "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
+          "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
+          "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+        ],
+        "jedec_fail": [],
+        "gaps": [
+          "PHY_DATA_BUS_OCCUPANCY",
+          "HOST_WRITE_BUFFER_BACKPRESSURE",
+          "HOST_ACK_ORDERING"
+        ],
+        "spec_path": "Validation/reports/spec_matrix/edge_in_order_close_page/microarch_spec.json",
+        "status": "PASS"
+      }
+    }
+  }
+}

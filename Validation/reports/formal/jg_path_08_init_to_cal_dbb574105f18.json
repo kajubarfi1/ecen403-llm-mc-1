@@ -1,0 +1,166 @@
+{
+  "$schema": "validation-formal/1",
+  "generated_utc": "2026-11-05T02:11:32.074261+00:00",
+  "tool": "JasperGold (Olympus)",
+  "drop": "dbb574105f18",
+  "design_id": "a03a5202d5fa",
+  "blocks_design_id": "a9593f1391cb",
+  "path": "path_08_init_to_cal",
+  "blocks": [
+    "calibration",
+    "init_fsm"
+  ],
+  "top": "Validation/formal/chain_formal.sv",
+  "assertions_files": [
+    "Validation/sva/generated/calibration_order_sva.sv",
+    "Validation/sva/generated/calibration_order_sva_bind.sv",
+    "Validation/sva/generated/init_fsm_sva.sv",
+    "Validation/sva/generated/init_fsm_sva_bind.sv"
+  ],
+  "abstractions": [],
+  "prove_time_limit": "20m",
+  "max_trace_length": null,
+  "bounded_bar_cycles": 28080,
+  "bounded_bars": {
+    "TIMING_012": 28080,
+    "TIMING_001": 6,
+    "TIMING_002": 6,
+    "TIMING_003": 14,
+    "TIMING_004": 20,
+    "TIMING_005": 4,
+    "TIMING_007": 4,
+    "TIMING_008": 6,
+    "TIMING_009": 4,
+    "TIMING_010": 2,
+    "TIMING_011": 64,
+    "TIMING_006": 16,
+    "REF_001": 368,
+    "*": 28080
+  },
+  "summary": {
+    "assertions": 8,
+    "proven": 8,
+    "cex": 0,
+    "undetermined": 0,
+    "bounded_proven": 0,
+    "bounded_vacuous": 0,
+    "proven_vacuous": 0,
+    "covers": 6,
+    "covered": 6
+  },
+  "results": [
+    {
+      "property": "chain_formal.u_calibration.u_calibration_order_sva.a_CAL_001",
+      "short": "a_CAL_001",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "0.001 s"
+    },
+    {
+      "property": "chain_formal.u_calibration.u_calibration_order_sva.a_CAL_002",
+      "short": "a_CAL_002",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "0.001 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_002",
+      "short": "a_INIT_002",
+      "status": "proven",
+      "engine": "Tricustom14",
+      "bound": "Infinite",
+      "time": "30.425 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_TIMING_014",
+      "short": "a_TIMING_014",
+      "status": "proven",
+      "engine": "Hp",
+      "bound": "Infinite",
+      "time": "0.050 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_002_init_done",
+      "short": "a_INIT_002_init_done",
+      "status": "proven",
+      "engine": "Tricustom14",
+      "bound": "Infinite",
+      "time": "14.725 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_001",
+      "short": "a_INIT_001",
+      "status": "proven",
+      "engine": "Tricustom14",
+      "bound": "Infinite",
+      "time": "21.656 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_001_then",
+      "short": "a_INIT_001_then",
+      "status": "proven",
+      "engine": "Tricustom14",
+      "bound": "Infinite",
+      "time": "25.396 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_003_init_done",
+      "short": "a_INIT_003_init_done",
+      "status": "proven",
+      "engine": "Tri",
+      "bound": "Infinite",
+      "time": "5.583 s"
+    },
+    {
+      "property": "chain_formal.u_calibration.u_calibration_order_sva.c_CAL_001",
+      "short": "c_CAL_001",
+      "status": "covered",
+      "engine": "J",
+      "bound": "73920 - 140176",
+      "time": "38.809 s"
+    },
+    {
+      "property": "chain_formal.u_calibration.u_calibration_order_sva.c_CAL_002",
+      "short": "c_CAL_002",
+      "status": "covered",
+      "engine": "J",
+      "bound": "75061 - 140177",
+      "time": "43.424 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_002",
+      "short": "c_INIT_002",
+      "status": "covered",
+      "engine": "J",
+      "bound": "71618 - 140173",
+      "time": "30.537 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.c_TIMING_014",
+      "short": "c_TIMING_014",
+      "status": "covered",
+      "engine": "J",
+      "bound": "69060 - 140038",
+      "time": "22.853 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_002_init_done",
+      "short": "c_INIT_002_init_done",
+      "status": "covered",
+      "engine": "J",
+      "bound": "72810 - 140175",
+      "time": "34.438 s"
+    },
+    {
+      "property": "chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_001",
+      "short": "c_INIT_001",
+      "status": "covered",
+      "engine": "J",
+      "bound": "70312 - 140046",
+      "time": "26.588 s"
+    }
+  ],
+  "raw_report": "Validation/reports/formal/jg_path_08_init_to_cal_dbb574105f18_report.txt"
+}

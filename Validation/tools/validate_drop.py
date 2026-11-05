@@ -539,20 +539,29 @@ def main() -> int:
     # live apart, so a blocked path's report from an earlier drop is never
     # judged, compared or snapshotted as if it were this drop's
     partial = bool(absent) or bool(blocked)
-    report_dir = REPORTS if not partial else os.path.join(
-        ROOT, "Validation", "reports", "partial", head)
-    if partial:
-        os.makedirs(report_dir, exist_ok=True)
+    # A flow run (VALIDATION_OUTBOX set) keeps its path reports beside its
+    # outbox, never in the shared reports: a preset run through the matrix
+    # overwrote the golden drop's traces and the next re-judge compared a
+    # DDR3-1333 drop's timing registers against the golden models (2026-11-05).
+    run_local = os.environ.get("VALIDATION_OUTBOX")
+    if run_local:
+        report_dir = os.path.join(os.path.dirname(os.path.abspath(run_local.rstrip("/"))), "reports")
+    elif partial:
+        report_dir = os.path.join(ROOT, "Validation", "reports", "partial", head)
+    else:
+        report_dir = REPORTS
+    if report_dir != REPORTS:
         os.makedirs(report_dir, exist_ok=True)
         for f in glob.glob(os.path.join(report_dir, "*")):
             os.remove(f)
         print(f"    reports -> {os.path.relpath(report_dir, ROOT)} (kept apart from "
-              f"full-drop reports so nothing stale is judged)")
+              f"the shared reports so nothing stale is judged"
+              + (", run-local" if run_local else "") + ")")
 
     def run_one(p):
         cmd = (f"python3 Validation/tools/run_path.py --path {p} "
                f"--timeout {args.timeout}" + (" --judge-only" if args.skip_sim else "")
-               + (f" --report-dir {report_dir}" if partial else ""))
+               + (f" --report-dir {report_dir}" if report_dir != REPORTS else ""))
         rc, out = sh(cmd, None, check=False, timeout=args.timeout + 300)
         with open(os.path.join(LOGS, f"{head}_{p}.txt"), "w") as f:
             f.write(out)
@@ -782,7 +791,8 @@ def main() -> int:
         rc, out = 0, ""
     else:
         rc, out = sh("python3 Validation/tools/compare_drops.py --snapshot"
-                 + (f" --b {report_dir} --tag partial" if partial else ""),
+                 + (f" --b {report_dir} --tag partial" if partial else
+                    f" --b {report_dir}" if report_dir != REPORTS else ""),
                  log, check=False)
         print("    " + out.strip())
 

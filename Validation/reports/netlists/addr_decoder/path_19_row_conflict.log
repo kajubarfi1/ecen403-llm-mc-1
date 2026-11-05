@@ -1,5 +1,5 @@
   stimulus: random on wb_port
-random_seed1: 39 step(s) (19 drive, 19 idle covering 135 cycle(s)), targets []
+random_seed1: 39 step(s) (19 drive, 19 idle covering 136 cycle(s)), targets []
   wrote Validation/sequences/generated/runs/netlist_addr_decoder/path_19_row_conflict/seq_driver.sv
 wrote Validation/sequences/generated/runs/netlist_addr_decoder/path_19_row_conflict/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
   (no stage decomposition: trailing block(s) ['bank_tracker'] produce no stream — the chain has no way to observe what they did — the path-level checker carries this path)
@@ -9,11 +9,11 @@ Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path
 Window  : 400 cycles settle after driver
 Stages  : 
 
-Running: xrun ... -top chain_harness  (53 file(s))
+Running: xrun ... -top chain_harness  (57 file(s))
   log -> Validation/reports/netlists/addr_decoder/path_19_row_conflict_sim.log
 
-  EMBEDDED RTL ASSERTIONS FIRED (1 total) — the design's own checks disagree with its behavior:
-    p_sel_nonzero_write      1x
+  EMBEDDED RTL ASSERTIONS FIRED (3 total) — the design's own checks disagree with its behavior:
+    p_sel_nonzero_write      3x
 353 transaction(s)
     cfg_refresh.reset        1
     cfg_timing.reset         1
@@ -53,12 +53,14 @@ Running: xrun ... -top chain_harness  (53 file(s))
     wb.reset                 1
     wb.write                 19
     wb_rsp.reset             1
-  time span: 0 .. 1774000
+  time span: 0 .. 2274000
 wrote 353 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/addr_decoder/path_19_row_conflict_observed.jsonl
 
 ==================================================================
   (path-level)                 [invariant ]  PASS
       scope=path_19_row_conflict  strategy=invariant  status=pass  (353 transactions, no rule broken)
+  (conservation)               [conservation]  PASS
+      scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable
 ==================================================================
 
   path verdict : PASS
