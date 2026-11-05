@@ -76,8 +76,10 @@ def _load_dotenv() -> None:
 _load_dotenv()
 
 MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-5")
-MAX_TOKENS = 32000  # corrected_generator_source alone can be a 750+ line file;
-                     # 16000 was observed truncating mid-file in practice.
+MAX_TOKENS = 64000  # corrected_generator_source alone can be a 750+ line file;
+                     # 16000, then 32000, were both observed truncating
+                     # mid-file in practice (2026-11-05: wb_port fix attempt
+                     # hit max_tokens at 32000 and had to retry).
 _REQUIRED_PROPOSAL_KEYS = ("root_cause", "explanation", "shift_left_recommendations",
                            "confidence", "corrected_generator_source")
 AUTO_YES = False   # --yes: apply without the human prompt (guardrails below)
