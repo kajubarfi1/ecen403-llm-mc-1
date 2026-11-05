@@ -201,9 +201,16 @@ def level1(entry, out_dir):
 
 
 # ---------------------------------------------------------------- level 2
-def level2(entry, out_dir, timeout=5400, backend=False):
+def level2(entry, out_dir, timeout=5400, backend=False, per_block_netlists=False):
     """The flow's RTL half on this spec: one generation, our validation, one
-    fix round. Reads the run state and the run-local package."""
+    fix round. Reads the run state and the run-local package.
+
+    backend=True is level 3 (the whole flow). per_block_netlists then builds
+    every block after the top so the flow's final stage has netlists to swap
+    into the paths -- without it that stage halts, because find_netlists()
+    excludes the top-level netlist and no top-level path exists yet. It is
+    opt-in because it adds roughly an hour per spec.
+    """
     choices_path = os.path.join(out_dir, "choices.json")
     with open(choices_path, "w") as f:
         json.dump(entry["choices"], f, indent=2)
@@ -212,6 +219,8 @@ def level2(entry, out_dir, timeout=5400, backend=False):
            "--run-dir", os.path.relpath(run_dir, ROOT), "--max-rtl-rounds", "2"]
     if not backend:
         cmd.append("--skip-backend")
+    elif per_block_netlists:
+        cmd.append("--per-block-netlists")
     elif os.environ.get("USE_DOCKER") != "1":
         return {"flow_rc": None, "run_dir": os.path.relpath(run_dir, ROOT),
                 "infrastructure": "level 3 needs USE_DOCKER=1 and the ORFS image (docs/RUNNING_THE_FLOW.md)"}
@@ -332,12 +341,23 @@ def main() -> int:
     ap.add_argument("--only", nargs="*", default=None, help="entry names to run")
     ap.add_argument("--origin", choices=("preset", "pairwise", "tier2_edge"), default=None)
     ap.add_argument("--skip-done", action="store_true", help="keep entries already in summary.json at this level")
-    ap.add_argument("--timeout", type=int, default=5400, help="per spec at level 2, seconds")
+    ap.add_argument("--per-block-netlists", action="store_true",
+                    help="level 3 only: after the top-level build, also build every block, so "
+                         "the flow's final stage has per-block netlists to swap into the paths. "
+                         "Without it that stage halts (it excludes the top-level netlist and no "
+                         "top-level path exists). Adds about an hour per spec")
+    ap.add_argument("--timeout", type=int, default=None,
+                    help="per spec, seconds. Default 5400 at levels 1-2; 21600 at level 3, "
+                         "where one spec is a full ORFS build (~40 min) plus, with "
+                         "--per-block-netlists, 11 more (~1 h) -- 5400 would kill a run "
+                         "mid-build and report it as a timeout rather than a result")
     ap.add_argument("--from-sweep", metavar="FILE",
                     help="level 1 over every entry of the Frontend's Tier-1 sweep export "
                          "(Spec/tier1_sweep_choices.json: {entries: [{name, choices}]}) instead of the matrix; "
                          "summary and digest go to reports/spec_matrix/sweep/")
     args = ap.parse_args()
+    # level 3 runs a full ORFS build per spec, so the level-2 budget does not fit
+    timeout = args.timeout if args.timeout else (21600 if args.level == 3 else 5400)
     if args.build:
         return build(args.seed)
     if args.from_sweep:
@@ -364,7 +384,8 @@ def main() -> int:
         res["level1"] = level1(e, out_dir)
         line = f"  {e['name']:26} L1 {res['level1']['status']:4} blocking={len(res['level1']['blocking'])} advisory={len(res['level1']['advisory'])}"
         if args.level >= 2 and res["level1"]["status"] == "PASS":
-            res["level2"] = level2(e, out_dir, args.timeout, backend=(args.level == 3))
+            res["level2"] = level2(e, out_dir, timeout, backend=(args.level == 3),
+                                   per_block_netlists=args.per_block_netlists)
             l2 = res["level2"]
             line += (f" | L{args.level} {'INFRA ' if l2.get('infrastructure') else ''}flow={l2.get('flow_status')} phases={l2.get('phases_passed')} "
                      f"validation={l2.get('validation_status')} failed={l2.get('failed_modules')}"
