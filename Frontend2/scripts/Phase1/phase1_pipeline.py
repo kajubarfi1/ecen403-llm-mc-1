@@ -468,7 +468,8 @@ def lint_failure(state: GraphState) -> dict:
             print(f"      {e}")
 
     report = {
-        "status": "FAIL", "pipeline": "phase1", "failure_stage": "LINT",
+        "status": "FAIL", "pipeline": "phase1",
+        "failure_stage": "LINT_NOT_RUN" if lint.get("status") == "SKIPPED" else "LINT",
         "lint_result": lint, "failed_modules": failed_mods,
         "requires_human_review": True,
         "timestamp": datetime.now().isoformat(),

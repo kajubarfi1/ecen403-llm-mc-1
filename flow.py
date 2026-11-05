@@ -222,9 +222,14 @@ def sh(cmd, cwd=None, stdin=None, env=None, log=None, timeout=None):
     if log:
         log(f"$ {' '.join(os.path.relpath(c, ROOT) if os.path.isabs(c) else c for c in cmd)}"
             + (f"   (cwd {os.path.relpath(cwd, ROOT)})" if cwd else ""))
+    # Python subsystems block-buffer a pipe, so their progress lines (the
+    # backend's [intake]/[runner]/[validator]) would land in flow.log only
+    # when they exit; unbuffered, the run log and gui/flow_gui.py see them live
+    env = dict(env or os.environ)
+    env.setdefault("PYTHONUNBUFFERED", "1")
     p = subprocess.Popen(cmd, cwd=cwd, stdin=subprocess.PIPE if stdin is not None else None,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
-                         env=env or os.environ.copy())
+                         env=env)
     if stdin is not None:
         p.stdin.write(stdin)
         p.stdin.close()
@@ -518,6 +523,23 @@ def stage_rtl_generation(run, args, phases=None):
     rc, txt = sh([PY, GENERATE_TOP, "--output-dir", run.drop, "--spec", spec],
                  cwd=FRONTEND, env=env, log=run.log, timeout=3600)
     if rc != 0:
+        # A SKIPPED lint (SSH refused the connection -- cluster load, not
+        # bad RTL) and a genuine lint FAIL both exit nonzero from
+        # generate_top.py, and reporting both as "its lint failed" told
+        # the Olympus-is-busy case a different story than what happened
+        # (Validation, spec matrix level 1, 2026-11-04: presets failing
+        # here were infrastructure, not RTL). Read the report it just
+        # wrote and say which one actually occurred.
+        lint_report_path = os.path.join(run.drop, "top_lint_report.json")
+        lint_status = None
+        try:
+            with open(lint_report_path) as f:
+                lint_status = json.load(f).get("status")
+        except Exception:
+            pass
+        if lint_status == "SKIPPED":
+            return run.halt("rtl_generation", "generate_top.py's lint gate was not run "
+                            "(SSH could not reach Olympus); see top_lint_report.json")
         return run.halt("rtl_generation", f"generate_top.py exited {rc} (top-level assembly or "
                         f"its lint failed); see flow.log")
     run.state["drop"] = run.drop
@@ -1190,6 +1212,19 @@ def plan(args):
           f"USE_DOCKER {os.environ.get('USE_DOCKER') or 'unset'}")
 
 
+def start_gui(run):
+    """Serve gui/flow_gui.py's page on this run from a background thread; it
+    only reads the run, so the flow goes on if it cannot start."""
+    try:
+        sys.path.insert(0, os.path.join(ROOT, "gui"))
+        import flow_gui
+        _, url = flow_gui.serve(flow_gui.Watcher(RUNS, run=run.dir))
+        run.log(f"progress page: {url}")
+    except Exception as e:
+        run.log(f"progress page did not start ({type(e).__name__}: {e}); "
+                f"run python3 gui/flow_gui.py --run {os.path.relpath(run.dir, ROOT)}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="LLM-MC design flow: spec -> RTL -> validation -> GDSII")
     src = ap.add_mutually_exclusive_group()
@@ -1225,6 +1260,8 @@ def main() -> int:
                     help="with --resume: validate the drop again even though the last "
                          "validation passed (the drop changed under the run)")
     ap.add_argument("--dry-run", action="store_true", help="print the plan and exit")
+    ap.add_argument("--gui", action="store_true",
+                    help="open the live progress page (gui/flow_gui.py) on this run")
     args = ap.parse_args()
     # no design input: the Frontend's microarch agent asks for it
     args.interactive = None if args.resume else not (args.request or args.preset
@@ -1264,6 +1301,8 @@ def main() -> int:
             RUNS, f"{datetime.now().strftime('%Y%m%d-%H%M%S')}-{slug}"))
         run = Run(run_dir, args)
         run.log(f"run {run.state['run_id']} -> {os.path.relpath(run_dir, ROOT)}")
+    if args.gui:
+        start_gui(run)
     rc = run_flow(run, args)
     run.log(f"state: {run.state['status']}  ({os.path.relpath(run.state_path, ROOT)})")
     return rc
