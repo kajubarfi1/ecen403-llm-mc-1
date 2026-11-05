@@ -370,6 +370,15 @@ The backend step detail comes from OpenROAD's own step logs under
 `ORFS_DIR` (read from `backend/agents/.env`). Without them the page still
 works, but estimates the backend steps from elapsed time.
 
+Opened with `python3 gui/flow_gui.py`, the page also has a **Terminal** tab
+that runs `flow.py` itself: type the arguments (or pick Interactive, Golden
+spec, Dry run or Resume), press Start run, and use it like a terminal. Spec
+questions, colour and Ctrl-C work as usual. A run started there keeps going
+if you close the browser tab (reopen the page to pick it back up), but stops
+when you stop `flow_gui.py`. One run at a time; macOS and Linux only. Use
+`--no-terminal` for a watch-only page. The terminal loads xterm.js from a
+CDN and falls back to a plain text box when offline.
+
 ### 4.4 Understand the output
 
 Each run creates its own directory, `runs/<timestamp>-<name>/`, with the
