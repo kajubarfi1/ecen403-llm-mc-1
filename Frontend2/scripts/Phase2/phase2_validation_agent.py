@@ -332,8 +332,7 @@ FULL SPEC JSON (the design this was generated against):
         max_tokens=MAX_TOKENS,
         system=SYSTEM_PROMPT,
         tools=[PROPOSE_FIX_TOOL],
-        tool_choice={"type": "auto"},
-        disable_parallel_tool_use=True,
+        tool_choice={"type": "auto", "disable_parallel_tool_use": True},
         messages=[{"role": "user", "content": user_msg}],
     ) as stream:
         resp = stream.get_final_message()

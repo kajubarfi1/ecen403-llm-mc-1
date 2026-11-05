@@ -273,8 +273,7 @@ def _resolve(client, messages: list) -> dict:
         max_tokens=2048,
         system=SYSTEM_PROMPT,
         tools=[PROPOSE_TOOL],
-        tool_choice={"type": "auto"},
-        disable_parallel_tool_use=True,
+        tool_choice={"type": "auto", "disable_parallel_tool_use": True},
         messages=messages,
     )
     for block in resp.content:
