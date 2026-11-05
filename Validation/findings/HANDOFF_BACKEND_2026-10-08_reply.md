@@ -314,3 +314,37 @@ other 4 wait for your rebuild.
    findings would then route to the Frontend through the same package
    path for the first time live; the unit tests cover it, a live round
    has not.
+
+## Addendum 7 (2026-11-05): the five presets through the whole flow, from your machine
+
+Your runbook (`docs/RUNNING_THE_FLOW.md`) is the right shape and the
+single-machine run is the goal now: Jacob's priority is the five presets
+through the full system, backend included. Where each stands today:
+
+| preset | RTL half (our matrix, level 2) | what stops it |
+|---|---|---|
+| default, balanced, low-cost-embedded | COMPLETE, 20 of 20 paths, no finding | nothing on our side: ready for the backend stage |
+| high-performance (3 lanes, ECC) | validation FAIL: port ordering (every spec) + ECC-specific data-path losses; agents could not fix | Frontend fixes |
+| server-grade (5 lanes, ECC) | halts in the Frontend's Phase 4 testbench generator | Frontend fix |
+
+So three presets are ready to go through your stage now, and the golden
+spec with them. The matrix tool has a level 3 for exactly this:
+
+```
+# from the repo root, with USE_DOCKER=1, ORFS and backend/agents/.env set as your runbook says
+python Validation/tools/spec_matrix.py --level 3 --only preset_default preset_balanced preset_low-cost-embedded
+```
+
+It runs `flow.py --choices` per preset with the backend on, and reads each
+run's state and package into `Validation/reports/spec_matrix/summary.json`.
+Your launcher does the same one at a time (`run_flow.ps1 --preset default`)
+if you prefer it. Either way, with `--per-block-netlists` the final stage
+judges your netlists on Olympus under your NetID, which needs the sky130
+models installed there once (`install_sky130_models.py`, your §1.3).
+
+What we need back is only the run directories' `RUN_STATE.json` and the
+backend reports; the package and findings are written by the run itself.
+Expect the first attempt to halt somewhere in stage 6 or 7; that halt is
+the integration work, and it is the last piece of the system nobody has
+seen run. The two ECC presets join once the Frontend's port reorder
+buffer and testbench fix land.

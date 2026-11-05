@@ -208,12 +208,55 @@ off to `flow.py`. All arguments pass straight through.
 .\run_flow.ps1 --spec Spec\llmmc_microarchitecturespec_filled.json
 ```
 
-**Use `--spec` with the golden spec to reproduce the signed-off chip.** This
-matters more than it looks: `--preset balanced` is **DDR3-1333**, not the
-DDR3-1600 the project has signed off. A preset run generates revision
+**Use `--spec` with the golden spec to reproduce the signed-off chip**, or
+`--preset default` to have the compiler produce the same design (see 2.1).
+
+What to avoid: **`--preset balanced` is DDR3-1333**, not the DDR3-1600 the
+project has signed off. A balanced run generates revision
 `compiled_ddr31333_x8_2lane_1rank_1ebcc694`, while the golden spec is
 `golden_ddr3_1600k_x8_2lane_1rank`. Mixing them is how a config_regs
 "mismatch" appears that is really two speed bins being compared to each other.
+
+### 2.1 Which preset is the golden design
+
+`default` is, and `balanced` is not. Measured across the five presets:
+
+| preset | speed bin | lanes | ECC | policies |
+|---|---|---|---|---|
+| **default** | **DDR3-1600K (11-11-11)** | **2** | **0** | **fr_fcfs / open_page** |
+| balanced | DDR3-1333H (9-9-9) | 2 | 0 | fr_fcfs / open_page |
+| high-performance | DDR3-1600K | 3 | 1 | fr_fcfs / open_page |
+| server-grade | DDR3-1600K | 5 | 1 | fr_fcfs / open_page |
+| low-cost-embedded | DDR3-800E (6-6-6) | 1 | 0 | in_order / close_page |
+
+`default` matches the golden spec's Tier-1 choices exactly -- DDR3-1600K, 2 Gb,
+x8, two byte lanes, one rank, fr_fcfs, open_page, ECC off -- and compiles with
+27/27 consistency checks passing.
+
+**It will not reproduce the golden spec document, and cannot.** The compiler
+stamps `compiled_*` revisions, so the revision name and `spec_id` always
+differ; golden is a hand-filled artifact, not a compiler output. Diffing the
+two at identical Tier-1 choices shows 13 of 22 top-level sections differing --
+but the differences are representational, not design:
+
+- `memory_geometry`: same density (2 Gb); only a cosmetic `$derived` block
+- `timing_model`: golden keeps **formula strings**, compiled stores the
+  **evaluated integers** (`tRCD_nCK: 11` either way)
+- `latency_model`: golden `"CL + tCCD + 2 - CWL = 11 + 4 + 2 - 8 = 9 nCK"`,
+  compiled `9`
+- `host_interface`: **no field differs**, and compiled *adds* `ack_ordering`
+  and `write_buffer_backpressure`
+
+That last point is worth keeping in mind: those two added fields are two of the
+three advisory gaps the spec review reports against golden on every run
+("`host_interface.ack_ordering` is not stated"). On that axis the compiled spec
+is **more** complete than golden, not less.
+
+Practical consequence: `--preset default`, or an English request naming those
+same choices, gives a design comparable to the signed-off chip, which is what
+makes the `--core-utilization 35` default defensible. Findings will file under
+`compiled_ddr31600_x8_2lane_1rank_<hash>`, so it is still not a like-for-like
+comparison against the golden-revision results.
 
 Other useful forms:
 
