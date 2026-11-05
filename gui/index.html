@@ -609,19 +609,11 @@ const chip = (() => {
       const side = i % 4, t = 0.06 + 0.88 * ((Math.floor(i / 4) + rnd() * 0.5) / 32);
       pins.push({ side, t, m: rnd() < 0.5 ? "m3" : "m2" });
     }
-    // critical path for STA: a chain of cells across the largest block
-    const big = blocks.reduce((a, b) => (a.w * a.h > b.w * b.h ? a : b));
-    const mid = big.y + big.h / 2;
-    let pool = (byBlock[big.name] || cells).filter((c) => Math.abs(c.y - mid) < big.h * 0.18);
-    if (pool.length < 9) pool = byBlock[big.name] || cells;
-    pool = pool.slice().sort((a, b) => a.x - b.x);
-    const path = [];
-    for (let i = 0; i < 9; i++) path.push(pool[Math.floor((i / 8) * (pool.length - 1))]);
     // metal fill
     const fill = [];
     for (let i = 0; i < 900; i++) fill.push({ x: CORE.x + rnd() * CORE.w, y: CORE.y + rnd() * CORE.h, w: 3 + rnd() * 6, m: rnd() < 0.5 });
 
-    return { blocks, cells, synthDots, nets, tree, gcells, pins, path, fill };
+    return { blocks, cells, synthDots, nets, tree, gcells, pins, fill };
   }
 
   // ---- static-ish layers
@@ -851,16 +843,6 @@ const chip = (() => {
       ctx.fillStyle = "rgba(167,243,208,0.9)"; ctx.fillRect(30, y, W - 60, 1.5);
       ctx.font = `700 15px ${FONT}`; ctx.fillStyle = "#bbf7d0";
       ctx.fillText(active === "sta" ? "STA" : "DRC · LVS", 40, y - 6);
-    }
-    // STA: critical path
-    if (disp.sta > 0.02) {
-      ctx.save();
-      const ok = result === "pass";
-      ctx.strokeStyle = ok ? "#4ade80" : "#fb923c"; ctx.lineWidth = 2.5; ctx.shadowColor = ctx.strokeStyle; ctx.shadowBlur = 10;
-      ctx.setLineDash([10, 6]); ctx.lineDashOffset = -t / 30;
-      ctx.beginPath();
-      model.path.forEach((c, i) => { const x = c.x + c.w / 2, y = c.y + c.h / 2; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
-      ctx.stroke(); ctx.restore();
     }
     // done: a sweep of light, then a stamp
     if (result === "pass" && disp.finish > 0.98) {
