@@ -342,11 +342,21 @@ it reads correctly.
   `sky130_fd_sc_hd__tt_025C_1v80.lib` -- typical process, 25 C, 1.80 V. No slow
   or fast corner, no voltage or temperature sweep. Always say "at the typical
   corner."
-- **The sign-off chip used `CORE_UTILIZATION 35`**, which is not the packager
-  default of 20. A default build does **not** reproduce the 200 MHz PASS. To
-  reproduce it, put `CORE_UTILIZATION: "35"` in the bundle's `manifest.json`
-  `orfs_config` -- the packager writes the default first and appends
-  `orfs_config` after, and Make takes the last assignment.
+- **The sign-off chip used `CORE_UTILIZATION 35`**, not the packager default of
+  20, and a default build does **not** reproduce the 200 MHz PASS. `flow.py`
+  now handles this: `--core-utilization` defaults to **35** and writes it into
+  `drop/TOPRTL/manifest.json`'s `orfs_config` before the backend runs (the
+  packager writes its own default first and appends `orfs_config` after, and
+  Make takes the last assignment). Pass `0` to leave the packager default.
+
+  This matters more than a number. At util 20 the top misses timing
+  (WNS -0.1216 vs +0.0220 at 35, cmp-identical RTL), and an STA miss naming a
+  scheduler module becomes a backend finding that stage 7 routes to the
+  Frontend's repair agents as an RTL change request -- sending them to rewrite
+  RTL for what is a floorplan setting, then burning both backend rounds.
+
+  Per-block builds are deliberately left at the packager default: 35 is
+  measured for the assembled top and untested on single blocks.
 - **Backend runs must stay sequential.** Every bundle shares the module name
   `ddr3_controller` and ORFS keys its results path on `DESIGN_NAME`, so
   concurrent builds overwrite each other. This is unfixed.
