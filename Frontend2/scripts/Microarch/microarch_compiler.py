@@ -367,10 +367,69 @@ def validate_choices(choices: dict) -> tuple[list[str], list[str], dict]:
         hw = r["host_data_width"]
         if chan_w <= 0:
             errors.append("computed channel data width <= 0")
-        elif not (hw % chan_w == 0 or chan_w % hw == 0):
+        elif chan_w > hw:
+            # data_path_gen.py only packs a host word down onto a narrower
+            # or equal channel (WORD_BEATS = DATA_WIDTH // DQ_WIDTH beats,
+            # each WORD_BEATS wide channel capture assembled into one host
+            # word). The other direction (one host word split across
+            # multiple channel-width captures smaller than itself never
+            # applies here, but a channel WIDER than the host word would
+            # need unpacking a single channel beat's bits across multiple
+            # host words -- no generator path exists for that; it would
+            # also need a WORD_BEATS < 1, which the beat counter can't
+            # represent. Reject it here rather than let the compiler emit
+            # an "unpack_*" pack_mode the schema's enum doesn't have and
+            # data_path_gen.py's own validate() only catches one stage
+            # later (Validation, spec matrix level 1, 2026-11-04).
+            errors.append(
+                f"channel_data_width={chan_w} is wider than "
+                f"host_data_width={hw} -- data_path_gen.py has no unpack "
+                "generator path (reduce byte_lanes/device_width or widen "
+                "host_data_width)")
+        elif hw % chan_w != 0:
             errors.append(
                 f"host_data_width={hw} and channel_data_width={chan_w} are "
                 "not an integer ratio -- data_path packing is undefined")
+
+    # ---- address space vs. the 32-bit CSR/host address field --------
+    if not errors:
+        density_bits = jd.DENSITY_BITS[r["density"]]
+        addr_space = density_bits * data_lanes // 8
+        aw = int(round(math.log2(addr_space))) if addr_space > 0 else 0
+        if aw > 32:
+            # BIST_ADDR_START/END and wb_port's own address bus are both
+            # fixed 32-bit fields (_csr_map's "reserved" bit range becomes
+            # inverted, 31:33, past this point, and wb_port_gen.py's own
+            # validate() rejects ADDR_WIDTH>32 one stage later anyway --
+            # Validation, spec matrix level 1, 2026-11-04). Reject here,
+            # with the real reason, instead of letting it reach either.
+            errors.append(
+                f"address_width_bits={aw} exceeds the 32-bit CSR/host "
+                "address field (density x byte_lanes is too large for this "
+                "32-bit-addressed design -- reduce density or byte_lanes)")
+
+    # ---- tRFC vs. the 8-bit TIMING_1.tRFC_nCK CSR field --------------
+    if not errors:
+        trfc_nck = jd.ns_to_nck(jd.TRFC_NS_BY_DENSITY[r["density"]],
+                                 jd.SPEED_GRADES[r["speed_grade"]]["tCK_ns"])
+        if trfc_nck > 255:
+            # _pack_le_bytes ANDs every field with 0xFF before packing --
+            # a value this field can't hold doesn't error, it silently
+            # truncates (280 -> 24), corrupting the register's reset
+            # value and every refresh timer that reads it. The field is
+            # a golden-spec constant shared with tRRD/tWTR/tFAW in the
+            # same 32-bit TIMING_1 word, so widening it means
+            # restructuring that whole word (and bank_tracker_gen.py /
+            # refresh_ctrl_gen.py / config_regs_gen.py, which all read
+            # it) -- a larger follow-up, not a one-line fix. Reject with
+            # the real reason for now (Validation, spec matrix level 1,
+            # 2026-11-04).
+            errors.append(
+                f"tRFC_nCK={trfc_nck} for density={r['density']!r} / "
+                f"speed_grade={r['speed_grade']!r} exceeds the 8-bit "
+                "TIMING_1.tRFC_nCK CSR field (max 255) -- that field needs "
+                "widening (and TIMING_1 restructuring) before this density/"
+                "speed-grade combination can be supported")
 
     # ---- Tier-3 --------------------------------------------------
     pl = r["pipeline_latency_cycles"]
@@ -427,9 +486,9 @@ def _geometry(choices: dict) -> dict:
 
     dw_bits = jd.device_width_bits(dw)
     rb = jd.row_bits(dens, dw)
-    cb = jd.column_bits(dw)
+    cb = jd.column_bits(dw, dens)
     chan_w = data_lanes * dw_bits
-    page_dev = jd.page_size_bytes_per_device(dw)
+    page_dev = jd.page_size_bytes_per_device(dw, dens)
     data_rate = jd.SPEED_GRADES[sg]["data_rate_MTps"]
 
     density_bits = jd.DENSITY_BITS[dens]
@@ -497,7 +556,7 @@ def _init_sequence(tm_ns: dict) -> dict:
         "tZQinit_ns": tZQinit_ns,
         "mode_registers": {
             "MR0": {
-                "burst_length": "fixed_8" if tm_ns["_bl"] == 8 else "on_the_fly",
+                "burst_length": "fixed_8" if tm_ns["_bl"] == 8 else "on_the_fly_4_8",
                 "cas_latency_cycles": CL,
                 "dll_reset": True,
                 "write_recovery_ns": tm_ns["tWR"],
@@ -904,6 +963,16 @@ def compile_spec(choices: dict) -> dict:
         "max_burst_length": r["burst_length"],
         "read_buffer_depth": r["read_buffer_depth"],
         "write_buffer_depth": r["write_buffer_depth"],
+        # Validation/spec/completeness_rules.json HOST_WRITE_BUFFER_BACKPRESSURE
+        # and HOST_ACK_ORDERING, answered 2026-11-05: wb_port stalls new
+        # writes while data_path's write buffer is full (wb_port_gen.py
+        # wires data_path's wr_data_ready into wb_stall_o), and acks return
+        # in request order (a completion-ordering queue holds a write's ack
+        # behind any earlier-accepted, still-outstanding read) -- required
+        # by interface_type=wishbone_pipelined, which has no per-transaction
+        # id for a master to match acks to requests any other way.
+        "write_buffer_backpressure": "port_stalls_on_full",
+        "ack_ordering": "in_request_order",
         "enable_data_mask": True,
         "$derived": {
             "addressable_space_bytes": addr_space,
@@ -987,9 +1056,9 @@ def compile_spec(choices: dict) -> dict:
         "data_path_mapping": {
             "ddr_channel_width_bits": chan_w,
             "host_width_bits": r["host_data_width"],
-            "pack_mode": f"pack_{r['host_data_width']}_to_{chan_w}"
-                         if r["host_data_width"] >= chan_w
-                         else f"unpack_{r['host_data_width']}_to_{chan_w}",
+            # Always "pack_*": validate_choices rejects chan_w > hw above,
+            # so host_data_width >= chan_w always holds here.
+            "pack_mode": f"pack_{r['host_data_width']}_to_{chan_w}",
             "alignment_bytes_required": max(1, chan_w // 8),
             "endianness": "little",
             "byte_enable_semantics": "wishbone_sel_per_byte",
@@ -1002,6 +1071,14 @@ def compile_spec(choices: dict) -> dict:
             "dqs_count": r["byte_lanes"],
             "dm_enabled": True,
             "ck_pair_present": True,
+            # Validation/spec/completeness_rules.json PHY_DATA_BUS_OCCUPANCY,
+            # answered "host_word_beats" (2026-11-05): one CAS occupies the
+            # data bus for host_data_width/channel_data_width controller
+            # cycles -- the same formula scheduler_gen.py's cas_spacing_ctr
+            # already independently re-derives and enforces as WORD_BEATS.
+            # Always an integer: validate_choices requires
+            # host_data_width % channel_data_width == 0.
+            "data_bus_cycles_per_cas": r["host_data_width"] // chan_w,
             "notes": "Abstracted DRAM boundary. Command/data semantics only.",
         },
         "csr_register_map": _csr_map(dc, geom, r, host,

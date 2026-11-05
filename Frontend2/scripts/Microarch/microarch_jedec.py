@@ -104,14 +104,25 @@ def device_width_bits(device_width: str) -> int:
     return {"x4": 4, "x8": 8, "x16": 16}[device_width]
 
 
-def page_size_bytes_per_device(device_width: str) -> int:
-    """DDR3 page size: x4/x8 -> 1 KB, x16 -> 2 KB."""
-    return 2048 if device_width == "x16" else 1024
+def page_size_bytes_per_device(device_width: str, density: str = None) -> int:
+    """DDR3 page size: x4/x8 -> 1 KB, x16 -> 2 KB -- except 8Gb x8, which
+    also needs 2 KB. DDR3's address bus is a fixed 16 pins (JEDEC package
+    ballout, A0-A15) across every density, so page size is the thing that
+    has to grow as density grows to keep row bits within that pin budget;
+    x16 already always uses 2 KB, which happens to be enough through 8Gb.
+    x8's 1 KB page only has enough row-address headroom through 4Gb --
+    8Gb x8 at 1 KB computes to 17 row bits, one more than the 16 pins
+    support (Validation, spec matrix level 1, 2026-11-04)."""
+    if device_width == "x16":
+        return 2048
+    if density == "8Gb":
+        return 2048
+    return 1024
 
 
-def column_bits(device_width: str) -> int:
+def column_bits(device_width: str, density: str = None) -> int:
     dw = device_width_bits(device_width)
-    cols = page_size_bytes_per_device(device_width) * 8 // dw
+    cols = page_size_bytes_per_device(device_width, density) * 8 // dw
     return int(round(math.log2(cols)))
 
 
@@ -119,7 +130,7 @@ def row_bits(density: str, device_width: str) -> int:
     """Rows implied by density once banks, columns and device width are fixed."""
     total = DENSITY_BITS[density]
     dw = device_width_bits(device_width)
-    rows = total // dw // (2 ** BANK_BITS) // (2 ** column_bits(device_width))
+    rows = total // dw // (2 ** BANK_BITS) // (2 ** column_bits(device_width, density))
     return int(round(math.log2(rows)))
 
 
@@ -218,4 +229,5 @@ if __name__ == "__main__":
     for k, v in dc.items():
         print(f"  {k:14s} {v}")
     print(f"\nrow_bits(2Gb,x8)   = {row_bits('2Gb', 'x8')}   (golden: 15)")
-    print(f"column_bits(x8)    = {column_bits('x8')}   (golden: 10)")
+    print(f"column_bits(x8,2Gb) = {column_bits('x8', '2Gb')}   (golden: 10)")
+    print(f"row_bits(8Gb,x8)   = {row_bits('8Gb', 'x8')}   (must be <= 16)")

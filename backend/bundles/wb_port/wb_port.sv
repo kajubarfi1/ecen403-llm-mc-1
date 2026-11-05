@@ -10,7 +10,7 @@
 //   byte-lane masking, error signalling, auxiliary tag propagation.
 //
 // Derived: DATA=32 ADDR=29 SEL=4 AUX=4 BURST=8 QUEUE=16
-// Validation: WB-001 .. WB-011
+// Validation: WB-001 .. WB-012
 ////////////////////////////////////////////////////////////////////////////////
 
 module wb_port #(
@@ -54,7 +54,8 @@ module wb_port #(
     // Internal <- Data Path
     input  logic                    rsp_valid,
     input  logic [DATA_WIDTH-1:0]   rsp_rdata,
-    input  logic [AUX_WIDTH-1:0]    rsp_aux
+    input  logic [AUX_WIDTH-1:0]    rsp_aux,
+    input  logic                    wr_data_ready
 );
 
     // CTI / BTE encodings
@@ -108,6 +109,16 @@ module wb_port #(
         wb_stall_o = 1'b0;
         if (req_valid && !req_ready)           wb_stall_o = 1'b1;
         if (!wb_we_i && tag_full && wb_stb_i)  wb_stall_o = 1'b1;
+        // Validation/spec/completeness_rules.json
+        // HOST_WRITE_BUFFER_BACKPRESSURE, answered
+        // 'port_stalls_on_full' (2026-11-05): write_buffer_depth
+        // equals command_queue_depth with no margin for writes in
+        // flight, so data_path's write buffer can fill while the
+        // queue still has room -- without this, a write word is
+        // silently dropped the cycle the host is told its beat was
+        // accepted (same shape as Finding 1, in the buffer the
+        // queue skid sits in front of, not the skid itself).
+        if (wb_we_i && wb_stb_i && !wr_data_ready) wb_stall_o = 1'b1;
     end
 
     // Burst tracker (WB-003, WB-004)
@@ -294,6 +305,15 @@ module wb_port #(
     endproperty
     assert property (p_wr_ack_no_wrap)
         else $error("[WB-011] wr_ack_pending would wrap -- a write ack was dropped");
+
+    // WB-012: a write beat is never accepted while the write buffer
+    // isn't ready for it (HOST_WRITE_BUFFER_BACKPRESSURE)
+    property p_wr_backpressure;
+        @(posedge clk) disable iff (!rst_n)
+        (wb_we_i && wb_stb_i && !wr_data_ready) |-> wb_stall_o;
+    endproperty
+    assert property (p_wr_backpressure)
+        else $error("[WB-012] write beat accepted (or not stalled) while wr_data_ready was low");
 
     covergroup cg_wb @(posedge clk);
         option.per_instance = 1;
