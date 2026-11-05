@@ -60,25 +60,77 @@ Two files, neither ever committed (`.gitignore` covers `*.env` and `setup.env`;
 
 `OLYMPUS_USER` is **your own NetID** -- nobody needs to share an account.
 
-`OLYMPUS_KEY` must be a **passphrase-less private key**, not a password. This
-is not a preference: `flow.py` halts the run if it is unset, because the
-Frontend phase pipelines prompt for a password and a non-interactive run cannot
-answer a prompt.
+**Either credential works**: `OLYMPUS_KEY`, a path to a **passphrase-less**
+private key, or `OLYMPUS_PASSWORD`. A passphrase-protected key is not an
+option, because a non-interactive run cannot answer a prompt.
+
+Prefer the key. Fall back to the password only if sshd refuses your key --
+which does happen, for reasons invisible from a user shell (see 1.2.1). Be
+deliberate about it: that is your NetID password in plaintext on disk, and a
+NetID password unlocks a great deal more than Olympus. The file is gitignored
+so it will not reach the public repo, but anything that can read your user
+profile can read it.
+
+Note `OLYMPUS_PASSWORD` only became real in `ff03df9`. Before that it was
+documented in `USAGE.md` but never read anywhere in `Frontend2` -- a
+password-only setup authenticated with nothing and failed every time.
 
 ```powershell
 ssh-keygen -t ed25519 -f $env:USERPROFILE\.ssh\olympus -N '""'
 ```
 
 ```powershell
-type $env:USERPROFILE\.ssh\olympus.pub | ssh NETID@olympus.ece.tamu.edu "mkdir -p ~/.ssh; cat >> ~/.ssh/authorized_keys; chmod 600 ~/.ssh/authorized_keys"
+$k = Get-Content $env:USERPROFILE\.ssh\olympus.pub; ssh NETID@olympus.ece.tamu.edu "mkdir -p ~/.ssh; chmod go-w ~; chmod 700 ~/.ssh; echo '$k' >> ~/.ssh/authorized_keys; chmod 600 ~/.ssh/authorized_keys"
 ```
 
 ```powershell
-ssh -i $env:USERPROFILE\.ssh\olympus NETID@olympus.ece.tamu.edu "hostname"
+ssh -o BatchMode=yes -i $env:USERPROFILE\.ssh\olympus NETID@olympus.ece.tamu.edu "hostname"
 ```
 
-That last command must print a hostname **without asking for a password**. If
-it prompts, the flow will halt at `rtl_generation`.
+`BatchMode=yes` disables password prompts, so that command either prints a
+hostname or fails immediately with the reason -- it cannot sit waiting at a
+prompt and look like a hang.
+
+### 1.2.1 If sshd refuses a correct key
+
+This happened on `dawsoncarpenter@olympus` on 2026-11-05 and cost an hour, so
+it is written down. The symptom in `ssh -v` is:
+
+```
+debug1: Offering public key: ...\.ssh\olympus ED25519 SHA256:...
+debug1: Authentications that can continue: publickey,password
+```
+
+Key offered, no `Server accepts key`, straight back to the method list.
+
+What that is **not** -- all checked, with evidence, so they need not be
+rechecked: the wrong key (compare `ssh-keygen -lf` on your `.pub` against the
+fingerprint in the `Offering` line, and the installed line on the server);
+`StrictModes` (home, `~/.ssh` and `authorized_keys` must be owner-only, and
+were); a passphrase; Windows refusing the private key (that prints
+`too open`); or SELinux on an NFS home (`getsebool use_nfs_home_dirs` was
+**on**, and `restorecon` has nothing to change because the label comes from the
+mount, not the file).
+
+What it probably **is**, and none of it is visible from a user shell:
+`/etc/ssh/sshd_config` returned `Permission denied`, which means a centrally
+managed config -- so `AuthorizedKeysFile` may point somewhere other than
+`~/.ssh/authorized_keys`, keys may come from an `AuthorizedKeysCommand`
+directory lookup, or a `Match` block may gate `PubkeyAuthentication`.
+
+Two traps specific to Windows while installing a key:
+- **`ssh-copy-id` does not ship with Windows OpenSSH.** Doing it by hand with
+  `type key.pub | ssh host "cat >> ..."` puts the key on ssh's stdin while ssh
+  also wants to prompt you for a password, and `type` emits CRLF -- a key line
+  ending in `
+` is invalid to sshd. Pass the key as an argument instead:
+  `$k = Get-Content ...pub; ssh host "echo '$k' >> ~/.ssh/authorized_keys"`.
+- On that NFS mount, `chmod 600` did not take -- the file stayed `-rwx------`.
+  Still owner-only, so harmless for `StrictModes`, but do not trust the mode
+  you asked for.
+
+**The fallback is `OLYMPUS_PASSWORD`**, which works and is the pragmatic
+answer when the key route is administratively closed.
 
 Then set in `Validation\setup.env`:
 
