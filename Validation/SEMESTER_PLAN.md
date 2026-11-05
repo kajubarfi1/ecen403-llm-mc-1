@@ -1046,6 +1046,44 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   queue depth (968). JasperGold reports "Global Stopats: <none>" even
   with cuts applied, so the run-matching check uses the assumption
   count only.
+- *2026-11-04, night — the spec matrix.* `tools/spec_matrix.py`: five
+  presets + a greedy pairwise covering set over the Tier-1 choices (32
+  specs; 33 value pairs are infeasible under the compiler's own rules,
+  all involving byte_lanes) + 13 Tier-2 edges = 50 specs. Level 1
+  (compile + spec review): 31 pass; the 19 blocked fall into five
+  compiler/schema defects none of which the golden spec shows
+  (unpack_32_to_64 not in the enum, 33-bit addresses in a 32-bit CSR,
+  row_bits 17 on 8Gb x8, tRFC_nCK 0x118 in an 8-bit field, MR0
+  burst_length 'on_the_fly'). Addendum 14. Level 2 (the flow's RTL
+  half per spec) queued behind tonight's loop. Netlists: Dawson's set
+  is from drop 5f56adc7b7f5; data_path, init_fsm, scheduler stale by
+  provenance; the current ones re-judged against 56ca186bf893.
+- *2026-11-04, 20:13 — the loop runs clean end to end.* `runs/nov04_loop`:
+  spec review PASS, Phases 1-4 generated with every Frontend gate passing
+  (her RefBlock polling clears T36/T37), top assembled and linted, our
+  validation 20/20 with no finding, backend skipped by flag: COMPLETE.
+  First run where nothing was repaired by anyone, human or agent.
+  (One formal replay inside it was the stalled pre-fix process I ended;
+  the remaining replays ran with the polling wait and the boot path's
+  8 properties proved again.)
+  Netlists re-judged against 56ca186bf893 (125 runs): the 7 blocks
+  whose netlists are current pass every path; data_path, init_fsm,
+  scheduler and wb_port are stale by provenance (built from
+  5f56adc7b7f5) and fail exactly where their old RTL did; Dawson's
+  NETLISTS.json needs regenerating from his newer builds (backend reply
+  addendum 6). The spec matrix's first level-2 pass on the presets was
+  lost to Olympus refusing SSH to her gates under load (her client
+  connects once; ours retries); flagged as infrastructure in the
+  summary and rerun serially.
+- *2026-11-05 — the laptop slept on the overnight runs.* The preset
+  level-2 run and the 60-min proof's poller both sat on dead SSH
+  sessions from 20:30 to 11:00; the JasperGold job itself finished at
+  20:44 and `--fetch` recovered it: 12 proven including PROTO_001,
+  REF_001 bounded 1359, PROTO_002 at 67, HOST_001 at 42, progress at
+  970 with no cex (the queue-scaled bound holds). PROTO_001 and
+  TIMING_008 closed in the package; PROTO_002 and HOST_001 await a
+  longer run. Presets relaunched through the flow with the machine
+  awake.
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

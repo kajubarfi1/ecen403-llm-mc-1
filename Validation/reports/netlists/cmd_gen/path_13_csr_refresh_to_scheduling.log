@@ -8,7 +8,7 @@ Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path
 Window  : 400 cycles settle after driver
 Stages  : config_regs(exact); refresh_ctrl(autonomous); scheduler(invariant)
 
-Running: xrun ... -top chain_harness  (53 file(s))
+Running: xrun ... -top chain_harness  (57 file(s))
   log -> Validation/reports/netlists/cmd_gen/path_13_csr_refresh_to_scheduling_sim.log
 283 transaction(s)
     cfg_refresh.reset        1
@@ -56,6 +56,8 @@ wrote 283 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/re
   refresh_ctrl                 [autonomous]  SVA-OWNED
   scheduler                    [invariant ]  PASS
       scope=scheduler  strategy=invariant  status=pass  (283 transactions, no rule broken)
+  (conservation)               [conservation]  PASS
+      scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable
 ==================================================================
 
   path verdict : PASS

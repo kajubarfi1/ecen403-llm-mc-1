@@ -5,8 +5,11 @@ Blocks  : calibration, init_fsm
 Window  : 180000 cycles (observation, no driver)
 Stages  : init_fsm(autonomous); calibration(autonomous)
 
-Running: xrun ... -top chain_harness  (15 file(s))
+Running: xrun ... -top chain_harness  (17 file(s))
   log -> Validation/reports/netlists/init_fsm/path_08_init_to_cal_sim.log
+
+  EMBEDDED RTL ASSERTIONS FIRED (1 total) — the design's own checks disagree with its behavior:
+    a_TIMING_014             1x
 12 transaction(s)
     cal_status.done          1
     cal_status.reset         1
@@ -20,11 +23,13 @@ Running: xrun ... -top chain_harness  (15 file(s))
 wrote 12 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/init_fsm/path_08_init_to_cal_observed.jsonl
 
 ==================================================================
-  init_fsm                     [autonomous]  SVA-OWNED
+  init_fsm                     [autonomous]  FAIL
+      SVA fired: a_TIMING_014 x1
+      a_TIMING_014 fired 1x (see the sim log)
   calibration                  [autonomous]  SVA-OWNED
   (path-level)                 [invariant ]  PASS
       scope=path_08_init_to_cal  strategy=invariant  status=pass  (12 transactions, no rule broken)
 ==================================================================
 
-  path verdict : PASS
+  path verdict : FAIL
   report -> Validation/reports/netlists/init_fsm/path_08_init_to_cal_report.json

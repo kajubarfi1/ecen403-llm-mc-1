@@ -1,0 +1,70 @@
+  stimulus: ack_collision on wb_port
+ack_collision_wb_port_seed1: 171 step(s) (85 drive, 85 idle covering 6285 cycle(s)), targets ['VP_FAIL_018', 'VP_FAIL_024', 'VP_FLOW_001']
+  wrote Validation/sequences/generated/runs/netlist_config_regs/path_23_host_ack_collision/seq_driver.sv
+wrote Validation/sequences/generated/runs/netlist_config_regs/path_23_host_ack_collision/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
+
+Path    : path_23_host_ack_collision  [composed]
+Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
+Window  : 300 cycles settle after driver
+Stages  : data_path(exact); wb_port(exact)
+
+Running: xrun ... -top chain_harness  (57 file(s))
+  log -> Validation/reports/netlists/config_regs/path_23_host_ack_collision_sim.log
+1644 transaction(s)
+    cfg_refresh.reset        1
+    cfg_timing.reset         1
+    cq_deq.dequeue           85
+    cq_deq.reset             1
+    cq_enq.enqueue           85
+    cq_enq.reset             1
+    csr.reset                1
+    csr_rsp.reset            1
+    csr_sts.reset            1
+    csr_sts_level.reset      1
+    csr_sts_level.state      12
+    ddr_cmd.command          259
+    ddr_cmd.reset            1
+    ddr_rd_beat.beat         86
+    ddr_rd_beat.reset        1
+    ddr_wr_beat.beat         84
+    ddr_wr_beat.reset        1
+    dp_cmd.read              43
+    dp_cmd.reset             1
+    dp_cmd.write             42
+    dp_rd_rsp.reset          1
+    dp_rd_rsp.response       43
+    dp_wr.reset              1
+    dp_wr.write              42
+    refresh_ack.ack          6
+    refresh_ack.reset        1
+    refresh_level.reset      1
+    refresh_level.state      12
+    refresh_req.request      6
+    refresh_req.reset        1
+    req.request              85
+    req.reset                1
+    sched_cmd.command        259
+    sched_cmd.reset          1
+    sched_deq.grant          85
+    sched_deq.reset          1
+    sched_in.command         259
+    sched_in.reset           1
+    wb.read                  43
+    wb.reset                 1
+    wb.write                 42
+    wb_rsp.read_data         43
+    wb_rsp.reset             1
+  time span: 0 .. 39123000
+wrote 1644 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/config_regs/path_23_host_ack_collision_observed.jsonl
+
+==================================================================
+  data_path                    [exact     ]  PASS
+      scope=data_path  strategy=exact  status=pass  matched=127/127  (127 output transaction(s) matched)
+  wb_port                      [exact     ]  PASS
+      scope=wb_port  strategy=exact  status=pass  matched=128/128  WAIVED=43 field comparison(s)  (128 output transaction(s) m
+  (conservation)               [conservation]  PASS
+      scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable
+==================================================================
+
+  path verdict : PASS
+  report -> Validation/reports/netlists/config_regs/path_23_host_ack_collision_report.json

@@ -1,15 +1,15 @@
 {
   "$schema": "validation-drop-comparison/1",
   "a": {
-    "dir": "Validation/reports/drops/2bea54c5eac1",
-    "drop_head": "2bea54c5eac1"
+    "dir": "Validation/reports/drops/dbb574105f18",
+    "drop_head": "dbb574105f18"
   },
   "b": {
     "dir": "Validation/reports/paths",
     "drop_head": "56ca186bf893"
   },
   "strict": false,
-  "generated_utc": "2026-11-05T00:32:20.673290Z",
+  "generated_utc": "2026-11-05T17:14:40.464351Z",
   "rows": [
     {
       "path": "path_01_write_cmd",
@@ -27,13 +27,18 @@
     },
     {
       "path": "path_02_read_cmd",
-      "kind": "same",
+      "kind": "fixed",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {},
+      "matched_up": {
+        "matched:cmd_gen": [
+          138,
+          147
+        ]
+      },
       "verdict": [
         "pass",
         "pass"
@@ -139,58 +144,86 @@
     },
     {
       "path": "path_10_csr_to_timing",
-      "kind": "same",
-      "new": {},
+      "kind": "regression",
+      "new": {
+        "stage:config_regs": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
+      "matched_down": {
+        "matched:config_regs": [
+          131,
+          115
+        ]
+      },
       "matched_up": {},
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
       "path": "path_11_csr_to_refresh",
-      "kind": "same",
-      "new": {},
+      "kind": "regression",
+      "new": {
+        "stage:config_regs": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
+      "matched_down": {
+        "matched:config_regs": [
+          131,
+          115
+        ]
+      },
       "matched_up": {},
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
       "path": "path_12_csr_timing_to_scheduling",
-      "kind": "same",
-      "new": {},
+      "kind": "regression",
+      "new": {
+        "stage:config_regs": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
+      "matched_down": {
+        "matched:config_regs": [
+          131,
+          115
+        ]
+      },
       "matched_up": {},
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
       "path": "path_13_csr_refresh_to_scheduling",
-      "kind": "same",
-      "new": {},
+      "kind": "regression",
+      "new": {
+        "stage:config_regs": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
+      "matched_down": {
+        "matched:config_regs": [
+          131,
+          115
+        ]
+      },
       "matched_up": {},
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
@@ -279,13 +312,18 @@
     },
     {
       "path": "path_20_refresh_preempt",
-      "kind": "same",
+      "kind": "fixed",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {},
+      "matched_up": {
+        "matched:cmd_gen": [
+          1844,
+          1848
+        ]
+      },
       "verdict": [
         "pass",
         "pass"
@@ -293,13 +331,9 @@
     },
     {
       "path": "path_21_wb_port_standalone",
-      "kind": "changed",
-      "new": {
-        "assert:p_sel_nonzero_write": 3
-      },
-      "gone": {
-        "log:DRIVER_STALL": 19
-      },
+      "kind": "same",
+      "new": {},
+      "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
@@ -311,16 +345,23 @@
     },
     {
       "path": "path_22_csr_standalone",
-      "kind": "same",
-      "new": {},
+      "kind": "regression",
+      "new": {
+        "stage:config_regs": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
+      "matched_down": {
+        "matched:config_regs": [
+          131,
+          115
+        ]
+      },
       "matched_up": {},
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {

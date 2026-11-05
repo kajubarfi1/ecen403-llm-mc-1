@@ -564,7 +564,8 @@ The path list is `Validation/spec/path_definitions.json`; `--help` lists the
 stimulus generators. `wb_burst` drives Wishbone linear bursts and a pile of
 pipelined reads deeper than the read buffer; `saturate` drives back-to-back
 mixed beats until the queue stalls the port; `write_read` writes then reads
-back. A response that carries no address of its own on the bus (a pipelined
+back; `ack_collision` lands a write beat the cycle before a read's data
+returns (an idle marked `within_run` is a gap inside one pipelined run). A response that carries no address of its own on the bus (a pipelined
 read ack) is attributed by the monitor from the accepted requests in order
 (catalog `pending` fields); a `MONITOR warnings` line in the summary means a
 response arrived with no request on record.

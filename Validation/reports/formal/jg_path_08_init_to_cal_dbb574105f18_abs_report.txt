@@ -1,0 +1,354 @@
+
+==============================================================
+    Jasper Verification Results
+==============================================================
+    2024.09 FCS 64 bits for Linux64 4.18.0-372.26.1.el8_6.x86_64
+    Host Name: n01-zeus.olympus.ece.tamu.edu
+    User Name: jacobz
+    Printed on: Wednesday, Nov 4, 2026 08:11:46 PM CST
+    Working Directory: /home/ugrads/j/jacobz/formal/auto/20261105T021132_1260/pkg
+
+
+==============================================================
+DESIGN INFO
+==============================================================
+    Top Level Module     : chain_formal
+    Clocks               : clk
+    Resets               : !rst_n
+    Global Stopats       :     <none>
+    Global Assumptions   :     <none>
+
+==============================================================
+SUMMARY
+==============================================================
+    Total Tasks           : 1
+    Total Properties      : 22
+          assumptions     : 0                   
+           - approved     : 0                   
+           - temporary    : 0                   
+          assertions      : 8                   
+           - proven       : 6                   ( 75.0% )
+           - marked_proven: 0                   ( 0.0% )
+           - cex          : 2                   ( 25.0% )
+           - ar_cex       : 0                   ( 0.0% )
+           - undetermined : 0                   ( 0.0% )
+           - unprocessed  : 0                   ( 0.0% )
+           - error        : 0                   ( 0.0% )
+          covers          : 14                  
+           - unreachable  : 0                   ( 0.0% )
+           - covered      : 14                  ( 100.0% )
+           - ar_covered   : 0                   ( 0.0% )
+           - undetermined : 0                   ( 0.0% )
+           - unprocessed  : 0                   ( 0.0% )
+           - error        : 0                   ( 0.0% )
+
+==============================================================
+RESULTS
+==============================================================
+
+---------------------------------------------------------------------------------------------------------------------------------------
+       Name                                                                           |    Result    |  Engine  |  Bound  |  Time    
+---------------------------------------------------------------------------------------------------------------------------------------
+
+---[ <embedded> ]----------------------------------------------------------------------------------------------------------------------
+[1]   chain_formal.u_calibration.u_calibration_order_sva.a_CAL_001                         proven          Hp     Infinite    0.001 s      
+[2]   chain_formal.u_calibration.u_calibration_order_sva.a_CAL_001:precondition1           covered         Ht           16    0.223 s      
+[3]   chain_formal.u_calibration.u_calibration_order_sva.c_CAL_001                         covered         Ht           16    0.254 s      
+[4]   chain_formal.u_calibration.u_calibration_order_sva.a_CAL_002                         proven          Hp     Infinite    0.001 s      
+[5]   chain_formal.u_calibration.u_calibration_order_sva.a_CAL_002:precondition1           covered         Ht           17    0.283 s      
+[6]   chain_formal.u_calibration.u_calibration_order_sva.c_CAL_002                         covered         Ht           17    0.336 s      
+[7]   chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_002                                    proven          Mpcustom2  Infinite  5.566 s    
+[8]   chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_002:precondition1                      covered         Ht           13    0.032 s      
+[9]   chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_002                                    covered         L      130 - 140   0.525 s      
+[10]  chain_formal.u_init_fsm.u_init_fsm_sva.a_TIMING_014                                  cex             Ht           13    0.070 s      
+[11]  chain_formal.u_init_fsm.u_init_fsm_sva.a_TIMING_014:precondition1                    covered         Hp            5    0.515 s      
+[12]  chain_formal.u_init_fsm.u_init_fsm_sva.c_TIMING_014                                  covered         Ht            7    0.001 s      
+[13]  chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_002_init_done                          cex             Ht           15    0.098 s      
+[14]  chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_002_init_done:precondition1            covered         Ht           13    0.032 s      
+[15]  chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_002_init_done                          covered         Bm          141    6.464 s      
+[16]  chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_001                                    proven          Hp     Infinite    2.568 s      
+[17]  chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_001:precondition1                      covered         Hp            5    0.515 s      
+[18]  chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_001_then                               proven          Hp     Infinite    2.568 s      
+[19]  chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_001_then:precondition1                 covered         Ht           13    0.032 s      
+[20]  chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_001                                    covered         Ht           13    0.070 s      
+[21]  chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_003_init_done                          proven          Hp     Infinite    0.186 s      
+[22]  chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_003_init_done:precondition1            covered         Ht           15    0.129 s      
+
+==============================================================
+ASSUMPTIONS
+==============================================================
+
+-------------------------------------------------------------------------------
+       Name    |  Expression  |  Location     |  Status      |  Dependencies                  
+-------------------------------------------------------------------------------
+
+==============================================================
+DETAILED RESULTS
+==============================================================
+
+---[ <embedded> ]--------------------------------------------------------------
+[1]
+    Name       : chain_formal.u_calibration.u_calibration_order_sva.a_CAL_001
+    Expression : u_calibration.u_calibration_order_sva.a_CAL_001
+    Type       : assert
+    Location   : calibration_order_sva.sv, 20
+
+    Result     : proven
+    Bound      : Infinite
+    Time       : 0.001 s
+    Engine     : Hp
+
+
+[2]
+    Name       : chain_formal.u_calibration.u_calibration_order_sva.a_CAL_001:precondition1
+    Expression : u_calibration.u_calibration_order_sva.a_CAL_001_precondition1
+    Type       : cover
+    Location   : calibration_order_sva.sv, 20
+
+    Result     : covered
+    Bound      : 16
+    Time       : 0.223 s
+    Engine     : Ht
+
+
+[3]
+    Name       : chain_formal.u_calibration.u_calibration_order_sva.c_CAL_001
+    Expression : u_calibration.u_calibration_order_sva.c_CAL_001
+    Type       : cover
+    Location   : calibration_order_sva.sv, 22
+
+    Result     : covered
+    Bound      : 16
+    Time       : 0.254 s
+    Engine     : Ht
+
+
+[4]
+    Name       : chain_formal.u_calibration.u_calibration_order_sva.a_CAL_002
+    Expression : u_calibration.u_calibration_order_sva.a_CAL_002
+    Type       : assert
+    Location   : calibration_order_sva.sv, 30
+
+    Result     : proven
+    Bound      : Infinite
+    Time       : 0.001 s
+    Engine     : Hp
+
+
+[5]
+    Name       : chain_formal.u_calibration.u_calibration_order_sva.a_CAL_002:precondition1
+    Expression : u_calibration.u_calibration_order_sva.a_CAL_002_precondition1
+    Type       : cover
+    Location   : calibration_order_sva.sv, 30
+
+    Result     : covered
+    Bound      : 17
+    Time       : 0.283 s
+    Engine     : Ht
+
+
+[6]
+    Name       : chain_formal.u_calibration.u_calibration_order_sva.c_CAL_002
+    Expression : u_calibration.u_calibration_order_sva.c_CAL_002
+    Type       : cover
+    Location   : calibration_order_sva.sv, 32
+
+    Result     : covered
+    Bound      : 17
+    Time       : 0.336 s
+    Engine     : Ht
+
+
+[7]
+    Name       : chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_002
+    Expression : u_init_fsm.u_init_fsm_sva.a_INIT_002
+    Type       : assert
+    Location   : init_fsm_sva.sv, 34
+
+    Result     : proven
+    Bound      : Infinite
+    Time       : 5.566 s
+    Engine     : Mpcustom2
+
+
+[8]
+    Name       : chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_002:precondition1
+    Expression : u_init_fsm.u_init_fsm_sva.a_INIT_002_precondition1
+    Type       : cover
+    Location   : init_fsm_sva.sv, 34
+
+    Result     : covered
+    Bound      : 13
+    Time       : 0.032 s
+    Engine     : Ht
+
+
+[9]
+    Name       : chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_002
+    Expression : u_init_fsm.u_init_fsm_sva.c_INIT_002
+    Type       : cover
+    Location   : init_fsm_sva.sv, 36
+
+    Result     : covered
+    Bound      : 130 - 140
+    Time       : 0.525 s
+    Engine     : L
+
+
+[10]
+    Name       : chain_formal.u_init_fsm.u_init_fsm_sva.a_TIMING_014
+    Expression : u_init_fsm.u_init_fsm_sva.a_TIMING_014
+    Type       : assert
+    Location   : init_fsm_sva.sv, 51
+
+    Result     : cex
+    Bound      : 13
+    Time       : 0.070 s
+    Engine     : Ht
+
+
+[11]
+    Name       : chain_formal.u_init_fsm.u_init_fsm_sva.a_TIMING_014:precondition1
+    Expression : u_init_fsm.u_init_fsm_sva.a_TIMING_014_precondition1
+    Type       : cover
+    Location   : init_fsm_sva.sv, 51
+
+    Result     : covered
+    Bound      : 5
+    Time       : 0.515 s
+    Engine     : Hp
+
+
+[12]
+    Name       : chain_formal.u_init_fsm.u_init_fsm_sva.c_TIMING_014
+    Expression : u_init_fsm.u_init_fsm_sva.c_TIMING_014
+    Type       : cover
+    Location   : init_fsm_sva.sv, 53
+
+    Result     : covered
+    Bound      : 7
+    Time       : 0.001 s
+    Engine     : Ht
+
+
+[13]
+    Name       : chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_002_init_done
+    Expression : u_init_fsm.u_init_fsm_sva.a_INIT_002_init_done
+    Type       : assert
+    Location   : init_fsm_sva.sv, 63
+
+    Result     : cex
+    Bound      : 15
+    Time       : 0.098 s
+    Engine     : Ht
+
+
+[14]
+    Name       : chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_002_init_done:precondition1
+    Expression : u_init_fsm.u_init_fsm_sva.a_INIT_002_init_done_precondition1
+    Type       : cover
+    Location   : init_fsm_sva.sv, 63
+
+    Result     : covered
+    Bound      : 13
+    Time       : 0.032 s
+    Engine     : Ht
+
+
+[15]
+    Name       : chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_002_init_done
+    Expression : u_init_fsm.u_init_fsm_sva.c_INIT_002_init_done
+    Type       : cover
+    Location   : init_fsm_sva.sv, 65
+
+    Result     : covered
+    Bound      : 141
+    Time       : 6.464 s
+    Engine     : Bm
+
+
+[16]
+    Name       : chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_001
+    Expression : u_init_fsm.u_init_fsm_sva.a_INIT_001
+    Type       : assert
+    Location   : init_fsm_sva.sv, 86
+
+    Result     : proven
+    Bound      : Infinite
+    Time       : 2.568 s
+    Engine     : Hp
+
+
+[17]
+    Name       : chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_001:precondition1
+    Expression : u_init_fsm.u_init_fsm_sva.a_INIT_001_precondition1
+    Type       : cover
+    Location   : init_fsm_sva.sv, 86
+
+    Result     : covered
+    Bound      : 5
+    Time       : 0.515 s
+    Engine     : Hp
+
+
+[18]
+    Name       : chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_001_then
+    Expression : u_init_fsm.u_init_fsm_sva.a_INIT_001_then
+    Type       : assert
+    Location   : init_fsm_sva.sv, 92
+
+    Result     : proven
+    Bound      : Infinite
+    Time       : 2.568 s
+    Engine     : Hp
+
+
+[19]
+    Name       : chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_001_then:precondition1
+    Expression : u_init_fsm.u_init_fsm_sva.a_INIT_001_then_precondition1
+    Type       : cover
+    Location   : init_fsm_sva.sv, 92
+
+    Result     : covered
+    Bound      : 13
+    Time       : 0.032 s
+    Engine     : Ht
+
+
+[20]
+    Name       : chain_formal.u_init_fsm.u_init_fsm_sva.c_INIT_001
+    Expression : u_init_fsm.u_init_fsm_sva.c_INIT_001
+    Type       : cover
+    Location   : init_fsm_sva.sv, 94
+
+    Result     : covered
+    Bound      : 13
+    Time       : 0.070 s
+    Engine     : Ht
+
+
+[21]
+    Name       : chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_003_init_done
+    Expression : u_init_fsm.u_init_fsm_sva.a_INIT_003_init_done
+    Type       : assert
+    Location   : init_fsm_sva.sv, 101
+
+    Result     : proven
+    Bound      : Infinite
+    Time       : 0.186 s
+    Engine     : Hp
+
+
+[22]
+    Name       : chain_formal.u_init_fsm.u_init_fsm_sva.a_INIT_003_init_done:precondition1
+    Expression : u_init_fsm.u_init_fsm_sva.a_INIT_003_init_done_precondition1
+    Type       : cover
+    Location   : init_fsm_sva.sv, 101
+
+    Result     : covered
+    Bound      : 15
+    Time       : 0.129 s
+    Engine     : Ht
+
+
+-------------------------------------------------------------------------------

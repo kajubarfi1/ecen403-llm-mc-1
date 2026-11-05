@@ -7,11 +7,14 @@ Path    : path_18_full_write  [composed]
 Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
 Window  : 2000 cycles settle after driver
 Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant); cmd_gen(exact); data_path(exact)
-    ssh connect attempt 1 failed (SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer); retrying in 9s
 
-Running: xrun ... -top chain_harness  (53 file(s))
+Running: xrun ... -top chain_harness  (57 file(s))
   log -> Validation/reports/netlists/scheduler/path_18_full_write_sim.log
-413 transaction(s)
+
+  EMBEDDED RTL ASSERTIONS FIRED (11 total) — the design's own checks disagree with its behavior:
+    p_tag                    10x
+    illegal bin: cp_tccd_spacing 1x
+443 transaction(s)
     cfg_refresh.reset        1
     cfg_timing.reset         1
     cq_deq.dequeue           24
@@ -23,9 +26,9 @@ Running: xrun ... -top chain_harness  (53 file(s))
     csr_sts.reset            1
     csr_sts_level.reset      1
     csr_sts_level.state      4
-    ddr_cmd.command          50
+    ddr_cmd.command          62
     ddr_cmd.reset            1
-    ddr_rd_beat.beat         24
+    ddr_rd_beat.beat         18
     ddr_rd_beat.reset        1
     ddr_wr_beat.beat         24
     ddr_wr_beat.reset        1
@@ -44,57 +47,40 @@ Running: xrun ... -top chain_harness  (53 file(s))
     refresh_req.reset        1
     req.request              24
     req.reset                1
-    sched_cmd.command        50
+    sched_cmd.command        62
     sched_cmd.reset          1
     sched_deq.grant          24
     sched_deq.reset          1
-    sched_in.command         50
+    sched_in.command         62
     sched_in.reset           1
     wb.read                  12
     wb.reset                 1
     wb.write                 12
     wb_rsp.read_data         12
     wb_rsp.reset             1
-  time span: 0 .. 7938000
-wrote 413 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/scheduler/path_18_full_write_observed.jsonl
+  time span: 0 .. 7948000
+wrote 443 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/scheduler/path_18_full_write_observed.jsonl
 
 ==================================================================
   wb_port                      [exact     ]  PASS
-      scope=wb_port  strategy=exact  status=pass  matched=36/36  (36 output transaction(s) matched)
+      scope=wb_port  strategy=exact  status=pass  matched=36/36  WAIVED=12 field comparison(s)  (36 output transaction(s) matc
   addr_decoder                 [exact     ]  PASS
       scope=addr_decoder  strategy=exact  status=pass  matched=24/24  (24 output transaction(s) matched)
   cmd_queue+scheduler          [invariant ]  PASS
-      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (413 transactions, no rule broken)
+      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (443 transactions, no rule broken)
   cmd_gen                      [exact     ]  PASS
-      scope=cmd_gen  strategy=exact  status=pass  matched=50/50  (50 output transaction(s) matched)
+      scope=cmd_gen  strategy=exact  status=pass  matched=62/62  (62 output transaction(s) matched)
   data_path                    [exact     ]  FAIL
-      scope=data_path  strategy=exact  status=fail  matched=24/36  value=12
-        dp_rd_rsp[0] value: predicted [dp_rd_rsp.response aux=0x1 data=0x1027c4d1] but observed [dp_rd_rsp.response aux=0x1 data=0xc4d10000]
-        dp_rd_rsp[1] value: predicted [dp_rd_rsp.response aux=0x3 data=0x7311d8a3] but observed [dp_rd_rsp.response aux=0x3 data=0xd8a30000]
-        dp_rd_rsp[2] value: predicted [dp_rd_rsp.response aux=0x5 data=0xc9e9c616] but observed [dp_rd_rsp.response aux=0x5 data=0xc6160000]
-        dp_rd_rsp[3] value: predicted [dp_rd_rsp.response aux=0x7 data=0x7ce42c82] but observed [dp_rd_rsp.response aux=0x7 data=0x2c820000]
-        dp_rd_rsp[4] value: predicted [dp_rd_rsp.response aux=0x9 data=0x7204e52d] but observed [dp_rd_rsp.response aux=0x9 data=0xe52d0000]
-        dp_rd_rsp[5] value: predicted [dp_rd_rsp.response aux=0xb data=0x51431193] but observed [dp_rd_rsp.response aux=0xb data=0x11930000]
+      scope=data_path  strategy=exact  status=fail  matched=26/33  unexpected=3 value=7
+      scope=data_path  strategy=exact  status=fail  matched=26/33  unexpected=3 value=7
+        dp_rd_rsp[2] value: predicted [dp_rd_rsp.response aux=0x7 data=0x7204e52d] but observed [dp_rd_rsp.response aux=0x7 data=0x0]
+        dp_rd_rsp[3] value: predicted [dp_rd_rsp.response aux=0x1 data=0xc5b60580] but observed [dp_rd_rsp.response aux=0x1 data=0x7204e52d]
+        dp_rd_rsp[4] value: predicted [dp_rd_rsp.response aux=0x7 data=0xab99254a] but observed [dp_rd_rsp.response aux=0x7 data=0xc5b60580]
+        dp_rd_rsp[5] value: predicted [dp_rd_rsp.response aux=0x5 data=0xc381e88f] but observed [dp_rd_rsp.response aux=0x5 data=0x0]
+        dp_rd_rsp[6] value: predicted [dp_rd_rsp.response aux=0xb data=0x7d4bedc] but observed [dp_rd_rsp.response aux=0xb data=0xab99254a]
+  (conservation)               [conservation]  PASS
+      scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable
 ==================================================================
 
   path verdict : FAIL
   report -> Validation/reports/netlists/scheduler/path_18_full_write_report.json
-Exception (client): Error reading SSH protocol banner[Errno 54] Connection reset by peer
-Traceback (most recent call last):
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2363, in _check_banner
-    buf = self.packetizer.readline(timeout)
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 395, in readline
-    buf += self._read_timeout(timeout)
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 663, in _read_timeout
-    x = self.__socket.recv(128)
-ConnectionResetError: [Errno 54] Connection reset by peer
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2179, in run
-    self._check_banner()
-  File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2367, in _check_banner
-    raise SSHException(
-paramiko.ssh_exception.SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer
-

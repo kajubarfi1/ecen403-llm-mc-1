@@ -282,8 +282,15 @@ session died):
   TIMING_012 / PROTO_001 / PROTO_002 undetermined at 319 (8245 on the
   previous design: the redesigned data path and port enlarge the state the
   bounded engines explore), HOST_001_progress cex at 254 again. Covers
-  3/16. The engines need longer than 20 min on this design; a 60-min
-  concrete run is the next formal step.
+  3/16.
+- concrete, 60 min (2026-11-05, with the queue-scaled HOST_001 bound and
+  the 16-bit owed counter): **12 proven at infinite bound including
+  PROTO_001**, REF_001 bounded-proven to 1359 (bar 368), 4 undetermined:
+  tREFI (14 044, as always), PROTO_002 at 67, HOST_001 safety at 42,
+  HOST_001_progress at 970 with no counterexample against the 968-cycle
+  bound (the 254-cycle one was the old bound). PROTO_001 and TIMING_008
+  are closed on this design; PROTO_002 and HOST_001 stay `awaiting_formal`
+  on a longer run.
 
 Previous (99f72da45a32, 2026-10-28, pipelined scheduler):
 - command path, concrete, 60 min (supersedes the 20-min run): 12 proven at

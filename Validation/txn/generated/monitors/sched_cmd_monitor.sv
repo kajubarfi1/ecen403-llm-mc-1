@@ -4,7 +4,7 @@
 //
 // Interface : sched_cmd   (Commands selected by the FR-FCFS scheduler)
 // Block     : scheduler
-// Manifest  : runs/nov04_loop/drop/PHASE3RTL/scheduler_manifest.json
+// Manifest  : runs/matrix/preset_balanced/drop/PHASE3RTL/scheduler_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

@@ -3,7 +3,7 @@
   "path": "path_05_scheduler_refresh_loop",
   "strategy": "invariant",
   "verdict": "pass",
-  "timestamp": "2026-10-20T16:58:56.901574",
+  "timestamp": "2026-11-04T20:15:43.936525",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,9 +21,9 @@
   "window_cycles": 6000,
   "coverage_collected": true,
   "rtl_drop": {
-    "git_head": "efece348d04e",
-    "drop_id": "efece348d04e",
-    "design_id": "766dc69c37e9",
+    "git_head": "56ca186bf893",
+    "drop_id": "56ca186bf893",
+    "design_id": "a03a5202d5fa",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -35,17 +35,17 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "0c57acd",
+    "validated_at": "b83b87c",
     "frontend_commits": {
-      "addr_decoder": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "bank_tracker": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "cmd_gen": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "cmd_queue": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "config_regs": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "data_path": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "refresh_ctrl": "6f659675f03286f6d19f4946500c8ae93de09850",
-      "scheduler": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151",
-      "wb_port": "a05b5d0a5f44ba5c4603761e1e5d8649e84b0151"
+      "addr_decoder": "f37ce49d323151a6118ae7765aa766918c816383",
+      "bank_tracker": "f37ce49d323151a6118ae7765aa766918c816383",
+      "cmd_gen": "f37ce49d323151a6118ae7765aa766918c816383",
+      "cmd_queue": "f37ce49d323151a6118ae7765aa766918c816383",
+      "config_regs": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc",
+      "data_path": "93e750db808f44eae5ae516978d484f33481aaa8",
+      "refresh_ctrl": "f37ce49d323151a6118ae7765aa766918c816383",
+      "scheduler": "eb1a77b69594911ac55eb4576c87ee649a466cff",
+      "wb_port": "2ee6e7f6ab334463e45a291fb86c9b7614be5629"
     },
     "roots": [
       "Frontend2/OutputFolders"
@@ -112,7 +112,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/scheduler_checker.py",
       "scope": "scheduler",
       "verdict": "pass",
-      "summary": "scope=scheduler  strategy=invariant  status=pass  (11069 transactions, no rule broken)",
+      "summary": "scope=scheduler  strategy=invariant  status=pass  (11092 transactions, no rule broken)",
       "detail": [],
       "rule_counts": {}
     },
@@ -130,7 +130,16 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_05_scheduler_refresh_loop_checker.py",
       "scope": "path_05_scheduler_refresh_loop",
       "verdict": "pass",
-      "summary": "scope=path_05_scheduler_refresh_loop  strategy=invariant  status=pass  (11069 transactions, no rule broken)",
+      "summary": "scope=path_05_scheduler_refresh_loop  strategy=invariant  status=pass  (11092 transactions, no rule broken)",
+      "detail": []
+    },
+    {
+      "stage": "(conservation)",
+      "kind": "conservation",
+      "scope": "(conservation)",
+      "model": null,
+      "verdict": "pass",
+      "summary": "scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable",
       "detail": []
     }
   ],

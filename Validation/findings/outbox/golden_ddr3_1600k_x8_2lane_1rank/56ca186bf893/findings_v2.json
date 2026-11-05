@@ -3,118 +3,10 @@
   "drop": "56ca186bf893",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "spec_id": "00d082c3f72d1b34",
-  "generated_utc": "2026-11-05T00:32:20.589828Z",
+  "generated_utc": "2026-11-05T17:14:40.374072Z",
   "reports": "Validation/reports/paths",
-  "finding_count": 3,
+  "finding_count": 8,
   "findings": [
-    {
-      "schema": "validation-findings/2",
-      "id": "formal/scheduler/PROTO_001",
-      "kind": "rtl_defect",
-      "check_id": "PROTO_001",
-      "taxonomy_id": "PROTO_001",
-      "detectors": [
-        "formal:jaspergold"
-      ],
-      "owner_module": "scheduler",
-      "owner_candidates": [
-        "scheduler"
-      ],
-      "severity": "critical",
-      "confidence": "unverified",
-      "title": "READ issued to a bank one cycle after that bank was PRECHARGEd (no ACTIVATE between)",
-      "requirement": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
-      "spec_ref": null,
-      "expected": "After PRE to bank b, no RD/WR to b until an ACT to b (JESD79-3 bank state machine).",
-      "actual": "PRE b=1 at cycle 183, RD b=1 at cycle 184.",
-      "detector": "formal:jaspergold",
-      "anchor": [
-        {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
-          "signal": "cmd_valid/cmd_type/cmd_bank"
-        },
-        {
-          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
-          "signal": "bank_rd_allowed"
-        }
-      ],
-      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 183 PRE bank 1 (A10=0), cycle 184 RD bank 1 col 0. The generated PROTO_001 tracker (row-open state from the observed ACT/PRE stream) shows bank 1 closed when the READ is issued. Never observed in simulation (no path stimulus reaches this interleaving); the scheduler or its bank_tracker gating lets a CAS follow its own precharge. Likely the same root as the open scheduler re-grant defect (commands are also held for 2-3 consecutive cycles in the trace, i.e. re-issued). [found on drop 1fea117; awaiting formal re-prove on 56ca186bf893]",
-      "paths": [
-        "formal:chain_formal"
-      ],
-      "occurrences": 1,
-      "repro": {
-        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
-        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
-        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
-      },
-      "drop": {
-        "git_head": "56ca186bf893",
-        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
-      },
-      "introduced_in": null,
-      "first_seen": "1fea117",
-      "last_seen": "56ca186bf893",
-      "resolved_in": null,
-      "status": "awaiting_formal",
-      "related_manual_findings": [
-        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
-      ]
-    },
-    {
-      "schema": "validation-findings/2",
-      "id": "formal/scheduler/TIMING_008",
-      "kind": "rtl_defect",
-      "check_id": "TIMING_008",
-      "taxonomy_id": "TIMING_008",
-      "detectors": [
-        "formal:jaspergold"
-      ],
-      "owner_module": "scheduler",
-      "owner_candidates": [
-        "scheduler"
-      ],
-      "severity": "critical",
-      "confidence": "unverified",
-      "title": "PRECHARGE issued one cycle after a WRITE to the same bank (tWR violated; write data lost)",
-      "requirement": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
-      "spec_ref": null,
-      "expected": "WR to bank b then no PRE to b for tWR (2 free cycles at 5 ns).",
-      "actual": "WR b=4 at cycle 173, PRE b=4 at cycle 174.",
-      "detector": "formal:jaspergold",
-      "anchor": [
-        {
-          "file": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
-          "signal": "bank_pre_allowed / ctr_wr"
-        },
-        {
-          "file": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
-          "signal": "precharge decision"
-        }
-      ],
-      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 173 WR bank 4, cycle 174 PRE bank 4. tWR = 15 ns = 3 controller cycles, so 2 cycles must separate the last write beat from the precharge. Not observed in simulation. bank_tracker's write-recovery timer (cfg_tWR_nCK) does not gate bank_pre_allowed for the cycle after a write, or the scheduler ignores it on the row-conflict path. [found on drop 1fea117; awaiting formal re-prove on 56ca186bf893]",
-      "paths": [
-        "formal:chain_formal"
-      ],
-      "occurrences": 1,
-      "repro": {
-        "top": "Validation/formal/chain_formal.sv (chain_harness_gen.py --path path_01_write_cmd --formal)",
-        "tcl": "~/formal/pkg/run3.tcl on Olympus (JasperGold 2024.09)",
-        "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
-      },
-      "drop": {
-        "git_head": "56ca186bf893",
-        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
-      },
-      "introduced_in": null,
-      "first_seen": "1fea117",
-      "last_seen": "56ca186bf893",
-      "resolved_in": null,
-      "status": "awaiting_formal",
-      "related_manual_findings": [
-        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_cmd_path_findings.json"
-      ]
-    },
     {
       "schema": "validation-findings/2",
       "id": "formal/wb_port/HOST_001",
@@ -172,6 +64,744 @@
       "status": "awaiting_formal",
       "related_manual_findings": [
         "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/formal_host_port_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "config_regs/MISMATCH/cfg_refresh[trefi]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/cfg_refresh[trefi]",
+      "taxonomy_id": "CSR_001",
+      "detectors": [
+        "exact:config_regs:value",
+        "twin:config_regs"
+      ],
+      "owner_module": "config_regs",
+      "owner_candidates": [
+        "config_regs"
+      ],
+      "severity": "minor",
+      "confidence": "confirmed",
+      "title": "config_regs: MISMATCH/cfg_refresh[trefi]",
+      "requirement": "config_regs must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "cfg_refresh.update force_refresh=0x1 max_postpone=0x8 priority=0x1 trefi=0x1860 urgent_threshold=0x6",
+      "actual": "cfg_refresh.update force_refresh=0x1 max_postpone=0x8 priority=0x1 trefi=0x1450 urgent_threshold=0x6",
+      "detector": "exact:config_regs:value",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 207,
+          "signal": "cfg_tREFI_nCK",
+          "text": "assign cfg_tREFI_nCK        = reg_timing_3[31:8];"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 213,
+          "signal": "cfg_force_refresh",
+          "text": "assign cfg_force_refresh    = reg_ctrl_config[6];"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 215,
+          "signal": "cfg_max_postpone",
+          "text": "assign cfg_max_postpone     = reg_refresh_config[3:0];"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 216,
+          "signal": "cfg_urgent_threshold",
+          "text": "assign cfg_urgent_threshold = reg_refresh_config[7:4];"
+        }
+      ],
+      "context": {
+        "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
+        "events": [
+          "t-120000 csr_rsp.write_ack addr=0x0 err=0x0",
+          "t-120000 csr.write addr=0x0 data=0xa5a5a5a5",
+          "t-96000 csr_rsp.read_data addr=0x0 data=0x0 err=0x0",
+          "t-96000 csr.read addr=0x0",
+          "t-72000 csr_rsp.write_ack addr=0x0 err=0x0",
+          "t-72000 csr.write addr=0x0 data=0x5a5a5a5a",
+          "t-48000 csr_rsp.read_data addr=0x0 data=0x0 err=0x0",
+          "t-48000 csr.read addr=0x0",
+          "t-24000 csr_rsp.read_data addr=0x4 data=0x9 err=0x0",
+          "t-24000 csr.read addr=0x4",
+          "t+0 csr_rsp.write_ack addr=0x4 err=0x0",
+          "t+0 csr.write addr=0x4 data=0xffffffff",
+          "t+0 cfg_refresh.update (observed, wrong) force_refresh=0x1 max_postpone=0x8 priority=0x1 trefi=0x1450 urgent_threshold=0x6"
+        ],
+        "value_provenance": [
+          "trefi: observed [23:16]=0, [15:8]=0x14 (no input matches), [7:0]=0x50 (no input matches)",
+          "trefi: expected [23:16]=0, [15:8]=0x18 (no input matches), [7:0]=0x60 (no input matches)"
+        ]
+      },
+      "mechanism": null,
+      "paths": [
+        "path_10_csr_to_timing",
+        "path_11_csr_to_refresh",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_22_csr_standalone"
+      ],
+      "occurrences": 20,
+      "repro": {
+        "path": "path_10_csr_to_timing",
+        "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+        "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+        "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+        "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "cfg_refresh[0] value: predicted [cfg_refresh.update force_refresh=0x1 max_postpone=0x8 priority=0x1 trefi=0x1860 urgent_threshold=0x6] but observed [cfg_refresh.update force_refresh=0x1 max_postpone=0x8 priority=0x1 trefi=0x1450 urgent_threshold=0x6]"
+        }
+      },
+      "drop": {
+        "git_head": "56ca186bf893",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "56ca186bf893",
+      "last_seen": "56ca186bf893",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_reserved_bits_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "config_regs/MISMATCH/cfg_timing[tfaw,trfc,trrd,trtp,twr,twtr]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/cfg_timing[tfaw,trfc,trrd,trtp,twr,twtr]",
+      "taxonomy_id": "CSR_001",
+      "detectors": [
+        "exact:config_regs:value",
+        "twin:config_regs"
+      ],
+      "owner_module": "config_regs",
+      "owner_candidates": [
+        "config_regs"
+      ],
+      "severity": "minor",
+      "confidence": "confirmed",
+      "title": "config_regs: MISMATCH/cfg_timing[tfaw,trfc,trrd,trtp,twr,twtr]",
+      "requirement": "config_regs must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "cfg_timing.update tccd=0x4 tfaw=0x20 tras=0xff trc=0xff trcd=0xff trfc=0x80 trp=0xff trrd=0x6 trtp=0x6 twr=0xc twtr=0x6",
+      "actual": "cfg_timing.update tccd=0x4 tfaw=0x1e tras=0xff trc=0xff trcd=0xff trfc=0x6b trp=0xff trrd=0x5 trtp=0x5 twr=0xa twtr=0x5",
+      "detector": "exact:config_regs:value",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 194,
+          "signal": "cfg_tRCD_nCK",
+          "text": "assign cfg_tRCD_nCK         = reg_timing_0[7:0];"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 195,
+          "signal": "cfg_tRP_nCK",
+          "text": "assign cfg_tRP_nCK          = reg_timing_0[15:8];"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 196,
+          "signal": "cfg_tRAS_nCK",
+          "text": "assign cfg_tRAS_nCK         = reg_timing_0[23:16];"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 197,
+          "signal": "cfg_tRC_nCK",
+          "text": "assign cfg_tRC_nCK          = reg_timing_0[31:24];"
+        }
+      ],
+      "context": {
+        "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
+        "events": [
+          "t-96000 csr.read addr=0x4",
+          "t-72000 csr_rsp.write_ack addr=0x4 err=0x0",
+          "t-72000 csr.write addr=0x4 data=0x5a5a5a5a",
+          "t-72000 cfg_refresh.update force_refresh=0x1 max_postpone=0x8 priority=0x1 trefi=0x1450 urgent_threshold=0x6",
+          "t-66000 cfg_refresh.update force_refresh=0x0 max_postpone=0x8 priority=0x1 trefi=0x1450 urgent_threshold=0x6",
+          "t-61000 csr_sts_level.state bist_done=0x0 bist_fail=0x0 bist_fail_addr=0x0 cal_done=0x0 cal_fail=0x0 ecc_ce_count=0x0 init_done=0x0 ref_pending=0x2 self_refresh=0x0",
+          "t-48000 csr_rsp.read_data addr=0x4 data=0x1a err=0x0",
+          "t-48000 csr.read addr=0x4",
+          "t-24000 csr_rsp.read_data addr=0x8 data=0x21180909 err=0x0",
+          "t-24000 csr.read addr=0x8",
+          "t+0 csr_rsp.write_ack addr=0x8 err=0x0",
+          "t+0 csr.write addr=0x8 data=0xffffffff",
+          "t+0 cfg_timing.update (observed, wrong) tccd=0x4 tfaw=0x1e tras=0xff trc=0xff trcd=0xff trfc=0x6b trp=0xff trrd=0x5 trtp=0x5 twr=0xa twtr=0x5"
+        ],
+        "value_provenance": [
+          "tccd: observed [7:4]=0, [3:0]=0x4 (no input matches)",
+          "tccd: expected [7:4]=0, [3:0]=0x4 (no input matches)",
+          "tfaw: observed [7:4]=0x1 (no input matches), [3:0]=0xe (no input matches)",
+          "tfaw: expected [7:4]=csr_sts_level#1.ref_pending (t-61000), [3:0]=0",
+          "tras: observed [7:4]=0xf (no input matches), [3:0]=0xf (no input matches)",
+          "tras: expected [7:4]=0xf (no input matches), [3:0]=0xf (no input matches)",
+          "trc: observed [7:4]=0xf (no input matches), [3:0]=0xf (no input matches)",
+          "trc: expected [7:4]=0xf (no input matches), [3:0]=0xf (no input matches)",
+          "trcd: observed [7:4]=0xf (no input matches), [3:0]=0xf (no input matches)",
+          "trcd: expected [7:4]=0xf (no input matches), [3:0]=0xf (no input matches)",
+          "trfc: observed [7:4]=cfg_refresh#2.urgent_threshold (t-66000), [3:0]=0xb (no input matches)",
+          "trfc: expected [7:4]=cfg_refresh#2.max_postpone (t-66000), [3:0]=0",
+          "trp: observed [7:4]=0xf (no input matches), [3:0]=0xf (no input matches)",
+          "trp: expected [7:4]=0xf (no input matches), [3:0]=0xf (no input matches)",
+          "trrd: observed [7:4]=0, [3:0]=0x5 (no input matches)",
+          "trrd: expected [7:4]=0, [3:0]=cfg_refresh#2.urgent_threshold (t-66000)",
+          "trtp: observed [7:4]=0, [3:0]=0x5 (no input matches)",
+          "trtp: expected [7:4]=0, [3:0]=cfg_refresh#2.urgent_threshold (t-66000)",
+          "twr: observed [7:4]=0, [3:0]=0xa (no input matches)",
+          "twr: expected [7:4]=0, [3:0]=0xc (no input matches)",
+          "twtr: observed [7:4]=0, [3:0]=0x5 (no input matches)",
+          "twtr: expected [7:4]=0, [3:0]=cfg_refresh#2.urgent_threshold (t-66000)"
+        ]
+      },
+      "mechanism": null,
+      "paths": [
+        "path_10_csr_to_timing",
+        "path_11_csr_to_refresh",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_22_csr_standalone"
+      ],
+      "occurrences": 20,
+      "repro": {
+        "path": "path_10_csr_to_timing",
+        "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+        "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+        "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+        "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "cfg_timing[0] value: predicted [cfg_timing.update tccd=0x4 tfaw=0x20 tras=0xff trc=0xff trcd=0xff trfc=0x80 trp=0xff trrd=0x6 trtp=0x6 twr=0xc twtr=0x6] but observed [cfg_timing.update tccd=0x4 tfaw=0x1e tras=0xff trc=0xff trcd=0xff trfc=0x6b trp=0xff trrd=0x5 trtp=0x5 twr=0xa twtr=0x5]"
+        }
+      },
+      "drop": {
+        "git_head": "56ca186bf893",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "56ca186bf893",
+      "last_seen": "56ca186bf893",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_reserved_bits_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "config_regs/MISMATCH/cfg_timing[trtp,twr]",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/cfg_timing[trtp,twr]",
+      "taxonomy_id": "CSR_001",
+      "detectors": [
+        "exact:config_regs:value",
+        "twin:config_regs"
+      ],
+      "owner_module": "config_regs",
+      "owner_candidates": [
+        "config_regs"
+      ],
+      "severity": "minor",
+      "confidence": "confirmed",
+      "title": "config_regs: MISMATCH/cfg_timing[trtp,twr]",
+      "requirement": "config_regs must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "cfg_timing.update tccd=0x4 tfaw=0xff tras=0x5a trc=0x5a trcd=0x5a trfc=0xff trp=0x5a trrd=0xff trtp=0x6 twr=0xc twtr=0xff",
+      "actual": "cfg_timing.update tccd=0x4 tfaw=0xff tras=0x5a trc=0x5a trcd=0x5a trfc=0xff trp=0x5a trrd=0xff trtp=0x5 twr=0xa twtr=0xff",
+      "detector": "exact:config_regs:value",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 194,
+          "signal": "cfg_tRCD_nCK",
+          "text": "assign cfg_tRCD_nCK         = reg_timing_0[7:0];"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 195,
+          "signal": "cfg_tRP_nCK",
+          "text": "assign cfg_tRP_nCK          = reg_timing_0[15:8];"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 196,
+          "signal": "cfg_tRAS_nCK",
+          "text": "assign cfg_tRAS_nCK         = reg_timing_0[23:16];"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 197,
+          "signal": "cfg_tRC_nCK",
+          "text": "assign cfg_tRC_nCK          = reg_timing_0[31:24];"
+        }
+      ],
+      "context": {
+        "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
+        "events": [
+          "t-120000 csr_rsp.write_ack addr=0x8 err=0x0",
+          "t-120000 csr.write addr=0x8 data=0xa5a5a5a5",
+          "t-96000 csr_rsp.read_data addr=0x8 data=0xa5a5a5a5 err=0x0",
+          "t-96000 csr.read addr=0x8",
+          "t-72000 csr_rsp.write_ack addr=0x8 err=0x0",
+          "t-72000 csr.write addr=0x8 data=0x5a5a5a5a",
+          "t-48000 csr_rsp.read_data addr=0x8 data=0x5a5a5a5a err=0x0",
+          "t-48000 csr.read addr=0x8",
+          "t-24000 csr_rsp.read_data addr=0xc data=0x6b1e0505 err=0x0",
+          "t-24000 csr.read addr=0xc",
+          "t+0 csr_rsp.write_ack addr=0xc err=0x0",
+          "t+0 csr.write addr=0xc data=0xffffffff",
+          "t+0 cfg_timing.update (observed, wrong) tccd=0x4 tfaw=0xff tras=0x5a trc=0x5a trcd=0x5a trfc=0xff trp=0x5a trrd=0xff trtp=0x5 twr=0xa twtr=0xff"
+        ]
+      },
+      "mechanism": null,
+      "paths": [
+        "path_10_csr_to_timing",
+        "path_11_csr_to_refresh",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_22_csr_standalone"
+      ],
+      "occurrences": 20,
+      "repro": {
+        "path": "path_10_csr_to_timing",
+        "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+        "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+        "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+        "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "cfg_timing[4] value: predicted [cfg_timing.update tccd=0x4 tfaw=0xff tras=0x5a trc=0x5a trcd=0x5a trfc=0xff trp=0x5a trrd=0xff trtp=0x6 twr=0xc twtr=0xff] but observed [cfg_timing.update tccd=0x4 tfaw=0xff tras=0x5a trc=0x5a trcd=0x5a trfc=0xff trp=0x5a trrd=0xff trtp=0x5 twr=0xa twtr=0xff]"
+        }
+      },
+      "drop": {
+        "git_head": "56ca186bf893",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "56ca186bf893",
+      "last_seen": "56ca186bf893",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_reserved_bits_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "config_regs/MISMATCH/csr_rsp[data]@TIMING_0",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/csr_rsp[data]@TIMING_0",
+      "taxonomy_id": "CSR_001",
+      "detectors": [
+        "exact:config_regs:value",
+        "twin:config_regs"
+      ],
+      "owner_module": "config_regs",
+      "owner_candidates": [
+        "config_regs"
+      ],
+      "severity": "minor",
+      "confidence": "confirmed",
+      "title": "config_regs: MISMATCH/csr_rsp[data]@TIMING_0",
+      "requirement": "config_regs must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "csr_rsp.read_data addr=0x8 data=0x271c0b0b err=0x0",
+      "actual": "csr_rsp.read_data addr=0x8 data=0x21180909 err=0x0",
+      "detector": "exact:config_regs:value",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 93,
+          "signal": "csr_err_o",
+          "text": "assign csr_err_o = err_r;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 190,
+          "signal": "csr_dat_o",
+          "text": "if (!rst_n) csr_dat_o <= 32'h0;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 191,
+          "signal": "csr_dat_o",
+          "text": "else if (csr_rd) csr_dat_o <= rdata_mux;"
+        }
+      ],
+      "context": {
+        "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
+        "events": [
+          "t-181000 csr_sts_level.state bist_done=0x0 bist_fail=0x0 bist_fail_addr=0x0 cal_done=0x0 cal_fail=0x0 ecc_ce_count=0x0 init_done=0x0 ref_pending=0x1 self_refresh=0x0",
+          "t-168000 csr.read addr=0x4",
+          "t-144000 csr.write addr=0x4 data=0x0",
+          "t-120000 csr.read addr=0x4",
+          "t-96000 csr.write addr=0x4 data=0xa5a5a5a5",
+          "t-72000 csr.read addr=0x4",
+          "t-48000 csr.write addr=0x4 data=0x5a5a5a5a",
+          "t-48000 cfg_refresh.update force_refresh=0x1 max_postpone=0x8 priority=0x1 trefi=0x1450 urgent_threshold=0x6",
+          "t-42000 cfg_refresh.update force_refresh=0x0 max_postpone=0x8 priority=0x1 trefi=0x1450 urgent_threshold=0x6",
+          "t-37000 csr_sts_level.state bist_done=0x0 bist_fail=0x0 bist_fail_addr=0x0 cal_done=0x0 cal_fail=0x0 ecc_ce_count=0x0 init_done=0x0 ref_pending=0x2 self_refresh=0x0",
+          "t-24000 csr.read addr=0x4",
+          "t+0 csr.read addr=0x8",
+          "t+0 csr_rsp.read_data (observed, wrong) addr=0x8 data=0x21180909 err=0x0"
+        ],
+        "value_provenance": [
+          "addr: observed [7:4]=0, [3:0]=cfg_refresh#2.max_postpone (t-42000)",
+          "addr: expected [7:4]=0, [3:0]=cfg_refresh#2.max_postpone (t-42000)",
+          "data: observed [31:24]=0x21 (no input matches), [23:16]=0x18 (no input matches), [15:8]=0x9 (no input matches), [7:0]=0x9 (no input matches)",
+          "data: expected [31:24]=0x27 (no input matches), [23:16]=0x1c (no input matches), [15:8]=0xb (no input matches), [7:0]=0xb (no input matches)"
+        ]
+      },
+      "mechanism": null,
+      "paths": [
+        "path_10_csr_to_timing",
+        "path_11_csr_to_refresh",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_22_csr_standalone"
+      ],
+      "occurrences": 5,
+      "repro": {
+        "path": "path_10_csr_to_timing",
+        "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+        "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+        "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+        "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "csr_rsp[18] value: predicted [csr_rsp.read_data addr=0x8 data=0x271c0b0b err=0x0] but observed [csr_rsp.read_data addr=0x8 data=0x21180909 err=0x0]"
+        }
+      },
+      "drop": {
+        "git_head": "56ca186bf893",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "56ca186bf893",
+      "last_seen": "56ca186bf893",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_reserved_bits_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "config_regs/MISMATCH/csr_rsp[data]@TIMING_1",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/csr_rsp[data]@TIMING_1",
+      "taxonomy_id": "CSR_001",
+      "detectors": [
+        "exact:config_regs:value",
+        "twin:config_regs"
+      ],
+      "owner_module": "config_regs",
+      "owner_candidates": [
+        "config_regs"
+      ],
+      "severity": "minor",
+      "confidence": "confirmed",
+      "title": "config_regs: MISMATCH/csr_rsp[data]@TIMING_1",
+      "requirement": "config_regs must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "csr_rsp.read_data addr=0xc data=0x80200606 err=0x0",
+      "actual": "csr_rsp.read_data addr=0xc data=0x6b1e0505 err=0x0",
+      "detector": "exact:config_regs:value",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 93,
+          "signal": "csr_err_o",
+          "text": "assign csr_err_o = err_r;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 190,
+          "signal": "csr_dat_o",
+          "text": "if (!rst_n) csr_dat_o <= 32'h0;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 191,
+          "signal": "csr_dat_o",
+          "text": "else if (csr_rd) csr_dat_o <= rdata_mux;"
+        }
+      ],
+      "context": {
+        "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
+        "events": [
+          "t-192000 cfg_timing.update tccd=0x4 tfaw=0x1e tras=0xff trc=0xff trcd=0xff trfc=0x6b trp=0xff trrd=0x5 trtp=0x5 twr=0xa twtr=0x5",
+          "t-168000 csr.read addr=0x8",
+          "t-144000 csr.write addr=0x8 data=0x0",
+          "t-144000 cfg_timing.update tccd=0x4 tfaw=0x1e tras=0x0 trc=0x0 trcd=0x0 trfc=0x6b trp=0x0 trrd=0x5 trtp=0x5 twr=0xa twtr=0x5",
+          "t-120000 csr.read addr=0x8",
+          "t-96000 csr.write addr=0x8 data=0xa5a5a5a5",
+          "t-96000 cfg_timing.update tccd=0x4 tfaw=0x1e tras=0xa5 trc=0xa5 trcd=0xa5 trfc=0x6b trp=0xa5 trrd=0x5 trtp=0x5 twr=0xa twtr=0x5",
+          "t-72000 csr.read addr=0x8",
+          "t-48000 csr.write addr=0x8 data=0x5a5a5a5a",
+          "t-48000 cfg_timing.update tccd=0x4 tfaw=0x1e tras=0x5a trc=0x5a trcd=0x5a trfc=0x6b trp=0x5a trrd=0x5 trtp=0x5 twr=0xa twtr=0x5",
+          "t-24000 csr.read addr=0x8",
+          "t+0 csr.read addr=0xc",
+          "t+0 csr_rsp.read_data (observed, wrong) addr=0xc data=0x6b1e0505 err=0x0"
+        ],
+        "value_provenance": [
+          "data: observed [31:24]=cfg_timing#4.trfc (t-48000), [23:16]=cfg_timing#4.tfaw (t-48000), [15:8]=cfg_timing#4.twtr (t-48000), [7:0]=cfg_timing#4.twtr (t-48000)",
+          "data: expected [31:24]=0x80 (no input matches), [23:16]=0x20 (no input matches), [15:8]=0x6 (no input matches), [7:0]=0x6 (no input matches)"
+        ]
+      },
+      "mechanism": null,
+      "paths": [
+        "path_10_csr_to_timing",
+        "path_11_csr_to_refresh",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_22_csr_standalone"
+      ],
+      "occurrences": 5,
+      "repro": {
+        "path": "path_10_csr_to_timing",
+        "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+        "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+        "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+        "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "csr_rsp[27] value: predicted [csr_rsp.read_data addr=0xc data=0x80200606 err=0x0] but observed [csr_rsp.read_data addr=0xc data=0x6b1e0505 err=0x0]"
+        }
+      },
+      "drop": {
+        "git_head": "56ca186bf893",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "56ca186bf893",
+      "last_seen": "56ca186bf893",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_reserved_bits_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "config_regs/MISMATCH/csr_rsp[data]@TIMING_2",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/csr_rsp[data]@TIMING_2",
+      "taxonomy_id": "CSR_001",
+      "detectors": [
+        "exact:config_regs:value",
+        "twin:config_regs"
+      ],
+      "owner_module": "config_regs",
+      "owner_candidates": [
+        "config_regs"
+      ],
+      "severity": "minor",
+      "confidence": "confirmed",
+      "title": "config_regs: MISMATCH/csr_rsp[data]@TIMING_2",
+      "requirement": "config_regs must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "csr_rsp.read_data addr=0x10 data=0x80b060c err=0x0",
+      "actual": "csr_rsp.read_data addr=0x10 data=0x709050a err=0x0",
+      "detector": "exact:config_regs:value",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 93,
+          "signal": "csr_err_o",
+          "text": "assign csr_err_o = err_r;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 190,
+          "signal": "csr_dat_o",
+          "text": "if (!rst_n) csr_dat_o <= 32'h0;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 191,
+          "signal": "csr_dat_o",
+          "text": "else if (csr_rd) csr_dat_o <= rdata_mux;"
+        }
+      ],
+      "context": {
+        "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
+        "events": [
+          "t-187000 csr_sts_level.state bist_done=0x0 bist_fail=0x0 bist_fail_addr=0x0 cal_done=0x0 cal_fail=0x0 ecc_ce_count=0x0 init_done=0x0 ref_pending=0x1 self_refresh=0x0",
+          "t-168000 csr.read addr=0xc",
+          "t-144000 csr.write addr=0xc data=0x0",
+          "t-144000 cfg_timing.update tccd=0x4 tfaw=0x0 tras=0x5a trc=0x5a trcd=0x5a trfc=0x0 trp=0x5a trrd=0x0 trtp=0x5 twr=0xa twtr=0x0",
+          "t-120000 csr.read addr=0xc",
+          "t-96000 csr.write addr=0xc data=0xa5a5a5a5",
+          "t-96000 cfg_timing.update tccd=0x4 tfaw=0xa5 tras=0x5a trc=0x5a trcd=0x5a trfc=0xa5 trp=0x5a trrd=0xa5 trtp=0x5 twr=0xa twtr=0xa5",
+          "t-72000 csr.read addr=0xc",
+          "t-48000 csr.write addr=0xc data=0x5a5a5a5a",
+          "t-48000 cfg_timing.update tccd=0x4 tfaw=0x5a tras=0x5a trc=0x5a trcd=0x5a trfc=0x5a trp=0x5a trrd=0x5a trtp=0x5 twr=0xa twtr=0x5a",
+          "t-24000 csr.read addr=0xc",
+          "t+0 csr.read addr=0x10",
+          "t+0 csr_rsp.read_data (observed, wrong) addr=0x10 data=0x709050a err=0x0"
+        ],
+        "value_provenance": [
+          "addr: observed [7:4]=csr_sts_level#1.ref_pending (t-187000), [3:0]=0",
+          "addr: expected [7:4]=csr_sts_level#1.ref_pending (t-187000), [3:0]=0",
+          "data: observed [31:24]=0x7 (no input matches), [23:16]=0x9 (no input matches), [15:8]=cfg_timing#3.trtp (t-48000), [7:0]=cfg_timing#3.twr (t-48000)",
+          "data: expected [31:24]=0x8 (no input matches), [23:16]=0xb (no input matches), [15:8]=0x6 (no input matches), [7:0]=csr#7.addr (t-24000)"
+        ]
+      },
+      "mechanism": null,
+      "paths": [
+        "path_10_csr_to_timing",
+        "path_11_csr_to_refresh",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_22_csr_standalone"
+      ],
+      "occurrences": 5,
+      "repro": {
+        "path": "path_10_csr_to_timing",
+        "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+        "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+        "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+        "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "csr_rsp[36] value: predicted [csr_rsp.read_data addr=0x10 data=0x80b060c err=0x0] but observed [csr_rsp.read_data addr=0x10 data=0x709050a err=0x0]"
+        }
+      },
+      "drop": {
+        "git_head": "56ca186bf893",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "56ca186bf893",
+      "last_seen": "56ca186bf893",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_reserved_bits_findings.json"
+      ]
+    },
+    {
+      "schema": "validation-findings/2",
+      "id": "config_regs/MISMATCH/csr_rsp[data]@TIMING_3",
+      "kind": "rtl_defect",
+      "check_id": "MISMATCH/csr_rsp[data]@TIMING_3",
+      "taxonomy_id": "CSR_001",
+      "detectors": [
+        "exact:config_regs:value",
+        "twin:config_regs"
+      ],
+      "owner_module": "config_regs",
+      "owner_candidates": [
+        "config_regs"
+      ],
+      "severity": "minor",
+      "confidence": "confirmed",
+      "title": "config_regs: MISMATCH/csr_rsp[data]@TIMING_3",
+      "requirement": "config_regs must produce the transactions the spec-derived model predicts",
+      "spec_ref": null,
+      "expected": "csr_rsp.read_data addr=0x14 data=0x186004 err=0x0",
+      "actual": "csr_rsp.read_data addr=0x14 data=0x145004 err=0x0",
+      "detector": "exact:config_regs:value",
+      "anchor": [
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 93,
+          "signal": "csr_err_o",
+          "text": "assign csr_err_o = err_r;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 190,
+          "signal": "csr_dat_o",
+          "text": "if (!rst_n) csr_dat_o <= 32'h0;"
+        },
+        {
+          "file": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+          "line": 191,
+          "signal": "csr_dat_o",
+          "text": "else if (csr_rd) csr_dat_o <= rdata_mux;"
+        }
+      ],
+      "context": {
+        "note": "the block's other interfaces in the window before the first wrong value (times relative to it, in the trace's units; oldest first)",
+        "events": [
+          "t-192000 cfg_timing.update tccd=0x4 tfaw=0x5a tras=0x5a trc=0x5a trcd=0x5a trfc=0x5a trp=0x5a trrd=0x5a trtp=0xff twr=0xff twtr=0x5a",
+          "t-168000 csr.read addr=0x10",
+          "t-144000 csr.write addr=0x10 data=0x0",
+          "t-144000 cfg_timing.update tccd=0x4 tfaw=0x5a tras=0x5a trc=0x5a trcd=0x5a trfc=0x5a trp=0x5a trrd=0x5a trtp=0x0 twr=0x0 twtr=0x5a",
+          "t-120000 csr.read addr=0x10",
+          "t-96000 csr.write addr=0x10 data=0xa5a5a5a5",
+          "t-96000 cfg_timing.update tccd=0x4 tfaw=0x5a tras=0x5a trc=0x5a trcd=0x5a trfc=0x5a trp=0x5a trrd=0x5a trtp=0xa5 twr=0xa5 twtr=0x5a",
+          "t-72000 csr.read addr=0x10",
+          "t-48000 csr.write addr=0x10 data=0x5a5a5a5a",
+          "t-48000 cfg_timing.update tccd=0x4 tfaw=0x5a tras=0x5a trc=0x5a trcd=0x5a trfc=0x5a trp=0x5a trrd=0x5a trtp=0x5a twr=0x5a twtr=0x5a",
+          "t-24000 csr.read addr=0x10",
+          "t+0 csr.read addr=0x14",
+          "t+0 csr_rsp.read_data (observed, wrong) addr=0x14 data=0x145004 err=0x0"
+        ],
+        "value_provenance": [
+          "data: observed [31:24]=0, [23:16]=csr#8.addr (t+0), [15:8]=0x50 (no input matches), [7:0]=cfg_timing#4.tccd (t-48000)",
+          "data: expected [31:24]=0, [23:16]=0x18 (no input matches), [15:8]=0x60 (no input matches), [7:0]=cfg_timing#4.tccd (t-48000)"
+        ]
+      },
+      "mechanism": null,
+      "paths": [
+        "path_10_csr_to_timing",
+        "path_11_csr_to_refresh",
+        "path_12_csr_timing_to_scheduling",
+        "path_13_csr_refresh_to_scheduling",
+        "path_22_csr_standalone"
+      ],
+      "occurrences": 5,
+      "repro": {
+        "path": "path_10_csr_to_timing",
+        "command": "python3 Validation/tools/run_path.py --path path_10_csr_to_timing",
+        "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+        "work_dir": "Validation/sequences/generated/runs/path_10_csr_to_timing",
+        "log": "Validation/reports/paths/path_12_csr_timing_to_scheduling_sim.log",
+        "trace": "Validation/reports/paths/path_12_csr_timing_to_scheduling_observed.jsonl",
+        "first_failure": {
+          "seq": null,
+          "line": "csr_rsp[45] value: predicted [csr_rsp.read_data addr=0x14 data=0x186004 err=0x0] but observed [csr_rsp.read_data addr=0x14 data=0x145004 err=0x0]"
+        }
+      },
+      "drop": {
+        "git_head": "56ca186bf893",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv"
+      },
+      "introduced_in": null,
+      "first_seen": "56ca186bf893",
+      "last_seen": "56ca186bf893",
+      "resolved_in": null,
+      "status": "open",
+      "related_manual_findings": [
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_findings.json",
+        "Validation/findings/outbox/golden_ddr3_1600k_x8_2lane_1rank/config_regs_reserved_bits_findings.json"
       ]
     }
   ],

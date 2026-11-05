@@ -1,64 +1,74 @@
-  stimulus: burst on wb_port
-burst_wb_port_seed1: 33 step(s) (32 drive, 0 idle covering 0 cycle(s)), targets ['VP_FLOW_001']
+  stimulus: saturate on wb_port
+saturate_wb_port_seed1: 241 step(s) (240 drive, 0 idle covering 0 cycle(s)), targets ['VP_FAIL_016', 'VP_FAIL_017', 'VP_FLOW_001']
   wrote Validation/sequences/generated/runs/netlist_scheduler/path_07_backpressure/seq_driver.sv
 wrote Validation/sequences/generated/runs/netlist_scheduler/path_07_backpressure/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
 
 Path    : path_07_backpressure  [composed]
 Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
-Window  : 3000 cycles settle after driver
+Window  : 6000 cycles settle after driver
 Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant)
 
-Running: xrun ... -top chain_harness  (53 file(s))
+Running: xrun ... -top chain_harness  (57 file(s))
   log -> Validation/reports/netlists/scheduler/path_07_backpressure_sim.log
-626 transaction(s)
+
+  EMBEDDED RTL ASSERTIONS FIRED (103 total) — the design's own checks disagree with its behavior:
+    p_tag                    103x
+4671 transaction(s)
     cfg_refresh.reset        1
     cfg_timing.reset         1
-    cq_deq.dequeue           32
+    cq_deq.dequeue           240
     cq_deq.reset             1
-    cq_enq.enqueue           32
+    cq_enq.enqueue           240
     cq_enq.reset             1
     csr.reset                1
     csr_rsp.reset            1
     csr_sts.reset            1
     csr_sts_level.reset      1
-    csr_sts_level.state      6
-    ddr_cmd.command          99
+    csr_sts_level.state      12
+    ddr_cmd.command          792
     ddr_cmd.reset            1
+    ddr_rd_beat.beat         190
     ddr_rd_beat.reset        1
-    ddr_wr_beat.beat         64
+    ddr_wr_beat.beat         252
     ddr_wr_beat.reset        1
+    dp_cmd.read              114
     dp_cmd.reset             1
-    dp_cmd.write             32
+    dp_cmd.write             126
     dp_rd_rsp.reset          1
+    dp_rd_rsp.response       114
     dp_wr.reset              1
-    dp_wr.write              32
-    refresh_ack.ack          3
+    dp_wr.write              126
+    refresh_ack.ack          6
     refresh_ack.reset        1
     refresh_level.reset      1
-    refresh_level.state      6
-    refresh_req.request      3
+    refresh_level.state      12
+    refresh_req.request      6
     refresh_req.reset        1
-    req.request              32
+    req.request              240
     req.reset                1
-    sched_cmd.command        99
+    sched_cmd.command        792
     sched_cmd.reset          1
-    sched_deq.grant          32
+    sched_deq.grant          240
     sched_deq.reset          1
-    sched_in.command         99
+    sched_in.command         792
     sched_in.reset           1
+    wb.read                  114
     wb.reset                 1
-    wb.write                 32
+    wb.write                 126
+    wb_rsp.read_data         114
     wb_rsp.reset             1
-  time span: 0 .. 15643000
-wrote 626 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/scheduler/path_07_backpressure_observed.jsonl
+  time span: 0 .. 39048000
+wrote 4671 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/scheduler/path_07_backpressure_observed.jsonl
 
 ==================================================================
   wb_port                      [exact     ]  PASS
-      scope=wb_port  strategy=exact  status=pass  matched=32/32  (32 output transaction(s) matched)
+      scope=wb_port  strategy=exact  status=pass  matched=354/354  WAIVED=114 field comparison(s)  (354 output transaction(s) 
   addr_decoder                 [exact     ]  PASS
-      scope=addr_decoder  strategy=exact  status=pass  matched=32/32  (32 output transaction(s) matched)
+      scope=addr_decoder  strategy=exact  status=pass  matched=240/240  (240 output transaction(s) matched)
   cmd_queue+scheduler          [invariant ]  PASS
-      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (626 transactions, no rule broken)
+      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (4671 transactions, no rule broken)
+  (conservation)               [conservation]  PASS
+      scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable
 ==================================================================
 
   path verdict : PASS

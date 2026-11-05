@@ -1,0 +1,186 @@
+[20:15:22] run preset_high-performance -> runs/matrix/preset_high-performance
+[20:15:22] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Frontend2/scripts/Microarch/microarch_cli.py --from-choices Validation/reports/spec_matrix/preset_high-performance/choices.json --out runs/matrix/preset_high-performance/spec/generated_spec.json   (cwd Frontend2/scripts/Microarch)
+[20:15:22]     
+[20:15:22]     -- resolved configuration ------------------------------------------
+[20:15:22]       Tier-1
+[20:15:22]         speed_grade              DDR3-1600
+[20:15:22]         density                  4Gb
+[20:15:22]         device_width             x8
+[20:15:22]         ranks                    1
+[20:15:22]         byte_lanes               3
+[20:15:22]         ecc_mode                 1
+[20:15:22]         scheduler_policy         fr_fcfs
+[20:15:22]         row_policy               open_page
+[20:15:22]       Tier-2 / Tier-3
+[20:15:22]         clock_ratio_ddr_to_controller 4
+[20:15:22]         command_queue_depth      32
+[20:15:22]         lookahead_depth          16
+[20:15:22]         address_mapping          row-bank-column
+[20:15:22]         burst_length             8
+[20:15:22]         host_data_width          32
+[20:15:22]         read_buffer_depth        16
+[20:15:22]         write_buffer_depth       16
+[20:15:22]         interface_type           wishbone_pipelined
+[20:15:22]         self_refresh_mode        auto
+[20:15:22]         target_frequency_mhz     200
+[20:15:22]         area_optimization_goal   balanced
+[20:15:22]         power_optimization_goal  balanced
+[20:15:22]         pipeline_latency_cycles  2
+[20:15:22]     
+[20:15:22]     -- warnings --------------------------------------------------------
+[20:15:22]         ! ecc_mode>0: SEC-DED datapath widening is only partially wired in data_path_agent -- verify generated RTL before trusting it
+[20:15:22]         ! byte_lanes=3 is unusual (expected 1/2/4/8); channel width will not be a power of 2
+[20:15:22]     
+[20:15:22]     -- JEDEC-derived (computed, not guessed) ---------------------------
+[20:15:22]         speed bin     DDR3-1600K (11-11-11)
+[20:15:22]         tCK           1.25 ns   ctrl 200.0 MHz / ddr 800.0 MHz / 1600.0 MT/s
+[20:15:22]         CL / CWL      11 / 8
+[20:15:22]         tRCD tRP tRAS tRC   11 11 28 39  nCK
+[20:15:22]         tRFC tFAW tRRD     240 32 6  nCK
+[20:15:22]         tWR tWTR tRTP tCCD  12 6 6 4  nCK
+[20:15:22]         geometry      4Gb  16 row / 10 col / 3 bank
+[20:15:22]         channel       16-bit   1024 MB   peak 3200 MB/s
+[20:15:22]     
+[20:15:22]     -- consistency -----------------------------------------------------
+[20:15:22]         [OK] 27/27 checks pass
+[20:15:22]     
+[20:15:22]       wrote /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/spec/generated_spec.json
+[20:15:22]             /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/spec/microarch_report.json
+[20:15:22] spec_synthesis         PASS     runs/matrix/preset_high-performance/spec/generated_spec.json
+[20:15:22] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Validation/spec/validate_spec_stage.py --spec runs/matrix/preset_high-performance/spec/generated_spec.json --json runs/matrix/preset_high-performance/spec/SPEC_REVIEW_round1.json
+[20:15:22]       spec      : runs/matrix/preset_high-performance/spec/generated_spec.json  rev compiled_ddr31600_x8_3lane_1rank_042f7b32
+[20:15:22]       status    : PASS   (0 blocking, 3 advisory)
+[20:15:22]       JEDEC     : 25 pass / 0 fail / 0 skipped
+[20:15:22]         note   [gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated
+[20:15:22]         note   [gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated
+[20:15:22]         note   [gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated
+[20:15:22]       human     : yes -- open decisions listed above
+[20:15:22]       wrote     : Validation/findings/outbox/current/SPEC_REVIEW.json
+[20:15:22] spec_review            PASS     3 open gap(s) carried as advisory; review: runs/matrix/preset_high-performance/spec/SPEC_REVIEW_round1.json
+[20:15:22] -- phase 1: init_fsm, config_regs, wb_port
+[20:15:22] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Frontend2/scripts/Phase1/phase1_pipeline.py   (cwd Frontend2/scripts/Phase1)
+[20:15:22]     /Users/jacob/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+[20:15:22]       warnings.warn(
+[20:15:22]     +========================================================+
+[20:15:22]     |   DDR3 Controller -- Phase 1 Pipeline (Frontend2)       |
+[20:15:22]     |                                                         |
+[20:15:22]     +========================================================+
+[20:15:22]     
+[20:15:22]     Spec JSON path: Output dir (Enter for ./output): Exception (client): Error reading SSH protocol banner[Errno 54] Connection reset by peer
+[20:15:22]     Traceback (most recent call last):
+[20:15:22]       File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2363, in _check_banner
+[20:15:22]         buf = self.packetizer.readline(timeout)
+[20:15:22]       File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 395, in readline
+[20:15:22]         buf += self._read_timeout(timeout)
+[20:15:22]       File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/packet.py", line 663, in _read_timeout
+[20:15:22]         x = self.__socket.recv(128)
+[20:15:22]     ConnectionResetError: [Errno 54] Connection reset by peer
+[20:15:22]     
+[20:15:22]     During handling of the above exception, another exception occurred:
+[20:15:22]     
+[20:15:22]     Traceback (most recent call last):
+[20:15:22]       File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2179, in run
+[20:15:22]         self._check_banner()
+[20:15:22]       File "/Users/jacob/Library/Python/3.9/lib/python/site-packages/paramiko/transport.py", line 2367, in _check_banner
+[20:15:22]         raise SSHException(
+[20:15:22]     paramiko.ssh_exception.SSHException: Error reading SSH protocol banner[Errno 54] Connection reset by peer
+[20:15:22]     
+[20:15:22]     
+[20:15:22]       Starting Phase 1 generation (deterministic, no LLM)...
+[20:15:22]     
+[20:15:22]       +- Generating config_regs (script)
+[20:15:22]     
+[20:15:22]       +- Generating init_fsm (script)
+[20:15:22]     
+[20:15:22]       +- Generating testbenches (spec-only, independent of RTL)
+[20:15:22]     
+[20:15:22]       +- Generating wb_port (script)
+[20:15:22]     ==============================================================
+[20:15:22]       WISHBONE PORT INTERFACE GENERATOR
+[20:15:22]       Spec: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/spec/generated_spec.json
+[20:15:22]     ==============================================================
+[20:15:22]     
+[20:15:22]     [1/5] Validating parameters ...
+[20:15:22]       OK: All parameters valid
+[20:15:22]         DATA_WIDTH           = 32
+[20:15:22]         ADDR_WIDTH           = 30
+[20:15:22]         GRANULARITY          = 8
+[20:15:22]         SEL_WIDTH            = 4
+[20:15:22]         BURST_TYPE           = linear
+[20:15:22]         MAX_BURST_LEN        = 8
+[20:15:22]         INTERFACE_TYPE       = wishbone_pipelined
+[20:15:22]         RD_BUFFER_DEPTH      = 16
+[20:15:22]         WR_BUFFER_DEPTH      = 16
+[20:15:22]         AUX_WIDTH            = 4
+[20:15:22]         QUEUE_DEPTH          = 32
+[20:15:22]         PIPELINE_LATENCY     = 2
+[20:15:22]         CTRL_FREQ            = 200.0
+[20:15:22]         CTRL_PERIOD          = 5.0
+[20:15:22]         ROW_BITS             = 16
+[20:15:22]         COL_BITS             = 10
+[20:15:22]         BANK_BITS            = 3
+[20:15:22]         RANKS                = 1
+[20:15:22]         BURST_CTR_WIDTH      = 4
+[20:15:22]         TAG_FIFO_DEPTH       = 16
+[20:15:22]         TAG_PTR_WIDTH        = 4
+[20:15:22]         ADDR_INC             = 4
+[20:15:22]     
+[20:15:22]     [2/5] Generating RTL ...
+[20:15:22]       OK: 315 lines of SystemVerilog
+[20:15:22]     
+[20:15:22]     [3/4] Generating port manifest ...
+[20:15:22]       OK: 24 ports | 7 assertions | 9 cover points
+[20:15:22]     
+[20:15:22]     [4/4] Writing files ...
+[20:15:22]       -> /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/PHASE1RTL/wb_port.sv
+[20:15:22]       -> /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/PHASE1RTL/wb_port_manifest.json
+[20:15:22]     
+[20:15:22]     ==============================================================
+[20:15:22]       DONE -- wb_port.sv ready for Phase 1
+[20:15:22]     ==============================================================
+[20:15:22]     
+[20:15:22]     ==============================================================
+[20:15:22]       GENERATION CHECK
+[20:15:22]     ==============================================================
+[20:15:22]       OK   config_regs     success
+[20:15:22]       OK   init_fsm        success
+[20:15:22]       OK   testbenches     success
+[20:15:22]       OK   wb_port         success
+[20:15:22]     
+[20:15:22]     ==============================================================
+[20:15:22]       TESTBENCH AUDIT GATE -- deterministic, local, spec-derived
+[20:15:22]     ==============================================================
+[20:15:22]       --   init_fsm        NO_CHECKS
+[20:15:22]       OK   config_regs     PASS
+[20:15:22]       --   wb_port         NO_CHECKS
+[20:15:22]     
+[20:15:22]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/tb_audit_report.json
+[20:15:22]     
+[20:15:22]     ==============================================================
+[20:15:22]       LINT GATE -- Verilator Static Analysis
+[20:15:22]     ==============================================================
+[20:15:22]       SKIP: SSH failed: Error reading SSH protocol banner[Errno 54] Connection reset by peer
+[20:15:22]     
+[20:15:22]     ==============================================================
+[20:15:22]       PHASE 1 PIPELINE FAILED AT LINT GATE
+[20:15:22]     ==============================================================
+[20:15:22]     
+[20:15:22]       Generation succeeded, but Verilator found a real static
+[20:15:22]       issue (width mismatch, syntax error, etc.) -- not a retry-able
+[20:15:22]       fluke. Fix the generator directly; see lint_report.json.
+[20:15:22]     
+[20:15:22]       NOTE: this gate was SKIPPED (SSH failed: Error reading SSH protocol banner[Errno 54] Connection reset by peer), not run. A skipped gate
+[20:15:22]       is not a pass: export OLYMPUS_USER / OLYMPUS_KEY, or set
+[20:15:22]       ALLOW_SKIPPED_GATES=1 to proceed explicitly unverified.
+[20:15:22]     
+[20:15:22]       Error report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase1_error_report.json
+[20:15:22] rtl_generation         FAIL     phase 1 failed at LINT (); its own fix agent, pass 1
+[20:15:22] -- phase 1 validation agent on the Frontend's own error report
+[20:15:22] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Frontend2/scripts/Phase1/phase1_validation_agent.py --output-dir runs/matrix/preset_high-performance/drop --spec runs/matrix/preset_high-performance/spec/generated_spec.json --yes   (cwd Frontend2/scripts/Phase1)
+[20:15:22]     This phase failed at LINT, not BEHAVIORAL_SIMULATION -- this agent only patches RTL generators in response to a real sim failure, and only understands sim_result's shape.
+[20:15:22] rtl_generation         AGENT    phase 1 agent exited 1; fixed: none
+[20:15:22] rtl_generation         FAIL     phase 1 failed at LINT ()
+[20:15:22] rtl_generation         HALT     phase 1 failed at LINT (). its fix agent (Frontend2/scripts/Phase1/phase1_validation_agent.py) ran 1 time(s) on the Frontend's own error report and did not clear it; fix by hand, then resume.
+[20:15:22] HALTED at rtl_generation: phase 1 failed at LINT (). its fix agent (Frontend2/scripts/Phase1/phase1_validation_agent.py) ran 1 time(s) on the Frontend's own error report and did not clear it; fix by hand, then resume.
+[20:15:22] resume with: python3 flow.py --resume runs/matrix/preset_high-performance
+[20:15:22] state: halted  (runs/matrix/preset_high-performance/RUN_STATE.json)

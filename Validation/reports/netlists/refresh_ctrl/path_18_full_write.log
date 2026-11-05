@@ -8,9 +8,12 @@ Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path
 Window  : 2000 cycles settle after driver
 Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant); cmd_gen(exact); data_path(exact)
 
-Running: xrun ... -top chain_harness  (53 file(s))
+Running: xrun ... -top chain_harness  (57 file(s))
   log -> Validation/reports/netlists/refresh_ctrl/path_18_full_write_sim.log
-413 transaction(s)
+
+  EMBEDDED RTL ASSERTIONS FIRED (9 total) — the design's own checks disagree with its behavior:
+    p_tag                    9x
+455 transaction(s)
     cfg_refresh.reset        1
     cfg_timing.reset         1
     cq_deq.dequeue           24
@@ -22,7 +25,7 @@ Running: xrun ... -top chain_harness  (53 file(s))
     csr_sts.reset            1
     csr_sts_level.reset      1
     csr_sts_level.state      4
-    ddr_cmd.command          50
+    ddr_cmd.command          64
     ddr_cmd.reset            1
     ddr_rd_beat.beat         24
     ddr_rd_beat.reset        1
@@ -43,38 +46,34 @@ Running: xrun ... -top chain_harness  (53 file(s))
     refresh_req.reset        1
     req.request              24
     req.reset                1
-    sched_cmd.command        50
+    sched_cmd.command        64
     sched_cmd.reset          1
     sched_deq.grant          24
     sched_deq.reset          1
-    sched_in.command         50
+    sched_in.command         64
     sched_in.reset           1
     wb.read                  12
     wb.reset                 1
     wb.write                 12
     wb_rsp.read_data         12
     wb_rsp.reset             1
-  time span: 0 .. 7938000
-wrote 413 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/refresh_ctrl/path_18_full_write_observed.jsonl
+  time span: 0 .. 7948000
+wrote 455 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/netlists/refresh_ctrl/path_18_full_write_observed.jsonl
 
 ==================================================================
   wb_port                      [exact     ]  PASS
-      scope=wb_port  strategy=exact  status=pass  matched=36/36  (36 output transaction(s) matched)
+      scope=wb_port  strategy=exact  status=pass  matched=36/36  WAIVED=12 field comparison(s)  (36 output transaction(s) matc
   addr_decoder                 [exact     ]  PASS
       scope=addr_decoder  strategy=exact  status=pass  matched=24/24  (24 output transaction(s) matched)
   cmd_queue+scheduler          [invariant ]  PASS
-      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (413 transactions, no rule broken)
+      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (455 transactions, no rule broken)
   cmd_gen                      [exact     ]  PASS
-      scope=cmd_gen  strategy=exact  status=pass  matched=50/50  (50 output transaction(s) matched)
-  data_path                    [exact     ]  FAIL
-      scope=data_path  strategy=exact  status=fail  matched=24/36  value=12
-        dp_rd_rsp[0] value: predicted [dp_rd_rsp.response aux=0x1 data=0x1027c4d1] but observed [dp_rd_rsp.response aux=0x1 data=0xc4d10000]
-        dp_rd_rsp[1] value: predicted [dp_rd_rsp.response aux=0x3 data=0x7311d8a3] but observed [dp_rd_rsp.response aux=0x3 data=0xd8a30000]
-        dp_rd_rsp[2] value: predicted [dp_rd_rsp.response aux=0x5 data=0xc9e9c616] but observed [dp_rd_rsp.response aux=0x5 data=0xc6160000]
-        dp_rd_rsp[3] value: predicted [dp_rd_rsp.response aux=0x7 data=0x7ce42c82] but observed [dp_rd_rsp.response aux=0x7 data=0x2c820000]
-        dp_rd_rsp[4] value: predicted [dp_rd_rsp.response aux=0x9 data=0x7204e52d] but observed [dp_rd_rsp.response aux=0x9 data=0xe52d0000]
-        dp_rd_rsp[5] value: predicted [dp_rd_rsp.response aux=0xb data=0x51431193] but observed [dp_rd_rsp.response aux=0xb data=0x11930000]
+      scope=cmd_gen  strategy=exact  status=pass  matched=64/64  (64 output transaction(s) matched)
+  data_path                    [exact     ]  PASS
+      scope=data_path  strategy=exact  status=pass  matched=36/36  (36 output transaction(s) matched)
+  (conservation)               [conservation]  PASS
+      scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable
 ==================================================================
 
-  path verdict : FAIL
+  path verdict : PASS
   report -> Validation/reports/netlists/refresh_ctrl/path_18_full_write_report.json
