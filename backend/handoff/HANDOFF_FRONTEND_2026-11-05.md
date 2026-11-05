@@ -13,9 +13,10 @@ LVS netlists match on 14,398 real nets. No RTL change -- your drop
 first full sign-off PASS the project has produced.
 
 Two things to read before celebrating too hard. Section 6: the margin is 22
-picoseconds at one corner. Section 7: Jacob's validation run landed while we
-were building this and the tree **simulates clean, 23/23 paths** -- but three
-critical formal findings are still open in the ledger.
+picoseconds at one corner. Section 7: validation pushed twice while this was
+being written -- the tree **simulates clean and two scheduler formal findings
+are now closed**, but the newest run reports FAIL on `config_regs` and we think
+that is a spec-label mismatch rather than a defect. Jacob needs to settle it.
 
 ## 1. The sweep
 
@@ -157,75 +158,120 @@ not worth the builds. **Margin at spec is the open exposure, not speed above
 spec.** If we spend compute on timing again it should go toward margin at 200
 MHz, not toward 210.
 
-## 7. Validation landed while we were building this. The tree simulates.
+## 7. Validation moved twice while we were writing this
 
-Jacob pushed `b83b87c` -- a complete validation run on `56ca186bf893` -- a few
-hours before this was written. It answers the question the last two handoffs
-have been carrying as the open item, and it answers it well.
+Two pushes landed during this write-up -- `b83b87c` at 00:32 and `f7d2d02` at
+17:14. They point in opposite directions and the second one needs a decision
+from Jacob before anyone quotes a validation status. Here is the state as we
+read it.
 
-**All 23 paths PASS.** 20 runnable paths simulated, 3 derived paths taking their
-verdict from their host run, 0 blocked, no module failed. `HANDOFF.json` reports
-`"status": "PASS"`, `"failed_modules": []`, and `DROP_STATUS.json` records
-"complete run: every runnable path simulated on this drop."
+### The simulation gap is closed, and the scheduler is clean in both runs
 
-**The stronger result is in the drop comparison.** Against `2bea54c5eac1` --
-which predates *both* the saturating countdown and the tree -- **22 of the 23
-paths produced byte-identical observed transaction streams** (`kind: "same"`).
-The only path that changed at all is `path_21_wb_port_standalone`, from the
-HOST_001 work, and it still passes.
+**The tree simulates.** In the 00:32 run all 23 paths PASS. Better than that,
+the drop comparison against `2bea54c5eac1` -- which predates *both* the
+saturating countdown and the tree -- shows **22 of 23 paths produced
+byte-identical observed transaction streams** (`kind: "same"`). The only one
+that moved is `path_21_wb_port_standalone`, from the HOST_001 work, and it still
+passes.
 
-That means two substantial RTL rewrites in a row produced **no observable
-behavioural difference on any scheduler path** -- `path_04_scheduler_bank_loop`,
+Two substantial RTL rewrites, and **no observable behavioural change on any
+scheduler path**: `path_04_scheduler_bank_loop`,
 `path_05_scheduler_refresh_loop`, `path_06_scheduler_dequeue`,
 `path_19_row_conflict` and `path_20_refresh_preempt` all come back `same` /
 `pass`. Your 200,000-trial Python model predicted the tree was
-arbitration-equivalent. The simulator now agrees with it on real stimulus
-through the full chain. That is about as direct a confirmation as this project
-can produce.
+arbitration-equivalent; the simulator agrees on real stimulus through the full
+chain. All five still pass in the 17:14 run too.
 
-So: your Python model, the four chip builds, and Jacob's 23 paths now agree. The
-gap we have been flagging since 11-03 is closed.
+Your model, four chip builds, and Jacob's paths now agree. The item we have
+been carrying since 11-03 is closed.
 
-### What is still open, and why it is not yours
+### Two critical findings got closed by formal
 
-Three findings remain in the ledger, all `severity: critical`:
+`SIGNOFF.md` records a 60-minute concrete JasperGold run on this design:
+**12 properties proven at infinite bound, and `PROTO_001` and `TIMING_008` are
+closed.** Those are the two scheduler findings -- READ-after-PRE without an
+intervening ACT, and PRE-after-WRITE violating tWR. Both are gone from the
+ledger.
 
-| id | module | status | first seen |
+`HOST_001` remains open at `awaiting_formal`, now with no counterexample against
+the corrected 968-cycle bound (the old 254-cycle counterexample was against the
+old bound). `PROTO_002` is undetermined at 67. Neither is a scheduler item.
+
+### The 17:14 run reports FAIL, and we think the label is wrong
+
+`findings/outbox/current/HANDOFF.json` now reads `"status": "FAIL"`,
+`"failed_modules": ["config_regs"]`, with 4 of 23 paths failing --
+`path_10_csr_to_timing`, `path_11_csr_to_refresh`,
+`path_12_csr_timing_to_scheduling`, `path_13_csr_refresh_to_scheduling` -- and
+7 new `minor` config_regs mismatches, all `first_seen: 56ca186bf893`.
+
+**We do not think this is a defect in the drop, and the arithmetic is clean
+enough to be worth your five minutes.**
+
+The headline mismatch:
+
+```
+expected  cfg_refresh.update ... trefi=0x1860 ...     (6240)
+actual    cfg_refresh.update ... trefi=0x1450 ...     (5200)
+```
+
+6240 / 5200 = **1.2 exactly**. And both values decode:
+
+| | clock | tREFI 7.8 us | x window_scale 4 |
 |---|---|---|---|
-| `formal/scheduler/PROTO_001` | scheduler | `awaiting_formal` | drop `1fea117` |
-| `formal/scheduler/TIMING_008` | scheduler | `awaiting_formal` | drop `1fea117` |
-| `formal/wb_port/HOST_001` | wb_port | `awaiting_formal` | drop `99f72da45a32` |
+| DDR3-1600 (1600/8 = 200 MHz, 5.0 ns) | 5.0 ns | 1560 | **6240 = 0x1860** = `expected` |
+| DDR3-1333 (1333/8 = 166.67 MHz, 6.0 ns) | 6.0 ns | 1300 | **5200 = 0x1450** = `actual` |
 
-Four things about these, because two of them name `scheduler` and that will
-look alarming next to a tree rewrite:
+Both sides land exactly on a speed bin. This is not a counter that is slightly
+off; it is **two different speed grades being compared to each other.**
 
-1. **None are tree-introduced.** All three have `first_seen` on drops that
-   predate `56ca186bf893`, and `confidence: unverified` with
-   `status: awaiting_formal` -- they are carried forward from earlier JasperGold
-   runs and are awaiting re-prove on this drop, not newly found on it.
-2. **All three are formal-only.** `detectors: ["formal:jaspergold"]`, and each
-   one's mechanism says explicitly it was never reached in simulation. They are
-   counterexamples under a free protocol-legal host, in interleavings no path
-   stimulus produces.
-3. **The two scheduler ones are anchored to `PHASE3RTL/scheduler.sv` and
-   `PHASE2RTL/bank_tracker.sv`**, not to the `TOPRTL` tree we built. Worth
-   someone confirming which tree the formal harness actually elaborated before
-   anyone acts on them.
-4. **They are bank-state and timing-protocol issues, not arbitration issues.**
-   PROTO_001 is a READ one cycle after a PRE to the same bank with no ACT
-   between; TIMING_008 is a PRE one cycle after a WRITE to the same bank
-   (tWR). Both are about whether `bank_tracker` gating lets a command through,
-   which is a different question from which entry the tree selects.
+The corroboration is in the same push. `txn/generated/schemas.json` was
+regenerated and now declares:
 
-Note also that Jacob's own `SIGNOFF.md` §2 defines Drop PASS as every path
-passing **and** no critical finding open. His tooling issued PASS with these
-three sitting at `awaiting_formal`, which is a defensible reading -- unverified
-is not confirmed -- but it is a judgement call, not an arithmetic one, and
-somebody should say out loud which reading the final report uses. We are not
-the right people to decide that; we are flagging that it needs deciding.
+```
+spec_source   : ddr3_mc_1333_x8_2lane_1rank
+spec_revision : compiled_ddr31333_x8_2lane_1rank_1ebcc694
+manifest      : runs/matrix/preset_balanced/drop/PHASE1RTL/config_regs_manifest.json
+```
 
-**Nothing here is a backend ask or, as far as we can tell, a frontend ask
-either.** It is a formal re-prove on the current drop.
+while `HANDOFF.json` and `DROP_STATUS.json` from the same commit still claim
+`golden_ddr3_1600k_x8_2lane_1rank` and `spec_id 00d082c3f72d1b34`.
+`revision_ids.json` gives the 1333 spec a different id, `d4550ccb88541f32`.
+
+So the most likely reading: **the 17:14 run is a spec-matrix run on the new
+DDR3-1333 `preset_balanced` spec** (`spec/spec_matrix.json` and
+`tools/spec_matrix.py` are both new in this push, built 02:09 today), and its
+results were written into `current/` and archived under the *golden 1600*
+directory carrying the golden label. The config_regs mismatch would then be
+stimulus from one spec checked against expectations from the other -- a harness
+bookkeeping inconsistency, not an RTL bug.
+
+**That is a hypothesis, not a conclusion, and it is Jacob's to settle** -- he
+can check which spec the harness elaborated in one command and we cannot. We
+are flagging it because the alternative reading is that drop `56ca186bf893`
+genuinely regressed config_regs between 00:32 and 17:14 on byte-identical RTL,
+which is not possible, so something in the labelling has to give.
+
+Two things we are confident of either way:
+
+1. **No scheduler, cmd_queue or data_path path fails in either run.** All four
+   failures are CSR-timing-programming paths. Whatever this is, it is not the
+   tree and not the countdown.
+2. **It does not touch the backend result.** The chip was built from `TOPRTL` at
+   `56ca186bf893`, the netlist is what it is, and DRC/LVS/STA are measurements
+   on that netlist. A spec-label question upstream does not move 22 ps of slack.
+
+### One thing the spec matrix does imply for us
+
+If the matrix becomes part of the bar -- and a greedy pairwise cover over speed
+grade, density, width, ranks, lanes and ECC mode is a lot of specs -- then note
+that **the backend has only ever built the golden DDR3-1600 spec.** Every number
+in this document is that one spec at one corner. A DDR3-1333 drop would want a
+6.0 ns constraint rather than 5.0, which we would expect to close with far more
+margin than 22 ps, but we have not built it and will not claim it.
+
+That is worth deciding deliberately rather than discovering at the end, and it
+is squarely the full-pipeline integration question rather than a frontend one.
 
 ## 8. Two housekeeping notes
 
@@ -258,8 +304,10 @@ on `DESIGN_NAME`, so two concurrent builds would overwrite each other.
 | Remaining margin | **22 ps, typical corner only** -- the real exposure |
 | Fmax sweep above 200 MHz | **declined** -- margin matters more than headroom |
 | Next RTL target *if ever needed* | `sel_idx_r` -> `sel_onehot_r`/`sel_type_r`, 28 levels |
-| Functional simulation of the tree | **PASS** -- 23/23 paths, 22 byte-identical to the pre-tree drop |
-| Open critical findings | **3**, all formal-only and `awaiting_formal`, none tree-introduced |
+| Functional simulation of the tree | **PASS** -- 23/23 at 00:32, 22 byte-identical to the pre-tree drop |
+| Scheduler formal findings | **`PROTO_001` and `TIMING_008` CLOSED** by the 60-min concrete run |
+| Open critical findings | **1** -- `formal/wb_port/HOST_001`, `awaiting_formal`, not a scheduler item |
+| 17:14 run reporting FAIL on config_regs | **likely a spec-label mismatch** (1600 vs 1333) -- Jacob's to settle, section 7 |
 
 The tree is what closed this. Two chained 16-deep ripples would not have gotten
 to 0.12 ns no matter what we did to the floorplan, and the floorplan lever only
