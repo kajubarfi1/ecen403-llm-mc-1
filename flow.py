@@ -460,11 +460,23 @@ def _phase_report(run, n):
 
 
 def _check_frontend_sim_env(run):
-    if not os.environ.get("OLYMPUS_KEY"):
+    """The Frontend phase pipelines reach Olympus to lint and simulate, and a
+    non-interactive run cannot answer a credential prompt. Either credential
+    satisfies that: a passphrase-less key, or OLYMPUS_PASSWORD, which the phase
+    pipelines and the lint paths read as of ff03df9 (before that it was
+    documented but never read, so a password-only setup authenticated with
+    nothing). Key auth is still preferable where it works -- on some hosts
+    sshd refuses keys for reasons invisible from a user shell, and a password
+    in a file is the pragmatic fallback, not the better option."""
+    if not (os.environ.get("OLYMPUS_KEY") or os.environ.get("OLYMPUS_PASSWORD")):
         return run.halt("rtl_generation",
-                        "the Frontend phase pipelines prompt for an Olympus password unless "
-                        "OLYMPUS_USER and OLYMPUS_KEY (path to a private key) are exported; a "
-                        "non-interactive run cannot answer that prompt. Export them and resume.")
+                        "the Frontend phase pipelines reach Olympus and cannot answer a "
+                        "credential prompt in a non-interactive run. Set OLYMPUS_USER plus "
+                        "either OLYMPUS_KEY (path to a passphrase-less private key) or "
+                        "OLYMPUS_PASSWORD, in Validation/setup.env or the shell, and resume.")
+    # OLYMPUS_USER is deliberately NOT gated here. sim_runner raises its own
+    # clear error without it, and it can legitimately come from ~/.ssh/config
+    # rather than the environment -- halting on it would stop a working run.
     return 0
 
 
@@ -1331,7 +1343,8 @@ def plan(args):
     print(f"  7 backend_to_frontend   edge      backend/findings/outbox -> retry package -> phase agents -> validate again")
     print(f"  8 final_validation      Validation  backend netlists through the paths (run_path --netlist, sky130 models)")
     print(f"  env: ANTHROPIC_API_KEY {'set' if os.environ.get('ANTHROPIC_API_KEY') else 'MISSING'}, "
-          f"OLYMPUS_KEY {'set' if os.environ.get('OLYMPUS_KEY') else 'MISSING (phase pipelines would prompt)'}, "
+          f"Olympus {'key' if os.environ.get('OLYMPUS_KEY') else 'password' if os.environ.get('OLYMPUS_PASSWORD') else 'NO CREDENTIAL (stages 3-5, 7, 8 would halt)'}"
+          f"{'' if os.environ.get('OLYMPUS_USER') else ' but no OLYMPUS_USER'}, "
           f"USE_DOCKER {os.environ.get('USE_DOCKER') or 'unset'}")
 
 

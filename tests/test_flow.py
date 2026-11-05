@@ -910,5 +910,44 @@ class TestPerBlockNetlists(FlowCase):
         self.assertIn("gate-level", run.state["halt"]["why"])
 
 
+class TestOlympusCredential(FlowCase):
+    """Either credential satisfies the Olympus gate. OLYMPUS_PASSWORD became
+    real in ff03df9 -- before that the phase pipelines and lint paths never
+    read it, so a password-only setup authenticated with nothing."""
+
+    def tearDown(self):
+        os.environ.pop("OLYMPUS_PASSWORD", None)
+        super().tearDown()
+
+    def test_a_password_alone_satisfies_the_gate(self):
+        os.environ.pop("OLYMPUS_KEY", None)
+        os.environ["OLYMPUS_PASSWORD"] = "x"
+        rc, run = self.go(Fake(self.run_dir), skip_backend=True)
+        # rtl_generation records once per phase plus the top-level assembly
+        got = [s["status"] for s in run.state["stages"] if s["stage"] == "rtl_generation"]
+        self.assertTrue(got, "the gate let rtl_generation run")
+        self.assertEqual(set(got), {"PASS"})
+        self.assertIsNone(run.state.get("halt"))
+
+    def test_a_key_alone_still_satisfies_the_gate(self):
+        os.environ.pop("OLYMPUS_PASSWORD", None)
+        os.environ["OLYMPUS_KEY"] = "/fake/key"
+        rc, run = self.go(Fake(self.run_dir), skip_backend=True)
+        got = [s["status"] for s in run.state["stages"] if s["stage"] == "rtl_generation"]
+        self.assertTrue(got)
+        self.assertEqual(set(got), {"PASS"})
+        self.assertIsNone(run.state.get("halt"))
+
+    def test_neither_credential_halts_before_any_phase_runs(self):
+        os.environ.pop("OLYMPUS_KEY", None)
+        os.environ.pop("OLYMPUS_PASSWORD", None)
+        fake = Fake(self.run_dir)
+        rc, run = self.go(fake, skip_backend=True)
+        self.assertEqual((run.state.get("halt") or {}).get("stage"), "rtl_generation")
+        self.assertIn("OLYMPUS_PASSWORD", run.state["halt"]["why"])
+        # halted before spending anything on a phase pipeline
+        self.assertFalse([c for c in fake.calls if c[0].startswith("phase")])
+
+
 if __name__ == "__main__":
     unittest.main()
