@@ -1,44 +1,63 @@
 {
   "$schema": "validation-drop-comparison/1",
   "a": {
-    "dir": "Validation/reports/drops/e4d883ad50e0",
-    "drop_head": "e4d883ad50e0"
+    "dir": "Validation/reports/drops/e6e1ab286a8f",
+    "drop_head": "e6e1ab286a8f"
   },
   "b": {
-    "dir": "Validation/reports/paths",
-    "drop_head": "56ca186bf893"
+    "dir": "runs/matrix/preset_high-performance/validation/reports",
+    "drop_head": "c3135943228e"
   },
   "strict": false,
-  "generated_utc": "2026-11-05T17:45:25.949736Z",
+  "generated_utc": "2026-11-05T18:08:03.263592Z",
   "rows": [
     {
       "path": "path_01_write_cmd",
-      "kind": "same",
+      "kind": "changed",
+      "new": {
+        "assert:p_stall_hold": 1,
+        "id:DRIVER_STALL": 3,
+        "log:DRIVER_STALL": 3,
+        "stage:(host handshake)": 1
+      },
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {
+        "matched:addr_decoder": [
+          19,
+          18
+        ],
+        "matched:wb_port": [
+          19,
+          18
+        ]
+      },
+      "matched_up": {
+        "matched:cmd_gen": [
+          51,
+          59
+        ]
+      },
+      "verdict": [
+        "pass",
+        "fail"
+      ]
+    },
+    {
+      "path": "path_02_read_cmd",
+      "kind": "fixed",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "pass"
-      ]
-    },
-    {
-      "path": "path_02_read_cmd",
-      "kind": "regression",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {
+      "matched_up": {
         "matched:cmd_gen": [
-          147,
-          138
+          138,
+          147
         ]
       },
-      "matched_up": {},
       "verdict": [
         "pass",
         "pass"
@@ -60,8 +79,13 @@
     },
     {
       "path": "path_04_scheduler_bank_loop",
-      "kind": "same",
-      "new": {},
+      "kind": "regression",
+      "new": {
+        "assert:p_stall_hold": 1,
+        "id:DRIVER_STALL": 3,
+        "log:DRIVER_STALL": 3,
+        "stage:(host handshake)": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
@@ -69,13 +93,20 @@
       "matched_up": {},
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
       "path": "path_05_scheduler_refresh_loop",
-      "kind": "same",
-      "new": {},
+      "kind": "regression",
+      "new": {
+        "assert:p_stall_hold": 1,
+        "assert:p_wr_no_overflow": 6,
+        "id:DRIVER_STALL": 148,
+        "log:DRIVER_STALL": 148,
+        "stage:(conservation)": 1,
+        "stage:(host handshake)": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
@@ -83,7 +114,7 @@
       "matched_up": {},
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
@@ -102,16 +133,30 @@
     },
     {
       "path": "path_07_backpressure",
-      "kind": "same",
-      "new": {},
+      "kind": "changed",
+      "new": {
+        "assert:a_HOST_002": 126,
+        "assert:p_wr_no_overflow": 5,
+        "stage:(conservation)": 1,
+        "stage:wb_port": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {},
+      "matched_up": {
+        "matched:addr_decoder": [
+          240,
+          252
+        ],
+        "matched:wb_port": [
+          354,
+          362
+        ]
+      },
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
@@ -256,32 +301,12 @@
     },
     {
       "path": "path_18_full_write",
-      "kind": "changed",
-      "new": {},
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {
-        "matched:data_path": [
-          60,
-          36
-        ]
+      "kind": "regression",
+      "new": {
+        "assert:a_HOST_002": 12,
+        "stage:(host memory)": 1,
+        "stage:wb_port": 1
       },
-      "matched_up": {
-        "matched:cmd_gen": [
-          62,
-          64
-        ]
-      },
-      "verdict": [
-        "pass",
-        "pass"
-      ]
-    },
-    {
-      "path": "path_19_row_conflict",
-      "kind": "same",
-      "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
@@ -289,26 +314,61 @@
       "matched_up": {},
       "verdict": [
         "pass",
-        "pass"
+        "fail"
+      ]
+    },
+    {
+      "path": "path_19_row_conflict",
+      "kind": "regression",
+      "new": {
+        "assert:p_stall_hold": 1,
+        "id:DRIVER_STALL": 3,
+        "log:DRIVER_STALL": 3,
+        "stage:(host handshake)": 1
+      },
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "pass",
+        "fail"
       ]
     },
     {
       "path": "path_20_refresh_preempt",
-      "kind": "regression",
-      "new": {},
+      "kind": "changed",
+      "new": {
+        "assert:p_stall_hold": 1,
+        "assert:p_wr_no_overflow": 6,
+        "id:DRIVER_STALL": 148,
+        "log:DRIVER_STALL": 148,
+        "stage:(conservation)": 1,
+        "stage:(host handshake)": 1
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {
-        "matched:cmd_gen": [
-          1900,
-          1844
+        "matched:addr_decoder": [
+          600,
+          599
+        ],
+        "matched:wb_port": [
+          600,
+          599
         ]
       },
-      "matched_up": {},
+      "matched_up": {
+        "matched:cmd_gen": [
+          1844,
+          2120
+        ]
+      },
       "verdict": [
         "pass",
-        "pass"
+        "fail"
       ]
     },
     {
@@ -341,21 +401,16 @@
     },
     {
       "path": "path_23_host_ack_collision",
-      "kind": "regression",
+      "kind": "same",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {
-        "matched:data_path": [
-          211,
-          127
-        ]
-      },
+      "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "pass",
-        "pass"
+        "fail",
+        "fail"
       ]
     }
   ]

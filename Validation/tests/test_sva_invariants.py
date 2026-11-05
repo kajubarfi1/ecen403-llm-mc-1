@@ -119,3 +119,22 @@ class CounterRules(unittest.TestCase):
         self.assertIn("##[0:HOST_001_BOUND] (wb_ack_o)", src)
         self.assertIn("parameter int HOST_001_BOUND", src)
         self.assertIn("c_HOST_001: cover property", src)
+
+
+class OrderRules(unittest.TestCase):
+    """An order rule: completions come back in the order their requests were
+    accepted (HOST_002, host_interface.ack_ordering = in_request_order)."""
+
+    def test_order_rule_generates_ring_and_check(self):
+        import json as _json
+        spec = _json.load(open(SG.SPEC_PATH))
+        grp = {"name": "host_port", "block": "wb_port", "order_rules": [{
+            "id": "HOST_002", "push": "wb_cyc_i && wb_stb_i && !wb_stall_o", "kind": "wb_we_i",
+            "pop": "wb_ack_o", "observed_kind": "!rsp_valid", "cover": "wb_ack_o", "depth": 32,
+            "requirement": "Host acknowledges in request order: oldest first."}]}
+        mod, src, block, ids = SG.generate_signal_group(spec, grp, {}, {})
+        self.assertEqual(ids, ["HOST_002"])
+        self.assertIn("parameter int HOST_002_DEPTH = 32", src)
+        self.assertIn("HOST_002_kind[HOST_002_wp % HOST_002_DEPTH] <= (wb_we_i)", src)
+        self.assertIn("HOST_002_kind[HOST_002_rp % HOST_002_DEPTH] == (!rsp_valid)", src)
+        self.assertIn("a_HOST_002: assert property", src)

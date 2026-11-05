@@ -166,7 +166,8 @@
   "proposed_taxonomy_extensions": {
     "$why": "The taxonomy bounds every timing parameter except tREFI. tREFI is a MAXIMUM interval, not a minimum separation, so it needs its own rule kind; JESD79-3 allows up to max_postpone_count refreshes to be deferred, so the observable bound is (max_postpone_count + 1) x tREFI between REFRESH commands.",
     "TIMING_012": "tREFI violation: no REFRESH issued within (max_postpone_count + 1) x tREFI of the previous REFRESH.",
-    "HOST_001": "Host acknowledge accounting: an accepted beat is acknowledged other than exactly once (a write-ack and a read-ack merged on the one ack line, or an ack owed indefinitely). Found by formal and a directed sequence 2026-10-28/29 as the write/read ack collision; stated as a counting rule since the fix."
+    "HOST_001": "Host acknowledge accounting: an accepted beat is acknowledged other than exactly once (a write-ack and a read-ack merged on the one ack line, or an ack owed indefinitely). Found by formal and a directed sequence 2026-10-28/29 as the write/read ack collision; stated as a counting rule since the fix.",
+    "HOST_002": "Host acknowledge ordering: an acknowledge completes a beat that is not the oldest outstanding one (host_interface.ack_ordering = in_request_order). Decided by the spec owner 2026-11-05; the port acknowledges a write one cycle after acceptance and a read when its data returns, so a write accepted after a read is acknowledged first."
   },
   "max_interval_rules": [
     {
@@ -301,6 +302,9 @@
     ],
     "HOST_*": [
       "wb_port"
+    ],
+    "HOST_002": [
+      "wb_port"
     ]
   },
   "signal_groups": [
@@ -381,6 +385,19 @@
           "requirement": "Host acknowledge accounting: every beat the port accepts (wb_cyc_i && wb_stb_i && !wb_stall_o) is acknowledged exactly once on wb_ack_o, whatever collides with it; never an acknowledge no beat is owed, and never a beat owed one for longer than a read's worst-case service time.",
           "spec_ref": "host_interface.interface_type (wishbone_pipelined: one acknowledge per accepted beat)",
           "$bound_note": "A beat at the back of a full command queue waits one worst-case row cycle (tRC in the design's enforced window) per entry ahead of it, plus a refresh and pipeline slack. The first bound (one read's service time, 252 cycles) produced a formal counterexample at 254 cycles that was a long queue, not a lost acknowledge (2026-11-04)."
+        }
+      ],
+      "order_rules": [
+        {
+          "id": "HOST_002",
+          "push": "wb_cyc_i && wb_stb_i && !wb_stall_o",
+          "kind": "wb_we_i",
+          "pop": "wb_ack_o",
+          "observed_kind": "!rsp_valid",
+          "cover": "wb_ack_o && !rsp_valid && $past(wb_cyc_i && wb_stb_i && !wb_stall_o && !wb_we_i)",
+          "depth": 64,
+          "requirement": "Host acknowledges in request order: the beat an acknowledge completes is the oldest outstanding one (a write ack, wb_ack_o without rsp_valid, may not be delivered while an earlier read is still waiting for its data; a B4 pipelined master has no transaction id and matches acknowledges to requests by arrival order).",
+          "spec_ref": "host_interface.ack_ordering = in_request_order (decided 2026-11-05)"
         }
       ]
     }

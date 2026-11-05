@@ -998,3 +998,105 @@ two should run the rest of the way.
 
 Matrix results in full: `Validation/reports/spec_matrix/summary.json`
 and `level1_findings.md`.
+
+## Addendum 16 (2026-11-05, afternoon): your compiler fixes, the whole Tier-1 space, and the ordering decision
+
+**The five defects are fixed, verified two ways.** The matrix rebuilt
+under your compiler (it now rejects the configurations it used to let
+through, with the real reasons: 42 specs instead of 50, 65 infeasible
+pairs instead of 33): 40 of 42 pass review. Your Tier-1 sweep export
+through level 1: **1152 of 1200 compiling combinations pass the spec
+review**, in two seconds, and the 48 that do not share one new
+message:
+
+6. **`BIST_ADDR_START/END` reserved field `31:32`** whenever
+   `address_width_bits` is exactly 32 (pair_08, pair_20 and 48 sweep
+   specs: 4Gb/8Gb at the lane counts that land on a 32-bit space). The
+   register-map builder writes a reserved range above the address even
+   when there is no bit left; at 32 bits the field should be omitted.
+   The twin of defect 2, one bit lower.
+
+That leaves one blocking message across every Tier-1 combination the
+compiler accepts, so after this fix the structural claim is "every
+Tier-1 combination compiles to a spec that passes review".
+
+**`data_bus_cycles_per_cas = 2`** (an integer): our intake rule listed
+an integer as an option but compared by equality; it accepts any
+positive integer now. Thank you for answering all three decisions in
+the compiler; they clear from every review.
+
+**Ack ordering is now a check, and your port fails it.** With
+`host_interface.ack_ordering = in_request_order` decided, the port's
+host side has a second generated rule, HOST_002: every acknowledge must
+complete the oldest outstanding beat (a write ack, `wb_ack_o` without
+`rsp_valid`, may not be delivered while an earlier read is still
+waiting). On path_23 it fires 76 times, once per (read, write) pair:
+the write is acknowledged one cycle after acceptance, the read tens of
+cycles later. That is exactly what you said was not yet enforced, and
+it is now `wb_port/HOST_002` in the package, major, routed to Phase
+1. The fix shape is the one you already built for HOST_001: the
+pending-ack counter becomes a queue of kinds in acceptance order, and
+a write's ack waits until every read ahead of it has returned. Your
+WB-012 stall holds (path_21 passes with the new input tied high in the
+standalone harness; the conservation rules pass on the full drop).
+
+**Still open from addendum 15**: `tb_generator.py` still sizes
+`DQ_WIDTH` from `byte_lanes` (line 45), so the two ECC presets halt in
+Phase 4 testbench generation as before.
+
+New drop e6e1ab286a8f: 20 of 20 paths before HOST_002, 19 with it
+(path_23), coverage 83.0 % measured.
+
+## Addendum 17 (2026-11-05, evening): yes, reads complete out of order, and the host gets the wrong data
+
+Your question in handoff 11-05 §3: "has any path actually seen two reads
+complete out of order?" Yes, on every path with concurrent reads, and
+we had a blind spot that hid it from both of us.
+
+**The measurement.** Mapping every read response back to its request
+through the scheduler's aux tag, on drop e6e1ab286a8f:
+
+| path | reads | responses out of acceptance order |
+|---|---|---|
+| path_02 (read bursts, piles) | 46 | 28 positions |
+| path_07 (saturate) | 114 | 108 positions |
+| path_18 (write then read back) | 12 | 9 positions |
+| path_23 (one read at a time) | 43 | 0 |
+
+The first swap on path_02 is two reads to the same open row, column 488
+then 496, answered 496 first: FR-FCFS picked the later one. Your WB-009
+(`rsp_aux == tag_mem[tag_rd]`) fired 66 times on path_02 saying exactly
+this; our emitter treats a design's own assertion as corroboration, not
+a finding, so it never reached the package. Our port monitor and
+predictor both attributed responses to the oldest pending read, so they
+agreed with each other and saw nothing. That is fixed: a new
+model-free stage, `(host memory)`, keeps the memory image the host
+builds with its own writes and compares every read response with what
+the host last wrote at the oldest outstanding read's address.
+
+**The consequence.** path_18 writes then reads back: **6 of 12
+read-backs return another address's data** (`HOSTMEM`: e.g. read of
+0x18f2a0a0 answered with the word the host wrote at 0x161ff4a0). A B4
+master matching by order corrupts its own data. This is the finding
+`wb_port/HOSTMEM/wb_rsp` in the package, critical, with the scheduler
+as a candidate owner; filed on the port because the spec decision puts
+ordering at the host boundary.
+
+**So the write fence is not sufficient.** Reads reorder among
+themselves whenever the scheduler finds a row hit behind a row miss,
+which is its job. The port already has what it needs: `tag_mem` holds
+the acceptance order of reads, and `rsp_aux` identifies which read a
+response belongs to. A completion reorder buffer at the port,
+`RD_FIFO_DEPTH` entries indexed by tag, releases a response only when
+its tag is the oldest outstanding; the write-ack queue you designed
+then sits behind the same head. The alternative, making the scheduler
+issue reads in acceptance order, gives up what FR-FCFS is for. Either
+way `HOST_002` (kinds in order) and `(host memory)` (data in order)
+judge the result.
+
+**ECC presets after your testbench fix**: high-performance (3 lanes)
+now generates all four phases and is in validation; server-grade (5
+lanes, ECC) still halts in Phase 4 testbench generation with the same
+message as before, "host word (32) is not a multiple of the channel width
+(40)": the spec says 4 data lanes (`pack_32_to_32`), the testbench still
+counts 5. Whatever the fix covered, it did not reach this configuration.

@@ -81,6 +81,8 @@ PRED_OBS_RE = re.compile(r"predicted \[(.*?)\] but observed \[(.*?)\]")
 XVAL_RE = re.compile(r"^\s*x_value: (\w+)\.(\w+) seq=(\d+) carries X/Z on \[(.*?)\]")
 # conservation.py: "CONSERVE <rule> owner=<blk> lost=<n> of=<m> from=<sel> to=<sel> observed=<k> [per_source=p] | <requirement>"
 CONSERVE_RE = re.compile(r"^\s*CONSERVE (\w+) owner=(\w+) (lost|extra)=(\d+) of=(\d+) from=(\S+) to=(\S+) observed=(\d+)(?: per_source=(\d+))? \| (.*)$")
+# host_memory.py: "HOSTMEM <rsp>[<i>] addr=0x.. expected=0x.. observed=0x.. [(the data the host wrote at 0x..)] read accepted t=.. answered t=.."
+HOSTMEM_RE = re.compile(r"^\s*HOSTMEM (\w+)\[(\d+)\] (.*)$")
 # the generated driver: "DRIVER_STALL: <iface> — <n> of <m> pipelined beat(s) never acknowledged (<signal>)" or "... — <what>"
 STALL_RE = re.compile(r"^\s*DRIVER_STALL: (\w+) — (.*)$")
 STALL_BEATS_RE = re.compile(r"(\d+) of (\d+) pipelined beat\(s\) never acknowledged \((\w+)\)")
@@ -236,6 +238,19 @@ def evidence_from_report(rep, rules, schemas, spec_regs=None, reports_dir=None):
                        "path": path, "confidence": "confirmed", "count": int(n), "line": ln.strip(),
                        "taxonomy_hint": cat.get("taxonomy", _exact_taxonomy(owner)),
                        "spec_ref": cat.get("spec_ref")}
+                continue
+            m = HOSTMEM_RE.match(ln)
+            if m:
+                iface, idx, what = m.groups()
+                owner = schemas.get(iface, {}).get("block", block) or "wb_port"
+                yield {"check_id": f"HOSTMEM/{iface}", "owner": owner, "owner_candidates": [owner, "scheduler"],
+                       "iface": iface, "kind": "read_data", "detector": "host_memory",
+                       "expected": ("the host reads back, at each address, the data it last wrote there, and the "
+                                    "responses arrive in the order the reads were accepted "
+                                    "(host_interface.ack_ordering = in_request_order)"),
+                       "actual": what.strip(), "path": path, "confidence": "confirmed", "count": 1,
+                       "line": ln.strip(), "taxonomy_hint": "DATA_001",
+                       "spec_ref": "host_interface.ack_ordering; failure_taxonomy DATA_001"}
                 continue
             m = STALL_RE.match(ln)
             if m:
@@ -586,6 +601,8 @@ def history_for(check_id, detector, snaps, current_head):
         keys.add("stage:(conservation)")
     if check_id.startswith("HANDSHAKE/"):
         keys.add("stage:(host handshake)")
+    if check_id.startswith("HOSTMEM/"):
+        keys.add("stage:(host memory)")
     seen = [h for h, _, k in snaps if keys & k]
     first = seen[0] if seen else current_head
     introduced = None
@@ -629,7 +646,7 @@ def emit(reports_dir, out_dir=None, drop_status=None):
             key = (ev["owner"], ev["check_id"])
             f = findings.get(key)
             if f is None:
-                tid = (ev.get("taxonomy_hint") if ev["check_id"].startswith(("MISMATCH/", "CONSERVE/", "HANDSHAKE/"))
+                tid = (ev.get("taxonomy_hint") if ev["check_id"].startswith(("MISMATCH/", "CONSERVE/", "HANDSHAKE/", "HOSTMEM/"))
                        else ev["check_id"])
                 first_seen, introduced = history_for(ev["check_id"], ev["detector"], snaps, head)
                 f = {
@@ -643,7 +660,7 @@ def emit(reports_dir, out_dir=None, drop_status=None):
                     "severity": rules.severity.get(tid, "major"),
                     "confidence": ev["confidence"],
                     "title": f"{ev['owner']}: {ev['check_id']}",
-                    "requirement": ev.get("expected") if ev["detector"].startswith(("invariant", "assertion", "conservation", "handshake")) else
+                    "requirement": ev.get("expected") if ev["detector"].startswith(("invariant", "assertion", "conservation", "handshake", "host_memory")) else
                                    f"{ev['owner']} must produce the transactions the spec-derived model predicts",
                     "spec_ref": ev.get("spec_ref"),
                     "expected": ev["expected"], "actual": ev["actual"],

@@ -3,7 +3,7 @@
   "$schema": "https://example.com/ddr3_microarchitecture.schema.json",
   "schema_version": "2.0.0",
   "design_id": "ddr3_mc_800_x8_1lane_1rank",
-  "revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc",
+  "revision": "compiled_ddr3800_x8_1lane_1rank_0a6e7ac5",
   "conversion_rules": {
     "timing_ns_to_nCK": "ceil(param_ns / tCK_ns)",
     "conversion_owner": "microarchitecture_agent",
@@ -278,6 +278,8 @@
     "max_burst_length": 8,
     "read_buffer_depth": 16,
     "write_buffer_depth": 16,
+    "write_buffer_backpressure": "port_stalls_on_full",
+    "ack_ordering": "in_request_order",
     "enable_data_mask": true,
     "$derived": {
       "addressable_space_bytes": 268435456,
@@ -301,6 +303,7 @@
     "dqs_count": 1,
     "dm_enabled": true,
     "ck_pair_present": true,
+    "data_bus_cycles_per_cas": 4,
     "notes": "Abstracted DRAM boundary. Command/data semantics only."
   },
   "csr_register_map": {

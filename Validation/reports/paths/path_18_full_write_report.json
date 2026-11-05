@@ -2,8 +2,8 @@
   "$schema": "validation-path-run/1",
   "path": "path_18_full_write",
   "strategy": "composed",
-  "verdict": "pass",
-  "timestamp": "2026-11-05T11:44:06.858327",
+  "verdict": "fail",
+  "timestamp": "2026-11-05T12:04:44.395828",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,9 +21,9 @@
   "window_cycles": 2000,
   "coverage_collected": true,
   "rtl_drop": {
-    "git_head": "56ca186bf893",
-    "drop_id": "56ca186bf893",
-    "design_id": "a03a5202d5fa",
+    "git_head": "e6e1ab286a8f",
+    "drop_id": "e6e1ab286a8f",
+    "design_id": "ce55daab01c5",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -35,7 +35,7 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "f7d2d02",
+    "validated_at": "86d8316",
     "frontend_commits": {
       "addr_decoder": "f37ce49d323151a6118ae7765aa766918c816383",
       "bank_tracker": "f37ce49d323151a6118ae7765aa766918c816383",
@@ -45,7 +45,7 @@
       "data_path": "93e750db808f44eae5ae516978d484f33481aaa8",
       "refresh_ctrl": "f37ce49d323151a6118ae7765aa766918c816383",
       "scheduler": "eb1a77b69594911ac55eb4576c87ee649a466cff",
-      "wb_port": "2ee6e7f6ab334463e45a291fb86c9b7614be5629"
+      "wb_port": "f7d2d02f1aeba5250542b2116105773911fffaed"
     },
     "roots": [
       "Frontend2/OutputFolders"
@@ -162,6 +162,22 @@
       "verdict": "pass",
       "summary": "scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable",
       "detail": []
+    },
+    {
+      "stage": "(host memory)",
+      "kind": "host_memory",
+      "scope": "(host memory)",
+      "model": null,
+      "verdict": "fail",
+      "summary": "scope=(host memory)  strategy=host_memory  status=fail  checked=12 skipped_unwritten=0 mismatches=6 outstanding_at_end=0",
+      "detail": [
+        "HOSTMEM wb_rsp[2] addr=0x18f2a0a0 expected=0x7204e52d observed=0x5805975 (the data the host wrote at 0x161ff4a0) read accepted t=63000 answered t=1449000",
+        "HOSTMEM wb_rsp[3] addr=0x1450c464 expected=0x7d4bedc observed=0xc5b6fecf read accepted t=73000 answered t=1459000",
+        "HOSTMEM wb_rsp[5] addr=0xe30323c expected=0xc381e88f observed=0xab99254a (the data the host wrote at 0x12f80f6c) read accepted t=93000 answered t=1619000",
+        "HOSTMEM wb_rsp[6] addr=0x161ff4a0 expected=0x5805975 observed=0x7204e52d (the data the host wrote at 0x18f2a0a0) read accepted t=103000 answered t=1659000",
+        "HOSTMEM wb_rsp[7] addr=0x12f80f6c expected=0xab99254a observed=0x7d4bedc (the data the host wrote at 0x1450c464) read accepted t=113000 answered t=1729000",
+        "HOSTMEM wb_rsp[8] addr=0x1ff58c44 expected=0x815a47c5 observed=0xc381e88f (the data the host wrote at 0xe30323c) read accepted t=783000 answered t=1929000"
+      ]
     }
   ],
   "log": "Validation/reports/paths/path_18_full_write_sim.log",

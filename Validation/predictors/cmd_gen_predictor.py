@@ -1,145 +1,248 @@
+from typing import Any, Dict, List
+
 from txn_contract import TransactionPredictor, Txn
 
 
-class Predictor(TransactionPredictor):
-    INPUT_IFACES = ('sched_in',)
-    OUTPUT_IFACES = ('ddr_cmd',)
+class CmdGenPredictor(TransactionPredictor):
+    """Reference model for the cmd_gen bridge.
 
-    # Scheduler type encoding (input side)
-    SCHED_NOP = 0
-    SCHED_ACT = 1
-    SCHED_READ = 2
-    SCHED_WRITE = 3
-    SCHED_PRE = 4
-    SCHED_REF = 5
-    SCHED_MRS = 6
-    SCHED_ZQCL = 7
+    cmd_gen takes one scheduler decision (sched_in) and drives the pin-level
+    DDR3 command bus (ddr_cmd).  Per the interface catalog it is a bridge with
+    exactly two things a plain field map cannot express:
 
-    # DDR command encoding (output side, active-low CS#/RAS#/CAS#/WE#)
-    # Standard DDR3 command truth table (active-low signals):
-    # MRS:        0b0000  (CS=0, RAS=0, CAS=0, WE=0)
-    # REF:        0b0001  (CS=0, RAS=0, CAS=0, WE=1)
-    # PRE:        0b0010  (CS=0, RAS=0, CAS=1, WE=0)
-    # ACT:        0b0011  (CS=0, RAS=0, CAS=1, WE=1)
-    # WRITE:      0b0100  (CS=0, RAS=1, CAS=0, WE=0)
-    # READ:       0b0101  (CS=0, RAS=1, CAS=0, WE=1)
-    # NOP:        0b0111  (CS=0, RAS=1, CAS=1, WE=1)
-    # DESEL:      0b1xxx
-    #
-    # But actual encoding used by the design may differ. We use a mapping
-    # that the spec implies: cmd_gen re-encodes between two different encodings.
-    # The scheduler encoding maps to DDR pin-level encoding.
+      * the command VALUE is re-encoded from the scheduler's logical command
+        enum into the JEDEC pin encoding {CS#,RAS#,CAS#,WE#};
+      * the address field is MUXed by command type: a row for ACTIVATE, a
+        column for a CAS (READ/WRITE).
+
+    The bank field passes straight through.  An idle scheduler slot (NOP) does
+    not produce a command transaction at all: the pins simply idle, which is
+    not an observable transaction on ddr_cmd.
+    """
+
+    INPUT_IFACES: tuple = ('sched_in',)
+    OUTPUT_IFACES: tuple = ('ddr_cmd',)
+
+    #: Scheduler-side logical command enum (sched_type).  The specification
+    #: carries no encoding table, so the conventional controller enum is used;
+    #: it can be overridden from the spec (see _load_encodings).
+    _DEFAULT_SCHED_ENCODING: Dict[int, str] = {
+        0: 'NOP',
+        1: 'ACT',
+        2: 'RD',
+        3: 'WR',
+        4: 'PRE',
+        5: 'REF',
+        6: 'ZQCS',
+        7: 'MRS',
+    }
+
+    #: DRAM-side pin encoding: {CS#, RAS#, CAS#, WE#}, CS# low (selected).
+    _DEFAULT_PIN_ENCODING: Dict[str, int] = {
+        'MRS': 0b0000,
+        'REF': 0b0001,
+        'PRE': 0b0010,
+        'PREA': 0b0010,
+        'ACT': 0b0011,
+        'WR': 0b0100,
+        'RD': 0b0101,
+        'ZQCS': 0b0110,
+        'ZQCL': 0b0110,
+        'NOP': 0b0111,
+    }
+
+    #: Logical commands whose address field is the row.
+    _ROW_ADDRESSED = ('ACT',)
+    #: Logical commands whose address field is the column (a CAS).
+    _COL_ADDRESSED = ('RD', 'WR')
+    #: Logical commands that are not driven onto the bus as a transaction.
+    _IDLE = ('NOP', 'DES')
 
     def __init__(self, spec: dict):
-        self.spec = spec
-        self._build_encoding_map()
+        self.spec = spec if isinstance(spec, dict) else {}
+        self._load_geometry()
+        self._load_encodings()
         self.reset()
 
-    def _build_encoding_map(self):
-        """Build the mapping from scheduler command type to DDR command encoding.
+    # ------------------------------------------------------------------
+    # configuration taken from the spec
+    # ------------------------------------------------------------------
+    def _load_geometry(self) -> None:
+        geom = self.spec.get('memory_geometry', {}) or {}
+        self.row_bits = int(geom.get('row_bits', 0) or 0)
+        self.column_bits = int(geom.get('column_bits', 0) or 0)
+        self.bank_bits = int(geom.get('bank_bits', 0) or 0)
 
-        The spec says: 'the command VALUE is re-encoded between two different encodings'
-        and 'the address field is selected by command type (a row for ACTIVATE, a column for a CAS)'.
-
-        Scheduler encoding (from sched_type values):
-          0 = NOP
-          1 = ACTIVATE
-          2 = READ
-          3 = WRITE
-          4 = PRECHARGE
-          5 = REFRESH
-          6 = MRS
-          7 = ZQCL
-
-        DDR3 pin-level command encoding {CS#, RAS#, CAS#, WE#}:
-          MRS:       0b0000 = 0
-          REFRESH:   0b0001 = 1
-          PRECHARGE: 0b0010 = 2
-          ACTIVATE:  0b0011 = 3
-          WRITE:     0b0100 = 4
-          READ:      0b0101 = 5
-          NOP:       0b0111 = 7
-          DESELECT:  0b1000 = 8
-        """
-        self.sched_to_ddr = {
-            1: 3,   # ACT -> 0b0011
-            2: 5,   # READ -> 0b0101
-            3: 4,   # WRITE -> 0b0100
-            4: 2,   # PRE -> 0b0010
-            5: 1,   # REF -> 0b0001
-            6: 0,   # MRS -> 0b0000
-            7: 8,   # ZQCL -> could be mapped; using deselect-like or special
-        }
-        # Commands that use row address
-        self.row_cmds = {1}  # ACTIVATE
-        # Commands that use column address
-        self.col_cmds = {2, 3}  # READ, WRITE
-        # Commands where addr is don't-care (PRE, REF, ZQCL)
-        self.dont_care_addr_cmds = {4, 5, 7}
-        # MRS uses row for mode register data
-        self.mrs_cmds = {6}
-
-    def reset(self) -> None:
-        pass
-
-    def process(self, txn: Txn) -> list:
-        if txn.iface != 'sched_in':
-            return []
-
-        if txn.kind != 'command':
-            return []
-
-        sched_type = int(txn.fields.get('type', 0))
-        row = int(txn.fields.get('row', 0))
-        col = int(txn.fields.get('col', 0))
-        bank = int(txn.fields.get('bank', 0))
-
-        # NOP produces no transaction - pins idle at NOP
-        if sched_type == self.SCHED_NOP:
-            return []
-
-        if sched_type not in self.sched_to_ddr:
-            return []
-
-        ddr_cmd = self.sched_to_ddr[sched_type]
-
-        # Determine address based on command type
-        if sched_type in self.row_cmds:
-            addr = row
-        elif sched_type in self.col_cmds:
-            addr = col
-        elif sched_type in self.mrs_cmds:
-            # MRS: address carries mode register settings
-            addr = row
-        elif sched_type in self.dont_care_addr_cmds:
-            # For PRECHARGE: A10=0 means single-bank precharge (spec says
-            # "the scheduler's PRECHARGE names one bank; A10 high would
-            # precharge every bank"). So we set addr to 0 (A10=0).
-            # For REF and ZQCL: address is don't care, use 0.
-            addr = 0
+        # A10 on the address bus is the "all banks" qualifier for PRECHARGE
+        # and the auto-precharge qualifier on a CAS.  It sits immediately
+        # above the column field.
+        if self.column_bits > 0:
+            self.all_banks_bit = 1 << self.column_bits
         else:
+            self.all_banks_bit = 0
+
+        if self.bank_bits > 0:
+            self.bank_mask = (1 << self.bank_bits) - 1
+        else:
+            self.bank_mask = None
+
+    def _load_encodings(self) -> None:
+        enc = {}
+        for key in ('command_encoding', 'cmd_encoding', 'encodings'):
+            cand = self.spec.get(key)
+            if isinstance(cand, dict):
+                enc = cand
+                break
+
+        sched_tbl = None
+        for key in ('sched_type', 'sched_in', 'scheduler', 'logical'):
+            cand = enc.get(key)
+            if isinstance(cand, dict):
+                sched_tbl = cand
+                break
+        if sched_tbl is None:
+            self.sched_encoding = dict(self._DEFAULT_SCHED_ENCODING)
+        else:
+            self.sched_encoding = {}
+            for k, v in sched_tbl.items():
+                try:
+                    if isinstance(k, str) and not k.lstrip('-').isdigit():
+                        # name -> code form
+                        self.sched_encoding[int(v)] = str(k).upper()
+                    else:
+                        self.sched_encoding[int(k)] = str(v).upper()
+                except (TypeError, ValueError):
+                    continue
+
+        pin_tbl = None
+        for key in ('ddr_cmd', 'pin', 'dram'):
+            cand = enc.get(key)
+            if isinstance(cand, dict):
+                pin_tbl = cand
+                break
+        if pin_tbl is None:
+            self.pin_encoding = dict(self._DEFAULT_PIN_ENCODING)
+        else:
+            self.pin_encoding = {}
+            for k, v in pin_tbl.items():
+                try:
+                    if isinstance(k, str) and not k.lstrip('-').isdigit():
+                        self.pin_encoding[str(k).upper()] = int(v)
+                    else:
+                        self.pin_encoding[str(v).upper()] = int(k)
+                except (TypeError, ValueError):
+                    continue
+
+    # ------------------------------------------------------------------
+    # lifecycle
+    # ------------------------------------------------------------------
+    def reset(self) -> None:
+        # Re-read everything configurable from the spec so that reset() really
+        # is a power-on state restore.
+        self._load_geometry()
+        self._load_encodings()
+        # cmd_gen is a combinational bridge: it holds no architectural state
+        # that affects the predicted command stream.  Nothing is buffered.
+        self._pending: List[Txn] = []
+
+    # ------------------------------------------------------------------
+    # helpers
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _fields(txn: Any) -> Dict[str, Any]:
+        f = getattr(txn, 'fields', None)
+        if isinstance(f, dict):
+            return f
+        return {}
+
+    @staticmethod
+    def _as_int(value: Any, default: int = 0) -> int:
+        if value is None:
+            return default
+        if isinstance(value, bool):
+            return 1 if value else 0
+        if isinstance(value, int):
+            return value
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            try:
+                return int(str(value), 0)
+            except (TypeError, ValueError):
+                return default
+
+    def _decode(self, sched_type: int, we: int) -> str:
+        name = self.sched_encoding.get(sched_type)
+        if name is None:
+            return 'UNKNOWN'
+        name = name.upper()
+        # Only if the scheduler enum does not itself distinguish the CAS
+        # direction does sched_we pick it.
+        if name in ('CAS', 'RDWR', 'COL', 'COLUMN'):
+            return 'WR' if we else 'RD'
+        return name
+
+    # ------------------------------------------------------------------
+    # main entry point
+    # ------------------------------------------------------------------
+    def process(self, txn: Any) -> List[Txn]:
+        iface = getattr(txn, 'iface', None)
+        if iface not in self.INPUT_IFACES:
+            return []
+        kind = getattr(txn, 'kind', None)
+        if kind is not None and kind != 'command':
+            return []
+
+        f = self._fields(txn)
+        sched_type = self._as_int(f.get('type'))
+        row = self._as_int(f.get('row'))
+        col = self._as_int(f.get('col'))
+        bank = self._as_int(f.get('bank'))
+        we = self._as_int(f.get('we'))
+
+        name = self._decode(sched_type, we)
+
+        # An idle slot is not a transaction on the command bus.
+        if name in self._IDLE:
+            return []
+        if name == 'UNKNOWN':
+            return []
+
+        cmd_code = self.pin_encoding.get(name)
+        if cmd_code is None:
+            return []
+
+        # Address mux by command type.
+        if name in self._ROW_ADDRESSED:
+            addr = row
+        elif name in self._COL_ADDRESSED:
+            addr = col
+        elif name in ('PREA', 'PRECHARGE_ALL', 'PRE_ALL'):
+            addr = self.all_banks_bit
+        elif name in ('MRS',):
+            # Mode-register opcode travels on the address pins; the scheduler
+            # presents it on the wide (row) field.
+            addr = row
+        else:
+            # PRE (single bank), REF, ZQCS: no address is required; A10 low.
             addr = 0
 
-        # Mask to field widths from schema
-        addr_width = 15  # ddr_addr width from schema
-        bank_width = 3   # ddr_bank width from schema
-        cmd_width = 4    # ddr_cmd width from schema
+        if self.bank_mask is not None:
+            bank = bank & self.bank_mask
 
-        addr = addr & ((1 << addr_width) - 1)
-        bank = bank & ((1 << bank_width) - 1)
-        ddr_cmd = ddr_cmd & ((1 << cmd_width) - 1)
-
-        out_txn = Txn(
+        out = Txn(
             iface='ddr_cmd',
             kind='command',
             fields={
-                'cmd': ddr_cmd,
+                'cmd': cmd_code,
                 'addr': addr,
                 'bank': bank,
-            }
+            },
         )
+        return [out]
 
-        return [out_txn]
-
-    def drain(self) -> list:
-        return []
+    def drain(self) -> List[Txn]:
+        # Nothing is buffered inside the bridge.
+        pending = self._pending
+        self._pending = []
+        return pending

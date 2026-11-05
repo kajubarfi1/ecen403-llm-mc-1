@@ -1,19 +1,84 @@
 {
   "$schema": "validation-retry-instructions/1",
-  "status": "PASS",
+  "status": "FAIL",
   "pipeline": "validation",
-  "drop": "56ca186bf893",
+  "drop": "e6e1ab286a8f",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "spec_id": "00d082c3f72d1b34",
-  "generated_utc": "2026-11-05T17:45:25.892069Z",
-  "failed_modules": [],
-  "retry_instructions": {},
+  "generated_utc": "2026-11-05T17:56:33.227101Z",
+  "failed_modules": [
+    "wb_port"
+  ],
+  "retry_instructions": {
+    "wb_port": {
+      "module": "wb_port",
+      "attempt": null,
+      "drop": "e6e1ab286a8f",
+      "failed_checks": [
+        {
+          "id": "HOST_002",
+          "name": "wb_port: HOST_002",
+          "pass": false,
+          "expected": "",
+          "actual": "fired 76x; first: xmsim: *E,ASRTST (./wb_port_order_sva.sv,60): (time 2347500 PS) Assertion chain_harness.u_wb_port.u_wb_port_order_sva.a_HOST_002 has failed",
+          "severity": "major",
+          "confidence": "confirmed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 179,
+              "signal": "req_we",
+              "text": "req_we    <= wb_we_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 180,
+              "signal": "req_addr",
+              "text": "req_addr  <= wb_adr_i;"
+            },
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 181,
+              "signal": "req_wdata",
+              "text": "req_wdata <= wb_dat_i;"
+            }
+          ],
+          "context": null,
+          "owner_candidates": [
+            "wb_port"
+          ],
+          "occurrences": 76,
+          "paths": [
+            "path_23_host_ack_collision"
+          ],
+          "repro": {
+            "path": "path_23_host_ack_collision",
+            "command": "python3 Validation/tools/run_path.py --path path_23_host_ack_collision",
+            "sequence": "Validation/sequences/generated/path_23_host_ack_collision_seed1.json",
+            "work_dir": "Validation/sequences/generated/runs/path_23_host_ack_collision",
+            "log": "Validation/reports/paths/path_23_host_ack_collision_sim.log",
+            "trace": "Validation/reports/paths/path_23_host_ack_collision_observed.jsonl",
+            "first_failure": {
+              "seq": null,
+              "line": "xmsim: *E,ASRTST (./wb_port_order_sva.sv,60): (time 2347500 PS) Assertion chain_harness.u_wb_port.u_wb_port_order_sva.a_HOST_002 has failed"
+            }
+          },
+          "introduced_in": null,
+          "repair": null,
+          "fix": null,
+          "finding_id": "wb_port/HOST_002"
+        }
+      ],
+      "message": "1 check(s) failed on drop e6e1ab286a8f; 1 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+    }
+  },
   "resolved_since_previous_drop": [],
   "requires_human_review": false,
   "source": "Validation/findings/emit_findings.py -> retry_adapter.py",
   "drop_status": {
     "$schema": "validation-drop-status/1",
-    "drop": "56ca186bf893",
+    "drop": "e6e1ab286a8f",
     "partial": false,
     "blocks_present": [
       "addr_decoder",
@@ -50,11 +115,14 @@
       "path_18_full_write",
       "path_19_row_conflict",
       "path_20_refresh_preempt",
-      "path_21_wb_port_standalone",
       "path_22_csr_standalone",
       "path_23_host_ack_collision"
     ],
-    "paths_blocked": {},
-    "note": "Complete run: every runnable path simulated on this drop."
+    "paths_blocked": {
+      "path_21_wb_port_standalone": [
+        "run error (rc=1): see Validation/reports/validate_drop/e6e1ab286a8f_path_21_wb_port_standalone.txt"
+      ]
+    },
+    "note": "Paths listed as blocked with a run error did not simulate on this drop (infrastructure, not design); nothing is known about them from this run."
   }
 }
