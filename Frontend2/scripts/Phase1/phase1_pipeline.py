@@ -583,7 +583,11 @@ if __name__ == "__main__":
     dirs = setup_output_dirs(out)
 
     ssh_password = ""
-    if HAS_SIM and not SIM_CONFIG.get("key_path"):
+    if HAS_SIM and not SIM_CONFIG.get("key_path") and not SIM_CONFIG.get("password"):
+        # OLYMPUS_PASSWORD already configured (.env or shell) means there's
+        # nothing to ask for -- SIM_CONFIG["password"] (read from env) is
+        # picked up directly by sim_gate's own fallback, so prompting here
+        # too just made the user retype a password they'd already set.
         username = SIM_CONFIG.get("username", "")
         if not username:
             username = input("Olympus username (Enter to skip sim): ").strip()
