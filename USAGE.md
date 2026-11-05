@@ -351,6 +351,25 @@ python3 Frontend2/scripts/Microarch/microarch_cli.py --preset server-grade --out
 You can then supply a saved specification to a full run with
 `python3 flow.py --spec my_spec.json` (Option D).
 
+#### Watch a run's progress
+
+Add `--gui` to any `flow.py` command to open a live progress page in your
+browser. It shows each stage of the flow, and for the backend a progress bar
+with the current OpenROAD step, an estimate of the time left, and a drawing
+of the chip that builds up as placement, clock tree and routing finish. To
+watch a run that is already going (or one that has ended), run the page on
+its own in a second terminal:
+
+```bash
+python3 gui/flow_gui.py                     # follows the newest run
+python3 gui/flow_gui.py --run runs/<run>    # one run
+python3 gui/flow_gui.py --demo              # a simulated run, no tools needed
+```
+
+The backend step detail comes from OpenROAD's own step logs under
+`ORFS_DIR` (read from `backend/agents/.env`). Without them the page still
+works, but estimates the backend steps from elapsed time.
+
 ### 4.4 Understand the output
 
 Each run creates its own directory, `runs/<timestamp>-<name>/`, with the
