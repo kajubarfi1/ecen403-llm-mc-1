@@ -194,8 +194,13 @@ def _ask(client, findings: list, spec: dict, feedback: str | None) -> dict:
             f"CURRENT SPEC (sections: {', '.join(spec)}):\n```json\n{json.dumps(spec, indent=1)[:60000]}\n```\n")
     if feedback:
         user += f"\nYOUR PREVIOUS ATTEMPT WAS REJECTED:\n{feedback}\nFix that and propose again.\n"
+    # Forced tool_choice ("any"/"tool") 400s on Claude Opus 5.5 and other
+    # current models ("tool_choice: type 'tool' and 'any' are not supported
+    # for this model") -- "auto" plus the system prompt's existing explicit
+    # instructions to call propose_compiler_patch / needs_owner_decision is
+    # the documented replacement (2026-11-05, hit live via flow.py --gui).
     with client.messages.stream(model=MODEL, max_tokens=MAX_TOKENS, system=SYSTEM_PROMPT,
-                                tools=[PATCH_TOOL, DECISION_TOOL], tool_choice={"type": "any"},
+                                tools=[PATCH_TOOL, DECISION_TOOL], tool_choice={"type": "auto"},
                                 messages=[{"role": "user", "content": user}]) as st:
         resp = st.get_final_message()
     if resp.stop_reason == "max_tokens":
