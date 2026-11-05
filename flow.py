@@ -67,6 +67,7 @@ Options: --max-spec-rounds 1 --max-rtl-rounds 4 --max-backend-rounds 2
 """
 
 import argparse
+import getpass
 import glob
 import json
 import os
@@ -270,6 +271,33 @@ def load_env():
                 k, _, v = line.partition("=")
                 k, v = k.strip(), v.strip().strip('"').strip("'")
                 os.environ.setdefault(k, v)
+
+
+def prompt_olympus_credentials():
+    """Stages 3-5/7/8 need Olympus; neither a key nor a password configured
+    in any .env means every one of them would silently SKIP. Ask once,
+    interactively, rather than let that happen quietly -- same reasoning as
+    phase1_pipeline.py's own standalone getpass prompt, but this is the one
+    flow.py itself drives, and it reaches every stage: env.setdefault() in
+    load_env() already means a real .env value always wins over this, and
+    what's typed here is never written to disk, only kept in this process's
+    environment for the stages it launches (each builds its subprocess env
+    from os.environ.copy() after this runs)."""
+    if not is_tty() or os.environ.get("OLYMPUS_USER") and (
+            os.environ.get("OLYMPUS_KEY") or os.environ.get("OLYMPUS_PASSWORD")):
+        return
+    print("No Olympus credentials configured (OLYMPUS_USER + OLYMPUS_KEY or "
+          "OLYMPUS_PASSWORD) -- stages that need it (lint, sim, backend, "
+          "final validation) would otherwise SKIP. Enter now, or press "
+          "Enter to skip and let those stages report SKIPPED as usual.")
+    user = os.environ.get("OLYMPUS_USER") or input("Olympus NetID (Enter to skip): ").strip()
+    if not user:
+        return
+    os.environ["OLYMPUS_USER"] = user
+    if not (os.environ.get("OLYMPUS_KEY") or os.environ.get("OLYMPUS_PASSWORD")):
+        pw = getpass.getpass(f"Password for {user}@olympus.ece.tamu.edu (Enter to skip): ")
+        if pw:
+            os.environ["OLYMPUS_PASSWORD"] = pw
 
 
 # --------------------------------------------------------------------------
@@ -1374,6 +1402,7 @@ def main() -> int:
     if args.dry_run:
         plan(args)
         return 0
+    prompt_olympus_credentials()
     if args.resume:
         run_dir = os.path.abspath(args.resume)
         if not os.path.exists(os.path.join(run_dir, "RUN_STATE.json")):
