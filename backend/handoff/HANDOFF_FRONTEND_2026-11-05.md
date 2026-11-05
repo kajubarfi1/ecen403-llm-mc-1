@@ -12,8 +12,10 @@ LVS netlists match on 14,398 real nets. No RTL change -- your drop
 `56ca186bf893` is byte-identical across all four builds below.** This is the
 first full sign-off PASS the project has produced.
 
-Read section 6 before celebrating too hard. The margin is 22 picoseconds at one
-corner, and that is the honest headline next to the first one.
+Two things to read before celebrating too hard. Section 6: the margin is 22
+picoseconds at one corner. Section 7: Jacob's validation run landed while we
+were building this and the tree **simulates clean, 23/23 paths** -- but three
+critical formal findings are still open in the ledger.
 
 ## 1. The sweep
 
@@ -155,24 +157,75 @@ not worth the builds. **Margin at spec is the open exposure, not speed above
 spec.** If we spend compute on timing again it should go toward margin at 200
 MHz, not toward 210.
 
-## 7. The real open item is Validation, and it is now the only one
+## 7. Validation landed while we were building this. The tree simulates.
 
-We said this on 11-04 and the sweep has made it sharper rather than softer.
+Jacob pushed `b83b87c` -- a complete validation run on `56ca186bf893` -- a few
+hours before this was written. It answers the question the last two handoffs
+have been carrying as the open item, and it answers it well.
 
-**Nothing has simulated the tree RTL.** Your 200,000-trial Python model shows the
-arbitration is equivalent. Four full builds show it synthesises, places, routes,
-and is physically correct -- DRC 0 and LVS match on 14,221 to 14,510 real nets
-depending on the point. **Neither of those shows the generated SystemVerilog
-behaves correctly end to end.** You flagged exactly this -- "I can't confirm the
-tree actually simulates correctly" -- and it is now the last thing standing
-between this and a defensible sign-off.
+**All 23 paths PASS.** 20 runnable paths simulated, 3 derived paths taking their
+verdict from their host run, 0 blocked, no module failed. `HANDOFF.json` reports
+`"status": "PASS"`, `"failed_modules": []`, and `DROP_STATUS.json` records
+"complete run: every runnable path simulated on this drop."
 
-Timing is closed. Physical verification is clean. The risk that remains is a
-**functional** regression in selection logic that touches how every command gets
-chosen, and no amount of backend work can find it. Jacob's harness is the
-instrument.
+**The stronger result is in the drop comparison.** Against `2bea54c5eac1` --
+which predates *both* the saturating countdown and the tree -- **22 of the 23
+paths produced byte-identical observed transaction streams** (`kind: "same"`).
+The only path that changed at all is `path_21_wb_port_standalone`, from the
+HOST_001 work, and it still passes.
 
-We will send Validation its own note with the drop and config details.
+That means two substantial RTL rewrites in a row produced **no observable
+behavioural difference on any scheduler path** -- `path_04_scheduler_bank_loop`,
+`path_05_scheduler_refresh_loop`, `path_06_scheduler_dequeue`,
+`path_19_row_conflict` and `path_20_refresh_preempt` all come back `same` /
+`pass`. Your 200,000-trial Python model predicted the tree was
+arbitration-equivalent. The simulator now agrees with it on real stimulus
+through the full chain. That is about as direct a confirmation as this project
+can produce.
+
+So: your Python model, the four chip builds, and Jacob's 23 paths now agree. The
+gap we have been flagging since 11-03 is closed.
+
+### What is still open, and why it is not yours
+
+Three findings remain in the ledger, all `severity: critical`:
+
+| id | module | status | first seen |
+|---|---|---|---|
+| `formal/scheduler/PROTO_001` | scheduler | `awaiting_formal` | drop `1fea117` |
+| `formal/scheduler/TIMING_008` | scheduler | `awaiting_formal` | drop `1fea117` |
+| `formal/wb_port/HOST_001` | wb_port | `awaiting_formal` | drop `99f72da45a32` |
+
+Four things about these, because two of them name `scheduler` and that will
+look alarming next to a tree rewrite:
+
+1. **None are tree-introduced.** All three have `first_seen` on drops that
+   predate `56ca186bf893`, and `confidence: unverified` with
+   `status: awaiting_formal` -- they are carried forward from earlier JasperGold
+   runs and are awaiting re-prove on this drop, not newly found on it.
+2. **All three are formal-only.** `detectors: ["formal:jaspergold"]`, and each
+   one's mechanism says explicitly it was never reached in simulation. They are
+   counterexamples under a free protocol-legal host, in interleavings no path
+   stimulus produces.
+3. **The two scheduler ones are anchored to `PHASE3RTL/scheduler.sv` and
+   `PHASE2RTL/bank_tracker.sv`**, not to the `TOPRTL` tree we built. Worth
+   someone confirming which tree the formal harness actually elaborated before
+   anyone acts on them.
+4. **They are bank-state and timing-protocol issues, not arbitration issues.**
+   PROTO_001 is a READ one cycle after a PRE to the same bank with no ACT
+   between; TIMING_008 is a PRE one cycle after a WRITE to the same bank
+   (tWR). Both are about whether `bank_tracker` gating lets a command through,
+   which is a different question from which entry the tree selects.
+
+Note also that Jacob's own `SIGNOFF.md` §2 defines Drop PASS as every path
+passing **and** no critical finding open. His tooling issued PASS with these
+three sitting at `awaiting_formal`, which is a defensible reading -- unverified
+is not confirmed -- but it is a judgement call, not an arithmetic one, and
+somebody should say out loud which reading the final report uses. We are not
+the right people to decide that; we are flagging that it needs deciding.
+
+**Nothing here is a backend ask or, as far as we can tell, a frontend ask
+either.** It is a formal re-prove on the current drop.
 
 ## 8. Two housekeeping notes
 
@@ -205,7 +258,8 @@ on `DESIGN_NAME`, so two concurrent builds would overwrite each other.
 | Remaining margin | **22 ps, typical corner only** -- the real exposure |
 | Fmax sweep above 200 MHz | **declined** -- margin matters more than headroom |
 | Next RTL target *if ever needed* | `sel_idx_r` -> `sel_onehot_r`/`sel_type_r`, 28 levels |
-| Functional simulation of the tree | **the one open item**, Validation |
+| Functional simulation of the tree | **PASS** -- 23/23 paths, 22 byte-identical to the pre-tree drop |
+| Open critical findings | **3**, all formal-only and `awaiting_formal`, none tree-introduced |
 
 The tree is what closed this. Two chained 16-deep ripples would not have gotten
 to 0.12 ns no matter what we did to the floorplan, and the floorplan lever only
