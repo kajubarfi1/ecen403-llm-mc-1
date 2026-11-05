@@ -38,7 +38,15 @@ def _from_setup_env(key):
             txt = f.read()
     except OSError:
         return None
-    m = re.search(r'^\s*' + key + r'\s*=\s*"?([^"\n]*?)"?\s*$', txt, re.M)
+    # [^\S\n] is horizontal whitespace only, and the distinction matters: \s
+    # matches newlines, so with `KEY=` left blank the \s* after the `=`
+    # crossed the line break and the capture group took the next non-blank
+    # line -- a `#` comment -- as the value. That handed paramiko a key file
+    # named '#' (FileNotFoundError: '#') while the real credential sat unused
+    # two lines below, and the failure named neither setup.env nor the key.
+    # An empty value must read as absent so _setting() falls through.
+    m = re.search(r'^[^\S\n]*' + key + r'[^\S\n]*=[^\S\n]*"?([^"\n]*?)"?[^\S\n]*$',
+                  txt, re.M)
     return m.group(1) if m and m.group(1) else None
 
 

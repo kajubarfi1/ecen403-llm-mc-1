@@ -60,25 +60,102 @@ Two files, neither ever committed (`.gitignore` covers `*.env` and `setup.env`;
 
 `OLYMPUS_USER` is **your own NetID** -- nobody needs to share an account.
 
-`OLYMPUS_KEY` must be a **passphrase-less private key**, not a password. This
-is not a preference: `flow.py` halts the run if it is unset, because the
-Frontend phase pipelines prompt for a password and a non-interactive run cannot
-answer a prompt.
+**Either credential works**: `OLYMPUS_KEY`, a path to a **passphrase-less**
+private key, or `OLYMPUS_PASSWORD`. A passphrase-protected key is not an
+option, because a non-interactive run cannot answer a prompt.
+
+Prefer the key. Fall back to the password only if sshd refuses your key --
+which does happen, for reasons invisible from a user shell (see 1.2.1). Be
+deliberate about it: that is your NetID password in plaintext on disk, and a
+NetID password unlocks a great deal more than Olympus. The file is gitignored
+so it will not reach the public repo, but anything that can read your user
+profile can read it.
+
+Note `OLYMPUS_PASSWORD` only became real in `ff03df9`. Before that it was
+documented in `USAGE.md` but never read anywhere in `Frontend2` -- a
+password-only setup authenticated with nothing and failed every time.
 
 ```powershell
 ssh-keygen -t ed25519 -f $env:USERPROFILE\.ssh\olympus -N '""'
 ```
 
 ```powershell
-type $env:USERPROFILE\.ssh\olympus.pub | ssh NETID@olympus.ece.tamu.edu "mkdir -p ~/.ssh; cat >> ~/.ssh/authorized_keys; chmod 600 ~/.ssh/authorized_keys"
+$k = Get-Content $env:USERPROFILE\.ssh\olympus.pub; ssh NETID@olympus.ece.tamu.edu "mkdir -p ~/.ssh; chmod go-w ~; chmod 700 ~/.ssh; echo '$k' >> ~/.ssh/authorized_keys; chmod 600 ~/.ssh/authorized_keys"
 ```
 
 ```powershell
-ssh -i $env:USERPROFILE\.ssh\olympus NETID@olympus.ece.tamu.edu "hostname"
+ssh -o BatchMode=yes -i $env:USERPROFILE\.ssh\olympus NETID@olympus.ece.tamu.edu "hostname"
 ```
 
-That last command must print a hostname **without asking for a password**. If
-it prompts, the flow will halt at `rtl_generation`.
+`BatchMode=yes` disables password prompts, so that command either prints a
+hostname or fails immediately with the reason -- it cannot sit waiting at a
+prompt and look like a hang.
+
+### 1.2.1 If sshd refuses a correct key
+
+This happened on `dawsoncarpenter@olympus` on 2026-11-05 and cost an hour, so
+it is written down. The symptom in `ssh -v` is:
+
+```
+debug1: Offering public key: ...\.ssh\olympus ED25519 SHA256:...
+debug1: Authentications that can continue: publickey,password
+```
+
+Key offered, no `Server accepts key`, straight back to the method list.
+
+What that is **not** -- all checked, with evidence, so they need not be
+rechecked: the wrong key (compare `ssh-keygen -lf` on your `.pub` against the
+fingerprint in the `Offering` line, and the installed line on the server);
+`StrictModes` (home, `~/.ssh` and `authorized_keys` must be owner-only, and
+were); a passphrase; Windows refusing the private key (that prints
+`too open`); or SELinux on an NFS home (`getsebool use_nfs_home_dirs` was
+**on**, and `restorecon` has nothing to change because the label comes from the
+mount, not the file).
+
+What it probably **is**, and none of it is visible from a user shell:
+`/etc/ssh/sshd_config` returned `Permission denied`, which means a centrally
+managed config -- so `AuthorizedKeysFile` may point somewhere other than
+`~/.ssh/authorized_keys`, keys may come from an `AuthorizedKeysCommand`
+directory lookup, or a `Match` block may gate `PubkeyAuthentication`.
+
+Two traps specific to Windows while installing a key:
+- **`ssh-copy-id` does not ship with Windows OpenSSH.** Doing it by hand with
+  `type key.pub | ssh host "cat >> ..."` puts the key on ssh's stdin while ssh
+  also wants to prompt you for a password, and `type` emits CRLF -- a key line
+  ending in `
+` is invalid to sshd. Pass the key as an argument instead:
+  `$k = Get-Content ...pub; ssh host "echo '$k' >> ~/.ssh/authorized_keys"`.
+- On that NFS mount, `chmod 600` did not take -- the file stayed `-rwx------`.
+  Still owner-only, so harmless for `StrictModes`, but do not trust the mode
+  you asked for.
+
+**The fallback is `OLYMPUS_PASSWORD`**, which works and is the pragmatic
+answer when the key route is administratively closed. Verified on this account
+2026-11-05: password auth reaches `olympus-login.engr.tamu.edu`, `srun`
+allocates on the `adademic` partition, and `xrun 24.03-s013` is visible from a
+compute node.
+
+### 1.2.2 A parser bug this exposed, now fixed
+
+Worth knowing, because the symptom named nothing useful. With the unused
+credential left blank (`OLYMPUS_KEY=`), `sim_runner._from_setup_env` read its
+value as `#` and handed paramiko a key file by that name:
+
+```
+FileNotFoundError: [Errno 2] No such file or directory: '#'
+```
+
+The regex was `r'^\s*' + key + r'\s*=\s*"?([^"\n]*?)"?\s*$'` under `re.M`.
+`\s` matches newlines, so the `\s*` after the `=` crossed the line break and
+the capture group took the next non-blank line -- a comment -- as the value.
+The real credential sat unused two lines below, and nothing in the error
+mentioned `setup.env`, or which key, or that a credential had been found at
+all.
+
+Fixed by using `[^\S\n]*` (horizontal whitespace only), so an empty value reads
+as absent and `_setting()` falls through to the next source. The other readers
+of `setup.env` are line-based and were never affected. A blank line is harmless
+now, but deleting the credential you are not using is still tidier.
 
 Then set in `Validation\setup.env`:
 
@@ -86,6 +163,17 @@ Then set in `Validation\setup.env`:
 OLYMPUS_USER=your_netid
 OLYMPUS_KEY=C:\Users\dawca\.ssh\olympus
 ```
+
+or, for the password route:
+
+```
+OLYMPUS_USER=your_netid
+OLYMPUS_PASSWORD=your_netid_password
+```
+
+**Uncomment the line you use** -- every loader skips anything starting with
+`#`, so a filled-in but still-commented `# OLYMPUS_PASSWORD=...` reads as
+absent and the gate reports no credential at all.
 
 ### 1.3 sky130 gate models on Olympus (only for netlist re-simulation)
 
@@ -100,6 +188,11 @@ C:\Users\dawca\llmmc_flow_venv\Scripts\python.exe Validation\tools\install_sky13
 If `--check` says they are absent, drop `--check` to install. The installer's
 own smoke test compiles a real netlist against the library, so a clean run is
 proof it works rather than just proof it copied files.
+
+**Done on this account 2026-11-05**: 233 cell models and 94 include dirs under
+`~/cadence_agent_work/sky130`, smoke test OK -- the `wb_port` netlist compiles.
+The `*W,DLCVAR ... Invalid environment variable ''` line is a `cds.lib`
+warning, not a failure.
 
 ## 2. Running it
 
@@ -249,11 +342,21 @@ it reads correctly.
   `sky130_fd_sc_hd__tt_025C_1v80.lib` -- typical process, 25 C, 1.80 V. No slow
   or fast corner, no voltage or temperature sweep. Always say "at the typical
   corner."
-- **The sign-off chip used `CORE_UTILIZATION 35`**, which is not the packager
-  default of 20. A default build does **not** reproduce the 200 MHz PASS. To
-  reproduce it, put `CORE_UTILIZATION: "35"` in the bundle's `manifest.json`
-  `orfs_config` -- the packager writes the default first and appends
-  `orfs_config` after, and Make takes the last assignment.
+- **The sign-off chip used `CORE_UTILIZATION 35`**, not the packager default of
+  20, and a default build does **not** reproduce the 200 MHz PASS. `flow.py`
+  now handles this: `--core-utilization` defaults to **35** and writes it into
+  `drop/TOPRTL/manifest.json`'s `orfs_config` before the backend runs (the
+  packager writes its own default first and appends `orfs_config` after, and
+  Make takes the last assignment). Pass `0` to leave the packager default.
+
+  This matters more than a number. At util 20 the top misses timing
+  (WNS -0.1216 vs +0.0220 at 35, cmp-identical RTL), and an STA miss naming a
+  scheduler module becomes a backend finding that stage 7 routes to the
+  Frontend's repair agents as an RTL change request -- sending them to rewrite
+  RTL for what is a floorplan setting, then burning both backend rounds.
+
+  Per-block builds are deliberately left at the packager default: 35 is
+  measured for the assembled top and untested on single blocks.
 - **Backend runs must stay sequential.** Every bundle shares the module name
   `ddr3_controller` and ORFS keys its results path on `DESIGN_NAME`, so
   concurrent builds overwrite each other. This is unfixed.

@@ -83,7 +83,15 @@ class Fake:
             return 0, ""
         if name == "generate_top.py":
             outdir = cmd[cmd.index("--output-dir") + 1]
-            os.makedirs(os.path.join(outdir, "TOPRTL"), exist_ok=True)
+            top = os.path.join(outdir, "TOPRTL")
+            os.makedirs(top, exist_ok=True)
+            # the real generate_top.py writes orfs_config with SYNTH_ARGS only
+            # and no CORE_UTILIZATION -- that absence is why
+            # --core-utilization exists
+            with open(os.path.join(top, "manifest.json"), "w") as f:
+                json.dump({"module_name": "ddr3_controller", "file": "ddr3_controller.sv",
+                           "clock_period_ns": 5.0,
+                           "orfs_config": {"SYNTH_ARGS": "-nofsm"}}, f)
             return 0, ""
         if name == "validate_drop.py":
             status = self.validation.pop(0) if self.validation else "PASS"
@@ -189,7 +197,8 @@ class FlowCase(unittest.TestCase):
         base = dict(request=None, preset="balanced", choices=None, spec=None, goal=None, phases=None, revalidate=False,
                     resume=None, run_dir=self.run_dir, max_spec_rounds=2, max_rtl_rounds=4,
                     max_backend_rounds=2, validate_per_phase=False, skip_backend=False, backend_mode="build",
-                    dry_run=False, interactive=False, per_block_netlists=False)
+                    dry_run=False, interactive=False, per_block_netlists=False,
+                    core_utilization=35)
         base.update(kw)
         a = type("A", (), {})()
         a.__dict__.update(base)          # instance attributes, so vars(args) records them as the real run does
@@ -908,6 +917,103 @@ class TestPerBlockNetlists(FlowCase):
         rc, run = self.go(fake, per_block_netlists=True)
         self.assertEqual((run.state.get("halt") or {}).get("stage"), "final_validation")
         self.assertIn("gate-level", run.state["halt"]["why"])
+
+
+class TestOlympusCredential(FlowCase):
+    """Either credential satisfies the Olympus gate. OLYMPUS_PASSWORD became
+    real in ff03df9 -- before that the phase pipelines and lint paths never
+    read it, so a password-only setup authenticated with nothing."""
+
+    def tearDown(self):
+        os.environ.pop("OLYMPUS_PASSWORD", None)
+        super().tearDown()
+
+    def test_a_password_alone_satisfies_the_gate(self):
+        os.environ.pop("OLYMPUS_KEY", None)
+        os.environ["OLYMPUS_PASSWORD"] = "x"
+        rc, run = self.go(Fake(self.run_dir), skip_backend=True)
+        # rtl_generation records once per phase plus the top-level assembly
+        got = [s["status"] for s in run.state["stages"] if s["stage"] == "rtl_generation"]
+        self.assertTrue(got, "the gate let rtl_generation run")
+        self.assertEqual(set(got), {"PASS"})
+        self.assertIsNone(run.state.get("halt"))
+
+    def test_a_key_alone_still_satisfies_the_gate(self):
+        os.environ.pop("OLYMPUS_PASSWORD", None)
+        os.environ["OLYMPUS_KEY"] = "/fake/key"
+        rc, run = self.go(Fake(self.run_dir), skip_backend=True)
+        got = [s["status"] for s in run.state["stages"] if s["stage"] == "rtl_generation"]
+        self.assertTrue(got)
+        self.assertEqual(set(got), {"PASS"})
+        self.assertIsNone(run.state.get("halt"))
+
+    def test_neither_credential_halts_before_any_phase_runs(self):
+        os.environ.pop("OLYMPUS_KEY", None)
+        os.environ.pop("OLYMPUS_PASSWORD", None)
+        fake = Fake(self.run_dir)
+        rc, run = self.go(fake, skip_backend=True)
+        self.assertEqual((run.state.get("halt") or {}).get("stage"), "rtl_generation")
+        self.assertIn("OLYMPUS_PASSWORD", run.state["halt"]["why"])
+        # halted before spending anything on a phase pipeline
+        self.assertFalse([c for c in fake.calls if c[0].startswith("phase")])
+
+
+class TestCoreUtilization(FlowCase):
+    """The top-level build's CORE_UTILIZATION. The packager hardcodes 20 and
+    generate_top.py's orfs_config carries only SYNTH_ARGS, so without this the
+    flow builds the top at a utilisation that does not meet the spec: on drop
+    56ca186bf893, util 20 measured WNS -0.1216 (FAIL) against util 35's
+    +0.0220 (PASS) on cmp-identical RTL."""
+
+    def setUp(self):
+        super().setUp()
+        os.environ["USE_DOCKER"] = "1"
+
+    def _cfg(self, run):
+        with open(os.path.join(run.drop, "TOPRTL", "manifest.json")) as f:
+            return (json.load(f).get("orfs_config") or {})
+
+    def test_default_writes_35_and_keeps_synth_args(self):
+        rc, run = self.go(Fake(self.run_dir))
+        cfg = self._cfg(run)
+        self.assertEqual(cfg.get("CORE_UTILIZATION"), "35")
+        self.assertEqual(cfg.get("SYNTH_ARGS"), "-nofsm",
+                         "the Frontend's own orfs_config entries survive")
+
+    def test_zero_leaves_the_packager_default_alone(self):
+        rc, run = self.go(Fake(self.run_dir), core_utilization=0)
+        self.assertNotIn("CORE_UTILIZATION", self._cfg(run))
+
+    def test_an_explicit_value_is_honoured(self):
+        rc, run = self.go(Fake(self.run_dir), core_utilization=30)
+        self.assertEqual(self._cfg(run).get("CORE_UTILIZATION"), "30")
+
+    def test_a_missing_manifest_does_not_break_the_backend_stage(self):
+        fake = Fake(self.run_dir)
+        orig = fake.__call__
+
+        def call(cmd, cwd=None, stdin=None, env=None, log=None, timeout=None):
+            rc, out = orig(cmd, cwd, stdin, env, log, timeout)
+            nm = os.path.basename(next((c for c in cmd if c.endswith(".py")), ""))
+            if nm == "generate_top.py":
+                outdir = cmd[cmd.index("--output-dir") + 1]
+                os.remove(os.path.join(outdir, "TOPRTL", "manifest.json"))
+            return rc, out
+
+        rc, run = self.go(call)
+        be = [s for s in run.state["stages"] if s["stage"] == "backend"]
+        self.assertEqual([x["status"] for x in be], ["PASS"],
+                         "no manifest is a logged skip, not a crash")
+
+    def test_the_per_block_builds_are_not_touched(self):
+        # 35 is measured for the assembled top and untested on single blocks
+        fake = Fake(self.run_dir)
+        rc, run = self.go(fake, per_block_netlists=True)
+        root = os.path.join(run.dir, "per_block_bundles")
+        for b in sorted(os.listdir(root)):
+            with open(os.path.join(root, b, b + "_manifest.json")) as f:
+                m = json.load(f)
+            self.assertNotIn("CORE_UTILIZATION", (m.get("orfs_config") or {}))
 
 
 if __name__ == "__main__":

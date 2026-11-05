@@ -69,6 +69,7 @@ SIM_CONFIG = {
     "port": 22,
     "username": os.environ.get("OLYMPUS_USER", ""),
     "key_path": os.environ.get("OLYMPUS_KEY", None),
+    "password": os.environ.get("OLYMPUS_PASSWORD", None),
 }
 
 
@@ -283,7 +284,10 @@ def sim_gate(state: GraphState) -> dict:
     sim = XceliumSimulator(ssh_config=SIM_CONFIG)
     try:
         print(f"  Connecting to {SIM_CONFIG['hostname']} as {username}...")
-        sim.connect(password=state.get("ssh_password", "") or None)
+        # state["ssh_password"] only gets set by this file's own standalone
+        # __main__ getpass prompt; a run through flow.py never sets it, so
+        # fall back to OLYMPUS_PASSWORD (SIM_CONFIG["password"]).
+        sim.connect(password=state.get("ssh_password", "") or SIM_CONFIG.get("password"))
         print(f"  Connected. Work dir: {sim.work_dir}")
     except Exception as e:
         print(f"  SKIP: SSH connection failed -- {e}")

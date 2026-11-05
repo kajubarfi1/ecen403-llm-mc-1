@@ -67,6 +67,7 @@ Options: --max-spec-rounds 1 --max-rtl-rounds 4 --max-backend-rounds 2
 """
 
 import argparse
+import getpass
 import glob
 import json
 import os
@@ -272,6 +273,35 @@ def load_env():
                 os.environ.setdefault(k, v)
 
 
+def prompt_olympus_credentials():
+    """Stages 3-5/7/8 need Olympus; neither a key nor a password configured
+    in any .env means every one of them would silently SKIP. Ask once,
+    interactively, rather than let that happen quietly -- same reasoning as
+    phase1_pipeline.py's own standalone getpass prompt, but this is the one
+    flow.py itself drives, and it reaches every stage: env.setdefault() in
+    load_env() already means a real .env value always wins over this, and
+    what's typed here is never written to disk, only kept in this process's
+    environment for the stages it launches (each builds its subprocess env
+    from os.environ.copy() after this runs)."""
+    if (not is_tty()
+            or os.environ.get("OLYMPUS_DISABLED", "").strip().lower() in ("1", "true", "yes")
+            or os.environ.get("OLYMPUS_USER") and (
+                os.environ.get("OLYMPUS_KEY") or os.environ.get("OLYMPUS_PASSWORD"))):
+        return
+    print("No Olympus credentials configured (OLYMPUS_USER + OLYMPUS_KEY or "
+          "OLYMPUS_PASSWORD) -- stages that need it (lint, sim, backend, "
+          "final validation) would otherwise SKIP. Enter now, or press "
+          "Enter to skip and let those stages report SKIPPED as usual.")
+    user = os.environ.get("OLYMPUS_USER") or input("Olympus NetID (Enter to skip): ").strip()
+    if not user:
+        return
+    os.environ["OLYMPUS_USER"] = user
+    if not (os.environ.get("OLYMPUS_KEY") or os.environ.get("OLYMPUS_PASSWORD")):
+        pw = getpass.getpass(f"Password for {user}@olympus.ece.tamu.edu (Enter to skip): ")
+        if pw:
+            os.environ["OLYMPUS_PASSWORD"] = pw
+
+
 # --------------------------------------------------------------------------
 # stages
 # --------------------------------------------------------------------------
@@ -432,11 +462,23 @@ def _phase_report(run, n):
 
 
 def _check_frontend_sim_env(run):
-    if not os.environ.get("OLYMPUS_KEY"):
+    """The Frontend phase pipelines reach Olympus to lint and simulate, and a
+    non-interactive run cannot answer a credential prompt. Either credential
+    satisfies that: a passphrase-less key, or OLYMPUS_PASSWORD, which the phase
+    pipelines and the lint paths read as of ff03df9 (before that it was
+    documented but never read, so a password-only setup authenticated with
+    nothing). Key auth is still preferable where it works -- on some hosts
+    sshd refuses keys for reasons invisible from a user shell, and a password
+    in a file is the pragmatic fallback, not the better option."""
+    if not (os.environ.get("OLYMPUS_KEY") or os.environ.get("OLYMPUS_PASSWORD")):
         return run.halt("rtl_generation",
-                        "the Frontend phase pipelines prompt for an Olympus password unless "
-                        "OLYMPUS_USER and OLYMPUS_KEY (path to a private key) are exported; a "
-                        "non-interactive run cannot answer that prompt. Export them and resume.")
+                        "the Frontend phase pipelines reach Olympus and cannot answer a "
+                        "credential prompt in a non-interactive run. Set OLYMPUS_USER plus "
+                        "either OLYMPUS_KEY (path to a passphrase-less private key) or "
+                        "OLYMPUS_PASSWORD, in Validation/setup.env or the shell, and resume.")
+    # OLYMPUS_USER is deliberately NOT gated here. sim_runner raises its own
+    # clear error without it, and it can legitimately come from ~/.ssh/config
+    # rather than the environment -- halting on it would stop a working run.
     return 0
 
 
@@ -856,6 +898,57 @@ def fixed_modules(run, n, newer_than=None):
     return out
 
 
+def _set_core_utilization(bundle, util, run):
+    """Put CORE_UTILIZATION into the top bundle's manifest orfs_config.
+
+    Why this is needed at all: packager_agent writes `export CORE_UTILIZATION
+    = 20` and THEN appends manifest.orfs_config, and Make takes the last
+    simple assignment -- so orfs_config is the override point. The Frontend's
+    generate_top.py writes orfs_config with only SYNTH_ARGS, and nothing else
+    sets utilisation, so a flow run would build the top at the packager's
+    default of 20.
+
+    That default does not meet the spec. On drop 56ca186bf893, util 20
+    measured WNS -0.1216 ns (FAIL) and util 35 measured +0.0220 ns (PASS,
+    DRC 0, LVS match) -- the same RTL, cmp-verified, differing only in this
+    setting. Worse than a plain failure: an STA miss naming a scheduler
+    module becomes a backend finding, which stage 7 routes to the Frontend's
+    repair agents as an RTL change request -- sending them to rewrite RTL for
+    what is a floorplan setting.
+
+    Patched in place in the run's own drop, not a staged copy, for two
+    reasons: the bundle directory must keep the name TOPRTL, because
+    find_netlists()/stage 8 identify the top-level netlist by that name and
+    would otherwise try to swap it into a path as if it were a block; and
+    drop_id is computed over each block's <block>.sv and <block>_manifest.json
+    only, so the top bundle's manifest.json is not part of it and the drop's
+    identity does not change.
+    """
+    mf = os.path.join(bundle, "manifest.json")
+    if not os.path.exists(mf):
+        run.log(f"    [core-util] no manifest at {os.path.relpath(mf, ROOT)}; "
+                f"leaving the packager default")
+        return
+    try:
+        with open(mf) as f:
+            m = json.load(f)
+    except (ValueError, OSError) as e:
+        run.log(f"    [core-util] cannot read {os.path.relpath(mf, ROOT)} ({e}); "
+                f"leaving the packager default")
+        return
+    cfg = m.get("orfs_config") or {}
+    if str(cfg.get("CORE_UTILIZATION", "")) == str(util):
+        return
+    was = cfg.get("CORE_UTILIZATION")
+    cfg["CORE_UTILIZATION"] = str(util)
+    m["orfs_config"] = cfg
+    with open(mf, "w") as f:
+        json.dump(m, f, indent=2)
+        f.write("\n")
+    run.log(f"    [core-util] CORE_UTILIZATION {was if was else '(packager default)'}"
+            f" -> {util} in {os.path.relpath(mf, ROOT)}")
+
+
 def stage_backend_per_block(run, args):
     """Build every block of the drop on its own, after the top, so
     final_validation has per-block netlists to swap into the paths.
@@ -949,6 +1042,9 @@ def stage_backend(run, args):
         return run.halt("backend", "the backend runs ORFS in Docker and needs USE_DOCKER=1 "
                         "(and ORFS_DIR) in backend/agents/.env or the shell; export them and "
                         "resume, or rerun with --skip-backend")
+    util = getattr(args, "core_utilization", None)
+    if util and int(util) > 0:
+        _set_core_utilization(bundle, int(util), run)
     run.state["rounds"]["backend"] += 1
     env_file = os.path.join(BACKEND_AGENTS, ".env")
     with open(run.state["spec"]) as f:
@@ -1295,6 +1391,12 @@ def plan(args):
           f"(agents present for phases {have}; others halt)")
     print(f"  6 backend               Backend   {'SKIPPED (--skip-backend)' if args.skip_backend else os.path.relpath(BACKEND_PIPELINE, ROOT) + ' --bundle_dir <run>/drop/TOPRTL --drop_id <id> --spec_revision <rev> --mode ' + (getattr(args, 'backend_mode', None) or 'build')}"
           + ("" if args.skip_backend else f"  (cap {args.max_backend_rounds} rounds; needs USE_DOCKER=1)"))
+    cu = getattr(args, "core_utilization", 0)
+    print("     core utilisation     "
+          + (f"CORE_UTILIZATION {cu} into drop/TOPRTL manifest.orfs_config "
+             f"({'the measured sign-off value' if cu == 35 else 'overridden'})"
+             if cu and int(cu) > 0 else
+             "packager default (20) -- does NOT meet 200 MHz on this design"))
     pb = getattr(args, "per_block_netlists", False)
     print("  6b per-block netlists   Backend   "
           + ("SKIPPED (pass --per-block-netlists to enable)" if not pb or args.skip_backend
@@ -1303,7 +1405,8 @@ def plan(args):
     print(f"  7 backend_to_frontend   edge      backend/findings/outbox -> retry package -> phase agents -> validate again")
     print(f"  8 final_validation      Validation  backend netlists through the paths (run_path --netlist, sky130 models)")
     print(f"  env: ANTHROPIC_API_KEY {'set' if os.environ.get('ANTHROPIC_API_KEY') else 'MISSING'}, "
-          f"OLYMPUS_KEY {'set' if os.environ.get('OLYMPUS_KEY') else 'MISSING (phase pipelines would prompt)'}, "
+          f"Olympus {'key' if os.environ.get('OLYMPUS_KEY') else 'password' if os.environ.get('OLYMPUS_PASSWORD') else 'NO CREDENTIAL (stages 3-5, 7, 8 would halt)'}"
+          f"{'' if os.environ.get('OLYMPUS_USER') else ' but no OLYMPUS_USER'}, "
           f"USE_DOCKER {os.environ.get('USE_DOCKER') or 'unset'}")
 
 
@@ -1351,6 +1454,17 @@ def main() -> int:
     ap.add_argument("--backend-mode", choices=["contract", "synth", "build", "full"], default="build",
                     help="backend depth (passed through as its --mode): contract = seconds, no ORFS; "
                          "synth = minutes; build = sign-off (~1 h for 11 blocks); full = + optimisation")
+    ap.add_argument("--core-utilization", type=int, default=35, metavar="PCT",
+                    help="ORFS CORE_UTILIZATION for the TOP-LEVEL build, written into the "
+                         "bundle's manifest orfs_config (the packager appends orfs_config "
+                         "after its own default, and Make takes the last assignment). "
+                         "Default 35: the measured sign-off value. The packager's default "
+                         "of 20 does NOT meet 200 MHz on this design (util 20 measured WNS "
+                         "-0.1216 FAIL, util 35 +0.0220 PASS on identical RTL), and the "
+                         "resulting STA miss is routed to the Frontend as an RTL change "
+                         "request for what is a floorplan setting. Pass 0 to leave the "
+                         "packager default alone. Per-block builds are not touched: 35 is "
+                         "measured for the assembled top and untested on single blocks")
     ap.add_argument("--per-block-netlists", action="store_true",
                     help="after the top-level build passes, also build every block of the "
                          "drop on its own (pipeline_batch.py), so final_validation has "
@@ -1374,6 +1488,7 @@ def main() -> int:
     if args.dry_run:
         plan(args)
         return 0
+    prompt_olympus_credentials()
     if args.resume:
         run_dir = os.path.abspath(args.resume)
         if not os.path.exists(os.path.join(run_dir, "RUN_STATE.json")):
