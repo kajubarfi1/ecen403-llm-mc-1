@@ -62,6 +62,8 @@ Usage:
     python3 flow.py --preset balanced --dry-run                     # print the plan only
 Options: --max-spec-rounds 1 --max-rtl-rounds 4 --max-backend-rounds 2
          --validate-per-phase  --skip-backend  --run-dir DIR  --from STAGE
+         --per-block-netlists   also build each block alone, so the final
+                                validation stage has netlists to swap in
 """
 
 import argparse
@@ -126,6 +128,7 @@ FORMAL_REPORTS = os.path.join(VALIDATION, "reports", "formal")
 OUTBOX_CURRENT = os.path.join(VALIDATION, "findings", "outbox", "current")
 BACKEND_AGENTS = os.path.join(ROOT, "backend", "agents")
 BACKEND_PIPELINE = os.path.join(BACKEND_AGENTS, "pipeline.py")
+BACKEND_BATCH = os.path.join(BACKEND_AGENTS, "pipeline_batch.py")
 
 QUIET = False          # tests: keep the run log out of stdout
 
@@ -227,8 +230,14 @@ def sh(cmd, cwd=None, stdin=None, env=None, log=None, timeout=None):
     # when they exit; unbuffered, the run log and gui/flow_gui.py see them live
     env = dict(env or os.environ)
     env.setdefault("PYTHONUNBUFFERED", "1")
+    # encoding/errors are not optional on Windows: text=True alone decodes with
+    # the locale codec (cp1252 here), and the backend's own status line contains
+    # a U+2192 arrow, so reading stage 6's output died with UnicodeDecodeError
+    # before it could return a verdict. Subsystems emit UTF-8; never let one
+    # stray byte lose a run that has already spent an hour in ORFS.
     p = subprocess.Popen(cmd, cwd=cwd, stdin=subprocess.PIPE if stdin is not None else None,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+                         encoding="utf-8", errors="replace",
                          env=env)
     if stdin is not None:
         p.stdin.write(stdin)
@@ -847,6 +856,85 @@ def fixed_modules(run, n, newer_than=None):
     return out
 
 
+def stage_backend_per_block(run, args):
+    """Build every block of the drop on its own, after the top, so
+    final_validation has per-block netlists to swap into the paths.
+
+    Why this exists: stage_backend builds the assembled top, which gives one
+    top-level netlist, and find_netlists()/final_validation deliberately
+    exclude TOPRTL and ddr3_controller because no top-level validation path
+    exists yet. Without per-block netlists stage 8 has nothing to swap and
+    halts. A per-block bundle is just <block>.sv + <block>_manifest.json, which
+    is exactly what each drop phase directory already holds, so the bundles are
+    cut from this run's own drop rather than from backend/bundles (which drifts
+    and is written by the Frontend).
+
+    NON-FATAL by design. These builds exist to produce netlists, not verdicts:
+    the top-level build is the sign-off. A block that misses timing standalone
+    still routes and still writes 6_final.v -- the scheduler has historically
+    failed standalone at 5 ns while the assembled top closed -- so an STA FAIL
+    here must not halt a run whose top passed. Only the absence of netlists is
+    worth reporting, and even that is left to stage 8 to act on.
+    """
+    bundles_root = os.path.join(run.dir, "per_block_bundles")
+    made, missing = [], []
+    for n, _dirname, _script, rtldir, blocks in PHASES:
+        for b in blocks:
+            src = os.path.join(run.drop, rtldir)
+            sv = os.path.join(src, f"{b}.sv")
+            mf = os.path.join(src, f"{b}_manifest.json")
+            if not (os.path.exists(sv) and os.path.exists(mf)):
+                missing.append(f"{rtldir}/{b}")
+                continue
+            dst = os.path.join(bundles_root, b)
+            os.makedirs(dst, exist_ok=True)
+            shutil.copy2(sv, os.path.join(dst, f"{b}.sv"))
+            shutil.copy2(mf, os.path.join(dst, f"{b}_manifest.json"))
+            made.append(dst)
+    if not made:
+        run.record("backend_per_block", "SKIPPED",
+                   "no per-block bundle could be cut from the drop"
+                   + (f"; missing {', '.join(missing)}" if missing else ""))
+        return 0
+    if not os.path.exists(BACKEND_BATCH):
+        run.record("backend_per_block", "SKIPPED",
+                   f"missing {os.path.relpath(BACKEND_BATCH, ROOT)}")
+        return 0
+    with open(run.state["spec"]) as f:
+        rev = json.load(f).get("revision") or ""
+    cmd = [PY, BACKEND_BATCH, "--bundle_dirs"] + made + [
+        "--out_root", run.backend_dir,
+        "--drop_id", run.state.get("drop_id") or "",
+        "--spec_revision", rev,
+        "--mode", getattr(args, "backend_mode", None) or "build"]
+    if run.state.get("spec_id"):
+        cmd += ["--spec_id", run.state["spec_id"]]
+    env_file = os.path.join(BACKEND_AGENTS, ".env")
+    if os.path.exists(env_file):
+        cmd += ["--env_file", env_file]
+    # exit 1 is pipeline_batch's normal STA-FAIL code across the set, not a
+    # crash, so the exit code is recorded and not acted on (see the docstring)
+    rc, _txt = sh(cmd, cwd=BACKEND_AGENTS, log=run.log, timeout=12 * 3600)
+    nets = find_netlists(run)
+    blocks = sorted(b for b in nets if b not in ("TOPRTL", "ddr3_controller"))
+    detail = (f"exit {rc}; {len(blocks)}/{len(made)} block netlist(s): "
+              + (", ".join(blocks) if blocks else "none"))
+    if missing:
+        detail += f"; not in the drop: {', '.join(missing)}"
+    # Only build and full place and route; contract (contract check only) and
+    # synth (no P&R) cannot produce 6_final.v, so "no netlists" is the correct
+    # outcome there and must not read as a failure. Without this the stage
+    # reported FAIL on a contract run that did exactly what was asked.
+    mode = getattr(args, "backend_mode", None) or "build"
+    if mode not in ("build", "full"):
+        run.record("backend_per_block", "PASS",
+                   detail + f"; --backend-mode {mode} does not place and route, so no "
+                            "netlist is expected (stage 8 needs build or full)")
+        return 0
+    run.record("backend_per_block", "PASS" if blocks else "FAIL", detail)
+    return 0
+
+
 def stage_backend(run, args):
     """Backend: RTL -> GDSII on the assembled top (drop/TOPRTL is a bundle)."""
     if args.skip_backend or getattr(args, "phases", None):
@@ -908,6 +996,8 @@ def stage_backend(run, args):
                f"sta={rep.get('sta_status')}" + (f"; netlist {netlist}" if netlist else ""),
                report=reports[0] if reports else None)
     if status == "PASS":
+        if getattr(args, "per_block_netlists", False):
+            stage_backend_per_block(run, args)
         return 0
     if rep.get("failed_stage") == "synth" or "synth" in str(rep.get("error_message", "")).lower():
         return 1            # the RTL itself: backend -> frontend edge
@@ -1205,6 +1295,11 @@ def plan(args):
           f"(agents present for phases {have}; others halt)")
     print(f"  6 backend               Backend   {'SKIPPED (--skip-backend)' if args.skip_backend else os.path.relpath(BACKEND_PIPELINE, ROOT) + ' --bundle_dir <run>/drop/TOPRTL --drop_id <id> --spec_revision <rev> --mode ' + (getattr(args, 'backend_mode', None) or 'build')}"
           + ("" if args.skip_backend else f"  (cap {args.max_backend_rounds} rounds; needs USE_DOCKER=1)"))
+    pb = getattr(args, "per_block_netlists", False)
+    print("  6b per-block netlists   Backend   "
+          + ("SKIPPED (pass --per-block-netlists to enable)" if not pb or args.skip_backend
+             else os.path.relpath(BACKEND_BATCH, ROOT) + " on every block cut from <run>/drop"
+                  " -> runner/<block>/6_final.v for stage 8  (~1 h, 11 blocks, non-fatal)"))
     print(f"  7 backend_to_frontend   edge      backend/findings/outbox -> retry package -> phase agents -> validate again")
     print(f"  8 final_validation      Validation  backend netlists through the paths (run_path --netlist, sky130 models)")
     print(f"  env: ANTHROPIC_API_KEY {'set' if os.environ.get('ANTHROPIC_API_KEY') else 'MISSING'}, "
@@ -1256,6 +1351,14 @@ def main() -> int:
     ap.add_argument("--backend-mode", choices=["contract", "synth", "build", "full"], default="build",
                     help="backend depth (passed through as its --mode): contract = seconds, no ORFS; "
                          "synth = minutes; build = sign-off (~1 h for 11 blocks); full = + optimisation")
+    ap.add_argument("--per-block-netlists", action="store_true",
+                    help="after the top-level build passes, also build every block of the "
+                         "drop on its own (pipeline_batch.py), so final_validation has "
+                         "per-block netlists to swap into the paths. Without this, stage 8 "
+                         "halts: it excludes the top-level netlist because no top-level "
+                         "validation path exists yet. Adds roughly an hour (11 blocks, 2 "
+                         "workers). Non-fatal: a block that misses timing standalone still "
+                         "yields a netlist, and the top-level build remains the sign-off")
     ap.add_argument("--revalidate", action="store_true",
                     help="with --resume: validate the drop again even though the last "
                          "validation passed (the drop changed under the run)")

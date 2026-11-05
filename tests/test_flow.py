@@ -32,6 +32,11 @@ class Fake:
         self.outbox_written = []            # where each fake validate_drop wrote its package
         self.absent = []                     # blocks the fake validation reports absent
         self.synth_rc = 0                    # microarch_cli.py one-shot exit (3 = needs clarification)
+        self.batch_rc = 0                    # pipeline_batch.py exit (1 = some block missed timing)
+        self.batch_no_netlists = False       # batch ran but produced no 6_final.v
+        self.batch_bundles = None            # bundle dirs the batch was given
+        self.path_verdict = "PASS"           # run_path.py gate-level verdict
+        self.netlist_swaps = []              # (path, [block=netlist]) each run_path got
         self.calls = []
 
     def __call__(self, cmd, cwd=None, stdin=None, env=None, log=None, timeout=None):
@@ -64,6 +69,17 @@ class Fake:
                 return 1, ""
             with open(os.path.join(rep, f"phase{n}_final_report.json"), "w") as f:
                 json.dump({"lint_status": "PASS", "sim_status": "PASS"}, f)
+            # the real phase pipeline also writes <block>.sv + <block>_manifest.json
+            # into the phase's RTL dir; --per-block-netlists cuts its bundles from
+            # exactly those, so the fake has to produce them too
+            rtldir = next(d for pn, _, _, d, _ in flow.PHASES if pn == n)
+            blocks = next(b for pn, _, _, _, b in flow.PHASES if pn == n)
+            os.makedirs(os.path.join(outdir, rtldir), exist_ok=True)
+            for b in blocks:
+                with open(os.path.join(outdir, rtldir, f"{b}.sv"), "w") as f:
+                    f.write("module %s; endmodule\n" % b)
+                with open(os.path.join(outdir, rtldir, f"{b}_manifest.json"), "w") as f:
+                    json.dump({"module_name": b, "file": f"{b}.sv"}, f)
             return 0, ""
         if name == "generate_top.py":
             outdir = cmd[cmd.index("--output-dir") + 1]
@@ -118,6 +134,29 @@ class Fake:
             with open(os.path.join(out_root, "pipeline_final_report_TOPRTL.json"), "w") as f:
                 json.dump(self.backend or {"pipeline_status": "PASS", "artifacts": ["x/6_final.v"]}, f)
             return 0 if (self.backend or {}).get("pipeline_status", "PASS") == "PASS" else 1, ""
+        if name == "pipeline_batch.py":
+            out_root = cmd[cmd.index("--out_root") + 1]
+            i = cmd.index("--bundle_dirs") + 1
+            bundles = []
+            while i < len(cmd) and not str(cmd[i]).startswith("--"):
+                bundles.append(cmd[i]); i += 1
+            self.batch_bundles = list(bundles)
+            if self.batch_no_netlists:
+                return 1, "ONE OR MORE BLOCKS FAILED\n"
+            for b in bundles:
+                d = os.path.join(out_root, "runner", os.path.basename(b))
+                os.makedirs(d, exist_ok=True)
+                with open(os.path.join(d, "6_final.v"), "w") as f:
+                    f.write("// netlist\n")
+            return self.batch_rc, ""
+        if name == "run_path.py":
+            pid = cmd[cmd.index("--path") + 1]
+            swaps = [cmd[i + 1] for i, c in enumerate(cmd) if c == "--netlist"]
+            self.netlist_swaps.append((pid, swaps))
+            dest = cmd[cmd.index("--report-dir") + 1]
+            os.makedirs(dest, exist_ok=True)
+            v = self.path_verdict
+            return (0 if v == "PASS" else 1), "  path verdict : %s" % v
         raise AssertionError(f"unexpected command {name}")
 
 
@@ -150,7 +189,7 @@ class FlowCase(unittest.TestCase):
         base = dict(request=None, preset="balanced", choices=None, spec=None, goal=None, phases=None, revalidate=False,
                     resume=None, run_dir=self.run_dir, max_spec_rounds=2, max_rtl_rounds=4,
                     max_backend_rounds=2, validate_per_phase=False, skip_backend=False, backend_mode="build",
-                    dry_run=False, interactive=False)
+                    dry_run=False, interactive=False, per_block_netlists=False)
         base.update(kw)
         a = type("A", (), {})()
         a.__dict__.update(base)          # instance attributes, so vars(args) records them as the real run does
@@ -754,6 +793,121 @@ class TestResume(FlowCase):
         names = [c[0] for c in fake.calls]
         self.assertNotIn("microarch_cli.py", names, "spec synthesis is not redone on resume")
         self.assertNotIn("validate_spec_stage.py", names, "a passed review is not redone")
+
+
+
+class TestPerBlockNetlists(FlowCase):
+    """--per-block-netlists: the edge that lets final_validation judge
+    gate-level netlists at all. Stage 6 builds the assembled top, and
+    find_netlists/final_validation exclude TOPRTL and ddr3_controller because
+    no top-level path exists, so without this the last stage has nothing to
+    swap in."""
+
+    def setUp(self):
+        super().setUp()
+        os.environ["USE_DOCKER"] = "1"
+
+    def test_off_by_default_the_batch_never_runs(self):
+        fake = Fake(self.run_dir)
+        rc, run = self.go(fake)
+        self.assertEqual([c[0] for c in fake.calls].count("pipeline_batch.py"), 0)
+        self.assertNotIn("backend_per_block", [s["stage"] for s in run.state["stages"]])
+
+    def test_builds_every_block_cut_from_this_runs_own_drop(self):
+        fake = Fake(self.run_dir)
+        rc, run = self.go(fake, per_block_netlists=True)
+        st = [s for s in run.state["stages"] if s["stage"] == "backend_per_block"]
+        self.assertEqual(len(st), 1, "the per-block stage ran exactly once")
+        self.assertEqual(st[0]["status"], "PASS")
+        # one bundle per block in PHASES, each cut from the run drop, not from
+        # backend/bundles (which drifts and is written by the Frontend)
+        want = sorted(b for _, _, _, _, blocks in flow.PHASES for b in blocks)
+        self.assertEqual(sorted(os.path.basename(b) for b in fake.batch_bundles), want)
+        for b in fake.batch_bundles:
+            self.assertTrue(b.startswith(run.dir), "bundles come from the run, not the repo")
+            name = os.path.basename(b)
+            self.assertEqual(sorted(os.listdir(b)),
+                             sorted([name + ".sv", name + "_manifest.json"]))
+        # and the netlists are where find_netlists looks for them
+        self.assertEqual(sorted(k for k in flow.find_netlists(run)), want)
+
+    def test_runs_after_the_top_and_into_the_same_out_root(self):
+        fake = Fake(self.run_dir)
+        rc, run = self.go(fake, per_block_netlists=True)
+        names = [c[0] for c in fake.calls]
+        self.assertLess(names.index("pipeline.py"), names.index("pipeline_batch.py"),
+                        "the top-level sign-off build runs first")
+        top = [c for c in fake.calls if c[0] == "pipeline.py"][0][1]
+        batch = [c for c in fake.calls if c[0] == "pipeline_batch.py"][0][1]
+        self.assertEqual(batch[batch.index("--out_root") + 1],
+                         top[top.index("--out_root") + 1],
+                         "same out_root, so find_netlists sees top and blocks together")
+        self.assertEqual(batch[batch.index("--drop_id") + 1], "abc123")
+        self.assertEqual(batch[batch.index("--spec_revision") + 1], "fake_rev")
+
+    def test_a_block_that_misses_timing_does_not_halt_the_run(self):
+        # these builds exist to produce netlists, not verdicts: the top-level
+        # build is the sign-off, and the scheduler has failed standalone at
+        # 5 ns while the assembled top closed
+        fake = Fake(self.run_dir)
+        fake.batch_rc = 1
+        rc, run = self.go(fake, per_block_netlists=True)
+        st = [s for s in run.state["stages"] if s["stage"] == "backend_per_block"][0]
+        self.assertEqual(st["status"], "PASS", "netlists exist, so the stage is useful")
+        self.assertNotEqual((run.state.get("halt") or {}).get("stage"), "backend_per_block")
+
+    def test_no_netlist_at_all_is_a_fail_in_build_mode(self):
+        fake = Fake(self.run_dir)
+        fake.batch_no_netlists = True
+        rc, run = self.go(fake, per_block_netlists=True)
+        st = [s for s in run.state["stages"] if s["stage"] == "backend_per_block"][0]
+        self.assertEqual(st["status"], "FAIL")
+        self.assertIn("none", st["detail"])
+
+    def test_contract_mode_expects_no_netlist_and_says_so(self):
+        # contract and synth do not place and route, so "no netlist" is the
+        # correct outcome there and must not read as a failure
+        fake = Fake(self.run_dir)
+        fake.batch_no_netlists = True
+        rc, run = self.go(fake, per_block_netlists=True, backend_mode="contract")
+        st = [s for s in run.state["stages"] if s["stage"] == "backend_per_block"][0]
+        self.assertEqual(st["status"], "PASS")
+        self.assertIn("does not place and route", st["detail"])
+
+
+    def test_final_validation_completes_only_because_of_this_flag(self):
+        # the whole point: with per-block netlists, stage 8 swaps them into the
+        # paths and finishes. Without them it has nothing to swap and halts,
+        # because find_netlists excludes the top-level netlist.
+        fake = Fake(self.run_dir)
+        rc, run = self.go(fake, per_block_netlists=True)
+        fv = [s for s in run.state["stages"] if s["stage"] == "final_validation"]
+        self.assertEqual(len(fv), 1)
+        self.assertEqual(fv[0]["status"], "PASS")
+        self.assertEqual(rc, 0, "the run completes end to end")
+        self.assertIsNone(run.state.get("halt"))
+        self.assertTrue(fake.netlist_swaps, "run_path was given netlists to swap in")
+        for _pid, swaps in fake.netlist_swaps:
+            self.assertTrue(swaps, "every judged path swapped at least one netlist")
+            for sw in swaps:
+                self.assertIn("=", sw, "--netlist takes block=path")
+
+    def test_without_the_flag_the_final_stage_still_halts(self):
+        # regression guard on the documented old behaviour, so the default
+        # path keeps saying plainly that it has nothing to judge
+        fake = Fake(self.run_dir)
+        rc, run = self.go(fake)
+        halt = run.state.get("halt") or {}
+        self.assertEqual(halt.get("stage"), "final_validation")
+        self.assertIn("per-block", halt.get("why", ""))
+        self.assertEqual([c[0] for c in fake.calls].count("run_path.py"), 0)
+
+    def test_a_gate_level_path_failure_halts_the_run(self):
+        fake = Fake(self.run_dir)
+        fake.path_verdict = "FAIL"
+        rc, run = self.go(fake, per_block_netlists=True)
+        self.assertEqual((run.state.get("halt") or {}).get("stage"), "final_validation")
+        self.assertIn("gate-level", run.state["halt"]["why"])
 
 
 if __name__ == "__main__":

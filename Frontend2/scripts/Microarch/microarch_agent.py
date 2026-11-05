@@ -262,12 +262,18 @@ def _anthropic_client():
 
 def _resolve(client, messages: list) -> dict:
     """One structured call. Returns the propose_configuration input dict."""
+    # Forced tool_choice ("tool"/"any") 400s on Claude Opus 5.5 and other
+    # current models ("tool_choice: type 'tool' and 'any' are not supported
+    # for this model") -- "auto" + disable_parallel_tool_use (at most one
+    # call) + the system prompt's existing "Call propose_configuration
+    # exactly once" is the documented replacement (2026-11-05, hit live via
+    # flow.py --gui).
     resp = client.messages.create(
         model=MODEL,
         max_tokens=2048,
         system=SYSTEM_PROMPT,
         tools=[PROPOSE_TOOL],
-        tool_choice={"type": "tool", "name": "propose_configuration"},
+        tool_choice={"type": "auto", "disable_parallel_tool_use": True},
         messages=messages,
     )
     for block in resp.content:

@@ -219,12 +219,17 @@ FULL SPEC JSON (the design this was generated against):
     # non-streaming call outright ("Streaming is required for operations
     # that may take longer than 10 minutes"). get_final_message() returns
     # the same Message shape .create() would have, so nothing below changes.
+    # Forced tool_choice ("tool"/"any") 400s on Claude Opus 5.5 and other
+    # current models ("tool_choice: type 'tool' and 'any' are not supported
+    # for this model") -- "auto" + disable_parallel_tool_use (at most one
+    # call) is the documented replacement (2026-11-05, hit live via
+    # flow.py --gui).
     with client.messages.stream(
         model=MODEL,
         max_tokens=MAX_TOKENS,
         system=SYSTEM_PROMPT,
         tools=[PROPOSE_TB_FIX_TOOL],
-        tool_choice={"type": "tool", "name": "propose_testbench_fix"},
+        tool_choice={"type": "auto", "disable_parallel_tool_use": True},
         messages=[{"role": "user", "content": user_msg}],
     ) as stream:
         resp = stream.get_final_message()
