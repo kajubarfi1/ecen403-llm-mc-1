@@ -686,6 +686,11 @@ def main() -> int:
     # used, so a design change never leaves `awaiting_formal` findings for a
     # person to remember (two on 4bf921ce1833, Frontend handoff 2026-10-15).
     sim_failed = any(v != "PASS" for v in verdicts.values()) if not args.skip_sim else False
+    if os.environ.get("VALIDATION_SKIP_FORMAL") and not args.skip_formal:
+        # a sweep (spec_matrix.py) judges generation and simulation per spec;
+        # the replays belong to the golden sign-off and would cost an hour each
+        args.skip_formal = True
+        banner("4b", "formal: skipped (VALIDATION_SKIP_FORMAL)")
     if not args.skip_formal and not args.skip_sim and not nothing_runs and not args.partial and sim_failed:
         banner("4b", "formal: deferred")
         print("    this drop fails simulation; proofs wait for a drop that passes it (an hour of "

@@ -963,3 +963,38 @@ presets are rerunning serially tonight.
    port is correct for a real Wishbone master.
 4. The Tier-1 sweep's generated choice sets, so level 1 of the matrix
    runs over all 1280 configurations instead of 50.
+
+## Addendum 15 (2026-11-05): the five presets through the loop
+
+Level 2 of the matrix, each preset through the flow's RTL half (spec
+review, your four phases and gates, our validation, formal replays
+switched off for a sweep):
+
+| preset | result |
+|---|---|
+| default (DDR3-1600 x8, 2 lanes) | COMPLETE: 4 phases, 20 of 20 paths, 0 findings |
+| balanced (DDR3-1333 x8, 2 lanes) | COMPLETE: 4 phases, 20 of 20 paths, 0 findings |
+| low-cost-embedded (1 lane) | COMPLETE: 4 phases, 20 of 20 paths, 0 findings |
+| high-performance (3 lanes, ECC) | halted in your Phase 4: testbench generation |
+| server-grade (5 lanes, ECC) | halted in your Phase 4: testbench generation |
+
+Three different specs now run the whole RTL half clean with nothing
+repaired, which is the first evidence beyond the golden spec that the
+loop is spec-agnostic rather than golden-tuned.
+
+**The two halts are one defect, and it is the one you already fixed in
+addr_decoder.** `tb_generator.py` (Phase 4) refuses both ECC presets with
+"host word (32) is not a multiple of the channel width (24 / 40)": it
+computes the channel width from `byte_lanes` (3 and 5, ECC lane
+included) while `data_path_mapping` and the data path itself use the
+data lanes (2 and 4: `pack_32_to_16`, `pack_32_to_32`). Same two
+formulas for one quantity as handoff 9's addr_decoder bug, in the
+testbench generator this time; `data_byte_lanes` is the right source,
+as there. Every ECC configuration hits it, and your Phase 4 agent could
+not get past a refusal in the generator's own argument check. The spec
+compiled and passed review, Phases 1 to 3 generated and passed their
+gates, so once the testbench generator agrees with the data path these
+two should run the rest of the way.
+
+Matrix results in full: `Validation/reports/spec_matrix/summary.json`
+and `level1_findings.md`.

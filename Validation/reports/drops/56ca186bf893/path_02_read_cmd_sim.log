@@ -1,9 +1,8 @@
-TOOL:	xrun	24.03-s013: Started on Nov 05, 2026 at 11:14:16 CST
+TOOL:	xrun	24.03-s013: Started on Nov 05, 2026 at 11:43:50 CST
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xrun: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
 xrun: 24.03-s013: (c) Copyright 1995-2025 Cadence Design Systems, Inc.
-*WARNING* file /home/ugrads/j/jacobz/CDS.log File is already locked by some other process.
 *WARNING* X Window Display Initialization failure
 *WARNING* (DISPLAY "")
 xrun: *N,CLEAN: Removing existing directory ./xcelium.d.
@@ -667,7 +666,7 @@ SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
 		worklib.dram_stub:sv <0x6b900fae>
 			streams:   3, words:  7224
-		worklib.wb_port_order_sva:sv <0x7aa911c8>
+		worklib.wb_port_order_sva:sv <0x62af31af>
 			streams:  16, words:  9294
 		worklib.wb_rsp_monitor:sv <0x4cdcfbc1>
 			streams:   4, words:  3426
@@ -675,7 +674,7 @@ xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environm
 			streams:   2, words:  3813
 		worklib.req_monitor:sv <0x6ad95e38>
 			streams:   2, words:  2235
-		worklib.scheduler_order_sva:sv <0x69fc1c67>
+		worklib.scheduler_order_sva:sv <0x1bcb36cd>
 			streams:  18, words:  9906
 		worklib.scheduler_fcov:sv <0x7080a0fb>
 			streams:   7, words:  4507
@@ -737,10 +736,10 @@ xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environm
 			streams:   9, words: 86308
 		worklib.chain_harness:sv <0x12cba3ad>
 			streams: 246, words: 66789
-		worklib.bank_tracker:sv <0x07e6f168>
-			streams:  37, words: 48972
+		worklib.bank_tracker:sv <0x29665636>
+			streams:  37, words: 49233
 		worklib.config_regs:sv <0x40a4daac>
-			streams:  64, words: 58861
+			streams:  64, words: 58855
 		worklib.cmd_queue:sv <0x5654213b>
 			streams:  21, words: 20719
 		worklib.cmd_gen:sv <0x0627931e>
@@ -753,7 +752,7 @@ xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environm
 			streams:  74, words: 56225
 		worklib.scheduler:sv <0x43651b87>
 			streams:  99, words: 122563
-		worklib.cmd_gen_sva:sv <0x7071fdc7>
+		worklib.cmd_gen_sva:sv <0x02b1d2ea>
 			streams: 333, words: 140663
 		worklib.\$unit_0x007516de :compilation_unit <0x05362c8d>
 			streams:   0, words:     0
@@ -857,1260 +856,1233 @@ TXN cq_enq reset t=0
 TXN cq_deq reset t=0
 TXN sched_in reset t=0
 TXN ddr_cmd reset t=0
-TXN refresh_req request t=34000 pending=1 starve=0 urgent=0
-TXN refresh_level state t=34000 pending=1 required=1 starve=0 urgent=0
-TXN csr_sts_level state t=39000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
-TXN wb write t=45000 addr=10530d0c bte=0 cti=2 data=1e2feb89 sel=f
-TXN req request t=46000 addr=10530d0c data=1e2feb89 mask=f we=1
-TXN sched_cmd command t=46000 aux=0 bank=0 col=0 row=0 type=5 we=0
-TXN refresh_ack ack t=46000 pending=1
-TXN dp_wr write t=46000 data=1e2feb89 mask=f
-TXN cq_enq enqueue t=46000 bank=1 col=280 row=414c we=1
-TXN sched_in command t=46000 aux=0 bank=0 col=0 row=0 type=5 we=0
-TXN wb write t=51000 addr=10530d10 bte=0 cti=2 data=c2ce6f44 sel=f
-TXN req request t=52000 addr=10530d10 data=c2ce6f44 mask=f we=1
-TXN refresh_level state t=52000 pending=0 required=0 starve=0 urgent=0
-TXN dp_wr write t=52000 data=c2ce6f44 mask=f
-TXN cq_enq enqueue t=52000 bank=1 col=288 row=414c we=1
-TXN ddr_cmd command t=52000 addr=0 bank=0 cmd=1
-TXN wb write t=57000 addr=10530d14 bte=0 cti=7 data=35bf992d sel=f
-TXN csr_sts_level state t=57000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
-TXN req request t=58000 addr=10530d14 data=35bf992d mask=f we=1
-TXN dp_wr write t=58000 data=35bf992d mask=f
-TXN cq_enq enqueue t=58000 bank=1 col=288 row=414c we=1
-TXN wb read t=105000 addr=1bb274a0 bte=0 cti=2
-TXN req request t=106000 addr=1bb274a0 data=35bf992d mask=f we=0
-TXN cq_enq enqueue t=106000 bank=6 col=250 row=6ec9 we=0
-TXN wb read t=111000 addr=1bb274a4 bte=0 cti=7
-TXN req request t=112000 addr=1bb274a4 data=35bf992d mask=f we=0
-TXN cq_enq enqueue t=112000 bank=6 col=250 row=6ec9 we=0
-TXN sched_cmd command t=712000 aux=0 bank=1 col=280 row=414c type=1 we=1
-TXN sched_in command t=712000 aux=0 bank=1 col=280 row=414c type=1 we=1
-TXN ddr_cmd command t=718000 addr=414c bank=1 cmd=3
-TXN sched_cmd command t=766000 aux=3 bank=6 col=250 row=6ec9 type=1 we=0
-TXN sched_in command t=766000 aux=3 bank=6 col=250 row=6ec9 type=1 we=0
-TXN ddr_cmd command t=772000 addr=6ec9 bank=6 cmd=3
-TXN sched_deq grant t=790000 idx=0
-TXN sched_cmd command t=790000 aux=0 bank=1 col=280 row=414c type=3 we=1
-TXN cq_deq dequeue t=790000 idx=0
-TXN sched_in command t=790000 aux=0 bank=1 col=280 row=414c type=3 we=1
-TXN dp_cmd write t=796000 aux=0
-TXN ddr_cmd command t=796000 addr=280 bank=1 cmd=4
-TXN sched_deq grant t=802000 idx=1
-TXN sched_cmd command t=802000 aux=1 bank=1 col=288 row=414c type=3 we=1
-TXN cq_deq dequeue t=802000 idx=1
-TXN sched_in command t=802000 aux=1 bank=1 col=288 row=414c type=3 we=1
-TXN dp_cmd write t=808000 aux=1
-TXN ddr_cmd command t=808000 addr=288 bank=1 cmd=4
-TXN ddr_wr_beat beat t=814000 data=eb89 mask=0
-TXN ddr_wr_beat beat t=820000 data=1e2f mask=0
-TXN ddr_wr_beat beat t=826000 data=6f44 mask=0
-TXN ddr_wr_beat beat t=832000 data=c2ce mask=0
-TXN sched_deq grant t=850000 idx=2
-TXN sched_cmd command t=850000 aux=2 bank=1 col=288 row=414c type=3 we=1
-TXN cq_deq dequeue t=850000 idx=2
-TXN sched_in command t=850000 aux=2 bank=1 col=288 row=414c type=3 we=1
-TXN dp_cmd write t=856000 aux=2
-TXN ddr_cmd command t=856000 addr=288 bank=1 cmd=4
-TXN ddr_wr_beat beat t=874000 data=992d mask=0
-TXN ddr_wr_beat beat t=880000 data=35bf mask=0
-TXN sched_deq grant t=970000 idx=3
-TXN sched_cmd command t=970000 aux=3 bank=6 col=250 row=6ec9 type=2 we=0
-TXN cq_deq dequeue t=970000 idx=3
-TXN sched_in command t=970000 aux=3 bank=6 col=250 row=6ec9 type=2 we=0
-TXN dp_cmd read t=976000 aux=3
-TXN ddr_cmd command t=976000 addr=250 bank=6 cmd=5
-TXN sched_deq grant t=982000 idx=4
-TXN sched_cmd command t=982000 aux=4 bank=6 col=250 row=6ec9 type=2 we=0
-TXN cq_deq dequeue t=982000 idx=4
-TXN sched_in command t=982000 aux=4 bank=6 col=250 row=6ec9 type=2 we=0
-TXN dp_cmd read t=988000 aux=4
-TXN ddr_cmd command t=988000 addr=250 bank=6 cmd=5
-TXN ddr_rd_beat beat t=1000000 data=7daf
-TXN ddr_rd_beat beat t=1006000 data=ed80
-TXN ddr_rd_beat beat t=1012000 data=7daf
-TXN wb_rsp read_data t=1018000 addr=1bb274a0 data=ed807daf
-TXN dp_rd_rsp response t=1018000 aux=3 data=ed807daf
-TXN ddr_rd_beat beat t=1018000 data=ed80
-TXN wb_rsp read_data t=1030000 addr=1bb274a4 data=ed807daf
-TXN dp_rd_rsp response t=1030000 aux=4 data=ed807daf
-TXN wb write t=1083000 addr=1c813948 bte=0 cti=2 data=cd447e35 sel=f
-TXN req request t=1084000 addr=1c813948 data=cd447e35 mask=f we=1
-TXN dp_wr write t=1084000 data=cd447e35 mask=f
-TXN cq_enq enqueue t=1084000 bank=7 col=a0 row=7204 we=1
-TXN wb write t=1089000 addr=1c81394c bte=0 cti=2 data=51431193 sel=f
-TXN req request t=1090000 addr=1c81394c data=51431193 mask=f we=1
-TXN dp_wr write t=1090000 data=51431193 mask=f
-TXN cq_enq enqueue t=1090000 bank=7 col=a0 row=7204 we=1
-TXN wb write t=1095000 addr=1c813950 bte=0 cti=2 data=5b6e6e3 sel=f
-TXN req request t=1096000 addr=1c813950 data=5b6e6e3 mask=f we=1
-TXN dp_wr write t=1096000 data=5b6e6e3 mask=f
-TXN cq_enq enqueue t=1096000 bank=7 col=a8 row=7204 we=1
-TXN wb write t=1101000 addr=1c813954 bte=0 cti=2 data=e1988ad9 sel=f
-TXN req request t=1102000 addr=1c813954 data=e1988ad9 mask=f we=1
-TXN sched_cmd command t=1102000 aux=5 bank=7 col=a0 row=7204 type=1 we=1
-TXN dp_wr write t=1102000 data=e1988ad9 mask=f
-TXN cq_enq enqueue t=1102000 bank=7 col=a8 row=7204 we=1
-TXN sched_in command t=1102000 aux=5 bank=7 col=a0 row=7204 type=1 we=1
-TXN wb write t=1107000 addr=1c813958 bte=0 cti=2 data=afbd67f9 sel=f
-TXN req request t=1108000 addr=1c813958 data=afbd67f9 mask=f we=1
-TXN dp_wr write t=1108000 data=afbd67f9 mask=f
-TXN cq_enq enqueue t=1108000 bank=7 col=a8 row=7204 we=1
-TXN ddr_cmd command t=1108000 addr=7204 bank=7 cmd=3
-TXN wb write t=1113000 addr=1c81395c bte=0 cti=2 data=f8130c42 sel=f
-TXN req request t=1114000 addr=1c81395c data=f8130c42 mask=f we=1
-TXN dp_wr write t=1114000 data=f8130c42 mask=f
-TXN cq_enq enqueue t=1114000 bank=7 col=a8 row=7204 we=1
-TXN wb write t=1119000 addr=1c813960 bte=0 cti=2 data=b9d179e0 sel=f
-TXN req request t=1120000 addr=1c813960 data=b9d179e0 mask=f we=1
-TXN dp_wr write t=1120000 data=b9d179e0 mask=f
-TXN cq_enq enqueue t=1120000 bank=7 col=b0 row=7204 we=1
-TXN wb write t=1125000 addr=1c813964 bte=0 cti=7 data=8712b8bc sel=f
-TXN req request t=1126000 addr=1c813964 data=8712b8bc mask=f we=1
-TXN dp_wr write t=1126000 data=8712b8bc mask=f
-TXN cq_enq enqueue t=1126000 bank=7 col=b0 row=7204 we=1
-TXN wb write t=1173000 addr=161ff4a0 bte=0 cti=2 data=5805975 sel=f
-TXN req request t=1174000 addr=161ff4a0 data=5805975 mask=f we=1
-TXN dp_wr write t=1174000 data=5805975 mask=f
-TXN cq_enq enqueue t=1174000 bank=6 col=250 row=587f we=1
-TXN wb write t=1179000 addr=161ff4a4 bte=0 cti=2 data=a46d6753 sel=f
-TXN req request t=1180000 addr=161ff4a4 data=a46d6753 mask=f we=1
-TXN sched_deq grant t=1180000 idx=0
-TXN sched_cmd command t=1180000 aux=5 bank=7 col=a0 row=7204 type=3 we=1
-TXN dp_wr write t=1180000 data=a46d6753 mask=f
-TXN cq_enq enqueue t=1180000 bank=6 col=250 row=587f we=1
-TXN cq_deq dequeue t=1180000 idx=0
-TXN sched_in command t=1180000 aux=5 bank=7 col=a0 row=7204 type=3 we=1
-TXN wb write t=1185000 addr=161ff4a8 bte=0 cti=2 data=dc2574bd sel=f
-TXN req request t=1186000 addr=161ff4a8 data=dc2574bd mask=f we=1
-TXN dp_wr write t=1186000 data=dc2574bd mask=f
-TXN dp_cmd write t=1186000 aux=5
-TXN cq_enq enqueue t=1186000 bank=6 col=250 row=587f we=1
-TXN ddr_cmd command t=1186000 addr=a0 bank=7 cmd=4
-TXN wb write t=1191000 addr=161ff4ac bte=0 cti=2 data=ab99254a sel=f
-TXN req request t=1192000 addr=161ff4ac data=ab99254a mask=f we=1
-TXN sched_deq grant t=1192000 idx=1
-TXN sched_cmd command t=1192000 aux=6 bank=7 col=a0 row=7204 type=3 we=1
-TXN dp_wr write t=1192000 data=ab99254a mask=f
-TXN cq_enq enqueue t=1192000 bank=6 col=250 row=587f we=1
-TXN cq_deq dequeue t=1192000 idx=1
-TXN sched_in command t=1192000 aux=6 bank=7 col=a0 row=7204 type=3 we=1
-TXN wb write t=1197000 addr=161ff4b0 bte=0 cti=7 data=4da98f1d sel=f
-TXN req request t=1198000 addr=161ff4b0 data=4da98f1d mask=f we=1
-TXN sched_cmd command t=1198000 aux=d bank=6 col=250 row=587f type=4 we=1
-TXN dp_wr write t=1198000 data=4da98f1d mask=f
-TXN dp_cmd write t=1198000 aux=6
-TXN cq_enq enqueue t=1198000 bank=6 col=258 row=587f we=1
-TXN sched_in command t=1198000 aux=d bank=6 col=250 row=587f type=4 we=1
-TXN ddr_cmd command t=1198000 addr=a0 bank=7 cmd=4
-TXN ddr_wr_beat beat t=1204000 data=7e35 mask=0
-TXN ddr_cmd command t=1204000 addr=0 bank=6 cmd=2
-TXN ddr_wr_beat beat t=1210000 data=cd44 mask=0
-TXN ddr_wr_beat beat t=1216000 data=1193 mask=0
-TXN ddr_wr_beat beat t=1222000 data=5143 mask=0
-TXN sched_deq grant t=1240000 idx=2
-TXN sched_cmd command t=1240000 aux=7 bank=7 col=a8 row=7204 type=3 we=1
-TXN cq_deq dequeue t=1240000 idx=2
-TXN sched_in command t=1240000 aux=7 bank=7 col=a8 row=7204 type=3 we=1
-TXN dp_cmd write t=1246000 aux=7
-TXN ddr_cmd command t=1246000 addr=a8 bank=7 cmd=4
-TXN wb read t=1251000 addr=235abd4 bte=0 cti=2
-TXN req request t=1252000 addr=235abd4 data=4da98f1d mask=f we=0
-TXN sched_deq grant t=1252000 idx=3
-TXN sched_cmd command t=1252000 aux=8 bank=7 col=a8 row=7204 type=3 we=1
-TXN cq_enq enqueue t=1252000 bank=5 col=1e8 row=8d6 we=0
-TXN cq_deq dequeue t=1252000 idx=3
-TXN sched_in command t=1252000 aux=8 bank=7 col=a8 row=7204 type=3 we=1
-TXN wb read t=1257000 addr=235abd8 bte=0 cti=2
-TXN req request t=1258000 addr=235abd8 data=4da98f1d mask=f we=0
-TXN dp_cmd write t=1258000 aux=8
-TXN cq_enq enqueue t=1258000 bank=5 col=1e8 row=8d6 we=0
-TXN ddr_cmd command t=1258000 addr=a8 bank=7 cmd=4
-TXN wb read t=1263000 addr=235abdc bte=0 cti=2
-TXN req request t=1264000 addr=235abdc data=4da98f1d mask=f we=0
-TXN ddr_wr_beat beat t=1264000 data=e6e3 mask=0
-TXN cq_enq enqueue t=1264000 bank=5 col=1e8 row=8d6 we=0
-TXN wb read t=1269000 addr=235abe0 bte=0 cti=2
-TXN req request t=1270000 addr=235abe0 data=4da98f1d mask=f we=0
-TXN sched_cmd command t=1270000 aux=2 bank=5 col=1e8 row=8d6 type=1 we=0
-TXN ddr_wr_beat beat t=1270000 data=5b6 mask=0
-TXN cq_enq enqueue t=1270000 bank=5 col=1f0 row=8d6 we=0
-TXN sched_in command t=1270000 aux=2 bank=5 col=1e8 row=8d6 type=1 we=0
-TXN wb read t=1275000 addr=235abe4 bte=0 cti=7
-TXN req request t=1276000 addr=235abe4 data=4da98f1d mask=f we=0
-TXN ddr_wr_beat beat t=1276000 data=8ad9 mask=0
-TXN cq_enq enqueue t=1276000 bank=5 col=1f0 row=8d6 we=0
-TXN ddr_cmd command t=1276000 addr=8d6 bank=5 cmd=3
-TXN ddr_wr_beat beat t=1282000 data=e198 mask=0
-TXN sched_deq grant t=1300000 idx=4
-TXN sched_cmd command t=1300000 aux=9 bank=7 col=a8 row=7204 type=3 we=1
-TXN cq_deq dequeue t=1300000 idx=4
-TXN sched_in command t=1300000 aux=9 bank=7 col=a8 row=7204 type=3 we=1
-TXN dp_cmd write t=1306000 aux=9
-TXN ddr_cmd command t=1306000 addr=a8 bank=7 cmd=4
-TXN sched_deq grant t=1312000 idx=5
-TXN sched_cmd command t=1312000 aux=a bank=7 col=a8 row=7204 type=3 we=1
-TXN cq_deq dequeue t=1312000 idx=5
-TXN sched_in command t=1312000 aux=a bank=7 col=a8 row=7204 type=3 we=1
-TXN dp_cmd write t=1318000 aux=a
-TXN ddr_cmd command t=1318000 addr=a8 bank=7 cmd=4
-TXN sched_cmd command t=1324000 aux=f bank=6 col=250 row=587f type=1 we=1
-TXN ddr_wr_beat beat t=1324000 data=67f9 mask=0
-TXN sched_in command t=1324000 aux=f bank=6 col=250 row=587f type=1 we=1
-TXN ddr_wr_beat beat t=1330000 data=afbd mask=0
-TXN ddr_cmd command t=1330000 addr=587f bank=6 cmd=3
-TXN ddr_wr_beat beat t=1336000 data=c42 mask=0
-TXN ddr_wr_beat beat t=1342000 data=f813 mask=0
-TXN sched_deq grant t=1360000 idx=6
-TXN sched_cmd command t=1360000 aux=b bank=7 col=b0 row=7204 type=3 we=1
-TXN cq_deq dequeue t=1360000 idx=6
-TXN sched_in command t=1360000 aux=b bank=7 col=b0 row=7204 type=3 we=1
-TXN dp_cmd write t=1366000 aux=b
-TXN ddr_cmd command t=1366000 addr=b0 bank=7 cmd=4
-TXN sched_deq grant t=1372000 idx=7
-TXN sched_cmd command t=1372000 aux=c bank=7 col=b0 row=7204 type=3 we=1
-TXN cq_deq dequeue t=1372000 idx=7
-TXN sched_in command t=1372000 aux=c bank=7 col=b0 row=7204 type=3 we=1
-TXN dp_cmd write t=1378000 aux=c
-TXN ddr_cmd command t=1378000 addr=b0 bank=7 cmd=4
-TXN ddr_wr_beat beat t=1384000 data=79e0 mask=0
-TXN ddr_wr_beat beat t=1390000 data=b9d1 mask=0
-TXN ddr_wr_beat beat t=1396000 data=b8bc mask=0
-TXN ddr_wr_beat beat t=1402000 data=8712 mask=0
-TXN sched_deq grant t=1420000 idx=0
-TXN sched_cmd command t=1420000 aux=f bank=6 col=250 row=587f type=3 we=1
-TXN cq_deq dequeue t=1420000 idx=0
-TXN sched_in command t=1420000 aux=f bank=6 col=250 row=587f type=3 we=1
-TXN dp_cmd write t=1426000 aux=f
-TXN ddr_cmd command t=1426000 addr=250 bank=6 cmd=4
-TXN sched_deq grant t=1432000 idx=1
-TXN sched_cmd command t=1432000 aux=1 bank=6 col=258 row=587f type=3 we=1
-TXN cq_deq dequeue t=1432000 idx=1
-TXN sched_in command t=1432000 aux=1 bank=6 col=258 row=587f type=3 we=1
-TXN dp_cmd write t=1438000 aux=1
-TXN ddr_cmd command t=1438000 addr=258 bank=6 cmd=4
-TXN ddr_wr_beat beat t=1444000 data=5975 mask=0
-TXN ddr_wr_beat beat t=1450000 data=580 mask=0
-TXN ddr_wr_beat beat t=1456000 data=6753 mask=0
-TXN ddr_wr_beat beat t=1462000 data=a46d mask=0
-TXN sched_deq grant t=1480000 idx=8
-TXN sched_cmd command t=1480000 aux=d bank=6 col=250 row=587f type=3 we=1
-TXN cq_deq dequeue t=1480000 idx=8
-TXN sched_in command t=1480000 aux=d bank=6 col=250 row=587f type=3 we=1
-TXN dp_cmd write t=1486000 aux=d
-TXN ddr_cmd command t=1486000 addr=250 bank=6 cmd=4
-TXN sched_deq grant t=1492000 idx=9
-TXN sched_cmd command t=1492000 aux=e bank=6 col=250 row=587f type=3 we=1
-TXN cq_deq dequeue t=1492000 idx=9
-TXN sched_in command t=1492000 aux=e bank=6 col=250 row=587f type=3 we=1
-TXN dp_cmd write t=1498000 aux=e
-TXN ddr_cmd command t=1498000 addr=250 bank=6 cmd=4
-TXN ddr_wr_beat beat t=1504000 data=74bd mask=0
-TXN ddr_wr_beat beat t=1510000 data=dc25 mask=0
-TXN ddr_wr_beat beat t=1516000 data=254a mask=0
-TXN ddr_wr_beat beat t=1522000 data=ab99 mask=0
-TXN sched_deq grant t=1540000 idx=a
-TXN sched_cmd command t=1540000 aux=0 bank=6 col=250 row=587f type=3 we=1
-TXN cq_deq dequeue t=1540000 idx=a
-TXN sched_in command t=1540000 aux=0 bank=6 col=250 row=587f type=3 we=1
-TXN dp_cmd write t=1546000 aux=0
-TXN ddr_cmd command t=1546000 addr=250 bank=6 cmd=4
-TXN ddr_wr_beat beat t=1564000 data=8f1d mask=0
-TXN ddr_wr_beat beat t=1570000 data=4da9 mask=0
-TXN sched_deq grant t=1660000 idx=2
-TXN sched_cmd command t=1660000 aux=2 bank=5 col=1e8 row=8d6 type=2 we=0
-TXN cq_deq dequeue t=1660000 idx=2
-TXN sched_in command t=1660000 aux=2 bank=5 col=1e8 row=8d6 type=2 we=0
-TXN dp_cmd read t=1666000 aux=2
-TXN ddr_cmd command t=1666000 addr=1e8 bank=5 cmd=5
-TXN sched_deq grant t=1672000 idx=3
-TXN sched_cmd command t=1672000 aux=3 bank=5 col=1e8 row=8d6 type=2 we=0
-TXN cq_deq dequeue t=1672000 idx=3
-TXN sched_in command t=1672000 aux=3 bank=5 col=1e8 row=8d6 type=2 we=0
-TXN dp_cmd read t=1678000 aux=3
-TXN ddr_cmd command t=1678000 addr=1e8 bank=5 cmd=5
-TXN ddr_rd_beat beat t=1690000 data=fe17
-TXN ddr_rd_beat beat t=1696000 data=15bb
-TXN ddr_rd_beat beat t=1702000 data=fe17
-TXN wb_rsp read_data t=1708000 addr=235abd4 data=15bbfe17
-TXN dp_rd_rsp response t=1708000 aux=2 data=15bbfe17
-TXN ddr_rd_beat beat t=1708000 data=15bb
-TXN wb_rsp read_data t=1720000 addr=235abd8 data=15bbfe17
-TXN sched_deq grant t=1720000 idx=b
-TXN sched_cmd command t=1720000 aux=4 bank=5 col=1e8 row=8d6 type=2 we=0
-TXN dp_rd_rsp response t=1720000 aux=3 data=15bbfe17
-TXN cq_deq dequeue t=1720000 idx=b
-TXN sched_in command t=1720000 aux=4 bank=5 col=1e8 row=8d6 type=2 we=0
-TXN dp_cmd read t=1726000 aux=4
-TXN ddr_cmd command t=1726000 addr=1e8 bank=5 cmd=5
-TXN sched_deq grant t=1732000 idx=c
-TXN sched_cmd command t=1732000 aux=5 bank=5 col=1f0 row=8d6 type=2 we=0
-TXN cq_deq dequeue t=1732000 idx=c
-TXN sched_in command t=1732000 aux=5 bank=5 col=1f0 row=8d6 type=2 we=0
-TXN dp_cmd read t=1738000 aux=5
-TXN ddr_cmd command t=1738000 addr=1f0 bank=5 cmd=5
-TXN ddr_rd_beat beat t=1750000 data=fe17
-TXN ddr_rd_beat beat t=1756000 data=15bb
-TXN ddr_rd_beat beat t=1762000 data=fe0f
-TXN wb_rsp read_data t=1768000 addr=235abdc data=15bbfe17
-TXN dp_rd_rsp response t=1768000 aux=4 data=15bbfe17
-TXN ddr_rd_beat beat t=1768000 data=15ba
-TXN wb_rsp read_data t=1780000 addr=235abe0 data=15bafe0f
-TXN sched_deq grant t=1780000 idx=d
-TXN sched_cmd command t=1780000 aux=6 bank=5 col=1f0 row=8d6 type=2 we=0
-TXN dp_rd_rsp response t=1780000 aux=5 data=15bafe0f
-TXN cq_deq dequeue t=1780000 idx=d
-TXN sched_in command t=1780000 aux=6 bank=5 col=1f0 row=8d6 type=2 we=0
-TXN dp_cmd read t=1786000 aux=6
-TXN ddr_cmd command t=1786000 addr=1f0 bank=5 cmd=5
-TXN ddr_rd_beat beat t=1810000 data=fe0f
-TXN ddr_rd_beat beat t=1816000 data=15ba
-TXN wb_rsp read_data t=1828000 addr=235abe4 data=15bafe0f
-TXN dp_rd_rsp response t=1828000 aux=6 data=15bafe0f
-TXN wb read t=1875000 addr=1a841edc bte=0 cti=2
-TXN req request t=1876000 addr=1a841edc data=4da98f1d mask=f we=0
-TXN cq_enq enqueue t=1876000 bank=3 col=368 row=6a10 we=0
-TXN wb read t=1881000 addr=1a841ee0 bte=0 cti=2
-TXN req request t=1882000 addr=1a841ee0 data=4da98f1d mask=f we=0
-TXN cq_enq enqueue t=1882000 bank=3 col=370 row=6a10 we=0
-TXN wb read t=1887000 addr=1a841ee4 bte=0 cti=7
-TXN req request t=1888000 addr=1a841ee4 data=4da98f1d mask=f we=0
-TXN cq_enq enqueue t=1888000 bank=3 col=370 row=6a10 we=0
-TXN sched_cmd command t=1894000 aux=7 bank=3 col=368 row=6a10 type=1 we=0
-TXN sched_in command t=1894000 aux=7 bank=3 col=368 row=6a10 type=1 we=0
-TXN ddr_cmd command t=1900000 addr=6a10 bank=3 cmd=3
-TXN sched_deq grant t=1972000 idx=0
-TXN sched_cmd command t=1972000 aux=7 bank=3 col=368 row=6a10 type=2 we=0
-TXN cq_deq dequeue t=1972000 idx=0
-TXN sched_in command t=1972000 aux=7 bank=3 col=368 row=6a10 type=2 we=0
-TXN dp_cmd read t=1978000 aux=7
-TXN ddr_cmd command t=1978000 addr=368 bank=3 cmd=5
-TXN sched_deq grant t=1984000 idx=1
-TXN sched_cmd command t=1984000 aux=8 bank=3 col=370 row=6a10 type=2 we=0
-TXN cq_deq dequeue t=1984000 idx=1
-TXN sched_in command t=1984000 aux=8 bank=3 col=370 row=6a10 type=2 we=0
-TXN dp_cmd read t=1990000 aux=8
-TXN ddr_cmd command t=1990000 addr=370 bank=3 cmd=5
-TXN ddr_rd_beat beat t=2002000 data=fc97
-TXN ddr_rd_beat beat t=2008000 data=2593
-TXN ddr_rd_beat beat t=2014000 data=fc8f
-TXN wb_rsp read_data t=2020000 addr=1a841edc data=2593fc97
-TXN dp_rd_rsp response t=2020000 aux=7 data=2593fc97
-TXN ddr_rd_beat beat t=2020000 data=2592
-TXN wb_rsp read_data t=2032000 addr=1a841ee0 data=2592fc8f
-TXN sched_deq grant t=2032000 idx=2
-TXN sched_cmd command t=2032000 aux=9 bank=3 col=370 row=6a10 type=2 we=0
-TXN dp_rd_rsp response t=2032000 aux=8 data=2592fc8f
-TXN cq_deq dequeue t=2032000 idx=2
-TXN sched_in command t=2032000 aux=9 bank=3 col=370 row=6a10 type=2 we=0
-TXN dp_cmd read t=2038000 aux=9
-TXN ddr_cmd command t=2038000 addr=370 bank=3 cmd=5
-TXN ddr_rd_beat beat t=2062000 data=fc8f
-TXN ddr_rd_beat beat t=2068000 data=2592
-TXN wb_rsp read_data t=2080000 addr=1a841ee4 data=2592fc8f
-TXN dp_rd_rsp response t=2080000 aux=9 data=2592fc8f
-TXN wb read t=2115000 addr=588af5c bte=0 cti=2
-TXN req request t=2116000 addr=588af5c data=4da98f1d mask=f we=0
-TXN cq_enq enqueue t=2116000 bank=5 col=3a8 row=1622 we=0
-TXN wb read t=2121000 addr=588af60 bte=0 cti=2
-TXN req request t=2122000 addr=588af60 data=4da98f1d mask=f we=0
-TXN cq_enq enqueue t=2122000 bank=5 col=3b0 row=1622 we=0
-TXN wb read t=2127000 addr=588af64 bte=0 cti=2
-TXN req request t=2128000 addr=588af64 data=4da98f1d mask=f we=0
-TXN cq_enq enqueue t=2128000 bank=5 col=3b0 row=1622 we=0
-TXN wb read t=2133000 addr=588af68 bte=0 cti=7
-TXN req request t=2134000 addr=588af68 data=4da98f1d mask=f we=0
-TXN sched_cmd command t=2134000 aux=a bank=5 col=3a8 row=1622 type=4 we=0
-TXN cq_enq enqueue t=2134000 bank=5 col=3b0 row=1622 we=0
-TXN sched_in command t=2134000 aux=a bank=5 col=3a8 row=1622 type=4 we=0
-TXN ddr_cmd command t=2140000 addr=0 bank=5 cmd=2
-TXN sched_cmd command t=2212000 aux=a bank=5 col=3a8 row=1622 type=1 we=0
-TXN sched_in command t=2212000 aux=a bank=5 col=3a8 row=1622 type=1 we=0
-TXN ddr_cmd command t=2218000 addr=1622 bank=5 cmd=3
-TXN sched_deq grant t=2290000 idx=0
-TXN sched_cmd command t=2290000 aux=a bank=5 col=3a8 row=1622 type=2 we=0
-TXN cq_deq dequeue t=2290000 idx=0
-TXN sched_in command t=2290000 aux=a bank=5 col=3a8 row=1622 type=2 we=0
-TXN dp_cmd read t=2296000 aux=a
-TXN ddr_cmd command t=2296000 addr=3a8 bank=5 cmd=5
-TXN sched_deq grant t=2302000 idx=1
-TXN sched_cmd command t=2302000 aux=b bank=5 col=3b0 row=1622 type=2 we=0
-TXN cq_deq dequeue t=2302000 idx=1
-TXN sched_in command t=2302000 aux=b bank=5 col=3b0 row=1622 type=2 we=0
-TXN dp_cmd read t=2308000 aux=b
-TXN ddr_cmd command t=2308000 addr=3b0 bank=5 cmd=5
-TXN ddr_rd_beat beat t=2320000 data=fc57
-TXN ddr_rd_beat beat t=2326000 data=b59f
-TXN ddr_rd_beat beat t=2332000 data=fc4f
-TXN wb_rsp read_data t=2338000 addr=588af5c data=b59ffc57
-TXN dp_rd_rsp response t=2338000 aux=a data=b59ffc57
-TXN ddr_rd_beat beat t=2338000 data=b59e
-TXN wb_rsp read_data t=2350000 addr=588af60 data=b59efc4f
-TXN sched_deq grant t=2350000 idx=2
-TXN sched_cmd command t=2350000 aux=c bank=5 col=3b0 row=1622 type=2 we=0
-TXN dp_rd_rsp response t=2350000 aux=b data=b59efc4f
-TXN cq_deq dequeue t=2350000 idx=2
-TXN sched_in command t=2350000 aux=c bank=5 col=3b0 row=1622 type=2 we=0
-TXN dp_cmd read t=2356000 aux=c
-TXN ddr_cmd command t=2356000 addr=3b0 bank=5 cmd=5
-TXN sched_deq grant t=2362000 idx=3
-TXN sched_cmd command t=2362000 aux=d bank=5 col=3b0 row=1622 type=2 we=0
-TXN cq_deq dequeue t=2362000 idx=3
-TXN sched_in command t=2362000 aux=d bank=5 col=3b0 row=1622 type=2 we=0
-TXN dp_cmd read t=2368000 aux=d
-TXN ddr_cmd command t=2368000 addr=3b0 bank=5 cmd=5
-TXN ddr_rd_beat beat t=2380000 data=fc4f
-TXN ddr_rd_beat beat t=2386000 data=b59e
-TXN ddr_rd_beat beat t=2392000 data=fc4f
-TXN wb_rsp read_data t=2398000 addr=588af64 data=b59efc4f
-TXN dp_rd_rsp response t=2398000 aux=c data=b59efc4f
-TXN ddr_rd_beat beat t=2398000 data=b59e
-TXN wb_rsp read_data t=2410000 addr=588af68 data=b59efc4f
-TXN dp_rd_rsp response t=2410000 aux=d data=b59efc4f
-TXN wb write t=2457000 addr=a7a0868 bte=0 cti=2 data=64ac5db9 sel=f
-TXN req request t=2458000 addr=a7a0868 data=64ac5db9 mask=f we=1
-TXN dp_wr write t=2458000 data=64ac5db9 mask=f
-TXN cq_enq enqueue t=2458000 bank=1 col=30 row=29e8 we=1
-TXN wb write t=2463000 addr=a7a086c bte=0 cti=2 data=7923986 sel=f
-TXN req request t=2464000 addr=a7a086c data=7923986 mask=f we=1
-TXN dp_wr write t=2464000 data=7923986 mask=f
-TXN cq_enq enqueue t=2464000 bank=1 col=30 row=29e8 we=1
-TXN wb write t=2469000 addr=a7a0870 bte=0 cti=2 data=b21fbac sel=f
-TXN req request t=2470000 addr=a7a0870 data=b21fbac mask=f we=1
-TXN dp_wr write t=2470000 data=b21fbac mask=f
-TXN cq_enq enqueue t=2470000 bank=1 col=38 row=29e8 we=1
-TXN wb write t=2475000 addr=a7a0874 bte=0 cti=2 data=2b9c014e sel=f
-TXN req request t=2476000 addr=a7a0874 data=2b9c014e mask=f we=1
-TXN sched_cmd command t=2476000 aux=e bank=1 col=30 row=29e8 type=4 we=1
-TXN dp_wr write t=2476000 data=2b9c014e mask=f
-TXN cq_enq enqueue t=2476000 bank=1 col=38 row=29e8 we=1
-TXN sched_in command t=2476000 aux=e bank=1 col=30 row=29e8 type=4 we=1
-TXN wb write t=2481000 addr=a7a0878 bte=0 cti=2 data=8092b4d4 sel=f
-TXN req request t=2482000 addr=a7a0878 data=8092b4d4 mask=f we=1
-TXN dp_wr write t=2482000 data=8092b4d4 mask=f
-TXN cq_enq enqueue t=2482000 bank=1 col=38 row=29e8 we=1
-TXN ddr_cmd command t=2482000 addr=0 bank=1 cmd=2
-TXN wb write t=2487000 addr=a7a087c bte=0 cti=2 data=fb695ffb sel=f
-TXN req request t=2488000 addr=a7a087c data=fb695ffb mask=f we=1
-TXN dp_wr write t=2488000 data=fb695ffb mask=f
-TXN cq_enq enqueue t=2488000 bank=1 col=38 row=29e8 we=1
-TXN wb write t=2493000 addr=a7a0880 bte=0 cti=7 data=c541013d sel=f
-TXN req request t=2494000 addr=a7a0880 data=c541013d mask=f we=1
-TXN dp_wr write t=2494000 data=c541013d mask=f
-TXN cq_enq enqueue t=2494000 bank=1 col=40 row=29e8 we=1
-TXN wb write t=2547000 addr=19e296a8 bte=0 cti=2 data=83868a29 sel=f
-TXN req request t=2548000 addr=19e296a8 data=83868a29 mask=f we=1
-TXN dp_wr write t=2548000 data=83868a29 mask=f
-TXN cq_enq enqueue t=2548000 bank=2 col=350 row=678a we=1
-TXN wb write t=2553000 addr=19e296ac bte=0 cti=2 data=93ea5c4e sel=f
-TXN req request t=2554000 addr=19e296ac data=93ea5c4e mask=f we=1
-TXN sched_cmd command t=2554000 aux=e bank=1 col=30 row=29e8 type=1 we=1
-TXN dp_wr write t=2554000 data=93ea5c4e mask=f
-TXN cq_enq enqueue t=2554000 bank=2 col=350 row=678a we=1
-TXN sched_in command t=2554000 aux=e bank=1 col=30 row=29e8 type=1 we=1
-TXN wb write t=2559000 addr=19e296b0 bte=0 cti=2 data=1762741 sel=f
-TXN req request t=2560000 addr=19e296b0 data=1762741 mask=f we=1
-TXN dp_wr write t=2560000 data=1762741 mask=f
-TXN cq_enq enqueue t=2560000 bank=2 col=358 row=678a we=1
-TXN ddr_cmd command t=2560000 addr=29e8 bank=1 cmd=3
-TXN wb write t=2565000 addr=19e296b4 bte=0 cti=2 data=cf23cae8 sel=f
-TXN req request t=2566000 addr=19e296b4 data=cf23cae8 mask=f we=1
-TXN dp_wr write t=2566000 data=cf23cae8 mask=f
-TXN cq_enq enqueue t=2566000 bank=2 col=358 row=678a we=1
-TXN wb write t=2571000 addr=19e296b8 bte=0 cti=2 data=8fb5262c sel=f
-TXN req request t=2572000 addr=19e296b8 data=8fb5262c mask=f we=1
-TXN dp_wr write t=2572000 data=8fb5262c mask=f
-TXN cq_enq enqueue t=2572000 bank=2 col=358 row=678a we=1
-TXN wb write t=2577000 addr=19e296bc bte=0 cti=2 data=e5e18ba sel=f
-TXN req request t=2578000 addr=19e296bc data=e5e18ba mask=f we=1
-TXN dp_wr write t=2578000 data=e5e18ba mask=f
-TXN cq_enq enqueue t=2578000 bank=2 col=358 row=678a we=1
-TXN wb write t=2583000 addr=19e296c0 bte=0 cti=2 data=deb8fc4c sel=f
-TXN req request t=2584000 addr=19e296c0 data=deb8fc4c mask=f we=1
-TXN dp_wr write t=2584000 data=deb8fc4c mask=f
-TXN cq_enq enqueue t=2584000 bank=2 col=360 row=678a we=1
-TXN wb write t=2589000 addr=19e296c4 bte=0 cti=7 data=81355c53 sel=f
-TXN req request t=2590000 addr=19e296c4 data=81355c53 mask=f we=1
-TXN dp_wr write t=2590000 data=81355c53 mask=f
-TXN cq_enq enqueue t=2590000 bank=2 col=360 row=678a we=1
-TXN sched_cmd command t=2608000 aux=5 bank=2 col=350 row=678a type=1 we=1
-TXN sched_in command t=2608000 aux=5 bank=2 col=350 row=678a type=1 we=1
-TXN ddr_cmd command t=2614000 addr=678a bank=2 cmd=3
-TXN sched_deq grant t=2632000 idx=0
-TXN sched_cmd command t=2632000 aux=e bank=1 col=30 row=29e8 type=3 we=1
-TXN cq_deq dequeue t=2632000 idx=0
-TXN sched_in command t=2632000 aux=e bank=1 col=30 row=29e8 type=3 we=1
-TXN wb read t=2637000 addr=1a85ee68 bte=0 cti=2
-TXN req request t=2638000 addr=1a85ee68 data=81355c53 mask=f we=0
-TXN dp_cmd write t=2638000 aux=e
-TXN cq_enq enqueue t=2638000 bank=5 col=330 row=6a17 we=0
-TXN ddr_cmd command t=2638000 addr=30 bank=1 cmd=4
-TXN wb read t=2643000 addr=1a85ee6c bte=0 cti=2
-TXN req request t=2644000 addr=1a85ee6c data=81355c53 mask=f we=0
-TXN sched_deq grant t=2644000 idx=1
-TXN sched_cmd command t=2644000 aux=f bank=1 col=30 row=29e8 type=3 we=1
-TXN cq_enq enqueue t=2644000 bank=5 col=330 row=6a17 we=0
-TXN cq_deq dequeue t=2644000 idx=1
-TXN sched_in command t=2644000 aux=f bank=1 col=30 row=29e8 type=3 we=1
-TXN wb read t=2649000 addr=1a85ee70 bte=0 cti=2
-TXN req request t=2650000 addr=1a85ee70 data=81355c53 mask=f we=0
-TXN dp_cmd write t=2650000 aux=f
-TXN cq_enq enqueue t=2650000 bank=5 col=338 row=6a17 we=0
-TXN ddr_cmd command t=2650000 addr=30 bank=1 cmd=4
-TXN wb read t=2655000 addr=1a85ee74 bte=0 cti=2
-TXN sched_cmd command t=2656000 aux=d bank=5 col=330 row=6a17 type=4 we=0
-TXN ddr_wr_beat beat t=2656000 data=5db9 mask=0
-TXN sched_in command t=2656000 aux=d bank=5 col=330 row=6a17 type=4 we=0
-TXN ddr_wr_beat beat t=2662000 data=64ac mask=0
-TXN ddr_cmd command t=2662000 addr=0 bank=5 cmd=2
-TXN ddr_wr_beat beat t=2668000 data=3986 mask=0
-TXN ddr_wr_beat beat t=2674000 data=792 mask=0
-TXN sched_deq grant t=2692000 idx=2
-TXN sched_cmd command t=2692000 aux=0 bank=1 col=38 row=29e8 type=3 we=1
-TXN cq_deq dequeue t=2692000 idx=2
-TXN sched_in command t=2692000 aux=0 bank=1 col=38 row=29e8 type=3 we=1
-TXN req request t=2698000 addr=1a85ee74 data=81355c53 mask=f we=0
-TXN dp_cmd write t=2698000 aux=0
-TXN cq_enq enqueue t=2698000 bank=5 col=338 row=6a17 we=0
-TXN ddr_cmd command t=2698000 addr=38 bank=1 cmd=4
-TXN wb read t=2703000 addr=1a85ee78 bte=0 cti=2
-TXN sched_deq grant t=2704000 idx=3
-TXN sched_cmd command t=2704000 aux=1 bank=1 col=38 row=29e8 type=3 we=1
-TXN cq_deq dequeue t=2704000 idx=3
-TXN sched_in command t=2704000 aux=1 bank=1 col=38 row=29e8 type=3 we=1
-TXN req request t=2710000 addr=1a85ee78 data=81355c53 mask=f we=0
-TXN dp_cmd write t=2710000 aux=1
-TXN cq_enq enqueue t=2710000 bank=5 col=338 row=6a17 we=0
-TXN ddr_cmd command t=2710000 addr=38 bank=1 cmd=4
-TXN wb read t=2715000 addr=1a85ee7c bte=0 cti=2
-TXN ddr_wr_beat beat t=2716000 data=fbac mask=0
-TXN ddr_wr_beat beat t=2722000 data=b21 mask=0
-TXN ddr_wr_beat beat t=2728000 data=14e mask=0
-TXN sched_cmd command t=2734000 aux=d bank=5 col=330 row=6a17 type=1 we=0
-TXN ddr_wr_beat beat t=2734000 data=2b9c mask=0
-TXN sched_in command t=2734000 aux=d bank=5 col=330 row=6a17 type=1 we=0
-TXN ddr_cmd command t=2740000 addr=6a17 bank=5 cmd=3
-TXN sched_deq grant t=2752000 idx=4
-TXN sched_cmd command t=2752000 aux=2 bank=1 col=38 row=29e8 type=3 we=1
-TXN cq_deq dequeue t=2752000 idx=4
-TXN sched_in command t=2752000 aux=2 bank=1 col=38 row=29e8 type=3 we=1
-TXN req request t=2758000 addr=1a85ee7c data=81355c53 mask=f we=0
-TXN dp_cmd write t=2758000 aux=2
-TXN cq_enq enqueue t=2758000 bank=5 col=338 row=6a17 we=0
-TXN ddr_cmd command t=2758000 addr=38 bank=1 cmd=4
-TXN wb read t=2763000 addr=1a85ee80 bte=0 cti=2
-TXN sched_deq grant t=2764000 idx=5
-TXN sched_cmd command t=2764000 aux=3 bank=1 col=38 row=29e8 type=3 we=1
-TXN cq_deq dequeue t=2764000 idx=5
-TXN sched_in command t=2764000 aux=3 bank=1 col=38 row=29e8 type=3 we=1
-TXN req request t=2770000 addr=1a85ee80 data=81355c53 mask=f we=0
-TXN dp_cmd write t=2770000 aux=3
-TXN cq_enq enqueue t=2770000 bank=5 col=340 row=6a17 we=0
-TXN ddr_cmd command t=2770000 addr=38 bank=1 cmd=4
-TXN wb read t=2775000 addr=1a85ee84 bte=0 cti=7
-TXN ddr_wr_beat beat t=2776000 data=b4d4 mask=0
-TXN ddr_wr_beat beat t=2782000 data=8092 mask=0
-TXN ddr_wr_beat beat t=2788000 data=5ffb mask=0
-TXN ddr_wr_beat beat t=2794000 data=fb69 mask=0
-TXN sched_deq grant t=2812000 idx=6
-TXN sched_cmd command t=2812000 aux=4 bank=1 col=40 row=29e8 type=3 we=1
-TXN cq_deq dequeue t=2812000 idx=6
-TXN sched_in command t=2812000 aux=4 bank=1 col=40 row=29e8 type=3 we=1
-TXN req request t=2818000 addr=1a85ee84 data=81355c53 mask=f we=0
-TXN dp_cmd write t=2818000 aux=4
-TXN cq_enq enqueue t=2818000 bank=5 col=340 row=6a17 we=0
-TXN ddr_cmd command t=2818000 addr=40 bank=1 cmd=4
-TXN sched_deq grant t=2824000 idx=7
-TXN sched_cmd command t=2824000 aux=5 bank=2 col=350 row=678a type=3 we=1
-TXN cq_deq dequeue t=2824000 idx=7
-TXN sched_in command t=2824000 aux=5 bank=2 col=350 row=678a type=3 we=1
-TXN dp_cmd write t=2830000 aux=5
-TXN ddr_cmd command t=2830000 addr=350 bank=2 cmd=4
-TXN ddr_wr_beat beat t=2836000 data=13d mask=0
-TXN ddr_wr_beat beat t=2842000 data=c541 mask=0
-TXN ddr_wr_beat beat t=2848000 data=8a29 mask=0
-TXN ddr_wr_beat beat t=2854000 data=8386 mask=0
-TXN sched_deq grant t=2872000 idx=8
-TXN sched_cmd command t=2872000 aux=6 bank=2 col=350 row=678a type=3 we=1
-TXN cq_deq dequeue t=2872000 idx=8
-TXN sched_in command t=2872000 aux=6 bank=2 col=350 row=678a type=3 we=1
-TXN dp_cmd write t=2878000 aux=6
-TXN ddr_cmd command t=2878000 addr=350 bank=2 cmd=4
-TXN sched_deq grant t=2884000 idx=9
-TXN sched_cmd command t=2884000 aux=7 bank=2 col=358 row=678a type=3 we=1
-TXN cq_deq dequeue t=2884000 idx=9
-TXN sched_in command t=2884000 aux=7 bank=2 col=358 row=678a type=3 we=1
-TXN dp_cmd write t=2890000 aux=7
-TXN ddr_cmd command t=2890000 addr=358 bank=2 cmd=4
-TXN ddr_wr_beat beat t=2896000 data=5c4e mask=0
-TXN ddr_wr_beat beat t=2902000 data=93ea mask=0
-TXN ddr_wr_beat beat t=2908000 data=2741 mask=0
-TXN ddr_wr_beat beat t=2914000 data=176 mask=0
-TXN sched_deq grant t=2932000 idx=a
-TXN sched_cmd command t=2932000 aux=8 bank=2 col=358 row=678a type=3 we=1
-TXN cq_deq dequeue t=2932000 idx=a
-TXN sched_in command t=2932000 aux=8 bank=2 col=358 row=678a type=3 we=1
-TXN dp_cmd write t=2938000 aux=8
-TXN ddr_cmd command t=2938000 addr=358 bank=2 cmd=4
-TXN sched_deq grant t=2944000 idx=b
-TXN sched_cmd command t=2944000 aux=9 bank=2 col=358 row=678a type=3 we=1
-TXN cq_deq dequeue t=2944000 idx=b
-TXN sched_in command t=2944000 aux=9 bank=2 col=358 row=678a type=3 we=1
-TXN dp_cmd write t=2950000 aux=9
-TXN ddr_cmd command t=2950000 addr=358 bank=2 cmd=4
-TXN ddr_wr_beat beat t=2956000 data=cae8 mask=0
-TXN ddr_wr_beat beat t=2962000 data=cf23 mask=0
-TXN ddr_wr_beat beat t=2968000 data=262c mask=0
-TXN ddr_wr_beat beat t=2974000 data=8fb5 mask=0
-TXN sched_deq grant t=2992000 idx=c
-TXN sched_cmd command t=2992000 aux=a bank=2 col=358 row=678a type=3 we=1
-TXN cq_deq dequeue t=2992000 idx=c
-TXN sched_in command t=2992000 aux=a bank=2 col=358 row=678a type=3 we=1
-TXN dp_cmd write t=2998000 aux=a
-TXN ddr_cmd command t=2998000 addr=358 bank=2 cmd=4
-TXN sched_deq grant t=3004000 idx=d
-TXN sched_cmd command t=3004000 aux=b bank=2 col=360 row=678a type=3 we=1
-TXN cq_deq dequeue t=3004000 idx=d
-TXN sched_in command t=3004000 aux=b bank=2 col=360 row=678a type=3 we=1
-TXN dp_cmd write t=3010000 aux=b
-TXN ddr_cmd command t=3010000 addr=360 bank=2 cmd=4
-TXN ddr_wr_beat beat t=3016000 data=18ba mask=0
-TXN ddr_wr_beat beat t=3022000 data=e5e mask=0
-TXN ddr_wr_beat beat t=3028000 data=fc4c mask=0
-TXN ddr_wr_beat beat t=3034000 data=deb8 mask=0
-TXN sched_deq grant t=3052000 idx=e
-TXN sched_cmd command t=3052000 aux=c bank=2 col=360 row=678a type=3 we=1
-TXN cq_deq dequeue t=3052000 idx=e
-TXN sched_in command t=3052000 aux=c bank=2 col=360 row=678a type=3 we=1
-TXN dp_cmd write t=3058000 aux=c
-TXN ddr_cmd command t=3058000 addr=360 bank=2 cmd=4
-TXN ddr_wr_beat beat t=3076000 data=5c53 mask=0
-TXN ddr_wr_beat beat t=3082000 data=8135 mask=0
-TXN sched_deq grant t=3172000 idx=0
-TXN sched_cmd command t=3172000 aux=d bank=5 col=330 row=6a17 type=2 we=0
-TXN cq_deq dequeue t=3172000 idx=0
-TXN sched_in command t=3172000 aux=d bank=5 col=330 row=6a17 type=2 we=0
-TXN dp_cmd read t=3178000 aux=d
-TXN ddr_cmd command t=3178000 addr=330 bank=5 cmd=5
-TXN sched_deq grant t=3184000 idx=1
-TXN sched_cmd command t=3184000 aux=f bank=5 col=338 row=6a17 type=2 we=0
-TXN cq_deq dequeue t=3184000 idx=1
-TXN sched_in command t=3184000 aux=f bank=5 col=338 row=6a17 type=2 we=0
-TXN dp_cmd read t=3190000 aux=f
-TXN ddr_cmd command t=3190000 addr=338 bank=5 cmd=5
-TXN ddr_rd_beat beat t=3202000 data=7ccf
-TXN ddr_rd_beat beat t=3208000 data=1d96
-TXN ddr_rd_beat beat t=3214000 data=7cc7
-TXN wb_rsp read_data t=3220000 addr=1a85ee68 data=1d967ccf
-TXN dp_rd_rsp response t=3220000 aux=d data=1d967ccf
-TXN ddr_rd_beat beat t=3220000 data=1d96
-TXN wb_rsp read_data t=3232000 addr=1a85ee6c data=1d967cc7
-TXN sched_deq grant t=3232000 idx=2
-TXN sched_cmd command t=3232000 aux=0 bank=5 col=338 row=6a17 type=2 we=0
-TXN dp_rd_rsp response t=3232000 aux=f data=1d967cc7
-TXN cq_deq dequeue t=3232000 idx=2
-TXN sched_in command t=3232000 aux=0 bank=5 col=338 row=6a17 type=2 we=0
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 3237 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN refresh_req request t=29000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=29000 pending=1 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=33000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
+TXN wb write t=38000 addr=10530d0c bte=0 cti=2 data=1e2feb89 sel=f
+TXN req request t=39000 addr=10530d0c data=1e2feb89 mask=f we=1
+TXN sched_cmd command t=39000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_ack ack t=39000 pending=1
+TXN dp_wr write t=39000 data=1e2feb89 mask=f
+TXN cq_enq enqueue t=39000 bank=1 col=280 row=414c we=1
+TXN sched_in command t=39000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN wb write t=43000 addr=10530d10 bte=0 cti=2 data=c2ce6f44 sel=f
+TXN req request t=44000 addr=10530d10 data=c2ce6f44 mask=f we=1
+TXN refresh_level state t=44000 pending=0 required=0 starve=0 urgent=0
+TXN dp_wr write t=44000 data=c2ce6f44 mask=f
+TXN cq_enq enqueue t=44000 bank=1 col=288 row=414c we=1
+TXN ddr_cmd command t=44000 addr=0 bank=0 cmd=1
+TXN wb write t=48000 addr=10530d14 bte=0 cti=7 data=35bf992d sel=f
+TXN csr_sts_level state t=48000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
+TXN req request t=49000 addr=10530d14 data=35bf992d mask=f we=1
+TXN dp_wr write t=49000 data=35bf992d mask=f
+TXN cq_enq enqueue t=49000 bank=1 col=288 row=414c we=1
+TXN wb read t=88000 addr=1bb274a0 bte=0 cti=2
+TXN req request t=89000 addr=1bb274a0 data=35bf992d mask=f we=0
+TXN cq_enq enqueue t=89000 bank=6 col=250 row=6ec9 we=0
+TXN wb read t=93000 addr=1bb274a4 bte=0 cti=7
+TXN req request t=94000 addr=1bb274a4 data=35bf992d mask=f we=0
+TXN cq_enq enqueue t=94000 bank=6 col=250 row=6ec9 we=0
+TXN sched_cmd command t=699000 aux=0 bank=1 col=280 row=414c type=1 we=1
+TXN sched_in command t=699000 aux=0 bank=1 col=280 row=414c type=1 we=1
+TXN ddr_cmd command t=704000 addr=414c bank=1 cmd=3
+TXN sched_cmd command t=749000 aux=3 bank=6 col=250 row=6ec9 type=1 we=0
+TXN sched_in command t=749000 aux=3 bank=6 col=250 row=6ec9 type=1 we=0
+TXN ddr_cmd command t=754000 addr=6ec9 bank=6 cmd=3
+TXN sched_deq grant t=774000 idx=0
+TXN sched_cmd command t=774000 aux=0 bank=1 col=280 row=414c type=3 we=1
+TXN cq_deq dequeue t=774000 idx=0
+TXN sched_in command t=774000 aux=0 bank=1 col=280 row=414c type=3 we=1
+TXN dp_cmd write t=779000 aux=0
+TXN ddr_cmd command t=779000 addr=280 bank=1 cmd=4
+TXN sched_deq grant t=784000 idx=1
+TXN sched_cmd command t=784000 aux=1 bank=1 col=288 row=414c type=3 we=1
+TXN cq_deq dequeue t=784000 idx=1
+TXN sched_in command t=784000 aux=1 bank=1 col=288 row=414c type=3 we=1
+TXN dp_cmd write t=789000 aux=1
+TXN ddr_cmd command t=789000 addr=288 bank=1 cmd=4
+TXN ddr_wr_beat beat t=794000 data=eb89 mask=0
+TXN ddr_wr_beat beat t=799000 data=1e2f mask=0
+TXN ddr_wr_beat beat t=804000 data=6f44 mask=0
+TXN ddr_wr_beat beat t=809000 data=c2ce mask=0
+TXN sched_deq grant t=824000 idx=2
+TXN sched_cmd command t=824000 aux=2 bank=1 col=288 row=414c type=3 we=1
+TXN cq_deq dequeue t=824000 idx=2
+TXN sched_in command t=824000 aux=2 bank=1 col=288 row=414c type=3 we=1
+TXN dp_cmd write t=829000 aux=2
+TXN ddr_cmd command t=829000 addr=288 bank=1 cmd=4
+TXN ddr_wr_beat beat t=844000 data=992d mask=0
+TXN ddr_wr_beat beat t=849000 data=35bf mask=0
+TXN sched_deq grant t=934000 idx=3
+TXN sched_cmd command t=934000 aux=3 bank=6 col=250 row=6ec9 type=2 we=0
+TXN cq_deq dequeue t=934000 idx=3
+TXN sched_in command t=934000 aux=3 bank=6 col=250 row=6ec9 type=2 we=0
+TXN dp_cmd read t=939000 aux=3
+TXN ddr_cmd command t=939000 addr=250 bank=6 cmd=5
+TXN sched_deq grant t=944000 idx=4
+TXN sched_cmd command t=944000 aux=4 bank=6 col=250 row=6ec9 type=2 we=0
+TXN cq_deq dequeue t=944000 idx=4
+TXN sched_in command t=944000 aux=4 bank=6 col=250 row=6ec9 type=2 we=0
+TXN dp_cmd read t=949000 aux=4
+TXN ddr_cmd command t=949000 addr=250 bank=6 cmd=5
+TXN ddr_rd_beat beat t=959000 data=7daf
+TXN ddr_rd_beat beat t=964000 data=ed80
+TXN ddr_rd_beat beat t=969000 data=7daf
+TXN wb_rsp read_data t=974000 addr=1bb274a0 data=ed807daf
+TXN dp_rd_rsp response t=974000 aux=3 data=ed807daf
+TXN ddr_rd_beat beat t=974000 data=ed80
+TXN wb_rsp read_data t=984000 addr=1bb274a4 data=ed807daf
+TXN dp_rd_rsp response t=984000 aux=4 data=ed807daf
+TXN wb write t=1028000 addr=1c813948 bte=0 cti=2 data=cd447e35 sel=f
+TXN req request t=1029000 addr=1c813948 data=cd447e35 mask=f we=1
+TXN dp_wr write t=1029000 data=cd447e35 mask=f
+TXN cq_enq enqueue t=1029000 bank=7 col=a0 row=7204 we=1
+TXN wb write t=1033000 addr=1c81394c bte=0 cti=2 data=51431193 sel=f
+TXN req request t=1034000 addr=1c81394c data=51431193 mask=f we=1
+TXN dp_wr write t=1034000 data=51431193 mask=f
+TXN cq_enq enqueue t=1034000 bank=7 col=a0 row=7204 we=1
+TXN wb write t=1038000 addr=1c813950 bte=0 cti=2 data=5b6e6e3 sel=f
+TXN req request t=1039000 addr=1c813950 data=5b6e6e3 mask=f we=1
+TXN dp_wr write t=1039000 data=5b6e6e3 mask=f
+TXN cq_enq enqueue t=1039000 bank=7 col=a8 row=7204 we=1
+TXN wb write t=1043000 addr=1c813954 bte=0 cti=2 data=e1988ad9 sel=f
+TXN req request t=1044000 addr=1c813954 data=e1988ad9 mask=f we=1
+TXN sched_cmd command t=1044000 aux=5 bank=7 col=a0 row=7204 type=1 we=1
+TXN dp_wr write t=1044000 data=e1988ad9 mask=f
+TXN cq_enq enqueue t=1044000 bank=7 col=a8 row=7204 we=1
+TXN sched_in command t=1044000 aux=5 bank=7 col=a0 row=7204 type=1 we=1
+TXN wb write t=1048000 addr=1c813958 bte=0 cti=2 data=afbd67f9 sel=f
+TXN req request t=1049000 addr=1c813958 data=afbd67f9 mask=f we=1
+TXN dp_wr write t=1049000 data=afbd67f9 mask=f
+TXN cq_enq enqueue t=1049000 bank=7 col=a8 row=7204 we=1
+TXN ddr_cmd command t=1049000 addr=7204 bank=7 cmd=3
+TXN wb write t=1053000 addr=1c81395c bte=0 cti=2 data=f8130c42 sel=f
+TXN req request t=1054000 addr=1c81395c data=f8130c42 mask=f we=1
+TXN dp_wr write t=1054000 data=f8130c42 mask=f
+TXN cq_enq enqueue t=1054000 bank=7 col=a8 row=7204 we=1
+TXN wb write t=1058000 addr=1c813960 bte=0 cti=2 data=b9d179e0 sel=f
+TXN req request t=1059000 addr=1c813960 data=b9d179e0 mask=f we=1
+TXN dp_wr write t=1059000 data=b9d179e0 mask=f
+TXN cq_enq enqueue t=1059000 bank=7 col=b0 row=7204 we=1
+TXN wb write t=1063000 addr=1c813964 bte=0 cti=7 data=8712b8bc sel=f
+TXN req request t=1064000 addr=1c813964 data=8712b8bc mask=f we=1
+TXN dp_wr write t=1064000 data=8712b8bc mask=f
+TXN cq_enq enqueue t=1064000 bank=7 col=b0 row=7204 we=1
+TXN wb write t=1103000 addr=161ff4a0 bte=0 cti=2 data=5805975 sel=f
+TXN req request t=1104000 addr=161ff4a0 data=5805975 mask=f we=1
+TXN dp_wr write t=1104000 data=5805975 mask=f
+TXN cq_enq enqueue t=1104000 bank=6 col=250 row=587f we=1
+TXN wb write t=1108000 addr=161ff4a4 bte=0 cti=2 data=a46d6753 sel=f
+TXN req request t=1109000 addr=161ff4a4 data=a46d6753 mask=f we=1
+TXN dp_wr write t=1109000 data=a46d6753 mask=f
+TXN cq_enq enqueue t=1109000 bank=6 col=250 row=587f we=1
+TXN wb write t=1113000 addr=161ff4a8 bte=0 cti=2 data=dc2574bd sel=f
+TXN req request t=1114000 addr=161ff4a8 data=dc2574bd mask=f we=1
+TXN dp_wr write t=1114000 data=dc2574bd mask=f
+TXN cq_enq enqueue t=1114000 bank=6 col=250 row=587f we=1
+TXN wb write t=1118000 addr=161ff4ac bte=0 cti=2 data=ab99254a sel=f
+TXN req request t=1119000 addr=161ff4ac data=ab99254a mask=f we=1
+TXN sched_deq grant t=1119000 idx=0
+TXN sched_cmd command t=1119000 aux=5 bank=7 col=a0 row=7204 type=3 we=1
+TXN dp_wr write t=1119000 data=ab99254a mask=f
+TXN cq_enq enqueue t=1119000 bank=6 col=250 row=587f we=1
+TXN cq_deq dequeue t=1119000 idx=0
+TXN sched_in command t=1119000 aux=5 bank=7 col=a0 row=7204 type=3 we=1
+TXN wb write t=1123000 addr=161ff4b0 bte=0 cti=7 data=4da98f1d sel=f
+TXN req request t=1124000 addr=161ff4b0 data=4da98f1d mask=f we=1
+TXN sched_cmd command t=1124000 aux=d bank=6 col=250 row=587f type=4 we=1
+TXN dp_wr write t=1124000 data=4da98f1d mask=f
+TXN dp_cmd write t=1124000 aux=5
+TXN cq_enq enqueue t=1124000 bank=6 col=258 row=587f we=1
+TXN sched_in command t=1124000 aux=d bank=6 col=250 row=587f type=4 we=1
+TXN ddr_cmd command t=1124000 addr=a0 bank=7 cmd=4
+TXN sched_deq grant t=1129000 idx=1
+TXN sched_cmd command t=1129000 aux=6 bank=7 col=a0 row=7204 type=3 we=1
+TXN cq_deq dequeue t=1129000 idx=1
+TXN sched_in command t=1129000 aux=6 bank=7 col=a0 row=7204 type=3 we=1
+TXN ddr_cmd command t=1129000 addr=0 bank=6 cmd=2
+TXN dp_cmd write t=1134000 aux=6
+TXN ddr_cmd command t=1134000 addr=a0 bank=7 cmd=4
+TXN ddr_wr_beat beat t=1139000 data=7e35 mask=0
+TXN ddr_wr_beat beat t=1144000 data=cd44 mask=0
+TXN ddr_wr_beat beat t=1149000 data=1193 mask=0
+TXN ddr_wr_beat beat t=1154000 data=5143 mask=0
+TXN wb read t=1168000 addr=235abd4 bte=0 cti=2
+TXN req request t=1169000 addr=235abd4 data=4da98f1d mask=f we=0
+TXN sched_deq grant t=1169000 idx=2
+TXN sched_cmd command t=1169000 aux=7 bank=7 col=a8 row=7204 type=3 we=1
+TXN cq_enq enqueue t=1169000 bank=5 col=1e8 row=8d6 we=0
+TXN cq_deq dequeue t=1169000 idx=2
+TXN sched_in command t=1169000 aux=7 bank=7 col=a8 row=7204 type=3 we=1
+TXN wb read t=1173000 addr=235abd8 bte=0 cti=2
+TXN req request t=1174000 addr=235abd8 data=4da98f1d mask=f we=0
+TXN dp_cmd write t=1174000 aux=7
+TXN cq_enq enqueue t=1174000 bank=5 col=1e8 row=8d6 we=0
+TXN ddr_cmd command t=1174000 addr=a8 bank=7 cmd=4
+TXN wb read t=1178000 addr=235abdc bte=0 cti=2
+TXN req request t=1179000 addr=235abdc data=4da98f1d mask=f we=0
+TXN sched_deq grant t=1179000 idx=3
+TXN sched_cmd command t=1179000 aux=8 bank=7 col=a8 row=7204 type=3 we=1
+TXN cq_enq enqueue t=1179000 bank=5 col=1e8 row=8d6 we=0
+TXN cq_deq dequeue t=1179000 idx=3
+TXN sched_in command t=1179000 aux=8 bank=7 col=a8 row=7204 type=3 we=1
+TXN wb read t=1183000 addr=235abe0 bte=0 cti=2
+TXN req request t=1184000 addr=235abe0 data=4da98f1d mask=f we=0
+TXN sched_cmd command t=1184000 aux=2 bank=5 col=1e8 row=8d6 type=1 we=0
+TXN dp_cmd write t=1184000 aux=8
+TXN cq_enq enqueue t=1184000 bank=5 col=1f0 row=8d6 we=0
+TXN sched_in command t=1184000 aux=2 bank=5 col=1e8 row=8d6 type=1 we=0
+TXN ddr_cmd command t=1184000 addr=a8 bank=7 cmd=4
+TXN wb read t=1188000 addr=235abe4 bte=0 cti=7
+TXN req request t=1189000 addr=235abe4 data=4da98f1d mask=f we=0
+TXN ddr_wr_beat beat t=1189000 data=e6e3 mask=0
+TXN cq_enq enqueue t=1189000 bank=5 col=1f0 row=8d6 we=0
+TXN ddr_cmd command t=1189000 addr=8d6 bank=5 cmd=3
+TXN ddr_wr_beat beat t=1194000 data=5b6 mask=0
+TXN ddr_wr_beat beat t=1199000 data=8ad9 mask=0
+TXN ddr_wr_beat beat t=1204000 data=e198 mask=0
+TXN sched_deq grant t=1219000 idx=4
+TXN sched_cmd command t=1219000 aux=9 bank=7 col=a8 row=7204 type=3 we=1
+TXN cq_deq dequeue t=1219000 idx=4
+TXN sched_in command t=1219000 aux=9 bank=7 col=a8 row=7204 type=3 we=1
+TXN dp_cmd write t=1224000 aux=9
+TXN ddr_cmd command t=1224000 addr=a8 bank=7 cmd=4
+TXN sched_deq grant t=1229000 idx=5
+TXN sched_cmd command t=1229000 aux=a bank=7 col=a8 row=7204 type=3 we=1
+TXN cq_deq dequeue t=1229000 idx=5
+TXN sched_in command t=1229000 aux=a bank=7 col=a8 row=7204 type=3 we=1
+TXN sched_cmd command t=1234000 aux=1 bank=6 col=258 row=587f type=1 we=1
+TXN dp_cmd write t=1234000 aux=a
+TXN sched_in command t=1234000 aux=1 bank=6 col=258 row=587f type=1 we=1
+TXN ddr_cmd command t=1234000 addr=a8 bank=7 cmd=4
+TXN ddr_wr_beat beat t=1239000 data=67f9 mask=0
+TXN ddr_cmd command t=1239000 addr=587f bank=6 cmd=3
+TXN ddr_wr_beat beat t=1244000 data=afbd mask=0
+TXN ddr_wr_beat beat t=1249000 data=c42 mask=0
+TXN ddr_wr_beat beat t=1254000 data=f813 mask=0
+TXN sched_deq grant t=1269000 idx=6
+TXN sched_cmd command t=1269000 aux=b bank=7 col=b0 row=7204 type=3 we=1
+TXN cq_deq dequeue t=1269000 idx=6
+TXN sched_in command t=1269000 aux=b bank=7 col=b0 row=7204 type=3 we=1
+TXN dp_cmd write t=1274000 aux=b
+TXN ddr_cmd command t=1274000 addr=b0 bank=7 cmd=4
+TXN sched_deq grant t=1279000 idx=7
+TXN sched_cmd command t=1279000 aux=c bank=7 col=b0 row=7204 type=3 we=1
+TXN cq_deq dequeue t=1279000 idx=7
+TXN sched_in command t=1279000 aux=c bank=7 col=b0 row=7204 type=3 we=1
+TXN dp_cmd write t=1284000 aux=c
+TXN ddr_cmd command t=1284000 addr=b0 bank=7 cmd=4
+TXN ddr_wr_beat beat t=1289000 data=79e0 mask=0
+TXN ddr_wr_beat beat t=1294000 data=b9d1 mask=0
+TXN ddr_wr_beat beat t=1299000 data=b8bc mask=0
+TXN ddr_wr_beat beat t=1304000 data=8712 mask=0
+TXN sched_deq grant t=1319000 idx=0
+TXN sched_cmd command t=1319000 aux=1 bank=6 col=258 row=587f type=3 we=1
+TXN cq_deq dequeue t=1319000 idx=0
+TXN sched_in command t=1319000 aux=1 bank=6 col=258 row=587f type=3 we=1
+TXN dp_cmd write t=1324000 aux=1
+TXN ddr_cmd command t=1324000 addr=258 bank=6 cmd=4
+TXN sched_deq grant t=1329000 idx=8
+TXN sched_cmd command t=1329000 aux=d bank=6 col=250 row=587f type=3 we=1
+TXN cq_deq dequeue t=1329000 idx=8
+TXN sched_in command t=1329000 aux=d bank=6 col=250 row=587f type=3 we=1
+TXN dp_cmd write t=1334000 aux=d
+TXN ddr_cmd command t=1334000 addr=250 bank=6 cmd=4
+TXN ddr_wr_beat beat t=1339000 data=5975 mask=0
+TXN ddr_wr_beat beat t=1344000 data=580 mask=0
+TXN ddr_wr_beat beat t=1349000 data=6753 mask=0
+TXN ddr_wr_beat beat t=1354000 data=a46d mask=0
+TXN sched_deq grant t=1369000 idx=9
+TXN sched_cmd command t=1369000 aux=e bank=6 col=250 row=587f type=3 we=1
+TXN cq_deq dequeue t=1369000 idx=9
+TXN sched_in command t=1369000 aux=e bank=6 col=250 row=587f type=3 we=1
+TXN dp_cmd write t=1374000 aux=e
+TXN ddr_cmd command t=1374000 addr=250 bank=6 cmd=4
+TXN sched_deq grant t=1379000 idx=a
+TXN sched_cmd command t=1379000 aux=f bank=6 col=250 row=587f type=3 we=1
+TXN cq_deq dequeue t=1379000 idx=a
+TXN sched_in command t=1379000 aux=f bank=6 col=250 row=587f type=3 we=1
+TXN dp_cmd write t=1384000 aux=f
+TXN ddr_cmd command t=1384000 addr=250 bank=6 cmd=4
+TXN ddr_wr_beat beat t=1389000 data=74bd mask=0
+TXN ddr_wr_beat beat t=1394000 data=dc25 mask=0
+TXN ddr_wr_beat beat t=1399000 data=254a mask=0
+TXN ddr_wr_beat beat t=1404000 data=ab99 mask=0
+TXN sched_deq grant t=1419000 idx=b
+TXN sched_cmd command t=1419000 aux=0 bank=6 col=250 row=587f type=3 we=1
+TXN cq_deq dequeue t=1419000 idx=b
+TXN sched_in command t=1419000 aux=0 bank=6 col=250 row=587f type=3 we=1
+TXN dp_cmd write t=1424000 aux=0
+TXN ddr_cmd command t=1424000 addr=250 bank=6 cmd=4
+TXN ddr_wr_beat beat t=1439000 data=8f1d mask=0
+TXN ddr_wr_beat beat t=1444000 data=4da9 mask=0
+TXN sched_deq grant t=1529000 idx=1
+TXN sched_cmd command t=1529000 aux=2 bank=5 col=1e8 row=8d6 type=2 we=0
+TXN cq_deq dequeue t=1529000 idx=1
+TXN sched_in command t=1529000 aux=2 bank=5 col=1e8 row=8d6 type=2 we=0
+TXN dp_cmd read t=1534000 aux=2
+TXN ddr_cmd command t=1534000 addr=1e8 bank=5 cmd=5
+TXN sched_deq grant t=1539000 idx=2
+TXN sched_cmd command t=1539000 aux=3 bank=5 col=1e8 row=8d6 type=2 we=0
+TXN cq_deq dequeue t=1539000 idx=2
+TXN sched_in command t=1539000 aux=3 bank=5 col=1e8 row=8d6 type=2 we=0
+TXN dp_cmd read t=1544000 aux=3
+TXN ddr_cmd command t=1544000 addr=1e8 bank=5 cmd=5
+TXN ddr_rd_beat beat t=1554000 data=fe17
+TXN ddr_rd_beat beat t=1559000 data=15bb
+TXN ddr_rd_beat beat t=1564000 data=fe17
+TXN wb_rsp read_data t=1569000 addr=235abd4 data=15bbfe17
+TXN dp_rd_rsp response t=1569000 aux=2 data=15bbfe17
+TXN ddr_rd_beat beat t=1569000 data=15bb
+TXN wb_rsp read_data t=1579000 addr=235abd8 data=15bbfe17
+TXN sched_deq grant t=1579000 idx=3
+TXN sched_cmd command t=1579000 aux=5 bank=5 col=1f0 row=8d6 type=2 we=0
+TXN dp_rd_rsp response t=1579000 aux=3 data=15bbfe17
+TXN cq_deq dequeue t=1579000 idx=3
+TXN sched_in command t=1579000 aux=5 bank=5 col=1f0 row=8d6 type=2 we=0
+TXN dp_cmd read t=1584000 aux=5
+TXN ddr_cmd command t=1584000 addr=1f0 bank=5 cmd=5
+TXN sched_deq grant t=1589000 idx=c
+TXN sched_cmd command t=1589000 aux=4 bank=5 col=1e8 row=8d6 type=2 we=0
+TXN cq_deq dequeue t=1589000 idx=c
+TXN sched_in command t=1589000 aux=4 bank=5 col=1e8 row=8d6 type=2 we=0
+TXN dp_cmd read t=1594000 aux=4
+TXN ddr_cmd command t=1594000 addr=1e8 bank=5 cmd=5
+TXN ddr_rd_beat beat t=1604000 data=fe0f
+TXN ddr_rd_beat beat t=1609000 data=15ba
+TXN ddr_rd_beat beat t=1614000 data=fe17
+TXN wb_rsp read_data t=1619000 addr=235abdc data=15bafe0f
+TXN dp_rd_rsp response t=1619000 aux=5 data=15bafe0f
+TXN ddr_rd_beat beat t=1619000 data=15bb
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 1622500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN dp_cmd read t=3238000 aux=0
-TXN ddr_cmd command t=3238000 addr=338 bank=5 cmd=5
-TXN sched_deq grant t=3244000 idx=3
-TXN sched_cmd command t=3244000 aux=1 bank=5 col=338 row=6a17 type=2 we=0
-TXN cq_deq dequeue t=3244000 idx=3
-TXN sched_in command t=3244000 aux=1 bank=5 col=338 row=6a17 type=2 we=0
-TXN dp_cmd read t=3250000 aux=1
-TXN ddr_cmd command t=3250000 addr=338 bank=5 cmd=5
-TXN ddr_rd_beat beat t=3262000 data=7cc7
-TXN ddr_rd_beat beat t=3268000 data=1d96
-TXN ddr_rd_beat beat t=3274000 data=7cc7
-TXN wb_rsp read_data t=3280000 addr=1a85ee70 data=1d967cc7
-TXN dp_rd_rsp response t=3280000 aux=0 data=1d967cc7
-TXN ddr_rd_beat beat t=3280000 data=1d96
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 3285 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN wb_rsp read_data t=1629000 addr=235abe0 data=15bbfe17
+TXN sched_deq grant t=1629000 idx=d
+TXN sched_cmd command t=1629000 aux=6 bank=5 col=1f0 row=8d6 type=2 we=0
+TXN dp_rd_rsp response t=1629000 aux=4 data=15bbfe17
+TXN cq_deq dequeue t=1629000 idx=d
+TXN sched_in command t=1629000 aux=6 bank=5 col=1f0 row=8d6 type=2 we=0
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 1632500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN wb_rsp read_data t=3292000 addr=1a85ee74 data=1d967cc7
-TXN sched_deq grant t=3292000 idx=4
-TXN sched_cmd command t=3292000 aux=2 bank=5 col=338 row=6a17 type=2 we=0
-TXN dp_rd_rsp response t=3292000 aux=1 data=1d967cc7
-TXN cq_deq dequeue t=3292000 idx=4
-TXN sched_in command t=3292000 aux=2 bank=5 col=338 row=6a17 type=2 we=0
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 3297 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN dp_cmd read t=1634000 aux=6
+TXN ddr_cmd command t=1634000 addr=1f0 bank=5 cmd=5
+TXN ddr_rd_beat beat t=1654000 data=fe0f
+TXN ddr_rd_beat beat t=1659000 data=15ba
+TXN wb_rsp read_data t=1669000 addr=235abe4 data=15bafe0f
+TXN dp_rd_rsp response t=1669000 aux=6 data=15bafe0f
+TXN wb read t=1708000 addr=1a841edc bte=0 cti=2
+TXN req request t=1709000 addr=1a841edc data=4da98f1d mask=f we=0
+TXN cq_enq enqueue t=1709000 bank=3 col=368 row=6a10 we=0
+TXN wb read t=1713000 addr=1a841ee0 bte=0 cti=2
+TXN req request t=1714000 addr=1a841ee0 data=4da98f1d mask=f we=0
+TXN cq_enq enqueue t=1714000 bank=3 col=370 row=6a10 we=0
+TXN wb read t=1718000 addr=1a841ee4 bte=0 cti=7
+TXN req request t=1719000 addr=1a841ee4 data=4da98f1d mask=f we=0
+TXN cq_enq enqueue t=1719000 bank=3 col=370 row=6a10 we=0
+TXN sched_cmd command t=1724000 aux=7 bank=3 col=368 row=6a10 type=1 we=0
+TXN sched_in command t=1724000 aux=7 bank=3 col=368 row=6a10 type=1 we=0
+TXN ddr_cmd command t=1729000 addr=6a10 bank=3 cmd=3
+TXN sched_deq grant t=1799000 idx=0
+TXN sched_cmd command t=1799000 aux=7 bank=3 col=368 row=6a10 type=2 we=0
+TXN cq_deq dequeue t=1799000 idx=0
+TXN sched_in command t=1799000 aux=7 bank=3 col=368 row=6a10 type=2 we=0
+TXN dp_cmd read t=1804000 aux=7
+TXN ddr_cmd command t=1804000 addr=368 bank=3 cmd=5
+TXN sched_deq grant t=1809000 idx=1
+TXN sched_cmd command t=1809000 aux=8 bank=3 col=370 row=6a10 type=2 we=0
+TXN cq_deq dequeue t=1809000 idx=1
+TXN sched_in command t=1809000 aux=8 bank=3 col=370 row=6a10 type=2 we=0
+TXN dp_cmd read t=1814000 aux=8
+TXN ddr_cmd command t=1814000 addr=370 bank=3 cmd=5
+TXN ddr_rd_beat beat t=1824000 data=fc97
+TXN ddr_rd_beat beat t=1829000 data=2593
+TXN ddr_rd_beat beat t=1834000 data=fc8f
+TXN wb_rsp read_data t=1839000 addr=1a841edc data=2593fc97
+TXN dp_rd_rsp response t=1839000 aux=7 data=2593fc97
+TXN ddr_rd_beat beat t=1839000 data=2592
+TXN wb_rsp read_data t=1849000 addr=1a841ee0 data=2592fc8f
+TXN sched_deq grant t=1849000 idx=2
+TXN sched_cmd command t=1849000 aux=9 bank=3 col=370 row=6a10 type=2 we=0
+TXN dp_rd_rsp response t=1849000 aux=8 data=2592fc8f
+TXN cq_deq dequeue t=1849000 idx=2
+TXN sched_in command t=1849000 aux=9 bank=3 col=370 row=6a10 type=2 we=0
+TXN dp_cmd read t=1854000 aux=9
+TXN ddr_cmd command t=1854000 addr=370 bank=3 cmd=5
+TXN ddr_rd_beat beat t=1874000 data=fc8f
+TXN ddr_rd_beat beat t=1879000 data=2592
+TXN wb_rsp read_data t=1889000 addr=1a841ee4 data=2592fc8f
+TXN dp_rd_rsp response t=1889000 aux=9 data=2592fc8f
+TXN wb read t=1918000 addr=588af5c bte=0 cti=2
+TXN req request t=1919000 addr=588af5c data=4da98f1d mask=f we=0
+TXN cq_enq enqueue t=1919000 bank=5 col=3a8 row=1622 we=0
+TXN wb read t=1923000 addr=588af60 bte=0 cti=2
+TXN req request t=1924000 addr=588af60 data=4da98f1d mask=f we=0
+TXN cq_enq enqueue t=1924000 bank=5 col=3b0 row=1622 we=0
+TXN wb read t=1928000 addr=588af64 bte=0 cti=2
+TXN req request t=1929000 addr=588af64 data=4da98f1d mask=f we=0
+TXN cq_enq enqueue t=1929000 bank=5 col=3b0 row=1622 we=0
+TXN wb read t=1933000 addr=588af68 bte=0 cti=7
+TXN req request t=1934000 addr=588af68 data=4da98f1d mask=f we=0
+TXN sched_cmd command t=1934000 aux=a bank=5 col=3a8 row=1622 type=4 we=0
+TXN cq_enq enqueue t=1934000 bank=5 col=3b0 row=1622 we=0
+TXN sched_in command t=1934000 aux=a bank=5 col=3a8 row=1622 type=4 we=0
+TXN ddr_cmd command t=1939000 addr=0 bank=5 cmd=2
+TXN sched_cmd command t=2009000 aux=a bank=5 col=3a8 row=1622 type=1 we=0
+TXN sched_in command t=2009000 aux=a bank=5 col=3a8 row=1622 type=1 we=0
+TXN ddr_cmd command t=2014000 addr=1622 bank=5 cmd=3
+TXN sched_deq grant t=2084000 idx=0
+TXN sched_cmd command t=2084000 aux=a bank=5 col=3a8 row=1622 type=2 we=0
+TXN cq_deq dequeue t=2084000 idx=0
+TXN sched_in command t=2084000 aux=a bank=5 col=3a8 row=1622 type=2 we=0
+TXN dp_cmd read t=2089000 aux=a
+TXN ddr_cmd command t=2089000 addr=3a8 bank=5 cmd=5
+TXN sched_deq grant t=2094000 idx=1
+TXN sched_cmd command t=2094000 aux=b bank=5 col=3b0 row=1622 type=2 we=0
+TXN cq_deq dequeue t=2094000 idx=1
+TXN sched_in command t=2094000 aux=b bank=5 col=3b0 row=1622 type=2 we=0
+TXN dp_cmd read t=2099000 aux=b
+TXN ddr_cmd command t=2099000 addr=3b0 bank=5 cmd=5
+TXN ddr_rd_beat beat t=2109000 data=fc57
+TXN ddr_rd_beat beat t=2114000 data=b59f
+TXN ddr_rd_beat beat t=2119000 data=fc4f
+TXN wb_rsp read_data t=2124000 addr=588af5c data=b59ffc57
+TXN dp_rd_rsp response t=2124000 aux=a data=b59ffc57
+TXN ddr_rd_beat beat t=2124000 data=b59e
+TXN wb_rsp read_data t=2134000 addr=588af60 data=b59efc4f
+TXN sched_deq grant t=2134000 idx=2
+TXN sched_cmd command t=2134000 aux=c bank=5 col=3b0 row=1622 type=2 we=0
+TXN dp_rd_rsp response t=2134000 aux=b data=b59efc4f
+TXN cq_deq dequeue t=2134000 idx=2
+TXN sched_in command t=2134000 aux=c bank=5 col=3b0 row=1622 type=2 we=0
+TXN dp_cmd read t=2139000 aux=c
+TXN ddr_cmd command t=2139000 addr=3b0 bank=5 cmd=5
+TXN sched_deq grant t=2144000 idx=3
+TXN sched_cmd command t=2144000 aux=d bank=5 col=3b0 row=1622 type=2 we=0
+TXN cq_deq dequeue t=2144000 idx=3
+TXN sched_in command t=2144000 aux=d bank=5 col=3b0 row=1622 type=2 we=0
+TXN dp_cmd read t=2149000 aux=d
+TXN ddr_cmd command t=2149000 addr=3b0 bank=5 cmd=5
+TXN ddr_rd_beat beat t=2159000 data=fc4f
+TXN ddr_rd_beat beat t=2164000 data=b59e
+TXN ddr_rd_beat beat t=2169000 data=fc4f
+TXN wb_rsp read_data t=2174000 addr=588af64 data=b59efc4f
+TXN dp_rd_rsp response t=2174000 aux=c data=b59efc4f
+TXN ddr_rd_beat beat t=2174000 data=b59e
+TXN wb_rsp read_data t=2184000 addr=588af68 data=b59efc4f
+TXN dp_rd_rsp response t=2184000 aux=d data=b59efc4f
+TXN wb write t=2223000 addr=a7a0868 bte=0 cti=2 data=64ac5db9 sel=f
+TXN req request t=2224000 addr=a7a0868 data=64ac5db9 mask=f we=1
+TXN dp_wr write t=2224000 data=64ac5db9 mask=f
+TXN cq_enq enqueue t=2224000 bank=1 col=30 row=29e8 we=1
+TXN wb write t=2228000 addr=a7a086c bte=0 cti=2 data=7923986 sel=f
+TXN req request t=2229000 addr=a7a086c data=7923986 mask=f we=1
+TXN dp_wr write t=2229000 data=7923986 mask=f
+TXN cq_enq enqueue t=2229000 bank=1 col=30 row=29e8 we=1
+TXN wb write t=2233000 addr=a7a0870 bte=0 cti=2 data=b21fbac sel=f
+TXN req request t=2234000 addr=a7a0870 data=b21fbac mask=f we=1
+TXN dp_wr write t=2234000 data=b21fbac mask=f
+TXN cq_enq enqueue t=2234000 bank=1 col=38 row=29e8 we=1
+TXN wb write t=2238000 addr=a7a0874 bte=0 cti=2 data=2b9c014e sel=f
+TXN req request t=2239000 addr=a7a0874 data=2b9c014e mask=f we=1
+TXN sched_cmd command t=2239000 aux=e bank=1 col=30 row=29e8 type=4 we=1
+TXN dp_wr write t=2239000 data=2b9c014e mask=f
+TXN cq_enq enqueue t=2239000 bank=1 col=38 row=29e8 we=1
+TXN sched_in command t=2239000 aux=e bank=1 col=30 row=29e8 type=4 we=1
+TXN wb write t=2243000 addr=a7a0878 bte=0 cti=2 data=8092b4d4 sel=f
+TXN req request t=2244000 addr=a7a0878 data=8092b4d4 mask=f we=1
+TXN dp_wr write t=2244000 data=8092b4d4 mask=f
+TXN cq_enq enqueue t=2244000 bank=1 col=38 row=29e8 we=1
+TXN ddr_cmd command t=2244000 addr=0 bank=1 cmd=2
+TXN wb write t=2248000 addr=a7a087c bte=0 cti=2 data=fb695ffb sel=f
+TXN req request t=2249000 addr=a7a087c data=fb695ffb mask=f we=1
+TXN dp_wr write t=2249000 data=fb695ffb mask=f
+TXN cq_enq enqueue t=2249000 bank=1 col=38 row=29e8 we=1
+TXN wb write t=2253000 addr=a7a0880 bte=0 cti=7 data=c541013d sel=f
+TXN req request t=2254000 addr=a7a0880 data=c541013d mask=f we=1
+TXN dp_wr write t=2254000 data=c541013d mask=f
+TXN cq_enq enqueue t=2254000 bank=1 col=40 row=29e8 we=1
+TXN wb write t=2298000 addr=19e296a8 bte=0 cti=2 data=83868a29 sel=f
+TXN req request t=2299000 addr=19e296a8 data=83868a29 mask=f we=1
+TXN dp_wr write t=2299000 data=83868a29 mask=f
+TXN cq_enq enqueue t=2299000 bank=2 col=350 row=678a we=1
+TXN wb write t=2303000 addr=19e296ac bte=0 cti=2 data=93ea5c4e sel=f
+TXN req request t=2304000 addr=19e296ac data=93ea5c4e mask=f we=1
+TXN dp_wr write t=2304000 data=93ea5c4e mask=f
+TXN cq_enq enqueue t=2304000 bank=2 col=350 row=678a we=1
+TXN wb write t=2308000 addr=19e296b0 bte=0 cti=2 data=1762741 sel=f
+TXN req request t=2309000 addr=19e296b0 data=1762741 mask=f we=1
+TXN dp_wr write t=2309000 data=1762741 mask=f
+TXN cq_enq enqueue t=2309000 bank=2 col=358 row=678a we=1
+TXN wb write t=2313000 addr=19e296b4 bte=0 cti=2 data=cf23cae8 sel=f
+TXN req request t=2314000 addr=19e296b4 data=cf23cae8 mask=f we=1
+TXN sched_cmd command t=2314000 aux=e bank=1 col=30 row=29e8 type=1 we=1
+TXN dp_wr write t=2314000 data=cf23cae8 mask=f
+TXN cq_enq enqueue t=2314000 bank=2 col=358 row=678a we=1
+TXN sched_in command t=2314000 aux=e bank=1 col=30 row=29e8 type=1 we=1
+TXN wb write t=2318000 addr=19e296b8 bte=0 cti=2 data=8fb5262c sel=f
+TXN req request t=2319000 addr=19e296b8 data=8fb5262c mask=f we=1
+TXN dp_wr write t=2319000 data=8fb5262c mask=f
+TXN cq_enq enqueue t=2319000 bank=2 col=358 row=678a we=1
+TXN ddr_cmd command t=2319000 addr=29e8 bank=1 cmd=3
+TXN wb write t=2323000 addr=19e296bc bte=0 cti=2 data=e5e18ba sel=f
+TXN req request t=2324000 addr=19e296bc data=e5e18ba mask=f we=1
+TXN dp_wr write t=2324000 data=e5e18ba mask=f
+TXN cq_enq enqueue t=2324000 bank=2 col=358 row=678a we=1
+TXN wb write t=2328000 addr=19e296c0 bte=0 cti=2 data=deb8fc4c sel=f
+TXN req request t=2329000 addr=19e296c0 data=deb8fc4c mask=f we=1
+TXN dp_wr write t=2329000 data=deb8fc4c mask=f
+TXN cq_enq enqueue t=2329000 bank=2 col=360 row=678a we=1
+TXN wb write t=2333000 addr=19e296c4 bte=0 cti=7 data=81355c53 sel=f
+TXN req request t=2334000 addr=19e296c4 data=81355c53 mask=f we=1
+TXN dp_wr write t=2334000 data=81355c53 mask=f
+TXN cq_enq enqueue t=2334000 bank=2 col=360 row=678a we=1
+TXN sched_cmd command t=2364000 aux=5 bank=2 col=350 row=678a type=1 we=1
+TXN sched_in command t=2364000 aux=5 bank=2 col=350 row=678a type=1 we=1
+TXN ddr_cmd command t=2369000 addr=678a bank=2 cmd=3
+TXN wb read t=2373000 addr=1a85ee68 bte=0 cti=2
+TXN req request t=2374000 addr=1a85ee68 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=2374000 bank=5 col=330 row=6a17 we=0
+TXN wb read t=2378000 addr=1a85ee6c bte=0 cti=2
+TXN sched_deq grant t=2389000 idx=0
+TXN sched_cmd command t=2389000 aux=e bank=1 col=30 row=29e8 type=3 we=1
+TXN cq_deq dequeue t=2389000 idx=0
+TXN sched_in command t=2389000 aux=e bank=1 col=30 row=29e8 type=3 we=1
+TXN req request t=2394000 addr=1a85ee6c data=81355c53 mask=f we=0
+TXN sched_cmd command t=2394000 aux=d bank=5 col=330 row=6a17 type=4 we=0
+TXN dp_cmd write t=2394000 aux=e
+TXN cq_enq enqueue t=2394000 bank=5 col=330 row=6a17 we=0
+TXN sched_in command t=2394000 aux=d bank=5 col=330 row=6a17 type=4 we=0
+TXN ddr_cmd command t=2394000 addr=30 bank=1 cmd=4
+TXN wb read t=2398000 addr=1a85ee70 bte=0 cti=2
+TXN sched_deq grant t=2399000 idx=1
+TXN sched_cmd command t=2399000 aux=f bank=1 col=30 row=29e8 type=3 we=1
+TXN cq_deq dequeue t=2399000 idx=1
+TXN sched_in command t=2399000 aux=f bank=1 col=30 row=29e8 type=3 we=1
+TXN ddr_cmd command t=2399000 addr=0 bank=5 cmd=2
+TXN req request t=2404000 addr=1a85ee70 data=81355c53 mask=f we=0
+TXN dp_cmd write t=2404000 aux=f
+TXN cq_enq enqueue t=2404000 bank=5 col=338 row=6a17 we=0
+TXN ddr_cmd command t=2404000 addr=30 bank=1 cmd=4
+TXN wb read t=2408000 addr=1a85ee74 bte=0 cti=2
+TXN ddr_wr_beat beat t=2409000 data=5db9 mask=0
+TXN ddr_wr_beat beat t=2414000 data=64ac mask=0
+TXN ddr_wr_beat beat t=2419000 data=3986 mask=0
+TXN ddr_wr_beat beat t=2424000 data=792 mask=0
+TXN sched_deq grant t=2439000 idx=2
+TXN sched_cmd command t=2439000 aux=0 bank=1 col=38 row=29e8 type=3 we=1
+TXN cq_deq dequeue t=2439000 idx=2
+TXN sched_in command t=2439000 aux=0 bank=1 col=38 row=29e8 type=3 we=1
+TXN req request t=2444000 addr=1a85ee74 data=81355c53 mask=f we=0
+TXN dp_cmd write t=2444000 aux=0
+TXN cq_enq enqueue t=2444000 bank=5 col=338 row=6a17 we=0
+TXN ddr_cmd command t=2444000 addr=38 bank=1 cmd=4
+TXN wb read t=2448000 addr=1a85ee78 bte=0 cti=2
+TXN sched_deq grant t=2449000 idx=3
+TXN sched_cmd command t=2449000 aux=1 bank=1 col=38 row=29e8 type=3 we=1
+TXN cq_deq dequeue t=2449000 idx=3
+TXN sched_in command t=2449000 aux=1 bank=1 col=38 row=29e8 type=3 we=1
+TXN req request t=2454000 addr=1a85ee78 data=81355c53 mask=f we=0
+TXN dp_cmd write t=2454000 aux=1
+TXN cq_enq enqueue t=2454000 bank=5 col=338 row=6a17 we=0
+TXN ddr_cmd command t=2454000 addr=38 bank=1 cmd=4
+TXN wb read t=2458000 addr=1a85ee7c bte=0 cti=2
+TXN ddr_wr_beat beat t=2459000 data=fbac mask=0
+TXN ddr_wr_beat beat t=2464000 data=b21 mask=0
+TXN sched_cmd command t=2469000 aux=e bank=5 col=330 row=6a17 type=1 we=0
+TXN ddr_wr_beat beat t=2469000 data=14e mask=0
+TXN sched_in command t=2469000 aux=e bank=5 col=330 row=6a17 type=1 we=0
+TXN ddr_wr_beat beat t=2474000 data=2b9c mask=0
+TXN ddr_cmd command t=2474000 addr=6a17 bank=5 cmd=3
+TXN sched_deq grant t=2489000 idx=4
+TXN sched_cmd command t=2489000 aux=2 bank=1 col=38 row=29e8 type=3 we=1
+TXN cq_deq dequeue t=2489000 idx=4
+TXN sched_in command t=2489000 aux=2 bank=1 col=38 row=29e8 type=3 we=1
+TXN req request t=2494000 addr=1a85ee7c data=81355c53 mask=f we=0
+TXN dp_cmd write t=2494000 aux=2
+TXN cq_enq enqueue t=2494000 bank=5 col=338 row=6a17 we=0
+TXN ddr_cmd command t=2494000 addr=38 bank=1 cmd=4
+TXN wb read t=2498000 addr=1a85ee80 bte=0 cti=2
+TXN sched_deq grant t=2499000 idx=5
+TXN sched_cmd command t=2499000 aux=3 bank=1 col=38 row=29e8 type=3 we=1
+TXN cq_deq dequeue t=2499000 idx=5
+TXN sched_in command t=2499000 aux=3 bank=1 col=38 row=29e8 type=3 we=1
+TXN req request t=2504000 addr=1a85ee80 data=81355c53 mask=f we=0
+TXN dp_cmd write t=2504000 aux=3
+TXN cq_enq enqueue t=2504000 bank=5 col=340 row=6a17 we=0
+TXN ddr_cmd command t=2504000 addr=38 bank=1 cmd=4
+TXN wb read t=2508000 addr=1a85ee84 bte=0 cti=7
+TXN ddr_wr_beat beat t=2509000 data=b4d4 mask=0
+TXN ddr_wr_beat beat t=2514000 data=8092 mask=0
+TXN ddr_wr_beat beat t=2519000 data=5ffb mask=0
+TXN ddr_wr_beat beat t=2524000 data=fb69 mask=0
+TXN sched_deq grant t=2539000 idx=6
+TXN sched_cmd command t=2539000 aux=4 bank=1 col=40 row=29e8 type=3 we=1
+TXN cq_deq dequeue t=2539000 idx=6
+TXN sched_in command t=2539000 aux=4 bank=1 col=40 row=29e8 type=3 we=1
+TXN req request t=2544000 addr=1a85ee84 data=81355c53 mask=f we=0
+TXN dp_cmd write t=2544000 aux=4
+TXN cq_enq enqueue t=2544000 bank=5 col=340 row=6a17 we=0
+TXN ddr_cmd command t=2544000 addr=40 bank=1 cmd=4
+TXN sched_deq grant t=2549000 idx=7
+TXN sched_cmd command t=2549000 aux=5 bank=2 col=350 row=678a type=3 we=1
+TXN cq_deq dequeue t=2549000 idx=7
+TXN sched_in command t=2549000 aux=5 bank=2 col=350 row=678a type=3 we=1
+TXN dp_cmd write t=2554000 aux=5
+TXN ddr_cmd command t=2554000 addr=350 bank=2 cmd=4
+TXN ddr_wr_beat beat t=2559000 data=13d mask=0
+TXN ddr_wr_beat beat t=2564000 data=c541 mask=0
+TXN ddr_wr_beat beat t=2569000 data=8a29 mask=0
+TXN ddr_wr_beat beat t=2574000 data=8386 mask=0
+TXN sched_deq grant t=2589000 idx=8
+TXN sched_cmd command t=2589000 aux=6 bank=2 col=350 row=678a type=3 we=1
+TXN cq_deq dequeue t=2589000 idx=8
+TXN sched_in command t=2589000 aux=6 bank=2 col=350 row=678a type=3 we=1
+TXN dp_cmd write t=2594000 aux=6
+TXN ddr_cmd command t=2594000 addr=350 bank=2 cmd=4
+TXN sched_deq grant t=2599000 idx=9
+TXN sched_cmd command t=2599000 aux=7 bank=2 col=358 row=678a type=3 we=1
+TXN cq_deq dequeue t=2599000 idx=9
+TXN sched_in command t=2599000 aux=7 bank=2 col=358 row=678a type=3 we=1
+TXN dp_cmd write t=2604000 aux=7
+TXN ddr_cmd command t=2604000 addr=358 bank=2 cmd=4
+TXN ddr_wr_beat beat t=2609000 data=5c4e mask=0
+TXN ddr_wr_beat beat t=2614000 data=93ea mask=0
+TXN ddr_wr_beat beat t=2619000 data=2741 mask=0
+TXN ddr_wr_beat beat t=2624000 data=176 mask=0
+TXN sched_deq grant t=2639000 idx=a
+TXN sched_cmd command t=2639000 aux=8 bank=2 col=358 row=678a type=3 we=1
+TXN cq_deq dequeue t=2639000 idx=a
+TXN sched_in command t=2639000 aux=8 bank=2 col=358 row=678a type=3 we=1
+TXN dp_cmd write t=2644000 aux=8
+TXN ddr_cmd command t=2644000 addr=358 bank=2 cmd=4
+TXN sched_deq grant t=2649000 idx=b
+TXN sched_cmd command t=2649000 aux=9 bank=2 col=358 row=678a type=3 we=1
+TXN cq_deq dequeue t=2649000 idx=b
+TXN sched_in command t=2649000 aux=9 bank=2 col=358 row=678a type=3 we=1
+TXN dp_cmd write t=2654000 aux=9
+TXN ddr_cmd command t=2654000 addr=358 bank=2 cmd=4
+TXN ddr_wr_beat beat t=2659000 data=cae8 mask=0
+TXN ddr_wr_beat beat t=2664000 data=cf23 mask=0
+TXN ddr_wr_beat beat t=2669000 data=262c mask=0
+TXN ddr_wr_beat beat t=2674000 data=8fb5 mask=0
+TXN sched_deq grant t=2689000 idx=c
+TXN sched_cmd command t=2689000 aux=a bank=2 col=358 row=678a type=3 we=1
+TXN cq_deq dequeue t=2689000 idx=c
+TXN sched_in command t=2689000 aux=a bank=2 col=358 row=678a type=3 we=1
+TXN dp_cmd write t=2694000 aux=a
+TXN ddr_cmd command t=2694000 addr=358 bank=2 cmd=4
+TXN sched_deq grant t=2699000 idx=d
+TXN sched_cmd command t=2699000 aux=b bank=2 col=360 row=678a type=3 we=1
+TXN cq_deq dequeue t=2699000 idx=d
+TXN sched_in command t=2699000 aux=b bank=2 col=360 row=678a type=3 we=1
+TXN dp_cmd write t=2704000 aux=b
+TXN ddr_cmd command t=2704000 addr=360 bank=2 cmd=4
+TXN ddr_wr_beat beat t=2709000 data=18ba mask=0
+TXN ddr_wr_beat beat t=2714000 data=e5e mask=0
+TXN ddr_wr_beat beat t=2719000 data=fc4c mask=0
+TXN ddr_wr_beat beat t=2724000 data=deb8 mask=0
+TXN sched_deq grant t=2739000 idx=e
+TXN sched_cmd command t=2739000 aux=c bank=2 col=360 row=678a type=3 we=1
+TXN cq_deq dequeue t=2739000 idx=e
+TXN sched_in command t=2739000 aux=c bank=2 col=360 row=678a type=3 we=1
+TXN dp_cmd write t=2744000 aux=c
+TXN ddr_cmd command t=2744000 addr=360 bank=2 cmd=4
+TXN ddr_wr_beat beat t=2759000 data=5c53 mask=0
+TXN ddr_wr_beat beat t=2764000 data=8135 mask=0
+TXN sched_deq grant t=2849000 idx=0
+TXN sched_cmd command t=2849000 aux=e bank=5 col=330 row=6a17 type=2 we=0
+TXN cq_deq dequeue t=2849000 idx=0
+TXN sched_in command t=2849000 aux=e bank=5 col=330 row=6a17 type=2 we=0
+TXN dp_cmd read t=2854000 aux=e
+TXN ddr_cmd command t=2854000 addr=330 bank=5 cmd=5
+TXN sched_deq grant t=2859000 idx=1
+TXN sched_cmd command t=2859000 aux=f bank=5 col=338 row=6a17 type=2 we=0
+TXN cq_deq dequeue t=2859000 idx=1
+TXN sched_in command t=2859000 aux=f bank=5 col=338 row=6a17 type=2 we=0
+TXN dp_cmd read t=2864000 aux=f
+TXN ddr_cmd command t=2864000 addr=338 bank=5 cmd=5
+TXN ddr_rd_beat beat t=2874000 data=7ccf
+TXN ddr_rd_beat beat t=2879000 data=1d96
+TXN ddr_rd_beat beat t=2884000 data=7cc7
+TXN wb_rsp read_data t=2889000 addr=1a85ee68 data=1d967ccf
+TXN dp_rd_rsp response t=2889000 aux=e data=1d967ccf
+TXN ddr_rd_beat beat t=2889000 data=1d96
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 2892500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN dp_cmd read t=3298000 aux=2
-TXN ddr_cmd command t=3298000 addr=338 bank=5 cmd=5
-TXN sched_deq grant t=3304000 idx=5
-TXN sched_cmd command t=3304000 aux=3 bank=5 col=340 row=6a17 type=2 we=0
-TXN cq_deq dequeue t=3304000 idx=5
-TXN sched_in command t=3304000 aux=3 bank=5 col=340 row=6a17 type=2 we=0
-TXN dp_cmd read t=3310000 aux=3
-TXN ddr_cmd command t=3310000 addr=340 bank=5 cmd=5
-TXN ddr_rd_beat beat t=3322000 data=7cc7
-TXN ddr_rd_beat beat t=3328000 data=1d96
-TXN ddr_rd_beat beat t=3334000 data=7cbf
-TXN wb_rsp read_data t=3340000 addr=1a85ee78 data=1d967cc7
-TXN dp_rd_rsp response t=3340000 aux=2 data=1d967cc7
-TXN ddr_rd_beat beat t=3340000 data=1d91
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 3345 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN wb_rsp read_data t=2899000 addr=1a85ee6c data=1d967cc7
+TXN sched_deq grant t=2899000 idx=2
+TXN sched_cmd command t=2899000 aux=0 bank=5 col=338 row=6a17 type=2 we=0
+TXN dp_rd_rsp response t=2899000 aux=f data=1d967cc7
+TXN cq_deq dequeue t=2899000 idx=2
+TXN sched_in command t=2899000 aux=0 bank=5 col=338 row=6a17 type=2 we=0
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 2902500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN wb_rsp read_data t=3352000 addr=1a85ee7c data=1d917cbf
-TXN sched_deq grant t=3352000 idx=6
-TXN sched_cmd command t=3352000 aux=4 bank=5 col=340 row=6a17 type=2 we=0
-TXN dp_rd_rsp response t=3352000 aux=3 data=1d917cbf
-TXN cq_deq dequeue t=3352000 idx=6
-TXN sched_in command t=3352000 aux=4 bank=5 col=340 row=6a17 type=2 we=0
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 3357 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN dp_cmd read t=2904000 aux=0
+TXN ddr_cmd command t=2904000 addr=338 bank=5 cmd=5
+TXN sched_deq grant t=2909000 idx=3
+TXN sched_cmd command t=2909000 aux=1 bank=5 col=338 row=6a17 type=2 we=0
+TXN cq_deq dequeue t=2909000 idx=3
+TXN sched_in command t=2909000 aux=1 bank=5 col=338 row=6a17 type=2 we=0
+TXN dp_cmd read t=2914000 aux=1
+TXN ddr_cmd command t=2914000 addr=338 bank=5 cmd=5
+TXN ddr_rd_beat beat t=2924000 data=7cc7
+TXN ddr_rd_beat beat t=2929000 data=1d96
+TXN ddr_rd_beat beat t=2934000 data=7cc7
+TXN wb_rsp read_data t=2939000 addr=1a85ee70 data=1d967cc7
+TXN dp_rd_rsp response t=2939000 aux=0 data=1d967cc7
+TXN ddr_rd_beat beat t=2939000 data=1d96
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 2942500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN dp_cmd read t=3358000 aux=4
-TXN ddr_cmd command t=3358000 addr=340 bank=5 cmd=5
-TXN sched_deq grant t=3364000 idx=f
-TXN sched_cmd command t=3364000 aux=e bank=5 col=330 row=6a17 type=2 we=0
-TXN cq_deq dequeue t=3364000 idx=f
-TXN sched_in command t=3364000 aux=e bank=5 col=330 row=6a17 type=2 we=0
-TXN dp_cmd read t=3370000 aux=e
-TXN ddr_cmd command t=3370000 addr=330 bank=5 cmd=5
-TXN ddr_rd_beat beat t=3382000 data=7cbf
-TXN ddr_rd_beat beat t=3388000 data=1d91
-TXN ddr_rd_beat beat t=3394000 data=7ccf
-TXN wb_rsp read_data t=3400000 addr=1a85ee80 data=1d917cbf
-TXN dp_rd_rsp response t=3400000 aux=4 data=1d917cbf
-TXN ddr_rd_beat beat t=3400000 data=1d96
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 3405 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN wb_rsp read_data t=2949000 addr=1a85ee74 data=1d967cc7
+TXN sched_deq grant t=2949000 idx=4
+TXN sched_cmd command t=2949000 aux=2 bank=5 col=338 row=6a17 type=2 we=0
+TXN dp_rd_rsp response t=2949000 aux=1 data=1d967cc7
+TXN cq_deq dequeue t=2949000 idx=4
+TXN sched_in command t=2949000 aux=2 bank=5 col=338 row=6a17 type=2 we=0
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 2952500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN wb_rsp read_data t=3412000 addr=1a85ee84 data=1d967ccf
-TXN dp_rd_rsp response t=3412000 aux=e data=1d967ccf
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 3417 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN dp_cmd read t=2954000 aux=2
+TXN ddr_cmd command t=2954000 addr=338 bank=5 cmd=5
+TXN sched_deq grant t=2959000 idx=5
+TXN sched_cmd command t=2959000 aux=3 bank=5 col=340 row=6a17 type=2 we=0
+TXN cq_deq dequeue t=2959000 idx=5
+TXN sched_in command t=2959000 aux=3 bank=5 col=340 row=6a17 type=2 we=0
+TXN dp_cmd read t=2964000 aux=3
+TXN ddr_cmd command t=2964000 addr=340 bank=5 cmd=5
+TXN ddr_rd_beat beat t=2974000 data=7cc7
+TXN ddr_rd_beat beat t=2979000 data=1d96
+TXN ddr_rd_beat beat t=2984000 data=7cbf
+TXN wb_rsp read_data t=2989000 addr=1a85ee78 data=1d967cc7
+TXN dp_rd_rsp response t=2989000 aux=2 data=1d967cc7
+TXN ddr_rd_beat beat t=2989000 data=1d91
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 2992500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN wb read t=3453000 addr=19f6e8 bte=0 cti=0
-TXN req request t=3454000 addr=19f6e8 data=81355c53 mask=f we=0
-TXN cq_enq enqueue t=3454000 bank=6 col=370 row=67 we=0
-TXN wb read t=3459000 addr=15315b24 bte=0 cti=0
-TXN req request t=3460000 addr=15315b24 data=81355c53 mask=f we=0
-TXN cq_enq enqueue t=3460000 bank=3 col=190 row=54c5 we=0
-TXN wb read t=3465000 addr=1d5246f0 bte=0 cti=0
-TXN req request t=3466000 addr=1d5246f0 data=81355c53 mask=f we=0
-TXN cq_enq enqueue t=3466000 bank=0 col=378 row=7549 we=0
-TXN wb read t=3471000 addr=1ca5790 bte=0 cti=0
-TXN req request t=3472000 addr=1ca5790 data=81355c53 mask=f we=0
-TXN sched_cmd command t=3472000 aux=5 bank=6 col=370 row=67 type=4 we=0
-TXN cq_enq enqueue t=3472000 bank=2 col=3c8 row=729 we=0
-TXN sched_in command t=3472000 aux=5 bank=6 col=370 row=67 type=4 we=0
-TXN wb read t=3477000 addr=eb1d948 bte=0 cti=0
-TXN req request t=3478000 addr=eb1d948 data=81355c53 mask=f we=0
-TXN sched_cmd command t=3478000 aux=6 bank=3 col=190 row=54c5 type=4 we=0
-TXN cq_enq enqueue t=3478000 bank=3 col=a0 row=3ac7 we=0
-TXN sched_in command t=3478000 aux=6 bank=3 col=190 row=54c5 type=4 we=0
-TXN ddr_cmd command t=3478000 addr=0 bank=6 cmd=2
-TXN wb read t=3483000 addr=b576de4 bte=0 cti=0
-TXN req request t=3484000 addr=b576de4 data=81355c53 mask=f we=0
-TXN sched_cmd command t=3484000 aux=7 bank=0 col=378 row=7549 type=1 we=0
-TXN cq_enq enqueue t=3484000 bank=5 col=2f0 row=2d5d we=0
-TXN sched_in command t=3484000 aux=7 bank=0 col=378 row=7549 type=1 we=0
-TXN ddr_cmd command t=3484000 addr=0 bank=3 cmd=2
-TXN wb read t=3489000 addr=b91f700 bte=0 cti=0
-TXN req request t=3490000 addr=b91f700 data=81355c53 mask=f we=0
-TXN sched_cmd command t=3490000 aux=8 bank=2 col=3c8 row=729 type=4 we=0
-TXN cq_enq enqueue t=3490000 bank=6 col=380 row=2e47 we=0
-TXN sched_in command t=3490000 aux=8 bank=2 col=3c8 row=729 type=4 we=0
-TXN ddr_cmd command t=3490000 addr=7549 bank=0 cmd=3
-TXN wb read t=3495000 addr=5dccc20 bte=0 cti=0
-TXN req request t=3496000 addr=5dccc20 data=81355c53 mask=f we=0
-TXN cq_enq enqueue t=3496000 bank=1 col=210 row=1773 we=0
-TXN ddr_cmd command t=3496000 addr=0 bank=2 cmd=2
-TXN wb read t=3501000 addr=1056bcd0 bte=0 cti=0
-TXN req request t=3502000 addr=1056bcd0 data=81355c53 mask=f we=0
-TXN sched_cmd command t=3502000 aux=a bank=5 col=2f0 row=2d5d type=4 we=0
-TXN cq_enq enqueue t=3502000 bank=7 col=268 row=415a we=0
-TXN sched_in command t=3502000 aux=a bank=5 col=2f0 row=2d5d type=4 we=0
-TXN wb read t=3507000 addr=213cf74 bte=0 cti=0
-TXN req request t=3508000 addr=213cf74 data=81355c53 mask=f we=0
-TXN cq_enq enqueue t=3508000 bank=1 col=3b8 row=84f we=0
-TXN ddr_cmd command t=3508000 addr=0 bank=5 cmd=2
-TXN wb read t=3513000 addr=4824f48 bte=0 cti=0
-TXN req request t=3514000 addr=4824f48 data=81355c53 mask=f we=0
-TXN sched_cmd command t=3514000 aux=c bank=1 col=210 row=1773 type=4 we=0
-TXN cq_enq enqueue t=3514000 bank=1 col=3a0 row=1209 we=0
-TXN sched_in command t=3514000 aux=c bank=1 col=210 row=1773 type=4 we=0
-TXN wb read t=3519000 addr=553b544 bte=0 cti=0
-TXN req request t=3520000 addr=553b544 data=81355c53 mask=f we=0
-TXN sched_cmd command t=3520000 aux=d bank=7 col=268 row=415a type=4 we=0
-TXN cq_enq enqueue t=3520000 bank=6 col=2a0 row=154e we=0
-TXN sched_in command t=3520000 aux=d bank=7 col=268 row=415a type=4 we=0
-TXN ddr_cmd command t=3520000 addr=0 bank=1 cmd=2
-TXN wb read t=3525000 addr=1117594 bte=0 cti=0
-TXN req request t=3526000 addr=1117594 data=81355c53 mask=f we=0
-TXN cq_enq enqueue t=3526000 bank=6 col=2c8 row=445 we=0
-TXN ddr_cmd command t=3526000 addr=0 bank=7 cmd=2
-TXN wb read t=3531000 addr=1cfdeea0 bte=0 cti=0
-TXN req request t=3532000 addr=1cfdeea0 data=81355c53 mask=f we=0
-TXN cq_enq enqueue t=3532000 bank=5 col=350 row=73f7 we=0
-TXN wb read t=3537000 addr=ee8cf4 bte=0 cti=0
-TXN req request t=3538000 addr=ee8cf4 data=81355c53 mask=f we=0
-TXN cq_enq enqueue t=3538000 bank=1 col=278 row=3ba we=0
-TXN wb read t=3543000 addr=11ff2058 bte=0 cti=0
-TXN req request t=3544000 addr=11ff2058 data=81355c53 mask=f we=0
-TXN cq_enq enqueue t=3544000 bank=4 col=28 row=47fc we=0
-TXN sched_cmd command t=3550000 aux=5 bank=6 col=370 row=67 type=1 we=0
-TXN sched_in command t=3550000 aux=5 bank=6 col=370 row=67 type=1 we=0
-TXN ddr_cmd command t=3556000 addr=67 bank=6 cmd=3
-TXN sched_deq grant t=3562000 idx=2
-TXN sched_cmd command t=3562000 aux=7 bank=0 col=378 row=7549 type=2 we=0
-TXN cq_deq dequeue t=3562000 idx=2
-TXN sched_in command t=3562000 aux=7 bank=0 col=378 row=7549 type=2 we=0
-TXN dp_cmd read t=3568000 aux=7
-TXN ddr_cmd command t=3568000 addr=378 bank=0 cmd=5
-TXN ddr_rd_beat beat t=3592000 data=7c87
-TXN ddr_rd_beat beat t=3598000 data=ed92
-TXN sched_cmd command t=3604000 aux=6 bank=3 col=190 row=54c5 type=1 we=0
-TXN sched_in command t=3604000 aux=6 bank=3 col=190 row=54c5 type=1 we=0
-TXN wb_rsp read_data t=3610000 addr=19f6e8 data=ed927c87
-TXN dp_rd_rsp response t=3610000 aux=7 data=ed927c87
-TXN ddr_cmd command t=3610000 addr=54c5 bank=3 cmd=3
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 3615 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN wb_rsp read_data t=2999000 addr=1a85ee7c data=1d917cbf
+TXN sched_deq grant t=2999000 idx=6
+TXN sched_cmd command t=2999000 aux=4 bank=5 col=340 row=6a17 type=2 we=0
+TXN dp_rd_rsp response t=2999000 aux=3 data=1d917cbf
+TXN cq_deq dequeue t=2999000 idx=6
+TXN sched_in command t=2999000 aux=4 bank=5 col=340 row=6a17 type=2 we=0
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3002500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN wb read t=3621000 addr=ff8c740 bte=0 cti=0
-TXN req request t=3622000 addr=ff8c740 data=81355c53 mask=f we=0
-TXN cq_enq enqueue t=3622000 bank=0 col=3a0 row=3fe3 we=0
-TXN sched_deq grant t=3628000 idx=0
-TXN sched_cmd command t=3628000 aux=5 bank=6 col=370 row=67 type=2 we=0
-TXN cq_deq dequeue t=3628000 idx=0
-TXN sched_in command t=3628000 aux=5 bank=6 col=370 row=67 type=2 we=0
-TXN dp_cmd read t=3634000 aux=5
-TXN ddr_cmd command t=3634000 addr=370 bank=6 cmd=5
-TXN sched_cmd command t=3652000 aux=5 bank=0 col=3a0 row=3fe3 type=4 we=0
-TXN sched_in command t=3652000 aux=5 bank=0 col=3a0 row=3fe3 type=4 we=0
-TXN sched_cmd command t=3658000 aux=8 bank=2 col=3c8 row=729 type=1 we=0
-TXN ddr_rd_beat beat t=3658000 data=7c8f
-TXN sched_in command t=3658000 aux=8 bank=2 col=3c8 row=729 type=1 we=0
-TXN ddr_cmd command t=3658000 addr=0 bank=0 cmd=2
-TXN ddr_rd_beat beat t=3664000 data=9d92
-TXN ddr_cmd command t=3664000 addr=729 bank=2 cmd=3
-TXN wb_rsp read_data t=3676000 addr=15315b24 data=9d927c8f
-TXN dp_rd_rsp response t=3676000 aux=5 data=9d927c8f
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 3681 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN dp_cmd read t=3004000 aux=4
+TXN ddr_cmd command t=3004000 addr=340 bank=5 cmd=5
+TXN sched_deq grant t=3009000 idx=f
+TXN sched_cmd command t=3009000 aux=d bank=5 col=330 row=6a17 type=2 we=0
+TXN cq_deq dequeue t=3009000 idx=f
+TXN sched_in command t=3009000 aux=d bank=5 col=330 row=6a17 type=2 we=0
+TXN dp_cmd read t=3014000 aux=d
+TXN ddr_cmd command t=3014000 addr=330 bank=5 cmd=5
+TXN ddr_rd_beat beat t=3024000 data=7cbf
+TXN ddr_rd_beat beat t=3029000 data=1d91
+TXN ddr_rd_beat beat t=3034000 data=7ccf
+TXN wb_rsp read_data t=3039000 addr=1a85ee80 data=1d917cbf
+TXN dp_rd_rsp response t=3039000 aux=4 data=1d917cbf
+TXN ddr_rd_beat beat t=3039000 data=1d96
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3042500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=3682000 idx=1
-TXN sched_cmd command t=3682000 aux=6 bank=3 col=190 row=54c5 type=2 we=0
-TXN cq_deq dequeue t=3682000 idx=1
-TXN sched_in command t=3682000 aux=6 bank=3 col=190 row=54c5 type=2 we=0
-TXN wb read t=3687000 addr=11316d1c bte=0 cti=0
-TXN req request t=3688000 addr=11316d1c data=81355c53 mask=f we=0
-TXN dp_cmd read t=3688000 aux=6
-TXN cq_enq enqueue t=3688000 bank=5 col=288 row=44c5 we=0
-TXN ddr_cmd command t=3688000 addr=190 bank=3 cmd=5
-TXN sched_cmd command t=3712000 aux=6 bank=5 col=288 row=44c5 type=1 we=0
-TXN ddr_rd_beat beat t=3712000 data=7e6f
-TXN sched_in command t=3712000 aux=6 bank=5 col=288 row=44c5 type=1 we=0
-TXN sched_cmd command t=3718000 aux=b bank=6 col=380 row=2e47 type=4 we=0
-TXN ddr_rd_beat beat t=3718000 data=8dbc
-TXN sched_in command t=3718000 aux=b bank=6 col=380 row=2e47 type=4 we=0
-TXN ddr_cmd command t=3718000 addr=44c5 bank=5 cmd=3
-TXN ddr_cmd command t=3724000 addr=0 bank=6 cmd=2
-TXN wb_rsp read_data t=3730000 addr=1d5246f0 data=8dbc7e6f
-TXN dp_rd_rsp response t=3730000 aux=6 data=8dbc7e6f
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 3735 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN wb_rsp read_data t=3049000 addr=1a85ee84 data=1d967ccf
+TXN dp_rd_rsp response t=3049000 aux=d data=1d967ccf
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3052500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=3736000 idx=3
-TXN sched_cmd command t=3736000 aux=8 bank=2 col=3c8 row=729 type=2 we=0
-TXN cq_deq dequeue t=3736000 idx=3
-TXN sched_in command t=3736000 aux=8 bank=2 col=3c8 row=729 type=2 we=0
-TXN wb read t=3741000 addr=701dc90 bte=0 cti=0
-TXN req request t=3742000 addr=701dc90 data=81355c53 mask=f we=0
-TXN dp_cmd read t=3742000 aux=8
-TXN cq_enq enqueue t=3742000 bank=3 col=248 row=1c07 we=0
-TXN ddr_cmd command t=3742000 addr=3c8 bank=2 cmd=5
-TXN sched_cmd command t=3766000 aux=5 bank=0 col=3a0 row=3fe3 type=1 we=0
-TXN ddr_rd_beat beat t=3766000 data=7c37
-TXN sched_in command t=3766000 aux=5 bank=0 col=3a0 row=3fe3 type=1 we=0
-TXN sched_cmd command t=3772000 aux=7 bank=3 col=248 row=1c07 type=4 we=0
-TXN ddr_rd_beat beat t=3772000 data=ed99
-TXN sched_in command t=3772000 aux=7 bank=3 col=248 row=1c07 type=4 we=0
-TXN ddr_cmd command t=3772000 addr=3fe3 bank=0 cmd=3
-TXN ddr_cmd command t=3778000 addr=0 bank=3 cmd=2
-TXN wb_rsp read_data t=3784000 addr=1ca5790 data=ed997c37
-TXN dp_rd_rsp response t=3784000 aux=8 data=ed997c37
-TXN sched_deq grant t=3790000 idx=0
-TXN sched_cmd command t=3790000 aux=6 bank=5 col=288 row=44c5 type=2 we=0
-TXN cq_deq dequeue t=3790000 idx=0
-TXN sched_in command t=3790000 aux=6 bank=5 col=288 row=44c5 type=2 we=0
-TXN wb read t=3795000 addr=bd0a738 bte=0 cti=0
-TXN req request t=3796000 addr=bd0a738 data=81355c53 mask=f we=0
-TXN dp_cmd read t=3796000 aux=6
-TXN cq_enq enqueue t=3796000 bank=4 col=398 row=2f42 we=0
-TXN ddr_cmd command t=3796000 addr=288 bank=5 cmd=5
-TXN sched_cmd command t=3820000 aux=8 bank=4 col=398 row=2f42 type=1 we=0
-TXN ddr_rd_beat beat t=3820000 data=7d77
-TXN sched_in command t=3820000 aux=8 bank=4 col=398 row=2f42 type=1 we=0
-TXN ddr_rd_beat beat t=3826000 data=8d8d
-TXN ddr_cmd command t=3826000 addr=2f42 bank=4 cmd=3
-TXN wb_rsp read_data t=3838000 addr=eb1d948 data=8d8d7d77
-TXN dp_rd_rsp response t=3838000 aux=6 data=8d8d7d77
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 3843 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN wb read t=3083000 addr=19f6e8 bte=0 cti=0
+TXN req request t=3084000 addr=19f6e8 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=3084000 bank=6 col=370 row=67 we=0
+TXN wb read t=3088000 addr=15315b24 bte=0 cti=0
+TXN req request t=3089000 addr=15315b24 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=3089000 bank=3 col=190 row=54c5 we=0
+TXN wb read t=3093000 addr=1d5246f0 bte=0 cti=0
+TXN req request t=3094000 addr=1d5246f0 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=3094000 bank=0 col=378 row=7549 we=0
+TXN wb read t=3098000 addr=1ca5790 bte=0 cti=0
+TXN req request t=3099000 addr=1ca5790 data=81355c53 mask=f we=0
+TXN sched_cmd command t=3099000 aux=5 bank=6 col=370 row=67 type=4 we=0
+TXN cq_enq enqueue t=3099000 bank=2 col=3c8 row=729 we=0
+TXN sched_in command t=3099000 aux=5 bank=6 col=370 row=67 type=4 we=0
+TXN wb read t=3103000 addr=eb1d948 bte=0 cti=0
+TXN req request t=3104000 addr=eb1d948 data=81355c53 mask=f we=0
+TXN sched_cmd command t=3104000 aux=6 bank=3 col=190 row=54c5 type=4 we=0
+TXN cq_enq enqueue t=3104000 bank=3 col=a0 row=3ac7 we=0
+TXN sched_in command t=3104000 aux=6 bank=3 col=190 row=54c5 type=4 we=0
+TXN ddr_cmd command t=3104000 addr=0 bank=6 cmd=2
+TXN wb read t=3108000 addr=b576de4 bte=0 cti=0
+TXN req request t=3109000 addr=b576de4 data=81355c53 mask=f we=0
+TXN sched_cmd command t=3109000 aux=7 bank=0 col=378 row=7549 type=1 we=0
+TXN cq_enq enqueue t=3109000 bank=5 col=2f0 row=2d5d we=0
+TXN sched_in command t=3109000 aux=7 bank=0 col=378 row=7549 type=1 we=0
+TXN ddr_cmd command t=3109000 addr=0 bank=3 cmd=2
+TXN wb read t=3113000 addr=b91f700 bte=0 cti=0
+TXN req request t=3114000 addr=b91f700 data=81355c53 mask=f we=0
+TXN sched_cmd command t=3114000 aux=8 bank=2 col=3c8 row=729 type=4 we=0
+TXN cq_enq enqueue t=3114000 bank=6 col=380 row=2e47 we=0
+TXN sched_in command t=3114000 aux=8 bank=2 col=3c8 row=729 type=4 we=0
+TXN ddr_cmd command t=3114000 addr=7549 bank=0 cmd=3
+TXN wb read t=3118000 addr=5dccc20 bte=0 cti=0
+TXN req request t=3119000 addr=5dccc20 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=3119000 bank=1 col=210 row=1773 we=0
+TXN ddr_cmd command t=3119000 addr=0 bank=2 cmd=2
+TXN wb read t=3123000 addr=1056bcd0 bte=0 cti=0
+TXN req request t=3124000 addr=1056bcd0 data=81355c53 mask=f we=0
+TXN sched_cmd command t=3124000 aux=a bank=5 col=2f0 row=2d5d type=4 we=0
+TXN cq_enq enqueue t=3124000 bank=7 col=268 row=415a we=0
+TXN sched_in command t=3124000 aux=a bank=5 col=2f0 row=2d5d type=4 we=0
+TXN wb read t=3128000 addr=213cf74 bte=0 cti=0
+TXN req request t=3129000 addr=213cf74 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=3129000 bank=1 col=3b8 row=84f we=0
+TXN ddr_cmd command t=3129000 addr=0 bank=5 cmd=2
+TXN wb read t=3133000 addr=4824f48 bte=0 cti=0
+TXN req request t=3134000 addr=4824f48 data=81355c53 mask=f we=0
+TXN sched_cmd command t=3134000 aux=c bank=1 col=210 row=1773 type=4 we=0
+TXN cq_enq enqueue t=3134000 bank=1 col=3a0 row=1209 we=0
+TXN sched_in command t=3134000 aux=c bank=1 col=210 row=1773 type=4 we=0
+TXN wb read t=3138000 addr=553b544 bte=0 cti=0
+TXN req request t=3139000 addr=553b544 data=81355c53 mask=f we=0
+TXN sched_cmd command t=3139000 aux=d bank=7 col=268 row=415a type=4 we=0
+TXN cq_enq enqueue t=3139000 bank=6 col=2a0 row=154e we=0
+TXN sched_in command t=3139000 aux=d bank=7 col=268 row=415a type=4 we=0
+TXN ddr_cmd command t=3139000 addr=0 bank=1 cmd=2
+TXN wb read t=3143000 addr=1117594 bte=0 cti=0
+TXN req request t=3144000 addr=1117594 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=3144000 bank=6 col=2c8 row=445 we=0
+TXN ddr_cmd command t=3144000 addr=0 bank=7 cmd=2
+TXN wb read t=3148000 addr=1cfdeea0 bte=0 cti=0
+TXN req request t=3149000 addr=1cfdeea0 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=3149000 bank=5 col=350 row=73f7 we=0
+TXN wb read t=3153000 addr=ee8cf4 bte=0 cti=0
+TXN req request t=3154000 addr=ee8cf4 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=3154000 bank=1 col=278 row=3ba we=0
+TXN wb read t=3158000 addr=11ff2058 bte=0 cti=0
+TXN req request t=3159000 addr=11ff2058 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=3159000 bank=4 col=28 row=47fc we=0
+TXN sched_cmd command t=3174000 aux=5 bank=6 col=370 row=67 type=1 we=0
+TXN sched_in command t=3174000 aux=5 bank=6 col=370 row=67 type=1 we=0
+TXN ddr_cmd command t=3179000 addr=67 bank=6 cmd=3
+TXN sched_deq grant t=3184000 idx=2
+TXN sched_cmd command t=3184000 aux=7 bank=0 col=378 row=7549 type=2 we=0
+TXN cq_deq dequeue t=3184000 idx=2
+TXN sched_in command t=3184000 aux=7 bank=0 col=378 row=7549 type=2 we=0
+TXN dp_cmd read t=3189000 aux=7
+TXN ddr_cmd command t=3189000 addr=378 bank=0 cmd=5
+TXN ddr_rd_beat beat t=3209000 data=7c87
+TXN ddr_rd_beat beat t=3214000 data=ed92
+TXN wb_rsp read_data t=3224000 addr=19f6e8 data=ed927c87
+TXN sched_cmd command t=3224000 aux=6 bank=3 col=190 row=54c5 type=1 we=0
+TXN dp_rd_rsp response t=3224000 aux=7 data=ed927c87
+TXN sched_in command t=3224000 aux=6 bank=3 col=190 row=54c5 type=1 we=0
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3227500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=3844000 idx=2
-TXN sched_cmd command t=3844000 aux=5 bank=0 col=3a0 row=3fe3 type=2 we=0
-TXN cq_deq dequeue t=3844000 idx=2
-TXN sched_in command t=3844000 aux=5 bank=0 col=3a0 row=3fe3 type=2 we=0
-TXN wb read t=3849000 addr=160b0630 bte=0 cti=0
-TXN req request t=3850000 addr=160b0630 data=81355c53 mask=f we=0
-TXN dp_cmd read t=3850000 aux=5
-TXN cq_enq enqueue t=3850000 bank=0 col=318 row=582c we=0
-TXN ddr_cmd command t=3850000 addr=3a0 bank=0 cmd=5
-TXN sched_cmd command t=3874000 aux=7 bank=3 col=248 row=1c07 type=1 we=0
-TXN ddr_rd_beat beat t=3874000 data=7c5f
-TXN sched_in command t=3874000 aux=7 bank=3 col=248 row=1c07 type=1 we=0
-TXN sched_cmd command t=3880000 aux=a bank=5 col=2f0 row=2d5d type=4 we=0
-TXN ddr_rd_beat beat t=3880000 data=bd9f
-TXN sched_in command t=3880000 aux=a bank=5 col=2f0 row=2d5d type=4 we=0
-TXN ddr_cmd command t=3880000 addr=1c07 bank=3 cmd=3
-TXN ddr_cmd command t=3886000 addr=0 bank=5 cmd=2
-TXN wb_rsp read_data t=3892000 addr=b576de4 data=bd9f7c5f
-TXN dp_rd_rsp response t=3892000 aux=5 data=bd9f7c5f
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 3897 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN ddr_cmd command t=3229000 addr=54c5 bank=3 cmd=3
+TXN wb read t=3233000 addr=ff8c740 bte=0 cti=0
+TXN req request t=3234000 addr=ff8c740 data=81355c53 mask=f we=0
+TXN cq_enq enqueue t=3234000 bank=0 col=3a0 row=3fe3 we=0
+TXN sched_deq grant t=3249000 idx=0
+TXN sched_cmd command t=3249000 aux=5 bank=6 col=370 row=67 type=2 we=0
+TXN cq_deq dequeue t=3249000 idx=0
+TXN sched_in command t=3249000 aux=5 bank=6 col=370 row=67 type=2 we=0
+TXN dp_cmd read t=3254000 aux=5
+TXN ddr_cmd command t=3254000 addr=370 bank=6 cmd=5
+TXN sched_cmd command t=3269000 aux=5 bank=0 col=3a0 row=3fe3 type=4 we=0
+TXN sched_in command t=3269000 aux=5 bank=0 col=3a0 row=3fe3 type=4 we=0
+TXN sched_cmd command t=3274000 aux=8 bank=2 col=3c8 row=729 type=1 we=0
+TXN ddr_rd_beat beat t=3274000 data=7c8f
+TXN sched_in command t=3274000 aux=8 bank=2 col=3c8 row=729 type=1 we=0
+TXN ddr_cmd command t=3274000 addr=0 bank=0 cmd=2
+TXN ddr_rd_beat beat t=3279000 data=9d92
+TXN ddr_cmd command t=3279000 addr=729 bank=2 cmd=3
+TXN wb_rsp read_data t=3289000 addr=15315b24 data=9d927c8f
+TXN dp_rd_rsp response t=3289000 aux=5 data=9d927c8f
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3292500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=3898000 idx=0
-TXN sched_cmd command t=3898000 aux=8 bank=4 col=398 row=2f42 type=2 we=0
-TXN cq_deq dequeue t=3898000 idx=0
-TXN sched_in command t=3898000 aux=8 bank=4 col=398 row=2f42 type=2 we=0
-TXN wb read t=3903000 addr=129404b4 bte=0 cti=0
-TXN req request t=3904000 addr=129404b4 data=81355c53 mask=f we=0
-TXN dp_cmd read t=3904000 aux=8
-TXN cq_enq enqueue t=3904000 bank=0 col=258 row=4a50 we=0
-TXN ddr_cmd command t=3904000 addr=398 bank=4 cmd=5
-TXN sched_cmd command t=3928000 aux=b bank=6 col=380 row=2e47 type=1 we=0
-TXN ddr_rd_beat beat t=3928000 data=fc67
-TXN sched_in command t=3928000 aux=b bank=6 col=380 row=2e47 type=1 we=0
-TXN sched_cmd command t=3934000 aux=a bank=0 col=258 row=4a50 type=4 we=0
-TXN ddr_rd_beat beat t=3934000 data=b59c
-TXN sched_in command t=3934000 aux=a bank=0 col=258 row=4a50 type=4 we=0
-TXN ddr_cmd command t=3934000 addr=2e47 bank=6 cmd=3
-TXN ddr_cmd command t=3940000 addr=0 bank=0 cmd=2
-TXN wb_rsp read_data t=3946000 addr=b91f700 data=b59cfc67
-TXN dp_rd_rsp response t=3946000 aux=8 data=b59cfc67
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 3951 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN wb read t=3298000 addr=11316d1c bte=0 cti=0
+TXN req request t=3299000 addr=11316d1c data=81355c53 mask=f we=0
+TXN sched_deq grant t=3299000 idx=1
+TXN sched_cmd command t=3299000 aux=6 bank=3 col=190 row=54c5 type=2 we=0
+TXN cq_enq enqueue t=3299000 bank=5 col=288 row=44c5 we=0
+TXN cq_deq dequeue t=3299000 idx=1
+TXN sched_in command t=3299000 aux=6 bank=3 col=190 row=54c5 type=2 we=0
+TXN dp_cmd read t=3304000 aux=6
+TXN ddr_cmd command t=3304000 addr=190 bank=3 cmd=5
+TXN sched_cmd command t=3324000 aux=6 bank=5 col=288 row=44c5 type=1 we=0
+TXN ddr_rd_beat beat t=3324000 data=7e6f
+TXN sched_in command t=3324000 aux=6 bank=5 col=288 row=44c5 type=1 we=0
+TXN ddr_rd_beat beat t=3329000 data=8dbc
+TXN ddr_cmd command t=3329000 addr=44c5 bank=5 cmd=3
+TXN sched_cmd command t=3334000 aux=b bank=6 col=380 row=2e47 type=4 we=0
+TXN sched_in command t=3334000 aux=b bank=6 col=380 row=2e47 type=4 we=0
+TXN wb_rsp read_data t=3339000 addr=1d5246f0 data=8dbc7e6f
+TXN dp_rd_rsp response t=3339000 aux=6 data=8dbc7e6f
+TXN ddr_cmd command t=3339000 addr=0 bank=6 cmd=2
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3342500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=3952000 idx=1
-TXN sched_cmd command t=3952000 aux=7 bank=3 col=248 row=1c07 type=2 we=0
-TXN cq_deq dequeue t=3952000 idx=1
-TXN sched_in command t=3952000 aux=7 bank=3 col=248 row=1c07 type=2 we=0
-TXN wb read t=3957000 addr=472f0a0 bte=0 cti=0
-TXN req request t=3958000 addr=472f0a0 data=81355c53 mask=f we=0
-TXN dp_cmd read t=3958000 aux=7
-TXN cq_enq enqueue t=3958000 bank=6 col=50 row=11cb we=0
-TXN ddr_cmd command t=3958000 addr=248 bank=3 cmd=5
-TXN sched_cmd command t=3982000 aux=a bank=5 col=2f0 row=2d5d type=1 we=0
-TXN ddr_rd_beat beat t=3982000 data=7db7
-TXN sched_in command t=3982000 aux=a bank=5 col=2f0 row=2d5d type=1 we=0
-TXN sched_cmd command t=3988000 aux=4 bank=4 col=28 row=47fc type=4 we=0
-TXN ddr_rd_beat beat t=3988000 data=9d81
-TXN sched_in command t=3988000 aux=4 bank=4 col=28 row=47fc type=4 we=0
-TXN ddr_cmd command t=3988000 addr=2d5d bank=5 cmd=3
-TXN ddr_cmd command t=3994000 addr=0 bank=4 cmd=2
-TXN wb_rsp read_data t=4000000 addr=5dccc20 data=9d817db7
-TXN dp_rd_rsp response t=4000000 aux=7 data=9d817db7
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 4005 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN wb read t=3348000 addr=701dc90 bte=0 cti=0
+TXN req request t=3349000 addr=701dc90 data=81355c53 mask=f we=0
+TXN sched_deq grant t=3349000 idx=3
+TXN sched_cmd command t=3349000 aux=8 bank=2 col=3c8 row=729 type=2 we=0
+TXN cq_enq enqueue t=3349000 bank=3 col=248 row=1c07 we=0
+TXN cq_deq dequeue t=3349000 idx=3
+TXN sched_in command t=3349000 aux=8 bank=2 col=3c8 row=729 type=2 we=0
+TXN dp_cmd read t=3354000 aux=8
+TXN ddr_cmd command t=3354000 addr=3c8 bank=2 cmd=5
+TXN sched_cmd command t=3374000 aux=5 bank=0 col=3a0 row=3fe3 type=1 we=0
+TXN ddr_rd_beat beat t=3374000 data=7c37
+TXN sched_in command t=3374000 aux=5 bank=0 col=3a0 row=3fe3 type=1 we=0
+TXN ddr_rd_beat beat t=3379000 data=ed99
+TXN ddr_cmd command t=3379000 addr=3fe3 bank=0 cmd=3
+TXN sched_cmd command t=3384000 aux=7 bank=3 col=248 row=1c07 type=4 we=0
+TXN sched_in command t=3384000 aux=7 bank=3 col=248 row=1c07 type=4 we=0
+TXN wb_rsp read_data t=3389000 addr=1ca5790 data=ed997c37
+TXN dp_rd_rsp response t=3389000 aux=8 data=ed997c37
+TXN ddr_cmd command t=3389000 addr=0 bank=3 cmd=2
+TXN wb read t=3398000 addr=bd0a738 bte=0 cti=0
+TXN req request t=3399000 addr=bd0a738 data=81355c53 mask=f we=0
+TXN sched_deq grant t=3399000 idx=0
+TXN sched_cmd command t=3399000 aux=6 bank=5 col=288 row=44c5 type=2 we=0
+TXN cq_enq enqueue t=3399000 bank=4 col=398 row=2f42 we=0
+TXN cq_deq dequeue t=3399000 idx=0
+TXN sched_in command t=3399000 aux=6 bank=5 col=288 row=44c5 type=2 we=0
+TXN dp_cmd read t=3404000 aux=6
+TXN ddr_cmd command t=3404000 addr=288 bank=5 cmd=5
+TXN sched_cmd command t=3424000 aux=8 bank=4 col=398 row=2f42 type=1 we=0
+TXN ddr_rd_beat beat t=3424000 data=7d77
+TXN sched_in command t=3424000 aux=8 bank=4 col=398 row=2f42 type=1 we=0
+TXN ddr_rd_beat beat t=3429000 data=8d8d
+TXN ddr_cmd command t=3429000 addr=2f42 bank=4 cmd=3
+TXN wb_rsp read_data t=3439000 addr=eb1d948 data=8d8d7d77
+TXN dp_rd_rsp response t=3439000 aux=6 data=8d8d7d77
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3442500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=4006000 idx=6
-TXN sched_cmd command t=4006000 aux=b bank=6 col=380 row=2e47 type=2 we=0
-TXN cq_deq dequeue t=4006000 idx=6
-TXN sched_in command t=4006000 aux=b bank=6 col=380 row=2e47 type=2 we=0
-TXN wb read t=4011000 addr=ab7d564 bte=0 cti=0
-TXN req request t=4012000 addr=ab7d564 data=81355c53 mask=f we=0
-TXN dp_cmd read t=4012000 aux=b
-TXN cq_enq enqueue t=4012000 bank=2 col=2b0 row=2adf we=0
-TXN ddr_cmd command t=4012000 addr=380 bank=6 cmd=5
-TXN sched_cmd command t=4030000 aux=c bank=2 col=2b0 row=2adf type=4 we=0
-TXN sched_in command t=4030000 aux=c bank=2 col=2b0 row=2adf type=4 we=0
-TXN sched_cmd command t=4036000 aux=a bank=0 col=258 row=4a50 type=1 we=0
-TXN ddr_rd_beat beat t=4036000 data=7c7f
-TXN sched_in command t=4036000 aux=a bank=0 col=258 row=4a50 type=1 we=0
-TXN ddr_cmd command t=4036000 addr=0 bank=2 cmd=2
-TXN sched_cmd command t=4042000 aux=9 bank=3 col=a0 row=3ac7 type=4 we=0
-TXN ddr_rd_beat beat t=4042000 data=9d9d
-TXN sched_in command t=4042000 aux=9 bank=3 col=a0 row=3ac7 type=4 we=0
-TXN ddr_cmd command t=4042000 addr=4a50 bank=0 cmd=3
-TXN ddr_cmd command t=4048000 addr=0 bank=3 cmd=2
-TXN wb_rsp read_data t=4054000 addr=1056bcd0 data=9d9d7c7f
-TXN dp_rd_rsp response t=4054000 aux=b data=9d9d7c7f
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 4059 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN wb read t=3448000 addr=160b0630 bte=0 cti=0
+TXN req request t=3449000 addr=160b0630 data=81355c53 mask=f we=0
+TXN sched_deq grant t=3449000 idx=2
+TXN sched_cmd command t=3449000 aux=5 bank=0 col=3a0 row=3fe3 type=2 we=0
+TXN cq_enq enqueue t=3449000 bank=0 col=318 row=582c we=0
+TXN cq_deq dequeue t=3449000 idx=2
+TXN sched_in command t=3449000 aux=5 bank=0 col=3a0 row=3fe3 type=2 we=0
+TXN dp_cmd read t=3454000 aux=5
+TXN ddr_cmd command t=3454000 addr=3a0 bank=0 cmd=5
+TXN sched_cmd command t=3474000 aux=7 bank=3 col=248 row=1c07 type=1 we=0
+TXN ddr_rd_beat beat t=3474000 data=7c5f
+TXN sched_in command t=3474000 aux=7 bank=3 col=248 row=1c07 type=1 we=0
+TXN ddr_rd_beat beat t=3479000 data=bd9f
+TXN ddr_cmd command t=3479000 addr=1c07 bank=3 cmd=3
+TXN sched_cmd command t=3484000 aux=a bank=5 col=2f0 row=2d5d type=4 we=0
+TXN sched_in command t=3484000 aux=a bank=5 col=2f0 row=2d5d type=4 we=0
+TXN wb_rsp read_data t=3489000 addr=b576de4 data=bd9f7c5f
+TXN dp_rd_rsp response t=3489000 aux=5 data=bd9f7c5f
+TXN ddr_cmd command t=3489000 addr=0 bank=5 cmd=2
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3492500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=4060000 idx=5
-TXN sched_cmd command t=4060000 aux=a bank=5 col=2f0 row=2d5d type=2 we=0
-TXN cq_deq dequeue t=4060000 idx=5
-TXN sched_in command t=4060000 aux=a bank=5 col=2f0 row=2d5d type=2 we=0
-TXN dp_cmd read t=4066000 aux=a
-TXN ddr_cmd command t=4066000 addr=2f0 bank=5 cmd=5
-TXN sched_cmd command t=4090000 aux=c bank=1 col=210 row=1773 type=1 we=0
-TXN ddr_rd_beat beat t=4090000 data=7d0f
-TXN sched_in command t=4090000 aux=c bank=1 col=210 row=1773 type=1 we=0
-TXN sched_cmd command t=4096000 aux=b bank=6 col=50 row=11cb type=4 we=0
-TXN ddr_rd_beat beat t=4096000 data=4d8a
-TXN sched_in command t=4096000 aux=b bank=6 col=50 row=11cb type=4 we=0
-TXN ddr_cmd command t=4096000 addr=1773 bank=1 cmd=3
-TXN ddr_cmd command t=4102000 addr=0 bank=6 cmd=2
-TXN wb_rsp read_data t=4108000 addr=213cf74 data=4d8a7d0f
-TXN dp_rd_rsp response t=4108000 aux=a data=4d8a7d0f
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 4113 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN wb read t=3498000 addr=129404b4 bte=0 cti=0
+TXN req request t=3499000 addr=129404b4 data=81355c53 mask=f we=0
+TXN sched_deq grant t=3499000 idx=3
+TXN sched_cmd command t=3499000 aux=8 bank=4 col=398 row=2f42 type=2 we=0
+TXN cq_enq enqueue t=3499000 bank=0 col=258 row=4a50 we=0
+TXN cq_deq dequeue t=3499000 idx=3
+TXN sched_in command t=3499000 aux=8 bank=4 col=398 row=2f42 type=2 we=0
+TXN dp_cmd read t=3504000 aux=8
+TXN ddr_cmd command t=3504000 addr=398 bank=4 cmd=5
+TXN sched_cmd command t=3524000 aux=b bank=6 col=380 row=2e47 type=1 we=0
+TXN ddr_rd_beat beat t=3524000 data=fc67
+TXN sched_in command t=3524000 aux=b bank=6 col=380 row=2e47 type=1 we=0
+TXN ddr_rd_beat beat t=3529000 data=b59c
+TXN ddr_cmd command t=3529000 addr=2e47 bank=6 cmd=3
+TXN sched_cmd command t=3534000 aux=9 bank=0 col=318 row=582c type=4 we=0
+TXN sched_in command t=3534000 aux=9 bank=0 col=318 row=582c type=4 we=0
+TXN wb_rsp read_data t=3539000 addr=b91f700 data=b59cfc67
+TXN dp_rd_rsp response t=3539000 aux=8 data=b59cfc67
+TXN ddr_cmd command t=3539000 addr=0 bank=0 cmd=2
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3542500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=4114000 idx=0
-TXN sched_cmd command t=4114000 aux=a bank=0 col=258 row=4a50 type=2 we=0
-TXN cq_deq dequeue t=4114000 idx=0
-TXN sched_in command t=4114000 aux=a bank=0 col=258 row=4a50 type=2 we=0
-TXN dp_cmd read t=4120000 aux=a
-TXN ddr_cmd command t=4120000 addr=258 bank=0 cmd=5
-TXN sched_cmd command t=4144000 aux=c bank=2 col=2b0 row=2adf type=1 we=0
-TXN ddr_rd_beat beat t=4144000 data=fda7
-TXN sched_in command t=4144000 aux=c bank=2 col=2b0 row=2adf type=1 we=0
-TXN sched_cmd command t=4150000 aux=2 bank=5 col=350 row=73f7 type=4 we=0
-TXN ddr_rd_beat beat t=4150000 data=2580
-TXN sched_in command t=4150000 aux=2 bank=5 col=350 row=73f7 type=4 we=0
-TXN ddr_cmd command t=4150000 addr=2adf bank=2 cmd=3
-TXN ddr_cmd command t=4156000 addr=0 bank=5 cmd=2
-TXN wb_rsp read_data t=4162000 addr=4824f48 data=2580fda7
-TXN dp_rd_rsp response t=4162000 aux=a data=2580fda7
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 4167 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN wb read t=3548000 addr=472f0a0 bte=0 cti=0
+TXN req request t=3549000 addr=472f0a0 data=81355c53 mask=f we=0
+TXN sched_deq grant t=3549000 idx=1
+TXN sched_cmd command t=3549000 aux=7 bank=3 col=248 row=1c07 type=2 we=0
+TXN cq_enq enqueue t=3549000 bank=6 col=50 row=11cb we=0
+TXN cq_deq dequeue t=3549000 idx=1
+TXN sched_in command t=3549000 aux=7 bank=3 col=248 row=1c07 type=2 we=0
+TXN dp_cmd read t=3554000 aux=7
+TXN ddr_cmd command t=3554000 addr=248 bank=3 cmd=5
+TXN sched_cmd command t=3574000 aux=a bank=5 col=2f0 row=2d5d type=1 we=0
+TXN ddr_rd_beat beat t=3574000 data=7db7
+TXN sched_in command t=3574000 aux=a bank=5 col=2f0 row=2d5d type=1 we=0
+TXN ddr_rd_beat beat t=3579000 data=9d81
+TXN ddr_cmd command t=3579000 addr=2d5d bank=5 cmd=3
+TXN sched_cmd command t=3584000 aux=4 bank=4 col=28 row=47fc type=4 we=0
+TXN sched_in command t=3584000 aux=4 bank=4 col=28 row=47fc type=4 we=0
+TXN wb_rsp read_data t=3589000 addr=5dccc20 data=9d817db7
+TXN dp_rd_rsp response t=3589000 aux=7 data=9d817db7
+TXN ddr_cmd command t=3589000 addr=0 bank=4 cmd=2
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3592500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=4168000 idx=7
-TXN sched_cmd command t=4168000 aux=c bank=1 col=210 row=1773 type=2 we=0
-TXN cq_deq dequeue t=4168000 idx=7
-TXN sched_in command t=4168000 aux=c bank=1 col=210 row=1773 type=2 we=0
-TXN dp_cmd read t=4174000 aux=c
-TXN ddr_cmd command t=4174000 addr=210 bank=1 cmd=5
-TXN sched_cmd command t=4198000 aux=b bank=6 col=50 row=11cb type=1 we=0
-TXN ddr_rd_beat beat t=4198000 data=7def
-TXN sched_in command t=4198000 aux=b bank=6 col=50 row=11cb type=1 we=0
-TXN sched_cmd command t=4204000 aux=9 bank=0 col=318 row=582c type=4 we=0
-TXN ddr_rd_beat beat t=4204000 data=3d84
-TXN sched_in command t=4204000 aux=9 bank=0 col=318 row=582c type=4 we=0
-TXN ddr_cmd command t=4204000 addr=11cb bank=6 cmd=3
-TXN ddr_cmd command t=4210000 addr=0 bank=0 cmd=2
-TXN wb_rsp read_data t=4216000 addr=553b544 data=3d847def
-TXN dp_rd_rsp response t=4216000 aux=c data=3d847def
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 4221 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN wb read t=3598000 addr=ab7d564 bte=0 cti=0
+TXN req request t=3599000 addr=ab7d564 data=81355c53 mask=f we=0
+TXN sched_deq grant t=3599000 idx=6
+TXN sched_cmd command t=3599000 aux=b bank=6 col=380 row=2e47 type=2 we=0
+TXN cq_enq enqueue t=3599000 bank=2 col=2b0 row=2adf we=0
+TXN cq_deq dequeue t=3599000 idx=6
+TXN sched_in command t=3599000 aux=b bank=6 col=380 row=2e47 type=2 we=0
+TXN dp_cmd read t=3604000 aux=b
+TXN ddr_cmd command t=3604000 addr=380 bank=6 cmd=5
+TXN sched_cmd command t=3614000 aux=c bank=2 col=2b0 row=2adf type=4 we=0
+TXN sched_in command t=3614000 aux=c bank=2 col=2b0 row=2adf type=4 we=0
+TXN ddr_cmd command t=3619000 addr=0 bank=2 cmd=2
+TXN sched_cmd command t=3624000 aux=9 bank=0 col=318 row=582c type=1 we=0
+TXN ddr_rd_beat beat t=3624000 data=7c7f
+TXN sched_in command t=3624000 aux=9 bank=0 col=318 row=582c type=1 we=0
+TXN ddr_rd_beat beat t=3629000 data=9d9d
+TXN ddr_cmd command t=3629000 addr=582c bank=0 cmd=3
+TXN sched_cmd command t=3634000 aux=9 bank=3 col=a0 row=3ac7 type=4 we=0
+TXN sched_in command t=3634000 aux=9 bank=3 col=a0 row=3ac7 type=4 we=0
+TXN wb_rsp read_data t=3639000 addr=1056bcd0 data=9d9d7c7f
+TXN dp_rd_rsp response t=3639000 aux=b data=9d9d7c7f
+TXN ddr_cmd command t=3639000 addr=0 bank=3 cmd=2
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3642500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=4222000 idx=3
-TXN sched_cmd command t=4222000 aux=c bank=2 col=2b0 row=2adf type=2 we=0
-TXN cq_deq dequeue t=4222000 idx=3
-TXN sched_in command t=4222000 aux=c bank=2 col=2b0 row=2adf type=2 we=0
-TXN dp_cmd read t=4228000 aux=c
-TXN ddr_cmd command t=4228000 addr=2b0 bank=2 cmd=5
-TXN sched_cmd command t=4252000 aux=9 bank=3 col=a0 row=3ac7 type=1 we=0
-TXN ddr_rd_beat beat t=4252000 data=7d4f
-TXN sched_in command t=4252000 aux=9 bank=3 col=a0 row=3ac7 type=1 we=0
-TXN sched_cmd command t=4258000 aux=e bank=1 col=3b8 row=84f type=4 we=0
-TXN ddr_rd_beat beat t=4258000 data=5d8e
-TXN sched_in command t=4258000 aux=e bank=1 col=3b8 row=84f type=4 we=0
-TXN ddr_cmd command t=4258000 addr=3ac7 bank=3 cmd=3
-TXN ddr_cmd command t=4264000 addr=0 bank=1 cmd=2
-TXN wb_rsp read_data t=4270000 addr=1117594 data=5d8e7d4f
-TXN dp_rd_rsp response t=4270000 aux=c data=5d8e7d4f
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 4275 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN sched_deq grant t=3649000 idx=5
+TXN sched_cmd command t=3649000 aux=a bank=5 col=2f0 row=2d5d type=2 we=0
+TXN cq_deq dequeue t=3649000 idx=5
+TXN sched_in command t=3649000 aux=a bank=5 col=2f0 row=2d5d type=2 we=0
+TXN dp_cmd read t=3654000 aux=a
+TXN ddr_cmd command t=3654000 addr=2f0 bank=5 cmd=5
+TXN sched_cmd command t=3674000 aux=c bank=1 col=210 row=1773 type=1 we=0
+TXN ddr_rd_beat beat t=3674000 data=7d0f
+TXN sched_in command t=3674000 aux=c bank=1 col=210 row=1773 type=1 we=0
+TXN ddr_rd_beat beat t=3679000 data=4d8a
+TXN ddr_cmd command t=3679000 addr=1773 bank=1 cmd=3
+TXN sched_cmd command t=3684000 aux=b bank=6 col=50 row=11cb type=4 we=0
+TXN sched_in command t=3684000 aux=b bank=6 col=50 row=11cb type=4 we=0
+TXN wb_rsp read_data t=3689000 addr=213cf74 data=4d8a7d0f
+TXN dp_rd_rsp response t=3689000 aux=a data=4d8a7d0f
+TXN ddr_cmd command t=3689000 addr=0 bank=6 cmd=2
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3692500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=4276000 idx=1
-TXN sched_cmd command t=4276000 aux=b bank=6 col=50 row=11cb type=2 we=0
-TXN cq_deq dequeue t=4276000 idx=1
-TXN sched_in command t=4276000 aux=b bank=6 col=50 row=11cb type=2 we=0
-TXN dp_cmd read t=4282000 aux=b
-TXN ddr_cmd command t=4282000 addr=50 bank=6 cmd=5
-TXN sched_cmd command t=4306000 aux=9 bank=0 col=318 row=582c type=1 we=0
-TXN ddr_rd_beat beat t=4306000 data=7faf
-TXN sched_in command t=4306000 aux=9 bank=0 col=318 row=582c type=1 we=0
-TXN ddr_rd_beat beat t=4312000 data=fda0
-TXN ddr_cmd command t=4312000 addr=582c bank=0 cmd=3
-TXN wb_rsp read_data t=4324000 addr=1cfdeea0 data=fda07faf
-TXN dp_rd_rsp response t=4324000 aux=b data=fda07faf
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 4329 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN sched_deq grant t=3699000 idx=0
+TXN sched_cmd command t=3699000 aux=9 bank=0 col=318 row=582c type=2 we=0
+TXN cq_deq dequeue t=3699000 idx=0
+TXN sched_in command t=3699000 aux=9 bank=0 col=318 row=582c type=2 we=0
+TXN dp_cmd read t=3704000 aux=9
+TXN ddr_cmd command t=3704000 addr=318 bank=0 cmd=5
+TXN sched_cmd command t=3724000 aux=c bank=2 col=2b0 row=2adf type=1 we=0
+TXN ddr_rd_beat beat t=3724000 data=fce7
+TXN sched_in command t=3724000 aux=c bank=2 col=2b0 row=2adf type=1 we=0
+TXN ddr_rd_beat beat t=3729000 data=c594
+TXN ddr_cmd command t=3729000 addr=2adf bank=2 cmd=3
+TXN sched_cmd command t=3734000 aux=2 bank=5 col=350 row=73f7 type=4 we=0
+TXN sched_in command t=3734000 aux=2 bank=5 col=350 row=73f7 type=4 we=0
+TXN wb_rsp read_data t=3739000 addr=4824f48 data=c594fce7
+TXN dp_rd_rsp response t=3739000 aux=9 data=c594fce7
+TXN ddr_cmd command t=3739000 addr=0 bank=5 cmd=2
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3742500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=4330000 idx=4
-TXN sched_cmd command t=4330000 aux=9 bank=3 col=a0 row=3ac7 type=2 we=0
-TXN cq_deq dequeue t=4330000 idx=4
-TXN sched_in command t=4330000 aux=9 bank=3 col=a0 row=3ac7 type=2 we=0
-TXN dp_cmd read t=4336000 aux=9
-TXN ddr_cmd command t=4336000 addr=a0 bank=3 cmd=5
-TXN sched_cmd command t=4360000 aux=d bank=7 col=268 row=415a type=1 we=0
-TXN ddr_rd_beat beat t=4360000 data=7f5f
-TXN sched_in command t=4360000 aux=d bank=7 col=268 row=415a type=1 we=0
-TXN sched_cmd command t=4366000 aux=0 bank=6 col=2a0 row=154e type=4 we=0
-TXN ddr_rd_beat beat t=4366000 data=9daf
-TXN sched_in command t=4366000 aux=0 bank=6 col=2a0 row=154e type=4 we=0
-TXN ddr_cmd command t=4366000 addr=415a bank=7 cmd=3
-TXN ddr_cmd command t=4372000 addr=0 bank=6 cmd=2
-TXN wb_rsp read_data t=4378000 addr=ee8cf4 data=9daf7f5f
-TXN dp_rd_rsp response t=4378000 aux=9 data=9daf7f5f
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 4383 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN sched_deq grant t=3749000 idx=7
+TXN sched_cmd command t=3749000 aux=c bank=1 col=210 row=1773 type=2 we=0
+TXN cq_deq dequeue t=3749000 idx=7
+TXN sched_in command t=3749000 aux=c bank=1 col=210 row=1773 type=2 we=0
+TXN dp_cmd read t=3754000 aux=c
+TXN ddr_cmd command t=3754000 addr=210 bank=1 cmd=5
+TXN sched_cmd command t=3774000 aux=b bank=6 col=50 row=11cb type=1 we=0
+TXN ddr_rd_beat beat t=3774000 data=7def
+TXN sched_in command t=3774000 aux=b bank=6 col=50 row=11cb type=1 we=0
+TXN ddr_rd_beat beat t=3779000 data=3d84
+TXN ddr_cmd command t=3779000 addr=11cb bank=6 cmd=3
+TXN sched_cmd command t=3784000 aux=a bank=0 col=258 row=4a50 type=4 we=0
+TXN sched_in command t=3784000 aux=a bank=0 col=258 row=4a50 type=4 we=0
+TXN wb_rsp read_data t=3789000 addr=553b544 data=3d847def
+TXN dp_rd_rsp response t=3789000 aux=c data=3d847def
+TXN ddr_cmd command t=3789000 addr=0 bank=0 cmd=2
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3792500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=4384000 idx=2
-TXN sched_cmd command t=4384000 aux=9 bank=0 col=318 row=582c type=2 we=0
-TXN cq_deq dequeue t=4384000 idx=2
-TXN sched_in command t=4384000 aux=9 bank=0 col=318 row=582c type=2 we=0
-TXN dp_cmd read t=4390000 aux=9
-TXN ddr_cmd command t=4390000 addr=318 bank=0 cmd=5
-TXN sched_cmd command t=4414000 aux=e bank=1 col=3b8 row=84f type=1 we=0
-TXN ddr_rd_beat beat t=4414000 data=fce7
-TXN sched_in command t=4414000 aux=e bank=1 col=3b8 row=84f type=1 we=0
-TXN ddr_rd_beat beat t=4420000 data=c594
-TXN ddr_cmd command t=4420000 addr=84f bank=1 cmd=3
-TXN wb_rsp read_data t=4432000 addr=11ff2058 data=c594fce7
-TXN dp_rd_rsp response t=4432000 aux=9 data=c594fce7
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 4437 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN sched_deq grant t=3799000 idx=1
+TXN sched_cmd command t=3799000 aux=c bank=2 col=2b0 row=2adf type=2 we=0
+TXN cq_deq dequeue t=3799000 idx=1
+TXN sched_in command t=3799000 aux=c bank=2 col=2b0 row=2adf type=2 we=0
+TXN dp_cmd read t=3804000 aux=c
+TXN ddr_cmd command t=3804000 addr=2b0 bank=2 cmd=5
+TXN sched_cmd command t=3824000 aux=9 bank=3 col=a0 row=3ac7 type=1 we=0
+TXN ddr_rd_beat beat t=3824000 data=7d4f
+TXN sched_in command t=3824000 aux=9 bank=3 col=a0 row=3ac7 type=1 we=0
+TXN ddr_rd_beat beat t=3829000 data=5d8e
+TXN ddr_cmd command t=3829000 addr=3ac7 bank=3 cmd=3
+TXN sched_cmd command t=3834000 aux=e bank=1 col=3b8 row=84f type=4 we=0
+TXN sched_in command t=3834000 aux=e bank=1 col=3b8 row=84f type=4 we=0
+TXN wb_rsp read_data t=3839000 addr=1117594 data=5d8e7d4f
+TXN dp_rd_rsp response t=3839000 aux=c data=5d8e7d4f
+TXN ddr_cmd command t=3839000 addr=0 bank=1 cmd=2
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3842500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=4438000 idx=8
-TXN sched_cmd command t=4438000 aux=d bank=7 col=268 row=415a type=2 we=0
-TXN cq_deq dequeue t=4438000 idx=8
-TXN sched_in command t=4438000 aux=d bank=7 col=268 row=415a type=2 we=0
-TXN dp_cmd read t=4444000 aux=d
-TXN ddr_cmd command t=4444000 addr=268 bank=7 cmd=5
-TXN sched_cmd command t=4468000 aux=0 bank=6 col=2a0 row=154e type=1 we=0
-TXN ddr_rd_beat beat t=4468000 data=fd97
-TXN sched_in command t=4468000 aux=0 bank=6 col=2a0 row=154e type=1 we=0
-TXN ddr_rd_beat beat t=4474000 data=7583
-TXN ddr_cmd command t=4474000 addr=154e bank=6 cmd=3
-TXN wb_rsp read_data t=4486000 addr=ff8c740 data=7583fd97
-TXN dp_rd_rsp response t=4486000 aux=d data=7583fd97
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 4491 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN sched_deq grant t=3849000 idx=3
+TXN sched_cmd command t=3849000 aux=b bank=6 col=50 row=11cb type=2 we=0
+TXN cq_deq dequeue t=3849000 idx=3
+TXN sched_in command t=3849000 aux=b bank=6 col=50 row=11cb type=2 we=0
+TXN dp_cmd read t=3854000 aux=b
+TXN ddr_cmd command t=3854000 addr=50 bank=6 cmd=5
+TXN sched_cmd command t=3874000 aux=a bank=0 col=258 row=4a50 type=1 we=0
+TXN ddr_rd_beat beat t=3874000 data=7faf
+TXN sched_in command t=3874000 aux=a bank=0 col=258 row=4a50 type=1 we=0
+TXN ddr_rd_beat beat t=3879000 data=fda0
+TXN ddr_cmd command t=3879000 addr=4a50 bank=0 cmd=3
+TXN wb_rsp read_data t=3889000 addr=1cfdeea0 data=fda07faf
+TXN dp_rd_rsp response t=3889000 aux=b data=fda07faf
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3892500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=4492000 idx=9
-TXN sched_cmd command t=4492000 aux=e bank=1 col=3b8 row=84f type=2 we=0
-TXN cq_deq dequeue t=4492000 idx=9
-TXN sched_in command t=4492000 aux=e bank=1 col=3b8 row=84f type=2 we=0
-TXN dp_cmd read t=4498000 aux=e
-TXN ddr_cmd command t=4498000 addr=3b8 bank=1 cmd=5
-TXN sched_cmd command t=4522000 aux=2 bank=5 col=350 row=73f7 type=1 we=0
-TXN ddr_rd_beat beat t=4522000 data=7c47
-TXN sched_in command t=4522000 aux=2 bank=5 col=350 row=73f7 type=1 we=0
-TXN ddr_rd_beat beat t=4528000 data=dd9e
-TXN ddr_cmd command t=4528000 addr=73f7 bank=5 cmd=3
-TXN wb_rsp read_data t=4540000 addr=11316d1c data=dd9e7c47
-TXN dp_rd_rsp response t=4540000 aux=e data=dd9e7c47
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 4545 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN sched_deq grant t=3899000 idx=4
+TXN sched_cmd command t=3899000 aux=9 bank=3 col=a0 row=3ac7 type=2 we=0
+TXN cq_deq dequeue t=3899000 idx=4
+TXN sched_in command t=3899000 aux=9 bank=3 col=a0 row=3ac7 type=2 we=0
+TXN dp_cmd read t=3904000 aux=9
+TXN ddr_cmd command t=3904000 addr=a0 bank=3 cmd=5
+TXN sched_cmd command t=3924000 aux=d bank=7 col=268 row=415a type=1 we=0
+TXN ddr_rd_beat beat t=3924000 data=7f5f
+TXN sched_in command t=3924000 aux=d bank=7 col=268 row=415a type=1 we=0
+TXN ddr_rd_beat beat t=3929000 data=9daf
+TXN ddr_cmd command t=3929000 addr=415a bank=7 cmd=3
+TXN sched_cmd command t=3934000 aux=0 bank=6 col=2a0 row=154e type=4 we=0
+TXN sched_in command t=3934000 aux=0 bank=6 col=2a0 row=154e type=4 we=0
+TXN wb_rsp read_data t=3939000 addr=ee8cf4 data=9daf7f5f
+TXN dp_rd_rsp response t=3939000 aux=9 data=9daf7f5f
+TXN ddr_cmd command t=3939000 addr=0 bank=6 cmd=2
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3942500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=4546000 idx=b
-TXN sched_cmd command t=4546000 aux=0 bank=6 col=2a0 row=154e type=2 we=0
-TXN cq_deq dequeue t=4546000 idx=b
-TXN sched_in command t=4546000 aux=0 bank=6 col=2a0 row=154e type=2 we=0
-TXN dp_cmd read t=4552000 aux=0
-TXN ddr_cmd command t=4552000 addr=2a0 bank=6 cmd=5
-TXN sched_cmd command t=4576000 aux=4 bank=4 col=28 row=47fc type=1 we=0
-TXN ddr_rd_beat beat t=4576000 data=fd5f
-TXN sched_in command t=4576000 aux=4 bank=4 col=28 row=47fc type=1 we=0
-TXN sched_cmd command t=4582000 aux=f bank=1 col=3a0 row=1209 type=4 we=0
-TXN ddr_rd_beat beat t=4582000 data=d58f
-TXN sched_in command t=4582000 aux=f bank=1 col=3a0 row=1209 type=4 we=0
-TXN ddr_cmd command t=4582000 addr=47fc bank=4 cmd=3
-TXN ddr_cmd command t=4588000 addr=0 bank=1 cmd=2
-TXN wb_rsp read_data t=4594000 addr=701dc90 data=d58ffd5f
-TXN dp_rd_rsp response t=4594000 aux=0 data=d58ffd5f
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 4599 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN sched_deq grant t=3949000 idx=2
+TXN sched_cmd command t=3949000 aux=a bank=0 col=258 row=4a50 type=2 we=0
+TXN cq_deq dequeue t=3949000 idx=2
+TXN sched_in command t=3949000 aux=a bank=0 col=258 row=4a50 type=2 we=0
+TXN dp_cmd read t=3954000 aux=a
+TXN ddr_cmd command t=3954000 addr=258 bank=0 cmd=5
+TXN sched_cmd command t=3974000 aux=e bank=1 col=3b8 row=84f type=1 we=0
+TXN ddr_rd_beat beat t=3974000 data=fda7
+TXN sched_in command t=3974000 aux=e bank=1 col=3b8 row=84f type=1 we=0
+TXN ddr_rd_beat beat t=3979000 data=2580
+TXN ddr_cmd command t=3979000 addr=84f bank=1 cmd=3
+TXN wb_rsp read_data t=3989000 addr=11ff2058 data=2580fda7
+TXN dp_rd_rsp response t=3989000 aux=a data=2580fda7
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 3992500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=4600000 idx=d
-TXN sched_cmd command t=4600000 aux=2 bank=5 col=350 row=73f7 type=2 we=0
-TXN cq_deq dequeue t=4600000 idx=d
-TXN sched_in command t=4600000 aux=2 bank=5 col=350 row=73f7 type=2 we=0
-TXN dp_cmd read t=4606000 aux=2
-TXN ddr_cmd command t=4606000 addr=350 bank=5 cmd=5
-TXN ddr_rd_beat beat t=4630000 data=7caf
-TXN sched_cmd command t=4636000 aux=1 bank=6 col=2c8 row=445 type=4 we=0
-TXN ddr_rd_beat beat t=4636000 data=1d90
-TXN sched_in command t=4636000 aux=1 bank=6 col=2c8 row=445 type=4 we=0
-TXN ddr_cmd command t=4642000 addr=0 bank=6 cmd=2
-TXN wb_rsp read_data t=4648000 addr=bd0a738 data=1d907caf
-TXN dp_rd_rsp response t=4648000 aux=2 data=1d907caf
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 4653 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN sched_deq grant t=3999000 idx=8
+TXN sched_cmd command t=3999000 aux=d bank=7 col=268 row=415a type=2 we=0
+TXN cq_deq dequeue t=3999000 idx=8
+TXN sched_in command t=3999000 aux=d bank=7 col=268 row=415a type=2 we=0
+TXN dp_cmd read t=4004000 aux=d
+TXN ddr_cmd command t=4004000 addr=268 bank=7 cmd=5
+TXN sched_cmd command t=4024000 aux=0 bank=6 col=2a0 row=154e type=1 we=0
+TXN ddr_rd_beat beat t=4024000 data=fd97
+TXN sched_in command t=4024000 aux=0 bank=6 col=2a0 row=154e type=1 we=0
+TXN ddr_rd_beat beat t=4029000 data=7583
+TXN ddr_cmd command t=4029000 addr=154e bank=6 cmd=3
+TXN wb_rsp read_data t=4039000 addr=ff8c740 data=7583fd97
+TXN dp_rd_rsp response t=4039000 aux=d data=7583fd97
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 4042500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=4654000 idx=f
-TXN sched_cmd command t=4654000 aux=4 bank=4 col=28 row=47fc type=2 we=0
-TXN cq_deq dequeue t=4654000 idx=f
-TXN sched_in command t=4654000 aux=4 bank=4 col=28 row=47fc type=2 we=0
-TXN sched_cmd command t=4660000 aux=f bank=1 col=3a0 row=1209 type=1 we=0
-TXN dp_cmd read t=4660000 aux=4
-TXN sched_in command t=4660000 aux=f bank=1 col=3a0 row=1209 type=1 we=0
-TXN ddr_cmd command t=4660000 addr=28 bank=4 cmd=5
-TXN ddr_cmd command t=4666000 addr=1209 bank=1 cmd=3
-TXN ddr_rd_beat beat t=4684000 data=ffd7
-TXN ddr_rd_beat beat t=4690000 data=45a7
-TXN wb_rsp read_data t=4702000 addr=160b0630 data=45a7ffd7
-TXN dp_rd_rsp response t=4702000 aux=4 data=45a7ffd7
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 4707 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN sched_deq grant t=4049000 idx=9
+TXN sched_cmd command t=4049000 aux=e bank=1 col=3b8 row=84f type=2 we=0
+TXN cq_deq dequeue t=4049000 idx=9
+TXN sched_in command t=4049000 aux=e bank=1 col=3b8 row=84f type=2 we=0
+TXN dp_cmd read t=4054000 aux=e
+TXN ddr_cmd command t=4054000 addr=3b8 bank=1 cmd=5
+TXN sched_cmd command t=4074000 aux=2 bank=5 col=350 row=73f7 type=1 we=0
+TXN ddr_rd_beat beat t=4074000 data=7c47
+TXN sched_in command t=4074000 aux=2 bank=5 col=350 row=73f7 type=1 we=0
+TXN ddr_rd_beat beat t=4079000 data=dd9e
+TXN ddr_cmd command t=4079000 addr=73f7 bank=5 cmd=3
+TXN wb_rsp read_data t=4089000 addr=11316d1c data=dd9e7c47
+TXN dp_rd_rsp response t=4089000 aux=e data=dd9e7c47
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 4092500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_cmd command t=4714000 aux=1 bank=6 col=2c8 row=445 type=1 we=0
-TXN sched_in command t=4714000 aux=1 bank=6 col=2c8 row=445 type=1 we=0
-TXN ddr_cmd command t=4720000 addr=445 bank=6 cmd=3
-TXN sched_deq grant t=4738000 idx=a
-TXN sched_cmd command t=4738000 aux=f bank=1 col=3a0 row=1209 type=2 we=0
-TXN cq_deq dequeue t=4738000 idx=a
-TXN sched_in command t=4738000 aux=f bank=1 col=3a0 row=1209 type=2 we=0
-TXN dp_cmd read t=4744000 aux=f
-TXN ddr_cmd command t=4744000 addr=3a0 bank=1 cmd=5
-TXN ddr_rd_beat beat t=4768000 data=7c5f
-TXN ddr_rd_beat beat t=4774000 data=ed9f
-TXN wb_rsp read_data t=4786000 addr=129404b4 data=ed9f7c5f
-TXN dp_rd_rsp response t=4786000 aux=f data=ed9f7c5f
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 4791 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN sched_deq grant t=4099000 idx=b
+TXN sched_cmd command t=4099000 aux=0 bank=6 col=2a0 row=154e type=2 we=0
+TXN cq_deq dequeue t=4099000 idx=b
+TXN sched_in command t=4099000 aux=0 bank=6 col=2a0 row=154e type=2 we=0
+TXN dp_cmd read t=4104000 aux=0
+TXN ddr_cmd command t=4104000 addr=2a0 bank=6 cmd=5
+TXN sched_cmd command t=4124000 aux=4 bank=4 col=28 row=47fc type=1 we=0
+TXN ddr_rd_beat beat t=4124000 data=fd5f
+TXN sched_in command t=4124000 aux=4 bank=4 col=28 row=47fc type=1 we=0
+TXN ddr_rd_beat beat t=4129000 data=d58f
+TXN ddr_cmd command t=4129000 addr=47fc bank=4 cmd=3
+TXN sched_cmd command t=4134000 aux=f bank=1 col=3a0 row=1209 type=4 we=0
+TXN sched_in command t=4134000 aux=f bank=1 col=3a0 row=1209 type=4 we=0
+TXN wb_rsp read_data t=4139000 addr=701dc90 data=d58ffd5f
+TXN dp_rd_rsp response t=4139000 aux=0 data=d58ffd5f
+TXN ddr_cmd command t=4139000 addr=0 bank=1 cmd=2
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 4142500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_deq grant t=4792000 idx=c
-TXN sched_cmd command t=4792000 aux=1 bank=6 col=2c8 row=445 type=2 we=0
-TXN cq_deq dequeue t=4792000 idx=c
-TXN sched_in command t=4792000 aux=1 bank=6 col=2c8 row=445 type=2 we=0
-TXN dp_cmd read t=4798000 aux=1
-TXN ddr_cmd command t=4798000 addr=2c8 bank=6 cmd=5
-TXN ddr_rd_beat beat t=4822000 data=7d37
-TXN sched_cmd command t=4828000 aux=3 bank=1 col=278 row=3ba type=4 we=0
-TXN ddr_rd_beat beat t=4828000 data=8d89
-TXN sched_in command t=4828000 aux=3 bank=1 col=278 row=3ba type=4 we=0
-TXN ddr_cmd command t=4834000 addr=0 bank=1 cmd=2
-TXN wb_rsp read_data t=4840000 addr=472f0a0 data=8d897d37
-TXN dp_rd_rsp response t=4840000 aux=1 data=8d897d37
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 4845 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN sched_deq grant t=4149000 idx=d
+TXN sched_cmd command t=4149000 aux=2 bank=5 col=350 row=73f7 type=2 we=0
+TXN cq_deq dequeue t=4149000 idx=d
+TXN sched_in command t=4149000 aux=2 bank=5 col=350 row=73f7 type=2 we=0
+TXN dp_cmd read t=4154000 aux=2
+TXN ddr_cmd command t=4154000 addr=350 bank=5 cmd=5
+TXN ddr_rd_beat beat t=4174000 data=7caf
+TXN ddr_rd_beat beat t=4179000 data=1d90
+TXN sched_cmd command t=4184000 aux=1 bank=6 col=2c8 row=445 type=4 we=0
+TXN sched_in command t=4184000 aux=1 bank=6 col=2c8 row=445 type=4 we=0
+TXN wb_rsp read_data t=4189000 addr=bd0a738 data=1d907caf
+TXN dp_rd_rsp response t=4189000 aux=2 data=1d907caf
+TXN ddr_cmd command t=4189000 addr=0 bank=6 cmd=2
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 4192500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN sched_cmd command t=4906000 aux=3 bank=1 col=278 row=3ba type=1 we=0
-TXN sched_in command t=4906000 aux=3 bank=1 col=278 row=3ba type=1 we=0
-TXN ddr_cmd command t=4912000 addr=3ba bank=1 cmd=3
-TXN sched_deq grant t=4984000 idx=e
-TXN sched_cmd command t=4984000 aux=3 bank=1 col=278 row=3ba type=2 we=0
-TXN cq_deq dequeue t=4984000 idx=e
-TXN sched_in command t=4984000 aux=3 bank=1 col=278 row=3ba type=2 we=0
-TXN dp_cmd read t=4990000 aux=3
-TXN ddr_cmd command t=4990000 addr=278 bank=1 cmd=5
-TXN ddr_rd_beat beat t=5014000 data=fd87
-TXN ddr_rd_beat beat t=5020000 data=7582
-TXN wb_rsp read_data t=5032000 addr=ab7d564 data=7582fd87
-TXN dp_rd_rsp response t=5032000 aux=3 data=7582fd87
-xmsim: *E,ASRTST (./wb_port.sv,253): (time 5037 NS) Assertion chain_harness.u_wb_port.p_tag has failed
+TXN sched_deq grant t=4199000 idx=f
+TXN sched_cmd command t=4199000 aux=4 bank=4 col=28 row=47fc type=2 we=0
+TXN cq_deq dequeue t=4199000 idx=f
+TXN sched_in command t=4199000 aux=4 bank=4 col=28 row=47fc type=2 we=0
+TXN dp_cmd read t=4204000 aux=4
+TXN ddr_cmd command t=4204000 addr=28 bank=4 cmd=5
+TXN sched_cmd command t=4209000 aux=f bank=1 col=3a0 row=1209 type=1 we=0
+TXN sched_in command t=4209000 aux=f bank=1 col=3a0 row=1209 type=1 we=0
+TXN ddr_cmd command t=4214000 addr=1209 bank=1 cmd=3
+TXN ddr_rd_beat beat t=4224000 data=ffd7
+TXN ddr_rd_beat beat t=4229000 data=45a7
+TXN wb_rsp read_data t=4239000 addr=160b0630 data=45a7ffd7
+TXN dp_rd_rsp response t=4239000 aux=4 data=45a7ffd7
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 4242500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
 [WB-009] aux tag mismatch
-TXN refresh_req request t=7834000 pending=1 starve=0 urgent=0
-TXN refresh_level state t=7834000 pending=1 required=1 starve=0 urgent=0
-TXN csr_sts_level state t=7839000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
-TXN sched_cmd command t=7846000 aux=0 bank=0 col=0 row=0 type=4 we=0
-TXN sched_in command t=7846000 aux=0 bank=0 col=0 row=0 type=4 we=0
-TXN sched_cmd command t=7852000 aux=0 bank=1 col=0 row=0 type=4 we=0
-TXN sched_in command t=7852000 aux=0 bank=1 col=0 row=0 type=4 we=0
-TXN ddr_cmd command t=7852000 addr=0 bank=0 cmd=2
-TXN sched_cmd command t=7858000 aux=0 bank=2 col=0 row=0 type=4 we=0
-TXN sched_in command t=7858000 aux=0 bank=2 col=0 row=0 type=4 we=0
-TXN ddr_cmd command t=7858000 addr=0 bank=1 cmd=2
-TXN sched_cmd command t=7864000 aux=0 bank=3 col=0 row=0 type=4 we=0
-TXN sched_in command t=7864000 aux=0 bank=3 col=0 row=0 type=4 we=0
-TXN ddr_cmd command t=7864000 addr=0 bank=2 cmd=2
-TXN sched_cmd command t=7870000 aux=0 bank=4 col=0 row=0 type=4 we=0
-TXN sched_in command t=7870000 aux=0 bank=4 col=0 row=0 type=4 we=0
-TXN ddr_cmd command t=7870000 addr=0 bank=3 cmd=2
-TXN sched_cmd command t=7876000 aux=0 bank=5 col=0 row=0 type=4 we=0
-TXN sched_in command t=7876000 aux=0 bank=5 col=0 row=0 type=4 we=0
-TXN ddr_cmd command t=7876000 addr=0 bank=4 cmd=2
-TXN sched_cmd command t=7882000 aux=0 bank=6 col=0 row=0 type=4 we=0
-TXN sched_in command t=7882000 aux=0 bank=6 col=0 row=0 type=4 we=0
-TXN ddr_cmd command t=7882000 addr=0 bank=5 cmd=2
-TXN sched_cmd command t=7888000 aux=0 bank=7 col=0 row=0 type=4 we=0
-TXN sched_in command t=7888000 aux=0 bank=7 col=0 row=0 type=4 we=0
-TXN ddr_cmd command t=7888000 addr=0 bank=6 cmd=2
-TXN ddr_cmd command t=7894000 addr=0 bank=7 cmd=2
-TXN sched_cmd command t=7966000 aux=0 bank=0 col=0 row=0 type=5 we=0
-TXN refresh_ack ack t=7966000 pending=1
-TXN sched_in command t=7966000 aux=0 bank=0 col=0 row=0 type=5 we=0
-TXN refresh_level state t=7972000 pending=0 required=0 starve=0 urgent=0
-TXN ddr_cmd command t=7972000 addr=0 bank=0 cmd=1
-TXN csr_sts_level state t=7977000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
+TXN sched_cmd command t=4259000 aux=1 bank=6 col=2c8 row=445 type=1 we=0
+TXN sched_in command t=4259000 aux=1 bank=6 col=2c8 row=445 type=1 we=0
+TXN ddr_cmd command t=4264000 addr=445 bank=6 cmd=3
+TXN sched_deq grant t=4284000 idx=a
+TXN sched_cmd command t=4284000 aux=f bank=1 col=3a0 row=1209 type=2 we=0
+TXN cq_deq dequeue t=4284000 idx=a
+TXN sched_in command t=4284000 aux=f bank=1 col=3a0 row=1209 type=2 we=0
+TXN dp_cmd read t=4289000 aux=f
+TXN ddr_cmd command t=4289000 addr=3a0 bank=1 cmd=5
+TXN ddr_rd_beat beat t=4309000 data=7c5f
+TXN ddr_rd_beat beat t=4314000 data=ed9f
+TXN wb_rsp read_data t=4324000 addr=129404b4 data=ed9f7c5f
+TXN dp_rd_rsp response t=4324000 aux=f data=ed9f7c5f
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 4327500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN sched_deq grant t=4334000 idx=c
+TXN sched_cmd command t=4334000 aux=1 bank=6 col=2c8 row=445 type=2 we=0
+TXN cq_deq dequeue t=4334000 idx=c
+TXN sched_in command t=4334000 aux=1 bank=6 col=2c8 row=445 type=2 we=0
+TXN dp_cmd read t=4339000 aux=1
+TXN ddr_cmd command t=4339000 addr=2c8 bank=6 cmd=5
+TXN ddr_rd_beat beat t=4359000 data=7d37
+TXN ddr_rd_beat beat t=4364000 data=8d89
+TXN sched_cmd command t=4369000 aux=3 bank=1 col=278 row=3ba type=4 we=0
+TXN sched_in command t=4369000 aux=3 bank=1 col=278 row=3ba type=4 we=0
+TXN wb_rsp read_data t=4374000 addr=472f0a0 data=8d897d37
+TXN dp_rd_rsp response t=4374000 aux=1 data=8d897d37
+TXN ddr_cmd command t=4374000 addr=0 bank=1 cmd=2
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 4377500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
+TXN sched_cmd command t=4444000 aux=3 bank=1 col=278 row=3ba type=1 we=0
+TXN sched_in command t=4444000 aux=3 bank=1 col=278 row=3ba type=1 we=0
+TXN ddr_cmd command t=4449000 addr=3ba bank=1 cmd=3
+TXN sched_deq grant t=4519000 idx=e
+TXN sched_cmd command t=4519000 aux=3 bank=1 col=278 row=3ba type=2 we=0
+TXN cq_deq dequeue t=4519000 idx=e
+TXN sched_in command t=4519000 aux=3 bank=1 col=278 row=3ba type=2 we=0
+TXN dp_cmd read t=4524000 aux=3
+TXN ddr_cmd command t=4524000 addr=278 bank=1 cmd=5
+TXN ddr_rd_beat beat t=4544000 data=fd87
+TXN ddr_rd_beat beat t=4549000 data=7582
+TXN wb_rsp read_data t=4559000 addr=ab7d564 data=7582fd87
+TXN dp_rd_rsp response t=4559000 aux=3 data=7582fd87
+xmsim: *E,ASRTST (./wb_port.sv,253): (time 4562500 PS) Assertion chain_harness.u_wb_port.p_tag has failed
+[WB-009] aux tag mismatch
 HARNESS_DONE
-Simulation complete via $finish(1) at time 8733 NS + 0
+Simulation complete via $finish(1) at time 7642500 PS + 0
 ./chain_harness.sv:452     $finish;
 xcelium> exit
 xmsim: *W,CGDEFN: Default name "bank_tracker_fcov#(32'h00000001).cg_scheduler_inst" will be generated for covergroup instance "chain_harness.u_bank_tracker.u_bank_tracker_fcov.cg_scheduler_inst@3_1" as the name of the covergroup instance is not specified explicitly: ./bank_tracker_fcov.sv, 34.
@@ -2133,6 +2105,6 @@ coverage setup:
   Coverage database dumped with the set_code_fine_grained_merging command during elaboration.
 
 coverage files:
-  model(design data) :  ./cov_work/scope/icc_188dbb0b_242e9920.ucm (reused)
-  data               :  ./cov_work/scope/path_02_read_cmd/icc_188dbb0b_242e9920.ucd
-TOOL:	xrun	24.03-s013: Exiting on Nov 05, 2026 at 11:14:19 CST  (total: 00:00:03)
+  model(design data) :  ./cov_work/scope/icc_57db1847_73b6b03c.ucm (reused)
+  data               :  ./cov_work/scope/path_02_read_cmd/icc_57db1847_73b6b03c.ucd
+TOOL:	xrun	24.03-s013: Exiting on Nov 05, 2026 at 11:43:51 CST  (total: 00:00:01)

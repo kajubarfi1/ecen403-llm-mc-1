@@ -1,8 +1,10 @@
-TOOL:	xrun	24.03-s013: Started on Nov 05, 2026 at 11:14:22 CST
+TOOL:	xrun	24.03-s013: Started on Nov 05, 2026 at 11:43:54 CST
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xrun: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
 xrun: 24.03-s013: (c) Copyright 1995-2025 Cadence Design Systems, Inc.
+*WARNING* X Window Display Initialization failure
+*WARNING* (DISPLAY "")
 xrun: *N,CLEAN: Removing existing directory ./xcelium.d.
 DEFINE std       ./STD
 |
@@ -142,8 +144,6 @@ xrun: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,13): c
 DEFINE cds_spicelib ./CDS_SPICELIB
 |
 xrun: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,14): cds.lib Invalid path '/opt/coe/cadence/XCELIUM240/tools/inca/files/CDS_SPICELIB' (cds.lib command ignored).
-*WARNING* X Window Display Initialization failure
-*WARNING* (DISPLAY "")
 DEFINE cds_amsfunctions ./CDS_AMSFUNCTIONS
 |
 xrun: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,15): cds.lib Invalid path '/opt/coe/cadence/XCELIUM240/tools/inca/files/CDS_AMSFUNCTIONS' (cds.lib command ignored).
@@ -611,8 +611,8 @@ xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environm
 		worklib.chain_harness:sv <0x62c53158>
 			streams:  92, words: 26033
 		worklib.config_regs:sv <0x73d4e486>
-			streams:  64, words: 58861
-		worklib.init_fsm:sv <0x2f34dd27>
+			streams:  64, words: 58855
+		worklib.init_fsm:sv <0x5bff11a7>
 			streams:  23, words: 29360
 		worklib.refresh_ctrl:sv <0x3510d65f>
 			streams:  23, words: 12929
@@ -703,155 +703,86 @@ TXN csr_rsp reset t=0
 TXN csr reset t=0
 TXN cfg_timing reset t=0
 TXN cfg_refresh reset t=0
-TXN init_cmd command t=700210000 addr=210 bank=2 cmd=0
-TXN init_cmd command t=700222000 addr=0 bank=3 cmd=0
-TXN init_cmd command t=700234000 addr=4 bank=1 cmd=0
-TXN init_cmd command t=700246000 addr=1b24 bank=0 cmd=0
-TXN init_cmd command t=700270000 addr=400 bank=0 cmd=6
-TXN init_status done t=701044000 fail=0 state=e
-TXN csr_sts_level state t=701049000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=0 self_refresh=0
-TXN refresh_req request t=701056000 pending=1 starve=0 urgent=0
-TXN refresh_level state t=701056000 pending=1 required=1 starve=0 urgent=0
-TXN csr_sts_level state t=701061000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=1 self_refresh=0
-TXN refresh_level state t=708856000 pending=2 required=1 starve=0 urgent=0
-TXN csr_sts_level state t=708861000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=2 self_refresh=0
-TXN refresh_level state t=716656000 pending=3 required=1 starve=0 urgent=0
-TXN csr_sts_level state t=716661000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=3 self_refresh=0
-TXN refresh_level state t=724456000 pending=4 required=1 starve=0 urgent=0
-TXN csr_sts_level state t=724461000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=4 self_refresh=0
-TXN refresh_level state t=732256000 pending=5 required=1 starve=0 urgent=0
-TXN csr_sts_level state t=732261000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=5 self_refresh=0
-TXN refresh_level state t=740056000 pending=6 required=1 starve=0 urgent=1
-TXN csr_sts_level state t=740061000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=6 self_refresh=0
-TXN refresh_level state t=747856000 pending=7 required=1 starve=0 urgent=1
-TXN csr_sts_level state t=747861000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=7 self_refresh=0
-TXN refresh_level state t=755656000 pending=8 required=1 starve=0 urgent=1
-TXN csr_sts_level state t=755661000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=8 self_refresh=0
-TXN refresh_level state t=763456000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=763456000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=763462000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=771256000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=771256000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=771262000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=779056000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=779056000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=779062000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=786856000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=786856000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=786862000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=794656000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=794656000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=794662000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=802456000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=802456000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=802462000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=810256000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=810256000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=810262000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=818056000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=818056000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=818062000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=825856000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=825856000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=825862000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=833656000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=833656000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=833662000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=841456000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=841456000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=841462000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=849256000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=849256000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=849262000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=857056000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=857056000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=857062000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=864856000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=864856000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=864862000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=872656000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=872656000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=872662000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=880456000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=880456000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=880462000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=888256000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=888256000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=888262000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=896056000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=896056000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=896062000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=903856000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=903856000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=903862000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=911656000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=911656000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=911662000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=919456000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=919456000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=919462000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=927256000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=927256000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=927262000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=935056000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=935056000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=935062000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=942856000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=942856000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=942862000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=950656000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=950656000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=950662000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=958456000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=958456000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=958462000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=966256000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=966256000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=966262000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=974056000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=974056000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=974062000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=981856000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=981856000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=981862000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=989656000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=989656000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=989662000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=997456000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=997456000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=997462000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=1005256000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=1005256000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=1005262000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=1013056000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=1013056000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=1013062000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=1020856000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=1020856000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=1020862000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=1028656000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=1028656000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=1028662000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=1036456000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=1036456000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=1036462000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=1044256000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=1044256000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=1044262000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=1052056000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=1052056000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=1052062000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=1059856000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=1059856000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=1059862000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=1067656000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=1067656000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=1067662000 pending=8 required=1 starve=0 urgent=1
-TXN refresh_level state t=1075456000 pending=8 required=1 starve=1 urgent=1
-TXN csr_sts event t=1075456000 ecc_ue=0 init_fail=0 ref_starve=1
-TXN refresh_level state t=1075462000 pending=8 required=1 starve=0 urgent=1
+TXN init_cmd command t=700194000 addr=218 bank=2 cmd=0
+TXN init_cmd command t=700204000 addr=0 bank=3 cmd=0
+TXN init_cmd command t=700214000 addr=4 bank=1 cmd=0
+TXN init_cmd command t=700224000 addr=1d34 bank=0 cmd=0
+TXN init_cmd command t=700244000 addr=400 bank=0 cmd=6
+TXN init_status done t=700889000 fail=0 state=e
+TXN csr_sts_level state t=700893000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=0 self_refresh=0
+TXN refresh_req request t=700899000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=700899000 pending=1 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=700903000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=1 self_refresh=0
+TXN refresh_level state t=708699000 pending=2 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=708703000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=2 self_refresh=0
+TXN refresh_level state t=716499000 pending=3 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=716503000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=3 self_refresh=0
+TXN refresh_level state t=724299000 pending=4 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=724303000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=4 self_refresh=0
+TXN refresh_level state t=732099000 pending=5 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=732103000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=5 self_refresh=0
+TXN refresh_level state t=739899000 pending=6 required=1 starve=0 urgent=1
+TXN csr_sts_level state t=739903000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=6 self_refresh=0
+TXN refresh_level state t=747699000 pending=7 required=1 starve=0 urgent=1
+TXN csr_sts_level state t=747703000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=7 self_refresh=0
+TXN refresh_level state t=755499000 pending=8 required=1 starve=0 urgent=1
+TXN csr_sts_level state t=755503000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=1 ref_pending=8 self_refresh=0
+TXN refresh_level state t=763299000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=763299000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=763304000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=771099000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=771099000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=771104000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=778899000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=778899000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=778904000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=786699000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=786699000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=786704000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=794499000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=794499000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=794504000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=802299000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=802299000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=802304000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=810099000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=810099000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=810104000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=817899000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=817899000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=817904000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=825699000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=825699000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=825704000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=833499000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=833499000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=833504000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=841299000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=841299000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=841304000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=849099000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=849099000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=849104000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=856899000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=856899000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=856904000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=864699000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=864699000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=864704000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=872499000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=872499000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=872504000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=880299000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=880299000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=880304000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=888099000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=888099000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=888104000 pending=8 required=1 starve=0 urgent=1
+TXN refresh_level state t=895899000 pending=8 required=1 starve=1 urgent=1
+TXN csr_sts event t=895899000 ecc_ue=0 init_fail=0 ref_starve=1
+TXN refresh_level state t=895904000 pending=8 required=1 starve=0 urgent=1
 HARNESS_DONE
-Simulation complete via $finish(1) at time 1080021 NS + 0
+Simulation complete via $finish(1) at time 900017500 PS + 0
 ./chain_harness.sv:194     $finish;
 xcelium> exit
 xmsim: *W,CGDEFN: Default name "config_regs_fcov#(32'h00000001).cg_csr_access_inst" will be generated for covergroup instance "chain_harness.u_config_regs.u_config_regs_fcov.cg_csr_access_inst@1_1" as the name of the covergroup instance is not specified explicitly: ./config_regs_fcov.sv, 120.
@@ -868,6 +799,6 @@ coverage setup:
   Coverage database dumped with the set_code_fine_grained_merging command during elaboration.
 
 coverage files:
-  model(design data) :  ./cov_work/scope/icc_4982bc30_679a287e.ucm (reused)
-  data               :  ./cov_work/scope/path_09_init_to_refresh/icc_4982bc30_679a287e.ucd
-TOOL:	xrun	24.03-s013: Exiting on Nov 05, 2026 at 11:14:24 CST  (total: 00:00:02)
+  model(design data) :  ./cov_work/scope/icc_28a3c6bd_0ea1fdab.ucm (reused)
+  data               :  ./cov_work/scope/path_09_init_to_refresh/icc_28a3c6bd_0ea1fdab.ucd
+TOOL:	xrun	24.03-s013: Exiting on Nov 05, 2026 at 11:43:55 CST  (total: 00:00:01)

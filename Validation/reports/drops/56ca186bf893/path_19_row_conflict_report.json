@@ -3,7 +3,7 @@
   "path": "path_19_row_conflict",
   "strategy": "invariant",
   "verdict": "pass",
-  "timestamp": "2026-11-05T11:14:40.454356",
+  "timestamp": "2026-11-05T11:44:06.678029",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,9 +21,9 @@
   "window_cycles": 400,
   "coverage_collected": true,
   "rtl_drop": {
-    "git_head": "ed67fffad6b8",
-    "drop_id": "ed67fffad6b8",
-    "design_id": "5de6672333b1",
+    "git_head": "56ca186bf893",
+    "drop_id": "56ca186bf893",
+    "design_id": "a03a5202d5fa",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -35,71 +35,71 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "b83b87c",
+    "validated_at": "f7d2d02",
     "frontend_commits": {
-      "addr_decoder": "b83b87c4a5ef2557a6a630046b11745f5eb130a3",
-      "bank_tracker": "b83b87c4a5ef2557a6a630046b11745f5eb130a3",
-      "cmd_gen": "b83b87c4a5ef2557a6a630046b11745f5eb130a3",
-      "cmd_queue": "b83b87c4a5ef2557a6a630046b11745f5eb130a3",
-      "config_regs": "b83b87c4a5ef2557a6a630046b11745f5eb130a3",
-      "data_path": "b83b87c4a5ef2557a6a630046b11745f5eb130a3",
-      "refresh_ctrl": "b83b87c4a5ef2557a6a630046b11745f5eb130a3",
-      "scheduler": "b83b87c4a5ef2557a6a630046b11745f5eb130a3",
-      "wb_port": "b83b87c4a5ef2557a6a630046b11745f5eb130a3"
+      "addr_decoder": "f37ce49d323151a6118ae7765aa766918c816383",
+      "bank_tracker": "f37ce49d323151a6118ae7765aa766918c816383",
+      "cmd_gen": "f37ce49d323151a6118ae7765aa766918c816383",
+      "cmd_queue": "f37ce49d323151a6118ae7765aa766918c816383",
+      "config_regs": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc",
+      "data_path": "93e750db808f44eae5ae516978d484f33481aaa8",
+      "refresh_ctrl": "f37ce49d323151a6118ae7765aa766918c816383",
+      "scheduler": "eb1a77b69594911ac55eb4576c87ee649a466cff",
+      "wb_port": "2ee6e7f6ab334463e45a291fb86c9b7614be5629"
     },
     "roots": [
-      "runs/matrix/preset_balanced/drop"
+      "Frontend2/OutputFolders"
     ],
     "blocks": {
       "addr_decoder": {
-        "rtl": "runs/matrix/preset_balanced/drop/PHASE2RTL/addr_decoder.sv",
-        "manifest": "runs/matrix/preset_balanced/drop/PHASE2RTL/addr_decoder_manifest.json",
-        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/addr_decoder.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "bank_tracker": {
-        "rtl": "runs/matrix/preset_balanced/drop/PHASE2RTL/bank_tracker.sv",
-        "manifest": "runs/matrix/preset_balanced/drop/PHASE2RTL/bank_tracker_manifest.json",
-        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "cmd_gen": {
-        "rtl": "runs/matrix/preset_balanced/drop/PHASE3RTL/cmd_gen.sv",
-        "manifest": "runs/matrix/preset_balanced/drop/PHASE3RTL/cmd_gen_manifest.json",
-        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "cmd_queue": {
-        "rtl": "runs/matrix/preset_balanced/drop/PHASE3RTL/cmd_queue.sv",
-        "manifest": "runs/matrix/preset_balanced/drop/PHASE3RTL/cmd_queue_manifest.json",
-        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "config_regs": {
-        "rtl": "runs/matrix/preset_balanced/drop/PHASE1RTL/config_regs.sv",
-        "manifest": "runs/matrix/preset_balanced/drop/PHASE1RTL/config_regs_manifest.json",
-        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "data_path": {
-        "rtl": "runs/matrix/preset_balanced/drop/PHASE4RTL/data_path.sv",
-        "manifest": "runs/matrix/preset_balanced/drop/PHASE4RTL/data_path_manifest.json",
-        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+        "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "refresh_ctrl": {
-        "rtl": "runs/matrix/preset_balanced/drop/PHASE2RTL/refresh_ctrl.sv",
-        "manifest": "runs/matrix/preset_balanced/drop/PHASE2RTL/refresh_ctrl_manifest.json",
-        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "scheduler": {
-        "rtl": "runs/matrix/preset_balanced/drop/PHASE3RTL/scheduler.sv",
-        "manifest": "runs/matrix/preset_balanced/drop/PHASE3RTL/scheduler_manifest.json",
-        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "wb_port": {
-        "rtl": "runs/matrix/preset_balanced/drop/PHASE1RTL/wb_port.sv",
-        "manifest": "runs/matrix/preset_balanced/drop/PHASE1RTL/wb_port_manifest.json",
-        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       }
     },
     "shipped_spec": {
-      "path": "runs/matrix/preset_balanced/drop/generated_spec.json",
-      "revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+      "path": "Frontend2/OutputFolders/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
     },
     "netlists": {}
   },

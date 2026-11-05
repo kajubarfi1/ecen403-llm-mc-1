@@ -1,0 +1,115 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_06_scheduler_dequeue",
+  "strategy": "exact",
+  "verdict": "pass",
+  "timestamp": "2026-11-05T11:34:54.289529",
+  "blocks": [
+    "scheduler",
+    "cmd_queue"
+  ],
+  "derived_from": {
+    "host": "path_01_write_cmd",
+    "stage": "cmd_queue+scheduler"
+  },
+  "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+  "stimulus_generator": "random",
+  "stages": [
+    {
+      "stage": "cmd_queue+scheduler",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
+      "scope": "cmd_queue_scheduler",
+      "verdict": "pass",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (353 transactions, no rule broken)",
+      "detail": [],
+      "rule_counts": {}
+    }
+  ],
+  "log": "runs/matrix/preset_balanced/validation/reports/path_01_write_cmd_sim.log",
+  "observed_trace": "runs/matrix/preset_balanced/validation/reports/path_01_write_cmd_observed.jsonl",
+  "rtl_drop": {
+    "git_head": "ed67fffad6b8",
+    "drop_id": "ed67fffad6b8",
+    "design_id": "5de6672333b1",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "f7d2d02",
+    "frontend_commits": {
+      "addr_decoder": "b83b87c4a5ef2557a6a630046b11745f5eb130a3",
+      "bank_tracker": "b83b87c4a5ef2557a6a630046b11745f5eb130a3",
+      "cmd_gen": "b83b87c4a5ef2557a6a630046b11745f5eb130a3",
+      "cmd_queue": "b83b87c4a5ef2557a6a630046b11745f5eb130a3",
+      "config_regs": "b83b87c4a5ef2557a6a630046b11745f5eb130a3",
+      "data_path": "b83b87c4a5ef2557a6a630046b11745f5eb130a3",
+      "refresh_ctrl": "b83b87c4a5ef2557a6a630046b11745f5eb130a3",
+      "scheduler": "b83b87c4a5ef2557a6a630046b11745f5eb130a3",
+      "wb_port": "b83b87c4a5ef2557a6a630046b11745f5eb130a3"
+    },
+    "roots": [
+      "runs/matrix/preset_balanced/drop"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "runs/matrix/preset_balanced/drop/PHASE2RTL/addr_decoder.sv",
+        "manifest": "runs/matrix/preset_balanced/drop/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+      },
+      "bank_tracker": {
+        "rtl": "runs/matrix/preset_balanced/drop/PHASE2RTL/bank_tracker.sv",
+        "manifest": "runs/matrix/preset_balanced/drop/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+      },
+      "cmd_gen": {
+        "rtl": "runs/matrix/preset_balanced/drop/PHASE3RTL/cmd_gen.sv",
+        "manifest": "runs/matrix/preset_balanced/drop/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+      },
+      "cmd_queue": {
+        "rtl": "runs/matrix/preset_balanced/drop/PHASE3RTL/cmd_queue.sv",
+        "manifest": "runs/matrix/preset_balanced/drop/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+      },
+      "config_regs": {
+        "rtl": "runs/matrix/preset_balanced/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/matrix/preset_balanced/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+      },
+      "data_path": {
+        "rtl": "runs/matrix/preset_balanced/drop/PHASE4RTL/data_path.sv",
+        "manifest": "runs/matrix/preset_balanced/drop/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+      },
+      "refresh_ctrl": {
+        "rtl": "runs/matrix/preset_balanced/drop/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "runs/matrix/preset_balanced/drop/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+      },
+      "scheduler": {
+        "rtl": "runs/matrix/preset_balanced/drop/PHASE3RTL/scheduler.sv",
+        "manifest": "runs/matrix/preset_balanced/drop/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+      },
+      "wb_port": {
+        "rtl": "runs/matrix/preset_balanced/drop/PHASE1RTL/wb_port.sv",
+        "manifest": "runs/matrix/preset_balanced/drop/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/matrix/preset_balanced/drop/generated_spec.json",
+      "revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694"
+    },
+    "netlists": {}
+  },
+  "coverage_collected": true
+}

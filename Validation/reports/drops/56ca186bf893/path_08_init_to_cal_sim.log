@@ -1,4 +1,4 @@
-TOOL:	xrun	24.03-s013: Started on Nov 05, 2026 at 11:14:22 CST
+TOOL:	xrun	24.03-s013: Started on Nov 05, 2026 at 11:43:54 CST
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xrun: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
@@ -568,7 +568,7 @@ xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environm
 			streams:  24, words:  9089
 		worklib.calibration:sv <0x0fc20843>
 			streams:  31, words: 18329
-		worklib.init_fsm:sv <0x4dcea53f>
+		worklib.init_fsm:sv <0x7dd432c6>
 			streams:  23, words: 29360
 		worklib.\$unit_0x243bb0b4 :compilation_unit <0x391f45be>
 			streams:   0, words:     0
@@ -650,16 +650,16 @@ TXN init_status reset t=0
 TXN init_cmd reset t=0
 TXN cal_zqcs reset t=0
 TXN cal_status reset t=0
-TXN init_cmd command t=700210000 addr=210 bank=2 cmd=0
-TXN init_cmd command t=700222000 addr=0 bank=3 cmd=0
-TXN init_cmd command t=700234000 addr=4 bank=1 cmd=0
-TXN init_cmd command t=700246000 addr=1b24 bank=0 cmd=0
-TXN init_cmd command t=700270000 addr=400 bank=0 cmd=6
-TXN init_status done t=701044000 fail=0 state=e
-TXN cal_status done t=701050000 fail=0
-TXN cal_zqcs request t=701056000
+TXN init_cmd command t=700194000 addr=218 bank=2 cmd=0
+TXN init_cmd command t=700204000 addr=0 bank=3 cmd=0
+TXN init_cmd command t=700214000 addr=4 bank=1 cmd=0
+TXN init_cmd command t=700224000 addr=1d34 bank=0 cmd=0
+TXN init_cmd command t=700244000 addr=400 bank=0 cmd=6
+TXN init_status done t=700889000 fail=0 state=e
+TXN cal_status done t=700894000 fail=0
+TXN cal_zqcs request t=700899000
 HARNESS_DONE
-Simulation complete via $finish(1) at time 1080021 NS + 0
+Simulation complete via $finish(1) at time 900017500 PS + 0
 ./chain_harness.sv:75     $finish;
 xcelium> exit
 xmsim: *W,CGDEFN: Default name "calibration#(32'h00000011,32'h0001f400,32'h00000010).cg_inst" will be generated for covergroup instance "chain_harness.u_calibration.cg_inst@1_1" as the name of the covergroup instance is not specified explicitly: ./calibration.sv, 115.
@@ -674,6 +674,6 @@ coverage setup:
   Coverage database dumped with the set_code_fine_grained_merging command during elaboration.
 
 coverage files:
-  model(design data) :  ./cov_work/scope/icc_2ddf9ed6_1f744da6.ucm (reused)
-  data               :  ./cov_work/scope/path_08_init_to_cal/icc_2ddf9ed6_1f744da6.ucd
-TOOL:	xrun	24.03-s013: Exiting on Nov 05, 2026 at 11:14:25 CST  (total: 00:00:03)
+  model(design data) :  ./cov_work/scope/icc_0591590b_68ef97ce.ucm (reused)
+  data               :  ./cov_work/scope/path_08_init_to_cal/icc_0591590b_68ef97ce.ucd
+TOOL:	xrun	24.03-s013: Exiting on Nov 05, 2026 at 11:43:55 CST  (total: 00:00:01)

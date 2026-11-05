@@ -17,7 +17,7 @@
         "lookahead_depth": 8
       },
       "level": 2,
-      "utc": "2026-11-05T02:13:58.730202+00:00",
+      "utc": "2026-11-05T17:34:47.606327+00:00",
       "level1": {
         "revision": "compiled_ddr31333_x8_2lane_1rank_1ebcc694",
         "blocking": [],
@@ -36,14 +36,10 @@
         "status": "PASS"
       },
       "level2": {
-        "flow_rc": 2,
+        "flow_rc": 0,
         "run_dir": "runs/matrix/preset_balanced",
-        "flow_status": "halted",
-        "halt": {
-          "stage": "rtl_generation",
-          "why": "generate_top.py exited 1 (top-level assembly or its lint failed); see flow.log",
-          "utc": "2026-11-05T02:15:21.897915+00:00"
-        },
+        "flow_status": "complete",
+        "halt": null,
         "phases_passed": [
           1,
           2,
@@ -53,9 +49,17 @@
         "stages": {
           "spec_synthesis": "PASS",
           "spec_review": "PASS",
-          "rtl_generation": "HALT"
+          "rtl_generation": "PASS",
+          "rtl_validation": "PASS",
+          "backend": "SKIPPED"
         },
-        "rtl_validation": null
+        "rtl_validation": "PASS; failed modules: none; package: runs/matrix/preset_balanced/validation/round_1",
+        "drop": null,
+        "validation_status": "PASS",
+        "failed_modules": [],
+        "findings": [],
+        "paths_run": 20,
+        "paths_blocked": 0
       }
     },
     "preset_default": {
@@ -74,7 +78,7 @@
         "lookahead_depth": 8
       },
       "level": 2,
-      "utc": "2026-11-05T02:15:21.920784+00:00",
+      "utc": "2026-11-05T17:36:19.597429+00:00",
       "level1": {
         "revision": "compiled_ddr31600_x8_2lane_1rank_b2a65970",
         "blocking": [],
@@ -93,23 +97,30 @@
         "status": "PASS"
       },
       "level2": {
-        "flow_rc": 2,
+        "flow_rc": 0,
         "run_dir": "runs/matrix/preset_default",
-        "flow_status": "halted",
-        "halt": {
-          "stage": "rtl_generation",
-          "why": "phase 1 failed at LINT (). its fix agent (Frontend2/scripts/Phase1/phase1_validation_agent.py) ran 1 time(s) on the Frontend's own error report and did not clear it; fix by hand, then resume.",
-          "utc": "2026-11-05T02:15:22.431299+00:00",
-          "phase": 1,
-          "report": "runs/matrix/preset_default/drop/VALIDATIONREPORT/phase1_error_report.json"
-        },
-        "phases_passed": [],
+        "flow_status": "complete",
+        "halt": null,
+        "phases_passed": [
+          1,
+          2,
+          3,
+          4
+        ],
         "stages": {
           "spec_synthesis": "PASS",
           "spec_review": "PASS",
-          "rtl_generation": "HALT"
+          "rtl_generation": "PASS",
+          "rtl_validation": "PASS",
+          "backend": "SKIPPED"
         },
-        "rtl_validation": null
+        "rtl_validation": "PASS; failed modules: none; package: runs/matrix/preset_default/validation/round_1",
+        "drop": null,
+        "validation_status": "PASS",
+        "failed_modules": [],
+        "findings": [],
+        "paths_run": 20,
+        "paths_blocked": 0
       }
     },
     "preset_high-performance": {
@@ -128,7 +139,7 @@
         "lookahead_depth": 16
       },
       "level": 2,
-      "utc": "2026-11-05T02:15:22.495191+00:00",
+      "utc": "2026-11-05T17:39:03.325859+00:00",
       "level1": {
         "revision": "compiled_ddr31600_x8_3lane_1rank_042f7b32",
         "blocking": [],
@@ -152,12 +163,16 @@
         "flow_status": "halted",
         "halt": {
           "stage": "rtl_generation",
-          "why": "phase 1 failed at LINT (). its fix agent (Frontend2/scripts/Phase1/phase1_validation_agent.py) ran 1 time(s) on the Frontend's own error report and did not clear it; fix by hand, then resume.",
-          "utc": "2026-11-05T02:15:22.994216+00:00",
-          "phase": 1,
-          "report": "runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase1_error_report.json"
+          "why": "phase 4 failed at GENERATION (testbenches). its fix agent (Frontend2/scripts/Phase4/phase4_validation_agent.py) ran 1 time(s) on the Frontend's own error report and did not clear it; fix by hand, then resume.",
+          "utc": "2026-11-05T17:40:01.282410+00:00",
+          "phase": 4,
+          "report": "runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase4_error_report.json"
         },
-        "phases_passed": [],
+        "phases_passed": [
+          1,
+          2,
+          3
+        ],
         "stages": {
           "spec_synthesis": "PASS",
           "spec_review": "PASS",
@@ -182,7 +197,7 @@
         "lookahead_depth": 0
       },
       "level": 2,
-      "utc": "2026-11-05T02:15:23.053348+00:00",
+      "utc": "2026-11-05T17:40:01.293561+00:00",
       "level1": {
         "revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc",
         "blocking": [],
@@ -201,23 +216,30 @@
         "status": "PASS"
       },
       "level2": {
-        "flow_rc": 2,
+        "flow_rc": 0,
         "run_dir": "runs/matrix/preset_low-cost-embedded",
-        "flow_status": "halted",
-        "halt": {
-          "stage": "rtl_generation",
-          "why": "phase 1 failed at LINT (). its fix agent (Frontend2/scripts/Phase1/phase1_validation_agent.py) ran 1 time(s) on the Frontend's own error report and did not clear it; fix by hand, then resume.",
-          "utc": "2026-11-05T02:15:23.584085+00:00",
-          "phase": 1,
-          "report": "runs/matrix/preset_low-cost-embedded/drop/VALIDATIONREPORT/phase1_error_report.json"
-        },
-        "phases_passed": [],
+        "flow_status": "complete",
+        "halt": null,
+        "phases_passed": [
+          1,
+          2,
+          3,
+          4
+        ],
         "stages": {
           "spec_synthesis": "PASS",
           "spec_review": "PASS",
-          "rtl_generation": "HALT"
+          "rtl_generation": "PASS",
+          "rtl_validation": "PASS",
+          "backend": "SKIPPED"
         },
-        "rtl_validation": null
+        "rtl_validation": "PASS; failed modules: none; package: runs/matrix/preset_low-cost-embedded/validation/round_1",
+        "drop": null,
+        "validation_status": "PASS",
+        "failed_modules": [],
+        "findings": [],
+        "paths_run": 20,
+        "paths_blocked": 0
       }
     },
     "preset_server-grade": {
@@ -236,7 +258,7 @@
         "lookahead_depth": 16
       },
       "level": 2,
-      "utc": "2026-11-05T02:15:23.603354+00:00",
+      "utc": "2026-11-05T17:42:15.440207+00:00",
       "level1": {
         "revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513",
         "blocking": [],
@@ -260,12 +282,16 @@
         "flow_status": "halted",
         "halt": {
           "stage": "rtl_generation",
-          "why": "phase 1 failed at LINT (). its fix agent (Frontend2/scripts/Phase1/phase1_validation_agent.py) ran 1 time(s) on the Frontend's own error report and did not clear it; fix by hand, then resume.",
-          "utc": "2026-11-05T02:15:24.121134+00:00",
-          "phase": 1,
-          "report": "runs/matrix/preset_server-grade/drop/VALIDATIONREPORT/phase1_error_report.json"
+          "why": "phase 4 failed at GENERATION (testbenches). its fix agent (Frontend2/scripts/Phase4/phase4_validation_agent.py) ran 1 time(s) on the Frontend's own error report and did not clear it; fix by hand, then resume.",
+          "utc": "2026-11-05T17:43:16.639380+00:00",
+          "phase": 4,
+          "report": "runs/matrix/preset_server-grade/drop/VALIDATIONREPORT/phase4_error_report.json"
         },
-        "phases_passed": [],
+        "phases_passed": [
+          1,
+          2,
+          3
+        ],
         "stages": {
           "spec_synthesis": "PASS",
           "spec_review": "PASS",

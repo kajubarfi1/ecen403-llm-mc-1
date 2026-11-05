@@ -1084,6 +1084,16 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   TIMING_008 closed in the package; PROTO_002 and HOST_001 await a
   longer run. Presets relaunched through the flow with the machine
   awake.
+  Level 2 on the presets (formal replays switched off for a sweep,
+  `VALIDATION_SKIP_FORMAL`): default, balanced and low-cost-embedded
+  run the whole RTL half COMPLETE, 20/20 each, no finding, nothing
+  repaired. high-performance and server-grade halt in her Phase 4
+  testbench generator, which counts the ECC lane into the channel
+  width (byte_lanes vs data_byte_lanes, the addr_decoder bug's twin):
+  addendum 15. The balanced preset's first pass had passed simulation
+  and was spending an hour in formal replays before the switch. A flow
+  run's path reports are now run-local like its outbox (they had
+  overwritten the golden drop's); the shared package re-validated.
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

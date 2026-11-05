@@ -1,8 +1,10 @@
-TOOL:	xrun	24.03-s013: Started on Nov 05, 2026 at 11:14:29 CST
+TOOL:	xrun	24.03-s013: Started on Nov 05, 2026 at 11:43:59 CST
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xrun: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
 xrun: 24.03-s013: (c) Copyright 1995-2025 Cadence Design Systems, Inc.
+*WARNING* X Window Display Initialization failure
+*WARNING* (DISPLAY "")
 xrun: *N,CLEAN: Removing existing directory ./xcelium.d.
 DEFINE std       ./STD
 |
@@ -49,8 +51,6 @@ xrun: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,14): c
 DEFINE cds_amsfunctions ./CDS_AMSFUNCTIONS
 |
 xrun: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,15): cds.lib Invalid path '/opt/coe/cadence/XCELIUM240/tools/inca/files/CDS_AMSFUNCTIONS' (cds.lib command ignored).
-*WARNING* X Window Display Initialization failure
-*WARNING* (DISPLAY "")
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xrun: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
@@ -666,7 +666,7 @@ SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
 		worklib.dram_stub:sv <0x3cf2722f>
 			streams:   3, words:  7224
-		worklib.wb_port_order_sva:sv <0x015f3601>
+		worklib.wb_port_order_sva:sv <0x19591666>
 			streams:  16, words:  9294
 		worklib.wb_rsp_monitor:sv <0x2e749963>
 			streams:   4, words:  3426
@@ -674,7 +674,7 @@ xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environm
 			streams:   2, words:  3813
 		worklib.req_monitor:sv <0x0a7dcf73>
 			streams:   2, words:  2235
-		worklib.scheduler_order_sva:sv <0x727055fb>
+		worklib.scheduler_order_sva:sv <0x00477f51>
 			streams:  18, words:  9906
 		worklib.scheduler_fcov:sv <0x01ea1200>
 			streams:   7, words:  4507
@@ -736,10 +736,10 @@ xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environm
 			streams:   4, words: 10203
 		worklib.chain_harness:sv <0x32b6e691>
 			streams: 245, words: 66699
-		worklib.bank_tracker:sv <0x01146ec4>
-			streams:  37, words: 48972
+		worklib.bank_tracker:sv <0x4755ac4e>
+			streams:  37, words: 49233
 		worklib.config_regs:sv <0x33fae264>
-			streams:  64, words: 58861
+			streams:  64, words: 58855
 		worklib.cmd_queue:sv <0x6f1c743c>
 			streams:  21, words: 20719
 		worklib.cmd_gen:sv <0x5f15b125>
@@ -752,7 +752,7 @@ xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environm
 			streams:  74, words: 56225
 		worklib.scheduler:sv <0x4ab57bfb>
 			streams:  99, words: 122563
-		worklib.cmd_gen_sva:sv <0x7c0226e8>
+		worklib.cmd_gen_sva:sv <0x09cbb625>
 			streams: 333, words: 140663
 		worklib.\$unit_0x007516de :compilation_unit <0x4e76f3cc>
 			streams:   0, words:     0
@@ -856,268 +856,268 @@ TXN cq_enq reset t=0
 TXN cq_deq reset t=0
 TXN sched_in reset t=0
 TXN ddr_cmd reset t=0
-TXN refresh_req request t=34000 pending=1 starve=0 urgent=0
-TXN refresh_level state t=34000 pending=1 required=1 starve=0 urgent=0
-TXN csr_sts_level state t=39000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
-TXN sched_cmd command t=46000 aux=0 bank=0 col=0 row=0 type=5 we=0
-TXN refresh_ack ack t=46000 pending=1
-TXN csr_rsp read_data t=46000 addr=0 data=20 err=0
-TXN csr read t=46000 addr=0
-TXN sched_in command t=46000 aux=0 bank=0 col=0 row=0 type=5 we=0
-TXN refresh_level state t=52000 pending=0 required=0 starve=0 urgent=0
-TXN ddr_cmd command t=52000 addr=0 bank=0 cmd=1
-TXN csr_sts_level state t=57000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
-TXN csr_rsp write_ack t=70000 addr=0 err=0
-TXN csr write t=70000 addr=0 data=ffffffff
-TXN csr_rsp read_data t=94000 addr=0 data=0 err=0
-TXN csr read t=94000 addr=0
-TXN csr_rsp write_ack t=118000 addr=0 err=0
-TXN csr write t=118000 addr=0 data=0
-TXN csr_rsp read_data t=142000 addr=0 data=0 err=0
-TXN csr read t=142000 addr=0
-TXN csr_rsp write_ack t=166000 addr=0 err=0
-TXN csr write t=166000 addr=0 data=a5a5a5a5
-TXN csr_rsp read_data t=190000 addr=0 data=0 err=0
-TXN csr read t=190000 addr=0
-TXN csr_rsp write_ack t=214000 addr=0 err=0
-TXN csr write t=214000 addr=0 data=5a5a5a5a
-TXN csr_rsp read_data t=238000 addr=0 data=0 err=0
-TXN csr read t=238000 addr=0
-TXN csr_rsp read_data t=262000 addr=4 data=9 err=0
-TXN csr read t=262000 addr=4
-TXN csr_rsp write_ack t=286000 addr=4 err=0
-TXN csr write t=286000 addr=4 data=ffffffff
-TXN cfg_refresh update t=286000 force_refresh=1 max_postpone=8 priority=1 trefi=1450 urgent_threshold=6
-TXN refresh_req request t=292000 pending=1 starve=0 urgent=0
-TXN refresh_level state t=292000 pending=1 required=1 starve=0 urgent=0
-TXN cfg_refresh update t=292000 force_refresh=0 max_postpone=8 priority=1 trefi=1450 urgent_threshold=6
-TXN csr_sts_level state t=297000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
-TXN csr_rsp read_data t=310000 addr=4 data=1f err=0
-TXN csr read t=310000 addr=4
-TXN csr_rsp write_ack t=334000 addr=4 err=0
-TXN csr write t=334000 addr=4 data=0
-TXN csr_rsp read_data t=358000 addr=4 data=0 err=0
-TXN csr read t=358000 addr=4
-TXN csr_rsp write_ack t=382000 addr=4 err=0
-TXN csr write t=382000 addr=4 data=a5a5a5a5
-TXN csr_rsp read_data t=406000 addr=4 data=5 err=0
-TXN csr read t=406000 addr=4
-TXN csr_rsp write_ack t=430000 addr=4 err=0
-TXN csr write t=430000 addr=4 data=5a5a5a5a
-TXN cfg_refresh update t=430000 force_refresh=1 max_postpone=8 priority=1 trefi=1450 urgent_threshold=6
-TXN refresh_level state t=436000 pending=2 required=1 starve=0 urgent=0
-TXN cfg_refresh update t=436000 force_refresh=0 max_postpone=8 priority=1 trefi=1450 urgent_threshold=6
-TXN csr_sts_level state t=441000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=2 self_refresh=0
-TXN csr_rsp read_data t=454000 addr=4 data=1a err=0
-TXN csr read t=454000 addr=4
-TXN csr_rsp read_data t=478000 addr=8 data=21180909 err=0
-TXN csr read t=478000 addr=8
-TXN csr_rsp write_ack t=502000 addr=8 err=0
-TXN csr write t=502000 addr=8 data=ffffffff
-TXN cfg_timing update t=502000 tccd=4 tfaw=1e tras=ff trc=ff trcd=ff trfc=6b trp=ff trrd=5 trtp=5 twr=a twtr=5
-TXN csr_rsp read_data t=526000 addr=8 data=ffffffff err=0
-TXN csr read t=526000 addr=8
-TXN csr_rsp write_ack t=550000 addr=8 err=0
-TXN csr write t=550000 addr=8 data=0
-TXN cfg_timing update t=550000 tccd=4 tfaw=1e tras=0 trc=0 trcd=0 trfc=6b trp=0 trrd=5 trtp=5 twr=a twtr=5
-TXN csr_rsp read_data t=574000 addr=8 data=0 err=0
-TXN csr read t=574000 addr=8
-TXN csr_rsp write_ack t=598000 addr=8 err=0
-TXN csr write t=598000 addr=8 data=a5a5a5a5
-TXN cfg_timing update t=598000 tccd=4 tfaw=1e tras=a5 trc=a5 trcd=a5 trfc=6b trp=a5 trrd=5 trtp=5 twr=a twtr=5
-TXN csr_rsp read_data t=622000 addr=8 data=a5a5a5a5 err=0
-TXN csr read t=622000 addr=8
-TXN csr_rsp write_ack t=646000 addr=8 err=0
-TXN csr write t=646000 addr=8 data=5a5a5a5a
-TXN cfg_timing update t=646000 tccd=4 tfaw=1e tras=5a trc=5a trcd=5a trfc=6b trp=5a trrd=5 trtp=5 twr=a twtr=5
-TXN csr_rsp read_data t=670000 addr=8 data=5a5a5a5a err=0
-TXN csr read t=670000 addr=8
-TXN csr_rsp read_data t=694000 addr=c data=6b1e0505 err=0
-TXN csr read t=694000 addr=c
-TXN sched_cmd command t=712000 aux=0 bank=0 col=0 row=0 type=5 we=0
-TXN refresh_ack ack t=712000 pending=2
-TXN sched_in command t=712000 aux=0 bank=0 col=0 row=0 type=5 we=0
-TXN refresh_level state t=718000 pending=1 required=1 starve=0 urgent=0
-TXN csr_rsp write_ack t=718000 addr=c err=0
-TXN csr write t=718000 addr=c data=ffffffff
-TXN cfg_timing update t=718000 tccd=4 tfaw=ff tras=5a trc=5a trcd=5a trfc=ff trp=5a trrd=ff trtp=5 twr=a twtr=ff
-TXN ddr_cmd command t=718000 addr=0 bank=0 cmd=1
-TXN csr_sts_level state t=723000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
-TXN csr_rsp read_data t=742000 addr=c data=ffffffff err=0
-TXN csr read t=742000 addr=c
-TXN csr_rsp write_ack t=766000 addr=c err=0
-TXN csr write t=766000 addr=c data=0
-TXN cfg_timing update t=766000 tccd=4 tfaw=0 tras=5a trc=5a trcd=5a trfc=0 trp=5a trrd=0 trtp=5 twr=a twtr=0
-TXN csr_rsp read_data t=790000 addr=c data=0 err=0
-TXN csr read t=790000 addr=c
-TXN csr_rsp write_ack t=814000 addr=c err=0
-TXN csr write t=814000 addr=c data=a5a5a5a5
-TXN cfg_timing update t=814000 tccd=4 tfaw=a5 tras=5a trc=5a trcd=5a trfc=a5 trp=5a trrd=a5 trtp=5 twr=a twtr=a5
-TXN csr_rsp read_data t=838000 addr=c data=a5a5a5a5 err=0
-TXN csr read t=838000 addr=c
-TXN csr_rsp write_ack t=862000 addr=c err=0
-TXN csr write t=862000 addr=c data=5a5a5a5a
-TXN cfg_timing update t=862000 tccd=4 tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=5 twr=a twtr=5a
-TXN csr_rsp read_data t=886000 addr=c data=5a5a5a5a err=0
-TXN csr read t=886000 addr=c
-TXN csr_rsp read_data t=910000 addr=10 data=709050a err=0
-TXN csr read t=910000 addr=10
-TXN csr_rsp write_ack t=934000 addr=10 err=0
-TXN csr write t=934000 addr=10 data=ffffffff
-TXN cfg_timing update t=934000 tccd=4 tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=ff twr=ff twtr=5a
-TXN csr_rsp read_data t=958000 addr=10 data=ffffffff err=0
-TXN csr read t=958000 addr=10
-TXN csr_rsp write_ack t=982000 addr=10 err=0
-TXN csr write t=982000 addr=10 data=0
-TXN cfg_timing update t=982000 tccd=4 tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=0 twr=0 twtr=5a
-TXN csr_rsp read_data t=1006000 addr=10 data=0 err=0
-TXN csr read t=1006000 addr=10
-TXN csr_rsp write_ack t=1030000 addr=10 err=0
-TXN csr write t=1030000 addr=10 data=a5a5a5a5
-TXN cfg_timing update t=1030000 tccd=4 tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=a5 twr=a5 twtr=5a
-TXN csr_rsp read_data t=1054000 addr=10 data=a5a5a5a5 err=0
-TXN csr read t=1054000 addr=10
-TXN csr_rsp write_ack t=1078000 addr=10 err=0
-TXN csr write t=1078000 addr=10 data=5a5a5a5a
-TXN cfg_timing update t=1078000 tccd=4 tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=5a twr=5a twtr=5a
-TXN csr_rsp read_data t=1102000 addr=10 data=5a5a5a5a err=0
-TXN csr read t=1102000 addr=10
-TXN csr_rsp read_data t=1126000 addr=14 data=145004 err=0
-TXN csr read t=1126000 addr=14
-TXN csr_rsp write_ack t=1150000 addr=14 err=0
-TXN csr write t=1150000 addr=14 data=ffffffff
-TXN cfg_timing update t=1150000 tccd=ff tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=5a twr=5a twtr=5a
-TXN cfg_refresh update t=1150000 force_refresh=0 max_postpone=8 priority=1 trefi=ffffff urgent_threshold=6
-TXN csr_rsp read_data t=1174000 addr=14 data=ffffffff err=0
-TXN csr read t=1174000 addr=14
-TXN csr_rsp write_ack t=1198000 addr=14 err=0
-TXN csr write t=1198000 addr=14 data=0
-TXN cfg_timing update t=1198000 tccd=0 tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=5a twr=5a twtr=5a
-TXN cfg_refresh update t=1198000 force_refresh=0 max_postpone=8 priority=1 trefi=0 urgent_threshold=6
-TXN csr_rsp read_data t=1222000 addr=14 data=0 err=0
-TXN csr read t=1222000 addr=14
-TXN csr_rsp write_ack t=1246000 addr=14 err=0
-TXN csr write t=1246000 addr=14 data=a5a5a5a5
-TXN cfg_timing update t=1246000 tccd=a5 tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=5a twr=5a twtr=5a
-TXN cfg_refresh update t=1246000 force_refresh=0 max_postpone=8 priority=1 trefi=a5a5a5 urgent_threshold=6
-TXN csr_rsp read_data t=1270000 addr=14 data=a5a5a5a5 err=0
-TXN csr read t=1270000 addr=14
-TXN csr_rsp write_ack t=1294000 addr=14 err=0
-TXN csr write t=1294000 addr=14 data=5a5a5a5a
-TXN cfg_timing update t=1294000 tccd=5a tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=5a twr=5a twtr=5a
-TXN cfg_refresh update t=1294000 force_refresh=0 max_postpone=8 priority=1 trefi=5a5a5a urgent_threshold=6
-TXN csr_rsp read_data t=1318000 addr=14 data=5a5a5a5a err=0
-TXN csr read t=1318000 addr=14
-TXN csr_rsp read_data t=1342000 addr=18 data=168 err=0
-TXN csr read t=1342000 addr=18
-TXN csr_rsp write_ack t=1366000 addr=18 err=0
-TXN csr write t=1366000 addr=18 data=ffffffff
-TXN cfg_refresh update t=1366000 force_refresh=0 max_postpone=f priority=1 trefi=5a5a5a urgent_threshold=f
-TXN csr_rsp read_data t=1390000 addr=18 data=1ff err=0
-TXN csr read t=1390000 addr=18
-TXN csr_rsp write_ack t=1414000 addr=18 err=0
-TXN csr write t=1414000 addr=18 data=0
-TXN cfg_refresh update t=1414000 force_refresh=0 max_postpone=0 priority=0 trefi=5a5a5a urgent_threshold=0
-TXN csr_rsp read_data t=1438000 addr=18 data=0 err=0
-TXN csr read t=1438000 addr=18
-TXN csr_rsp write_ack t=1462000 addr=18 err=0
-TXN csr write t=1462000 addr=18 data=a5a5a5a5
-TXN cfg_refresh update t=1462000 force_refresh=0 max_postpone=5 priority=1 trefi=5a5a5a urgent_threshold=a
-TXN csr_rsp read_data t=1486000 addr=18 data=1a5 err=0
-TXN csr read t=1486000 addr=18
-TXN sched_cmd command t=1498000 aux=0 bank=0 col=0 row=0 type=5 we=0
-TXN refresh_ack ack t=1498000 pending=1
-TXN sched_in command t=1498000 aux=0 bank=0 col=0 row=0 type=5 we=0
-TXN refresh_level state t=1504000 pending=0 required=0 starve=0 urgent=0
-TXN ddr_cmd command t=1504000 addr=0 bank=0 cmd=1
-TXN csr_sts_level state t=1509000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
-TXN csr_rsp write_ack t=1510000 addr=18 err=0
-TXN csr write t=1510000 addr=18 data=5a5a5a5a
-TXN cfg_refresh update t=1510000 force_refresh=0 max_postpone=a priority=0 trefi=5a5a5a urgent_threshold=5
-TXN csr_rsp read_data t=1534000 addr=18 data=5a err=0
-TXN csr read t=1534000 addr=18
-TXN csr_rsp read_data t=1558000 addr=1c data=0 err=0
-TXN csr read t=1558000 addr=1c
-TXN csr_rsp write_ack t=1582000 addr=1c err=0
-TXN csr write t=1582000 addr=1c data=ffffffff
-TXN csr_rsp read_data t=1606000 addr=1c data=0 err=0
-TXN csr read t=1606000 addr=1c
-TXN csr_rsp write_ack t=1630000 addr=1c err=0
-TXN csr write t=1630000 addr=1c data=0
-TXN csr_rsp read_data t=1654000 addr=1c data=0 err=0
-TXN csr read t=1654000 addr=1c
-TXN csr_rsp write_ack t=1678000 addr=1c err=0
-TXN csr write t=1678000 addr=1c data=a5a5a5a5
-TXN csr_rsp read_data t=1702000 addr=1c data=0 err=0
-TXN csr read t=1702000 addr=1c
-TXN csr_rsp write_ack t=1726000 addr=1c err=0
-TXN csr write t=1726000 addr=1c data=5a5a5a5a
-TXN csr_rsp read_data t=1750000 addr=1c data=0 err=0
-TXN csr read t=1750000 addr=1c
-TXN csr_rsp read_data t=1774000 addr=20 data=0 err=0
-TXN csr read t=1774000 addr=20
-TXN csr_rsp write_ack t=1798000 addr=20 err=0
-TXN csr write t=1798000 addr=20 data=ffffffff
-TXN csr_rsp read_data t=1822000 addr=20 data=f err=0
-TXN csr read t=1822000 addr=20
-TXN csr_rsp write_ack t=1846000 addr=20 err=0
-TXN csr write t=1846000 addr=20 data=0
-TXN csr_rsp read_data t=1870000 addr=20 data=0 err=0
-TXN csr read t=1870000 addr=20
-TXN csr_rsp write_ack t=1894000 addr=20 err=0
-TXN csr write t=1894000 addr=20 data=a5a5a5a5
-TXN csr_rsp read_data t=1918000 addr=20 data=5 err=0
-TXN csr read t=1918000 addr=20
-TXN csr_rsp write_ack t=1942000 addr=20 err=0
-TXN csr write t=1942000 addr=20 data=5a5a5a5a
-TXN csr_rsp read_data t=1966000 addr=20 data=a err=0
-TXN csr read t=1966000 addr=20
-TXN csr_rsp read_data t=1990000 addr=24 data=0 err=0
-TXN csr read t=1990000 addr=24
-TXN csr_rsp write_ack t=2014000 addr=24 err=0
-TXN csr write t=2014000 addr=24 data=ffffffff
-TXN csr_rsp read_data t=2038000 addr=24 data=1fffffff err=0
-TXN csr read t=2038000 addr=24
-TXN csr_rsp write_ack t=2062000 addr=24 err=0
-TXN csr write t=2062000 addr=24 data=0
-TXN csr_rsp read_data t=2086000 addr=24 data=0 err=0
-TXN csr read t=2086000 addr=24
-TXN csr_rsp write_ack t=2110000 addr=24 err=0
-TXN csr write t=2110000 addr=24 data=a5a5a5a5
-TXN csr_rsp read_data t=2134000 addr=24 data=5a5a5a5 err=0
-TXN csr read t=2134000 addr=24
-TXN csr_rsp write_ack t=2158000 addr=24 err=0
-TXN csr write t=2158000 addr=24 data=5a5a5a5a
-TXN csr_rsp read_data t=2182000 addr=24 data=1a5a5a5a err=0
-TXN csr read t=2182000 addr=24
-TXN csr_rsp read_data t=2206000 addr=28 data=1fffffff err=0
-TXN csr read t=2206000 addr=28
-TXN csr_rsp write_ack t=2230000 addr=28 err=0
-TXN csr write t=2230000 addr=28 data=ffffffff
-TXN csr_rsp read_data t=2254000 addr=28 data=1fffffff err=0
-TXN csr read t=2254000 addr=28
-TXN csr_rsp write_ack t=2278000 addr=28 err=0
-TXN csr write t=2278000 addr=28 data=0
-TXN csr_rsp read_data t=2302000 addr=28 data=0 err=0
-TXN csr read t=2302000 addr=28
-TXN csr_rsp write_ack t=2326000 addr=28 err=0
-TXN csr write t=2326000 addr=28 data=a5a5a5a5
-TXN csr_rsp read_data t=2350000 addr=28 data=5a5a5a5 err=0
-TXN csr read t=2350000 addr=28
-TXN csr_rsp write_ack t=2374000 addr=28 err=0
-TXN csr write t=2374000 addr=28 data=5a5a5a5a
-TXN csr_rsp read_data t=2398000 addr=28 data=1a5a5a5a err=0
-TXN csr read t=2398000 addr=28
-TXN csr_rsp read_data t=2422000 addr=2c data=0 err=1
-TXN csr read t=2422000 addr=2c
-TXN csr_rsp write_ack t=2446000 addr=2c err=1
-TXN csr write t=2446000 addr=2c data=5a5a5a5a
-TXN csr_rsp read_data t=2470000 addr=fc data=0 err=1
-TXN csr read t=2470000 addr=fc
-TXN csr_rsp write_ack t=2494000 addr=fc err=1
-TXN csr write t=2494000 addr=fc data=5a5a5a5a
+TXN refresh_req request t=29000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=29000 pending=1 required=1 starve=0 urgent=0
+TXN csr_sts_level state t=33000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
+TXN sched_cmd command t=39000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_ack ack t=39000 pending=1
+TXN csr_rsp read_data t=39000 addr=0 data=20 err=0
+TXN csr read t=39000 addr=0
+TXN sched_in command t=39000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_level state t=44000 pending=0 required=0 starve=0 urgent=0
+TXN ddr_cmd command t=44000 addr=0 bank=0 cmd=1
+TXN csr_sts_level state t=48000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
+TXN csr_rsp write_ack t=59000 addr=0 err=0
+TXN csr write t=59000 addr=0 data=ffffffff
+TXN csr_rsp read_data t=79000 addr=0 data=0 err=0
+TXN csr read t=79000 addr=0
+TXN csr_rsp write_ack t=99000 addr=0 err=0
+TXN csr write t=99000 addr=0 data=0
+TXN csr_rsp read_data t=119000 addr=0 data=0 err=0
+TXN csr read t=119000 addr=0
+TXN csr_rsp write_ack t=139000 addr=0 err=0
+TXN csr write t=139000 addr=0 data=a5a5a5a5
+TXN csr_rsp read_data t=159000 addr=0 data=0 err=0
+TXN csr read t=159000 addr=0
+TXN csr_rsp write_ack t=179000 addr=0 err=0
+TXN csr write t=179000 addr=0 data=5a5a5a5a
+TXN csr_rsp read_data t=199000 addr=0 data=0 err=0
+TXN csr read t=199000 addr=0
+TXN csr_rsp read_data t=219000 addr=4 data=9 err=0
+TXN csr read t=219000 addr=4
+TXN csr_rsp write_ack t=239000 addr=4 err=0
+TXN csr write t=239000 addr=4 data=ffffffff
+TXN cfg_refresh update t=239000 force_refresh=1 max_postpone=8 priority=1 trefi=1860 urgent_threshold=6
+TXN refresh_req request t=244000 pending=1 starve=0 urgent=0
+TXN refresh_level state t=244000 pending=1 required=1 starve=0 urgent=0
+TXN cfg_refresh update t=244000 force_refresh=0 max_postpone=8 priority=1 trefi=1860 urgent_threshold=6
+TXN csr_sts_level state t=248000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
+TXN csr_rsp read_data t=259000 addr=4 data=1f err=0
+TXN csr read t=259000 addr=4
+TXN csr_rsp write_ack t=279000 addr=4 err=0
+TXN csr write t=279000 addr=4 data=0
+TXN csr_rsp read_data t=299000 addr=4 data=0 err=0
+TXN csr read t=299000 addr=4
+TXN csr_rsp write_ack t=319000 addr=4 err=0
+TXN csr write t=319000 addr=4 data=a5a5a5a5
+TXN csr_rsp read_data t=339000 addr=4 data=5 err=0
+TXN csr read t=339000 addr=4
+TXN csr_rsp write_ack t=359000 addr=4 err=0
+TXN csr write t=359000 addr=4 data=5a5a5a5a
+TXN cfg_refresh update t=359000 force_refresh=1 max_postpone=8 priority=1 trefi=1860 urgent_threshold=6
+TXN refresh_level state t=364000 pending=2 required=1 starve=0 urgent=0
+TXN cfg_refresh update t=364000 force_refresh=0 max_postpone=8 priority=1 trefi=1860 urgent_threshold=6
+TXN csr_sts_level state t=368000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=2 self_refresh=0
+TXN csr_rsp read_data t=379000 addr=4 data=1a err=0
+TXN csr read t=379000 addr=4
+TXN csr_rsp read_data t=399000 addr=8 data=271c0b0b err=0
+TXN csr read t=399000 addr=8
+TXN csr_rsp write_ack t=419000 addr=8 err=0
+TXN csr write t=419000 addr=8 data=ffffffff
+TXN cfg_timing update t=419000 tccd=4 tfaw=20 tras=ff trc=ff trcd=ff trfc=80 trp=ff trrd=6 trtp=6 twr=c twtr=6
+TXN csr_rsp read_data t=439000 addr=8 data=ffffffff err=0
+TXN csr read t=439000 addr=8
+TXN csr_rsp write_ack t=459000 addr=8 err=0
+TXN csr write t=459000 addr=8 data=0
+TXN cfg_timing update t=459000 tccd=4 tfaw=20 tras=0 trc=0 trcd=0 trfc=80 trp=0 trrd=6 trtp=6 twr=c twtr=6
+TXN csr_rsp read_data t=479000 addr=8 data=0 err=0
+TXN csr read t=479000 addr=8
+TXN csr_rsp write_ack t=499000 addr=8 err=0
+TXN csr write t=499000 addr=8 data=a5a5a5a5
+TXN cfg_timing update t=499000 tccd=4 tfaw=20 tras=a5 trc=a5 trcd=a5 trfc=80 trp=a5 trrd=6 trtp=6 twr=c twtr=6
+TXN csr_rsp read_data t=519000 addr=8 data=a5a5a5a5 err=0
+TXN csr read t=519000 addr=8
+TXN csr_rsp write_ack t=539000 addr=8 err=0
+TXN csr write t=539000 addr=8 data=5a5a5a5a
+TXN cfg_timing update t=539000 tccd=4 tfaw=20 tras=5a trc=5a trcd=5a trfc=80 trp=5a trrd=6 trtp=6 twr=c twtr=6
+TXN csr_rsp read_data t=559000 addr=8 data=5a5a5a5a err=0
+TXN csr read t=559000 addr=8
+TXN csr_rsp read_data t=579000 addr=c data=80200606 err=0
+TXN csr read t=579000 addr=c
+TXN csr_rsp write_ack t=599000 addr=c err=0
+TXN csr write t=599000 addr=c data=ffffffff
+TXN cfg_timing update t=599000 tccd=4 tfaw=ff tras=5a trc=5a trcd=5a trfc=ff trp=5a trrd=ff trtp=6 twr=c twtr=ff
+TXN csr_rsp read_data t=619000 addr=c data=ffffffff err=0
+TXN csr read t=619000 addr=c
+TXN csr_rsp write_ack t=639000 addr=c err=0
+TXN csr write t=639000 addr=c data=0
+TXN cfg_timing update t=639000 tccd=4 tfaw=0 tras=5a trc=5a trcd=5a trfc=0 trp=5a trrd=0 trtp=6 twr=c twtr=0
+TXN csr_rsp read_data t=659000 addr=c data=0 err=0
+TXN csr read t=659000 addr=c
+TXN csr_rsp write_ack t=679000 addr=c err=0
+TXN csr write t=679000 addr=c data=a5a5a5a5
+TXN cfg_timing update t=679000 tccd=4 tfaw=a5 tras=5a trc=5a trcd=5a trfc=a5 trp=5a trrd=a5 trtp=6 twr=c twtr=a5
+TXN sched_cmd command t=699000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_ack ack t=699000 pending=2
+TXN csr_rsp read_data t=699000 addr=c data=a5a5a5a5 err=0
+TXN csr read t=699000 addr=c
+TXN sched_in command t=699000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_level state t=704000 pending=1 required=1 starve=0 urgent=0
+TXN ddr_cmd command t=704000 addr=0 bank=0 cmd=1
+TXN csr_sts_level state t=708000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=1 self_refresh=0
+TXN csr_rsp write_ack t=719000 addr=c err=0
+TXN csr write t=719000 addr=c data=5a5a5a5a
+TXN cfg_timing update t=719000 tccd=4 tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=6 twr=c twtr=5a
+TXN csr_rsp read_data t=739000 addr=c data=5a5a5a5a err=0
+TXN csr read t=739000 addr=c
+TXN csr_rsp read_data t=759000 addr=10 data=80b060c err=0
+TXN csr read t=759000 addr=10
+TXN csr_rsp write_ack t=779000 addr=10 err=0
+TXN csr write t=779000 addr=10 data=ffffffff
+TXN cfg_timing update t=779000 tccd=4 tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=ff twr=ff twtr=5a
+TXN csr_rsp read_data t=799000 addr=10 data=ffffffff err=0
+TXN csr read t=799000 addr=10
+TXN csr_rsp write_ack t=819000 addr=10 err=0
+TXN csr write t=819000 addr=10 data=0
+TXN cfg_timing update t=819000 tccd=4 tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=0 twr=0 twtr=5a
+TXN csr_rsp read_data t=839000 addr=10 data=0 err=0
+TXN csr read t=839000 addr=10
+TXN csr_rsp write_ack t=859000 addr=10 err=0
+TXN csr write t=859000 addr=10 data=a5a5a5a5
+TXN cfg_timing update t=859000 tccd=4 tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=a5 twr=a5 twtr=5a
+TXN csr_rsp read_data t=879000 addr=10 data=a5a5a5a5 err=0
+TXN csr read t=879000 addr=10
+TXN csr_rsp write_ack t=899000 addr=10 err=0
+TXN csr write t=899000 addr=10 data=5a5a5a5a
+TXN cfg_timing update t=899000 tccd=4 tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=5a twr=5a twtr=5a
+TXN csr_rsp read_data t=919000 addr=10 data=5a5a5a5a err=0
+TXN csr read t=919000 addr=10
+TXN csr_rsp read_data t=939000 addr=14 data=186004 err=0
+TXN csr read t=939000 addr=14
+TXN csr_rsp write_ack t=959000 addr=14 err=0
+TXN csr write t=959000 addr=14 data=ffffffff
+TXN cfg_timing update t=959000 tccd=ff tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=5a twr=5a twtr=5a
+TXN cfg_refresh update t=959000 force_refresh=0 max_postpone=8 priority=1 trefi=ffffff urgent_threshold=6
+TXN csr_rsp read_data t=979000 addr=14 data=ffffffff err=0
+TXN csr read t=979000 addr=14
+TXN csr_rsp write_ack t=999000 addr=14 err=0
+TXN csr write t=999000 addr=14 data=0
+TXN cfg_timing update t=999000 tccd=0 tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=5a twr=5a twtr=5a
+TXN cfg_refresh update t=999000 force_refresh=0 max_postpone=8 priority=1 trefi=0 urgent_threshold=6
+TXN csr_rsp read_data t=1019000 addr=14 data=0 err=0
+TXN csr read t=1019000 addr=14
+TXN csr_rsp write_ack t=1039000 addr=14 err=0
+TXN csr write t=1039000 addr=14 data=a5a5a5a5
+TXN cfg_timing update t=1039000 tccd=a5 tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=5a twr=5a twtr=5a
+TXN cfg_refresh update t=1039000 force_refresh=0 max_postpone=8 priority=1 trefi=a5a5a5 urgent_threshold=6
+TXN csr_rsp read_data t=1059000 addr=14 data=a5a5a5a5 err=0
+TXN csr read t=1059000 addr=14
+TXN csr_rsp write_ack t=1079000 addr=14 err=0
+TXN csr write t=1079000 addr=14 data=5a5a5a5a
+TXN cfg_timing update t=1079000 tccd=5a tfaw=5a tras=5a trc=5a trcd=5a trfc=5a trp=5a trrd=5a trtp=5a twr=5a twtr=5a
+TXN cfg_refresh update t=1079000 force_refresh=0 max_postpone=8 priority=1 trefi=5a5a5a urgent_threshold=6
+TXN csr_rsp read_data t=1099000 addr=14 data=5a5a5a5a err=0
+TXN csr read t=1099000 addr=14
+TXN csr_rsp read_data t=1119000 addr=18 data=168 err=0
+TXN csr read t=1119000 addr=18
+TXN csr_rsp write_ack t=1139000 addr=18 err=0
+TXN csr write t=1139000 addr=18 data=ffffffff
+TXN cfg_refresh update t=1139000 force_refresh=0 max_postpone=f priority=1 trefi=5a5a5a urgent_threshold=f
+TXN csr_rsp read_data t=1159000 addr=18 data=1ff err=0
+TXN csr read t=1159000 addr=18
+TXN csr_rsp write_ack t=1179000 addr=18 err=0
+TXN csr write t=1179000 addr=18 data=0
+TXN cfg_refresh update t=1179000 force_refresh=0 max_postpone=0 priority=0 trefi=5a5a5a urgent_threshold=0
+TXN csr_rsp read_data t=1199000 addr=18 data=0 err=0
+TXN csr read t=1199000 addr=18
+TXN csr_rsp write_ack t=1219000 addr=18 err=0
+TXN csr write t=1219000 addr=18 data=a5a5a5a5
+TXN cfg_refresh update t=1219000 force_refresh=0 max_postpone=5 priority=1 trefi=5a5a5a urgent_threshold=a
+TXN csr_rsp read_data t=1239000 addr=18 data=1a5 err=0
+TXN csr read t=1239000 addr=18
+TXN csr_rsp write_ack t=1259000 addr=18 err=0
+TXN csr write t=1259000 addr=18 data=5a5a5a5a
+TXN cfg_refresh update t=1259000 force_refresh=0 max_postpone=a priority=0 trefi=5a5a5a urgent_threshold=5
+TXN csr_rsp read_data t=1279000 addr=18 data=5a err=0
+TXN csr read t=1279000 addr=18
+TXN csr_rsp read_data t=1299000 addr=1c data=0 err=0
+TXN csr read t=1299000 addr=1c
+TXN csr_rsp write_ack t=1319000 addr=1c err=0
+TXN csr write t=1319000 addr=1c data=ffffffff
+TXN csr_rsp read_data t=1339000 addr=1c data=0 err=0
+TXN csr read t=1339000 addr=1c
+TXN csr_rsp write_ack t=1359000 addr=1c err=0
+TXN csr write t=1359000 addr=1c data=0
+TXN csr_rsp read_data t=1379000 addr=1c data=0 err=0
+TXN csr read t=1379000 addr=1c
+TXN csr_rsp write_ack t=1399000 addr=1c err=0
+TXN csr write t=1399000 addr=1c data=a5a5a5a5
+TXN csr_rsp read_data t=1419000 addr=1c data=0 err=0
+TXN csr read t=1419000 addr=1c
+TXN csr_rsp write_ack t=1439000 addr=1c err=0
+TXN csr write t=1439000 addr=1c data=5a5a5a5a
+TXN csr_rsp read_data t=1459000 addr=1c data=0 err=0
+TXN csr read t=1459000 addr=1c
+TXN csr_rsp read_data t=1479000 addr=20 data=0 err=0
+TXN csr read t=1479000 addr=20
+TXN csr_rsp write_ack t=1499000 addr=20 err=0
+TXN csr write t=1499000 addr=20 data=ffffffff
+TXN csr_rsp read_data t=1519000 addr=20 data=f err=0
+TXN csr read t=1519000 addr=20
+TXN csr_rsp write_ack t=1539000 addr=20 err=0
+TXN csr write t=1539000 addr=20 data=0
+TXN sched_cmd command t=1544000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_ack ack t=1544000 pending=1
+TXN sched_in command t=1544000 aux=0 bank=0 col=0 row=0 type=5 we=0
+TXN refresh_level state t=1549000 pending=0 required=0 starve=0 urgent=0
+TXN ddr_cmd command t=1549000 addr=0 bank=0 cmd=1
+TXN csr_sts_level state t=1553000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
+TXN csr_rsp read_data t=1559000 addr=20 data=0 err=0
+TXN csr read t=1559000 addr=20
+TXN csr_rsp write_ack t=1579000 addr=20 err=0
+TXN csr write t=1579000 addr=20 data=a5a5a5a5
+TXN csr_rsp read_data t=1599000 addr=20 data=5 err=0
+TXN csr read t=1599000 addr=20
+TXN csr_rsp write_ack t=1619000 addr=20 err=0
+TXN csr write t=1619000 addr=20 data=5a5a5a5a
+TXN csr_rsp read_data t=1639000 addr=20 data=a err=0
+TXN csr read t=1639000 addr=20
+TXN csr_rsp read_data t=1659000 addr=24 data=0 err=0
+TXN csr read t=1659000 addr=24
+TXN csr_rsp write_ack t=1679000 addr=24 err=0
+TXN csr write t=1679000 addr=24 data=ffffffff
+TXN csr_rsp read_data t=1699000 addr=24 data=1fffffff err=0
+TXN csr read t=1699000 addr=24
+TXN csr_rsp write_ack t=1719000 addr=24 err=0
+TXN csr write t=1719000 addr=24 data=0
+TXN csr_rsp read_data t=1739000 addr=24 data=0 err=0
+TXN csr read t=1739000 addr=24
+TXN csr_rsp write_ack t=1759000 addr=24 err=0
+TXN csr write t=1759000 addr=24 data=a5a5a5a5
+TXN csr_rsp read_data t=1779000 addr=24 data=5a5a5a5 err=0
+TXN csr read t=1779000 addr=24
+TXN csr_rsp write_ack t=1799000 addr=24 err=0
+TXN csr write t=1799000 addr=24 data=5a5a5a5a
+TXN csr_rsp read_data t=1819000 addr=24 data=1a5a5a5a err=0
+TXN csr read t=1819000 addr=24
+TXN csr_rsp read_data t=1839000 addr=28 data=1fffffff err=0
+TXN csr read t=1839000 addr=28
+TXN csr_rsp write_ack t=1859000 addr=28 err=0
+TXN csr write t=1859000 addr=28 data=ffffffff
+TXN csr_rsp read_data t=1879000 addr=28 data=1fffffff err=0
+TXN csr read t=1879000 addr=28
+TXN csr_rsp write_ack t=1899000 addr=28 err=0
+TXN csr write t=1899000 addr=28 data=0
+TXN csr_rsp read_data t=1919000 addr=28 data=0 err=0
+TXN csr read t=1919000 addr=28
+TXN csr_rsp write_ack t=1939000 addr=28 err=0
+TXN csr write t=1939000 addr=28 data=a5a5a5a5
+TXN csr_rsp read_data t=1959000 addr=28 data=5a5a5a5 err=0
+TXN csr read t=1959000 addr=28
+TXN csr_rsp write_ack t=1979000 addr=28 err=0
+TXN csr write t=1979000 addr=28 data=5a5a5a5a
+TXN csr_rsp read_data t=1999000 addr=28 data=1a5a5a5a err=0
+TXN csr read t=1999000 addr=28
+TXN csr_rsp read_data t=2019000 addr=2c data=0 err=1
+TXN csr read t=2019000 addr=2c
+TXN csr_rsp write_ack t=2039000 addr=2c err=1
+TXN csr write t=2039000 addr=2c data=5a5a5a5a
+TXN csr_rsp read_data t=2059000 addr=fc data=0 err=1
+TXN csr read t=2059000 addr=fc
+TXN csr_rsp write_ack t=2079000 addr=fc err=1
+TXN csr write t=2079000 addr=fc data=5a5a5a5a
 HARNESS_DONE
-Simulation complete via $finish(1) at time 5001 NS + 0
+Simulation complete via $finish(1) at time 4167500 PS + 0
 ./chain_harness.sv:451     $finish;
 xcelium> exit
 xmsim: *W,CGDEFN: Default name "bank_tracker_fcov#(32'h00000001).cg_scheduler_inst" will be generated for covergroup instance "chain_harness.u_bank_tracker.u_bank_tracker_fcov.cg_scheduler_inst@3_1" as the name of the covergroup instance is not specified explicitly: ./bank_tracker_fcov.sv, 34.
@@ -1140,6 +1140,6 @@ coverage setup:
   Coverage database dumped with the set_code_fine_grained_merging command during elaboration.
 
 coverage files:
-  model(design data) :  ./cov_work/scope/icc_188dbb0b_242e9920.ucm (reused)
-  data               :  ./cov_work/scope/path_13_csr_refresh_to_scheduling/icc_188dbb0b_242e9920.ucd
-TOOL:	xrun	24.03-s013: Exiting on Nov 05, 2026 at 11:14:31 CST  (total: 00:00:02)
+  model(design data) :  ./cov_work/scope/icc_57db1847_73b6b03c.ucm (reused)
+  data               :  ./cov_work/scope/path_13_csr_refresh_to_scheduling/icc_57db1847_73b6b03c.ucd
+TOOL:	xrun	24.03-s013: Exiting on Nov 05, 2026 at 11:44:01 CST  (total: 00:00:02)

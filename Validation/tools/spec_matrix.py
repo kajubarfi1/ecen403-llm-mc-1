@@ -210,9 +210,12 @@ def level2(entry, out_dir, timeout=5400):
     run_dir = os.path.join(RUNS, entry["name"])
     cmd = [sys.executable, "flow.py", "--choices", choices_path, "--skip-backend",
            "--run-dir", os.path.relpath(run_dir, ROOT), "--max-rtl-rounds", "2"]
+    # the matrix judges generation and simulation per spec; the formal
+    # replays (20-60 min each) belong to the golden sign-off, not to a sweep
+    env = dict(os.environ, VALIDATION_SKIP_FORMAL="1")
     with open(os.path.join(out_dir, "flow.log"), "w") as log:
         try:
-            r = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, timeout=timeout)
+            r = subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, timeout=timeout, env=env)
             rc = r.returncode
         except subprocess.TimeoutExpired:
             rc = -1
@@ -242,7 +245,8 @@ def level2(entry, out_dir, timeout=5400):
     fp = os.path.join(run_dir, "validation", "outbox", "current", "findings_v2.json")
     if os.path.exists(hp):
         h = json.load(open(hp))
-        res["drop"] = h.get("drop")
+        res["drop"] = h.get("drop_id") or h.get("drop")
+        res["design_id"] = h.get("design_id")
         res["validation_status"] = h.get("status")
         res["failed_modules"] = h.get("failed_modules")
     if os.path.exists(fp):

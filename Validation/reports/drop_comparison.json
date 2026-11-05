@@ -1,15 +1,15 @@
 {
   "$schema": "validation-drop-comparison/1",
   "a": {
-    "dir": "Validation/reports/drops/dbb574105f18",
-    "drop_head": "dbb574105f18"
+    "dir": "Validation/reports/drops/e4d883ad50e0",
+    "drop_head": "e4d883ad50e0"
   },
   "b": {
     "dir": "Validation/reports/paths",
     "drop_head": "56ca186bf893"
   },
   "strict": false,
-  "generated_utc": "2026-11-05T17:14:40.464351Z",
+  "generated_utc": "2026-11-05T17:45:25.949736Z",
   "rows": [
     {
       "path": "path_01_write_cmd",
@@ -27,18 +27,18 @@
     },
     {
       "path": "path_02_read_cmd",
-      "kind": "fixed",
+      "kind": "regression",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
-      "matched_up": {
+      "matched_down": {
         "matched:cmd_gen": [
-          138,
-          147
+          147,
+          138
         ]
       },
+      "matched_up": {},
       "verdict": [
         "pass",
         "pass"
@@ -144,86 +144,58 @@
     },
     {
       "path": "path_10_csr_to_timing",
-      "kind": "regression",
-      "new": {
-        "stage:config_regs": 1
-      },
+      "kind": "same",
+      "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {
-        "matched:config_regs": [
-          131,
-          115
-        ]
-      },
+      "matched_down": {},
       "matched_up": {},
       "verdict": [
         "pass",
-        "fail"
+        "pass"
       ]
     },
     {
       "path": "path_11_csr_to_refresh",
-      "kind": "regression",
-      "new": {
-        "stage:config_regs": 1
-      },
+      "kind": "same",
+      "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {
-        "matched:config_regs": [
-          131,
-          115
-        ]
-      },
+      "matched_down": {},
       "matched_up": {},
       "verdict": [
         "pass",
-        "fail"
+        "pass"
       ]
     },
     {
       "path": "path_12_csr_timing_to_scheduling",
-      "kind": "regression",
-      "new": {
-        "stage:config_regs": 1
-      },
+      "kind": "same",
+      "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {
-        "matched:config_regs": [
-          131,
-          115
-        ]
-      },
+      "matched_down": {},
       "matched_up": {},
       "verdict": [
         "pass",
-        "fail"
+        "pass"
       ]
     },
     {
       "path": "path_13_csr_refresh_to_scheduling",
-      "kind": "regression",
-      "new": {
-        "stage:config_regs": 1
-      },
+      "kind": "same",
+      "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {
-        "matched:config_regs": [
-          131,
-          115
-        ]
-      },
+      "matched_down": {},
       "matched_up": {},
       "verdict": [
         "pass",
-        "fail"
+        "pass"
       ]
     },
     {
@@ -284,13 +256,23 @@
     },
     {
       "path": "path_18_full_write",
-      "kind": "same",
+      "kind": "changed",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
+      "matched_down": {
+        "matched:data_path": [
+          60,
+          36
+        ]
+      },
+      "matched_up": {
+        "matched:cmd_gen": [
+          62,
+          64
+        ]
+      },
       "verdict": [
         "pass",
         "pass"
@@ -312,18 +294,18 @@
     },
     {
       "path": "path_20_refresh_preempt",
-      "kind": "fixed",
+      "kind": "regression",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
-      "matched_up": {
+      "matched_down": {
         "matched:cmd_gen": [
-          1844,
-          1848
+          1900,
+          1844
         ]
       },
+      "matched_up": {},
       "verdict": [
         "pass",
         "pass"
@@ -345,33 +327,31 @@
     },
     {
       "path": "path_22_csr_standalone",
-      "kind": "regression",
-      "new": {
-        "stage:config_regs": 1
-      },
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {
-        "matched:config_regs": [
-          131,
-          115
-        ]
-      },
-      "matched_up": {},
-      "verdict": [
-        "pass",
-        "fail"
-      ]
-    },
-    {
-      "path": "path_23_host_ack_collision",
       "kind": "same",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "pass",
+        "pass"
+      ]
+    },
+    {
+      "path": "path_23_host_ack_collision",
+      "kind": "regression",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {
+        "matched:data_path": [
+          211,
+          127
+        ]
+      },
       "matched_up": {},
       "verdict": [
         "pass",

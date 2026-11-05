@@ -69,6 +69,23 @@ Functional: 33/45 covered, 11 unreachable by spec, 1 partial
 (`cg_refresh.cp_ref_002_exercised`, covered on 10-27, lost while the port
 drops half the pipelined traffic; it returns with the wb_port fix).
 
+## 3b. Beyond the golden spec: the spec matrix
+
+"Any generated spec" is judged by `tools/spec_matrix.py` over
+`spec/spec_matrix.json`: the five presets, a greedy pairwise covering set
+over the Tier-1 choices (every value of every parameter, and every pair of
+values of two parameters, in at least one spec the compiler accepts; pairs
+no valid spec can hold are listed as infeasible), and the Tier-2 edges that
+have bitten before. Level 1 compiles each spec and runs the spec review;
+level 2 runs the flow's RTL half on it (generation, gates, our validation;
+formal replays off, they belong to this document's §6). The claim the
+matrix supports is "every Tier-1 value and every pair, structurally, and
+the full RTL half on the corners", not "every spec". Current
+(2026-11-05): 50 specs, 31 pass review (the 19 blocked are five
+compiler/schema defects, Frontend reply addendum 14); presets at level 2:
+3 COMPLETE with 20 of 20 paths, 2 halted in the Frontend's Phase 4
+testbench generator on ECC configurations (addendum 15).
+
 ## 4. Exclusion rules
 
 An uncovered item may be excluded from the target only for one of these

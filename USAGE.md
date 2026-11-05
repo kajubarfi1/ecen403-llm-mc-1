@@ -570,6 +570,33 @@ read ack) is attributed by the monitor from the accepted requests in order
 (catalog `pending` fields); a `MONITOR warnings` line in the summary means a
 response arrived with no request on record.
 
+### 7.4b Many specs at once: the spec matrix
+
+```bash
+python3 Validation/tools/spec_matrix.py --build          # (re)build Validation/spec/spec_matrix.json
+python3 Validation/tools/spec_matrix.py                  # level 1: compile each spec, run the spec review (seconds each)
+python3 Validation/tools/spec_matrix.py --level 2 --origin preset     # level 2: the flow's RTL half per spec (minutes each, Olympus)
+python3 Validation/tools/spec_matrix.py --level 2 --only pair_07 edge_ratio8
+```
+
+The matrix holds the five presets, a pairwise covering set over the Tier-1
+choices and the Tier-2 edges. Level 2 runs `flow.py --choices` per spec
+with `VALIDATION_SKIP_FORMAL=1` (the replays belong to the golden sign-off)
+and reads each run's state and package; a run the cluster refused (SSH
+reset) is flagged `infrastructure` and rerun, not judged. Results:
+`Validation/reports/spec_matrix/summary.json`, one directory per spec with
+its compiled spec, choices and flow log, and `level1_findings.md` grouping
+every blocking message with the specs it hits.
+
+A flow run (`VALIDATION_OUTBOX` set) keeps its path reports beside its
+outbox (`runs/<run>/validation/reports`), never in `Validation/reports/paths`,
+which always describes the repository's checked-in drop.
+
+Formal runs submit a Slurm batch job and poll it with fresh SSH sessions;
+if the local process is lost, `run_formal.py --fetch ~/formal/auto/<dir>`
+with the same options builds the report from the finished job. A report
+whose assumption count does not match the run is refused.
+
 ### 7.5 Gate-level: the backend's netlists through the same paths
 
 The backend's per-block netlists live at `backend/outputs/<block>/6_final.v`.

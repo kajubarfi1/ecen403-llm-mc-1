@@ -1,0 +1,72 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_16_status_refresh",
+  "strategy": "composed",
+  "verdict": "pass",
+  "timestamp": "2026-11-05T11:41:25.256455",
+  "blocks": [
+    "config_regs",
+    "refresh_ctrl"
+  ],
+  "sequence": "Validation/sequences/generated/path_16_status_refresh_seed1.json",
+  "stimulus_generator": "status_poll",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "e4d883ad50e0",
+    "drop_id": "e4d883ad50e0",
+    "design_id": "639368fb2c98",
+    "blocks_used": [
+      "config_regs",
+      "refresh_ctrl"
+    ],
+    "validated_at": "f7d2d02",
+    "frontend_commits": {
+      "config_regs": "f7d2d02f1aeba5250542b2116105773911fffaed",
+      "refresh_ctrl": "f7d2d02f1aeba5250542b2116105773911fffaed"
+    },
+    "roots": [
+      "runs/matrix/preset_low-cost-embedded/drop"
+    ],
+    "blocks": {
+      "config_regs": {
+        "rtl": "runs/matrix/preset_low-cost-embedded/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/matrix/preset_low-cost-embedded/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc"
+      },
+      "refresh_ctrl": {
+        "rtl": "runs/matrix/preset_low-cost-embedded/drop/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "runs/matrix/preset_low-cost-embedded/drop/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/matrix/preset_low-cost-embedded/drop/generated_spec.json",
+      "revision": "compiled_ddr3800_x8_1lane_1rank_08cc0fbc"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "refresh_ctrl",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "refresh_ctrl",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
+    },
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "pass",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=120/120  (120 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    }
+  ],
+  "log": "runs/matrix/preset_low-cost-embedded/validation/reports/path_16_status_refresh_sim.log",
+  "observed_trace": "runs/matrix/preset_low-cost-embedded/validation/reports/path_16_status_refresh_observed.jsonl"
+}

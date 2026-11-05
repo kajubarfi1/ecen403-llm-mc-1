@@ -2,8 +2,8 @@
   "$schema": "validation-path-run/1",
   "path": "path_11_csr_to_refresh",
   "strategy": "exact",
-  "verdict": "fail",
-  "timestamp": "2026-11-05T11:14:35.539164",
+  "verdict": "pass",
+  "timestamp": "2026-11-05T11:44:01.545418",
   "blocks": [
     "config_regs",
     "refresh_ctrl"
@@ -20,22 +20,9 @@
       "kind": "exact",
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
       "scope": "config_regs",
-      "verdict": "fail",
-      "summary": "scope=config_regs  strategy=exact  status=fail  matched=115/131  WAIVED=2 field comparison(s)  value=16",
-      "detail": [
-        "  cfg_timing[0] value: predicted [cfg_timing.update tccd=0x4 tfaw=0x20 tras=0xff trc=0xff trcd=0xff trfc=0x80 trp=0xff trrd=0x6 trtp=0x6 twr=0xc twtr=0x6] but observed [cfg_timing.update tccd=0x4 tfaw=0x1e tras=0xff trc=0xff trcd=0xff trfc=0x6b trp=0xff trrd=0x5 trtp=0x5 twr=0xa twtr=0x5]",
-        "  cfg_timing[1] value: predicted [cfg_timing.update tccd=0x4 tfaw=0x20 tras=0x0 trc=0x0 trcd=0x0 trfc=0x80 trp=0x0 trrd=0x6 trtp=0x6 twr=0xc twtr=0x6] but observed [cfg_timing.update tccd=0x4 tfaw=0x1e tras=0x0 trc=0x0 trcd=0x0 trfc=0x6b trp=0x0 trrd=0x5 trtp=0x5 twr=0xa twtr=0x5]",
-        "  cfg_timing[2] value: predicted [cfg_timing.update tccd=0x4 tfaw=0x20 tras=0xa5 trc=0xa5 trcd=0xa5 trfc=0x80 trp=0xa5 trrd=0x6 trtp=0x6 twr=0xc twtr=0x6] but observed [cfg_timing.update tccd=0x4 tfaw=0x1e tras=0xa5 trc=0xa5 trcd=0xa5 trfc=0x6b trp=0xa5 trrd=0x5 trtp=0x5 twr=0xa twtr=0x5]",
-        "  cfg_timing[3] value: predicted [cfg_timing.update tccd=0x4 tfaw=0x20 tras=0x5a trc=0x5a trcd=0x5a trfc=0x80 trp=0x5a trrd=0x6 trtp=0x6 twr=0xc twtr=0x6] but observed [cfg_timing.update tccd=0x4 tfaw=0x1e tras=0x5a trc=0x5a trcd=0x5a trfc=0x6b trp=0x5a trrd=0x5 trtp=0x5 twr=0xa twtr=0x5]",
-        "  cfg_timing[4] value: predicted [cfg_timing.update tccd=0x4 tfaw=0xff tras=0x5a trc=0x5a trcd=0x5a trfc=0xff trp=0x5a trrd=0xff trtp=0x6 twr=0xc twtr=0xff] but observed [cfg_timing.update tccd=0x4 tfaw=0xff tras=0x5a trc=0x5a trcd=0x5a trfc=0xff trp=0x5a trrd=0xff trtp=0x5 twr=0xa twtr=0xff]",
-        "  cfg_timing[5] value: predicted [cfg_timing.update tccd=0x4 tfaw=0x0 tras=0x5a trc=0x5a trcd=0x5a trfc=0x0 trp=0x5a trrd=0x0 trtp=0x6 twr=0xc twtr=0x0] but observed [cfg_timing.update tccd=0x4 tfaw=0x0 tras=0x5a trc=0x5a trcd=0x5a trfc=0x0 trp=0x5a trrd=0x0 trtp=0x5 twr=0xa twtr=0x0]",
-        "  cfg_timing[6] value: predicted [cfg_timing.update tccd=0x4 tfaw=0xa5 tras=0x5a trc=0x5a trcd=0x5a trfc=0xa5 trp=0x5a trrd=0xa5 trtp=0x6 twr=0xc twtr=0xa5] but observed [cfg_timing.update tccd=0x4 tfaw=0xa5 tras=0x5a trc=0x5a trcd=0x5a trfc=0xa5 trp=0x5a trrd=0xa5 trtp=0x5 twr=0xa twtr=0xa5]",
-        "  cfg_timing[7] value: predicted [cfg_timing.update tccd=0x4 tfaw=0x5a tras=0x5a trc=0x5a trcd=0x5a trfc=0x5a trp=0x5a trrd=0x5a trtp=0x6 twr=0xc twtr=0x5a] but observed [cfg_timing.update tccd=0x4 tfaw=0x5a tras=0x5a trc=0x5a trcd=0x5a trfc=0x5a trp=0x5a trrd=0x5a trtp=0x5 twr=0xa twtr=0x5a]",
-        "  csr_rsp[18] value: predicted [csr_rsp.read_data addr=0x8 data=0x271c0b0b err=0x0] but observed [csr_rsp.read_data addr=0x8 data=0x21180909 err=0x0]",
-        "  csr_rsp[27] value: predicted [csr_rsp.read_data addr=0xc data=0x80200606 err=0x0] but observed [csr_rsp.read_data addr=0xc data=0x6b1e0505 err=0x0]",
-        "  csr_rsp[36] value: predicted [csr_rsp.read_data addr=0x10 data=0x80b060c err=0x0] but observed [csr_rsp.read_data addr=0x10 data=0x709050a err=0x0]",
-        "  csr_rsp[45] value: predicted [csr_rsp.read_data addr=0x14 data=0x186004 err=0x0] but observed [csr_rsp.read_data addr=0x14 data=0x145004 err=0x0]"
-      ],
+      "verdict": "pass",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=131/131  WAIVED=2 field comparison(s)  (131 output transaction(s) matched)",
+      "detail": [],
       "rule_counts": {}
     }
   ],
@@ -56,7 +43,7 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "b83b87c",
+    "validated_at": "f7d2d02",
     "frontend_commits": {
       "addr_decoder": "f37ce49d323151a6118ae7765aa766918c816383",
       "bank_tracker": "f37ce49d323151a6118ae7765aa766918c816383",
