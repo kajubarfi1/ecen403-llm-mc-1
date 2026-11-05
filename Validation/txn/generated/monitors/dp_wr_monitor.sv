@@ -4,7 +4,7 @@
 //
 // Interface : dp_wr   (Host write data accepted by the data path)
 // Block     : data_path
-// Manifest  : Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json
+// Manifest  : runs/nov04_loop/drop/PHASE4RTL/data_path_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

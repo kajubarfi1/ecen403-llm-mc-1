@@ -1,17 +1,17 @@
 <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 <> User: jacobz
 
-Host: n01-zeus.olympus.ece.tamu.edu
+Host: n02-hera.olympus.ece.tamu.edu
 
-Report date: Thu 29 Oct 2026 11:52:25 CDT
+Report date: Wed 04 Nov 2026 18:31:39 CST
 
 Report options: -detail -metrics block:expression:toggle:fsm -out /home/ugrads/j/jacobz/cov_uncov_u_wb_port.txt -inst chain_harness.u_wb_port -uncovered -source on -overwrite
 
 Coverage database path: /home/ugrads/j/jacobz/cov_merged_paths
 
-Coverage model files: /home/ugrads/j/jacobz/cov_merged_paths/icc_0760043a_097ec634.ucm
+Coverage model files: /home/ugrads/j/jacobz/cov_merged_paths/icc_250ddfbf_45ac7fd6.ucm
 
-Coverage data files: /home/ugrads/j/jacobz/cov_merged_paths/icc_0760043a_097ec634.ucd
+Coverage data files: /home/ugrads/j/jacobz/cov_merged_paths/icc_250ddfbf_45ac7fd6.ucd
 
 CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_conf.ccf
     // Xcelium coverage configuration for the DDR3 validation subsystem.
@@ -79,7 +79,7 @@ CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_
     
 
 
-Coverage database date: Thu 29 Oct 2026 11:47:00 CDT
+Coverage database date: Wed 04 Nov 2026 18:29:31 CST
 
 *** There were no refinement files applied ***
 
@@ -130,10 +130,10 @@ Uncovered Toggle Detail Report, Instance Based
 Instance name: chain_harness.u_wb_port
 Type name: wb_port#(32'h00000020,32'h0000001d,32'h00000004,32'h00000004,32'h00000008,32'h00000010,32'h00000004,32'h00000010,32'h00000004,3'h0,3'h1,3'h2,3'h7,2'h0,4)
 File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/wb_port.sv
-Number of uncovered signal bits: 54 of 342
+Number of uncovered signal bits: 45 of 350
 Number of unreachable signal bits: 0
-Number of signal bits partially toggled(rise): 14 of 342
-Number of signal bits partially toggled(fall): 9 of 342
+Number of signal bits partially toggled(rise): 7 of 350
+Number of signal bits partially toggled(fall): 3 of 350
 
 Hit(Full)  Hit(Rise)  Hit(Fall)  Signal                    
 -----------------------------------------------------------
@@ -164,33 +164,24 @@ Hit(Full)  Hit(Rise)  Hit(Fall)  Signal
 0          0          0          rsp_rdata[2]              
 0          0          0          rsp_rdata[1]              
 0          0          0          rsp_rdata[0]              
-0          0          0          tag_mem[15][1]            
-0          1          0          tag_mem[15][2]            
-0          0          1          tag_mem[14][0]            
+0          0          0          tag_mem[15][2]            
+0          1          0          tag_mem[14][1]            
 0          0          1          tag_mem[13][1]            
-0          0          0          tag_mem[13][2]            
-0          1          0          tag_mem[12][1]            
-0          0          1          tag_mem[12][2]            
-0          0          1          tag_mem[11][0]            
-0          0          0          tag_mem[11][1]            
-0          1          0          tag_mem[10][0]            
-0          0          1          tag_mem[10][1]            
-0          0          0          tag_mem[10][2]            
-0          0          1          tag_mem[9][0]             
-0          0          1          tag_mem[9][3]             
+0          1          0          tag_mem[11][2]            
 0          1          0          tag_mem[8][0]             
-0          0          1          tag_mem[8][3]             
 0          1          0          tag_mem[7][3]             
-0          1          0          tag_mem[6][2]             
-0          1          0          tag_mem[5][1]             
-0          1          0          tag_mem[3][3]             
-0          1          0          tag_mem[2][0]             
-0          1          0          tag_mem[2][3]             
-0          1          0          tag_mem[1][0]             
-0          0          1          tag_mem[1][1]             
+0          0          1          tag_mem[6][1]             
+0          1          0          tag_mem[5][2]             
+0          0          1          tag_mem[3][1]             
 0          1          0          tag_mem[1][3]             
-0          1          0          tag_mem[0][1]             
 0          0          0          burst_cnt[3]              
+0          0          0          wr_ack_pending[7]         
+0          0          0          wr_ack_pending[6]         
+0          0          0          wr_ack_pending[5]         
+0          0          0          wr_ack_pending[4]         
+0          0          0          wr_ack_pending[3]         
+0          0          0          wr_ack_pending[2]         
+0          0          0          wr_ack_pending[1]         
 
 Uncovered Fsm Detail Report, Instance Based
 ===========================================

@@ -1,57 +1,19 @@
 {
   "$schema": "validation-drop-comparison/1",
   "a": {
-    "dir": "Validation/reports/drops/5994bb667dba",
-    "drop_head": "5994bb667dba"
+    "dir": "Validation/reports/drops/2bea54c5eac1",
+    "drop_head": "2bea54c5eac1"
   },
   "b": {
     "dir": "Validation/reports/paths",
-    "drop_head": "e5ec723f495e"
+    "drop_head": "56ca186bf893"
   },
   "strict": false,
-  "generated_utc": "2026-10-29T17:56:36.551779Z",
+  "generated_utc": "2026-11-05T00:32:20.673290Z",
   "rows": [
     {
       "path": "path_01_write_cmd",
-      "kind": "changed",
-      "new": {
-        "assert:p_sel_nonzero_write": 3
-      },
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "fail",
-        "pass"
-      ],
-      "notes": [
-        "coverage collected on one side only; illegal-bin hits ignored"
-      ]
-    },
-    {
-      "path": "path_02_read_cmd",
-      "kind": "changed",
-      "new": {
-        "assert:p_tag": 33
-      },
-      "gone": {},
-      "grew": {},
-      "shrank": {},
-      "matched_down": {},
-      "matched_up": {},
-      "verdict": [
-        "fail",
-        "pass"
-      ],
-      "notes": [
-        "coverage collected on one side only; illegal-bin hits ignored"
-      ]
-    },
-    {
-      "path": "path_03_read_return",
-      "kind": "fixed",
+      "kind": "same",
       "new": {},
       "gone": {},
       "grew": {},
@@ -59,74 +21,92 @@
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "fail",
+        "pass",
         "pass"
-      ],
-      "notes": [
-        "coverage collected on one side only; illegal-bin hits ignored"
+      ]
+    },
+    {
+      "path": "path_02_read_cmd",
+      "kind": "same",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "pass",
+        "pass"
+      ]
+    },
+    {
+      "path": "path_03_read_return",
+      "kind": "same",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "pass",
+        "pass"
       ]
     },
     {
       "path": "path_04_scheduler_bank_loop",
-      "kind": "changed",
-      "new": {
-        "assert:p_sel_nonzero_write": 3
-      },
+      "kind": "same",
+      "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "fail",
+        "pass",
         "pass"
-      ],
-      "notes": [
-        "coverage collected on one side only; illegal-bin hits ignored"
       ]
     },
     {
       "path": "path_05_scheduler_refresh_loop",
-      "kind": "regression",
-      "new": {
-        "assert:p_wr_no_overflow": 1,
-        "stage:(conservation)": 1
-      },
+      "kind": "same",
+      "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "fail",
-        "fail"
-      ],
-      "notes": [
-        "coverage collected on one side only; illegal-bin hits ignored"
+        "pass",
+        "pass"
       ]
     },
     {
       "path": "path_06_scheduler_dequeue",
-      "kind": "missing",
-      "side": "a"
-    },
-    {
-      "path": "path_07_backpressure",
-      "kind": "changed",
-      "new": {
-        "assert:p_tag": 108
-      },
+      "kind": "same",
+      "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "fail",
+        "pass",
         "pass"
-      ],
-      "notes": [
-        "coverage collected on one side only; illegal-bin hits ignored"
+      ]
+    },
+    {
+      "path": "path_07_backpressure",
+      "kind": "same",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "pass",
+        "pass"
       ]
     },
     {
@@ -159,17 +139,7 @@
     },
     {
       "path": "path_10_csr_to_timing",
-      "kind": "missing",
-      "side": "a"
-    },
-    {
-      "path": "path_11_csr_to_refresh",
-      "kind": "missing",
-      "side": "a"
-    },
-    {
-      "path": "path_12_csr_timing_to_scheduling",
-      "kind": "fixed",
+      "kind": "same",
       "new": {},
       "gone": {},
       "grew": {},
@@ -177,16 +147,41 @@
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "fail",
+        "pass",
         "pass"
-      ],
-      "notes": [
-        "coverage collected on one side only; illegal-bin hits ignored"
+      ]
+    },
+    {
+      "path": "path_11_csr_to_refresh",
+      "kind": "same",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "pass",
+        "pass"
+      ]
+    },
+    {
+      "path": "path_12_csr_timing_to_scheduling",
+      "kind": "same",
+      "new": {},
+      "gone": {},
+      "grew": {},
+      "shrank": {},
+      "matched_down": {},
+      "matched_up": {},
+      "verdict": [
+        "pass",
+        "pass"
       ]
     },
     {
       "path": "path_13_csr_refresh_to_scheduling",
-      "kind": "fixed",
+      "kind": "same",
       "new": {},
       "gone": {},
       "grew": {},
@@ -194,11 +189,8 @@
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "fail",
+        "pass",
         "pass"
-      ],
-      "notes": [
-        "coverage collected on one side only; illegal-bin hits ignored"
       ]
     },
     {
@@ -259,67 +251,55 @@
     },
     {
       "path": "path_18_full_write",
-      "kind": "changed",
-      "new": {
-        "assert:p_tag": 9
-      },
+      "kind": "same",
+      "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "fail",
+        "pass",
         "pass"
-      ],
-      "notes": [
-        "coverage collected on one side only; illegal-bin hits ignored"
       ]
     },
     {
       "path": "path_19_row_conflict",
-      "kind": "changed",
-      "new": {
-        "assert:p_sel_nonzero_write": 3
-      },
+      "kind": "same",
+      "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "fail",
+        "pass",
         "pass"
-      ],
-      "notes": [
-        "coverage collected on one side only; illegal-bin hits ignored"
       ]
     },
     {
       "path": "path_20_refresh_preempt",
-      "kind": "regression",
-      "new": {
-        "assert:p_wr_no_overflow": 1,
-        "stage:(conservation)": 1
-      },
+      "kind": "same",
+      "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "fail",
-        "fail"
-      ],
-      "notes": [
-        "coverage collected on one side only; illegal-bin hits ignored"
+        "pass",
+        "pass"
       ]
     },
     {
       "path": "path_21_wb_port_standalone",
-      "kind": "same",
-      "new": {},
-      "gone": {},
+      "kind": "changed",
+      "new": {
+        "assert:p_sel_nonzero_write": 3
+      },
+      "gone": {
+        "log:DRIVER_STALL": 19
+      },
       "grew": {},
       "shrank": {},
       "matched_down": {},
@@ -345,25 +325,16 @@
     },
     {
       "path": "path_23_host_ack_collision",
-      "kind": "regression",
-      "new": {
-        "assert:a_HOST_001": 1,
-        "id:DRIVER_STALL": 4,
-        "log:DRIVER_STALL": 4,
-        "stage:(host handshake)": 1,
-        "stage:wb_port": 1
-      },
+      "kind": "same",
+      "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
       "matched_up": {},
       "verdict": [
-        "fail",
-        "fail"
-      ],
-      "notes": [
-        "coverage collected on one side only; illegal-bin hits ignored"
+        "pass",
+        "pass"
       ]
     }
   ]

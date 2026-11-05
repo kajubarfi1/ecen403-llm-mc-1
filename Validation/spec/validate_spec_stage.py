@@ -195,6 +195,52 @@ def check_register_map(spec):
 # the stage
 # --------------------------------------------------------------------------
 
+def check_derived(spec):
+    """Arithmetic identities between the spec's stated fields and its own
+    `$derived` values, re-checked here rather than trusted from the
+    compiler's `consistency_ok` (a spec handed in directly has no compile
+    result). Added 2026-11-04 after the Frontend's Tier-1 sweep found a
+    generator deriving the address width from every byte lane (ECC lane
+    included) while the compiler derives it from the data lanes only: two
+    formulas for one quantity, equal whenever ECC is off. The identities
+    below are the ones every block's width must agree with."""
+    import math
+    out = []
+    geom = spec.get("memory_geometry", {}) or {}
+    host = spec.get("host_interface", {}) or {}
+    gd = geom.get("$derived", {}) or {}
+    hd = host.get("$derived", {}) or {}
+    lanes = geom.get("byte_lanes")
+    data_lanes = gd.get("data_byte_lanes", lanes)
+    ecc = (spec.get("controller_architecture", {}) or {}).get("ecc_mode", 0)
+    if lanes is not None and data_lanes is not None:
+        ecc_lanes = int(lanes) - int(data_lanes)
+        if ecc and ecc_lanes < 1:
+            out.append(f"memory_geometry: ecc_mode = {ecc} but byte_lanes ({lanes}) leaves no lane "
+                       f"beyond data_byte_lanes ({data_lanes}); an ECC mode needs a check-byte lane")
+        if not ecc and ecc_lanes != 0:
+            out.append(f"memory_geometry: ecc_mode = 0 but byte_lanes ({lanes}) != data_byte_lanes ({data_lanes})")
+    dens = gd.get("device_density_bits")
+    cap = gd.get("channel_capacity_bytes")
+    ranks = geom.get("ranks", 1)
+    if dens and cap and data_lanes:
+        want = int(dens) // 8 * int(data_lanes) * int(ranks)
+        if int(cap) != want:
+            out.append(f"memory_geometry.$derived.channel_capacity_bytes = {cap}, but density/8 x data lanes x ranks "
+                       f"= {dens}/8 x {data_lanes} x {ranks} = {want}")
+    aw = host.get("address_width_bits")
+    if aw and cap and host.get("addressing", "byte") == "byte":
+        want = int(round(math.log2(int(cap))))
+        if int(aw) != want:
+            out.append(f"host_interface.address_width_bits = {aw}, but log2(channel_capacity_bytes {cap}) = {want}: "
+                       f"every block that derives an address width from the geometry must agree with this")
+    dw = host.get("data_width_bits")
+    sel = hd.get("sel_width_bits")
+    if dw and sel and int(sel) != int(dw) // 8:
+        out.append(f"host_interface.$derived.sel_width_bits = {sel}, but data_width_bits/8 = {int(dw) // 8}")
+    return out
+
+
 def review(spec, compile_result=None):
     """Everything validate_spec() decides from, as structured data."""
     import spec_conformance as JC
@@ -228,6 +274,10 @@ def review(spec, compile_result=None):
     # register map
     for s in check_register_map(spec):
         blocking.append(f"registers: {s}")
+
+    # derived-value identities (independent of the compiler's own checks)
+    for s in check_derived(spec):
+        blocking.append(f"derived: {s}")
 
     # compiler's own checks
     if compile_result is not None and not compile_result.get("consistency_ok", True):

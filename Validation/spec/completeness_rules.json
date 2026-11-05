@@ -211,6 +211,20 @@
       "question": "When the data path's write buffer is full, does the host port stall writes (wr_data_ready reaches wb_stall_o), or is the buffer sized so that it can never be full while the queue has room (write_buffer_depth >= command_queue_depth + writes in flight)?",
       "consequence": "Today write_buffer_depth = command_queue_depth = 16 and wr_data_ready has no consumer: a write word is dropped whenever the buffer is full in the cycle the queue accepts another write (1 of 600 on the refresh paths, drop e5ec723f495e, 2026-10-29). Either answer closes it; the first needs a new edge in the Phase 1/4 manifests.",
       "discovered_by": "CONSERVE/WRITE_REQUEST_TO_DATA on path_05/path_20, drop e5ec723f495e (2026-10-29)"
+    },
+    {
+      "id": "HOST_ACK_ORDERING",
+      "kind": "required_field",
+      "when_present": "host_interface",
+      "require": "host_interface.ack_ordering",
+      "options": [
+        "in_request_order",
+        "writes_may_complete_early"
+      ],
+      "disposition": "decision",
+      "question": "Must the host port return acknowledges in the order the beats were accepted (Wishbone B4 pipelined masters match acks to requests by order; a response carries no id), or may a write be acknowledged ahead of an earlier read that is still waiting for its data?",
+      "consequence": "The design acknowledges a write one cycle after acceptance and a read when its data returns, tens of cycles later, so a write accepted after a read is acknowledged first. A B4 master counting acks attributes that ack to the read and takes whatever is on wb_dat_o as its data. Validation's monitors and driver attribute read responses by rsp_valid, not by ack order, so this is not caught today; if the answer is in_request_order it becomes a check and a finding, if writes_may_complete_early the host contract must say so.",
+      "discovered_by": "review of the HOST_001 fix (write acks now queued behind read acks, 1fe4c9d, 2026-10-29)"
     }
   ]
 }

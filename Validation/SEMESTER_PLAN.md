@@ -1004,6 +1004,48 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   (1018 bits of 32-bit deadline storage that cannot toggle); told her
   8 bits would do. Formal replays on the new scheduler launched
   (per-run remote dirs, concurrent). Reply addendum 11.
+- *2026-10-29, night — 20 of 20.* Her next drop (2bea54c5eac1: write
+  buffer pop/push race, HOST_001 held with a pending-ack counter, the
+  Phase 3 gate's RefBlock test polling, an addr_decoder ECC-lane
+  formula fix from her own Tier-1 sweep): every path passes, no open
+  simulation finding. Our HOST_001 property was the old
+  implementation's hazard, not the requirement, and kept firing on the
+  fixed port: restated as a *counter rule* (new kind in sva_gen: owed =
+  beats accepted minus acks delivered, never negative, progress within
+  a spec-derived bound). Two intake questions filed (write-buffer
+  back-pressure consumer, ack ordering). Formal runner: per-run local
+  tarball too (the two replays had shared one and the abstraction run
+  lost its stopats). Replays on the new design running. Addendum 12.
+- *2026-11-04 — spec review re-checks the derived identities itself.*
+  Her Tier-1 sweep (handoff 9) found addr_decoder deriving the address
+  width from every byte lane, ECC lane included, while the compiler
+  uses the data lanes: two formulas for one quantity. `validate_spec_
+  stage.check_derived` now re-checks capacity = density/8 x data lanes
+  x ranks, address width = log2(capacity), sel width = data width/8 and
+  the ECC lane count against the stated fields, blocking on a mismatch,
+  without trusting the compiler's own `consistency_ok`. All five
+  presets (her 6efa9d2 made all five compile) pass the review with 0
+  blocking and the same three advisory intake questions. The formal
+  replays launched on 10-29 left no report (the session's scratch
+  files went with it); they rerun on her newest drop after the pull.
+  Her newest drop 56ca186bf893 (4-bit saturating deadlines, registered
+  wr_data_ready, balanced priority tree): 20/20 PASS; code coverage
+  back to 82.9 % measured / 89.2 % adjusted (data_path 70 %, up from
+  30). One rule correction: path_21 (standalone port, responses tied
+  off) drove reads that can never be acknowledged there, and the new
+  HOST_001 progress property rightly complained; the path now drives
+  writes only, as its tie note always said. Flow loop started on the
+  clean drop (`runs/nov04_loop`); formal replays running.
+  Evening: the SSH sessions waiting on JasperGold died (laptop network)
+  while the Slurm jobs finished; `run_formal.py` now submits with
+  sbatch and polls with fresh sessions, and `--fetch <dir>` builds the
+  report from a finished run. Results on 56ca186bf893: TIMING_008
+  proven again, PROTO_001/002 and HOST_001 undetermined at ~42 in 20
+  min (the redesigned blocks enlarge the state), HOST_001_progress cex
+  at 254: a long queue, not a lost ack; the bound now scales with the
+  queue depth (968). JasperGold reports "Global Stopats: <none>" even
+  with cuts applied, so the run-matching check uses the assumption
+  count only.
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

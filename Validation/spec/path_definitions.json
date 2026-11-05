@@ -1277,10 +1277,10 @@
       "check_strategy": "exact",
       "check_strategy_reason": "Phase-1 block judged on its own: the wb_port predictor predicts the req stream (one request per accepted host access with its address/data/mask/we) and the write acks; the request sink is tied always-ready and no read data returns (standalone_ties), so reads are accepted and judged on the req stream but never complete -- the driver's bounded completion wait reports that as expected. Runs on every drop, so its evidence is comparable once Phase 3/4 arrive and path_02/03 judge the responses.",
       "stimulus_kinds": [
-        "write",
-        "read"
+        "write"
       ],
-      "settle_cycles": 64
+      "settle_cycles": 64,
+      "$stimulus_kinds_note": "2026-11-04: writes only. The standalone path ties the data path's response off, so a read is never acknowledged there; it was already judged on the request stream only (standalone_ties note), and the HOST_001 counter rule (every accepted beat acknowledged within the bound) now makes an unanswerable read a false alarm. Reads on the port are judged by path_02/03/18/23 on the full drop."
     },
     {
       "id": "path_22_csr_standalone",
