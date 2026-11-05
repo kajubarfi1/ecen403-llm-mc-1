@@ -79,8 +79,20 @@ function Show-Ready($name, $hint) {
 }
 Show-Ready "ANTHROPIC_API_KEY" "Frontend spec synthesis and all repair agents need it"
 Show-Ready "OLYMPUS_USER"      "your TAMU NetID; set it in Validation\setup.env"
-Show-Ready "OLYMPUS_KEY"       "path to a passphrase-less private key; see Validation\setup.env"
 Show-Ready "ORFS_DIR"          "OpenROAD-flow-scripts checkout, from the backend .env"
+
+# Either credential satisfies flow.py's Olympus gate: a passphrase-less key, or
+# OLYMPUS_PASSWORD (real as of ff03df9). Reporting only the key would nag at a
+# working password-only setup.
+$oKey = [Environment]::GetEnvironmentVariable("OLYMPUS_KEY")
+$oPwd = [Environment]::GetEnvironmentVariable("OLYMPUS_PASSWORD")
+if ($oKey) {
+    Write-Host "  Olympus credential OK (key)" -ForegroundColor Green
+} elseif ($oPwd) {
+    Write-Host "  Olympus credential OK (password)" -ForegroundColor Green
+} else {
+    Write-Host "  Olympus credential MISSING -- set OLYMPUS_KEY or OLYMPUS_PASSWORD in Validation\setup.env; stages 3-5, 7 and 8 will halt without one" -ForegroundColor Yellow
+}
 
 $key = [Environment]::GetEnvironmentVariable("OLYMPUS_KEY")
 if ($key -and -not (Test-Path $key)) {
