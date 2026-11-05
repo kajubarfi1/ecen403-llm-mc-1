@@ -130,7 +130,32 @@ Two traps specific to Windows while installing a key:
   you asked for.
 
 **The fallback is `OLYMPUS_PASSWORD`**, which works and is the pragmatic
-answer when the key route is administratively closed.
+answer when the key route is administratively closed. Verified on this account
+2026-11-05: password auth reaches `olympus-login.engr.tamu.edu`, `srun`
+allocates on the `adademic` partition, and `xrun 24.03-s013` is visible from a
+compute node.
+
+### 1.2.2 A parser bug this exposed, now fixed
+
+Worth knowing, because the symptom named nothing useful. With the unused
+credential left blank (`OLYMPUS_KEY=`), `sim_runner._from_setup_env` read its
+value as `#` and handed paramiko a key file by that name:
+
+```
+FileNotFoundError: [Errno 2] No such file or directory: '#'
+```
+
+The regex was `r'^\s*' + key + r'\s*=\s*"?([^"\n]*?)"?\s*$'` under `re.M`.
+`\s` matches newlines, so the `\s*` after the `=` crossed the line break and
+the capture group took the next non-blank line -- a comment -- as the value.
+The real credential sat unused two lines below, and nothing in the error
+mentioned `setup.env`, or which key, or that a credential had been found at
+all.
+
+Fixed by using `[^\S\n]*` (horizontal whitespace only), so an empty value reads
+as absent and `_setting()` falls through to the next source. The other readers
+of `setup.env` are line-based and were never affected. A blank line is harmless
+now, but deleting the credential you are not using is still tidier.
 
 Then set in `Validation\setup.env`:
 
@@ -138,6 +163,17 @@ Then set in `Validation\setup.env`:
 OLYMPUS_USER=your_netid
 OLYMPUS_KEY=C:\Users\dawca\.ssh\olympus
 ```
+
+or, for the password route:
+
+```
+OLYMPUS_USER=your_netid
+OLYMPUS_PASSWORD=your_netid_password
+```
+
+**Uncomment the line you use** -- every loader skips anything starting with
+`#`, so a filled-in but still-commented `# OLYMPUS_PASSWORD=...` reads as
+absent and the gate reports no credential at all.
 
 ### 1.3 sky130 gate models on Olympus (only for netlist re-simulation)
 
@@ -152,6 +188,11 @@ C:\Users\dawca\llmmc_flow_venv\Scripts\python.exe Validation\tools\install_sky13
 If `--check` says they are absent, drop `--check` to install. The installer's
 own smoke test compiles a real netlist against the library, so a clean run is
 proof it works rather than just proof it copied files.
+
+**Done on this account 2026-11-05**: 233 cell models and 94 include dirs under
+`~/cadence_agent_work/sky130`, smoke test OK -- the `wb_port` netlist compiles.
+The `*W,DLCVAR ... Invalid environment variable ''` line is a `cds.lib`
+warning, not a failure.
 
 ## 2. Running it
 
