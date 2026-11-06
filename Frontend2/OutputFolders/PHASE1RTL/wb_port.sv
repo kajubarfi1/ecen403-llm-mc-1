@@ -146,10 +146,18 @@ module wb_port #(
     logic [DATA_WIDTH-1:0] rd_data_buf   [0:TAG_FIFO_DEPTH-1];
     logic                  rd_data_valid [0:TAG_FIFO_DEPTH-1];
 
-    // No reset: gated entirely by rd_data_valid below, which does
-    // reset -- an unread stale value here is never observable.
-    always_ff @(posedge clk)
-        if (rsp_valid) rd_data_buf[rsp_aux[TAG_PTR_W-1:0]] <= rsp_rdata;
+    // Reset to 0, not left uninitialized: wb_dat_o reads
+    // rd_data_buf[rd_head_idx] continuously, not only when
+    // actually acking, so an unwritten slot's X would otherwise
+    // show up on the port even while idle -- caught live
+    // (2026-11-06): Validation's monitor flagged X/Z on wb_dat_o
+    // before any read had used that slot.
+    always_ff @(posedge clk or negedge rst_n)
+        if (!rst_n) begin
+            for (int i = 0; i < TAG_FIFO_DEPTH; i++) rd_data_buf[i] <= '0;
+        end else if (rsp_valid) begin
+            rd_data_buf[rsp_aux[TAG_PTR_W-1:0]] <= rsp_rdata;
+        end
 
     // Stall generation (WB-005)
     //
@@ -273,9 +281,21 @@ module wb_port #(
     // addendum 11): a write below ord_mem's head simply cannot
     // ack early, so the write-vs-read-ack collision that bug
     // was about cannot recur structurally, not just by counting.
-    wire [TAG_PTR_W-1:0] rd_head_idx    = tag_mem[tag_rd[TAG_PTR_W-1:0]][TAG_PTR_W-1:0];
+    wire [TAG_PTR_W-1:0] rd_head_idx = tag_mem[tag_rd[TAG_PTR_W-1:0]][TAG_PTR_W-1:0];
+    // A response landing exactly for the current head bypasses
+    // rd_data_buf and acks the SAME cycle it arrives, same
+    // zero-added-latency timing as the original rd_ack=rsp_valid
+    // design. rd_data_valid only takes its new value the NEXT
+    // edge, so without this bypass EVERY read -- not just a
+    // reordered one -- would wait one extra cycle to ack, which
+    // is exactly what Validation's HOST_002 caught live
+    // (2026-11-06): it expects a read's ack to coincide with
+    // rsp_valid, true for the original design and now true again
+    // except on the genuinely-reordered path, which still buffers.
+    wire rsp_is_head = rsp_valid && (rsp_aux[TAG_PTR_W-1:0] == rd_head_idx);
     wire                 wr_ack_deliver = !ord_empty && !ord_head_rd;
-    wire                 rd_ack         = !ord_empty &&  ord_head_rd && rd_data_valid[rd_head_idx];
+    wire                 rd_ack         = !ord_empty &&  ord_head_rd &&
+                                           (rd_data_valid[rd_head_idx] || rsp_is_head);
     wire                 ord_pop        = wr_ack_deliver | rd_ack;
 
     always_ff @(posedge clk or negedge rst_n)
@@ -290,12 +310,15 @@ module wb_port #(
         else if (rd_ack) tag_rd <= tag_rd + 1'b1;
 
     // rd_data_valid: set when a response for that tag arrives,
-    // cleared when that tag's slot is actually delivered. These
-    // two conditions targeting the same index in the same cycle
-    // would mean a second response landed for an already-
-    // delivered tag -- cannot happen in correct operation (WB-009
-    // below checks it), so the set/clear order here never matters
-    // in practice.
+    // cleared when that tag's slot is actually delivered. The
+    // common case (rsp_is_head bypass) sets and clears the SAME
+    // index in the SAME cycle -- the clear (textually later, so
+    // it wins) is correct: the data went straight to wb_dat_o via
+    // the bypass mux, so the buffer slot was never the delivery
+    // path and has nothing worth marking valid. Any OTHER
+    // same-index collision (two responses for one still-
+    // outstanding tag) would mean a real protocol violation --
+    // WB-009 below checks for that.
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             for (int i = 0; i < TAG_FIFO_DEPTH; i++) rd_data_valid[i] <= 1'b0;
@@ -306,7 +329,7 @@ module wb_port #(
     end
 
     assign wb_ack_o = wr_ack_deliver | rd_ack;
-    assign wb_dat_o = rd_data_buf[rd_head_idx];
+    assign wb_dat_o = rsp_is_head ? rsp_rdata : rd_data_buf[rd_head_idx];
 
     // Error detection (WB-007)
     logic err_r;

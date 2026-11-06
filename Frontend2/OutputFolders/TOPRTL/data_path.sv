@@ -219,6 +219,10 @@ module data_path #(
         end
     end
 
+    // NOTE: wr_buf_valid is NOT cleared in this FSM block -- it is
+    // driven solely by the write-buffer push block further down
+    // (single always_ff driver rule), which clears the popped
+    // entry via wr_pop_this_cycle / wr_pop_idx.
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             wr_state     <= WR_IDLE;
@@ -238,7 +242,6 @@ module data_path #(
                         // position -- it may not be the data pushed Nth.
                         wr_dat_r     <= wr_buf[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]].data;
                         wr_msk_r     <= wr_buf[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]].mask;
-                        wr_buf_valid[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]] <= 1'b0;
                         wr_rptr      <= wr_rptr + 1'b1;
                         wr_pend_rptr <= wr_pend_rptr + 1'b1;
                         wr_state     <= WR_DRIVE;
@@ -250,7 +253,6 @@ module data_path #(
                         // cmd_aux -- no wr_pend_aux lookup needed.
                         wr_dat_r <= wr_buf[cmd_aux[FIFO_PTR_W-1:0]].data;
                         wr_msk_r <= wr_buf[cmd_aux[FIFO_PTR_W-1:0]].mask;
-                        wr_buf_valid[cmd_aux[FIFO_PTR_W-1:0]] <= 1'b0;
                         wr_rptr  <= wr_rptr + 1'b1;
                         if (cfg_CWL_nCK <= CLK_RATIO[7:0]) begin
                             // CWL fits in one ctrl cycle, go straight to drive
@@ -291,7 +293,6 @@ module data_path #(
                             // pushed Nth.
                             wr_dat_r     <= wr_buf[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]].data;
                             wr_msk_r     <= wr_buf[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]].mask;
-                            wr_buf_valid[wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0]] <= 1'b0;
                             wr_rptr      <= wr_rptr + 1'b1;
                             wr_pend_rptr <= wr_pend_rptr + 1'b1;
                             wr_state     <= WR_DRIVE;
@@ -323,6 +324,15 @@ module data_path #(
          ((!wr_pend_empty && !wr_empty && wr_head_due_r) || wr_bypass))
         || ((wr_state == WR_DRIVE) && (wr_burst_ctr == WORD_BEATS[1:0] - 1'b1) &&
             !wr_pend_empty && !wr_empty && (wr_pend_wait[wr_pend_rptr[FIFO_PTR_W-1:0]] <= 4'd1));
+
+    // Which wr_buf entry the pop (if any) frees this cycle: the
+    // bypass path fetches by this cycle's cmd_aux; the queued and
+    // chained paths fetch by the pending-queue head's own tag.
+    // wr_bypass requires wr_pend_empty, so it is mutually exclusive
+    // with both other pop paths.
+    wire [FIFO_PTR_W-1:0] wr_pop_idx = wr_bypass
+        ? cmd_aux[FIFO_PTR_W-1:0]
+        : wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0];
 
     assign wr_data_ready = ~wr_full || wr_pop_this_cycle;
 
@@ -357,14 +367,21 @@ module data_path #(
 
     // Write buffer push -- stored BY TAG (wr_data_aux), not by
     // wr_wptr position; wr_wptr itself only tracks occupancy now.
+    // This is the ONLY always_ff driving wr_buf_valid: the pop's
+    // clear comes first, the push's set second, so a push landing
+    // on the very slot being freed this cycle stays valid.
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             wr_wptr <= '0;
             for (int i = 0; i < RD_FIFO_DEPTH; i++) wr_buf_valid[i] <= 1'b0;
-        end else if (wr_data_valid && (~wr_full || wr_pop_this_cycle)) begin
-            wr_buf[wr_data_aux[FIFO_PTR_W-1:0]]       <= '{data: wr_data, mask: wr_mask};
-            wr_buf_valid[wr_data_aux[FIFO_PTR_W-1:0]] <= 1'b1;
-            wr_wptr <= wr_wptr + 1'b1;
+        end else begin
+            if (wr_pop_this_cycle)
+                wr_buf_valid[wr_pop_idx] <= 1'b0;
+            if (wr_data_valid && (~wr_full || wr_pop_this_cycle)) begin
+                wr_buf[wr_data_aux[FIFO_PTR_W-1:0]]       <= '{data: wr_data, mask: wr_mask};
+                wr_buf_valid[wr_data_aux[FIFO_PTR_W-1:0]] <= 1'b1;
+                wr_wptr <= wr_wptr + 1'b1;
+            end
         end
     end
 
