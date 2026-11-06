@@ -71,9 +71,11 @@ def _load_dotenv() -> None:
 _load_dotenv()
 
 MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-5")
-MAX_TOKENS = 64000  # 32000 was observed truncating a corrected generator
-                     # file mid-generation in practice (2026-11-05, Phase1's
-                     # equivalent agent -- same risk here).
+MAX_TOKENS = 128000  # the real model ceiling (confirmed live via the Models
+                     # API against whatever CLAUDE_MODEL resolves to); 64000
+                     # itself was hit live (2026-11-06, Phase1's equivalent
+                     # agent), and 32000/16000 truncated before that
+                     # (2026-11-05) -- same risk here.
 AUTO_YES = False   # --yes: apply without the human prompt (guardrails below)
 MAX_ATTEMPTS_PER_MODULE = 3
 
