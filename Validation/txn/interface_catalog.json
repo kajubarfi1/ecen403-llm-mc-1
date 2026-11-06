@@ -272,8 +272,8 @@
       "clock": "clk",
       "reset": "rst_n",
       "reset_active_low": true,
-      "qualifier": "rsp_valid",
-      "qualifier_note": "The data path's read response arriving at the port (a wb_port boundary port). The host-side wb_ack_o is shared with the write acknowledge and, on a pipelined bus, wb_we_i/wb_adr_i at ack time belong to whatever beat the master is presenting, not to the beat being completed -- qualifying on wb_ack_o && !wb_we_i and reading wb_adr_i mis-attributed every response under burst/pipelined stimulus (2026-10-28, path_02).",
+      "qualifier": "rd_ack",
+      "qualifier_note": "Superseded 2026-11-06 (Frontend handoff 3): rsp_valid (the 2026-10-28 fix) stopped coinciding with host-visible delivery once wb_port started tag-indexed buffering of reordered read responses (HOSTMEM/HOST_002, 2026-11-05) -- rsp_valid now just means 'a response for some outstanding tag arrived', which can happen cycles before (or long after) that tag reaches the head of ord_mem and is actually handed to the host. Firing on it credited whichever pending address was oldest with whatever wb_dat_o happened to be frozen at (reproduced directly: wb_ack_o=0 for the whole window around both false completions in path_02's round-2 run). The 2026-10-28 note's own objection to wb_ack_o && !wb_we_i still holds (wb_we_i at ack time reflects whatever beat the master is currently presenting, not the one completing) -- so instead of re-deriving kind from the live bus, wb_port now exposes rd_ack directly: its own internal, ord_mem-order-correct 'a read is being delivered this cycle' signal, immune to that mis-attribution because it comes from the FIFO-order kind tracker, not the live wb_we_i input.",
       "kinds": {
         "read_data": {
           "addr": {

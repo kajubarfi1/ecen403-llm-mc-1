@@ -218,7 +218,17 @@ class WishbonePortGenerator:
         L(f"    input  logic                    rsp_valid,")
         L(f"    input  logic [DATA_WIDTH-1:0]   rsp_rdata,")
         L(f"    input  logic [AUX_WIDTH-1:0]    rsp_aux,")
-        L(f"    input  logic                    wr_data_ready")
+        L(f"    input  logic                    wr_data_ready,")
+        L(f"")
+        L(f"    // Observability only, no fan-in from anything else: true")
+        L(f"    // exactly the cycle a READ is being delivered to the host.")
+        L(f"    // Exposed so Validation's wb_rsp monitor can qualify on the")
+        L(f"    // real per-beat completion instead of on rsp_valid, which")
+        L(f"    // (since the HOSTMEM/HOST_002 tag-indexed buffering fix,")
+        L(f"    // 2026-11-05/06) no longer coincides with host-visible")
+        L(f"    // delivery for a reordered response -- see Validation")
+        L(f"    // handoff 2026-11-06 (3).")
+        L(f"    output logic                    rd_ack")
         L(f");")
         L(f"")
         L(f"    // CTI / BTE encodings")
@@ -491,7 +501,9 @@ class WishbonePortGenerator:
         L(f"    // tag is still awaiting may bypass.")
         L(f"    wire rsp_is_head = rsp_take && (rsp_idx == rd_head_idx);")
         L(f"    wire                 wr_ack_deliver = !ord_empty && !ord_head_rd;")
-        L(f"    wire                 rd_ack         = !ord_empty &&  ord_head_rd &&")
+        L(f"    // rd_ack is an output port (see the header) -- assign, not")
+        L(f"    // wire, since it's already declared by the port list.")
+        L(f"    assign               rd_ack         = !ord_empty &&  ord_head_rd &&")
         L(f"                                           (rd_data_valid[rd_head_idx] || rsp_is_head);")
         L(f"    wire                 ord_pop        = wr_ack_deliver | rd_ack;")
         L(f"")
@@ -1116,6 +1128,12 @@ class WishbonePortGenerator:
                     {"name": "req_wdata", "width": p["DATA_WIDTH"], "dir": "output"},
                     {"name": "req_wmask", "width": p["SEL_WIDTH"],  "dir": "output"},
                     {"name": "req_aux",   "width": p["AUX_WIDTH"],  "dir": "output"},
+                    # Observability only (no RTL consumer) -- true exactly the
+                    # cycle a read is delivered to the host. Validation's
+                    # wb_rsp monitor qualifies on this instead of rsp_valid
+                    # (2026-11-06 fix: rsp_valid stopped coinciding with
+                    # host-visible delivery once reordered responses buffer).
+                    {"name": "rd_ack",    "width": 1,               "dir": "output"},
                 ],
                 "internal_in": [
                     {"name": "req_ready", "width": 1,               "dir": "input",

@@ -58,7 +58,17 @@ module wb_port #(
     input  logic                    rsp_valid,
     input  logic [DATA_WIDTH-1:0]   rsp_rdata,
     input  logic [AUX_WIDTH-1:0]    rsp_aux,
-    input  logic                    wr_data_ready
+    input  logic                    wr_data_ready,
+
+    // Observability only, no fan-in from anything else: true
+    // exactly the cycle a READ is being delivered to the host.
+    // Exposed so Validation's wb_rsp monitor can qualify on the
+    // real per-beat completion instead of on rsp_valid, which
+    // (since the HOSTMEM/HOST_002 tag-indexed buffering fix,
+    // 2026-11-05/06) no longer coincides with host-visible
+    // delivery for a reordered response -- see Validation
+    // handoff 2026-11-06 (3).
+    output logic                    rd_ack
 );
 
     // CTI / BTE encodings
@@ -317,7 +327,9 @@ module wb_port #(
     // tag is still awaiting may bypass.
     wire rsp_is_head = rsp_take && (rsp_idx == rd_head_idx);
     wire                 wr_ack_deliver = !ord_empty && !ord_head_rd;
-    wire                 rd_ack         = !ord_empty &&  ord_head_rd &&
+    // rd_ack is an output port (see the header) -- assign, not
+    // wire, since it's already declared by the port list.
+    assign               rd_ack         = !ord_empty &&  ord_head_rd &&
                                            (rd_data_valid[rd_head_idx] || rsp_is_head);
     wire                 ord_pop        = wr_ack_deliver | rd_ack;
 

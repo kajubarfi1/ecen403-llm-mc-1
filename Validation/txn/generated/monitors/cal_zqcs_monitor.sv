@@ -4,7 +4,7 @@
 //
 // Interface : cal_zqcs   (ZQ short-calibration request issued by the calibration block)
 // Block     : calibration
-// Manifest  : runs/matrix/preset_server-grade/drop/PHASE2RTL/calibration_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE2RTL/calibration_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //

@@ -4,7 +4,7 @@
 //
 // Interface : ddr_cmd   (Pin-level DDR3 command stream out of cmd_gen)
 // Block     : cmd_gen
-// Manifest  : runs/matrix/preset_server-grade/drop/PHASE3RTL/cmd_gen_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //
@@ -19,7 +19,7 @@ module ddr_cmd_monitor #(
 ) (
     input  logic clk,
     input  logic rst_n,
-    input  logic [15:0] ddr_addr,
+    input  logic [14:0] ddr_addr,
     input  logic [2:0] ddr_bank,
     input  logic [3:0] ddr_cmd
 );
