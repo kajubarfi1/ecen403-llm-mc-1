@@ -146,6 +146,27 @@ module wb_port #(
     logic [DATA_WIDTH-1:0] rd_data_buf   [0:TAG_FIFO_DEPTH-1];
     logic                  rd_data_valid [0:TAG_FIFO_DEPTH-1];
 
+    // Per-tag 'awaiting response' bit (DATA_001/HOST_002, Validation
+    // 2026-11-06): set when a read is accepted under that tag,
+    // cleared when its FIRST response is taken. Only a response
+    // whose tag is actually awaiting one is accepted (rsp_take);
+    // a duplicate, late or unmatched response used to set a
+    // stale rd_data_valid bit, so the NEXT read reusing that tag
+    // acked immediately with old/X data and every later pairing
+    // drifted by one.
+    logic                  rd_pending    [0:TAG_FIFO_DEPTH-1];
+    wire  [TAG_PTR_W-1:0]  rsp_idx  = rsp_aux[TAG_PTR_W-1:0];
+    wire                   rsp_take = rsp_valid && rd_pending[rsp_idx];
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            for (int i = 0; i < TAG_FIFO_DEPTH; i++) rd_pending[i] <= 1'b0;
+        end else begin
+            if (rsp_take)              rd_pending[rsp_idx] <= 1'b0;
+            if (wb_beat && !wb_we_i)   rd_pending[rd_aux_ctr[TAG_PTR_W-1:0]] <= 1'b1;
+        end
+    end
+
     // Reset to 0, not left uninitialized: wb_dat_o reads
     // rd_data_buf[rd_head_idx] continuously, not only when
     // actually acking, so an unwritten slot's X would otherwise
@@ -155,8 +176,8 @@ module wb_port #(
     always_ff @(posedge clk or negedge rst_n)
         if (!rst_n) begin
             for (int i = 0; i < TAG_FIFO_DEPTH; i++) rd_data_buf[i] <= '0;
-        end else if (rsp_valid) begin
-            rd_data_buf[rsp_aux[TAG_PTR_W-1:0]] <= rsp_rdata;
+        end else if (rsp_take) begin
+            rd_data_buf[rsp_idx] <= rsp_rdata;
         end
 
     // Stall generation (WB-005)
@@ -292,7 +313,9 @@ module wb_port #(
     // (2026-11-06): it expects a read's ack to coincide with
     // rsp_valid, true for the original design and now true again
     // except on the genuinely-reordered path, which still buffers.
-    wire rsp_is_head = rsp_valid && (rsp_aux[TAG_PTR_W-1:0] == rd_head_idx);
+    // Gated by rsp_take (not raw rsp_valid): only a response its
+    // tag is still awaiting may bypass.
+    wire rsp_is_head = rsp_take && (rsp_idx == rd_head_idx);
     wire                 wr_ack_deliver = !ord_empty && !ord_head_rd;
     wire                 rd_ack         = !ord_empty &&  ord_head_rd &&
                                            (rd_data_valid[rd_head_idx] || rsp_is_head);
@@ -317,13 +340,12 @@ module wb_port #(
     // the bypass mux, so the buffer slot was never the delivery
     // path and has nothing worth marking valid. Any OTHER
     // same-index collision (two responses for one still-
-    // outstanding tag) would mean a real protocol violation --
-    // WB-009 below checks for that.
+    // outstanding tag) is now filtered by rsp_take/rd_pending.
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             for (int i = 0; i < TAG_FIFO_DEPTH; i++) rd_data_valid[i] <= 1'b0;
         end else begin
-            if (rsp_valid) rd_data_valid[rsp_aux[TAG_PTR_W-1:0]] <= 1'b1;
+            if (rsp_take)  rd_data_valid[rsp_idx]               <= 1'b1;
             if (rd_ack)    rd_data_valid[rd_head_idx]           <= 1'b0;
         end
     end
@@ -365,10 +387,19 @@ module wb_port #(
     // reordering -- this replaces it, not patches it).
     property p_tag;
         @(posedge clk) disable iff (!rst_n)
-        rsp_valid |-> !rd_data_valid[rsp_aux[TAG_PTR_W-1:0]];
+        rsp_take |-> !rd_data_valid[rsp_idx];
     endproperty
     assert property (p_tag)
         else $error("[WB-009] response landed on a tag already holding undelivered data");
+
+    // WB-013: every response should match a read still awaiting
+    // one; anything else is ignored by rsp_take, flagged here.
+    property p_rsp_matches_pending;
+        @(posedge clk) disable iff (!rst_n)
+        rsp_valid |-> rd_pending[rsp_idx];
+    endproperty
+    assert property (p_rsp_matches_pending)
+        else $warning("[WB-013] response for a tag with no read awaiting it -- ignored");
 
     property p_burst_len;
         @(posedge clk) disable iff (!rst_n)
