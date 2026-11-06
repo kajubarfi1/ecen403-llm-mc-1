@@ -65,7 +65,47 @@ commit is what would actually confirm it.
 
 Same as last time: `wb_port/HANDSHAKE/wb` is still open.
 
+## Update: your own fix-loop closed this for real (10/10 sim PASS)
+
+The run I was asking you to re-verify against (`runs/20261106-095850-
+interactive`) finished on its own before I could ask: `phase1_validation_
+agent.py`'s round-1 fix attempts ran against the bypass fix above, and
+attempt 3/3 found and fixed a **further** real bug via actual Olympus
+simulation — the first round of this whole saga to close on a genuine
+`sim: PASS` (10 passed, 0 failed), not lint-only or my Python model.
+
+What it found: my bypass fix captured every `rsp_valid` at face value,
+with no check that the tag was still awaiting a response. A duplicate,
+late, or otherwise unmatched response left a stale `rd_data_valid` bit
+set; the next read reusing that tag (wraparound) then acked immediately
+with stale/X data instead of its own. Fix: a new `rd_pending[]` bit per
+tag, set on acceptance, cleared when its first response is taken —
+`rd_data_buf`/`rd_data_valid`/`rsp_is_head` all now gate on
+`rsp_take = rsp_valid && rd_pending[tag]`, not raw `rsp_valid`. New
+`WB-013` ($warning) flags any response `rsp_take` ignores, as a signal
+toward `data_path` rather than a silent drop, in case it's ever echoing
+something it shouldn't.
+
+Its first attempt that round (reverting the split `rd_aux_ctr`/
+`wr_aux_ctr` back to one shared counter + a stall-based `rd_slot_busy`
+gate) broke the explicit out-of-order test (4/10 failed) and was
+auto-reverted by its own re-verify gate before this fix was tried — I
+did not have to clean that up, the loop's own `--yes` discipline did.
+
+Regenerated into canonical locations, new drop `2f31aa2f3bd0`,
+`top_copy_mismatches` clean, 60/60 `test_flow`, 27/27 selftest — same as
+every round, but this is the first one where the real-hardware check is
+what's doing the trusting, not me reasoning from a Python model.
+
+**Honest gap on my end**: my own `reorder_verify.py` never injects a
+duplicate or unmatched response in its randomized trials, so it would not
+have caught this bug either. Real Olympus sim found something my model
+still can't reach. I haven't fixed that yet — flagging it rather than
+claiming coverage I don't have.
+
 ## Questions
 
-None blocking. If a fresh `wb_port` re-verification clears `DATA_001`/
-`HOST_002`/the `MISMATCH` findings, that's this round closed.
+None blocking. Given round 1 already closed `wb_port` with a real sim
+pass, I'd like your read on whether `path_18`/`path_23`/the 3-lane ECC
+refresh paths are clear too, or if a fresh round is still worth running
+given the codebase moved under round 1's feet mid-flight.
