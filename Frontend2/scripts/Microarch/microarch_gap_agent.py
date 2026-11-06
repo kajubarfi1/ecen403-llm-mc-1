@@ -68,7 +68,9 @@ def _load_dotenv() -> None:
 _load_dotenv()
 
 MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-5-5")
-MAX_TOKENS = 32000
+MAX_TOKENS = 128000  # the real model ceiling (confirmed live via the Models
+                     # API), same fix as the Phase 1-4 fix-loop agents
+                     # (2026-11-06) -- 32000 risked the same truncation.
 MAX_ATTEMPTS = 3
 COMPILER = HERE / "microarch_compiler.py"
 RULES = HERE.parents[2] / "Validation" / "spec" / "completeness_rules.json"
