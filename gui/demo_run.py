@@ -85,23 +85,87 @@ class Demo:
         L("$ Validation/spec/validate_spec_stage.py --spec spec/generated_spec.json")
         self.wait(2)
         self.record("spec_review", "PASS", "0 open gap(s)")
-        mods = {1: "init_fsm, config_regs, wb_port", 2: "addr_decoder, bank_tracker, refresh_ctrl, calibration",
-                3: "cmd_queue, scheduler, cmd_gen", 4: "data_path"}
+        mods = {1: ["init_fsm", "config_regs", "wb_port"],
+                2: ["addr_decoder", "bank_tracker", "refresh_ctrl", "calibration"],
+                3: ["cmd_queue", "scheduler", "cmd_gen"],
+                4: ["data_path"]}
         for n in range(1, 5):
-            L(f"-- phase {n}: {mods[n]}")
+            L(f"-- phase {n}: {', '.join(mods[n])}")
             L(f"$ Frontend2/scripts/Phase{n}/phase{n}_pipeline.py --spec spec/generated_spec.json")
-            for m in mods[n].split(", "):
-                L(f"[gen] {m}: lint OK, sim OK", True)
-                self.wait(0.6)
+            L("    ==============================================================", True)
+            L("      GENERATION CHECK", True)
+            L("    ==============================================================", True)
+            for m in mods[n]:
+                L(f"      OK   {m:15} success", True)
+                self.wait(0.3)
+            if n == 4:
+                # one module fails its own sim gate, Frontend fixes it itself
+                L("    ==============================================================", True)
+                L("      PHASE 4 PIPELINE FAILED AT SIM GATE", True)
+                L("    ==============================================================", True)
+                L("        FAIL data_path -- see data_path_xrun.log", True)
+                self.record("rtl_generation", "FAIL", "phase 4 failed at BEHAVIORAL_SIMULATION (data_path)")
+                L("Failing module(s): data_path")
+                L("##############################################################")
+                L("#  data_path: fix attempt 1/3")
+                L("##############################################################")
+                L("  asking Claude to diagnose + propose a fix...", True)
+                self.wait(1.5)
+                L("  ROOT CAUSE (high confidence):", True)
+                L("    a single-driver violation in the write-buffer valid bit.", True)
+                L("  data_path: FIXED -- lint PASS, sim PASS on re-verification.", True)
+                self.wait(0.3)
+            L("    ==============================================================", True)
+            L(f"      PHASE {n} PIPELINE -- ALL CHECKS PASSED", True)
+            L("    ==============================================================", True)
             self.record("rtl_generation", "PASS", f"phase {n}")
         L("$ Frontend2/scripts/generate_top.py --drop drop")
         self.wait(1)
         self.record("rtl_generation", "PASS", "top-level assembled: drop/TOPRTL")
-        L("$ Validation/tools/validate_drop.py --drop drop")
-        for i in range(20):
-            L(f"[path {i + 1:02d}/20] PASS", True)
-            self.wait(0.35)
-        self.record("rtl_validation", "PASS", "PASS; failed modules: none")
+
+        path_names = [
+            "path_01_write_cmd", "path_02_read_cmd", "path_03_read_return",
+            "path_04_scheduler_bank_loop", "path_05_scheduler_refresh_loop",
+            "path_07_backpressure", "path_08_init_to_cal", "path_09_init_to_refresh",
+            "path_12_csr_timing_to_scheduling", "path_13_csr_refresh_to_scheduling",
+            "path_14_status_init", "path_15_status_cal", "path_16_status_refresh",
+            "path_17_full_boot", "path_18_full_write", "path_19_row_conflict",
+            "path_20_refresh_preempt", "path_21_wb_port_standalone",
+            "path_22_csr_standalone", "path_23_host_ack_collision"]
+
+        def validate_round(fail_paths, failed_modules, round_n):
+            L("$ Validation/tools/validate_drop.py --drop drop")
+            L(f"    [4] simulate {len(path_names)} path(s), 4 at a time", True)
+            for name in path_names:
+                st = "FAIL" if name in fail_paths else "PASS"
+                L(f"        {name:35} {st}", True)
+                self.wait(0.25)
+            nfail = len(fail_paths)
+            L(f"        pass={len(path_names) - nfail} fail={nfail} error=0", True)
+            if failed_modules:
+                detail = (f"FAIL; failed modules: {', '.join(failed_modules)}; "
+                          f"package: runs/demo/validation/round_{round_n}")
+                self.record("rtl_validation", "FAIL", detail)
+            else:
+                self.record("rtl_validation", "PASS", "PASS; failed modules: none")
+
+        self.state["rounds"]["rtl"] = 1
+        self._save()
+        validate_round({"path_02_read_cmd", "path_18_full_write"}, ["wb_port"], 1)
+        L("Failing module(s): wb_port")
+        L("##############################################################")
+        L("#  wb_port: fix attempt 1/3")
+        L("##############################################################")
+        L("  asking Claude to diagnose + propose a fix...", True)
+        self.wait(1.5)
+        L("  ROOT CAUSE (medium confidence):", True)
+        L("    a tag-indexed response buffer gated on a stale pending bit.", True)
+        L("  wb_port: FIXED -- lint PASS, sim PASS on re-verification.", True)
+        self.wait(0.3)
+        self.record("frontend_regeneration", "PASS", "phase 1 agent exited 0; fixed: wb_port")
+        self.state["rounds"]["rtl"] = 2
+        self._save()
+        validate_round(set(), [], 2)
         L("$ Validation/tools/run_formal.py --drop drop")
         self.wait(2)
         self.record("formal", "PASS", "informational: 6/6 properties proven")

@@ -190,10 +190,45 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .fb-in { width: 100%; margin-top: 6px; background: #111723; color: var(--text); border: 1px solid var(--line);
   border-radius: 6px; padding: 6px 8px; font: 13px var(--mono); }
 
+/* frontend + validation */
+.main2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; margin-top: 16px; }
+.phase-rows { padding: 12px 16px 6px; display: flex; flex-direction: column; gap: 8px; }
+.phase-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.phase-row .pn { width: 54px; font-size: 12px; color: var(--muted); font-weight: 650; flex-shrink: 0; }
+.phase-row .pn.active { color: var(--active); }
+.phase-row .pn.fail { color: var(--fail); }
+.mod-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px;
+  font-size: 12px; background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); }
+.mod-chip.pass { border-color: #4ade8055; color: var(--pass); }
+.mod-chip.fail { border-color: #f8717166; color: var(--fail); background: #f8717114; }
+.mod-chip.active { border-color: var(--active); color: var(--active); }
+.mod-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+.fixhist { padding: 4px 16px 14px; display: flex; flex-direction: column; gap: 6px; max-height: 190px; overflow: auto; }
+.fix-ev { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; padding: 6px 9px; border-radius: 8px;
+  background: var(--panel-2); border: 1px solid var(--line); }
+.fix-ev .ic { width: 14px; text-align: center; flex-shrink: 0; font-size: 12px; }
+.fix-ev.fixed { border-color: #4ade8044; } .fix-ev.fixed .ic { color: var(--pass); }
+.fix-ev.unresolved, .fix-ev.error { border-color: #f8717144; } .fix-ev.unresolved .ic, .fix-ev.error .ic { color: var(--fail); }
+.fix-ev.retry, .fix-ev.active { border-color: #fbbf2444; } .fix-ev.retry .ic, .fix-ev.active .ic { color: var(--halt); }
+.fix-ev .mod { font-weight: 650; }
+.fix-ev .trig { color: var(--muted); margin-left: auto; font-size: 11px; white-space: nowrap; }
+
+.pathgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 6px; padding: 4px 16px 16px; }
+.path-chip { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 7px; font-size: 11.5px;
+  background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; overflow: hidden; }
+.path-chip .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; background: var(--muted); }
+.path-chip.pass .dot { background: var(--pass); } .path-chip.pass { color: var(--pass); }
+.path-chip.fail .dot { background: var(--fail); } .path-chip.fail { color: var(--fail); border-color: #f8717155; background: #f8717112; }
+.path-chip .nm { overflow: hidden; text-overflow: ellipsis; }
+
+.banner.loop { background: #c86bff14; border: 1px solid #c86bff55; color: #ecd3ff; animation: loopglow 1.8s ease-in-out infinite; }
+@keyframes loopglow { 0%,100% { box-shadow: 0 0 0 0 #c86bff00; } 50% { box-shadow: 0 0 0 4px #c86bff22; } }
+
 .empty { padding: 60px 20px; text-align: center; color: var(--muted); }
 
 @media (max-width: 1000px) {
-  .main { grid-template-columns: 1fr; }
+  .main, .main2 { grid-template-columns: 1fr; }
   .strip { grid-template-columns: repeat(4, 1fr); row-gap: 16px; }
   .stage:nth-child(5)::before { display: none; }
 }
@@ -262,6 +297,21 @@ button:disabled { opacity: .45; cursor: not-allowed; }
       <div class="tiles" id="tiles"></div>
       <ul class="steps" id="steps"></ul>
       <div class="notes" id="notes"></div>
+    </div>
+  </section>
+
+  <section class="main main2">
+    <div class="card">
+      <div class="card-head"><h2>Frontend · RTL generation</h2><span class="meta" id="fe-meta"></span></div>
+      <div id="fe-banner"></div>
+      <div class="phase-rows" id="fe-phases"></div>
+      <div class="fixhist" id="fe-fixhist"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Validation · System paths</h2><span class="meta" id="val-meta"></span></div>
+      <div id="val-banner"></div>
+      <div class="tiles" id="val-tiles"></div>
+      <div class="pathgrid" id="val-paths"></div>
     </div>
   </section>
 
@@ -385,6 +435,8 @@ function render() {
   }).join("");
 
   renderBackend();
+  renderFrontend();
+  renderValidation();
   renderLog();
   term.update(data.terminal || { available: false, reason: "" });
   chip.update(data);
@@ -470,6 +522,74 @@ function renderBackend() {
       <span class="tm">${tm}</span></li>`;
   }).join("");
   $("notes").innerHTML = (bk.notes || []).slice(-4).map((n) => `<div>${esc(clock(n.t))} ${esc(n.text)}</div>`).join("");
+}
+
+const FIX_ICON = { fixed: "✓", unresolved: "✕", error: "⚠", retry: "↺" };
+function trigLabel(trig) {
+  if (!trig) return "";
+  return trig.kind === "validation" ? `validation round ${trig.round} FAIL` : "own sim gate";
+}
+function renderFrontend() {
+  const fe = data.frontend;
+  if (!fe) return;
+  $("fe-meta").textContent = fe.round ? `round ${fe.round}` : "";
+
+  $("fe-phases").innerHTML = fe.phases.map((p) => {
+    const mods = Object.entries(p.modules).map(([m, s]) =>
+      `<span class="mod-chip ${s}" title="${esc(m)}: ${esc(s)}"><span class="dot"></span>${esc(m)}</span>`).join("");
+    const pnCls = p.result === "active" ? "active" : p.result === "fail" ? "fail" : "";
+    return `<div class="phase-row"><span class="pn ${pnCls}">Phase ${p.n}</span>${mods}</div>`;
+  }).join("");
+
+  const af = fe.active_fix;
+  let banner = "";
+  if (af) {
+    const trig = trigLabel(af.trigger);
+    banner = `<div class="banner loop"><b>⚡ Fixing ${esc(af.module)}</b> — attempt ${af.attempt}/${af.max_attempts}` +
+      (af.confidence ? ` <span style="opacity:.75">(${esc(af.confidence)} confidence diagnosis)</span>` : "") +
+      (trig ? `<br><span style="opacity:.8">triggered by ${esc(trig)}</span>` : "") + `</div>`;
+  }
+  $("fe-banner").innerHTML = banner;
+
+  const hist = (fe.fixloop || []).slice(-8).reverse();
+  $("fe-fixhist").innerHTML = hist.length ? hist.map((f) => {
+    const cls = f.outcome || "active";
+    const ic = f.outcome ? (FIX_ICON[f.outcome] || "?") : "…";
+    const trig = trigLabel(f.trigger);
+    return `<div class="fix-ev ${cls}"><span class="ic">${ic}</span>
+      <span class="mod">${esc(f.module)}</span><span>attempt ${f.attempt}/${f.max_attempts}</span>
+      <span class="trig">${esc(trig)}</span></div>`;
+  }).join("") : `<div class="empty" style="padding:16px 0">No fix attempts this run.</div>`;
+}
+
+function renderValidation() {
+  const v = data.validation;
+  if (!v) return;
+  $("val-meta").textContent = v.round ? `round ${v.round}` : "";
+  const s = v.summary || {};
+  const tiles = [
+    ["Pass", s.pass ?? "—", s.pass ? "good" : ""],
+    ["Fail", s.fail ?? "—", s.fail ? "bad" : ""],
+    ["Error", s.error ?? "—", s.error ? "bad" : ""],
+    ["Total", v.total ?? (v.paths || []).length ?? "—", ""],
+  ];
+  $("val-tiles").innerHTML = tiles.map(([k, val, c]) =>
+    `<div class="tile"><div class="k">${k}</div><div class="v ${c}">${esc(val)}</div></div>`).join("");
+
+  $("val-paths").innerHTML = (v.paths || []).length
+    ? v.paths.map((p) => `<div class="path-chip ${p.status}" title="${esc(p.name)}">
+        <span class="dot"></span><span class="nm">${esc(p.name.replace(/^path_\d+_/, ""))}</span></div>`).join("")
+    : `<div class="empty" style="padding:16px 0">${v.result === "active" ? "Running…" : "No validation run yet."}</div>`;
+
+  let banner = "";
+  if (v.result === "fail" && (v.failed_modules || []).length) {
+    const mods = v.failed_modules;
+    banner = `<div class="banner loop"><b>↩ Sent back to Frontend</b> — ${esc(mods.join(", "))} ` +
+      `${mods.length > 1 ? "need" : "needs"} regeneration (round ${v.round})</div>`;
+  } else if (v.result === "pass") {
+    banner = `<div class="banner pass">All system paths passed.</div>`;
+  }
+  $("val-banner").innerHTML = banner;
 }
 
 const labelOf = (k) => (data.stages.find((s) => s.key === k) || { label: k }).label;

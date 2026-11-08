@@ -86,6 +86,34 @@ PHASE_MODULES = {1: ["init_fsm", "config_regs", "wb_port"],
                  3: ["cmd_queue", "scheduler", "cmd_gen"],
                  4: ["data_path"]}
 
+# --------------------------------------------------------------------------
+# Frontend (per-phase/module generation + its own fix-loop) and Validation
+# (the system-level path suite) detail -- the two subsystems either side of
+# `rtl_generation`/`rtl_validation` in the stage strip, broken out so a
+# module failing, a fix attempt, and a validation round sending work back
+# to the Frontend are all visible as they happen, not just as one dot.
+# --------------------------------------------------------------------------
+
+PHASE_START_LINE = re.compile(r"^-- phase (\d+):")
+GEN_CHECK_HDR = re.compile(r"^\s*GENERATION CHECK\s*$")
+LINT_GATE_HDR = re.compile(r"^\s*LINT GATE\b")
+SIM_GATE_HDR = re.compile(r"^\s*SIM GATE\b")
+MOD_STATUS_LINE = re.compile(r"^\s*(OK|FAIL|--)\s+(\w+)\s+(.*)$")
+PHASE_PASS_LINE = re.compile(r"^\s*PHASE (\d+) PIPELINE -- ALL CHECKS PASSED")
+PHASE_FAIL_LINE = re.compile(r"^\s*PHASE (\d+) PIPELINE FAILED AT (\S.*)$")
+FAIL_MOD_LINE = re.compile(r"^\s*FAIL (\w+) -- (.*)$")
+FIX_ATTEMPT_HDR = re.compile(r"^\s*#\s+(\w+): fix attempt (\d+)/(\d+)\s*$")
+ROOT_CAUSE_LINE = re.compile(r"^\s*ROOT CAUSE \(([^)]*)\):")
+FIX_OUTCOME_LINE = re.compile(
+    r"^\s*(\w+): (FIXED|still failing after this patch|unresolved)")
+FAILING_MODULES_LINE = re.compile(r"^\s*Failing module\(s\): (.+)$")
+FIX_ERROR_LINE = re.compile(r"^\s*ERROR: response hit max_tokens")
+VAL_FAIL_LINE = re.compile(
+    r"^rtl_validation\s+FAIL\b.*?failed modules:\s*([^;]+).*?round_(\d+)")
+SIMULATE_HDR_LINE = re.compile(r"^\s*\[4\] simulate (\d+) path")
+PATH_LINE = re.compile(r"^\s*(path_\w+)\s+(PASS|FAIL|ERROR)\s*$")
+PATH_SUMMARY_LINE = re.compile(r"^\s*pass=(\d+)\s+fail=(\d+)\s+error=(\d+)")
+
 LINE = re.compile(r"^\[(\d\d):(\d\d):(\d\d)\] (.*)$")
 RECORD = re.compile(r"^([a-z_]+)(?::(\S+))?\s+([A-Z_]+)\s*(.*)$")
 
@@ -428,6 +456,8 @@ class Watcher:
         res["stages"], cur = self._flow_stages(state, log, run["status"])
         res["current"] = cur
         res["rtl"] = self._rtl_state(state, log)
+        res["frontend"] = self._frontend_state(state, log)
+        res["validation"] = self._validation_state(state, log)
         res["backend"] = self._backend(run_dir, state, log, now, cur)
         tail = [(t, b) for t, b in log[-200:]]
         res["log_tail"] = [{"t": t, "line": b} for t, b in tail]
@@ -509,6 +539,170 @@ class Watcher:
         validated = any(s["stage"] == "rtl_validation" and s["status"] == "PASS"
                         for s in state.get("stages", []))
         return {"phases": phases, "validated": validated}
+
+    def _frontend_state(self, state, log):
+        """Per-phase, per-module generation/lint/sim status, plus the
+        Frontend's own fix-loop (a module failing its own phase's sim gate,
+        or Validation sending a module back) -- the detail behind the
+        single `rtl_generation` dot in the stage strip."""
+        phases = {n: {"n": n, "modules": {m: "pending" for m in mods},
+                      "result": "pending", "failing_module": None,
+                      "started": None, "ended": None}
+                  for n, mods in PHASE_MODULES.items()}
+        section = None
+        cur_phase = None
+        fixloop = []
+        cur_fix = None
+        last_trigger = None   # {"kind": "validation"|"own_sim_gate", "round": n, "modules": [...]}
+
+        def find_open(mod):
+            return next((f for f in reversed(fixloop)
+                        if f["module"] == mod and f["outcome"] is None), None)
+
+        for t, body in log:
+            m = PHASE_START_LINE.match(body)
+            if m:
+                cur_phase = int(m.group(1))
+                if cur_phase in phases:
+                    phases[cur_phase]["started"] = phases[cur_phase]["started"] or t
+                    phases[cur_phase]["result"] = "active"
+                section = None
+                continue
+            if GEN_CHECK_HDR.match(body):
+                section = "gen"
+                continue
+            if LINT_GATE_HDR.search(body):
+                section = "lint"
+                continue
+            if SIM_GATE_HDR.search(body):
+                section = "sim"
+                continue
+            m = MOD_STATUS_LINE.match(body)
+            if m and cur_phase in phases and m.group(2) in phases[cur_phase]["modules"]:
+                tag, mod = m.group(1), m.group(2)
+                if tag in ("OK", "FAIL"):
+                    phases[cur_phase]["modules"][mod] = "pass" if tag == "OK" else "fail"
+                continue
+            m = PHASE_PASS_LINE.match(body)
+            if m:
+                n = int(m.group(1))
+                if n in phases:
+                    phases[n]["result"] = "pass"
+                    phases[n]["ended"] = t
+                continue
+            m = PHASE_FAIL_LINE.match(body)
+            if m:
+                n = int(m.group(1))
+                if n in phases:
+                    phases[n]["result"] = "fail"
+                    phases[n]["ended"] = t
+                continue
+            m = FAIL_MOD_LINE.match(body)
+            if m and cur_phase in phases:
+                mod = m.group(1)
+                phases[cur_phase]["failing_module"] = mod
+                if mod in phases[cur_phase]["modules"]:
+                    phases[cur_phase]["modules"][mod] = "fail"
+                last_trigger = {"kind": "own_sim_gate", "round": None, "modules": [mod], "t": t}
+                continue
+            m = VAL_FAIL_LINE.match(body)
+            if m:
+                mods = [x.strip() for x in m.group(1).split(",")]
+                last_trigger = {"kind": "validation", "round": int(m.group(2)), "modules": mods, "t": t}
+                continue
+            m = FAILING_MODULES_LINE.match(body)
+            if m:
+                mods = [x.strip() for x in m.group(1).split(",")]
+                if last_trigger and set(last_trigger["modules"]) & set(mods):
+                    last_trigger = {**last_trigger, "modules": mods, "t": t}
+                else:
+                    last_trigger = {"kind": "own_sim_gate", "round": None, "modules": mods, "t": t}
+                continue
+            m = FIX_ATTEMPT_HDR.match(body)
+            if m:
+                mod, att, mx = m.group(1), int(m.group(2)), int(m.group(3))
+                trig = last_trigger if last_trigger and mod in last_trigger["modules"] else None
+                cur_fix = {"module": mod, "attempt": att, "max_attempts": mx,
+                           "phase": cur_phase, "started": t, "ended": None,
+                           "confidence": None, "outcome": None, "trigger": trig}
+                fixloop.append(cur_fix)
+                continue
+            m = ROOT_CAUSE_LINE.match(body)
+            if m and cur_fix:
+                cur_fix["confidence"] = m.group(1)
+                continue
+            if FIX_ERROR_LINE.match(body) and cur_fix:
+                cur_fix["outcome"] = "error"
+                cur_fix["ended"] = t
+                cur_fix = None
+                continue
+            m = FIX_OUTCOME_LINE.match(body)
+            if m:
+                mod, outcome = m.group(1), m.group(2)
+                if outcome == "unresolved":
+                    # The loop's own final verdict, one line after the last
+                    # attempt's "still failing" already closed it out --
+                    # overwrite that attempt's outcome, not a fresh (absent)
+                    # open one, so the loop's actual end isn't dropped.
+                    target = next((f for f in reversed(fixloop) if f["module"] == mod), None)
+                else:
+                    target = cur_fix if cur_fix and cur_fix["module"] == mod else find_open(mod)
+                if target:
+                    target["outcome"] = ("fixed" if outcome == "FIXED" else
+                                         "unresolved" if outcome == "unresolved" else
+                                         "retry")
+                    target["ended"] = t
+                    if target is cur_fix:
+                        cur_fix = None
+                continue
+
+        return {"phases": [phases[n] for n in sorted(phases)],
+                "fixloop": fixloop[-25:], "active_fix": cur_fix,
+                "round": state.get("rounds", {}).get("rtl", 0)}
+
+    def _validation_state(self, state, log):
+        """The system-level path suite (validate_drop.py's [4] simulate
+        N path(s)) -- every path run this round, not just pass/fail/count,
+        plus which modules a FAIL sends back to the Frontend."""
+        paths, cur_paths = [], {}
+        total = None
+        summary = None
+        failed_modules = []
+        result = "pending"
+        started = None
+
+        for t, body in log:
+            m = SIMULATE_HDR_LINE.match(body)
+            if m:
+                total = int(m.group(1))
+                cur_paths = {}
+                started = t
+                result = "active"
+                continue
+            m = PATH_LINE.match(body)
+            if m and total is not None:
+                cur_paths[m.group(1)] = m.group(2).lower()
+                continue
+            m = PATH_SUMMARY_LINE.match(body)
+            if m:
+                summary = {"pass": int(m.group(1)), "fail": int(m.group(2)), "error": int(m.group(3))}
+                paths = [{"name": k, "status": v} for k, v in cur_paths.items()]
+                continue
+            if body.startswith("rtl_validation"):
+                mm = re.match(r"^rtl_validation\s+(\S+)\s+(.*)$", body)
+                if mm:
+                    status, detail = mm.groups()
+                    result = STATUS_MAP.get(status, "info")
+                    fm = re.search(r"failed modules:\s*([^;]+)", detail)
+                    txt = fm.group(1).strip() if fm else ""
+                    failed_modules = [x.strip() for x in txt.split(",")] if txt and txt != "none" else []
+                continue
+
+        # RUN_STATE's own round counter is authoritative and always current
+        # (a PASS round's detail carries no "round_N" path to parse it from).
+        return {"paths": paths, "total": total, "summary": summary,
+                "failed_modules": failed_modules, "result": result,
+                "round": state.get("rounds", {}).get("rtl", 0), "started": started}
 
     # -- backend ----------------------------------------------------------
     def _backend(self, run_dir, state, log, now, current):

@@ -83,6 +83,19 @@ class DemoRun(unittest.TestCase):
             self.assertEqual(bk["report"]["lvs_status"], "PASS")
             # the slow steps were each seen running, read from ORFS's own logs
             self.assertTrue({"place", "route"} <= seen_steps, seen_steps)
+            # the demo's own fix-loop (data_path's sim gate, then Validation
+            # sending wb_port back) resolved and the final state is clean
+            fe, val = st["frontend"], st["validation"]
+            self.assertIsNone(fe["active_fix"])
+            self.assertTrue(all(p["result"] == "pass" for p in fe["phases"]), fe["phases"])
+            outcomes = {(f["module"], f["outcome"]) for f in fe["fixloop"]}
+            self.assertIn(("data_path", "fixed"), outcomes)
+            self.assertIn(("wb_port", "fixed"), outcomes)
+            wb_fix = next(f for f in fe["fixloop"] if f["module"] == "wb_port")
+            self.assertEqual(wb_fix["trigger"]["kind"], "validation")
+            self.assertEqual(val["result"], "pass")
+            self.assertEqual(val["failed_modules"], [])
+            self.assertEqual(len(val["paths"]), 20)
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 
