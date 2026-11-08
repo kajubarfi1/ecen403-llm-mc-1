@@ -284,7 +284,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     </div>
 
     <div class="card">
-      <div class="card-head"><h2>Backend · RTL → GDSII</h2><span class="meta" id="bk-meta"></span></div>
+      <div class="card-head"><h2 id="hero-title">Backend · RTL → GDSII</h2><span class="meta" id="bk-meta"></span></div>
       <div class="bk-top">
         <div class="bk-row">
           <div class="bk-pct" id="bk-pct">0<small>%</small></div>
@@ -420,8 +420,10 @@ function render() {
   $("status-text").textContent = st === "running" ? "running" : st;
   const end = st === "running" ? nowS() : (run.updated || nowS());
   $("elapsed").textContent = `${run.id} · ${dur(end - run.created)}`;
-  document.title = st === "running" && data.backend.active
-    ? `${Math.floor(data.backend.progress * 100)}% · backend · LLM MC` : `LLM MC Flow Monitor`;
+  const showBackendHero = heroIsBackend();
+  document.title = st !== "running" ? `LLM MC Flow Monitor`
+    : showBackendHero ? `${Math.floor(data.backend.progress * 100)}% · backend · LLM MC`
+    : `frontend · LLM MC`;
 
   // stage strip
   $("strip").innerHTML = data.stages.map((s, i) => {
@@ -434,7 +436,7 @@ function render() {
       <div class="lab">${esc(s.label)}</div><div class="sub">${esc(t + rounds)}</div></div>`;
   }).join("");
 
-  renderBackend();
+  if (showBackendHero) renderBackend(); else renderFrontendHero();
   renderFrontend();
   renderValidation();
   renderLog();
@@ -442,8 +444,128 @@ function render() {
   chip.update(data);
 }
 
+// ---------------------------------------------------------- hero panel
+// The big card (% / bar / tiles / steps) shows whichever subsystem is
+// actually moving right now: Frontend (generation, its own fix-loop, and
+// the system validation suite) until the backend starts, then Backend --
+// and back to Frontend again if the backend sends work back (loop stages
+// alias to rtl_generation in the stage strip, same signal used here).
+function heroIsBackend() {
+  const cur = data.current;
+  if (cur) return cur.key === "backend";
+  const st = (data.stages || []).find((s) => s.key === "backend");
+  return !!(st && st.state !== "pending");
+}
+
+const STEP_STATE = { pending: "pending", active: "active", pass: "done", fail: "fail" };
+
+function frontendHeroSteps() {
+  const fe = data.frontend, val = data.validation, af = fe.active_fix;
+  const steps = fe.phases.map((p) => {
+    const mods = Object.entries(p.modules);
+    const passed = mods.filter(([, s]) => s === "pass").length;
+    const fixing = af && af.phase === p.n;
+    let state = STEP_STATE[p.result] || "pending";
+    let detail = mods.map(([m, s]) => `${m}: ${s}`).join(" · ");
+    if (fixing) {
+      state = "active";
+      detail = `fixing ${af.module} — attempt ${af.attempt}/${af.max_attempts}` +
+        (af.confidence ? ` (${af.confidence} confidence)` : "");
+    }
+    return { key: `phase${p.n}`, label: `Phase ${p.n}`, weight: Math.max(1, mods.length), state,
+      frac: fixing ? 0.5 : mods.length ? passed / mods.length : 0, detail,
+      started: p.started, ended: p.ended };
+  });
+  const vTotal = val.total || (val.paths || []).length || 20;
+  const vDone = (val.paths || []).length;
+  const vState = STEP_STATE[val.result] || "pending";
+  steps.push({
+    key: "validate", label: "System validation", weight: 6, state: vState,
+    frac: vTotal ? vDone / vTotal : 0,
+    detail: val.summary ? `${val.summary.pass} pass, ${val.summary.fail} fail, ${val.summary.error} error`
+      : vDone ? `${vDone}/${vTotal} paths run` : "",
+    started: val.started, ended: null,
+  });
+  return steps;
+}
+
+function renderFrontendHero() {
+  const fe = data.frontend, val = data.validation, run = data.run;
+  $("hero-title").textContent = "Frontend · RTL generation & validation";
+  const steps = frontendHeroSteps();
+  const totW = steps.reduce((a, s) => a + s.weight, 0) || 1;
+  const doneW = steps.reduce((a, s) => a + s.weight * (s.state === "pending" ? 0 : s.frac), 0);
+  const allDone = steps.every((s) => s.state === "done");
+  const anyActive = steps.some((s) => s.state === "active");
+  const anyFail = steps.some((s) => s.state === "fail");
+  const pct = allDone ? 100 : Math.min(99.9, (doneW / totW) * 100);
+
+  $("bk-pct").innerHTML = `${pct < 10 && pct > 0 ? pct.toFixed(1) : Math.floor(pct)}<small>%</small>`;
+  const bar = $("bk-bar");
+  bar.className = "bar " + (anyActive ? "active" : allDone ? "pass" : anyFail ? "fail" : "");
+  bar.querySelector(".fill").style.width = pct.toFixed(2) + "%";
+  let acc = 0;
+  $("bk-ticks").innerHTML = steps.slice(0, -1).map((s) => { acc += s.weight; return `<span style="left:${acc / totW * 100}%"></span>`; }).join("");
+
+  const firstStart = steps.map((s) => s.started).filter(Boolean).sort((a, b) => a - b)[0];
+  $("bk-eta").innerHTML = anyActive && firstStart ? `<b>${dur(nowS() - firstStart)}</b>elapsed`
+    : firstStart ? `<b>—</b>in progress` : `<b>—</b>not started`;
+
+  const cur = steps.find((s) => s.state === "active");
+  $("bk-now").innerHTML = cur ? `${esc(cur.label)}<span class="detail">${esc(cur.detail || "")}</span>`
+    : allDone ? "Frontend generation + validation complete"
+    : anyFail ? "A module or validation path failed"
+    : "Waiting to start";
+
+  $("bk-meta").textContent = fe.round ? `round ${fe.round}` : "";
+
+  let banner = "";
+  if (run.status === "halted" && run.halt) {
+    banner = `<div class="banner halt"><b>Halted at ${esc(run.halt.stage)}</b>: ${esc((run.halt.why || "").slice(0, 280))}<br>
+      Resume with <code>python3 flow.py --resume ${esc(run.dir)}</code></div>`;
+  } else if (fe.active_fix) {
+    const af = fe.active_fix, trig = trigLabel(af.trigger);
+    banner = `<div class="banner loop"><b>⚡ Fixing ${esc(af.module)}</b> — attempt ${af.attempt}/${af.max_attempts}` +
+      (trig ? ` · triggered by ${esc(trig)}` : "") + `</div>`;
+  } else if (val.result === "fail" && (val.failed_modules || []).length) {
+    banner = `<div class="banner loop"><b>↩ Sent back to Frontend</b> — ${esc(val.failed_modules.join(", "))} (round ${val.round})</div>`;
+  } else if (allDone) {
+    banner = `<div class="banner pass">All phases generated and all system paths passed.</div>`;
+  }
+  $("banner").innerHTML = banner;
+
+  const unresolved = (fe.fixloop || []).filter((f) => f.outcome === "unresolved" || f.outcome === "error").length;
+  const modPass = fe.phases.reduce((a, p) => a + Object.values(p.modules).filter((s) => s === "pass").length, 0);
+  const modTotal = fe.phases.reduce((a, p) => a + Object.keys(p.modules).length, 0);
+  const tiles = [
+    ["Modules", `${modPass}/${modTotal}`, modPass === modTotal ? "good" : ""],
+    ["Validation round", fe.round || "—", ""],
+    ["Paths", val.summary ? `${val.summary.pass}/${val.total || (val.paths || []).length}` : "—",
+      val.summary && val.summary.fail ? "bad" : (val.summary ? "good" : "")],
+    ["Fix attempts", (fe.fixloop || []).length ? `${fe.fixloop.length}${unresolved ? ` (${unresolved} stuck)` : ""}` : "—",
+      unresolved ? "bad" : ""],
+  ];
+  $("tiles").innerHTML = tiles.map(([k, v, c]) => `<div class="tile"><div class="k">${k}</div><div class="v ${c}">${esc(v)}</div></div>`).join("");
+
+  $("steps").innerHTML = steps.map((s) => {
+    const ic = { done: "✓", fail: "✕", halt: "!", skip: "–" }[s.state] || "";
+    let tm = "";
+    if (s.state === "active") tm = `${Math.round(s.frac * 100)}%`;
+    else if (s.started && s.ended && s.state !== "pending") tm = dur(s.ended - s.started);
+    return `<li class="step ${s.state}">
+      <span class="ic">${ic}</span><span class="nm" title="${esc(s.detail || "")}">${esc(s.label)}</span>
+      <span class="mini"><b style="width:${(s.state === "pending" ? 0 : s.frac * 100).toFixed(1)}%"></b></span>
+      <span class="tm">${tm}</span></li>`;
+  }).join("");
+
+  $("notes").innerHTML = (fe.fixloop || []).slice(-4).reverse().map((f) =>
+    `<div>${f.ended ? clock(f.ended) + " " : ""}${esc(f.module)} attempt ${f.attempt}/${f.max_attempts}: ${esc(f.outcome || "in progress")}</div>`
+  ).join("");
+}
+
 function renderBackend() {
   const bk = data.backend, run = data.run;
+  $("hero-title").textContent = "Backend · RTL → GDSII";
   const pct = bk.progress * 100;
   $("bk-pct").innerHTML = `${pct < 10 && pct > 0 ? pct.toFixed(1) : Math.floor(pct)}<small>%</small>`;
   const bar = $("bk-bar");
