@@ -132,6 +132,7 @@ module scheduler #(
     input  logic [BANK_BITS-1:0]    q_bank    [DEPTH],
     input  logic                    q_we      [DEPTH],
     input  logic [AUX_WIDTH-1:0]    q_aux     [DEPTH],
+    input  logic [DEPTH-1:0]        q_urgent,       // one-hot: oldest entry past the queue's age bound
 
     // ── From bank_tracker ──
     input  logic [NUM_BANKS-1:0]    bank_is_active,
@@ -408,6 +409,16 @@ module scheduler #(
         end
     end
 
+    // q_urgent decoded once (one-hot or zero).
+    logic                urg_valid;
+    logic [IDX_BITS-1:0] urg_idx;
+    always_comb begin
+        urg_valid = |q_urgent;
+        urg_idx   = '0;
+        for (int i = 0; i < DEPTH; i++)
+            if (q_urgent[i]) urg_idx = i[IDX_BITS-1:0];
+    end
+
 {t2_tree}
     wire                t2_valid = {t2_valid_w};
     wire [IDX_BITS-1:0] t2_idx   = {t2_idx_w};
@@ -451,11 +462,29 @@ module scheduler #(
                 end
             end
         end
+        // Age priority (Validation, 2026-11-09): the oldest request past
+        // cmd_queue's STARVE_CYCLES (q_urgent, one-hot) wins whichever tier
+        // it is eligible for this cycle -- its CAS over other row hits, its
+        // ACT/PRE over other misses. When its own bank's timing makes it
+        // eligible for neither, the normal tiers run so other banks are not
+        // idled. FR-FCFS with no age bound starved a write for 480 cycles
+        // (drop 2a18a7929dce) and the tree's fixed index order could do the
+        // same to a row hit at a high index.
         // Priority 2: Row-hit CAS (first-come = lowest index), priority 3:
         // ACT for row-miss -- both resolved above by their own tree, run
         // concurrently; this is just "which tier wins."
         else begin
-            if (t2_valid) begin
+            if (urg_valid && is_cas_ready[urg_idx]) begin
+                sel_valid            = 1'b1;
+                sel_idx               = urg_idx;
+                sel_onehot            = q_urgent;
+                sel_type              = q_we[urg_idx] ? CMD_WR : CMD_RD;
+            end else if (urg_valid && eligible3[urg_idx]) begin
+                sel_valid            = 1'b1;
+                sel_idx               = urg_idx;
+                sel_onehot            = q_urgent;
+                sel_type              = act_cond_pre[urg_idx] ? CMD_PRE : CMD_ACT;
+            end else if (t2_valid) begin
                 sel_valid            = 1'b1;
                 sel_idx               = t2_idx;
                 sel_onehot[t2_idx]    = 1'b1;
@@ -609,6 +638,7 @@ endmodule
                     {"name": "q_bank", "width": f"{p['DEPTH']}x{p['BANK_BITS']}", "dir": "input", "source": "cmd_queue.entry_bank"},
                     {"name": "q_we", "width": f"{p['DEPTH']}x1", "dir": "input", "source": "cmd_queue.entry_we"},
                     {"name": "q_aux", "width": f"{p['DEPTH']}x{p['AUX_WIDTH']}", "dir": "input", "source": "cmd_queue.entry_aux"},
+                    {"name": "q_urgent", "width": p["DEPTH"], "dir": "input", "source": "cmd_queue.entry_urgent"},
                 ],
                 "bank_status": [
                     {"name": "bank_is_active", "width": p["NUM_BANKS"], "dir": "input", "source": "bank_tracker.bank_is_active"},

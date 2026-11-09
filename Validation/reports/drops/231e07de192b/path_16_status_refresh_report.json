@@ -1,0 +1,72 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_16_status_refresh",
+  "strategy": "composed",
+  "verdict": "pass",
+  "timestamp": "2026-11-09T16:05:12.926121",
+  "blocks": [
+    "config_regs",
+    "refresh_ctrl"
+  ],
+  "sequence": "Validation/sequences/generated/path_16_status_refresh_seed1.json",
+  "stimulus_generator": "status_poll",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "231e07de192b",
+    "drop_id": "231e07de192b",
+    "design_id": "690aa5bfb6ab",
+    "blocks_used": [
+      "config_regs",
+      "refresh_ctrl"
+    ],
+    "validated_at": "3338b7e",
+    "frontend_commits": {
+      "config_regs": "3338b7ec2707d5b85fe8840f3f99dc6a6b8657f5",
+      "refresh_ctrl": "3338b7ec2707d5b85fe8840f3f99dc6a6b8657f5"
+    },
+    "roots": [
+      "runs/matrix/preset_balanced/drop"
+    ],
+    "blocks": {
+      "config_regs": {
+        "rtl": "runs/matrix/preset_balanced/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/matrix/preset_balanced/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_bce23f46"
+      },
+      "refresh_ctrl": {
+        "rtl": "runs/matrix/preset_balanced/drop/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "runs/matrix/preset_balanced/drop/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "compiled_ddr31333_x8_2lane_1rank_bce23f46"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/matrix/preset_balanced/drop/generated_spec.json",
+      "revision": "compiled_ddr31333_x8_2lane_1rank_bce23f46"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "refresh_ctrl",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "refresh_ctrl",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
+    },
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "pass",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=120/120  (120 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    }
+  ],
+  "log": "runs/matrix/preset_balanced/validation/reports/path_16_status_refresh_sim.log",
+  "observed_trace": "runs/matrix/preset_balanced/validation/reports/path_16_status_refresh_observed.jsonl"
+}

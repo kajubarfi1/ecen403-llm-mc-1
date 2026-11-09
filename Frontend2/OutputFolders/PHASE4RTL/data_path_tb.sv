@@ -161,11 +161,19 @@ module data_path_tb;
     endtask
 
     task automatic push_wr_data(input [DATA_WIDTH-1:0] d, input [SEL_WIDTH-1:0] m);
-        @(posedge clk);
+        // Drive on the falling edge and hold across exactly one rising
+        // edge: the old drive-at-posedge form raced the DUT's sampling
+        // (valid read as 1 for a second edge by the assertions) and,
+        // once wr_data_ready became per-slot (2026-11-09), read a
+        // not-yet-settled ready. Then present the NEXT word's tag, as
+        // wb_port does, so a check of wr_data_ready after a push asks
+        // about the word that would come next.
+        @(negedge clk);
         wr_data_valid = 1; wr_data = d; wr_mask = m; wr_data_aux = shadow_wr_aux_ctr;
         shadow_wr_aux_ctr = shadow_wr_aux_ctr + 1'b1;
-        @(posedge clk);
-        wr_data_valid = 0;
+        @(negedge clk);
+        wr_data_valid = 0; wr_data_aux = shadow_wr_aux_ctr;
+        #1;   // let wr_data_ready settle for the new tag before a check reads it
     endtask
 
     task automatic issue_wr_cmd(input [AUX_WIDTH-1:0] aux);

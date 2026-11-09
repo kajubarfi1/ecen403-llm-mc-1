@@ -4,7 +4,7 @@
 //
 // Interface : req   (Internal request descriptors wb_port emits toward cmd_queue)
 // Block     : wb_port
-// Manifest  : Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json
+// Manifest  : runs/matrix/preset_balanced/drop/PHASE1RTL/wb_port_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //
@@ -20,6 +20,7 @@ module req_monitor #(
     input  logic clk,
     input  logic rst_n,
     input  logic [28:0] req_addr,
+    input  logic [3:0] req_aux,
     input  logic req_ready,
     input  logic req_valid,
     input  logic [31:0] req_wdata,
@@ -38,7 +39,7 @@ module req_monitor #(
   always @(posedge clk) begin
     #SAMPLE_DELAY;                 // sample after non-blocking assignments commit
     if (rst_n && (req_valid && req_ready)) begin
-        $display("TXN req request t=%0t addr=%0h data=%0h mask=%0h we=%0h", $time, req_addr, req_wdata, req_wmask, req_we);
+        $display("TXN req request t=%0t addr=%0h aux=%0h data=%0h mask=%0h we=%0h", $time, req_addr, req_aux, req_wdata, req_wmask, req_we);
     end
   end
 

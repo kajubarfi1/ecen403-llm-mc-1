@@ -3,7 +3,7 @@
   "$schema": "https://example.com/ddr3_microarchitecture.schema.json",
   "schema_version": "2.0.0",
   "design_id": "ddr3_mc_1333_x8_2lane_1rank",
-  "revision": "compiled_ddr31333_x8_2lane_1rank_ce2d2afe",
+  "revision": "compiled_ddr31333_x8_2lane_1rank_bce23f46",
   "conversion_rules": {
     "timing_ns_to_nCK": "ceil(param_ns / tCK_ns)",
     "conversion_owner": "microarchitecture_agent",
@@ -303,7 +303,7 @@
     "dqs_count": 2,
     "dm_enabled": true,
     "ck_pair_present": true,
-    "data_bus_cycles_per_cas": 2,
+    "data_bus_cycles_per_cas": "host_word_beats",
     "notes": "Abstracted DRAM boundary. Command/data semantics only."
   },
   "csr_register_map": {

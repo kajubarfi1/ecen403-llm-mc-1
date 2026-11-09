@@ -3,7 +3,7 @@
   "path": "path_20_refresh_preempt",
   "strategy": "invariant",
   "verdict": "pass",
-  "timestamp": "2026-11-05T12:23:24.948563",
+  "timestamp": "2026-11-09T15:38:25.864308",
   "blocks": [
     "addr_decoder",
     "bank_tracker",
@@ -21,9 +21,9 @@
   "window_cycles": 6000,
   "coverage_collected": true,
   "rtl_drop": {
-    "git_head": "e6e1ab286a8f",
-    "drop_id": "e6e1ab286a8f",
-    "design_id": "ce55daab01c5",
+    "git_head": "e4794e87a8c1",
+    "drop_id": "e4794e87a8c1",
+    "design_id": "ae80be01ac4f",
     "blocks_used": [
       "addr_decoder",
       "bank_tracker",
@@ -35,17 +35,17 @@
       "scheduler",
       "wb_port"
     ],
-    "validated_at": "a2cdd65",
+    "validated_at": "3338b7e",
     "frontend_commits": {
       "addr_decoder": "f37ce49d323151a6118ae7765aa766918c816383",
       "bank_tracker": "f37ce49d323151a6118ae7765aa766918c816383",
       "cmd_gen": "f37ce49d323151a6118ae7765aa766918c816383",
-      "cmd_queue": "f37ce49d323151a6118ae7765aa766918c816383",
+      "cmd_queue": "3338b7ec2707d5b85fe8840f3f99dc6a6b8657f5",
       "config_regs": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc",
-      "data_path": "93e750db808f44eae5ae516978d484f33481aaa8",
+      "data_path": "3338b7ec2707d5b85fe8840f3f99dc6a6b8657f5",
       "refresh_ctrl": "f37ce49d323151a6118ae7765aa766918c816383",
-      "scheduler": "eb1a77b69594911ac55eb4576c87ee649a466cff",
-      "wb_port": "f7d2d02f1aeba5250542b2116105773911fffaed"
+      "scheduler": "3338b7ec2707d5b85fe8840f3f99dc6a6b8657f5",
+      "wb_port": "3338b7ec2707d5b85fe8840f3f99dc6a6b8657f5"
     },
     "roots": [
       "Frontend2/OutputFolders"
@@ -130,7 +130,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
       "scope": "cmd_queue_scheduler",
       "verdict": "pass",
-      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (11092 transactions, no rule broken)",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (11120 transactions, no rule broken)",
       "detail": [],
       "rule_counts": {}
     },
@@ -148,7 +148,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
       "scope": "cmd_gen",
       "verdict": "pass",
-      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=1844/1844  (1844 output transaction(s) matched)",
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=1850/1850  (1850 output transaction(s) matched)",
       "detail": [],
       "rule_counts": {}
     },
@@ -158,7 +158,7 @@
       "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_20_refresh_preempt_checker.py",
       "scope": "path_20_refresh_preempt",
       "verdict": "pass",
-      "summary": "scope=path_20_refresh_preempt  strategy=invariant  status=pass  (11092 transactions, no rule broken)",
+      "summary": "scope=path_20_refresh_preempt  strategy=invariant  status=pass  (11120 transactions, no rule broken)",
       "detail": []
     },
     {
@@ -168,6 +168,15 @@
       "model": null,
       "verdict": "pass",
       "summary": "scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable",
+      "detail": []
+    },
+    {
+      "stage": "(address order)",
+      "kind": "address_order",
+      "scope": "(address order)",
+      "model": null,
+      "verdict": "pass",
+      "summary": "scope=(address order)  strategy=address_order  status=pass  rules=1 checked=600 unpaired=0 violations=0",
       "detail": []
     }
   ],

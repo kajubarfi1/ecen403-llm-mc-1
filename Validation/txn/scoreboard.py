@@ -222,12 +222,16 @@ def _dont_care_rules():
         for iface, d in cat.items():
             enc = {k: v for k, v in d.get("command_encoding", {}).items() if not k.startswith("$")}
             for rule in d.get("dont_care", []):
-                (wf, wv), = rule["when"].items()
-                if isinstance(wv, str) and wv in enc:
-                    wv = int(enc[wv].split("'b")[-1], 2)
+                if rule.get("when"):
+                    (wf, wv), = rule["when"].items()
+                    if isinstance(wv, str) and wv in enc:
+                        wv = int(enc[wv].split("'b")[-1], 2)
+                    wv = int(wv)
+                else:
+                    wf, wv = None, None          # unconditional: the field is never compared on this stream
                 for fld in rule.get("fields", [rule.get("field")]):
                     if fld:
-                        _DONT_CARE.setdefault(iface, []).append((wf, int(wv), fld, int(rule["keep_mask"])))
+                        _DONT_CARE.setdefault(iface, []).append((wf, wv, fld, int(rule["keep_mask"])))
     return _DONT_CARE
 
 
@@ -238,9 +242,13 @@ def _apply_dont_care(t):
     fields = dict(t.fields)
     changed = False
     for wf, wv, fld, keep in rules:
-        if fields.get(wf) == wv and fld in fields:
-            fields[fld] = fields[fld] & keep
-            changed = True
+        # A declared don't-care aligns both sides: a predictor that never
+        # emits the field (the port's own tag, 2026-11-09) and a monitor that
+        # records it compare equal once the field is masked on both.
+        if wf is None or fields.get(wf) == wv:
+            if fld in fields or keep == 0:
+                fields[fld] = fields.get(fld, 0) & keep
+                changed = True
     if not changed:
         return t
     n = Txn(iface=t.iface, kind=t.kind, fields=fields)

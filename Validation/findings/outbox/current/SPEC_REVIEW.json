@@ -5,12 +5,14 @@
   "spec": "Validation/spec/llmmc_microarchitecturespec_filled.json",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "design_id": "ddr3_mc_core_v2",
-  "generated_utc": "2026-11-05T18:05:20.906188+00:00",
+  "generated_utc": "2026-11-09T21:37:39.009420+00:00",
   "blocking": [],
   "advisory": [
     "[gap:decision] PHY_DATA_BUS_OCCUPANCY: phy_interface.data_bus_cycles_per_cas is not stated",
     "[gap:decision] HOST_WRITE_BUFFER_BACKPRESSURE: host_interface.write_buffer_backpressure is not stated",
-    "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated"
+    "[gap:decision] HOST_ACK_ORDERING: host_interface.ack_ordering is not stated",
+    "[gap:standard] SCHED_SAME_ADDRESS_ORDERING: controller_architecture.same_address_ordering is not stated",
+    "[gap:decision] SCHED_STARVATION_BOUND: controller_architecture.starvation_limit_cycles is not stated"
   ],
   "jedec": [
     {
@@ -225,6 +227,30 @@
       "options": [
         "in_request_order",
         "writes_may_complete_early"
+      ]
+    },
+    {
+      "id": "SCHED_SAME_ADDRESS_ORDERING",
+      "status": "gap",
+      "disposition": "standard",
+      "question": "When the scheduler reorders commands, who keeps same-address requests in host order: the scheduler (or queue) when it picks, or the host port by not accepting the later request?",
+      "detail": "controller_architecture.same_address_ordering is not stated",
+      "require": "controller_architecture.same_address_ordering",
+      "options": [
+        "preserve_host_order",
+        "host_port_serializes"
+      ]
+    },
+    {
+      "id": "SCHED_STARVATION_BOUND",
+      "status": "gap",
+      "disposition": "decision",
+      "question": "How long may a reordering scheduler (fr_fcfs) leave a queued request un-issued while newer requests win? The bound is the age, in controller cycles, past which a request is served before any younger one.",
+      "detail": "controller_architecture.starvation_limit_cycles is not stated",
+      "require": "controller_architecture.starvation_limit_cycles",
+      "options": [
+        "<integer controller cycles>",
+        "none"
       ]
     }
   ],

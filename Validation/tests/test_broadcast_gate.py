@@ -265,3 +265,77 @@ class TestUnpackMaskPolarity(unittest.TestCase):
     def test_silent_spec_grades_nothing(self):
         self.assertEqual(self._grade(None, [1, 3]), [])
         self.assertEqual(self._grade(None, [2, 0]), [])
+
+
+class TestTaggedUnpack(unittest.TestCase):
+    """The bus-bridge gate's tag-indexed unpack (2026-11-09): with
+    `unpack.command_iface` declared, a word is emitted when the command
+    carrying its tag arrives, and commands may come in another order than
+    the words. The FIFO model that had been accepted (beats on word arrival,
+    arrival order) is rejected; a tag-paired model is accepted."""
+
+    SCHEMAS = {"dp_wr": {"kinds": {"write": {"data": {"width": 32}, "mask": {"width": 4}, "aux": {"width": 4}}}},
+               "dp_cmd": {"kinds": {"write": {"aux": {"width": 4}}, "read": {"aux": {"width": 4}}}},
+               "ddr_wr_beat": {"kinds": {"beat": {"data": {"width": 16}, "mask": {"width": 2}}}}}
+    SPEC = {"data_path_mapping": {"host_width_bits": 32, "ddr_channel_width_bits": 16,
+                                  "endianness": "little", "ddr_dm_polarity": "active_high_mask"}}
+    U = {"geometry_section": "data_path_mapping", "from_field": "data", "data_field": "data",
+         "mask_from_field": "mask", "mask_field": "mask", "polarity_key": "ddr_dm_polarity",
+         "command_iface": "dp_cmd", "command_kind": "write", "tag_field": "aux"}
+
+    def _beats(self, word, mask):
+        from txn_contract import Txn
+        return [Txn("ddr_wr_beat", "beat", {"data": (word >> (16 * i)) & 0xFFFF,
+                                            "mask": (~(mask >> (2 * i)) & 0x3)}) for i in range(2)]
+
+    def _grade(self, predictor):
+        import predictor_gates as G
+        return G.BusBridgeGate._grade_unpack(predictor, self.SPEC, self.SCHEMAS, "ddr_wr_beat",
+                                             {"unpack": self.U}, "dp_wr")
+
+    def test_tag_paired_model_accepted(self):
+        test = self
+
+        class Tagged:
+            def reset(self): self.buf = {}
+            def drain(self): return []
+            def process(self, t):
+                if t.iface == "dp_wr":
+                    self.buf[t.fields["aux"]] = (t.fields["data"], t.fields["mask"]); return []
+                if t.iface == "dp_cmd" and t.kind == "write":
+                    w, m = self.buf.pop(t.fields["aux"]); return test._beats(w, m)
+                return []
+        self.assertEqual(self._grade(Tagged()), [])
+
+    def test_fifo_model_rejected(self):
+        test = self
+
+        class Fifo:
+            def reset(self): pass
+            def drain(self): return []
+            def process(self, t):
+                return test._beats(t.fields["data"], t.fields["mask"]) if t.iface == "dp_wr" else []
+        fails = self._grade(Fifo())
+        self.assertTrue(fails and "holds the word until" in fails[0], fails)
+
+    def test_oldest_word_model_rejected(self):
+        test = self
+
+        class Oldest:
+            def reset(self): self.q = []
+            def drain(self): return []
+            def process(self, t):
+                if t.iface == "dp_wr":
+                    self.q.append((t.fields["data"], t.fields["mask"])); return []
+                if t.iface == "dp_cmd" and t.kind == "write":
+                    w, m = self.q.pop(0); return test._beats(w, m)
+                return []
+        fails = self._grade(Oldest())
+        self.assertTrue(fails and "never with the oldest word" in fails[0], fails)
+
+    def test_schemas_without_the_tag_are_not_applicable(self):
+        import predictor_gates as G
+        schemas = {k: json.loads(json.dumps(v)) for k, v in self.SCHEMAS.items()}
+        del schemas["dp_wr"]["kinds"]["write"]["aux"]
+        with self.assertRaises(G.GateNotApplicable):
+            G.BusBridgeGate._grade_unpack(None, self.SPEC, schemas, "ddr_wr_beat", {"unpack": self.U}, "dp_wr")

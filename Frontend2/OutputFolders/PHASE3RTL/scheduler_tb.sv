@@ -12,6 +12,7 @@ module scheduler_tb;
     logic [DEPTH-1:0] q_valid;
     logic [ROW_BITS-1:0] q_row[DEPTH]; logic [COL_BITS-1:0] q_col[DEPTH];
     logic [BANK_BITS-1:0] q_bank[DEPTH]; logic q_we[DEPTH]; logic [AUX_WIDTH-1:0] q_aux[DEPTH];
+    logic [DEPTH-1:0] q_urgent = '0;   // age priority from cmd_queue (2026-11-09); none in these tests
     // Bank tracker
     logic [NUM_BANKS-1:0] bank_is_active,bank_act_allowed,bank_rd_allowed,bank_wr_allowed,bank_pre_allowed;
     logic [ROW_BITS-1:0] bank_open_row[NUM_BANKS];

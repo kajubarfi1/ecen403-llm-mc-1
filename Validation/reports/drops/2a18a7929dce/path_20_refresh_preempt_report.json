@@ -1,0 +1,226 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_20_refresh_preempt",
+  "strategy": "invariant",
+  "verdict": "fail",
+  "timestamp": "2026-11-09T13:09:18.869849",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_20_refresh_preempt_seed1.json",
+  "stimulus_generator": "refresh_stress",
+  "autonomous": false,
+  "window_cycles": 6000,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "2a18a7929dce",
+    "drop_id": "2a18a7929dce",
+    "design_id": "a4251c2e8751",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "3338b7e",
+    "frontend_commits": {
+      "addr_decoder": "f37ce49d323151a6118ae7765aa766918c816383",
+      "bank_tracker": "f37ce49d323151a6118ae7765aa766918c816383",
+      "cmd_gen": "f37ce49d323151a6118ae7765aa766918c816383",
+      "cmd_queue": "f37ce49d323151a6118ae7765aa766918c816383",
+      "config_regs": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc",
+      "data_path": "ab5e2973fca68d5391108c911830169fbd93c56e",
+      "refresh_ctrl": "f37ce49d323151a6118ae7765aa766918c816383",
+      "scheduler": "eb1a77b69594911ac55eb4576c87ee649a466cff",
+      "wb_port": "4caccee33e233ea89d3729b4d2b96e89110dcda2"
+    },
+    "roots": [
+      "Frontend2/OutputFolders"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/addr_decoder.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "bank_tracker": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_gen": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_queue": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "config_regs": {
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "data_path": {
+        "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "refresh_ctrl": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "scheduler": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "wb_port": {
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "Frontend2/OutputFolders/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "pass",
+      "summary": "scope=wb_port  strategy=exact  status=pass  matched=600/600  (600 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "addr_decoder",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
+      "scope": "addr_decoder",
+      "verdict": "pass",
+      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=600/600  (600 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "cmd_queue+scheduler",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
+      "scope": "cmd_queue_scheduler",
+      "verdict": "pass",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (11092 transactions, no rule broken)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "refresh_ctrl",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "refresh_ctrl",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
+    },
+    {
+      "stage": "cmd_gen",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
+      "scope": "cmd_gen",
+      "verdict": "pass",
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=1844/1844  (1844 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "(path-level)",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/path_20_refresh_preempt_checker.py",
+      "scope": "path_20_refresh_preempt",
+      "verdict": "pass",
+      "summary": "scope=path_20_refresh_preempt  strategy=invariant  status=pass  (11092 transactions, no rule broken)",
+      "detail": []
+    },
+    {
+      "stage": "(conservation)",
+      "kind": "conservation",
+      "scope": "(conservation)",
+      "model": null,
+      "verdict": "pass",
+      "summary": "scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable",
+      "detail": []
+    },
+    {
+      "stage": "(address order)",
+      "kind": "address_order",
+      "scope": "(address order)",
+      "model": null,
+      "verdict": "fail",
+      "summary": "scope=(address order)  strategy=address_order  status=fail  rules=1 checked=600 unpaired=0 violations=405",
+      "detail": [
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x1cfdeea0 write accepted t=879000 reuses tag 2 of the older write accepted t=89000 to 0x18f2a0a0 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0xbd0a738 write accepted t=929000 reuses tag 3 of the older write accepted t=94000 to 0x1f52fb4 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0xac2e304 write accepted t=979000 reuses tag 4 of the older write accepted t=99000 to 0x1b03f53c still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0xd61bf28 write accepted t=1129000 reuses tag 7 of the older write accepted t=114000 to 0x1b03cd14 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x242c82c write accepted t=1179000 reuses tag 8 of the older write accepted t=119000 to 0x192cb4ac still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x1cdaa51c write accepted t=1229000 reuses tag 9 of the older write accepted t=124000 to 0xb128da4 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x1b487d30 write accepted t=1279000 reuses tag 10 of the older write accepted t=129000 to 0x6e85884 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x4e47e6c write accepted t=1329000 reuses tag 11 of the older write accepted t=134000 to 0x1e48e60 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x8585408 write accepted t=1379000 reuses tag 12 of the older write accepted t=139000 to 0xaca3fbc still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x2652500 write accepted t=1429000 reuses tag 13 of the older write accepted t=144000 to 0xedbf940 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x1bb5746c write accepted t=1479000 reuses tag 14 of the older write accepted t=149000 to 0x8459f60 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x18f6c07c write accepted t=1529000 reuses tag 15 of the older write accepted t=154000 to 0x1757d5d8 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x12a34574 write accepted t=1779000 reuses tag 4 of the older write accepted t=979000 to 0xac2e304 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x1831cd24 write accepted t=1879000 reuses tag 6 of the older write accepted t=1079000 to 0x1af054e0 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x12ea557c write accepted t=1929000 reuses tag 7 of the older write accepted t=1129000 to 0xd61bf28 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x12ed5ed4 write accepted t=1979000 reuses tag 8 of the older write accepted t=1179000 to 0x242c82c still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0xc06ea60 write accepted t=2029000 reuses tag 9 of the older write accepted t=1229000 to 0x1cdaa51c still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0xa2c26a4 write accepted t=2079000 reuses tag 10 of the older write accepted t=1279000 to 0x1b487d30 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x1e875558 write accepted t=2129000 reuses tag 11 of the older write accepted t=1329000 to 0x4e47e6c still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x12ea49f0 write accepted t=2179000 reuses tag 12 of the older write accepted t=1379000 to 0x8585408 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x41bb8a8 write accepted t=2229000 reuses tag 13 of the older write accepted t=1429000 to 0x2652500 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x1e02c974 write accepted t=2279000 reuses tag 14 of the older write accepted t=1479000 to 0x1bb5746c still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x13ab2634 write accepted t=2329000 reuses tag 15 of the older write accepted t=1529000 to 0x18f6c07c still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x13a25a98 write accepted t=2429000 reuses tag 1 of the older write accepted t=1629000 to 0xda247b8 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x1607c94 write accepted t=2579000 reuses tag 4 of the older write accepted t=979000 to 0xac2e304 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x1607c94 write accepted t=2579000 reuses tag 4 of the older write accepted t=1779000 to 0x12a34574 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x90ef620 write accepted t=2679000 reuses tag 6 of the older write accepted t=1879000 to 0x1831cd24 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x9114bb0 write accepted t=2729000 reuses tag 7 of the older write accepted t=1929000 to 0x12ea557c still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0xa1afbc8 write accepted t=2779000 reuses tag 8 of the older write accepted t=1979000 to 0x12ed5ed4 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x100399f8 write accepted t=2829000 reuses tag 9 of the older write accepted t=2029000 to 0xc06ea60 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x15acc15c write accepted t=2879000 reuses tag 10 of the older write accepted t=2079000 to 0xa2c26a4 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x1aaaf2dc write accepted t=2929000 reuses tag 11 of the older write accepted t=2129000 to 0x1e875558 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x8dd1d78 write accepted t=2979000 reuses tag 12 of the older write accepted t=2179000 to 0x12ea49f0 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0xef22658 write accepted t=3029000 reuses tag 13 of the older write accepted t=2229000 to 0x41bb8a8 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x1c0d6288 write accepted t=3079000 reuses tag 14 of the older write accepted t=2279000 to 0x1e02c974 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0xe676acc write accepted t=3129000 reuses tag 15 of the older write accepted t=2329000 to 0x13ab2634 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x182401dc write accepted t=3279000 reuses tag 2 of the older write accepted t=2479000 to 0x13613a64 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x29af898 write accepted t=3379000 reuses tag 4 of the older write accepted t=2579000 to 0x1607c94 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x14d474b0 write accepted t=3479000 reuses tag 6 of the older write accepted t=2679000 to 0x90ef620 still unissued",
+        "ADDRORDER SAME_ADDRESS_HOST_ORDER_TAG_REUSE owner=data_path addr=0x1a2057f4 write accepted t=3529000 reuses tag 7 of the older write accepted t=2729000 to 0x9114bb0 still unissued"
+      ]
+    }
+  ],
+  "log": "Validation/reports/paths/path_20_refresh_preempt_sim.log",
+  "observed_trace": "Validation/reports/paths/path_20_refresh_preempt_observed.jsonl"
+}

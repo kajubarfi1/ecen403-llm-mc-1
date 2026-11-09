@@ -1,7 +1,7 @@
 {
   "$schema": "validation-findings/1",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "finding_count": 3,
+  "finding_count": 5,
   "findings": [
     {
       "source": "validation",
@@ -72,6 +72,54 @@
         "options": [
           "in_request_order",
           "writes_may_complete_early"
+        ]
+      },
+      "status": "open"
+    },
+    {
+      "source": "validation",
+      "target": "spec",
+      "kind": "spec_gap",
+      "scope": "controller_architecture",
+      "severity": "major",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "[intake] When the scheduler reorders commands, who keeps same-address requests in host order: the scheduler (or queue) when it picks, or the host port by not accepting the later request?",
+      "detail": "controller_architecture.same_address_ordering is not stated. Without a sentence the checker still fails a read issued ahead of an older write to its address (the data is wrong either way) but attributes it to the scheduler by default; the spec names the owner. The applicable standard (single-master memory consistency (Wishbone B4 carries no reorder semantics)) answers this: preserve_host_order \u2014 A host that writes an address and then reads it must read what it wrote; a reordering scheduler (fr_fcfs) may reorder across addresses but must issue same-address requests in host order. host_port_serializes is the alternative: the port holds a request while an older one to the same address is outstanding, and the scheduler is then free. Validation adopts that value and keeps checking; please state it in the spec. First encountered as: path_18_full_write on drop 2a18a7929dce (2026-11-09): dp_cmd read aux=10 issued at t=1424000 ps, the older write to the same address at t=1464000 ps; the host read back 0xc5b6fecf for 0x1622bd79..",
+      "evidence": {
+        "rule": "SCHED_SAME_ADDRESS_ORDERING",
+        "status": "gap",
+        "proposed_patch": {
+          "controller_architecture": {
+            "same_address_ordering": "preserve_host_order"
+          }
+        },
+        "options": [
+          "preserve_host_order",
+          "host_port_serializes"
+        ]
+      },
+      "status": "open"
+    },
+    {
+      "source": "validation",
+      "target": "spec",
+      "kind": "spec_gap",
+      "scope": "controller_architecture",
+      "severity": "major",
+      "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+      "title": "[intake] How long may a reordering scheduler (fr_fcfs) leave a queued request un-issued while newer requests win? The bound is the age, in controller cycles, past which a request is served before any younger one.",
+      "detail": "controller_architecture.starvation_limit_cycles is not stated. Without a bound FR-FCFS starved a write for 2.4 us (480 cycles) on drop 2a18a7929dce; with same-address ordering and per-slot write-buffer back-pressure in place the host port then stalls for that long (driver completion timeouts on the saturation paths of e322c9ab238a). The queue enforces a default of 128 controller cycles until the spec names one; the checker reads the field when present. Disposition: decision \u2014 comparisons that depend on this are UNDETERMINED until the spec states it. First encountered as: path_07/path_05/path_20 on drop e322c9ab238a (2026-11-09): HANDSHAKE/wb, the port stalled past the driver's 256-cycle wait while a starved write held the tag slot the pending write needed..",
+      "evidence": {
+        "rule": "SCHED_STARVATION_BOUND",
+        "status": "gap",
+        "proposed_patch": {
+          "controller_architecture": {
+            "starvation_limit_cycles": "<one of ['<integer controller cycles>', 'none']>"
+          }
+        },
+        "options": [
+          "<integer controller cycles>",
+          "none"
         ]
       },
       "status": "open"

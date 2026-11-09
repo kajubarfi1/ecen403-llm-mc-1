@@ -225,6 +225,39 @@
       "question": "Must the host port return acknowledges in the order the beats were accepted (Wishbone B4 pipelined masters match acks to requests by order; a response carries no id), or may a write be acknowledged ahead of an earlier read that is still waiting for its data?",
       "consequence": "The design acknowledges a write one cycle after acceptance and a read when its data returns, tens of cycles later, so a write accepted after a read is acknowledged first. A B4 master counting acks attributes that ack to the read and takes whatever is on wb_dat_o as its data. Validation's monitors and driver attribute read responses by rsp_valid, not by ack order, so this is not caught today; if the answer is in_request_order it becomes a check and a finding, if writes_may_complete_early the host contract must say so.",
       "discovered_by": "review of the HOST_001 fix (write acks now queued behind read acks, 1fe4c9d, 2026-10-29)"
+    },
+    {
+      "id": "SCHED_SAME_ADDRESS_ORDERING",
+      "kind": "required_field",
+      "when_present": "controller_architecture.scheduler_policy",
+      "require": "controller_architecture.same_address_ordering",
+      "options": [
+        "preserve_host_order",
+        "host_port_serializes"
+      ],
+      "disposition": "standard",
+      "standard": {
+        "name": "single-master memory consistency (Wishbone B4 carries no reorder semantics)",
+        "value": "preserve_host_order",
+        "note": "A host that writes an address and then reads it must read what it wrote; a reordering scheduler (fr_fcfs) may reorder across addresses but must issue same-address requests in host order. host_port_serializes is the alternative: the port holds a request while an older one to the same address is outstanding, and the scheduler is then free."
+      },
+      "question": "When the scheduler reorders commands, who keeps same-address requests in host order: the scheduler (or queue) when it picks, or the host port by not accepting the later request?",
+      "consequence": "Without a sentence the checker still fails a read issued ahead of an older write to its address (the data is wrong either way) but attributes it to the scheduler by default; the spec names the owner.",
+      "discovered_by": "path_18_full_write on drop 2a18a7929dce (2026-11-09): dp_cmd read aux=10 issued at t=1424000 ps, the older write to the same address at t=1464000 ps; the host read back 0xc5b6fecf for 0x1622bd79."
+    },
+    {
+      "id": "SCHED_STARVATION_BOUND",
+      "kind": "required_field",
+      "when_present": "controller_architecture.scheduler_policy",
+      "require": "controller_architecture.starvation_limit_cycles",
+      "options": [
+        "<integer controller cycles>",
+        "none"
+      ],
+      "disposition": "decision",
+      "question": "How long may a reordering scheduler (fr_fcfs) leave a queued request un-issued while newer requests win? The bound is the age, in controller cycles, past which a request is served before any younger one.",
+      "consequence": "Without a bound FR-FCFS starved a write for 2.4 us (480 cycles) on drop 2a18a7929dce; with same-address ordering and per-slot write-buffer back-pressure in place the host port then stalls for that long (driver completion timeouts on the saturation paths of e322c9ab238a). The queue enforces a default of 128 controller cycles until the spec names one; the checker reads the field when present.",
+      "discovered_by": "path_07/path_05/path_20 on drop e322c9ab238a (2026-11-09): HANDSHAKE/wb, the port stalled past the driver's 256-cycle wait while a starved write held the tag slot the pending write needed."
     }
   ]
 }

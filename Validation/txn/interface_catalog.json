@@ -109,7 +109,8 @@
           "we": "req_we",
           "addr": "req_addr",
           "data": "req_wdata",
-          "mask": "req_wmask"
+          "mask": "req_wmask",
+          "aux": "req_aux"
         }
       },
       "clock": "clk",
@@ -158,6 +159,11 @@
             "data"
           ],
           "why": "A read carries no write data or byte mask; wb_port forwards whatever was on wb_dat_i/wb_sel_i at the beat (the previous write's values on a pipelined bus). The spec fixes neither, so neither is compared on a read."
+        },
+        {
+          "field": "aux",
+          "keep_mask": 0,
+          "$why": "The tag the port assigns is its own bookkeeping; the spec fixes only its width (controller_architecture.aux_width), never its values. It is recorded so the (address order) stage can pair each issued command with its host request, not compared (2026-11-09)."
         }
       ]
     },
@@ -294,7 +300,7 @@
           "addr": "addr"
         },
         "$note": "A read response echoes the requested address; its data comes from downstream and is not determined by the request, so it is deliberately not in field_map \u2014 gating it would assert a requirement the spec does not make of this block.",
-        "model_guidance": "Emit exactly one wb_rsp.read_data per wb.read, in request order, with the request's addr. Its data is NOT known from the request: it is the data field of the dp_rd_rsp.response for that read (responses return in request order), which the model receives as an input transaction. Hold the response until that dp_rd_rsp arrives and emit it then; never derive read data from a memory image of earlier writes, and never emit nothing for a read.",
+        "model_guidance": "Emit exactly one wb_rsp.read_data per wb.read, in request order, with the request's addr. The port delivers responses in request order whatever order the data path returns them (host_interface.ack_ordering = in_request_order, 2026-11-05): a dp_rd_rsp.response input is 'one more read answered', so emit the OLDEST pending read's response when one arrives. Its data is NOT compared on this stream (dont_care): the model cannot know which read a response belongs to without the design's tag, and the host-memory stage judges read data end to end. Never derive read data from a memory image of earlier writes, and never emit nothing for a read.",
         "completes_on": {
           "interface": "dp_rd_rsp",
           "kind": "response",
@@ -310,7 +316,14 @@
       "pending": {
         "push": "wb_cyc_i && wb_stb_i && !wb_stall_o && !wb_we_i",
         "$why": "A read response carries no address on the bus. The monitor records the address of every accepted read beat (same pre-NBA sample as the wb request stream) and replays them in order as responses arrive -- the in-order rule the spec's model_guidance already states. A read the design drops shifts every later response's address, which is exactly what the scoreboard should then see."
-      }
+      },
+      "dont_care": [
+        {
+          "field": "data",
+          "keep_mask": 0,
+          "$why": "Since the port buffers reordered responses (tag-indexed, 2026-11-05) the n-th dp_rd_rsp arrival is not the n-th delivered read, so a model with no tag cannot pair data to a read; comparing it produced false wb_rsp[data] mismatches (Frontend handoff 2026-11-06 (2)). Read data is judged by the (host memory) stage (the host's own writes, in request order) and by the data_path predictor on dp_rd_rsp; this stream judges that every read is answered, in order, with its address."
+        }
+      ]
     },
     "init_cmd": {
       "block": "init_fsm",
@@ -549,7 +562,8 @@
       "kinds": {
         "write": {
           "data": "wr_data",
-          "mask": "wr_mask"
+          "mask": "wr_mask",
+          "aux": "wr_data_aux"
         }
       },
       "role": "request",
@@ -558,7 +572,8 @@
           "wr_data_valid"
         ],
         "complete": "wr_data_ready"
-      }
+      },
+      "model_guidance": "Tag-indexed write buffer: a word is held under its aux until a dp_cmd.write with the same aux arrives, and THAT command's beats carry this word. Commands may be issued in a different order than the words arrived (the scheduler reorders writes under scheduler_policy), so never pair a command with the oldest word; pair it with the word whose aux matches. A word always arrives no later than its command (the design checks DP-015), so emit the beats when the command arrives (2026-11-09, drop 2a18a7929dce: 12 of 12 WR commands carried their own tag's data while a FIFO model predicted arrival order)."
     },
     "dp_rd_rsp": {
       "block": "data_path",
@@ -782,7 +797,7 @@
       },
       "role": "response",
       "derives_from": {
-        "$note": "UNPACK side of the spec's data_path_mapping: each accepted host write word is emitted as host_width/channel_width beats on the DDR side, low half first for little endianness. The mask is sliced per beat like the data, with the polarity data_path_mapping.ddr_dm_polarity declares (active_high_mask: DM=1 masks the byte, so each beat's mask is the INVERTED byte-enable slice; decided 2026-10-08, graded by the gate).",
+        "$note": "UNPACK side of the spec's data_path_mapping: each accepted host write word is emitted as host_width/channel_width beats on the DDR side, low half first for little endianness. The mask is sliced per beat like the data, with the polarity data_path_mapping.ddr_dm_polarity declares (active_high_mask: DM=1 masks the byte, so each beat's mask is the INVERTED byte-enable slice; decided 2026-10-08, graded by the gate). Tagged (2026-11-09): a word is emitted when the dp_cmd.write carrying its aux arrives, not when the word itself arrives; command_iface/command_kind/tag_field declare that pairing and the gate grades a command order different from the word order.",
         "interface": "dp_wr",
         "unpack": {
           "geometry_section": "data_path_mapping",
@@ -790,7 +805,10 @@
           "data_field": "data",
           "mask_from_field": "mask",
           "mask_field": "mask",
-          "polarity_key": "ddr_dm_polarity"
+          "polarity_key": "ddr_dm_polarity",
+          "command_iface": "dp_cmd",
+          "command_kind": "write",
+          "tag_field": "aux"
         }
       }
     },
@@ -916,6 +934,46 @@
         "requirement": "Every read response the data path returns (rd_rsp_valid) is returned to the host as a read-data ack.",
         "taxonomy": "DATA_001",
         "spec_ref": "host_interface.interface_type"
+      }
+    ]
+  },
+  "ordering": {
+    "$comment": "Same-address ordering: requests to one address reach the memory in the order the host issued them, whatever the scheduler's reordering policy. Model-free and spec-agnostic: each host request (the `request` stream, with its address, direction and the tag the port assigned) is paired with the command that issues it (the `issue` stream, by direction and tag, oldest first); a command issued while an OLDER request to the same word address of a conflicting kind (read-after-write, write-after-read, write-after-write) is still waiting is a violation. The host-memory check sees only the consequence (a read answered with stale data); this names the block that reordered. Declared 2026-11-09 after path_18 on drop 2a18a7929dce issued a read to DDR 40 ns before the older write to the same address (host read back 0xc5b6fecf for 0x1622bd79). Rules are DATA; address_order.py checks them.",
+    "rules": [
+      {
+        "id": "SAME_ADDRESS_HOST_ORDER",
+        "request": {
+          "iface": "req",
+          "addr": "addr",
+          "we": "we",
+          "aux": "aux"
+        },
+        "issue": {
+          "iface": "dp_cmd",
+          "aux": "aux",
+          "kind_we": {
+            "read": 0,
+            "write": 1
+          }
+        },
+        "owner": "scheduler",
+        "owner_candidates": [
+          "scheduler",
+          "cmd_queue"
+        ],
+        "requirement": "Requests to the same word address are issued to the memory in host order: a read is never issued ahead of an older write to its address (it would return stale data), a write never ahead of an older read (the read would return the new data) or an older write (the final contents would be the older word). Reordering across DIFFERENT addresses is the scheduler's to do; same-address order is not.",
+        "taxonomy": "DATA_001",
+        "spec_ref": "controller_architecture.scheduler_policy; controller_architecture.same_address_ordering (intake rule SCHED_SAME_ADDRESS_ORDERING); failure_taxonomy DATA_001",
+        "tag_reuse": {
+          "owner": "data_path",
+          "owner_candidates": [
+            "data_path",
+            "wb_port"
+          ],
+          "taxonomy": "DATA_001",
+          "requirement": "A request is never accepted while an older, still-unissued request of the same direction holds the same tag: in a tag-indexed write buffer the new word overwrites the old one and the old command is later issued with the new data and mask (path_07 on 2a18a7929dce, 2026-11-09: the write accepted at t=94000 to 0x160165c reached DDR at t=2929000 carrying the word and mask of the write accepted at t=2199000, 19 reuses in the run, DP-015 x17). The buffer must refuse the word (wr_data_ready low while its slot is valid) or the port must not allocate an in-flight tag; an occupancy count is not a per-slot check.",
+          "spec_ref": "controller_architecture.aux_width; host_interface.write_buffer_depth; host_interface.write_buffer_backpressure; failure_taxonomy DATA_001"
+        }
       }
     ]
   }

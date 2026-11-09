@@ -83,6 +83,8 @@ XVAL_RE = re.compile(r"^\s*x_value: (\w+)\.(\w+) seq=(\d+) carries X/Z on \[(.*?
 CONSERVE_RE = re.compile(r"^\s*CONSERVE (\w+) owner=(\w+) (lost|extra)=(\d+) of=(\d+) from=(\S+) to=(\S+) observed=(\d+)(?: per_source=(\d+))? \| (.*)$")
 # host_memory.py: "HOSTMEM <rsp>[<i>] addr=0x.. expected=0x.. observed=0x.. [(the data the host wrote at 0x..)] read accepted t=.. answered t=.."
 HOSTMEM_RE = re.compile(r"^\s*HOSTMEM (\w+)\[(\d+)\] (.*)$")
+# address_order.py: "ADDRORDER <rule> owner=<blk> addr=0x.. <kind> accepted t=.. issued t=.. ahead of the older <kind> accepted t=.. still unissued"
+ADDRORDER_RE = re.compile(r"^\s*ADDRORDER (\w+) owner=(\w+) (addr=0x[0-9a-f]+ .*)$")
 # the generated driver: "DRIVER_STALL: <iface> — <n> of <m> pipelined beat(s) never acknowledged (<signal>)" or "... — <what>"
 STALL_RE = re.compile(r"^\s*DRIVER_STALL: (\w+) — (.*)$")
 STALL_BEATS_RE = re.compile(r"(\d+) of (\d+) pipelined beat\(s\) never acknowledged \((\w+)\)")
@@ -251,6 +253,19 @@ def evidence_from_report(rep, rules, schemas, spec_regs=None, reports_dir=None):
                        "actual": what.strip(), "path": path, "confidence": "confirmed", "count": 1,
                        "line": ln.strip(), "taxonomy_hint": "DATA_001",
                        "spec_ref": "host_interface.ack_ordering; failure_taxonomy DATA_001"}
+                continue
+            m = ADDRORDER_RE.match(ln)
+            if m:
+                rule, owner, what = m.groups()
+                cat = _catalog_ordering().get(rule, {})
+                yield {"check_id": f"ADDRORDER/{rule}", "owner": owner,
+                       "owner_candidates": cat.get("owner_candidates", [owner]),
+                       "iface": cat.get("issue", {}).get("iface"), "kind": None,
+                       "detector": f"address_order:{rule}",
+                       "expected": cat.get("requirement", "same-address requests are issued to the memory in host order"),
+                       "actual": what.strip(), "path": path, "confidence": "confirmed", "count": 1,
+                       "line": ln.strip(), "taxonomy_hint": cat.get("taxonomy", "DATA_001"),
+                       "spec_ref": cat.get("spec_ref")}
                 continue
             m = STALL_RE.match(ln)
             if m:
@@ -533,6 +548,26 @@ def _register_names(spec):
 _CONS_CACHE = None
 
 
+_ORD_CACHE = None
+
+
+def _catalog_ordering():
+    """{rule_id: rule} from the catalog's ordering section."""
+    global _ORD_CACHE
+    if _ORD_CACHE is None:
+        with open(os.path.join(ROOT, "Validation", "txn", "interface_catalog.json")) as f:
+            _ORD_CACHE = {}
+            for r in json.load(f).get("ordering", {}).get("rules", []):
+                _ORD_CACHE[r["id"]] = r
+                tr = r.get("tag_reuse")
+                if tr:
+                    _ORD_CACHE[r["id"] + "_TAG_REUSE"] = dict(
+                        tr, id=r["id"] + "_TAG_REUSE",
+                        issue={"iface": r.get("request", {}).get("iface")},
+                        spec_ref=tr.get("spec_ref", r.get("spec_ref")))
+    return _ORD_CACHE
+
+
 def _catalog_conservation():
     """{rule_id: rule} from the catalog's conservation section."""
     global _CONS_CACHE
@@ -603,6 +638,8 @@ def history_for(check_id, detector, snaps, current_head):
         keys.add("stage:(host handshake)")
     if check_id.startswith("HOSTMEM/"):
         keys.add("stage:(host memory)")
+    if check_id.startswith("ADDRORDER/"):
+        keys.add("stage:(address order)")
     seen = [h for h, _, k in snaps if keys & k]
     first = seen[0] if seen else current_head
     introduced = None
@@ -646,7 +683,7 @@ def emit(reports_dir, out_dir=None, drop_status=None):
             key = (ev["owner"], ev["check_id"])
             f = findings.get(key)
             if f is None:
-                tid = (ev.get("taxonomy_hint") if ev["check_id"].startswith(("MISMATCH/", "CONSERVE/", "HANDSHAKE/", "HOSTMEM/"))
+                tid = (ev.get("taxonomy_hint") if ev["check_id"].startswith(("MISMATCH/", "CONSERVE/", "HANDSHAKE/", "HOSTMEM/", "ADDRORDER/"))
                        else ev["check_id"])
                 first_seen, introduced = history_for(ev["check_id"], ev["detector"], snaps, head)
                 f = {
@@ -660,7 +697,7 @@ def emit(reports_dir, out_dir=None, drop_status=None):
                     "severity": rules.severity.get(tid, "major"),
                     "confidence": ev["confidence"],
                     "title": f"{ev['owner']}: {ev['check_id']}",
-                    "requirement": ev.get("expected") if ev["detector"].startswith(("invariant", "assertion", "conservation", "handshake", "host_memory")) else
+                    "requirement": ev.get("expected") if ev["detector"].startswith(("invariant", "assertion", "conservation", "handshake", "host_memory", "address_order")) else
                                    f"{ev['owner']} must produce the transactions the spec-derived model predicts",
                     "spec_ref": ev.get("spec_ref"),
                     "expected": ev["expected"], "actual": ev["actual"],

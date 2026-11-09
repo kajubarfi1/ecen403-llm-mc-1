@@ -372,7 +372,7 @@
           "id": "HOST_001",
           "up": "wb_cyc_i && wb_stb_i && !wb_stall_o",
           "down": "wb_ack_o",
-          "cover": "rsp_valid && $past(wb_cyc_i && wb_stb_i && !wb_stall_o && wb_we_i)",
+          "cover": "rd_ack && $past(wb_cyc_i && wb_stb_i && !wb_stall_o && wb_we_i)",
           "bound": {
             "params": [
               "tRC"
@@ -393,11 +393,12 @@
           "push": "wb_cyc_i && wb_stb_i && !wb_stall_o",
           "kind": "wb_we_i",
           "pop": "wb_ack_o",
-          "observed_kind": "!rsp_valid",
-          "cover": "wb_ack_o && !rsp_valid && $past(wb_cyc_i && wb_stb_i && !wb_stall_o && !wb_we_i)",
+          "observed_kind": "!rd_ack",
+          "cover": "wb_ack_o && !rd_ack && $past(wb_cyc_i && wb_stb_i && !wb_stall_o && !wb_we_i)",
           "depth": 64,
           "requirement": "Host acknowledges in request order: the beat an acknowledge completes is the oldest outstanding one (a write ack, wb_ack_o without rsp_valid, may not be delivered while an earlier read is still waiting for its data; a B4 pipelined master has no transaction id and matches acknowledges to requests by arrival order).",
-          "spec_ref": "host_interface.ack_ordering = in_request_order (decided 2026-11-05)"
+          "spec_ref": "host_interface.ack_ordering = in_request_order (decided 2026-11-05)",
+          "$note": "observed_kind reads the port's own rd_ack output (a read is being delivered this cycle), not rsp_valid: since the port buffers reordered responses, a read's delivery no longer coincides with its data's arrival (Frontend handoff 2026-11-06 (2))."
         }
       ]
     }

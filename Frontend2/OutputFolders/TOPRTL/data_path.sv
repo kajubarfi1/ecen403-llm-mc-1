@@ -334,7 +334,26 @@ module data_path #(
         ? cmd_aux[FIFO_PTR_W-1:0]
         : wr_pend_aux[wr_pend_rptr[FIFO_PTR_W-1:0]][FIFO_PTR_W-1:0];
 
-    assign wr_data_ready = ~wr_full || wr_pop_this_cycle;
+    // Per-slot check, not only occupancy (Validation addendum 19,
+    // 2026-11-09, ADDRORDER/..._TAG_REUSE): wr_buf is addressed by the
+    // write's own aux, and wb_port's write counter wraps every
+    // RD_FIFO_DEPTH writes whether or not the write that last used a
+    // tag has issued. Under saturation an old write starves in the
+    // queue (FR-FCFS, no age limit) while the count stays below full,
+    // so the new word landed in the old write's slot and the old WR
+    // later went to DDR with the new data and mask (path_07 on drop
+    // 2a18a7929dce: 19 reuses; 405 on each refresh loop). The word is
+    // refused while its slot still holds an unissued write, unless
+    // that very slot is popped this cycle; wb_port holds the request
+    // (req_valid gated on wr_data_ready) until it is taken.
+    // always_comb, not a continuous assign: Xcelium re-evaluated the
+    // variable-indexed unpacked-array read a cycle late when only the
+    // index (wr_data_aux) changed, and the push sampled a stale ready.
+    logic wr_slot_busy;
+    always_comb
+        wr_slot_busy = wr_buf_valid[wr_data_aux[FIFO_PTR_W-1:0]] &&
+                       !(wr_pop_this_cycle && (wr_pop_idx == wr_data_aux[FIFO_PTR_W-1:0]));
+    assign wr_data_ready = (~wr_full || wr_pop_this_cycle) && !wr_slot_busy;
 
     // wr_head_due_r's own update -- one cycle behind wr_pop_this_cycle
     // (needed to compute it) and the per-entry countdown decrement
@@ -377,7 +396,7 @@ module data_path #(
         end else begin
             if (wr_pop_this_cycle)
                 wr_buf_valid[wr_pop_idx] <= 1'b0;
-            if (wr_data_valid && (~wr_full || wr_pop_this_cycle)) begin
+            if (wr_data_valid && wr_data_ready) begin
                 wr_buf[wr_data_aux[FIFO_PTR_W-1:0]]       <= '{data: wr_data, mask: wr_mask};
                 wr_buf_valid[wr_data_aux[FIFO_PTR_W-1:0]] <= 1'b1;
                 wr_wptr <= wr_wptr + 1'b1;
@@ -749,6 +768,17 @@ module data_path #(
     endproperty
     assert property (p_wr_data_precedes_issue)
         else $error("[DP-015] WR command issued before its data arrived in wr_buf");
+
+    // DP-016: a word is never pushed into a slot that still holds an
+    // unissued write (the slot may be popped the same cycle). The
+    // defect behind ADDRORDER/..._TAG_REUSE (Validation, 2026-11-09).
+    property p_wr_slot_not_overwritten;
+        @(posedge clk) disable iff (!rst_n)
+        (wr_data_valid && wr_data_ready) |-> (!wr_buf_valid[wr_data_aux[FIFO_PTR_W-1:0]] ||
+            (wr_pop_this_cycle && (wr_pop_idx == wr_data_aux[FIFO_PTR_W-1:0])));
+    endproperty
+    assert property (p_wr_slot_not_overwritten)
+        else $error("[DP-016] write word pushed over an unissued write's slot");
 
     // Coverage
     covergroup cg_dp @(posedge clk);

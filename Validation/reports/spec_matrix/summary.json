@@ -16,16 +16,49 @@
         "command_queue_depth": 16,
         "lookahead_depth": 8
       },
-      "level": 1,
-      "utc": "2026-11-05T17:54:41.575030+00:00",
+      "level": 2,
+      "utc": "2026-11-09T22:03:10.048854+00:00",
       "level1": {
-        "revision": "compiled_ddr31333_x8_2lane_1rank_ce2d2afe",
+        "revision": "compiled_ddr31333_x8_2lane_1rank_bce23f46",
         "blocking": [],
-        "advisory": [],
+        "advisory": [
+          "[gap:standard] SCHED_SAME_ADDRESS_ORDERING: controller_architecture.same_address_ordering is not stated",
+          "[gap:decision] SCHED_STARVATION_BOUND: controller_architecture.starvation_limit_cycles is not stated"
+        ],
         "jedec_fail": [],
-        "gaps": [],
+        "gaps": [
+          "SCHED_SAME_ADDRESS_ORDERING",
+          "SCHED_STARVATION_BOUND"
+        ],
         "spec_path": "Validation/reports/spec_matrix/preset_balanced/microarch_spec.json",
         "status": "PASS"
+      },
+      "level2": {
+        "flow_rc": 0,
+        "run_dir": "runs/matrix/preset_balanced",
+        "flow_status": "complete",
+        "halt": null,
+        "phases_passed": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "stages": {
+          "spec_synthesis": "PASS",
+          "spec_review": "PASS",
+          "rtl_generation": "PASS",
+          "rtl_validation": "PASS",
+          "backend": "SKIPPED"
+        },
+        "rtl_validation": "PASS; failed modules: none; package: runs/matrix/preset_balanced/validation/round_1",
+        "drop": "231e07de192b",
+        "design_id": "690aa5bfb6ab",
+        "validation_status": "PASS",
+        "failed_modules": [],
+        "findings": [],
+        "paths_run": 20,
+        "paths_blocked": 0
       }
     },
     "preset_default": {
@@ -43,16 +76,49 @@
         "command_queue_depth": 16,
         "lookahead_depth": 8
       },
-      "level": 1,
-      "utc": "2026-11-05T17:54:41.582022+00:00",
+      "level": 2,
+      "utc": "2026-11-09T22:02:14.498004+00:00",
       "level1": {
-        "revision": "compiled_ddr31600_x8_2lane_1rank_a004e956",
+        "revision": "compiled_ddr31600_x8_2lane_1rank_d83fcf22",
         "blocking": [],
-        "advisory": [],
+        "advisory": [
+          "[gap:standard] SCHED_SAME_ADDRESS_ORDERING: controller_architecture.same_address_ordering is not stated",
+          "[gap:decision] SCHED_STARVATION_BOUND: controller_architecture.starvation_limit_cycles is not stated"
+        ],
         "jedec_fail": [],
-        "gaps": [],
+        "gaps": [
+          "SCHED_SAME_ADDRESS_ORDERING",
+          "SCHED_STARVATION_BOUND"
+        ],
         "spec_path": "Validation/reports/spec_matrix/preset_default/microarch_spec.json",
         "status": "PASS"
+      },
+      "level2": {
+        "flow_rc": 0,
+        "run_dir": "runs/matrix/preset_default",
+        "flow_status": "complete",
+        "halt": null,
+        "phases_passed": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "stages": {
+          "spec_synthesis": "PASS",
+          "spec_review": "PASS",
+          "rtl_generation": "PASS",
+          "rtl_validation": "PASS",
+          "backend": "SKIPPED"
+        },
+        "rtl_validation": "PASS; failed modules: none; package: runs/matrix/preset_default/validation/round_1",
+        "drop": "4177120ab972",
+        "design_id": "fd8b5baa9d54",
+        "validation_status": "PASS",
+        "failed_modules": [],
+        "findings": [],
+        "paths_run": 20,
+        "paths_blocked": 0
       }
     },
     "preset_high-performance": {
@@ -71,13 +137,19 @@
         "lookahead_depth": 16
       },
       "level": 2,
-      "utc": "2026-11-05T18:00:55.916897+00:00",
+      "utc": "2026-11-09T22:02:14.542111+00:00",
       "level1": {
-        "revision": "compiled_ddr31600_x8_3lane_1rank_305910af",
+        "revision": "compiled_ddr31600_x8_3lane_1rank_d47b2e9f",
         "blocking": [],
-        "advisory": [],
+        "advisory": [
+          "[gap:standard] SCHED_SAME_ADDRESS_ORDERING: controller_architecture.same_address_ordering is not stated",
+          "[gap:decision] SCHED_STARVATION_BOUND: controller_architecture.starvation_limit_cycles is not stated"
+        ],
         "jedec_fail": [],
-        "gaps": [],
+        "gaps": [
+          "SCHED_SAME_ADDRESS_ORDERING",
+          "SCHED_STARVATION_BOUND"
+        ],
         "spec_path": "Validation/reports/spec_matrix/preset_high-performance/microarch_spec.json",
         "status": "PASS"
       },
@@ -87,9 +159,9 @@
         "flow_status": "halted",
         "halt": {
           "stage": "frontend_regeneration",
-          "why": "every phase agent fixed nothing (phase 1 agent exited 1: ############################################################## | wb_port: unresolved | wrote /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase1_fix_report; phase 4 agent exited 1: ############################################################## | data_path: unresolved | wrote /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase4_fix_report). Package: runs/matrix/preset_high-performance/validation/round_1",
-          "utc": "2026-11-05T18:35:36.289213+00:00",
-          "package": "/Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/validation/round_1"
+          "why": "2 validation round(s) without a pass (cap 2); last package: runs/matrix/preset_high-performance/validation/round_2",
+          "utc": "2026-11-09T22:02:14.845357+00:00",
+          "package": "/Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/validation/round_2"
         },
         "phases_passed": [
           1,
@@ -104,7 +176,7 @@
           "rtl_validation": "FAIL",
           "frontend_regeneration": "HALT"
         },
-        "rtl_validation": "FAIL; failed modules: data_path, wb_port; package: runs/matrix/preset_high-performance/validation/round_1",
+        "rtl_validation": "FAIL; failed modules: data_path, wb_port; package: runs/matrix/preset_high-performance/validation/round_2",
         "drop": "c3135943228e",
         "design_id": "4d572024849e",
         "validation_status": "FAIL",
@@ -158,16 +230,49 @@
         "command_queue_depth": 4,
         "lookahead_depth": 0
       },
-      "level": 1,
-      "utc": "2026-11-05T17:54:41.588188+00:00",
+      "level": 2,
+      "utc": "2026-11-09T22:02:14.898631+00:00",
       "level1": {
-        "revision": "compiled_ddr3800_x8_1lane_1rank_0a6e7ac5",
+        "revision": "compiled_ddr3800_x8_1lane_1rank_8ee94bc3",
         "blocking": [],
-        "advisory": [],
+        "advisory": [
+          "[gap:standard] SCHED_SAME_ADDRESS_ORDERING: controller_architecture.same_address_ordering is not stated",
+          "[gap:decision] SCHED_STARVATION_BOUND: controller_architecture.starvation_limit_cycles is not stated"
+        ],
         "jedec_fail": [],
-        "gaps": [],
+        "gaps": [
+          "SCHED_SAME_ADDRESS_ORDERING",
+          "SCHED_STARVATION_BOUND"
+        ],
         "spec_path": "Validation/reports/spec_matrix/preset_low-cost-embedded/microarch_spec.json",
         "status": "PASS"
+      },
+      "level2": {
+        "flow_rc": 0,
+        "run_dir": "runs/matrix/preset_low-cost-embedded",
+        "flow_status": "complete",
+        "halt": null,
+        "phases_passed": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "stages": {
+          "spec_synthesis": "PASS",
+          "spec_review": "PASS",
+          "rtl_generation": "PASS",
+          "rtl_validation": "PASS",
+          "backend": "SKIPPED"
+        },
+        "rtl_validation": "PASS; failed modules: none; package: runs/matrix/preset_low-cost-embedded/validation/round_1",
+        "drop": "e4d883ad50e0",
+        "design_id": "639368fb2c98",
+        "validation_status": "PASS",
+        "failed_modules": [],
+        "findings": [],
+        "paths_run": 20,
+        "paths_blocked": 0
       }
     },
     "preset_server-grade": {
@@ -185,16 +290,83 @@
         "command_queue_depth": 32,
         "lookahead_depth": 16
       },
-      "level": 1,
-      "utc": "2026-11-05T17:54:41.591161+00:00",
+      "level": 2,
+      "utc": "2026-11-09T22:02:14.943958+00:00",
       "level1": {
-        "revision": "compiled_ddr31600_x8_5lane_1rank_0e5ef989",
+        "revision": "compiled_ddr31600_x8_5lane_1rank_24196b26",
         "blocking": [],
-        "advisory": [],
+        "advisory": [
+          "[gap:standard] SCHED_SAME_ADDRESS_ORDERING: controller_architecture.same_address_ordering is not stated",
+          "[gap:decision] SCHED_STARVATION_BOUND: controller_architecture.starvation_limit_cycles is not stated"
+        ],
         "jedec_fail": [],
-        "gaps": [],
+        "gaps": [
+          "SCHED_SAME_ADDRESS_ORDERING",
+          "SCHED_STARVATION_BOUND"
+        ],
         "spec_path": "Validation/reports/spec_matrix/preset_server-grade/microarch_spec.json",
         "status": "PASS"
+      },
+      "level2": {
+        "flow_rc": 2,
+        "run_dir": "runs/matrix/preset_server-grade",
+        "flow_status": "halted",
+        "halt": {
+          "stage": "frontend_regeneration",
+          "why": "2 validation round(s) without a pass (cap 2); last package: runs/matrix/preset_server-grade/validation/round_2",
+          "utc": "2026-11-09T22:02:15.225422+00:00",
+          "package": "/Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_server-grade/validation/round_2"
+        },
+        "phases_passed": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "stages": {
+          "spec_synthesis": "PASS",
+          "spec_review": "PASS",
+          "rtl_generation": "PASS",
+          "rtl_validation": "FAIL",
+          "frontend_regeneration": "HALT"
+        },
+        "rtl_validation": "FAIL; failed modules: data_path, wb_port; package: runs/matrix/preset_server-grade/validation/round_2",
+        "drop": "9a7390bdce1e",
+        "design_id": "d041f7d2e9e4",
+        "validation_status": "FAIL",
+        "failed_modules": [
+          "data_path",
+          "wb_port"
+        ],
+        "findings": [
+          {
+            "owner": "data_path",
+            "check_id": "CONSERVE/WRITE_CMD_TO_BEATS",
+            "status": "open"
+          },
+          {
+            "owner": "data_path",
+            "check_id": "CONSERVE/WRITE_REQUEST_TO_DATA",
+            "status": "open"
+          },
+          {
+            "owner": "wb_port",
+            "check_id": "HANDSHAKE/wb",
+            "status": "open"
+          },
+          {
+            "owner": "wb_port",
+            "check_id": "HOSTMEM/wb_rsp",
+            "status": "open"
+          },
+          {
+            "owner": "wb_port",
+            "check_id": "HOST_002",
+            "status": "open"
+          }
+        ],
+        "paths_run": 20,
+        "paths_blocked": 0
       }
     },
     "pair_01": {

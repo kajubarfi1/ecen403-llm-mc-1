@@ -690,6 +690,9 @@ class BusBridgeGate:
         u = d["unpack"]
         host, chan, n, endian = cls._pack_geometry(u, spec)
         fails = []
+        if u.get("command_iface"):
+            return cls._grade_unpack_tagged(predictor, spec, schemas, oi, u, src,
+                                            host, chan, n, endian)
 
         for skind, sfields in schemas[src]["kinds"].items():
             for pat in range(3):
@@ -727,6 +730,85 @@ class BusBridgeGate:
                         f"the word is the first beat driven.")
                     continue
                 fails += cls._grade_unpack_mask(spec, u, oi, src, drive, mine, chan, endian, n)
+        return fails
+
+    @classmethod
+    def _grade_unpack_tagged(cls, predictor, spec, schemas, oi, u, src,
+                             host, chan, n, endian):
+        """A tag-indexed write buffer (catalog `unpack.command_iface`): a word
+        is held under its tag and emitted when the command carrying that tag
+        arrives -- NOT when the word arrives, and NOT in word order. The
+        scheduler reorders writes (2026-11-09, drop 2a18a7929dce: every WR
+        command carried its own tag's word while the FIFO model predicted
+        arrival order). Graded: no beats before the command; the beats of
+        the command's own word when commands come in a different order than
+        words; n beats per word, low half first for little endianness; the
+        mask as the untagged grade does."""
+        ci, ck, tag = u["command_iface"], u["command_kind"], u["tag_field"]
+        skind = next(iter(schemas[src]["kinds"]))
+        sfields = schemas[src]["kinds"][skind]
+        if tag not in sfields or tag not in schemas.get(ci, {}).get("kinds", {}).get(ck, {}):
+            raise GateNotApplicable(
+                f"unpack declares pairing on {src}.{tag} / {ci}.{ck}.{tag} but the schemas "
+                f"carry no such field; regenerate the schemas before grading.")
+        tag_w = sfields[tag]["width"] if isinstance(sfields[tag]["width"], int) else 4
+        fails = []
+
+        def word_fields(pat, seed):
+            drive = {}
+            for fname, info in sfields.items():
+                w = info["width"]
+                if not isinstance(w, int):
+                    continue
+                seed += 1
+                drive[fname] = ((0xDEADBEEF >> pat) ^ (seed * 0x91)) & ((1 << w) - 1)
+            return drive
+
+        def halves(word):
+            hs = [(word >> (i * chan)) & ((1 << chan) - 1) for i in range(n)]
+            return hs if endian == "little" else list(reversed(hs))
+
+        for pat in range(3):
+            # two words, tags A and B; commands arrive B then A
+            ta, tb = (pat % (1 << tag_w)), ((pat + 5) % (1 << tag_w))
+            if ta == tb:
+                tb = (ta + 1) % (1 << tag_w)
+            wa, wb = word_fields(pat, 0), word_fields(pat, 7)
+            wa[tag], wb[tag] = ta, tb
+            predictor.reset()
+            early = list(predictor.process(Txn(src, skind, wa)) or [])
+            early += predictor.process(Txn(src, skind, wb)) or []
+            if [t for t in early if t.iface == oi]:
+                fails.append(
+                    f"{oi!r} beats were emitted when the {src} word arrived; a tag-indexed "
+                    f"buffer holds the word until the {ci}.{ck} carrying its {tag} issues it.")
+                break
+            cmd_b = {f: 0 for f in schemas[ci]["kinds"][ck]}
+            cmd_b[tag] = tb
+            got_b = [t for t in (predictor.process(Txn(ci, ck, cmd_b)) or []) if t.iface == oi]
+            cmd_a = dict(cmd_b, **{tag: ta})
+            got_a = [t for t in (predictor.process(Txn(ci, ck, cmd_a)) or []) if t.iface == oi]
+            for label, got, word, drive in (("first (tag %d)" % tb, got_b, wb[u["from_field"]], wb),
+                                            ("second (tag %d)" % ta, got_a, wa[u["from_field"]], wa)):
+                if len(got) != n:
+                    fails.append(
+                        f"the {label} {ci}.{ck} produced {len(got)} beat(s) on {oi!r}; the spec's "
+                        f"mapping ({host}-bit host word, {chan}-bit channel) requires exactly {n}, "
+                        f"and they must be the beats of the word whose {tag} the command carries.")
+                    continue
+                want = halves(word)
+                vals = [t.fields.get(u["data_field"]) for t in got]
+                if vals != want:
+                    fails.append(
+                        f"{oi}.{u['data_field']} beats are "
+                        f"{[hex(v) if v is not None else None for v in vals]} for the {label} command; "
+                        f"its own word ({src}.{u['from_field']}={word:#x}) unpacks to "
+                        f"{[hex(w_) for w_ in want]}. Pair each command with the word of the same "
+                        f"{tag}, never with the oldest word.")
+                    continue
+                fails += cls._grade_unpack_mask(spec, u, oi, src, drive, got, chan, endian, n)
+            if fails:
+                break
         return fails
 
     @classmethod

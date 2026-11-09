@@ -1,0 +1,190 @@
+{
+  "$schema": "validation-retry-instructions/1",
+  "untested_in_this_drop": [
+    {
+      "finding_id": "data_path/ADDRORDER/SAME_ADDRESS_HOST_ORDER_TAG_REUSE",
+      "module": "data_path",
+      "check_id": "ADDRORDER/SAME_ADDRESS_HOST_ORDER_TAG_REUSE",
+      "note": "open in drop 2a18a7929dce; drop 900b282da0c3 is partial and did not test it (block absent or every path blocked). Still open."
+    },
+    {
+      "finding_id": "scheduler/ADDRORDER/SAME_ADDRESS_HOST_ORDER",
+      "module": "scheduler",
+      "check_id": "ADDRORDER/SAME_ADDRESS_HOST_ORDER",
+      "note": "open in drop 2a18a7929dce; drop 900b282da0c3 is partial and did not test it (block absent or every path blocked). Still open."
+    },
+    {
+      "finding_id": "wb_port/CONSERVE/RESPONSE_TO_HOST",
+      "module": "wb_port",
+      "check_id": "CONSERVE/RESPONSE_TO_HOST",
+      "note": "open in drop 2a18a7929dce; drop 900b282da0c3 is partial and did not test it (block absent or every path blocked). Still open."
+    },
+    {
+      "finding_id": "wb_port/HOSTMEM/wb_rsp",
+      "module": "wb_port",
+      "check_id": "HOSTMEM/wb_rsp",
+      "note": "open in drop 2a18a7929dce; drop 900b282da0c3 is partial and did not test it (block absent or every path blocked). Still open."
+    },
+    {
+      "finding_id": "wb_port/MISMATCH/wb_rsp[addr,data]",
+      "module": "wb_port",
+      "check_id": "MISMATCH/wb_rsp[addr,data]",
+      "note": "open in drop 2a18a7929dce; drop 900b282da0c3 is partial and did not test it (block absent or every path blocked). Still open."
+    },
+    {
+      "finding_id": "wb_port/HOST_002",
+      "module": "wb_port",
+      "check_id": "HOST_002",
+      "note": "open in drop 2a18a7929dce; drop 900b282da0c3 is partial and did not test it (block absent or every path blocked). Still open."
+    }
+  ],
+  "status": "FAIL",
+  "pipeline": "validation",
+  "drop": "900b282da0c3",
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "spec_id": "00d082c3f72d1b34",
+  "generated_utc": "2026-11-09T21:16:10.725003Z",
+  "failed_modules": [
+    "wb_port"
+  ],
+  "retry_instructions": {
+    "wb_port": {
+      "module": "wb_port",
+      "attempt": null,
+      "drop": "900b282da0c3",
+      "failed_checks": [
+        {
+          "id": "COMPILE_ERROR",
+          "name": "xmvlog rejects wb_port.sv as shipped in this drop (1 error(s)); every path that instantiates it (13) has no verdict and every finding on those paths is carried ",
+          "pass": false,
+          "expected": "wb_port.sv compiles under IEEE 1800 (the Frontend lint gate passes on the shipped drop)",
+          "actual": "wb_port.sv:217: 'req_pend': undeclared identifier [12.5(IEEE)].",
+          "severity": "critical",
+          "confidence": "confirmed",
+          "spec_ref": null,
+          "anchor": [
+            {
+              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+              "line": 217,
+              "signal": null,
+              "text": "'req_pend': undeclared identifier [12.5(IEEE)]."
+            }
+          ],
+          "context": null,
+          "owner_candidates": [
+            "wb_port"
+          ],
+          "occurrences": 1,
+          "paths": [
+            "path_01_write_cmd",
+            "path_02_read_cmd",
+            "path_03_read_return",
+            "path_04_scheduler_bank_loop",
+            "path_05_scheduler_refresh_loop",
+            "path_07_backpressure",
+            "path_12_csr_timing_to_scheduling",
+            "path_13_csr_refresh_to_scheduling",
+            "path_18_full_write",
+            "path_19_row_conflict",
+            "path_20_refresh_preempt",
+            "path_21_wb_port_standalone",
+            "path_23_host_ack_collision"
+          ],
+          "repro": {
+            "cmd": "python3 Validation/tools/run_path.py --path path_01_write_cmd"
+          },
+          "introduced_in": null,
+          "repair": null,
+          "fix": null,
+          "finding_id": "structural/wb_port/COMPILE_ERROR"
+        }
+      ],
+      "message": "1 check(s) failed on drop 900b282da0c3; 1 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+    }
+  },
+  "resolved_since_previous_drop": [],
+  "requires_human_review": false,
+  "source": "Validation/findings/emit_findings.py -> retry_adapter.py",
+  "drop_status": {
+    "$schema": "validation-drop-status/1",
+    "drop": "900b282da0c3",
+    "partial": false,
+    "blocks_present": [
+      "addr_decoder",
+      "bank_tracker",
+      "calibration",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "init_fsm",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "blocks_absent": [],
+    "inconsistent_edges": [],
+    "validation_spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "foreign_spec_blocks": {},
+    "paths_run": [
+      "path_08_init_to_cal",
+      "path_09_init_to_refresh",
+      "path_14_status_init",
+      "path_15_status_cal",
+      "path_16_status_refresh",
+      "path_17_full_boot",
+      "path_22_csr_standalone"
+    ],
+    "paths_blocked": {
+      "path_03_read_return": [
+        "compile error in wb_port.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_21_wb_port_standalone": [
+        "compile error in wb_port.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_04_scheduler_bank_loop": [
+        "compile error in wb_port.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_12_csr_timing_to_scheduling": [
+        "compile error in wb_port.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_10_csr_to_timing": [
+        "compile error in wb_port.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_23_host_ack_collision": [
+        "compile error in wb_port.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_18_full_write": [
+        "compile error in wb_port.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_02_read_cmd": [
+        "compile error in wb_port.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_13_csr_refresh_to_scheduling": [
+        "compile error in wb_port.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_11_csr_to_refresh": [
+        "compile error in wb_port.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_07_backpressure": [
+        "compile error in wb_port.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_01_write_cmd": [
+        "compile error in wb_port.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_06_scheduler_dequeue": [
+        "compile error in wb_port.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_05_scheduler_refresh_loop": [
+        "compile error in wb_port.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_20_refresh_preempt": [
+        "compile error in wb_port.sv: no verdict on this drop; findings carried untested"
+      ],
+      "path_19_row_conflict": [
+        "compile error in wb_port.sv: no verdict on this drop; findings carried untested"
+      ]
+    },
+    "note": "Paths listed as blocked with a run error did not simulate on this drop (infrastructure, not design); nothing is known about them from this run."
+  }
+}

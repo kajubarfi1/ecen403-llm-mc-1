@@ -24,7 +24,7 @@ A drop failing A1 or A3 is returned to the Frontend without simulation.
 
 | Level | Criterion |
 |---|---|
-| Path PASS | every stage checker passes, no assertion failure, no illegal coverage bin, no harness timeout, no X on a checked field, the host reads back at every written address the data it last wrote there, in request order (`(host memory)` stage, model-free), every request conserved (`(conservation)` stage: each catalog `conservation` rule's `from` count produced its `to` count by the end of the run) and every accepted host beat acknowledged (`(host handshake)` stage from the driver's count; expected to fail only on a standalone path with responses tied off) |
+| Path PASS | every stage checker passes, no assertion failure, no illegal coverage bin, no harness timeout, no X on a checked field, the host reads back at every written address the data it last wrote there, in request order (`(host memory)` stage, model-free), same-address requests issued to the memory in host order (`(address order)` stage: each catalog `ordering` rule pairs issued commands with host requests by direction and tag; a read issued ahead of an older write to its address, or a write ahead of an older read or write, fails and names the reordering block), every request conserved (`(conservation)` stage: each catalog `conservation` rule's `from` count produced its `to` count by the end of the run) and every accepted host beat acknowledged (`(host handshake)` stage from the driver's count; expected to fail only on a standalone path with responses tied off) |
 | Path FAIL | otherwise; the failing stage and first failing check are recorded, and a finding is emitted (or re-attached to an open one) |
 | Block PASS | every path that instantiates the block passes, **and** every formal property owned by the block is proven or bounded-proven to the agreed depth |
 | Block PASS-with-waivers | as above, except failures that are covered by an approved waiver (§5) |
@@ -83,8 +83,11 @@ matrix supports is "every Tier-1 value and every pair, structurally, and
 the full RTL half on the corners", not "every spec". Current
 (2026-11-05): 50 specs, 31 pass review (the 19 blocked are five
 compiler/schema defects, Frontend reply addendum 14); presets at level 2:
-3 COMPLETE with 20 of 20 paths, 2 halted in the Frontend's Phase 4
-testbench generator on ECC configurations (addendum 15).
+3 COMPLETE with 20 of 20 paths and no finding; the 2 ECC presets run all
+20 paths and fail validation on the port's ordering findings (as the golden
+spec does) plus an ECC-specific data-path loss (addenda 15, 18). Level 3,
+the whole flow with the backend, runs from the Backend's machine
+(docs/RUNNING_THE_FLOW.md).
 
 ## 4. Exclusion rules
 
@@ -276,13 +279,12 @@ path that has ever been proved and has no report that applies to the
 design under judgement, with the options of its last report, so a design
 change never leaves `awaiting_formal` findings for a person to remember.
 
-Simulation status (e6e1ab286a8f, 2026-11-05): 18 of 20 paths PASS; the open
-simulation findings are HOST_002 (acknowledges out of request order, a check
-since the spec owner decided `host_interface.ack_ordering =
-in_request_order`) and HOSTMEM (6 of 12 read-backs on path_18 return another
-address's data: FR-FCFS reordering reaching the host, invisible until the
-host-memory stage existed). Formal: HOST_001
-awaiting a longer run on this design.
+Simulation status (e4794e87a8c1, 2026-11-09 evening): 20 of 20 paths PASS, no
+open simulation finding, after the three 2a18a7929dce defects (in-flight
+write-tag reuse, same-address reorder, ack-tracker overflow) were fixed in
+the Frontend generators with Lehana's permission (handoff addendum 20) and a
+scheduler age bound added so the port's new back-pressure is bounded.
+Formal: PROTO_001, TIMING_008, HOST_001 awaiting replays on this design.
 
 Current (56ca186bf893, 2026-11-04, balanced priority tree, 4-bit deadlines,
 pending-ack counter in the port; 20 min each, fetched after the waiting SSH

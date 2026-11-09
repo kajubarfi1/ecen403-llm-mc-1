@@ -1,14 +1,13 @@
 {
   "$schema": "validation-coverage-rollup/1",
-  "generated_utc": "2026-11-05T18:38:19.357027+00:00",
-  "spec_revision": "compiled_ddr31600_x8_5lane_1rank_d1d1a513",
+  "generated_utc": "2026-11-09T22:05:54.698530+00:00",
+  "spec_revision": "compiled_ddr31333_x8_2lane_1rank_bce23f46",
   "vplan_items": 45,
   "coverpoints_measured": 66,
   "window_scale": 4,
   "summary": {
-    "covered": 33,
-    "partial": 1,
-    "unreachable_by_spec": 11
+    "covered": 35,
+    "unreachable_by_spec": 10
   },
   "items": [
     {
@@ -258,19 +257,17 @@
       "method": "assertion",
       "priority": "major",
       "prior_status": "not_started",
-      "status": "partial",
+      "status": "covered",
       "coverage": [
         {
           "name": "cg_refresh.cp_ref_002_exercised",
           "goal": 100,
-          "measured": 0.0,
-          "bins": "0/1",
-          "state": "short"
+          "measured": 100.0,
+          "bins": "1/1",
+          "state": "met"
         }
       ],
-      "short_of_goal": [
-        "cg_refresh.cp_ref_002_exercised 0.0% of 100%"
-      ],
+      "short_of_goal": [],
       "not_measured": []
     },
     {
@@ -688,25 +685,18 @@
       "method": "random",
       "priority": "critical",
       "prior_status": "not_started",
-      "status": "unreachable_by_spec",
+      "status": "covered",
       "coverage": [
         {
           "name": "cg_timing.cp_tccd_spacing",
           "goal": 100,
-          "measured": 66.67,
-          "bins": "2/3",
-          "state": "unreachable_by_spec",
-          "unhit_bins": [
-            "within_enforced_window"
-          ]
+          "measured": 100.0,
+          "bins": "3/3",
+          "state": "met"
         }
       ],
       "short_of_goal": [],
-      "not_measured": [],
-      "unreachable_by_spec": [
-        "cg_timing.cp_tccd_spacing ['within_enforced_window']"
-      ],
-      "reason": "timing_model.counter_clock.window_scale = 4: the spec declares the design enforces 4 x this parameter, so the exact-minimum spacing cannot occur while that declaration stands; stimulus cannot close it. Reverts to partial when the declaration goes."
+      "not_measured": []
     },
     {
       "id": "VP_TIME_002",
@@ -852,18 +842,19 @@
         {
           "name": "cg_timing.cp_trfc_spacing",
           "goal": 100,
-          "measured": 66.67,
-          "bins": "2/3",
+          "measured": 33.33,
+          "bins": "1/3",
           "state": "unreachable_by_spec",
           "unhit_bins": [
-            "at_minimum"
+            "at_minimum",
+            "within_enforced_window"
           ]
         }
       ],
       "short_of_goal": [],
       "not_measured": [],
       "unreachable_by_spec": [
-        "cg_timing.cp_trfc_spacing ['at_minimum']"
+        "cg_timing.cp_trfc_spacing ['at_minimum', 'within_enforced_window']"
       ],
       "reason": "timing_model.counter_clock.window_scale = 4: the spec declares the design enforces 4 x this parameter, so the exact-minimum spacing cannot occur while that declaration stands; stimulus cannot close it. Reverts to partial when the declaration goes."
     },

@@ -1,7 +1,7 @@
 {
-  "git_commit": "eb1a77b69594911ac55eb4576c87ee649a466cff",
+  "git_commit": "3338b7ec2707d5b85fe8840f3f99dc6a6b8657f5",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "generated_utc": "2026-11-04T21:07:58.000440+00:00",
+  "generated_utc": "2026-11-09T21:37:07.882169+00:00",
   "clock_period_ns": 5.0,
   "module_name": "scheduler",
   "file": "scheduler.sv",
@@ -74,6 +74,12 @@
         "width": "16x4",
         "dir": "input",
         "source": "cmd_queue.entry_aux"
+      },
+      {
+        "name": "q_urgent",
+        "width": 16,
+        "dir": "input",
+        "source": "cmd_queue.entry_urgent"
       }
     ],
     "bank_status": [

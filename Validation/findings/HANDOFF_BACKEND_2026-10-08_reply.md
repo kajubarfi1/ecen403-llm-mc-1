@@ -325,7 +325,7 @@ through the full system, backend included. Where each stands today:
 |---|---|---|
 | default, balanced, low-cost-embedded | COMPLETE, 20 of 20 paths, no finding | nothing on our side: ready for the backend stage |
 | high-performance (3 lanes, ECC) | validation FAIL: port ordering (every spec) + ECC-specific data-path losses; agents could not fix | Frontend fixes |
-| server-grade (5 lanes, ECC) | halts in the Frontend's Phase 4 testbench generator | Frontend fix |
+| server-grade (5 lanes, ECC) | validation FAIL: the same five findings as high-performance | Frontend fixes |
 
 So three presets are ready to go through your stage now, and the golden
 spec with them. The matrix tool has a level 3 for exactly this:
@@ -348,3 +348,31 @@ Expect the first attempt to halt somewhere in stage 6 or 7; that halt is
 the integration work, and it is the last piece of the system nobody has
 seen run. The two ECC presets join once the Frontend's port reorder
 buffer and testbench fix land.
+
+## Addendum 8 (2026-11-08): how Validation authenticates to Olympus (your §7)
+
+Exactly the procedure in `USAGE.md` §3.6, nothing more: a dedicated
+passphrase-less ed25519 key (`ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_olympus2 -N ""`),
+installed with `ssh-copy-id -i <that key> <netid>@olympus.ece.tamu.edu`
+(password prompt once, at install), then `ssh -i <key> <netid>@olympus... exit`
+as the no-prompt check. `Validation/setup.env` holds `OLYMPUS_USER=<netid>`
+and `OLYMPUS_KEY=<path to the private key>`; `sim_runner.CadenceSSHAgent`
+hands that path to paramiko as `key_filename`. No portal, no ticket, no
+`authorized_keys` placed by hand. The key sits where `ssh-copy-id` put it,
+`~/.ssh/authorized_keys` in the Olympus home, and that home is under
+`/home/ugrads/j/jacobz`, the same NFS tree as yours, so the NFS theory does
+not separate us.
+
+Two things that would settle it from your side, since nothing here is
+different from what you did: the `ssh -v` line that says which key the
+server accepted or why it declined (`Server accepts key` or `Authentications
+that can continue`), and whether `~/.ssh` itself is 700 and the home
+directory is not group- or world-writable: sshd's `StrictModes` refuses
+the whole directory on a writable home, and NFS mounts that ignore `chmod`
+are exactly where that bites. `olympus1` was simply the first key, replaced
+when the second was made with no passphrase; nothing was changed on the
+server between them.
+
+Olympus itself was unreachable from off campus tonight (connection timeouts
+at 22:45 for about an hour); if you were testing in that window, retry on
+the VPN before concluding anything.

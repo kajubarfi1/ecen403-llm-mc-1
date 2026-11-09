@@ -80,6 +80,7 @@ module wb_port #(
     localparam int unsigned ADDR_INC = DATA_WIDTH / 8;
 
     wire wb_beat = wb_cyc_i & wb_stb_i & ~wb_stall_o;
+    logic req_pend;   // skid entry held; req_valid gates it (see Request register)
 
     // Aux-tag counters (WB-009), declared before tag FIFO --
     // one per kind, not one shared counter. rd_data_buf/wr_buf
@@ -137,6 +138,14 @@ module wb_port #(
     wire  [ORD_PTR_W:0] ord_cnt     = ord_wr - ord_rd;
     wire                 ord_empty   = (ord_cnt == 0);
     wire                 ord_head_rd = ord_mem[ord_rd[ORD_PTR_W-1:0]];
+    // Full: stall the next beat (Validation addendum 19, 2026-11-09).
+    // The sizing argument above holds for reads (tag_full) but not for
+    // writes: a write's ord_mem entry lives until it is acknowledged
+    // at the head, while its wr_buf slot frees as soon as the WR
+    // issues, so behind one slow read the port kept accepting writes
+    // until ord_cnt passed ORD_DEPTH (WB-011 x319 on path_07 of drop
+    // 2a18a7929dce; 9 of 110 read responses lost, HOST_002 x15).
+    wire                 ord_full    = (ord_cnt == ORD_DEPTH[ORD_PTR_W:0]);
 
     always_ff @(posedge clk or negedge rst_n)
         if (!rst_n) ord_wr <= '0;
@@ -206,18 +215,18 @@ module wb_port #(
     // finding 1).
     always_comb begin
         wb_stall_o = 1'b0;
-        if (req_valid && !req_ready)           wb_stall_o = 1'b1;
+        if (req_pend && !(req_valid && req_ready)) wb_stall_o = 1'b1;
         if (!wb_we_i && tag_full && wb_stb_i)  wb_stall_o = 1'b1;
-        // Validation/spec/completeness_rules.json
-        // HOST_WRITE_BUFFER_BACKPRESSURE, answered
-        // 'port_stalls_on_full' (2026-11-05): write_buffer_depth
-        // equals command_queue_depth with no margin for writes in
-        // flight, so data_path's write buffer can fill while the
-        // queue still has room -- without this, a write word is
-        // silently dropped the cycle the host is told its beat was
-        // accepted (same shape as Finding 1, in the buffer the
-        // queue skid sits in front of, not the skid itself).
-        if (wb_we_i && wb_stb_i && !wr_data_ready) wb_stall_o = 1'b1;
+        if (wb_stb_i && ord_full)              wb_stall_o = 1'b1;  // ack tracker full (addendum 19)
+        // HOST_WRITE_BUFFER_BACKPRESSURE ('port_stalls_on_full',
+        // 2026-11-05) is carried by the skid gate above: a pending
+        // write is not presented to the queue (req_valid low) until
+        // data_path can take its word, and the stall on a pending,
+        // unconsumed request holds the bus. The former beat-level
+        // term on !wr_data_ready read the PENDING request's tag, not
+        // the beat's, and would have stalled every write behind the
+        // one just pushed once wr_data_ready became per-slot
+        // (addendum 19, 2026-11-09).
     end
 
     // Burst tracker (WB-003, WB-004)
@@ -267,9 +276,19 @@ module wb_port #(
     // latched when the skid is empty, or in the same cycle the
     // entry it holds is actually consumed (req_valid && req_ready),
     // which pipelines straight through with no bubble.
+    // req_valid is the skid entry (req_pend) gated on the data path
+    // being able to take a write's word (Validation addendum 19,
+    // 2026-11-09): wr_data_valid is wired as req_valid && req_we &&
+    // enq_ready, so a request the queue took while data_path refused
+    // the word (its tag's slot still holding an unissued write) would
+    // leave the queue holding a write with no data. Held here instead,
+    // the queue never sees it until the word can land; a read is
+    // never gated. wr_data_ready only rises while a write is pending
+    // (no other push can happen), so a gated request never withdraws.
+    assign req_valid = req_pend && (!req_we || wr_data_ready);
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            req_valid <= 1'b0; req_we <= 1'b0; req_addr <= '0;
+            req_pend <= 1'b0; req_we <= 1'b0; req_addr <= '0;
             req_wdata <= '0; req_wmask <= '0; req_aux <= '0;
         end else if (req_valid && req_ready) begin
             // Consumed this cycle: load the next beat straight
@@ -281,18 +300,18 @@ module wb_port #(
                 req_wmask <= wb_sel_i;
                 req_aux   <= wb_we_i ? wr_aux_ctr : rd_aux_ctr;
             end else begin
-                req_valid <= 1'b0;
+                req_pend <= 1'b0;
             end
-        end else if (!req_valid && wb_beat) begin
+        end else if (!req_pend && wb_beat) begin
             // Skid was empty; latch the new beat.
-            req_valid <= 1'b1;
+            req_pend <= 1'b1;
             req_we    <= wb_we_i;
             req_addr  <= wb_adr_i;
             req_wdata <= wb_dat_i;
             req_wmask <= wb_sel_i;
             req_aux   <= wb_we_i ? wr_aux_ctr : rd_aux_ctr;
         end
-        // else: req_valid && !req_ready -- hold everything; wb_stall_o
+        // else: req_pend and not consumed -- hold everything; wb_stall_o
         // guarantees no wb_beat landed this cycle to race it.
     end
 
@@ -439,14 +458,15 @@ module wb_port #(
     // accepted request may be lost while back-pressure is asserted)
     property p_req_held_stable;
         @(posedge clk) disable iff (!rst_n)
-        (req_valid && !req_ready) |=> (req_valid && $stable(req_we) &&
+        (req_pend && !(req_valid && req_ready)) |=> (req_pend && $stable(req_we) &&
             $stable(req_addr) && $stable(req_wdata) &&
             $stable(req_wmask) && $stable(req_aux));
     endproperty
     assert property (p_req_held_stable)
         else $error("[WB-010] accepted request changed or dropped while queue wasn't ready");
 
-    // WB-011: the ack-ordering tracker can never overflow -- each
+    // WB-011: the ack-ordering tracker can never overflow -- ord_full
+    // stalls the next beat (addendum 19, 2026-11-09); before that, each
     // side's own backpressure (tag_full, wr_data_ready) already
     // caps that side's outstanding count below ORD_DEPTH's share
     // for it, so this should be unreachable by construction; it
@@ -459,11 +479,12 @@ module wb_port #(
     assert property (p_wr_ack_no_wrap)
         else $error("[WB-011] ack-ordering tracker overflow -- an ack would be dropped");
 
-    // WB-012: a write beat is never accepted while the write buffer
-    // isn't ready for it (HOST_WRITE_BUFFER_BACKPRESSURE)
+    // WB-012: a pending write is held (bus stalled, not presented to
+    // the queue) while the write buffer cannot take its word
+    // (HOST_WRITE_BUFFER_BACKPRESSURE; per-slot since 2026-11-09)
     property p_wr_backpressure;
         @(posedge clk) disable iff (!rst_n)
-        (wb_we_i && wb_stb_i && !wr_data_ready) |-> wb_stall_o;
+        (req_pend && req_we && !wr_data_ready) |-> (wb_stall_o && !req_valid);
     endproperty
     assert property (p_wr_backpressure)
         else $error("[WB-012] write beat accepted (or not stalled) while wr_data_ready was low");

@@ -1,7 +1,7 @@
 {
-  "git_commit": "f37ce49d323151a6118ae7765aa766918c816383",
+  "git_commit": "3338b7ec2707d5b85fe8840f3f99dc6a6b8657f5",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-  "generated_utc": "2026-10-27T20:37:31.573331+00:00",
+  "generated_utc": "2026-11-09T21:37:07.864523+00:00",
   "clock_period_ns": 5.0,
   "module_name": "cmd_queue",
   "file": "cmd_queue.sv",
@@ -19,6 +19,7 @@
     "COL_BITS": 10,
     "BANK_BITS": 3,
     "AUX_WIDTH": 4,
+    "STARVE_CYCLES": 128,
     "DATA_WIDTH": 32,
     "ENTRY_W": 33
   },
@@ -116,6 +117,11 @@
       {
         "name": "entry_we",
         "width": "16x1",
+        "dir": "output"
+      },
+      {
+        "name": "entry_urgent",
+        "width": 16,
         "dir": "output"
       },
       {

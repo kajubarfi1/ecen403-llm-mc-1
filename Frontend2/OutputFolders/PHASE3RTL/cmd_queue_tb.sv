@@ -14,6 +14,7 @@ module cmd_queue_tb;
     logic [ROW_BITS-1:0] entry_row[DEPTH]; logic [COL_BITS-1:0] entry_col[DEPTH];
     logic [BANK_BITS-1:0] entry_bank[DEPTH]; logic entry_we[DEPTH];
     logic [AUX_WIDTH-1:0] entry_aux[DEPTH];
+    logic [DEPTH-1:0] entry_urgent;   // oldest entry past STARVE_CYCLES (2026-11-09)
     logic queue_full, queue_empty; logic [IDX_BITS:0] queue_count;
 
     cmd_queue #(.DEPTH(DEPTH),.IDX_BITS(IDX_BITS),.ROW_BITS(ROW_BITS),

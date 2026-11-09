@@ -710,6 +710,31 @@ def main() -> int:
                             "verdict": "pass" if "status=pass" in h_first else "fail",
                             "summary": h_first.strip(),
                             "detail": [l.strip() for l in h_lines if l.strip().startswith("HOSTMEM")]})
+    # Same-address order: requests to one address reach the memory in host
+    # order whatever the scheduler reorders across addresses. host_memory
+    # sees the stale read-back at the port; this pairs each issued command
+    # with its host request (by direction and tag) and names the block that
+    # issued a read ahead of the older write to its address (path_18 on
+    # 2a18a7929dce, 2026-11-09). Rules are data in the catalog (`ordering`).
+    if not observe and pdef.get("standalone") is None:
+        rc_a, out_a = run_local(
+            f"python3 Validation/txn/address_order.py --trace {trace} "
+            f"--blocks {','.join(blocks)} --data-bits {spec_host_width()}")
+        a_lines = out_a.strip().splitlines()
+        a_first = next((l for l in a_lines if "status=" in l), "")
+        if rc_a != 0 or not a_first:
+            a_verdict = "unknown"
+        elif "status=not_applicable" in a_first:
+            a_verdict = None
+        elif "status=unknown" in a_first:
+            a_verdict = "unknown"
+        else:
+            a_verdict = "pass" if "status=pass" in a_first else "fail"
+        if a_verdict:
+            results.append({"stage": "(address order)", "kind": "address_order",
+                            "scope": "(address order)", "model": None,
+                            "verdict": a_verdict, "summary": a_first.strip() or out_a.strip()[-200:],
+                            "detail": [l.strip() for l in a_lines if l.strip().startswith("ADDRORDER")]})
     # The host handshake: the driver counted every beat the slave accepted
     # and every acknowledge it returned. A beat never acknowledged is a
     # host access the controller lost, whichever block lost it (the

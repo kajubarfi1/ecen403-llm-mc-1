@@ -1131,6 +1131,231 @@ fix is a design change. Phase 4's attempt is in the run log. The run
 halted with "every phase agent fixed nothing", which is the honest
 outcome and the one the round was for.
 
-The 5-lane server-grade preset still halts before any of this, in Phase
-4 testbench generation ("host word (32) is not a multiple of the channel
-width (40)"): the spec says 4 data lanes, the testbench still counts 5.
+**Correction, later the same night**: the 5-lane server-grade preset got
+through Phase 4 on its rerun (the halt I quoted was the earlier attempt),
+ran the whole RTL half and fails validation with exactly the same five
+findings as the 3-lane one, on drop 9a7390bdce1e: the two ordering
+findings, 1 beat never acknowledged, 6 of 599 write words never
+accepted and 6 of 599 WR commands driving no data. Its package is at
+`Validation/findings/outbox/compiled_ddr31600_x8_5lane_1rank_d1d1a513/9a7390bdce1e/`.
+Two ECC configurations, identical losses, none on the golden spec: one
+ECC-specific defect in the data path, and the reorder buffer for the
+rest. Your Phase 4 agent tried three times on each and left data_path
+unresolved.
+
+## Addendum 19 (2026-11-09): your reorder buffer works, our monitor and predictor were the stale ones, and three defects remain on 2a18a7929dce
+
+You were right in 11-06_2, twice. The `wb_rsp` monitor's `rsp_valid`
+qualifier was our false positive, and the `data_path` MISMATCH that our
+first run of 2a18a7929dce reported was ours too: every one of the 12 WR
+commands on path_18 carried its own tag's word, exactly as your tag-indexed
+`wr_buf` is meant to, while our data_path predictor still paired commands
+with words in arrival order. The catalog now declares `dp_wr.aux`
+(`wr_data_aux`) and the pairing (`ddr_wr_beat.derives_from.unpack`
+carries `command_iface`/`tag_field`), the bus-bridge gate grades a command
+order different from the word order, the stale predictor was rejected and
+regenerated, and that stage passes on your drop. `req.aux` (`req_aux`) is
+recorded too, as a declared don't-care at the scoreboard: the tag values
+are your bookkeeping, the spec fixes only their width.
+
+With our side corrected, the judgement of drop 2a18a7929dce (golden spec)
+is **16 of 20 paths PASS**. The two ordering findings from addenda 17/18
+are gone: path_02 passes, acks are in acceptance order on every path but
+one, and the one HOSTMEM line left has a different cause (below). What
+remains is three defects, each with the trace to go with it in
+`Validation/reports/paths/` and the package in
+`Validation/findings/outbox/current/`:
+
+### 1. `data_path/ADDRORDER/SAME_ADDRESS_HOST_ORDER_TAG_REUSE` — a write tag is reused while the older write is still queued, and its data is overwritten
+
+New check, new finding, and the most consequential of the three. On
+path_07 (saturate) 19 writes, on path_05 and path_20 (refresh loops) 405
+each, were accepted while an older, still-unissued write held the same
+4-bit tag. The clearest case, path_07:
+
+| write | accepted | tag | address | data / mask | WR issued | beats carried |
+|---|---|---|---|---|---|---|
+| A | t=94000 | 4 | 0x160165c | 0x19999e3f / 0xc | t=2929000 | **0x736a947a, masks 2/3** |
+| B | t=2199000 | 4 | 0xe1e4e64 | 0x736a947a / 0x1 | t=2529000 | 0x736a947a, masks 2/3 |
+
+A sat in the queue for 2.4 µs (FR-FCFS, no age limit; the early writes
+arrive before init completes and newer rows keep winning). When B took
+tag 4, its push into `wr_buf[4]` replaced A's word and mask. A's WR
+command then went to DDR with B's data and B's byte mask: the host's write
+to 0x160165c is lost and a different byte of that word is corrupted. Your
+own `DP-015` fired 17 times on the path for the same reason (a WR issued
+after its slot had been popped by the other command).
+
+Why the back-pressure does not catch it: `wr_data_ready = ~wr_full` is an
+occupancy count. With starvation the un-issued writes are not contiguous
+in tag space, so occupancy is well below 16 while the one slot the
+counter wraps onto is occupied. The read side has `tag_full` because
+reads are bounded by outstanding count; writes have no equivalent. Two
+ways to close it, either is fine by the spec: `data_path` drops
+`wr_data_ready` while `wr_buf_valid[wr_data_aux]` is set (a per-slot
+check next to the occupancy one), or `wb_port` does not allocate a tag
+whose write has not issued. The catalog rule's `tag_reuse` facet names
+`data_path` with `wb_port` as the other candidate; the checker is
+`Validation/txn/address_order.py`, the stage `(address order)` on every
+non-standalone path. The 5-lane and 3-lane preset packages' "write words
+never accepted / WR commands drive no data" losses under saturation are
+worth re-reading with this in hand; they may be the same mechanism seen
+through conservation counts.
+
+### 2. `scheduler/ADDRORDER/SAME_ADDRESS_HOST_ORDER` — a read reaches DDR ahead of the older write to the same address (path_18)
+
+The host wrote 0x1622bd79 to 0x17fb2260 (accepted t=979000, tag 10) and
+read it back (accepted t=1089000, tag 10). The read's RD command issued
+at t=1424000, the write's WR at t=1464000. The read returned 0xc5b6fecf,
+whatever the DRAM held: that is the one `HOSTMEM/wb_rsp` line left on the
+drop (same address, same times), so it is a scheduler finding wearing a
+port label. Reordering across addresses is yours to do; same-address
+requests must issue in host order, or the port must hold the later one.
+The spec never said who owns this, so we filed intake rule
+`SCHED_SAME_ADDRESS_ORDERING` (standard disposition, not blocking: a
+single Wishbone master expects to read what it wrote). Owner defaults to
+`scheduler`, `cmd_queue` is the other candidate; a sentence in the
+compiler (`controller_architecture.same_address_ordering`) settles it.
+
+### 3. `wb_port`: the ack-ordering tracker overflows and drops acks (path_07)
+
+`WB-011` ("ack-ordering tracker overflow, an ack would be dropped") fired
+319 times, from t=1957500 on. By then the port had accepted 40 beats (20
+writes, 20 reads) and delivered 4 read acks; the head of `ord_mem` was a
+read waiting on DDR and at most 3 writes behind it could have been
+acknowledged, so `ord_cnt` passed `ORD_DEPTH = 32`. The comment above
+`p_wr_ack_no_wrap` says each side's own back-pressure caps its share;
+that holds for reads (`tag_full`, 16) but not for writes: a write's
+`ord_mem` entry lives until it is acknowledged at the head, while its
+`wr_buf` slot frees as soon as the WR issues, so `wr_data_ready` stays
+high and the port keeps accepting writes behind the stalled read. The
+consequences are the rest of the path_07 package: 9 of 110 read
+responses never produced a `wb_rsp` (`CONSERVE/RESPONSE_TO_HOST`, the same
+9 as `MISMATCH/wb_rsp[addr,data]`) and `HOST_002` fired 15 times once the
+ring wrapped. Fix: stall the beat (`wb_stall_o`) while `ord_cnt ==
+ORD_DEPTH`, or size `ORD_DEPTH` to the real bound, which is the read cap
+plus every write the queue and buffer can hold.
+
+### What is not a finding
+
+- The read-reorder buffer: 110 of 110 responses on path_07 arrive at the
+  host in acceptance order until the tracker overflows; path_02's 46 reads
+  are all in order. HOST_002 is clean on every path but path_07.
+- `wb_rsp[data]` is a declared don't-care at the monitor since 11-08; the
+  `(host memory)` stage judges read data, and it passes on every path but
+  the RAW case above.
+- The formal rows (`PROTO_001`, `TIMING_008`, `HOST_001`) are
+  `awaiting_formal`: this run skipped the replays for turnaround; they
+  rerun on the next drop that changes the scheduler or port.
+
+Order of work, if you want ours: 1 first (it corrupts host data under any
+sustained write traffic and is a one-line condition in either block),
+then 3 (a stall), then 2 (a same-address check at pick time, or in the
+port). All three are design changes rather than regenerations, so your
+fix agents will likely return them to you as they did the reorder
+buffer. The flow routes the package to Phase 1 and Phase 4 as before.
+
+## Addendum 20 (2026-11-09, evening): the three defects fixed in your generators, with Jacob's word that you agreed
+
+Jacob told us you had agreed to let us fix addendum 19's three defects in
+your generators directly, so the five presets can move. Everything below is
+in `Frontend2/scripts/Phase{1,3,4}/*_gen.py` (and two testbench generators);
+the `.sv` under `Frontend2/OutputFolders/` was regenerated from them, the
+TOPRTL bundle rebuilt with `generate_top.py` (your Verilator lint: PASS, 0
+errors, the same 19 pre-existing width/unused warnings), and your own block
+testbenches rerun on Olympus: wb_port 10/10, cmd_queue 32/32, scheduler
+51/51, cmd_gen 36/36, data_path 29/29. Please read the diffs; each change is commented
+in place with the addendum it answers.
+
+### data_path_gen.py — the write buffer refuses a word whose slot still holds an unissued write (defect 1)
+
+`wr_data_ready` is now `(~wr_full || wr_pop_this_cycle) && !wr_slot_busy`,
+where `wr_slot_busy` is `wr_buf_valid[wr_data_aux]` unless that very slot
+pops this cycle. The push uses `wr_data_ready` directly. New assertion
+`DP-016` (a word is never pushed over an unissued write's slot). One
+simulator note worth keeping: as a continuous assign the variable-indexed
+read of `wr_buf_valid` re-evaluated a cycle late in Xcelium when only the
+index changed, so it is an `always_comb`.
+
+### wb_port_gen.py — a pending write is held until the data path can take its word; the ack tracker stalls when full (defects 1 and 3)
+
+- `req_valid` is now `req_pend && (!req_we || wr_data_ready)`: the skid
+  entry (`req_pend`, the register the old `req_valid` was) is not presented
+  to the queue while data_path refuses its word, so the queue never holds a
+  write whose data was dropped. The stall term is `req_pend && !(req_valid
+  && req_ready)`. The old beat-level stall on `!wr_data_ready` is gone: it
+  read the pending request's tag, not the beat's, and with a per-slot ready
+  it would have stalled every write behind the one just pushed. WB-010 and
+  WB-012 are restated on `req_pend`.
+- `ord_full = (ord_cnt == ORD_DEPTH)` stalls the next beat. WB-011's
+  comment now says why the old sizing argument failed for writes.
+- Your embedded testbench instantiation ties `.wr_data_ready(1'b1)` (the
+  spec-only Phase 1 testbench already drove it).
+
+### cmd_queue_gen.py and scheduler_gen.py — same-address order in the queue, an age bound across one new port (defect 2 and its consequence)
+
+- `conf[s][j]` is set at enqueue when slot j holds an older request to the
+  same bank/row/column with a write on either side; `hazard[i] = |(conf[i]
+  & mem_valid)`; an entry is hidden from `entry_valid` while its hazard
+  holds; `conf[*][j]` clears when j dequeues. The oldest conflicting entry
+  is never hidden, so a hidden one always surfaces. No scheduler change
+  for this part.
+- Anti-starvation: each entry ages (saturating at `STARVE_CYCLES`, a new
+  queue parameter, 128 controller cycles unless the spec says
+  `controller_architecture.starvation_limit_cycles`; intake rule
+  `SCHED_STARVATION_BOUND` filed). `older[i][j]` (set at enqueue, cleared
+  when j dequeues) is a strict age order over live entries, and the oldest
+  visible entry past the bound is flagged one-hot on a new output,
+  `entry_urgent`. The scheduler takes it as `q_urgent` (manifest source
+  `cmd_queue.entry_urgent`, wired by `generate_top.py`) and, before the
+  two tiers, serves that entry in whichever tier it is eligible for this
+  cycle: its CAS over other row hits, its ACT/PRE over other misses. When
+  its own bank's timing makes it eligible for neither, the tiers run as
+  before, so other banks are never idled. Two simpler forms were tried
+  and measured first: showing only the starved entries (after init most of
+  the queue is past the threshold and FR-FCFS among them starved the same
+  write again, drop 2867a40acc70) and showing only the oldest one (correct
+  but serialised the drain to one CAS per 33 cycles, so path_01 ended with
+  three requests still queued, drop 85cf24c69ba7).
+- Why the port needed the scheduler to be fair: the 480-cycle starvation we
+  measured on 2a18a7929dce was the condition under which write tags
+  wrapped. Once the port waits instead of corrupting, that wait became a
+  266-cycle host stall; the bound makes it a bounded one.
+- Your `cmd_queue_tb`/`scheduler_tb` declare the new signal for their `.*`
+  instantiation (`q_urgent = '0` in the scheduler bench, so its 51 tests
+  exercise the tiers unchanged).
+
+### Phase4/tb_generator.py — the push task
+
+`push_wr_data` drives on the falling edge and holds across exactly one
+rising edge, then presents the next word's tag and lets `wr_data_ready`
+settle (`#1`). The old drive-at-posedge form raced the DUT's sampling (your
+DP-001 saw valid for a second edge once the run continued past H4) and read
+a not-yet-settled per-slot ready in H1. Test content is unchanged.
+
+### Not changed, for you to look at
+
+Your spec-only `wb_port_tb` fires `WB-010 p_req_held_stable` at t=107.5 ns
+on the committed RTL exactly as on ours ("Stall when backend busy": the
+test changes the beat while the port holds it). All 10 of its checks pass;
+the assertion is pre-existing and unrelated to this work.
+
+### Result
+
+Drop **e4794e87a8c1** (golden spec, the RTL now in `Frontend2/OutputFolders/`):
+**20 of 20 paths PASS**, no open simulation finding, code coverage 81.4%.
+Against 2a18a7929dce that resolves all six findings of addendum 19 (the
+tag reuse, the same-address reorder and its HOSTMEM line, the lost
+responses, HOST_002, the missing wb_rsp) with nothing new behind them;
+the three intermediate drops (e322c9ab238a, 2867a40acc70, 85cf24c69ba7)
+are in `Validation/reports/drops/` if you want the steps. The three
+formal rows (PROTO_001, TIMING_008, HOST_001) are `awaiting_formal` until
+the replays run on this design; nothing in simulation contradicts them.
+
+What this does to your flow: the Phase 1, 3 and 4 generators produce this
+RTL for every spec (the new logic is parametrised like the rest: the
+conflict/age matrices scale with `command_queue_depth`, the slot check
+with `aux_width`), so the five presets regenerate with the fixes the next
+time the flow runs them. The ECC presets' "write words never accepted /
+WR commands drive no data" losses should be re-read against this drop
+first; they had the shape of the tag reuse.

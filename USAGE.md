@@ -556,8 +556,13 @@ deliver) and, when the driver's own count disagrees, a `(host handshake)` row
 the host streams and a data path a `(host memory)` row: the memory image the
 host built with its own writes against every read response, in the order
 the reads were accepted (a read of an address the host never wrote is
-skipped). The last line is the
-verdict:
+skipped), and an `(address order)` row: every command the data path is
+handed is paired with the host request it issues (by direction and the tag
+the port assigned; the `ordering` rules of the catalog) and a command issued
+while an older request to the same word address with a write on either side
+is still waiting is a violation, attributed to the block that reorders
+(the `(host memory)` row sees only the stale read-back at the port). The
+last line is the verdict:
 
 ```
   drop a7cd3cb93546: 19 pass / 0 fail / 0 error in 1.6 min; log Validation/reports/validate_drop/a7cd3cb93546.log

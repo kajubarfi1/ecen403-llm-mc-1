@@ -80,6 +80,7 @@ module cmd_queue_tb;
     logic [ROW_BITS-1:0] entry_row[DEPTH]; logic [COL_BITS-1:0] entry_col[DEPTH];
     logic [BANK_BITS-1:0] entry_bank[DEPTH]; logic entry_we[DEPTH];
     logic [AUX_WIDTH-1:0] entry_aux[DEPTH];
+    logic [DEPTH-1:0] entry_urgent;   // oldest entry past STARVE_CYCLES (2026-11-09)
     logic queue_full, queue_empty; logic [IDX_BITS:0] queue_count;
 
     cmd_queue #(.DEPTH(DEPTH),.IDX_BITS(IDX_BITS),.ROW_BITS(ROW_BITS),
@@ -244,6 +245,7 @@ module scheduler_tb;
     logic [DEPTH-1:0] q_valid;
     logic [ROW_BITS-1:0] q_row[DEPTH]; logic [COL_BITS-1:0] q_col[DEPTH];
     logic [BANK_BITS-1:0] q_bank[DEPTH]; logic q_we[DEPTH]; logic [AUX_WIDTH-1:0] q_aux[DEPTH];
+    logic [DEPTH-1:0] q_urgent = '0;   // age priority from cmd_queue (2026-11-09); none in these tests
     // Bank tracker
     logic [NUM_BANKS-1:0] bank_is_active,bank_act_allowed,bank_rd_allowed,bank_wr_allowed,bank_pre_allowed;
     logic [ROW_BITS-1:0] bank_open_row[NUM_BANKS];

@@ -4,7 +4,7 @@
 //
 // Interface : dp_wr   (Host write data accepted by the data path)
 // Block     : data_path
-// Manifest  : Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json
+// Manifest  : runs/matrix/preset_balanced/drop/PHASE4RTL/data_path_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //
@@ -20,6 +20,7 @@ module dp_wr_monitor #(
     input  logic clk,
     input  logic rst_n,
     input  logic [31:0] wr_data,
+    input  logic [3:0] wr_data_aux,
     input  logic wr_data_ready,
     input  logic wr_data_valid,
     input  logic [3:0] wr_mask
@@ -36,7 +37,7 @@ module dp_wr_monitor #(
   always @(posedge clk) begin
     #SAMPLE_DELAY;                 // sample after non-blocking assignments commit
     if (rst_n && (wr_data_valid && wr_data_ready)) begin
-        $display("TXN dp_wr write t=%0t data=%0h mask=%0h", $time, wr_data, wr_mask);
+        $display("TXN dp_wr write t=%0t aux=%0h data=%0h mask=%0h", $time, wr_data_aux, wr_data, wr_mask);
     end
   end
 

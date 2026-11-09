@@ -1,127 +1,40 @@
 {
   "$schema": "validation-retry-instructions/1",
-  "status": "FAIL",
+  "status": "PASS",
   "pipeline": "validation",
-  "drop": "e6e1ab286a8f",
+  "drop": "e4794e87a8c1",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "spec_id": "00d082c3f72d1b34",
-  "generated_utc": "2026-11-05T18:23:26.926929Z",
-  "failed_modules": [
-    "wb_port"
-  ],
-  "retry_instructions": {
-    "wb_port": {
-      "module": "wb_port",
-      "attempt": null,
-      "drop": "e6e1ab286a8f",
-      "failed_checks": [
-        {
-          "id": "HOSTMEM/wb_rsp",
-          "name": "the host reads back, at each address, the data it last wrote there, and the responses arrive in the order the reads were accepted (host_interface.ack_ordering =",
-          "pass": false,
-          "expected": "the host reads back, at each address, the data it last wrote there, and the responses arrive in the order the reads were accepted (host_interface.ack_ordering = in_request_order)",
-          "actual": "addr=0x18f2a0a0 expected=0x7204e52d observed=0x5805975 (the data the host wrote at 0x161ff4a0) read accepted t=63000 answered t=1449000",
-          "severity": "critical",
-          "confidence": "confirmed",
-          "spec_ref": "host_interface.ack_ordering; failure_taxonomy DATA_001",
-          "anchor": [
-            {
-              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
-              "line": 232,
-              "signal": "wb_dat_o",
-              "text": "assign wb_dat_o = rsp_rdata;"
-            }
-          ],
-          "context": null,
-          "owner_candidates": [
-            "wb_port",
-            "scheduler"
-          ],
-          "occurrences": 6,
-          "paths": [
-            "path_18_full_write"
-          ],
-          "repro": {
-            "path": "path_18_full_write",
-            "command": "python3 Validation/tools/run_path.py --path path_18_full_write",
-            "sequence": "Validation/sequences/generated/path_18_full_write_seed1.json",
-            "work_dir": "Validation/sequences/generated/runs/path_18_full_write",
-            "log": "Validation/reports/paths/path_18_full_write_sim.log",
-            "trace": "Validation/reports/paths/path_18_full_write_observed.jsonl",
-            "first_failure": {
-              "seq": null,
-              "line": "HOSTMEM wb_rsp[2] addr=0x18f2a0a0 expected=0x7204e52d observed=0x5805975 (the data the host wrote at 0x161ff4a0) read accepted t=63000 answered t=1449000"
-            }
-          },
-          "introduced_in": "c3135943228e",
-          "repair": null,
-          "fix": null,
-          "finding_id": "wb_port/HOSTMEM/wb_rsp"
-        },
-        {
-          "id": "HOST_002",
-          "name": "wb_port: HOST_002",
-          "pass": false,
-          "expected": "",
-          "actual": "fired 76x; first: xmsim: *E,ASRTST (./wb_port_order_sva.sv,60): (time 2347500 PS) Assertion chain_harness.u_wb_port.u_wb_port_order_sva.a_HOST_002 has failed",
-          "severity": "major",
-          "confidence": "confirmed",
-          "spec_ref": null,
-          "anchor": [
-            {
-              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
-              "line": 179,
-              "signal": "req_we",
-              "text": "req_we    <= wb_we_i;"
-            },
-            {
-              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
-              "line": 180,
-              "signal": "req_addr",
-              "text": "req_addr  <= wb_adr_i;"
-            },
-            {
-              "file": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
-              "line": 181,
-              "signal": "req_wdata",
-              "text": "req_wdata <= wb_dat_i;"
-            }
-          ],
-          "context": null,
-          "owner_candidates": [
-            "wb_port"
-          ],
-          "occurrences": 76,
-          "paths": [
-            "path_23_host_ack_collision"
-          ],
-          "repro": {
-            "path": "path_23_host_ack_collision",
-            "command": "python3 Validation/tools/run_path.py --path path_23_host_ack_collision",
-            "sequence": "Validation/sequences/generated/path_23_host_ack_collision_seed1.json",
-            "work_dir": "Validation/sequences/generated/runs/path_23_host_ack_collision",
-            "log": "Validation/reports/paths/path_23_host_ack_collision_sim.log",
-            "trace": "Validation/reports/paths/path_23_host_ack_collision_observed.jsonl",
-            "first_failure": {
-              "seq": null,
-              "line": "xmsim: *E,ASRTST (./wb_port_order_sva.sv,60): (time 2347500 PS) Assertion chain_harness.u_wb_port.u_wb_port_order_sva.a_HOST_002 has failed"
-            }
-          },
-          "introduced_in": "e6e1ab286a8f",
-          "repair": null,
-          "fix": null,
-          "finding_id": "wb_port/HOST_002"
-        }
+  "generated_utc": "2026-11-09T21:39:04.816388Z",
+  "failed_modules": [],
+  "retry_instructions": {},
+  "resolved_since_previous_drop": [
+    {
+      "schema": "validation-findings/2",
+      "id": "scheduler/SCHED_001",
+      "kind": "rtl_defect",
+      "check_id": "SCHED_001",
+      "taxonomy_id": "SCHED_001",
+      "owner_module": "scheduler",
+      "severity": "critical",
+      "title": "scheduler: SCHED_001",
+      "paths": [
+        "path_01_write_cmd",
+        "path_06_scheduler_dequeue",
+        "path_19_row_conflict"
       ],
-      "message": "2 check(s) failed on drop e6e1ab286a8f; 2 with model-free evidence. Fix the highest-severity check first; each carries the spec requirement, expected vs actual, source anchors and a reproduction command."
+      "status": "resolved",
+      "resolved_in": "e4794e87a8c1",
+      "last_seen": "85cf24c69ba7",
+      "first_seen": "85cf24c69ba7",
+      "note": "open in drop 85cf24c69ba7, not raised by drop e4794e87a8c1"
     }
-  },
-  "resolved_since_previous_drop": [],
+  ],
   "requires_human_review": false,
   "source": "Validation/findings/emit_findings.py -> retry_adapter.py",
   "drop_status": {
     "$schema": "validation-drop-status/1",
-    "drop": "e6e1ab286a8f",
+    "drop": "e4794e87a8c1",
     "partial": false,
     "blocks_present": [
       "addr_decoder",
@@ -158,14 +71,11 @@
       "path_18_full_write",
       "path_19_row_conflict",
       "path_20_refresh_preempt",
+      "path_21_wb_port_standalone",
       "path_22_csr_standalone",
       "path_23_host_ack_collision"
     ],
-    "paths_blocked": {
-      "path_21_wb_port_standalone": [
-        "run error (rc=1): see Validation/reports/validate_drop/e6e1ab286a8f_path_21_wb_port_standalone.txt"
-      ]
-    },
-    "note": "Paths listed as blocked with a run error did not simulate on this drop (infrastructure, not design); nothing is known about them from this run."
+    "paths_blocked": {},
+    "note": "Complete run: every runnable path simulated on this drop."
   }
 }
