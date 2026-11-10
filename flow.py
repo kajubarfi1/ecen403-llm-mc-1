@@ -664,6 +664,19 @@ def stage_rtl_validation(run, args, partial=False, tag=None):
     env["VALIDATION_RTL_DROP_ROOTS"] = run.drop
     env["VALIDATION_SPEC"] = run.state["spec"]
     env["VALIDATION_OUTBOX"] = run_outbox(run)
+    # validate_drop has its OWN stage 4b that re-proves formal paths whose
+    # proofs predate the design -- 20-60 minutes per path -- and it is not the
+    # same thing as this flow's --formal stage. Without this the plan printed
+    # "4b formal (opt-in) SKIPPED (pass --formal to enable)" and stage 4 then
+    # replayed JasperGold anyway: on 2026-11-09 a "--time 20m" proof sat for
+    # two hours until validate_drop's own 7200s timeout fired, after all 20
+    # paths had already passed, and the run halted having written no handoff.
+    # --formal is meant to be the single switch for formal in this flow, so
+    # opting out has to reach the internal stage too. spec_matrix.py already
+    # set this for the same reason: the replays belong to a sign-off, not to
+    # every run.
+    if not getattr(args, "formal", False):
+        env["VALIDATION_SKIP_FORMAL"] = "1"
     partial = partial or bool(getattr(args, "phases", None))
     cmd = [PY, VALIDATE_DROP] + (["--partial"] if partial else [])
     rc, txt = sh(cmd, cwd=ROOT, env=env, log=run.log, timeout=4 * 3600)

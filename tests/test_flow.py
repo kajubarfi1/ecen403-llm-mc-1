@@ -37,6 +37,8 @@ class Fake:
         self.batch_no_netlists = False       # batch ran but produced no 6_final.v
         self.batch_bundles = None            # bundle dirs the batch was given
         self.path_verdict = "PASS"           # run_path.py gate-level verdict
+        self.formal_rc = 0                   # run_formal.py exit (flow's own 4b)
+        self.formal_calls = []               # argv of each run_formal.py call
         self.netlist_swaps = []              # (path, [block=netlist]) each run_path got
         self.calls = []
 
@@ -158,6 +160,11 @@ class Fake:
                 with open(os.path.join(d, "6_final.v"), "w") as f:
                     f.write("// netlist\n")
             return self.batch_rc, ""
+        if name == "run_formal.py":
+            # flow.py's own stage 4b, reached only with --formal. Informational
+            # by design: it never halts or loops the run.
+            self.formal_calls.append(list(cmd))
+            return self.formal_rc, "  proven 12, undetermined 4\n"
         if name == "run_path.py":
             pid = cmd[cmd.index("--path") + 1]
             swaps = [cmd[i + 1] for i, c in enumerate(cmd) if c == "--netlist"]
@@ -1124,6 +1131,23 @@ class TestChildStdoutEncoding(unittest.TestCase):
                            'print("\u250c" + "\u2500" * 8 + "\u2510")'])
         self.assertEqual(rc, 0, out)
         self.assertIn("\u250c", out)
+
+
+class TestFormalSwitch(FlowCase):
+    def _validate_env(self, **kw):
+        fake = Fake(self.run_dir)
+        self.go(fake, skip_backend=True, **kw)
+        calls = [c for c in fake.calls if c[0] == "validate_drop.py"]
+        self.assertTrue(calls, "stage 4 ran")
+        return calls[0][3]
+
+    def test_default_run_skips_the_internal_formal_replay(self):
+        env = self._validate_env()
+        self.assertEqual(env.get("VALIDATION_SKIP_FORMAL"), "1")
+
+    def test_formal_lets_the_internal_replay_run(self):
+        env = self._validate_env(formal=True)
+        self.assertNotIn("VALIDATION_SKIP_FORMAL", env)
 
 
 if __name__ == "__main__":
