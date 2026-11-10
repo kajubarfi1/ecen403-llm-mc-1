@@ -1,28 +1,716 @@
-[16:02:14] run preset_high-performance -> runs/matrix/preset_high-performance
-[16:02:14] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Validation/tools/validate_drop.py   (cwd .)
-[16:02:14]     
-[16:02:14]     [1] resolve blocks through the declared drop (git c3135943228e)
-[16:02:14]         --------------------------------------------------------------------
-[16:02:14]           11/11 block(s) resolved
-[16:02:14]         validation spec : rev compiled_ddr31600_x8_3lane_1rank_042f7b32 id bee4394a978b3769 (runs/matrix/preset_high-performance/spec/generated_spec.json)
-[16:02:14]         drop ships spec : rev compiled_ddr31600_x8_3lane_1rank_042f7b32 id bee4394a978b3769 (runs/matrix/preset_high-performance/drop/generated_spec.json)
-[16:02:14]     
-[16:02:14]     [2] spec review (rev compiled_ddr31600_x8_3lane_1rank_042f7b32)
-[16:02:14]         --------------------------------------------------------------------
-[16:02:14]         status    : PASS   (0 blocking, 5 advisory)
-[16:02:14]         JEDEC     : 25 pass / 0 fail / 0 skipped
-[16:02:14]         human     : yes -- open decisions listed above
-[16:02:14]     
-[16:02:14]     [3] regenerate integration map, schemas, monitors, SVA, coverage from the drop
-[16:02:14]         --------------------------------------------------------------------
-[16:02:14]         ok   vplan_gen.py             wrote /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/vplan/vplan.json
-[16:02:14]         ok   integration_map_findings.json   wrote 0 finding(s) -> runs/matrix/preset_high-performance/validation/outbox/in
-[16:02:14]         ok   width_findings.json      0 width mismatch(es) filed
-[16:02:14]         FAIL schema_gen.py              dp_wr.write.aux: port 'wr_data_aux' not in data_path manifest (runs/matrix/pre
-[16:02:14]         STOP: a generator refused the drop; its output is in the log.
-[16:02:14]         log: Validation/reports/validate_drop/c3135943228e.log
-[16:02:14] rtl_validation         FAIL     FAIL; failed modules: data_path, wb_port; package: runs/matrix/preset_high-performance/validation/round_2
-[16:02:14] frontend_regeneration  HALT     2 validation round(s) without a pass (cap 2); last package: runs/matrix/preset_high-performance/validation/round_2
-[16:02:14] HALTED at frontend_regeneration: 2 validation round(s) without a pass (cap 2); last package: runs/matrix/preset_high-performance/validation/round_2
-[16:02:14] resume with: python3 flow.py --resume runs/matrix/preset_high-performance
-[16:02:14] state: halted  (runs/matrix/preset_high-performance/RUN_STATE.json)
+[18:35:39] run preset_high-performance -> runs/matrix/preset_high-performance
+[18:35:39] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Frontend2/scripts/Microarch/microarch_cli.py --from-choices Validation/reports/spec_matrix/preset_high-performance/choices.json --out runs/matrix/preset_high-performance/spec/generated_spec.json   (cwd Frontend2/scripts/Microarch)
+[18:35:39]     
+[18:35:39]     -- resolved configuration ------------------------------------------
+[18:35:39]       Tier-1
+[18:35:39]         speed_grade              DDR3-1600
+[18:35:39]         density                  4Gb
+[18:35:39]         device_width             x8
+[18:35:39]         ranks                    1
+[18:35:39]         byte_lanes               3
+[18:35:39]         ecc_mode                 1
+[18:35:39]         scheduler_policy         fr_fcfs
+[18:35:39]         row_policy               open_page
+[18:35:39]       Tier-2 / Tier-3
+[18:35:39]         clock_ratio_ddr_to_controller 4
+[18:35:39]         command_queue_depth      32
+[18:35:39]         lookahead_depth          16
+[18:35:39]         address_mapping          row-bank-column
+[18:35:39]         burst_length             8
+[18:35:39]         host_data_width          32
+[18:35:39]         read_buffer_depth        16
+[18:35:39]         write_buffer_depth       16
+[18:35:39]         interface_type           wishbone_pipelined
+[18:35:39]         self_refresh_mode        auto
+[18:35:39]         target_frequency_mhz     200
+[18:35:39]         area_optimization_goal   balanced
+[18:35:39]         power_optimization_goal  balanced
+[18:35:39]         pipeline_latency_cycles  2
+[18:35:39]     
+[18:35:39]     -- warnings --------------------------------------------------------
+[18:35:39]         ! ecc_mode>0: SEC-DED datapath widening is only partially wired in data_path_agent -- verify generated RTL before trusting it
+[18:35:39]         ! byte_lanes=3 is unusual (expected 1/2/4/8); channel width will not be a power of 2
+[18:35:39]     
+[18:35:39]     -- JEDEC-derived (computed, not guessed) ---------------------------
+[18:35:39]         speed bin     DDR3-1600K (11-11-11)
+[18:35:39]         tCK           1.25 ns   ctrl 200.0 MHz / ddr 800.0 MHz / 1600.0 MT/s
+[18:35:39]         CL / CWL      11 / 8
+[18:35:39]         tRCD tRP tRAS tRC   11 11 28 39  nCK
+[18:35:39]         tRFC tFAW tRRD     240 32 6  nCK
+[18:35:39]         tWR tWTR tRTP tCCD  12 6 6 4  nCK
+[18:35:39]         geometry      4Gb  16 row / 10 col / 3 bank
+[18:35:39]         channel       16-bit   1024 MB   peak 3200 MB/s
+[18:35:39]     
+[18:35:39]     -- consistency -----------------------------------------------------
+[18:35:39]         [OK] 27/27 checks pass
+[18:35:39]     
+[18:35:39]       wrote /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/spec/generated_spec.json
+[18:35:39]             /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/spec/microarch_report.json
+[18:35:39] spec_synthesis         PASS     runs/matrix/preset_high-performance/spec/generated_spec.json
+[18:35:39] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Validation/spec/validate_spec_stage.py --spec runs/matrix/preset_high-performance/spec/generated_spec.json --json runs/matrix/preset_high-performance/spec/SPEC_REVIEW_round1.json
+[18:35:39]       spec      : runs/matrix/preset_high-performance/spec/generated_spec.json  rev compiled_ddr31600_x8_3lane_1rank_d47b2e9f
+[18:35:39]       status    : PASS   (0 blocking, 2 advisory)
+[18:35:39]       JEDEC     : 25 pass / 0 fail / 0 skipped
+[18:35:39]         note   [gap:standard] SCHED_SAME_ADDRESS_ORDERING: controller_architecture.same_address_ordering is not stated
+[18:35:39]         note   [gap:decision] SCHED_STARVATION_BOUND: controller_architecture.starvation_limit_cycles is not stated
+[18:35:39]       human     : yes -- open decisions listed above
+[18:35:39]       wrote     : Validation/findings/outbox/current/SPEC_REVIEW.json
+[18:35:39] spec_review            PASS     2 open gap(s) carried as advisory; review: runs/matrix/preset_high-performance/spec/SPEC_REVIEW_round1.json
+[18:35:39] -- phase 1: init_fsm, config_regs, wb_port
+[18:35:39] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Frontend2/scripts/Phase1/phase1_pipeline.py   (cwd Frontend2/scripts/Phase1)
+[18:35:39]     /Users/jacob/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+[18:35:39]       warnings.warn(
+[18:35:39]     +========================================================+
+[18:35:39]     |   DDR3 Controller -- Phase 1 Pipeline (Frontend2)       |
+[18:35:39]     |                                                         |
+[18:35:39]     +========================================================+
+[18:35:39]     
+[18:35:39]     Spec JSON path: Output dir (Enter for ./output):
+[18:35:39]       Starting Phase 1 generation (deterministic, no LLM)...
+[18:35:39]     
+[18:35:39]       +- Generating config_regs (script)
+[18:35:39]     
+[18:35:39]       +- Generating init_fsm (script)
+[18:35:39]     
+[18:35:39]       +- Generating testbenches (spec-only, independent of RTL)
+[18:35:39]     
+[18:35:39]       +- Generating wb_port (script)
+[18:35:39]     ==============================================================
+[18:35:39]       WISHBONE PORT INTERFACE GENERATOR
+[18:35:39]       Spec: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/spec/generated_spec.json
+[18:35:39]     ==============================================================
+[18:35:39]     
+[18:35:39]     [1/5] Validating parameters ...
+[18:35:39]       OK: All parameters valid
+[18:35:39]         DATA_WIDTH           = 32
+[18:35:39]         ADDR_WIDTH           = 30
+[18:35:39]         GRANULARITY          = 8
+[18:35:39]         SEL_WIDTH            = 4
+[18:35:39]         BURST_TYPE           = linear
+[18:35:39]         MAX_BURST_LEN        = 8
+[18:35:39]         INTERFACE_TYPE       = wishbone_pipelined
+[18:35:39]         RD_BUFFER_DEPTH      = 16
+[18:35:39]         WR_BUFFER_DEPTH      = 16
+[18:35:39]         AUX_WIDTH            = 4
+[18:35:39]         QUEUE_DEPTH          = 32
+[18:35:39]         PIPELINE_LATENCY     = 2
+[18:35:39]         CTRL_FREQ            = 200.0
+[18:35:39]         CTRL_PERIOD          = 5.0
+[18:35:39]         ROW_BITS             = 16
+[18:35:39]         COL_BITS             = 10
+[18:35:39]         BANK_BITS            = 3
+[18:35:39]         RANKS                = 1
+[18:35:39]         BURST_CTR_WIDTH      = 4
+[18:35:39]         TAG_FIFO_DEPTH       = 16
+[18:35:39]         TAG_PTR_WIDTH        = 4
+[18:35:39]         WR_TAG_PTR_WIDTH     = 4
+[18:35:39]         ORD_DEPTH            = 32
+[18:35:39]         ORD_PTR_WIDTH        = 5
+[18:35:39]         ADDR_INC             = 4
+[18:35:39]     
+[18:35:39]     [2/5] Generating RTL ...
+[18:35:39]       OK: 555 lines of SystemVerilog
+[18:35:39]     
+[18:35:39]     [3/4] Generating port manifest ...
+[18:35:39]       OK: 26 ports | 10 assertions | 9 cover points
+[18:35:39]     
+[18:35:39]     [4/4] Writing files ...
+[18:35:39]       -> /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/PHASE1RTL/wb_port.sv
+[18:35:39]       -> /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/PHASE1RTL/wb_port_manifest.json
+[18:35:39]     
+[18:35:39]     ==============================================================
+[18:35:39]       DONE -- wb_port.sv ready for Phase 1
+[18:35:39]     ==============================================================
+[18:35:39]     
+[18:35:39]     ==============================================================
+[18:35:39]       GENERATION CHECK
+[18:35:39]     ==============================================================
+[18:35:39]       OK   config_regs     success
+[18:35:39]       OK   init_fsm        success
+[18:35:39]       OK   testbenches     success
+[18:35:39]       OK   wb_port         success
+[18:35:39]     
+[18:35:39]     ==============================================================
+[18:35:39]       TESTBENCH AUDIT GATE -- deterministic, local, spec-derived
+[18:35:39]     ==============================================================
+[18:35:39]       --   init_fsm        NO_CHECKS
+[18:35:39]       OK   config_regs     PASS
+[18:35:39]       --   wb_port         NO_CHECKS
+[18:35:39]     
+[18:35:39]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/tb_audit_report.json
+[18:35:39]     
+[18:35:39]     ==============================================================
+[18:35:39]       LINT GATE -- Verilator Static Analysis
+[18:35:39]     ==============================================================
+[18:35:50]       OK   init_fsm        0 error(s), 0 warning(s)
+[18:35:50]       OK   config_regs     0 error(s), 1 warning(s)
+[18:35:50]         WARN: %Warning-UNUSED: config_regs.sv:14: Signal is not used: 'csr_sel_i'
+[18:35:50]       OK   wb_port         0 error(s), 1 warning(s)
+[18:35:50]         WARN: %Warning-UNUSED: wb_port.sv:41: Signal is not used: 'wb_bte_i'
+[18:35:50]     
+[18:35:50]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/lint_report.json
+[18:35:50]     
+[18:35:50]     ==============================================================
+[18:35:50]       SIM GATE -- Cadence Xcelium Behavioral Simulation
+[18:35:50]     ==============================================================
+[18:35:50]       Connecting to olympus.ece.tamu.edu as jacobz...
+[18:35:51]       Connected. Work dir: /home/ugrads/j/jacobz/cadence_agent_work
+[18:35:51]     
+[18:35:51]       Uploading 6 files...
+[18:35:52]     
+[18:35:52]       Running init_fsm...
+[18:35:54]         OK: init_fsm -- 11 passed, 0 failed
+[18:35:54]     
+[18:35:54]       Running config_regs...
+[18:35:57]         OK: config_regs -- 36 passed, 0 failed
+[18:35:57]     
+[18:35:57]       Running wb_port...
+[18:36:00]         OK: wb_port -- 10 passed, 0 failed
+[18:36:00]     
+[18:36:00]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/sim_report.json
+[18:36:00]     
+[18:36:00]     ==============================================================
+[18:36:00]       PHASE 1 PIPELINE -- ALL CHECKS PASSED
+[18:36:00]     ==============================================================
+[18:36:00]     
+[18:36:00]       Lint: PASS
+[18:36:00]       Sim:  PASS
+[18:36:00]         OK init_fsm.sv  OK init_fsm_tb.sv
+[18:36:00]         OK config_regs.sv  OK config_regs_tb.sv
+[18:36:00]         OK wb_port.sv  OK wb_port_tb.sv
+[18:36:00]     
+[18:36:00]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase1_final_report.json
+[18:36:00] rtl_generation         PASS     phase 1
+[18:36:00] -- phase 2: addr_decoder, bank_tracker, refresh_ctrl, calibration
+[18:36:00] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Frontend2/scripts/Phase2/phase2_pipeline.py   (cwd Frontend2/scripts/Phase2)
+[18:36:00]     /Users/jacob/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+[18:36:00]       warnings.warn(
+[18:36:00]     +========================================================+
+[18:36:00]     |   DDR3 Controller -- Phase 2 Pipeline (Frontend2)       |
+[18:36:00]     |                                                         |
+[18:36:00]     +========================================================+
+[18:36:00]     
+[18:36:00]     Spec JSON path: Output dir (Enter for ./output):
+[18:36:00]       Starting Phase 2 generation (deterministic, no LLM)...
+[18:36:00]     
+[18:36:00]       +- Generating addr_decoder (script)
+[18:36:00]     
+[18:36:00]       +- Generating bank_tracker (script)
+[18:36:00]     
+[18:36:00]       +- Generating calibration (script)
+[18:36:00]     
+[18:36:00]       +- Generating refresh_ctrl (script)
+[18:36:00]     
+[18:36:00]       +- Generating testbenches (spec-only, independent of RTL)
+[18:36:00]     ==============================================================
+[18:36:00]       ADDRESS DECODER GENERATOR
+[18:36:00]       Spec: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/spec/generated_spec.json
+[18:36:00]     ==============================================================
+[18:36:00]     
+[18:36:00]     [1/4] Validating …
+[18:36:00]       ✓ Valid
+[18:36:00]         ROW_BITS             = 16
+[18:36:00]         COL_BITS             = 10
+[18:36:00]         BANK_BITS            = 3
+[18:36:00]     ==============================================================
+[18:36:00]       CALIBRATION GENERATOR
+[18:36:00]       Spec: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/spec/generated_spec.json
+[18:36:00]     ==============================================================
+[18:36:00]     
+[18:36:00]     [1/4] Validating …
+[18:36:00]         RANKS                = 1  ✓ Valid
+[18:36:00]     
+[18:36:00]         RANK_BITS            = 0    PERIODIC_ZQCS        = True
+[18:36:00]         ZQCS_INTERVAL        = 512000
+[18:36:00]         ZQCS_CTRL_CYC        = 128000
+[18:36:00]         ZQCS_CTR_W           = 17
+[18:36:00]         tZQCS_CYC            = 16
+[18:36:00]         WL_ENABLE            = False
+[18:36:00]         RL_ENABLE            = False
+[18:36:00]         BL                   = 8
+[18:36:00]     
+[18:36:00]     
+[18:36:00]     [2/4] Generating RTL …    ADDR_WIDTH           = 30
+[18:36:00]         DATA_WIDTH           = 32
+[18:36:00]         MAPPING              = row-bank-column
+[18:36:00]         BURST_OFFSET         = 4
+[18:36:00]         COL_LOW_SKIP         = 3
+[18:36:00]         COL_USED             = 7
+[18:36:00]     
+[18:36:00]     [2/4] Generating RTL …
+[18:36:00]       ✓ 78 lines
+[18:36:00]     
+[18:36:00]     [3/4] Manifest …
+[18:36:00]     
+[18:36:00]       ✓ 120 lines
+[18:36:00]     
+[18:36:00]     [3/4] Manifest …
+[18:36:00]       ✓ 5 ports
+[18:36:00]     
+[18:36:00]     [4/4] Writing …
+[18:36:00]       ✓ /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/PHASE2RTL/addr_decoder.sv
+[18:36:00]       ✓ /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/PHASE2RTL/addr_decoder_manifest.json
+[18:36:00]     
+[18:36:00]     ==============================================================
+[18:36:00]       DONE — addr_decoder.sv
+[18:36:00]     ==============================================================
+[18:36:00]       ✓ 7 ports
+[18:36:00]     
+[18:36:00]     [4/4] Writing …
+[18:36:00]       ✓ /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/PHASE2RTL/calibration.sv
+[18:36:00]       ✓ /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/PHASE2RTL/calibration_manifest.json
+[18:36:00]     
+[18:36:00]     ==============================================================
+[18:36:00]       DONE — calibration.sv
+[18:36:00]     ==============================================================
+[18:36:00]     
+[18:36:00]     ==============================================================
+[18:36:00]       GENERATION CHECK
+[18:36:00]     ==============================================================
+[18:36:00]       OK   addr_decoder    success
+[18:36:00]       OK   bank_tracker    success
+[18:36:00]       OK   calibration     success
+[18:36:00]       OK   refresh_ctrl    success
+[18:36:00]       OK   testbenches     success
+[18:36:00]     
+[18:36:00]     ==============================================================
+[18:36:00]       TESTBENCH AUDIT GATE -- deterministic, local, spec-derived
+[18:36:00]     ==============================================================
+[18:36:00]       OK   addr_decoder    PASS
+[18:36:00]       OK   calibration     PASS
+[18:36:00]       OK   refresh_ctrl    PASS
+[18:36:00]       OK   bank_tracker    PASS
+[18:36:00]     
+[18:36:00]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase2_tb_audit_report.json
+[18:36:00]     
+[18:36:00]     ==============================================================
+[18:36:00]       LINT GATE -- Verilator Static Analysis
+[18:36:00]     ==============================================================
+[18:36:13]       OK   addr_decoder    0 error(s), 1 warning(s)
+[18:36:13]         WARN: %Warning-UNUSED: addr_decoder.sv:32: Bits of signal are not used: 'req_addr'[3:0]
+[18:36:13]       OK   calibration     0 error(s), 0 warning(s)
+[18:36:13]       OK   refresh_ctrl    0 error(s), 0 warning(s)
+[18:36:13]       OK   bank_tracker    0 error(s), 0 warning(s)
+[18:36:13]     
+[18:36:13]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase2_lint_report.json
+[18:36:13]     
+[18:36:13]     ==============================================================
+[18:36:13]       SIM GATE -- Cadence Xcelium Behavioral Simulation
+[18:36:13]     ==============================================================
+[18:36:13]       Connecting to olympus.ece.tamu.edu as jacobz...
+[18:36:14]       Connected. Work dir: /home/ugrads/j/jacobz/cadence_agent_work
+[18:36:14]     
+[18:36:14]       Uploading 8 files...
+[18:36:15]     
+[18:36:15]       Running addr_decoder...
+[18:36:17]         OK: addr_decoder -- 24 passed, 0 failed
+[18:36:17]     
+[18:36:17]       Running calibration...
+[18:36:20]         OK: calibration -- 8 passed, 0 failed
+[18:36:20]     
+[18:36:20]       Running refresh_ctrl...
+[18:36:23]         OK: refresh_ctrl -- 11 passed, 0 failed
+[18:36:23]     
+[18:36:23]       Running bank_tracker...
+[18:36:26]         OK: bank_tracker -- 33 passed, 0 failed
+[18:36:26]     
+[18:36:26]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase2_sim_report.json
+[18:36:26]     
+[18:36:26]     ==============================================================
+[18:36:26]       PHASE 2 PIPELINE -- ALL CHECKS PASSED
+[18:36:26]     ==============================================================
+[18:36:26]     
+[18:36:26]       Lint: PASS
+[18:36:26]       Sim:  PASS
+[18:36:26]         OK addr_decoder.sv  OK addr_decoder_tb.sv
+[18:36:26]         OK calibration.sv  OK calibration_tb.sv
+[18:36:26]         OK refresh_ctrl.sv  OK refresh_ctrl_tb.sv
+[18:36:26]         OK bank_tracker.sv  OK bank_tracker_tb.sv
+[18:36:26]     
+[18:36:26]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase2_final_report.json
+[18:36:26] rtl_generation         PASS     phase 2
+[18:36:26] -- phase 3: cmd_queue, scheduler, cmd_gen
+[18:36:26] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Frontend2/scripts/Phase3/phase3_pipeline.py   (cwd Frontend2/scripts/Phase3)
+[18:36:26]     /Users/jacob/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+[18:36:26]       warnings.warn(
+[18:36:26]     +========================================================+
+[18:36:26]     |   DDR3 Controller -- Phase 3 Pipeline (Frontend2)       |
+[18:36:26]     |                                                         |
+[18:36:26]     +========================================================+
+[18:36:26]     
+[18:36:26]     Spec JSON path: Output dir (Enter for ./output):
+[18:36:26]       Starting Phase 3 generation (deterministic, no LLM)...
+[18:36:26]     
+[18:36:26]       +- Generating cmd_gen (script, incl. own testbench)
+[18:36:26]     
+[18:36:26]       +- Generating cmd_queue (script, incl. own testbench)
+[18:36:26]     
+[18:36:26]       +- Generating scheduler (script, incl. own testbench)
+[18:36:26]     
+[18:36:26]       +- Generating testbenches (spec-only, independent of RTL)
+[18:36:26]     ==============================================================
+[18:36:26]       COMMAND GENERATOR GENERATOR
+[18:36:26]       Spec: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/spec/generated_spec.json
+[18:36:26]     ==============================================================
+[18:36:26]         ROW_BITS             = 16
+[18:36:26]         COL_BITS             = 10
+[18:36:26]         BANK_BITS            = 3
+[18:36:26]     ==============================================================
+[18:36:26]       COMMAND QUEUE GENERATOR
+[18:36:26]       Spec: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/spec/generated_spec.json
+[18:36:26]     ============================================================================================================================
+[18:36:26]       SCHEDULER GENERATOR
+[18:36:26]       Spec: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/spec/generated_spec.json
+[18:36:26]     ==============================================================
+[18:36:26]     
+[18:36:26]         DEPTH                = 32
+[18:36:26]       V Valid
+[18:36:26]         DEPTH                = 32
+[18:36:26]         DDR_ADDR_W           = 16
+[18:36:26]         IDX_BITS             = 5
+[18:36:26]         ROW_BITS             = 16
+[18:36:26]         COL_BITS             = 10
+[18:36:26]         BANK_BITS            = 3
+[18:36:26]         NUM_BANKS            = 8
+[18:36:26]         AUX_WIDTH            = 4
+[18:36:26]         DDR_BANK_W           = 3
+[18:36:26]         AUX_WIDTH            = 4
+[18:36:26]         IDX_BITS             = 5    POLICY               = fr_fcfs
+[18:36:26]     
+[18:36:26]         ROW_BITS             = 16    ROW_POLICY           = open_page
+[18:36:26]     
+[18:36:26]         COL_BITS             = 10
+[18:36:26]         BANK_BITS            = 3    WORD_BEATS           = 2
+[18:36:26]     
+[18:36:26]         AUX_WIDTH            = 4
+[18:36:26]         STARVE_CYCLES        = 128
+[18:36:26]         DATA_WIDTH           = 32
+[18:36:26]         ENTRY_W              = 34
+[18:36:26]       V scheduler.sv        (730 lines)  V cmd_queue.sv        (213 lines)
+[18:36:26]       V cmd_queue_manifest.json
+[18:36:26]     
+[18:36:26]     ==============================================================
+[18:36:26]       DONE — cmd_queue
+[18:36:26]     ==============================================================
+[18:36:26]     
+[18:36:26]       V scheduler_manifest.json
+[18:36:26]     
+[18:36:26]     ==============================================================
+[18:36:26]       DONE — scheduler
+[18:36:26]     ==============================================================
+[18:36:26]       V cmd_gen.sv          (171 lines)
+[18:36:26]       V cmd_gen_manifest.json
+[18:36:26]     
+[18:36:26]     ==============================================================
+[18:36:26]       DONE — cmd_gen
+[18:36:26]     ==============================================================
+[18:36:26]     
+[18:36:26]     ==============================================================
+[18:36:26]       GENERATION CHECK
+[18:36:26]     ==============================================================
+[18:36:26]       OK   cmd_gen         success
+[18:36:26]       OK   cmd_queue       success
+[18:36:26]       OK   scheduler       success
+[18:36:26]       OK   testbenches     success
+[18:36:26]     
+[18:36:26]     ==============================================================
+[18:36:26]       LINT GATE -- Verilator Static Analysis
+[18:36:26]     ==============================================================
+[18:36:36]       OK   cmd_queue       0 error(s), 0 warning(s)
+[18:36:36]       OK   scheduler       0 error(s), 0 warning(s)
+[18:36:36]       OK   cmd_gen         0 error(s), 1 warning(s)
+[18:36:36]         WARN: %Warning-UNUSED: cmd_gen.sv:32: Signal is not used: 'sched_we'
+[18:36:36]     
+[18:36:36]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase3_lint_report.json
+[18:36:36]     
+[18:36:36]     ==============================================================
+[18:36:36]       SIM GATE -- Cadence Xcelium Behavioral Simulation
+[18:36:36]     ==============================================================
+[18:36:36]       Connecting to olympus.ece.tamu.edu as jacobz...
+[18:36:37]       Connected. Work dir: /home/ugrads/j/jacobz/cadence_agent_work
+[18:36:37]     
+[18:36:37]       Uploading 6 files...
+[18:36:38]     
+[18:36:38]       Running cmd_queue...
+[18:36:40]         OK: cmd_queue -- 32 passed, 0 failed
+[18:36:40]     
+[18:36:40]       Running scheduler...
+[18:36:43]         OK: scheduler -- 51 passed, 0 failed
+[18:36:43]     
+[18:36:43]       Running cmd_gen...
+[18:36:46]         OK: cmd_gen -- 36 passed, 0 failed
+[18:36:46]     
+[18:36:46]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase3_sim_report.json
+[18:36:46]     
+[18:36:46]     ==============================================================
+[18:36:46]       PHASE 3 PIPELINE -- ALL CHECKS PASSED
+[18:36:46]     ==============================================================
+[18:36:46]     
+[18:36:46]       Lint: PASS
+[18:36:46]       Sim:  PASS
+[18:36:46]         OK cmd_queue.sv  OK cmd_queue_tb.sv
+[18:36:46]         OK scheduler.sv  OK scheduler_tb.sv
+[18:36:46]         OK cmd_gen.sv  OK cmd_gen_tb.sv
+[18:36:46]     
+[18:36:46]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase3_final_report.json
+[18:36:46] rtl_generation         PASS     phase 3
+[18:36:46] -- phase 4: data_path
+[18:36:46] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Frontend2/scripts/Phase4/phase4_pipeline.py   (cwd Frontend2/scripts/Phase4)
+[18:36:46]     /Users/jacob/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+[18:36:46]       warnings.warn(
+[18:36:46]     +========================================================+
+[18:36:46]     |   DDR3 Controller -- Phase 4 Pipeline (Frontend2)       |
+[18:36:46]     |                                                         |
+[18:36:46]     +========================================================+
+[18:36:46]     
+[18:36:46]     Spec JSON path: Output dir (Enter for ./output):
+[18:36:46]       Starting Phase 4 generation (deterministic, no LLM)...
+[18:36:46]     
+[18:36:46]       +- Generating data_path (script, incl. own testbench)
+[18:36:46]     
+[18:36:46]       +- Generating testbenches (spec-only, independent of RTL)
+[18:36:46]     ==============================================================
+[18:36:46]       DATA PATH / ALIGNMENT GENERATOR
+[18:36:46]       Spec: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/spec/generated_spec.json
+[18:36:46]     ==============================================================
+[18:36:46]     
+[18:36:46]     [1/4] Validating parameters ...
+[18:36:46]       OK: All parameters valid
+[18:36:46]         CTRL_FREQ            = 200.0
+[18:36:46]         CTRL_PERIOD          = 5.0
+[18:36:46]         tCK_ns               = 1.25
+[18:36:46]         CLK_RATIO            = 4
+[18:36:46]         DATA_WIDTH           = 32
+[18:36:46]         ADDR_WIDTH           = 30
+[18:36:46]         SEL_WIDTH            = 4
+[18:36:46]         AUX_WIDTH            = 4
+[18:36:46]         DQ_WIDTH             = 16
+[18:36:46]         DQS_PAIRS            = 2
+[18:36:46]         DM_WIDTH             = 2
+[18:36:46]         BURST_LEN            = 8
+[18:36:46]         BEATS_PER_CYC        = 4
+[18:36:46]         BURST_CTRL_CYCLES    = 2
+[18:36:46]         WORD_BEATS           = 2
+[18:36:46]         CL                   = 11
+[18:36:46]         CWL                  = 8
+[18:36:46]         CL_CTRL              = 3
+[18:36:46]         CWL_CTRL             = 2
+[18:36:46]         WL                   = 8
+[18:36:46]         RD_FIFO_DEPTH        = 16
+[18:36:46]         WR_FIFO_DEPTH        = 16
+[18:36:46]         FIFO_PTR_W           = 4
+[18:36:46]         QUEUE_DEPTH          = 32
+[18:36:46]         ROW_BITS             = 16
+[18:36:46]         BANK_BITS            = 3
+[18:36:46]     
+[18:36:46]     [2/4] Generating RTL ...
+[18:36:46]       OK: 796 lines of SystemVerilog
+[18:36:46]     
+[18:36:46]     [3/4] Generating port manifest ...
+[18:36:46]       OK: 22 ports | 6 assertions | 4 cover points
+[18:36:46]     
+[18:36:46]     [4/4] Writing files ...
+[18:36:46]       -> /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/PHASE4RTL/data_path.sv
+[18:36:46]       -> /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/PHASE4RTL/data_path_manifest.json
+[18:36:46]     
+[18:36:46]     ==============================================================
+[18:36:46]       DONE -- data_path.sv ready for Phase 4
+[18:36:46]     ==============================================================
+[18:36:46]     
+[18:36:46]     ==============================================================
+[18:36:46]       GENERATION CHECK
+[18:36:46]     ==============================================================
+[18:36:46]       OK   data_path       success
+[18:36:46]       OK   testbenches     success
+[18:36:46]     
+[18:36:46]     ==============================================================
+[18:36:46]       LINT GATE -- Verilator Static Analysis
+[18:36:46]     ==============================================================
+[18:36:50]       OK   data_path       0 error(s), 15 warning(s)
+[18:36:50]         WARN: %Warning-WIDTH: data_path.sv:173: Operator ADD expects 32 bits on the LHS, but LHS's VARREF 'cfg_CWL_nCK' generates 8 bits.
+[18:36:50]         WARN: %Warning-WIDTH: data_path.sv:173: Operator ADD expects 32 bits on the RHS, but RHS's SEL generates 8 bits.
+[18:36:50]         WARN: %Warning-WIDTH: data_path.sv:173: Operator DIV expects 32 bits on the RHS, but RHS's SEL generates 8 bits.
+[18:36:50]         WARN: %Warning-WIDTH: data_path.sv:213: Operator EQ expects 32 bits on the RHS, but RHS's SEL generates 4 bits.
+[18:36:50]         WARN: %Warning-WIDTH: data_path.sv:369: Operator COND expects 4 bits on the Conditional True, but Conditional True's CONST '1'h1' generates 1 bits.
+[18:36:50]         WARN: %Warning-WIDTH: data_path.sv:369: Operator COND expects 4 bits on the Conditional False, but Conditional False's CONST '1'h0' generates 1 bits.
+[18:36:50]         WARN: %Warning-WIDTH: data_path.sv:377: Operator COND expects 5 bits on the Conditional True, but Conditional True's CONST '1'h1' generates 1 bits.
+[18:36:50]         WARN: %Warning-WIDTH: data_path.sv:377: Operator COND expects 5 bits on the Conditional False, but Conditional False's CONST '1'h0' generates 1 bits.
+[18:36:50]         WARN: %Warning-WIDTH: data_path.sv:377: Operator COND expects 5 bits on the Conditional True, but Conditional True's CONST '1'h1' generates 1 bits.
+[18:36:50]         WARN: %Warning-WIDTH: data_path.sv:377: Operator COND expects 5 bits on the Conditional False, but Conditional False's CONST '1'h0' generates 1 bits.
+[18:36:50]         WARN: %Warning-WIDTH: data_path.sv:510: Operator ADD expects 32 bits on the LHS, but LHS's VARREF 'cfg_CL_nCK' generates 8 bits.
+[18:36:50]         WARN: %Warning-WIDTH: data_path.sv:510: Operator ADD expects 32 bits on the RHS, but RHS's SEL generates 8 bits.
+[18:36:50]         WARN: %Warning-WIDTH: data_path.sv:510: Operator DIV expects 32 bits on the RHS, but RHS's SEL generates 8 bits.
+[18:36:50]         WARN: %Warning-WIDTH: data_path.sv:546: Operator EQ expects 32 bits on the RHS, but RHS's SEL generates 4 bits.
+[18:36:50]         WARN: %Warning-UNUSED: data_path.sv:79: Signal is not used: 'ddr_dqs_i'
+[18:36:50]     
+[18:36:50]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase4_lint_report.json
+[18:36:50]     
+[18:36:50]     ==============================================================
+[18:36:50]       SIM GATE -- Cadence Xcelium Behavioral Simulation
+[18:36:50]     ==============================================================
+[18:36:50]       Connecting to olympus.ece.tamu.edu as jacobz...
+[18:36:50]       Connected. Work dir: /home/ugrads/j/jacobz/cadence_agent_work
+[18:36:50]     
+[18:36:50]       Uploading 2 files...
+[18:36:51]     
+[18:36:51]       Running data_path...
+[18:36:53]         OK: data_path -- 29 passed, 0 failed
+[18:36:53]     
+[18:36:53]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase4_sim_report.json
+[18:36:53]     
+[18:36:53]     ==============================================================
+[18:36:53]       PHASE 4 PIPELINE -- ALL CHECKS PASSED
+[18:36:53]     ==============================================================
+[18:36:53]     
+[18:36:53]       Lint: PASS
+[18:36:53]       Sim:  PASS
+[18:36:53]         OK data_path.sv  OK data_path_tb.sv
+[18:36:53]     
+[18:36:53]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/VALIDATIONREPORT/phase4_final_report.json
+[18:36:53] rtl_generation         PASS     phase 4
+[18:36:53] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Frontend2/scripts/generate_top.py --output-dir runs/matrix/preset_high-performance/drop --spec runs/matrix/preset_high-performance/spec/generated_spec.json   (cwd Frontend2/scripts)
+[18:36:53]     wrote /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/drop/TOPRTL/ddr3_controller.sv and manifest.json
+[18:36:53]       blocks instantiated       : 11
+[18:36:53]       direct connections        : 80
+[18:36:53]       registered glue groups    : 0
+[18:36:53]       combinational glue exprs  : 1
+[18:36:53]       top-level ports           : 24 in + 45 out + clk/rst_n
+[18:36:53]       known gaps                : 1
+[18:36:53]     
+[18:36:53]     running combined Verilator lint on Olympus...
+[18:36:59]       PASS -- 0 errors, 19 warning(s)
+[18:36:59] rtl_generation         PASS     top-level assembled: drop/TOPRTL
+[18:36:59] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Validation/tools/validate_drop.py   (cwd .)
+[18:37:00]     
+[18:37:00]     [1] resolve blocks through the declared drop (git 298f5fb01c28)
+[18:37:00]         --------------------------------------------------------------------
+[18:37:00]           11/11 block(s) resolved
+[18:37:00]         validation spec : rev compiled_ddr31600_x8_3lane_1rank_d47b2e9f id 4d2b542e8eb1eaac (runs/matrix/preset_high-performance/spec/generated_spec.json)
+[18:37:00]         drop ships spec : rev compiled_ddr31600_x8_3lane_1rank_d47b2e9f id 4d2b542e8eb1eaac (runs/matrix/preset_high-performance/drop/generated_spec.json)
+[18:37:00]     
+[18:37:00]     [2] spec review (rev compiled_ddr31600_x8_3lane_1rank_d47b2e9f)
+[18:37:00]         --------------------------------------------------------------------
+[18:37:00]         status    : PASS   (0 blocking, 2 advisory)
+[18:37:00]         JEDEC     : 25 pass / 0 fail / 0 skipped
+[18:37:00]         human     : yes -- open decisions listed above
+[18:37:00]     
+[18:37:00]     [3] regenerate integration map, schemas, monitors, SVA, coverage from the drop
+[18:37:00]         --------------------------------------------------------------------
+[18:37:00]         ok   vplan_gen.py             wrote /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/vplan/vplan.json
+[18:37:00]         ok   integration_map_findings.json   wrote 0 finding(s) -> runs/matrix/preset_high-performance/validation/outbox/in
+[18:37:00]         ok   width_findings.json      0 width mismatch(es) filed
+[18:37:00]         ok   schema_gen.py            wrote Validation/txn/generated/schemas.json
+[18:37:00]         ok   monitor_gen.py             monitors_bind.sv     27 bind statement(s)
+[18:37:00]         ok   sva_gen.py                   3 assertion(s); taxonomy IDs: HOST_001, HOST_002
+[18:37:00]         ok   coverage_gen.py            vplan asks for 49 coverage item(s) across 9 covergroup(s); this generator cove
+[18:37:00]         ok   block_coverage_gen.py      23 generated, 0 skipped, 26 timing points via coverage_gen.py
+[18:37:00]     
+[18:37:00]     [3a] re-grade the accepted models under this spec
+[18:37:00]         --------------------------------------------------------------------
+[18:37:00]     /Users/jacob/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+[18:37:00]       warnings.warn(
+[18:37:00]         ok    addr_decoder                       predictor gate bus_bridge
+[18:37:00]         ok    bank_tracker_scheduler             checker   gate stage_invariant
+[18:37:00]         ok    cmd_gen                            predictor gate bus_bridge
+[18:37:00]         ok    cmd_queue_scheduler                checker   gate stage_invariant
+[18:37:00]         ok    config_regs                        predictor gate register_map
+[18:37:00]         ok    data_path                          predictor gate bus_bridge
+[18:37:00]         ok    path_04_scheduler_bank_loop        checker   gate stage_invariant
+[18:37:00]         ok    path_05_scheduler_refresh_loop     checker   gate stage_invariant
+[18:37:00]         ok    path_08_init_to_cal                checker   gate stage_invariant
+[18:37:00]         ok    path_09_init_to_refresh            checker   gate stage_invariant
+[18:37:00]         ok    path_19_row_conflict               checker   gate stage_invariant
+[18:37:00]         ok    path_20_refresh_preempt            checker   gate stage_invariant
+[18:37:00]         ok    scheduler                          checker   gate stage_invariant
+[18:37:00]         ok    wb_port                            predictor gate bus_bridge
+[18:37:00]         ok    addr_decoder                       twin      gate bus_bridge
+[18:37:00]         ok    bank_tracker_scheduler             twin      gate stage_invariant
+[18:37:00]         ok    cmd_queue_scheduler                twin      gate stage_invariant
+[18:37:00]         ok    config_regs                        twin      gate register_map
+[18:37:00]         ok    data_path                          twin      gate bus_bridge
+[18:37:00]         ok    path_04_scheduler_bank_loop        twin      gate stage_invariant
+[18:37:00]         ok    path_05_scheduler_refresh_loop     twin      gate stage_invariant
+[18:37:00]         ok    path_08_init_to_cal                twin      gate stage_invariant
+[18:37:00]         ok    path_09_init_to_refresh            twin      gate stage_invariant
+[18:37:00]         ok    path_19_row_conflict               twin      gate stage_invariant
+[18:37:00]         ok    path_20_refresh_preempt            twin      gate stage_invariant
+[18:37:00]         ok    scheduler                          twin      gate stage_invariant
+[18:37:00]         ok    wb_port                            twin      gate bus_bridge
+[18:37:00]     
+[18:37:00]     [4] simulate 20 path(s), 4 at a time
+[18:37:00]         --------------------------------------------------------------------
+[18:37:00]         reports -> runs/matrix/preset_high-performance/validation/reports (kept apart from the shared reports so nothing stale is judged, run-local)
+[18:37:14]         path_01_write_cmd                  PASS
+[18:37:17]         path_02_read_cmd                   PASS
+[18:37:18]         path_03_read_return                PASS
+[18:37:18]         path_04_scheduler_bank_loop        PASS
+[18:37:28]         path_05_scheduler_refresh_loop     PASS
+[18:37:28]         path_07_backpressure               PASS
+[18:37:28]         path_08_init_to_cal                PASS
+[18:37:28]         path_09_init_to_refresh            PASS
+[18:37:36]         path_12_csr_timing_to_scheduling   PASS
+[18:37:38]         path_13_csr_refresh_to_scheduling  PASS
+[18:37:38]         path_14_status_init                PASS
+[18:37:38]         path_15_status_cal                 PASS
+[18:37:43]         path_16_status_refresh             PASS
+[18:37:45]         path_17_full_boot                  PASS
+[18:37:50]         path_18_full_write                 PASS
+[18:37:52]         path_19_row_conflict               PASS
+[18:38:05]         path_20_refresh_preempt            PASS
+[18:38:05]         path_21_wb_port_standalone         PASS
+[18:38:05]         path_22_csr_standalone             PASS
+[18:38:06]         path_23_host_ack_collision         PASS
+[18:38:06]         pass=20 fail=0 error=0
+[18:38:07]     
+[18:38:07]     [4b] formal: skipped (VALIDATION_SKIP_FORMAL)
+[18:38:07]         --------------------------------------------------------------------
+[18:38:07]     
+[18:38:07]     [5] coverage rollup
+[18:38:07]         --------------------------------------------------------------------
+[18:38:28]         design code coverage 73.8%; 35/45 vplan item(s) fully covered (77.8%)
+[18:38:28]     
+[18:38:28]     [5b] second opinions on this run's traces
+[18:38:28]         --------------------------------------------------------------------
+[18:38:29]         addr_decoder                       predictor     11    11        0       0
+[18:38:29]         bank_tracker_scheduler             checker       15    15        0       0
+[18:38:29]         cmd_queue_scheduler                checker       14    14        0       0
+[18:38:29]         config_regs                        predictor     18    18        0       0
+[18:38:29]         data_path                          predictor     10    10        0       0
+[18:38:29]         path_04_scheduler_bank_loop        checker        0     0        0       0
+[18:38:29]         path_05_scheduler_refresh_loop     checker       14    14        0       2
+[18:38:29]         path_08_init_to_cal                checker        5     5        0       0
+[18:38:29]         path_09_init_to_refresh            checker        5     5        0       0
+[18:38:29]         path_19_row_conflict               checker       10    10        0       0
+[18:38:29]         path_20_refresh_preempt            checker       14    14        0       0
+[18:38:29]         scheduler                          checker       14    14        0       0
+[18:38:29]         wb_port                            predictor     11    11        0       0
+[18:38:29]     
+[18:38:29]     [6] findings v2 + retry instructions
+[18:38:29]         --------------------------------------------------------------------
+[18:38:29]         drop 298f5fb01c28: 0 finding(s), 0 resolved since the previous drop, 0 carried untested
+[18:38:30]         PASS: 0 module(s) with failed checks:
+[18:38:30]     
+[18:38:30]     [7] compare with the previous drop
+[18:38:30]         --------------------------------------------------------------------
+[18:38:30]         FIX  path_02_read_cmd                   pass     -> pass
+[18:38:30]         FIX  path_05_scheduler_refresh_loop     fail     -> pass
+[18:38:30]         FIX  path_07_backpressure               pass     -> pass
+[18:38:30]         FIX  path_18_full_write                 pass     -> pass
+[18:38:30]         CHG  path_20_refresh_preempt            fail     -> pass
+[18:38:30]         FIX  path_23_host_ack_collision         pass     -> pass
+[18:38:30]         changed=1  fixed=5  same=17
+[18:38:30]         vs f43e153c6c8f: changed=1  fixed=5  same=17
+[18:38:30]     
+[18:38:30]     [8] snapshot
+[18:38:30]         --------------------------------------------------------------------
+[18:38:30]         snapshot: 23 report(s) -> Validation/reports/drops/298f5fb01c28
+[18:38:30]     
+[18:38:30]     [9] cockpit
+[18:38:30]         --------------------------------------------------------------------
+[18:38:30]         wrote Validation/reports/dashboard.html
+[18:38:30]     
+[18:38:30]       drop 298f5fb01c28: 20 pass / 0 fail / 0 error in 1.5 min; log Validation/reports/validate_drop/298f5fb01c28.log
+[18:38:30] rtl_validation         PASS     PASS; failed modules: none; package: runs/matrix/preset_high-performance/validation/round_1
+[18:38:30] backend                SKIPPED  --skip-backend
+[18:38:30] COMPLETE (backend skipped): the RTL drop passed validation.
+[18:38:30] state: complete  (runs/matrix/preset_high-performance/RUN_STATE.json)

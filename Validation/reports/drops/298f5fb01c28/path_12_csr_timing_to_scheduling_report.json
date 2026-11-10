@@ -1,0 +1,139 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_12_csr_timing_to_scheduling",
+  "strategy": "composed",
+  "verdict": "pass",
+  "timestamp": "2026-11-09T18:37:36.948439",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/path_12_csr_timing_to_scheduling_seed1.json",
+  "stimulus_generator": "register_walk",
+  "autonomous": false,
+  "window_cycles": 400,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "298f5fb01c28",
+    "drop_id": "298f5fb01c28",
+    "design_id": "239877e732a9",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "0445be9",
+    "frontend_commits": {
+      "addr_decoder": "0445be9ec7f36abea11b57c929b9678811a69acb",
+      "bank_tracker": "0445be9ec7f36abea11b57c929b9678811a69acb",
+      "cmd_gen": "0445be9ec7f36abea11b57c929b9678811a69acb",
+      "cmd_queue": "0445be9ec7f36abea11b57c929b9678811a69acb",
+      "config_regs": "0445be9ec7f36abea11b57c929b9678811a69acb",
+      "data_path": "0445be9ec7f36abea11b57c929b9678811a69acb",
+      "refresh_ctrl": "0445be9ec7f36abea11b57c929b9678811a69acb",
+      "scheduler": "0445be9ec7f36abea11b57c929b9678811a69acb",
+      "wb_port": "0445be9ec7f36abea11b57c929b9678811a69acb"
+    },
+    "roots": [
+      "runs/matrix/preset_high-performance/drop"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "runs/matrix/preset_high-performance/drop/PHASE2RTL/addr_decoder.sv",
+        "manifest": "runs/matrix/preset_high-performance/drop/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_3lane_1rank_d47b2e9f"
+      },
+      "bank_tracker": {
+        "rtl": "runs/matrix/preset_high-performance/drop/PHASE2RTL/bank_tracker.sv",
+        "manifest": "runs/matrix/preset_high-performance/drop/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_3lane_1rank_d47b2e9f"
+      },
+      "cmd_gen": {
+        "rtl": "runs/matrix/preset_high-performance/drop/PHASE3RTL/cmd_gen.sv",
+        "manifest": "runs/matrix/preset_high-performance/drop/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_3lane_1rank_d47b2e9f"
+      },
+      "cmd_queue": {
+        "rtl": "runs/matrix/preset_high-performance/drop/PHASE3RTL/cmd_queue.sv",
+        "manifest": "runs/matrix/preset_high-performance/drop/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_3lane_1rank_d47b2e9f"
+      },
+      "config_regs": {
+        "rtl": "runs/matrix/preset_high-performance/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/matrix/preset_high-performance/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_3lane_1rank_d47b2e9f"
+      },
+      "data_path": {
+        "rtl": "runs/matrix/preset_high-performance/drop/PHASE4RTL/data_path.sv",
+        "manifest": "runs/matrix/preset_high-performance/drop/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_3lane_1rank_d47b2e9f"
+      },
+      "refresh_ctrl": {
+        "rtl": "runs/matrix/preset_high-performance/drop/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "runs/matrix/preset_high-performance/drop/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_3lane_1rank_d47b2e9f"
+      },
+      "scheduler": {
+        "rtl": "runs/matrix/preset_high-performance/drop/PHASE3RTL/scheduler.sv",
+        "manifest": "runs/matrix/preset_high-performance/drop/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_3lane_1rank_d47b2e9f"
+      },
+      "wb_port": {
+        "rtl": "runs/matrix/preset_high-performance/drop/PHASE1RTL/wb_port.sv",
+        "manifest": "runs/matrix/preset_high-performance/drop/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_3lane_1rank_d47b2e9f"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/matrix/preset_high-performance/drop/generated_spec.json",
+      "revision": "compiled_ddr31600_x8_3lane_1rank_d47b2e9f"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "pass",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=131/131  (131 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "bank_tracker+scheduler",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/bank_tracker_scheduler_checker.py",
+      "scope": "bank_tracker_scheduler",
+      "verdict": "pass",
+      "summary": "scope=bank_tracker_scheduler  strategy=invariant  status=pass  (283 transactions, no rule broken)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "(conservation)",
+      "kind": "conservation",
+      "scope": "(conservation)",
+      "model": null,
+      "verdict": "pass",
+      "summary": "scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable",
+      "detail": []
+    }
+  ],
+  "log": "runs/matrix/preset_high-performance/validation/reports/path_12_csr_timing_to_scheduling_sim.log",
+  "observed_trace": "runs/matrix/preset_high-performance/validation/reports/path_12_csr_timing_to_scheduling_observed.jsonl"
+}

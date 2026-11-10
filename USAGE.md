@@ -473,6 +473,51 @@ python3 flow.py [design input] [options]
 
 For the complete list of options, run `python3 flow.py --help`.
 
+### Running the whole flow on a Mac (Apple Silicon)
+
+Set up on Jacob's machine 2026-11-09; the Windows version is Dawson's
+`docs/RUNNING_THE_FLOW.md` and `run_flow.ps1`. Only the backend stage needs
+local tooling: the Frontend is local Python, Validation runs on Olympus over
+SSH. The published `openroad/orfs` image is x86-64 only and its OpenROAD
+binary uses AVX, which Rosetta does not emulate (`openroad -version` dies
+with "Illegal instruction"; yosys runs). So on Apple Silicon the toolchain
+image is built natively for arm64 from the ORFS checkout with ORFS's own
+helper; the dependency installer supports aarch64. One to three hours, once.
+
+```bash
+brew install colima docker docker-buildx
+mkdir -p ~/.docker/cli-plugins && ln -sfn "$(brew --prefix)/opt/docker-buildx/bin/docker-buildx" ~/.docker/cli-plugins/docker-buildx
+colima start --cpu 6 --memory 12 --disk 60 --vm-type vz --vz-rosetta
+git clone --depth 1 https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts.git ~/Capstone/OpenROAD-flow-scripts
+cd ~/Capstone/OpenROAD-flow-scripts && git submodule update --init --recursive --depth 1
+./etc/DockerHelper.sh create -target=dev        # Ubuntu 26.04 + build deps
+./etc/DockerHelper.sh create -target=builder    # compiles yosys, OpenROAD, kepler-formal
+docker tag openroad/flow-ubuntu26.04-builder:$(./etc/DockerTag.sh -dev) openroad/orfs:arm64-local
+docker run --rm openroad/orfs:arm64-local bash -c "/OpenROAD-flow-scripts/tools/install/OpenROAD/bin/openroad -version"
+python3 -m pip install --user jsonschema paramiko anthropic langgraph langchain-core
+```
+
+Then `backend/agents/.env` (gitignored; copy `backend/env.template`) with
+`ORFS_DIR=~/Capstone/OpenROAD-flow-scripts` expanded to a full path,
+`ORFS_DOCKER_IMAGE=openroad/orfs:arm64-local`, `USE_DOCKER=1`,
+`PLATFORM=sky130hd`, `MAKE_JOBS=4`. The Anthropic key and
+the Olympus credential live in `Validation/setup.env`; `flow.py` loads both
+files, so nothing is duplicated. The sky130 gate models for stage 8 must be
+on Olympus once (`python3 Validation/tools/install_sky130_models.py --check`).
+
+`colima start` is needed after each reboot (or `brew services start colima`
+to start it at login). Check readiness, then run:
+
+```bash
+set -a; . Validation/setup.env; set +a
+python3 flow.py --spec Spec/llmmc_microarchitecturespec_filled.json --per-block-netlists --dry-run
+python3 flow.py --spec Spec/llmmc_microarchitecturespec_filled.json --per-block-netlists
+```
+
+The dry run's last line must say `ANTHROPIC_API_KEY set, Olympus key,
+USE_DOCKER 1`. Level 3 of the spec matrix (`spec_matrix.py --level 3
+--per-block-netlists`) runs the presets the same way, backend included.
+
 ---
 
 ## 7. Validation Subsystem: Standalone Use
@@ -552,7 +597,10 @@ transaction a block was handed produced the one it owes downstream by the end
 of the run; the rules are the `conservation` section of
 `Validation/txn/interface_catalog.json`, attributed to the block that must
 deliver) and, when the driver's own count disagrees, a `(host handshake)` row
-(beats the host presented that were never acknowledged), and on paths with
+(beats the host presented that were never acknowledged within the spec's
+host liveness bound, the HOST_001 bound of `sva_rules.json`: tRC x window
+scale x command_queue_depth + banks + slack, 968 cycles on the golden spec,
+never below 256), and on paths with
 the host streams and a data path a `(host memory)` row: the memory image the
 host built with its own writes against every read response, in the order
 the reads were accepted (a read of an address the host never wrote is

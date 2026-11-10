@@ -1352,6 +1352,20 @@ are in `Validation/reports/drops/` if you want the steps. The three
 formal rows (PROTO_001, TIMING_008, HOST_001) are `awaiting_formal` until
 the replays run on this design; nothing in simulation contradicts them.
 
+**The five presets, same evening**: `spec_matrix.py --level 2` on the fixed
+generators, fresh run directories, every preset through all four phases
+and our validation: **5 of 5 PASS with no finding** (default, balanced,
+low-cost-embedded, high-performance, server-grade). The ECC presets'
+Nov 5 data-path losses were the tag reuse, as suspected. Their one
+remaining line was ours: our driver gave a beat 256 cycles to be accepted,
+and a 32-deep queue with 16 write tags fills the write buffer in the first
+158 ns after reset, so the 17th beat waits for init to end (~1.2 us). The
+driver's bound is now the spec's HOST_001 liveness bound (968 cycles on
+golden, 1736 on those presets). One thing for you from that run: on the
+server-grade preset your fix agent's model call ended with "The read
+operation timed out" and the retry hung with no output for 100 minutes;
+a timeout on the retry would let the flow halt instead of stall.
+
 What this does to your flow: the Phase 1, 3 and 4 generators produce this
 RTL for every spec (the new logic is parametrised like the rest: the
 conflict/age matrices scale with `command_queue_depth`, the slot check

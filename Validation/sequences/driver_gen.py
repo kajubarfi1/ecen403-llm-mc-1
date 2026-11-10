@@ -52,7 +52,42 @@ def _kind_signal(cat, kind):
     return ks["expr"], rev[kind]
 
 
-def generate(seq, schemas, catalog):
+SPEC_DEFAULT = os.path.join(ROOT, "Validation", "spec", "llmmc_microarchitecturespec_filled.json")
+MIN_WAIT = 256
+
+
+def host_wait_cycles(spec_path=None):
+    """How long the driver waits for the slave to accept or acknowledge a
+    beat before calling it a stall: the same queue-scaled liveness bound
+    HOST_001 gives the port (sva_rules.json, host_port counter rule: tRC x
+    window scale x command_queue_depth + banks + slack), never below
+    MIN_WAIT. A fixed 256 cycles flagged the ECC presets (2026-11-09):
+    a 32-deep queue with 16 write tags fills the write buffer in the first
+    158 ns after reset and the 17th beat legitimately waits for init to end
+    (~1.2 us), which is a stall of the host, not a defect of the port. One
+    bound, derived from the spec, decides both the assertion and the driver."""
+    sp = spec_path or os.environ.get("VALIDATION_SPEC") or SPEC_DEFAULT
+    try:
+        sys.path.insert(0, os.path.join(ROOT, "Validation", "sva"))
+        import sva_gen as SG
+        with open(sp) as f:
+            spec = json.load(f)
+        with open(os.path.join(ROOT, "Validation", "sva", "sva_rules.json")) as f:
+            rules = json.load(f)
+        groups = rules["signal_groups"]
+        groups = groups if isinstance(groups, list) else list(groups.values())
+        for g in groups:
+            for c in g.get("counter_rules", []):
+                if c.get("id") == "HOST_001" and c.get("bound"):
+                    return max(MIN_WAIT, int(SG.liveness_bound(spec, c["bound"])))
+    except Exception:
+        pass
+    return MIN_WAIT
+
+
+def generate(seq, schemas, catalog, wait=None):
+    wait = int(wait) if wait else MIN_WAIT
+    wait_all = max(2048, wait)
     """Emit a SystemVerilog driver module for one sequence.
 
     Two driving styles, decided by catalog data (see
@@ -102,7 +137,7 @@ def generate(seq, schemas, catalog):
   task automatic wait_all_{iface}();
     int w_;
     w_ = 0;
-    while (acked_{iface} < issued_{iface} && w_ < 2048) begin @(negedge clk); w_++; end
+    while (acked_{iface} < issued_{iface} && w_ < {wait_all}) begin @(negedge clk); w_++; end
     if (acked_{iface} < issued_{iface})
       $display("DRIVER_STALL: {iface} — %0d of %0d pipelined beat(s) never acknowledged ({c})", issued_{iface} - acked_{iface}, issued_{iface});
   endtask
@@ -116,9 +151,9 @@ def generate(seq, schemas, catalog):
             waits.append(f"""  task automatic accept_{iface}();
     int w_;
     w_ = 0;
-    while (!({a}) && w_ < 256) begin @(negedge clk); w_++; end
+    while (!({a}) && w_ < {wait}) begin @(negedge clk); w_++; end
     if (!({a}))
-      $display("DRIVER_STALL: {iface} — accept ({a}) never true within 256 cycles");
+      $display("DRIVER_STALL: {iface} — accept ({a}) never true within {wait} cycles");
     @(negedge clk);   // one beat accepted at the posedge just passed
     {rel};
   endtask
@@ -131,18 +166,18 @@ def generate(seq, schemas, catalog):
                 waits.append(f"""  task automatic wait_{iface}();
     int w_;
     w_ = 0;
-    while (!{c} && w_ < 256) begin @(negedge clk); w_++; end
+    while (!{c} && w_ < {wait}) begin @(negedge clk); w_++; end
     if (!{c})
-      $display("DRIVER_STALL: {iface} — {c} never asserted within 256 cycles");
+      $display("DRIVER_STALL: {iface} — {c} never asserted within {wait} cycles");
   endtask
 """)
             else:
                 waits.append(f"""  task automatic wait_{iface}();
     int w_;
     w_ = 0;
-    do begin @(negedge clk); w_++; end while (!{c} && w_ < 256);
+    do begin @(negedge clk); w_++; end while (!{c} && w_ < {wait});
     if (!{c})
-      $display("DRIVER_STALL: {iface} — {c} never asserted within 256 cycles");
+      $display("DRIVER_STALL: {iface} — {c} never asserted within {wait} cycles");
   endtask
 """)
 
@@ -322,12 +357,13 @@ def main() -> int:
             print(f"  {e}", file=sys.stderr)
         return 1
 
-    src = generate(seq, schemas, catalog)
+    wait = host_wait_cycles()
+    src = generate(seq, schemas, catalog, wait=wait)
     os.makedirs(args.outdir, exist_ok=True)
     dest = os.path.join(args.outdir, "seq_driver.sv")
     with open(dest, "w") as f:
         f.write(src)
-    print(f"  {SC.summarize(seq)}")
+    print(f"  {SC.summarize(seq)}  (driver stall bound {wait} cycles, spec-derived)")
     print(f"  wrote {os.path.relpath(dest, ROOT)}")
     return 0
 

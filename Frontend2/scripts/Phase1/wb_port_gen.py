@@ -14,7 +14,7 @@
 |                                                                      |
 |  Implements:                                                         |
 |    Wishbone B4 pipelined slave with backpressure (stall),            |
-|    linear burst (BL8), byte-lane masking, error signalling,          |
+|    linear burst (BL8), byte-lane masking, error signalling,           |
 |    and auxiliary tag propagation.                                     |
 |                                                                      |
 |  Testbench: ~33 tests across 9 sections (A-I)                       |
@@ -184,6 +184,7 @@ class WishbonePortGenerator:
         L(f"    parameter TAG_FIFO_DEPTH = {p['TAG_FIFO_DEPTH']},")
         L(f"    parameter TAG_PTR_W      = {p['TAG_PTR_WIDTH']},")
         L(f"    parameter WR_TAG_PTR_W   = {p['WR_TAG_PTR_WIDTH']},")
+        L(f"    parameter WR_BUFFER_DEPTH = {p['WR_BUFFER_DEPTH']},")
         L(f"    parameter ORD_DEPTH      = {p['ORD_DEPTH']},")
         L(f"    parameter ORD_PTR_W      = {p['ORD_PTR_WIDTH']}")
         L(f") (")
@@ -265,6 +266,29 @@ class WishbonePortGenerator:
         L(f"        else if (wb_beat &&  wb_we_i) wr_aux_ctr <= wr_aux_ctr + 1'b1;")
         L(f"")
 
+        # Write-side outstanding counter (new) -- mirrors tag_wr/tag_rd for writes
+        L(f"    // Outstanding-write counter (mirrors tag_wr/tag_rd below, but for")
+        L(f"    // writes): caps writes in flight at WR_BUFFER_DEPTH so wr_aux_ctr's")
+        L(f"    // WR_TAG_PTR_W-bit tag space can never wrap onto a write that hasn't")
+        L(f"    // been acknowledged yet. There was previously no write-side")
+        L(f"    // counterpart to tag_full below -- a write accepted past")
+        L(f"    // WR_BUFFER_DEPTH outstanding reused an in-flight write's tag, and")
+        L(f"    // the one-entry skid (which the whole WB bus stalls behind -- see")
+        L(f"    // Request output below) then waited on that aliased slot's")
+        L(f"    // wr_data_ready, which could never resolve: every further beat,")
+        L(f"    // reads included, stalled indefinitely under sustained pipelined")
+        L(f"    // traffic (Validation: HANDSHAKE/wb, wb_stall_o never clears).")
+        L(f"    // wr_out_rd's own update is deferred to Acknowledge below, after")
+        L(f"    // wr_ack_deliver exists to gate it -- same pattern as tag_rd/rd_ack.")
+        L(f"    logic [WR_TAG_PTR_W:0] wr_out_wr, wr_out_rd;")
+        L(f"    wire  [WR_TAG_PTR_W:0] wr_out_cnt = wr_out_wr - wr_out_rd;")
+        L(f"    wire                    wr_full    = (wr_out_cnt == WR_BUFFER_DEPTH[WR_TAG_PTR_W:0]);")
+        L(f"")
+        L(f"    always_ff @(posedge clk or negedge rst_n)")
+        L(f"        if (!rst_n) wr_out_wr <= '0;")
+        L(f"        else if (wb_beat && wb_we_i) wr_out_wr <= wr_out_wr + 1'b1;")
+        L(f"")
+
         # Tag FIFO
         L(f"    // Tag FIFO -- tracks outstanding read requests")
         L(f"    logic [AUX_WIDTH-1:0] tag_mem [0:TAG_FIFO_DEPTH-1];")
@@ -293,8 +317,8 @@ class WishbonePortGenerator:
         L(f"    // ack_ordering = in_request_order) -- one entry per accepted")
         L(f"    // beat, read(1) or write(0), in acceptance order. Sized")
         L(f"    // RD_BUFFER_DEPTH+WR_BUFFER_DEPTH: it can never overflow,")
-        L(f"    // since each side's OWN backpressure (tag_full below,")
-        L(f"    // wr_data_ready/WB-012) already caps that side's own")
+        L(f"    // since each side's OWN backpressure (tag_full below, wr_full")
+        L(f"    // below, wr_data_ready/WB-012) already caps that side's own")
         L(f"    // outstanding count before this would. ord_wr/ord_mem's push")
         L(f"    // only needs wb_beat, defined here; ord_rd's pop needs")
         L(f"    // ord_pop, which needs wr_ack_deliver/rd_ack -- declared")
@@ -305,12 +329,11 @@ class WishbonePortGenerator:
         L(f"    wire                 ord_empty   = (ord_cnt == 0);")
         L(f"    wire                 ord_head_rd = ord_mem[ord_rd[ORD_PTR_W-1:0]];")
         L(f"    // Full: stall the next beat (Validation addendum 19, 2026-11-09).")
-        L(f"    // The sizing argument above holds for reads (tag_full) but not for")
-        L(f"    // writes: a write's ord_mem entry lives until it is acknowledged")
-        L(f"    // at the head, while its wr_buf slot frees as soon as the WR")
-        L(f"    // issues, so behind one slow read the port kept accepting writes")
-        L(f"    // until ord_cnt passed ORD_DEPTH (WB-011 x319 on path_07 of drop")
-        L(f"    // 2a18a7929dce; 9 of 110 read responses lost, HOST_002 x15).")
+        L(f"    // The sizing argument above holds for reads (tag_full) and now")
+        L(f"    // for writes too (wr_full, added below) -- behind one slow read")
+        L(f"    // the port used to keep accepting writes until ord_cnt passed")
+        L(f"    // ORD_DEPTH (WB-011 x319 on path_07 of drop 2a18a7929dce; 9 of")
+        L(f"    // 110 read responses lost, HOST_002 x15).")
         L(f"    wire                 ord_full    = (ord_cnt == ORD_DEPTH[ORD_PTR_W:0]);")
         L(f"")
         L(f"    always_ff @(posedge clk or negedge rst_n)")
@@ -385,6 +408,13 @@ class WishbonePortGenerator:
         L(f"        wb_stall_o = 1'b0;")
         L(f"        if (req_pend && !(req_valid && req_ready)) wb_stall_o = 1'b1;")
         L(f"        if (!wb_we_i && tag_full && wb_stb_i)  wb_stall_o = 1'b1;")
+        L(f"        // WR_BUFFER_DEPTH outstanding-write cap (mirrors tag_full")
+        L(f"        // above) -- without this, a write accepted beyond")
+        L(f"        // WR_BUFFER_DEPTH reused an in-flight write's wr_aux_ctr tag")
+        L(f"        // and could wedge the one-entry skid forever waiting on the")
+        L(f"        // aliased slot's wr_data_ready, stalling the whole bus")
+        L(f"        // (Validation: HANDSHAKE/wb, pipelined run never un-stalls).")
+        L(f"        if (wb_we_i &&  wr_full && wb_stb_i)   wb_stall_o = 1'b1;")
         L(f"        if (wb_stb_i && ord_full)              wb_stall_o = 1'b1;  // ack tracker full (addendum 19)")
         L(f"        // HOST_WRITE_BUFFER_BACKPRESSURE ('port_stalls_on_full',")
         L(f"        // 2026-11-05) is carried by the skid gate above: a pending")
@@ -520,6 +550,14 @@ class WishbonePortGenerator:
         L(f"    // tag is still awaiting may bypass.")
         L(f"    wire rsp_is_head = rsp_take && (rsp_idx == rd_head_idx);")
         L(f"    wire                 wr_ack_deliver = !ord_empty && !ord_head_rd;")
+        L(f"    // Deferred from the outstanding-write counter above: wr_out_rd")
+        L(f"    // advances when a write is actually delivered (wr_ack_deliver),")
+        L(f"    // the same way tag_rd advances on rd_ack below -- keeps wr_full")
+        L(f"    // accurate so a new write can never alias a still-outstanding one.")
+        L(f"    always_ff @(posedge clk or negedge rst_n)")
+        L(f"        if (!rst_n) wr_out_rd <= '0;")
+        L(f"        else if (wr_ack_deliver) wr_out_rd <= wr_out_rd + 1'b1;")
+        L(f"")
         L(f"    // rd_ack is an output port (see the header) -- assign, not")
         L(f"    // wire, since it's already declared by the port list.")
         L(f"    assign               rd_ack         = !ord_empty &&  ord_head_rd &&")
@@ -624,6 +662,16 @@ class WishbonePortGenerator:
         L(f"    assert property (p_tag_no_overflow)")
         L(f"        else $error(\"[WB-005] tag FIFO overflow\");")
         L(f"")
+        L(f"    // Write-side counterpart of p_tag_no_overflow: catches the exact")
+        L(f"    // aliasing condition (wr_out_cnt exceeding WR_BUFFER_DEPTH) that")
+        L(f"    // wr_full above now prevents from ever being reached.")
+        L(f"    property p_wr_no_overflow;")
+        L(f"        @(posedge clk) disable iff (!rst_n)")
+        L(f"        1'b1 |-> (wr_out_cnt <= WR_BUFFER_DEPTH[WR_TAG_PTR_W:0]);")
+        L(f"    endproperty")
+        L(f"    assert property (p_wr_no_overflow)")
+        L(f"        else $error(\"[WB-012] outstanding-write counter overflow -- write tag aliasing\");")
+        L(f"")
         L(f"    property p_sel_nonzero_write;")
         L(f"        @(posedge clk) disable iff (!rst_n)")
         L(f"        (wb_beat && wb_we_i) |-> (|wb_sel_i);")
@@ -645,7 +693,7 @@ class WishbonePortGenerator:
         L(f"")
         L(f"    // WB-011: the ack-ordering tracker can never overflow -- ord_full")
         L(f"    // stalls the next beat (addendum 19, 2026-11-09); before that, each")
-        L(f"    // side's own backpressure (tag_full, wr_data_ready) already")
+        L(f"    // side's own backpressure (tag_full, wr_full) already")
         L(f"    // caps that side's outstanding count below ORD_DEPTH's share")
         L(f"    // for it, so this should be unreachable by construction; it")
         L(f"    // is still checked at runtime (same shape as p_tag_no_overflow")
@@ -937,7 +985,7 @@ class WishbonePortGenerator:
         L(f"        $display(\"\"); $display(\"  -- Section A: Single Write / Read --\");")
         L(f"        hw_reset(); reset_monitors();")
         L(f"        wb_write_classic({aw}'h0000_0100, 32'hDEAD_BEEF);")
-        L(f"        check(\"A1: Single write - no error\", wb_err_o === 1'b0);")
+        L(f"        check(\"A1: Single write - no error\", wb_err_o===1'b0);")
         L(f"        check($sformatf(\"A2: req_valid seen [count=%0d]\", req_valid_count), req_valid_count >= 1);")
         L(f"        reset_monitors();")
         L(f"        wb_read_classic({aw}'h0000_0100, rd_data, 32'hCAFE_1234, 3); etag_rd++;")
@@ -945,7 +993,7 @@ class WishbonePortGenerator:
         L(f"        check($sformatf(\"A4: Read data = 0x%08X\", rd_data), rd_data == 32'hCAFE_1234);")
         L(f"        reset_monitors();")
         L(f"        wb_write_classic({aw}'h1ABC_DE00, 32'h1234_5678);")
-        L(f"        check(\"A5: Write at high address\", wb_err_o === 1'b0);")
+        L(f"        check(\"A5: Write at high address\", wb_err_o===1'b0);")
         L(f"")
 
         # Section B
@@ -1119,6 +1167,7 @@ class WishbonePortGenerator:
                 "QUEUE_DEPTH": p["QUEUE_DEPTH"],
                 "BURST_CTR_W": p["BURST_CTR_WIDTH"],
                 "TAG_FIFO_DEPTH": p["TAG_FIFO_DEPTH"],
+                "WR_BUFFER_DEPTH": p["WR_BUFFER_DEPTH"],
                 "ROW_BITS": p["ROW_BITS"],
             },
             "ports": {
@@ -1174,6 +1223,7 @@ class WishbonePortGenerator:
                 {"name": "p_tag",               "check": "WB-009"},
                 {"name": "p_burst_len",         "check": "WB-003/004"},
                 {"name": "p_tag_no_overflow",   "check": "WB-005"},
+                {"name": "p_wr_no_overflow",    "check": "WB-012"},
                 {"name": "p_sel_nonzero_write", "check": "WB-006"},
                 {"name": "p_req_held_stable",   "check": "WB-010"},
                 {"name": "p_wr_ack_no_wrap",    "check": "WB-011"},

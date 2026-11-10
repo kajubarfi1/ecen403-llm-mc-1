@@ -99,3 +99,41 @@ class TestGapInsideRun(unittest.TestCase):
         drivable = {i for i, d in catalog.items() if d.get("drive")}
         errs = SC.validate(bad, schemas, drivable, require_targets=False)
         self.assertTrue(any("within_run" in e for e in errs), errs)
+
+
+class TestStallBound(unittest.TestCase):
+    """The driver's stall bound is the spec's, not a literal (2026-11-09): the
+    HOST_001 liveness bound (tRC x window scale x command_queue_depth + banks
+    + slack), never below MIN_WAIT. A 32-deep queue with 16 write tags fills
+    the write buffer before init ends, and the 17th beat's wait is the host
+    stalling, not a port defect."""
+
+    def test_golden_bound_is_the_host_001_bound(self):
+        w = DG.host_wait_cycles()
+        self.assertGreater(w, DG.MIN_WAIT)
+        self.assertEqual(w, 968)      # (tRC 12) x 4 x 16 + 8 banks + 200 slack on the golden spec
+
+    def test_a_deeper_queue_waits_longer(self):
+        import tempfile
+        with open(DG.SPEC_DEFAULT) as f:
+            spec = json.load(f)
+        spec["controller_architecture"]["command_queue_depth"] = 32
+        fd, p = tempfile.mkstemp(suffix=".json")
+        with os.fdopen(fd, "w") as f:
+            json.dump(spec, f)
+        self.assertGreater(DG.host_wait_cycles(p), DG.host_wait_cycles())
+
+    def test_unreadable_spec_falls_back_to_the_minimum(self):
+        self.assertEqual(DG.host_wait_cycles("/nonexistent/spec.json"), DG.MIN_WAIT)
+
+    def test_generated_driver_uses_the_bound(self):
+        with open(DG.SCHEMA_PATH) as f:
+            schemas = json.load(f)["interfaces"]
+        with open(DG.CATALOG_PATH) as f:
+            catalog = json.load(f)["interfaces"]
+        seq = {"name": "t", "targets": ["x"], "steps": [
+            {"op": "reset"},
+            {"op": "drive", "iface": "wb", "kind": "write", "fields": {"addr": 8, "data": 1, "sel": 15, "cti": 0, "bte": 0}}]}
+        src = DG.generate(seq, schemas, catalog, wait=777)
+        self.assertIn("within 777 cycles", src)
+        self.assertNotIn("within 256 cycles", src)

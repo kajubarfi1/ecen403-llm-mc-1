@@ -1202,6 +1202,20 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   wb_port's WB-010 fires on the committed RTL too, pre-existing).
   Result: drop e4794e87a8c1, 20/20, no open simulation finding, 81.4%
   coverage; formal replays owed. Addendum 20.
+- *2026-11-09, night — five presets, five passes; the Mac can run the
+  backend.* Matrix level 2 on the fixed generators: default, balanced,
+  low-cost-embedded, high-performance and server-grade all through the
+  four phases and validation with no finding. The ECC presets' only line
+  was our driver's fixed 256-cycle accept wait (queue 32, 16 write tags:
+  the 17th beat waits for init); the bound is now the spec's HOST_001
+  liveness bound (`driver_gen.host_wait_cycles`). Lehana's fix agent
+  hung on a timed-out model call for 100 minutes on server-grade; the
+  matrix run was stopped and the two presets rerun. Jacob's Mac set up
+  for the whole flow: Colima with Rosetta (the openroad/orfs image is
+  amd64-only), the Docker CLI, a shallow OpenROAD-flow-scripts clone,
+  jsonschema, `backend/agents/.env`; sky130 models already on Olympus;
+  `flow.py --dry-run` reports every stage ready (USAGE.md, "Running the
+  whole flow on a Mac").
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

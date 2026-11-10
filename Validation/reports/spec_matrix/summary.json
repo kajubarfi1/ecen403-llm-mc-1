@@ -77,7 +77,7 @@
         "lookahead_depth": 8
       },
       "level": 2,
-      "utc": "2026-11-09T22:02:14.498004+00:00",
+      "utc": "2026-11-09T22:05:55.940891+00:00",
       "level1": {
         "revision": "compiled_ddr31600_x8_2lane_1rank_d83fcf22",
         "blocking": [],
@@ -112,8 +112,8 @@
           "backend": "SKIPPED"
         },
         "rtl_validation": "PASS; failed modules: none; package: runs/matrix/preset_default/validation/round_1",
-        "drop": "4177120ab972",
-        "design_id": "fd8b5baa9d54",
+        "drop": "d15a73cc45dc",
+        "design_id": "7ff4ac9d80f0",
         "validation_status": "PASS",
         "failed_modules": [],
         "findings": [],
@@ -137,7 +137,7 @@
         "lookahead_depth": 16
       },
       "level": 2,
-      "utc": "2026-11-09T22:02:14.542111+00:00",
+      "utc": "2026-11-10T00:35:39.443849+00:00",
       "level1": {
         "revision": "compiled_ddr31600_x8_3lane_1rank_d47b2e9f",
         "blocking": [],
@@ -154,15 +154,10 @@
         "status": "PASS"
       },
       "level2": {
-        "flow_rc": 2,
+        "flow_rc": 0,
         "run_dir": "runs/matrix/preset_high-performance",
-        "flow_status": "halted",
-        "halt": {
-          "stage": "frontend_regeneration",
-          "why": "2 validation round(s) without a pass (cap 2); last package: runs/matrix/preset_high-performance/validation/round_2",
-          "utc": "2026-11-09T22:02:14.845357+00:00",
-          "package": "/Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_high-performance/validation/round_2"
-        },
+        "flow_status": "complete",
+        "halt": null,
         "phases_passed": [
           1,
           2,
@@ -173,44 +168,15 @@
           "spec_synthesis": "PASS",
           "spec_review": "PASS",
           "rtl_generation": "PASS",
-          "rtl_validation": "FAIL",
-          "frontend_regeneration": "HALT"
+          "rtl_validation": "PASS",
+          "backend": "SKIPPED"
         },
-        "rtl_validation": "FAIL; failed modules: data_path, wb_port; package: runs/matrix/preset_high-performance/validation/round_2",
-        "drop": "c3135943228e",
-        "design_id": "4d572024849e",
-        "validation_status": "FAIL",
-        "failed_modules": [
-          "data_path",
-          "wb_port"
-        ],
-        "findings": [
-          {
-            "owner": "data_path",
-            "check_id": "CONSERVE/WRITE_CMD_TO_BEATS",
-            "status": "open"
-          },
-          {
-            "owner": "data_path",
-            "check_id": "CONSERVE/WRITE_REQUEST_TO_DATA",
-            "status": "open"
-          },
-          {
-            "owner": "wb_port",
-            "check_id": "HANDSHAKE/wb",
-            "status": "open"
-          },
-          {
-            "owner": "wb_port",
-            "check_id": "HOSTMEM/wb_rsp",
-            "status": "open"
-          },
-          {
-            "owner": "wb_port",
-            "check_id": "HOST_002",
-            "status": "open"
-          }
-        ],
+        "rtl_validation": "PASS; failed modules: none; package: runs/matrix/preset_high-performance/validation/round_1",
+        "drop": "298f5fb01c28",
+        "design_id": "239877e732a9",
+        "validation_status": "PASS",
+        "failed_modules": [],
+        "findings": [],
         "paths_run": 20,
         "paths_blocked": 0
       }
@@ -231,7 +197,7 @@
         "lookahead_depth": 0
       },
       "level": 2,
-      "utc": "2026-11-09T22:02:14.898631+00:00",
+      "utc": "2026-11-09T22:23:23.651862+00:00",
       "level1": {
         "revision": "compiled_ddr3800_x8_1lane_1rank_8ee94bc3",
         "blocking": [],
@@ -266,8 +232,8 @@
           "backend": "SKIPPED"
         },
         "rtl_validation": "PASS; failed modules: none; package: runs/matrix/preset_low-cost-embedded/validation/round_1",
-        "drop": "e4d883ad50e0",
-        "design_id": "639368fb2c98",
+        "drop": "79a005318b27",
+        "design_id": "06972a119eb2",
         "validation_status": "PASS",
         "failed_modules": [],
         "findings": [],
@@ -291,7 +257,7 @@
         "lookahead_depth": 16
       },
       "level": 2,
-      "utc": "2026-11-09T22:02:14.943958+00:00",
+      "utc": "2026-11-10T00:38:30.197472+00:00",
       "level1": {
         "revision": "compiled_ddr31600_x8_5lane_1rank_24196b26",
         "blocking": [],
@@ -308,15 +274,10 @@
         "status": "PASS"
       },
       "level2": {
-        "flow_rc": 2,
+        "flow_rc": 0,
         "run_dir": "runs/matrix/preset_server-grade",
-        "flow_status": "halted",
-        "halt": {
-          "stage": "frontend_regeneration",
-          "why": "2 validation round(s) without a pass (cap 2); last package: runs/matrix/preset_server-grade/validation/round_2",
-          "utc": "2026-11-09T22:02:15.225422+00:00",
-          "package": "/Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_server-grade/validation/round_2"
-        },
+        "flow_status": "complete",
+        "halt": null,
         "phases_passed": [
           1,
           2,
@@ -327,44 +288,15 @@
           "spec_synthesis": "PASS",
           "spec_review": "PASS",
           "rtl_generation": "PASS",
-          "rtl_validation": "FAIL",
-          "frontend_regeneration": "HALT"
+          "rtl_validation": "PASS",
+          "backend": "SKIPPED"
         },
-        "rtl_validation": "FAIL; failed modules: data_path, wb_port; package: runs/matrix/preset_server-grade/validation/round_2",
-        "drop": "9a7390bdce1e",
-        "design_id": "d041f7d2e9e4",
-        "validation_status": "FAIL",
-        "failed_modules": [
-          "data_path",
-          "wb_port"
-        ],
-        "findings": [
-          {
-            "owner": "data_path",
-            "check_id": "CONSERVE/WRITE_CMD_TO_BEATS",
-            "status": "open"
-          },
-          {
-            "owner": "data_path",
-            "check_id": "CONSERVE/WRITE_REQUEST_TO_DATA",
-            "status": "open"
-          },
-          {
-            "owner": "wb_port",
-            "check_id": "HANDSHAKE/wb",
-            "status": "open"
-          },
-          {
-            "owner": "wb_port",
-            "check_id": "HOSTMEM/wb_rsp",
-            "status": "open"
-          },
-          {
-            "owner": "wb_port",
-            "check_id": "HOST_002",
-            "status": "open"
-          }
-        ],
+        "rtl_validation": "PASS; failed modules: none; package: runs/matrix/preset_server-grade/validation/round_1",
+        "drop": "68178ead798d",
+        "design_id": "9a05ce107976",
+        "validation_status": "PASS",
+        "failed_modules": [],
+        "findings": [],
         "paths_run": 20,
         "paths_blocked": 0
       }

@@ -1,3 +1,722 @@
-[16:02:14] run preset_low-cost-embedded -> runs/matrix/preset_low-cost-embedded
-[16:02:14] COMPLETE (backend skipped): the RTL drop passed validation.
-[16:02:14] state: complete  (runs/matrix/preset_low-cost-embedded/RUN_STATE.json)
+[16:23:23] run preset_low-cost-embedded -> runs/matrix/preset_low-cost-embedded
+[16:23:23] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Frontend2/scripts/Microarch/microarch_cli.py --from-choices Validation/reports/spec_matrix/preset_low-cost-embedded/choices.json --out runs/matrix/preset_low-cost-embedded/spec/generated_spec.json   (cwd Frontend2/scripts/Microarch)
+[16:23:23]     
+[16:23:23]     -- resolved configuration ------------------------------------------
+[16:23:23]       Tier-1
+[16:23:23]         speed_grade              DDR3-800
+[16:23:23]         density                  2Gb
+[16:23:23]         device_width             x8
+[16:23:23]         ranks                    1
+[16:23:23]         byte_lanes               1
+[16:23:23]         ecc_mode                 0
+[16:23:23]         scheduler_policy         in_order
+[16:23:23]         row_policy               close_page
+[16:23:23]       Tier-2 / Tier-3
+[16:23:23]         clock_ratio_ddr_to_controller 4
+[16:23:23]         command_queue_depth      4
+[16:23:23]         lookahead_depth          0
+[16:23:23]         address_mapping          row-bank-column
+[16:23:23]         burst_length             8
+[16:23:23]         host_data_width          32
+[16:23:23]         read_buffer_depth        16
+[16:23:23]         write_buffer_depth       16
+[16:23:23]         interface_type           wishbone_pipelined
+[16:23:23]         self_refresh_mode        auto
+[16:23:23]         target_frequency_mhz     100
+[16:23:23]         area_optimization_goal   balanced
+[16:23:23]         power_optimization_goal  balanced
+[16:23:23]         pipeline_latency_cycles  2
+[16:23:23]     
+[16:23:23]     -- JEDEC-derived (computed, not guessed) ---------------------------
+[16:23:23]         speed bin     DDR3-800E (6-6-6)
+[16:23:23]         tCK           2.5 ns   ctrl 100.0 MHz / ddr 400.0 MHz / 800.0 MT/s
+[16:23:23]         CL / CWL      6 / 5
+[16:23:23]         tRCD tRP tRAS tRC   6 6 15 21  nCK
+[16:23:23]         tRFC tFAW tRRD     64 16 4  nCK
+[16:23:23]         tWR tWTR tRTP tCCD  6 4 4 4  nCK
+[16:23:23]         geometry      2Gb  15 row / 10 col / 3 bank
+[16:23:23]         channel       8-bit   256 MB   peak 800 MB/s
+[16:23:23]     
+[16:23:23]     -- consistency -----------------------------------------------------
+[16:23:23]         [OK] 27/27 checks pass
+[16:23:23]     
+[16:23:23]       wrote /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/spec/generated_spec.json
+[16:23:23]             /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/spec/microarch_report.json
+[16:23:23] spec_synthesis         PASS     runs/matrix/preset_low-cost-embedded/spec/generated_spec.json
+[16:23:23] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Validation/spec/validate_spec_stage.py --spec runs/matrix/preset_low-cost-embedded/spec/generated_spec.json --json runs/matrix/preset_low-cost-embedded/spec/SPEC_REVIEW_round1.json
+[16:23:23]       spec      : runs/matrix/preset_low-cost-embedded/spec/generated_spec.json  rev compiled_ddr3800_x8_1lane_1rank_8ee94bc3
+[16:23:23]       status    : PASS   (0 blocking, 2 advisory)
+[16:23:23]       JEDEC     : 25 pass / 0 fail / 0 skipped
+[16:23:23]         note   [gap:standard] SCHED_SAME_ADDRESS_ORDERING: controller_architecture.same_address_ordering is not stated
+[16:23:23]         note   [gap:decision] SCHED_STARVATION_BOUND: controller_architecture.starvation_limit_cycles is not stated
+[16:23:23]       human     : yes -- open decisions listed above
+[16:23:23]       wrote     : Validation/findings/outbox/current/SPEC_REVIEW.json
+[16:23:23] spec_review            PASS     2 open gap(s) carried as advisory; review: runs/matrix/preset_low-cost-embedded/spec/SPEC_REVIEW_round1.json
+[16:23:23] -- phase 1: init_fsm, config_regs, wb_port
+[16:23:23] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Frontend2/scripts/Phase1/phase1_pipeline.py   (cwd Frontend2/scripts/Phase1)
+[16:23:23]     /Users/jacob/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+[16:23:23]       warnings.warn(
+[16:23:24]     +========================================================+
+[16:23:24]     |   DDR3 Controller -- Phase 1 Pipeline (Frontend2)       |
+[16:23:24]     |                                                         |
+[16:23:24]     +========================================================+
+[16:23:24]     
+[16:23:24]     Spec JSON path: Output dir (Enter for ./output):
+[16:23:24]       Starting Phase 1 generation (deterministic, no LLM)...
+[16:23:24]     
+[16:23:24]       +- Generating config_regs (script)
+[16:23:24]     
+[16:23:24]       +- Generating init_fsm (script)
+[16:23:24]     
+[16:23:24]       +- Generating testbenches (spec-only, independent of RTL)
+[16:23:24]     
+[16:23:24]       +- Generating wb_port (script)
+[16:23:24]     ==============================================================
+[16:23:24]       WISHBONE PORT INTERFACE GENERATOR
+[16:23:24]       Spec: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/spec/generated_spec.json
+[16:23:24]     ==============================================================
+[16:23:24]     
+[16:23:24]     [1/5] Validating parameters ...
+[16:23:24]       OK: All parameters valid
+[16:23:24]         DATA_WIDTH           = 32
+[16:23:24]         ADDR_WIDTH           = 28
+[16:23:24]         GRANULARITY          = 8
+[16:23:24]         SEL_WIDTH            = 4
+[16:23:24]         BURST_TYPE           = linear
+[16:23:24]         MAX_BURST_LEN        = 8
+[16:23:24]         INTERFACE_TYPE       = wishbone_pipelined
+[16:23:24]         RD_BUFFER_DEPTH      = 16
+[16:23:24]         WR_BUFFER_DEPTH      = 16
+[16:23:24]         AUX_WIDTH            = 4
+[16:23:24]         QUEUE_DEPTH          = 4
+[16:23:24]         PIPELINE_LATENCY     = 2
+[16:23:24]         CTRL_FREQ            = 100.0
+[16:23:24]         CTRL_PERIOD          = 10.0
+[16:23:24]         ROW_BITS             = 15
+[16:23:24]         COL_BITS             = 10
+[16:23:24]         BANK_BITS            = 3
+[16:23:24]         RANKS                = 1
+[16:23:24]         BURST_CTR_WIDTH      = 4
+[16:23:24]         TAG_FIFO_DEPTH       = 16
+[16:23:24]         TAG_PTR_WIDTH        = 4
+[16:23:24]         WR_TAG_PTR_WIDTH     = 4
+[16:23:24]         ORD_DEPTH            = 32
+[16:23:24]         ORD_PTR_WIDTH        = 5
+[16:23:24]         ADDR_INC             = 4
+[16:23:24]     
+[16:23:24]     [2/5] Generating RTL ...
+[16:23:24]       OK: 555 lines of SystemVerilog
+[16:23:24]     
+[16:23:24]     [3/4] Generating port manifest ...
+[16:23:24]       OK: 26 ports | 10 assertions | 9 cover points
+[16:23:24]     
+[16:23:24]     [4/4] Writing files ...
+[16:23:24]       -> /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/PHASE1RTL/wb_port.sv
+[16:23:24]       -> /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/PHASE1RTL/wb_port_manifest.json
+[16:23:24]     
+[16:23:24]     ==============================================================
+[16:23:24]       DONE -- wb_port.sv ready for Phase 1
+[16:23:24]     ==============================================================
+[16:23:24]     
+[16:23:24]     ==============================================================
+[16:23:24]       GENERATION CHECK
+[16:23:24]     ==============================================================
+[16:23:24]       OK   config_regs     success
+[16:23:24]       OK   init_fsm        success
+[16:23:24]       OK   testbenches     success
+[16:23:24]       OK   wb_port         success
+[16:23:24]     
+[16:23:24]     ==============================================================
+[16:23:24]       TESTBENCH AUDIT GATE -- deterministic, local, spec-derived
+[16:23:24]     ==============================================================
+[16:23:24]       --   init_fsm        NO_CHECKS
+[16:23:24]       OK   config_regs     PASS
+[16:23:24]       --   wb_port         NO_CHECKS
+[16:23:24]     
+[16:23:24]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/VALIDATIONREPORT/tb_audit_report.json
+[16:23:24]     
+[16:23:24]     ==============================================================
+[16:23:24]       LINT GATE -- Verilator Static Analysis
+[16:23:24]     ==============================================================
+[16:23:33]       OK   init_fsm        0 error(s), 0 warning(s)
+[16:23:33]       OK   config_regs     0 error(s), 1 warning(s)
+[16:23:33]         WARN: %Warning-UNUSED: config_regs.sv:14: Signal is not used: 'csr_sel_i'
+[16:23:33]       OK   wb_port         0 error(s), 1 warning(s)
+[16:23:33]         WARN: %Warning-UNUSED: wb_port.sv:41: Signal is not used: 'wb_bte_i'
+[16:23:33]     
+[16:23:33]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/VALIDATIONREPORT/lint_report.json
+[16:23:33]     
+[16:23:33]     ==============================================================
+[16:23:33]       SIM GATE -- Cadence Xcelium Behavioral Simulation
+[16:23:33]     ==============================================================
+[16:23:33]       Connecting to olympus.ece.tamu.edu as jacobz...
+[16:23:34]       Connected. Work dir: /home/ugrads/j/jacobz/cadence_agent_work
+[16:23:34]     
+[16:23:34]       Uploading 6 files...
+[16:23:36]     
+[16:23:36]       Running init_fsm...
+[16:23:39]         OK: init_fsm -- 11 passed, 0 failed
+[16:23:40]     
+[16:23:40]       Running config_regs...
+[16:23:43]         OK: config_regs -- 36 passed, 0 failed
+[16:23:43]     
+[16:23:43]       Running wb_port...
+[16:23:47]         OK: wb_port -- 10 passed, 0 failed
+[16:23:47]     
+[16:23:47]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/VALIDATIONREPORT/sim_report.json
+[16:23:47]     
+[16:23:47]     ==============================================================
+[16:23:47]       PHASE 1 PIPELINE -- ALL CHECKS PASSED
+[16:23:47]     ==============================================================
+[16:23:47]     
+[16:23:47]       Lint: PASS
+[16:23:47]       Sim:  PASS
+[16:23:47]         OK init_fsm.sv  OK init_fsm_tb.sv
+[16:23:47]         OK config_regs.sv  OK config_regs_tb.sv
+[16:23:47]         OK wb_port.sv  OK wb_port_tb.sv
+[16:23:47]     
+[16:23:47]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/VALIDATIONREPORT/phase1_final_report.json
+[16:23:47] rtl_generation         PASS     phase 1
+[16:23:47] -- phase 2: addr_decoder, bank_tracker, refresh_ctrl, calibration
+[16:23:47] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Frontend2/scripts/Phase2/phase2_pipeline.py   (cwd Frontend2/scripts/Phase2)
+[16:23:48]     /Users/jacob/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+[16:23:48]       warnings.warn(
+[16:23:48]     +========================================================+
+[16:23:48]     |   DDR3 Controller -- Phase 2 Pipeline (Frontend2)       |
+[16:23:48]     |                                                         |
+[16:23:48]     +========================================================+
+[16:23:48]     
+[16:23:48]     Spec JSON path: Output dir (Enter for ./output):
+[16:23:48]       Starting Phase 2 generation (deterministic, no LLM)...
+[16:23:48]     
+[16:23:48]       +- Generating addr_decoder (script)
+[16:23:48]     
+[16:23:48]       +- Generating bank_tracker (script)
+[16:23:48]     
+[16:23:48]       +- Generating calibration (script)
+[16:23:48]     ==============================================================
+[16:23:48]       ADDRESS DECODER GENERATOR
+[16:23:48]       Spec: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/spec/generated_spec.json
+[16:23:48]     ==============================================================
+[16:23:48]     
+[16:23:48]     [1/4] Validating …==============================================================
+[16:23:48]       CALIBRATION GENERATOR
+[16:23:48]       Spec: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/spec/generated_spec.json
+[16:23:48]     ==============================================================
+[16:23:48]     
+[16:23:48]     [1/4] Validating …
+[16:23:48]       ✓ Valid
+[16:23:48]         PERIODIC_ZQCS        = True
+[16:23:48]         ZQCS_INTERVAL        = 512000
+[16:23:48]         ZQCS_CTRL_CYC        = 128000
+[16:23:48]     
+[16:23:48]       ✓ Valid
+[16:23:48]         ROW_BITS             = 15
+[16:23:48]         COL_BITS             = 10
+[16:23:48]         BANK_BITS            = 3
+[16:23:48]         RANKS                = 1
+[16:23:48]         RANK_BITS            = 0
+[16:23:48]         BL                   = 8    ZQCS_CTR_W           = 17
+[16:23:48]         tZQCS_CYC            = 16
+[16:23:48]         WL_ENABLE            = False
+[16:23:48]         RL_ENABLE            = False
+[16:23:48]     
+[16:23:48]     [2/4] Generating RTL …
+[16:23:48]       ✓ 120 lines
+[16:23:48]     
+[16:23:48]     [3/4] Manifest …
+[16:23:48]     
+[16:23:48]       +- Generating refresh_ctrl (script)
+[16:23:48]     
+[16:23:48]         ADDR_WIDTH           = 28
+[16:23:48]         DATA_WIDTH           = 32
+[16:23:48]         MAPPING              = row-bank-column
+[16:23:48]     
+[16:23:48]       +- Generating testbenches (spec-only, independent of RTL)
+[16:23:48]         BURST_OFFSET         = 3
+[16:23:48]         COL_LOW_SKIP         = 3
+[16:23:48]         COL_USED             = 7
+[16:23:48]     
+[16:23:48]     [2/4] Generating RTL …
+[16:23:48]       ✓ 78 lines
+[16:23:48]     
+[16:23:48]     [3/4] Manifest …
+[16:23:48]       ✓ 7 ports
+[16:23:48]     
+[16:23:48]     [4/4] Writing …
+[16:23:48]       ✓ /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/PHASE2RTL/calibration.sv
+[16:23:48]       ✓ /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/PHASE2RTL/calibration_manifest.json
+[16:23:48]     
+[16:23:48]     ==============================================================
+[16:23:48]       DONE — calibration.sv
+[16:23:48]     ==============================================================
+[16:23:48]       ✓ 5 ports
+[16:23:48]     
+[16:23:48]     [4/4] Writing …
+[16:23:48]       ✓ /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/PHASE2RTL/addr_decoder.sv
+[16:23:48]       ✓ /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/PHASE2RTL/addr_decoder_manifest.json
+[16:23:48]     
+[16:23:48]     ==============================================================
+[16:23:48]       DONE — addr_decoder.sv
+[16:23:48]     ==============================================================
+[16:23:48]     
+[16:23:48]     ==============================================================
+[16:23:48]       GENERATION CHECK
+[16:23:48]     ==============================================================
+[16:23:48]       OK   addr_decoder    success
+[16:23:48]       OK   bank_tracker    success
+[16:23:48]       OK   calibration     success
+[16:23:48]       OK   refresh_ctrl    success
+[16:23:48]       OK   testbenches     success
+[16:23:48]     
+[16:23:48]     ==============================================================
+[16:23:48]       TESTBENCH AUDIT GATE -- deterministic, local, spec-derived
+[16:23:48]     ==============================================================
+[16:23:48]       OK   addr_decoder    PASS
+[16:23:48]       OK   calibration     PASS
+[16:23:48]       OK   refresh_ctrl    PASS
+[16:23:48]       OK   bank_tracker    PASS
+[16:23:48]     
+[16:23:48]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/VALIDATIONREPORT/phase2_tb_audit_report.json
+[16:23:48]     
+[16:23:48]     ==============================================================
+[16:23:48]       LINT GATE -- Verilator Static Analysis
+[16:23:48]     ==============================================================
+[16:23:59]       OK   addr_decoder    0 error(s), 1 warning(s)
+[16:23:59]         WARN: %Warning-UNUSED: addr_decoder.sv:32: Bits of signal are not used: 'req_addr'[2:0]
+[16:23:59]       OK   calibration     0 error(s), 0 warning(s)
+[16:23:59]       OK   refresh_ctrl    0 error(s), 0 warning(s)
+[16:23:59]       OK   bank_tracker    0 error(s), 11 warning(s)
+[16:23:59]         WARN: %Warning-UNUSED: bank_tracker.sv:26: Bits of signal are not used: 'cfg_tRCD_nCK'[7]
+[16:23:59]         WARN: %Warning-UNUSED: bank_tracker.sv:27: Bits of signal are not used: 'cfg_tRP_nCK'[7]
+[16:23:59]         WARN: %Warning-UNUSED: bank_tracker.sv:28: Bits of signal are not used: 'cfg_tRAS_nCK'[7]
+[16:23:59]         WARN: %Warning-UNUSED: bank_tracker.sv:29: Bits of signal are not used: 'cfg_tRC_nCK'[7]
+[16:23:59]         WARN: %Warning-UNUSED: bank_tracker.sv:30: Bits of signal are not used: 'cfg_tRRD_nCK'[7]
+[16:23:59]         WARN: %Warning-UNUSED: bank_tracker.sv:31: Bits of signal are not used: 'cfg_tFAW_nCK'[7]
+[16:23:59]         WARN: %Warning-UNUSED: bank_tracker.sv:32: Bits of signal are not used: 'cfg_tWTR_nCK'[7]
+[16:23:59]         WARN: %Warning-UNUSED: bank_tracker.sv:33: Bits of signal are not used: 'cfg_tWR_nCK'[7]
+[16:23:59]         WARN: %Warning-UNUSED: bank_tracker.sv:34: Bits of signal are not used: 'cfg_tRTP_nCK'[7]
+[16:23:59]         WARN: %Warning-UNUSED: bank_tracker.sv:35: Bits of signal are not used: 'cfg_tCCD_nCK'[7]
+[16:23:59]         WARN: %Warning-UNUSED: bank_tracker.sv:36: Bits of signal are not used: 'cfg_tRFC_nCK'[7]
+[16:23:59]     
+[16:23:59]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/VALIDATIONREPORT/phase2_lint_report.json
+[16:23:59]     
+[16:23:59]     ==============================================================
+[16:23:59]       SIM GATE -- Cadence Xcelium Behavioral Simulation
+[16:23:59]     ==============================================================
+[16:23:59]       Connecting to olympus.ece.tamu.edu as jacobz...
+[16:24:00]       Connected. Work dir: /home/ugrads/j/jacobz/cadence_agent_work
+[16:24:00]     
+[16:24:00]       Uploading 8 files...
+[16:24:02]     
+[16:24:02]       Running addr_decoder...
+[16:24:06]         OK: addr_decoder -- 24 passed, 0 failed
+[16:24:06]     
+[16:24:06]       Running calibration...
+[16:24:10]         OK: calibration -- 8 passed, 0 failed
+[16:24:10]     
+[16:24:10]       Running refresh_ctrl...
+[16:24:14]         OK: refresh_ctrl -- 11 passed, 0 failed
+[16:24:14]     
+[16:24:14]       Running bank_tracker...
+[16:24:18]         OK: bank_tracker -- 33 passed, 0 failed
+[16:24:19]     
+[16:24:19]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/VALIDATIONREPORT/phase2_sim_report.json
+[16:24:19]     
+[16:24:19]     ==============================================================
+[16:24:19]       PHASE 2 PIPELINE -- ALL CHECKS PASSED
+[16:24:19]     ==============================================================
+[16:24:19]     
+[16:24:19]       Lint: PASS
+[16:24:19]       Sim:  PASS
+[16:24:19]         OK addr_decoder.sv  OK addr_decoder_tb.sv
+[16:24:19]         OK calibration.sv  OK calibration_tb.sv
+[16:24:19]         OK refresh_ctrl.sv  OK refresh_ctrl_tb.sv
+[16:24:19]         OK bank_tracker.sv  OK bank_tracker_tb.sv
+[16:24:19]     
+[16:24:19]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/VALIDATIONREPORT/phase2_final_report.json
+[16:24:19] rtl_generation         PASS     phase 2
+[16:24:19] -- phase 3: cmd_queue, scheduler, cmd_gen
+[16:24:19] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Frontend2/scripts/Phase3/phase3_pipeline.py   (cwd Frontend2/scripts/Phase3)
+[16:24:19]     /Users/jacob/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+[16:24:19]       warnings.warn(
+[16:24:19]     +========================================================+
+[16:24:19]     |   DDR3 Controller -- Phase 3 Pipeline (Frontend2)       |
+[16:24:19]     |                                                         |
+[16:24:19]     +========================================================+
+[16:24:19]     
+[16:24:19]     Spec JSON path: Output dir (Enter for ./output):
+[16:24:19]       Starting Phase 3 generation (deterministic, no LLM)...
+[16:24:19]     
+[16:24:19]       +- Generating cmd_gen (script, incl. own testbench)
+[16:24:19]     
+[16:24:19]       +- Generating cmd_queue (script, incl. own testbench)
+[16:24:19]     
+[16:24:19]       +- Generating scheduler (script, incl. own testbench)
+[16:24:19]     ==============================================================
+[16:24:19]       COMMAND GENERATOR GENERATOR
+[16:24:19]       Spec: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/spec/generated_spec.json
+[16:24:19]     ==============================================================
+[16:24:19]         ROW_BITS             = 15
+[16:24:19]     ==============================================================
+[16:24:19]       SCHEDULER GENERATOR
+[16:24:19]       Spec: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/spec/generated_spec.json
+[16:24:19]     ==============================================================
+[16:24:19]         DEPTH                = 4
+[16:24:19]     ==============================================================
+[16:24:19]       COMMAND QUEUE GENERATOR
+[16:24:19]       Spec: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/spec/generated_spec.json
+[16:24:19]     ==============================================================
+[16:24:19]       V Valid
+[16:24:19]         DEPTH                = 4
+[16:24:19]         IDX_BITS             = 2
+[16:24:19]         IDX_BITS             = 2
+[16:24:19]     
+[16:24:19]       +- Generating testbenches (spec-only, independent of RTL)
+[16:24:19]         ROW_BITS             = 15
+[16:24:19]         COL_BITS             = 10
+[16:24:19]         COL_BITS             = 10    BANK_BITS            = 3
+[16:24:19]         ROW_BITS             = 15
+[16:24:19]     
+[16:24:19]         BANK_BITS            = 3
+[16:24:19]         NUM_BANKS            = 8    COL_BITS             = 10
+[16:24:19]         BANK_BITS            = 3
+[16:24:19]         AUX_WIDTH            = 4
+[16:24:19]     
+[16:24:19]         AUX_WIDTH            = 4    STARVE_CYCLES        = 128    DDR_ADDR_W           = 15
+[16:24:19]     
+[16:24:19]         DDR_BANK_W           = 3
+[16:24:19]     
+[16:24:19]         POLICY               = in_order    AUX_WIDTH            = 4    DATA_WIDTH           = 32
+[16:24:19]     
+[16:24:19]         ENTRY_W              = 33
+[16:24:19]     
+[16:24:19]         ROW_POLICY           = close_page
+[16:24:19]         WORD_BEATS           = 4
+[16:24:19]       V cmd_gen.sv          (171 lines)
+[16:24:19]       V cmd_gen_manifest.json
+[16:24:19]     
+[16:24:19]     ==============================================================
+[16:24:19]       DONE — cmd_gen
+[16:24:19]     ==============================================================
+[16:24:19]       V cmd_queue.sv        (213 lines)
+[16:24:19]       V cmd_queue_manifest.json
+[16:24:19]     
+[16:24:19]     ==============================================================
+[16:24:19]       DONE — cmd_queue
+[16:24:19]     ==============================================================
+[16:24:19]       V scheduler.sv        (544 lines)
+[16:24:19]       V scheduler_manifest.json
+[16:24:19]     
+[16:24:19]     ==============================================================
+[16:24:19]       DONE — scheduler
+[16:24:19]     ==============================================================
+[16:24:19]     
+[16:24:19]     ==============================================================
+[16:24:19]       GENERATION CHECK
+[16:24:19]     ==============================================================
+[16:24:19]       OK   cmd_gen         success
+[16:24:19]       OK   cmd_queue       success
+[16:24:19]       OK   scheduler       success
+[16:24:19]       OK   testbenches     success
+[16:24:19]     
+[16:24:19]     ==============================================================
+[16:24:19]       LINT GATE -- Verilator Static Analysis
+[16:24:19]     ==============================================================
+[16:24:29]       OK   cmd_queue       0 error(s), 0 warning(s)
+[16:24:29]       OK   scheduler       0 error(s), 0 warning(s)
+[16:24:29]       OK   cmd_gen         0 error(s), 1 warning(s)
+[16:24:29]         WARN: %Warning-UNUSED: cmd_gen.sv:32: Signal is not used: 'sched_we'
+[16:24:29]     
+[16:24:29]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/VALIDATIONREPORT/phase3_lint_report.json
+[16:24:29]     
+[16:24:29]     ==============================================================
+[16:24:29]       SIM GATE -- Cadence Xcelium Behavioral Simulation
+[16:24:29]     ==============================================================
+[16:24:29]       Connecting to olympus.ece.tamu.edu as jacobz...
+[16:24:30]       Connected. Work dir: /home/ugrads/j/jacobz/cadence_agent_work
+[16:24:30]     
+[16:24:30]       Uploading 6 files...
+[16:24:31]     
+[16:24:31]       Running cmd_queue...
+[16:24:36]         OK: cmd_queue -- 32 passed, 0 failed
+[16:24:36]     
+[16:24:36]       Running scheduler...
+[16:24:40]         OK: scheduler -- 51 passed, 0 failed
+[16:24:41]     
+[16:24:41]       Running cmd_gen...
+[16:24:44]         OK: cmd_gen -- 36 passed, 0 failed
+[16:24:45]     
+[16:24:45]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/VALIDATIONREPORT/phase3_sim_report.json
+[16:24:45]     
+[16:24:45]     ==============================================================
+[16:24:45]       PHASE 3 PIPELINE -- ALL CHECKS PASSED
+[16:24:45]     ==============================================================
+[16:24:45]     
+[16:24:45]       Lint: PASS
+[16:24:45]       Sim:  PASS
+[16:24:45]         OK cmd_queue.sv  OK cmd_queue_tb.sv
+[16:24:45]         OK scheduler.sv  OK scheduler_tb.sv
+[16:24:45]         OK cmd_gen.sv  OK cmd_gen_tb.sv
+[16:24:45]     
+[16:24:45]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/VALIDATIONREPORT/phase3_final_report.json
+[16:24:45] rtl_generation         PASS     phase 3
+[16:24:45] -- phase 4: data_path
+[16:24:45] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Frontend2/scripts/Phase4/phase4_pipeline.py   (cwd Frontend2/scripts/Phase4)
+[16:24:45]     /Users/jacob/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+[16:24:45]       warnings.warn(
+[16:24:45]     +========================================================+
+[16:24:45]     |   DDR3 Controller -- Phase 4 Pipeline (Frontend2)       |
+[16:24:45]     |                                                         |
+[16:24:45]     +========================================================+
+[16:24:45]     
+[16:24:45]     Spec JSON path: Output dir (Enter for ./output):
+[16:24:45]       Starting Phase 4 generation (deterministic, no LLM)...
+[16:24:45]     
+[16:24:45]       +- Generating data_path (script, incl. own testbench)
+[16:24:45]     
+[16:24:45]       +- Generating testbenches (spec-only, independent of RTL)
+[16:24:45]     ==============================================================
+[16:24:45]       DATA PATH / ALIGNMENT GENERATOR
+[16:24:45]       Spec: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/spec/generated_spec.json
+[16:24:45]     ==============================================================
+[16:24:45]     
+[16:24:45]     [1/4] Validating parameters ...
+[16:24:45]       OK: All parameters valid
+[16:24:45]         CTRL_FREQ            = 100.0
+[16:24:45]         CTRL_PERIOD          = 10.0
+[16:24:45]         tCK_ns               = 2.5
+[16:24:45]         CLK_RATIO            = 4
+[16:24:45]         DATA_WIDTH           = 32
+[16:24:45]         ADDR_WIDTH           = 28
+[16:24:45]         SEL_WIDTH            = 4
+[16:24:45]         AUX_WIDTH            = 4
+[16:24:45]         DQ_WIDTH             = 8
+[16:24:45]         DQS_PAIRS            = 1
+[16:24:45]         DM_WIDTH             = 1
+[16:24:45]         BURST_LEN            = 8
+[16:24:45]         BEATS_PER_CYC        = 4
+[16:24:45]         BURST_CTRL_CYCLES    = 2
+[16:24:45]         WORD_BEATS           = 4
+[16:24:45]         CL                   = 6
+[16:24:45]         CWL                  = 5
+[16:24:45]         CL_CTRL              = 2
+[16:24:45]         CWL_CTRL             = 2
+[16:24:45]         WL                   = 5
+[16:24:45]         RD_FIFO_DEPTH        = 16
+[16:24:45]         WR_FIFO_DEPTH        = 16
+[16:24:45]         FIFO_PTR_W           = 4
+[16:24:45]         QUEUE_DEPTH          = 4
+[16:24:45]         ROW_BITS             = 15
+[16:24:45]         BANK_BITS            = 3
+[16:24:45]     
+[16:24:45]     [2/4] Generating RTL ...
+[16:24:45]       OK: 796 lines of SystemVerilog
+[16:24:45]     
+[16:24:45]     [3/4] Generating port manifest ...
+[16:24:45]       OK: 22 ports | 6 assertions | 4 cover points
+[16:24:45]     
+[16:24:45]     [4/4] Writing files ...
+[16:24:45]       -> /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/PHASE4RTL/data_path.sv
+[16:24:45]       -> /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/PHASE4RTL/data_path_manifest.json
+[16:24:45]     
+[16:24:45]     ==============================================================
+[16:24:45]       DONE -- data_path.sv ready for Phase 4
+[16:24:45]     ==============================================================
+[16:24:45]     
+[16:24:45]     ==============================================================
+[16:24:45]       GENERATION CHECK
+[16:24:45]     ==============================================================
+[16:24:45]       OK   data_path       success
+[16:24:45]       OK   testbenches     success
+[16:24:45]     
+[16:24:45]     ==============================================================
+[16:24:45]       LINT GATE -- Verilator Static Analysis
+[16:24:45]     ==============================================================
+[16:24:48]       OK   data_path       0 error(s), 15 warning(s)
+[16:24:48]         WARN: %Warning-WIDTH: data_path.sv:173: Operator ADD expects 32 bits on the LHS, but LHS's VARREF 'cfg_CWL_nCK' generates 8 bits.
+[16:24:48]         WARN: %Warning-WIDTH: data_path.sv:173: Operator ADD expects 32 bits on the RHS, but RHS's SEL generates 8 bits.
+[16:24:48]         WARN: %Warning-WIDTH: data_path.sv:173: Operator DIV expects 32 bits on the RHS, but RHS's SEL generates 8 bits.
+[16:24:48]         WARN: %Warning-WIDTH: data_path.sv:213: Operator EQ expects 32 bits on the RHS, but RHS's SEL generates 4 bits.
+[16:24:48]         WARN: %Warning-WIDTH: data_path.sv:369: Operator COND expects 4 bits on the Conditional True, but Conditional True's CONST '1'h1' generates 1 bits.
+[16:24:48]         WARN: %Warning-WIDTH: data_path.sv:369: Operator COND expects 4 bits on the Conditional False, but Conditional False's CONST '1'h0' generates 1 bits.
+[16:24:48]         WARN: %Warning-WIDTH: data_path.sv:377: Operator COND expects 5 bits on the Conditional True, but Conditional True's CONST '1'h1' generates 1 bits.
+[16:24:48]         WARN: %Warning-WIDTH: data_path.sv:377: Operator COND expects 5 bits on the Conditional False, but Conditional False's CONST '1'h0' generates 1 bits.
+[16:24:48]         WARN: %Warning-WIDTH: data_path.sv:377: Operator COND expects 5 bits on the Conditional True, but Conditional True's CONST '1'h1' generates 1 bits.
+[16:24:48]         WARN: %Warning-WIDTH: data_path.sv:377: Operator COND expects 5 bits on the Conditional False, but Conditional False's CONST '1'h0' generates 1 bits.
+[16:24:48]         WARN: %Warning-WIDTH: data_path.sv:510: Operator ADD expects 32 bits on the LHS, but LHS's VARREF 'cfg_CL_nCK' generates 8 bits.
+[16:24:48]         WARN: %Warning-WIDTH: data_path.sv:510: Operator ADD expects 32 bits on the RHS, but RHS's SEL generates 8 bits.
+[16:24:48]         WARN: %Warning-WIDTH: data_path.sv:510: Operator DIV expects 32 bits on the RHS, but RHS's SEL generates 8 bits.
+[16:24:48]         WARN: %Warning-WIDTH: data_path.sv:546: Operator EQ expects 32 bits on the RHS, but RHS's SEL generates 4 bits.
+[16:24:48]         WARN: %Warning-UNUSED: data_path.sv:79: Signal is not used: 'ddr_dqs_i'
+[16:24:48]     
+[16:24:48]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/VALIDATIONREPORT/phase4_lint_report.json
+[16:24:48]     
+[16:24:48]     ==============================================================
+[16:24:48]       SIM GATE -- Cadence Xcelium Behavioral Simulation
+[16:24:48]     ==============================================================
+[16:24:48]       Connecting to olympus.ece.tamu.edu as jacobz...
+[16:24:49]       Connected. Work dir: /home/ugrads/j/jacobz/cadence_agent_work
+[16:24:49]     
+[16:24:49]       Uploading 2 files...
+[16:24:49]     
+[16:24:49]       Running data_path...
+[16:24:53]         OK: data_path -- 35 passed, 0 failed
+[16:24:54]     
+[16:24:54]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/VALIDATIONREPORT/phase4_sim_report.json
+[16:24:54]     
+[16:24:54]     ==============================================================
+[16:24:54]       PHASE 4 PIPELINE -- ALL CHECKS PASSED
+[16:24:54]     ==============================================================
+[16:24:54]     
+[16:24:54]       Lint: PASS
+[16:24:54]       Sim:  PASS
+[16:24:54]         OK data_path.sv  OK data_path_tb.sv
+[16:24:54]     
+[16:24:54]       Report: /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/VALIDATIONREPORT/phase4_final_report.json
+[16:24:54] rtl_generation         PASS     phase 4
+[16:24:54] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Frontend2/scripts/generate_top.py --output-dir runs/matrix/preset_low-cost-embedded/drop --spec runs/matrix/preset_low-cost-embedded/spec/generated_spec.json   (cwd Frontend2/scripts)
+[16:24:54]     wrote /Users/jacob/Capstone/ecen403-llm-mc-1/runs/matrix/preset_low-cost-embedded/drop/TOPRTL/ddr3_controller.sv and manifest.json
+[16:24:54]       blocks instantiated       : 11
+[16:24:54]       direct connections        : 80
+[16:24:54]       registered glue groups    : 0
+[16:24:54]       combinational glue exprs  : 1
+[16:24:54]       top-level ports           : 24 in + 45 out + clk/rst_n
+[16:24:54]       known gaps                : 1
+[16:24:54]     
+[16:24:54]     running combined Verilator lint on Olympus...
+[16:24:59]       PASS -- 0 errors, 30 warning(s)
+[16:24:59] rtl_generation         PASS     top-level assembled: drop/TOPRTL
+[16:24:59] $ ../../../../Library/Developer/CommandLineTools/usr/bin/python3 Validation/tools/validate_drop.py   (cwd .)
+[16:24:59]     
+[16:24:59]     [1] resolve blocks through the declared drop (git 79a005318b27)
+[16:24:59]         --------------------------------------------------------------------
+[16:24:59]           11/11 block(s) resolved
+[16:24:59]         validation spec : rev compiled_ddr3800_x8_1lane_1rank_8ee94bc3 id 7ac9a20ddee4db71 (runs/matrix/preset_low-cost-embedded/spec/generated_spec.json)
+[16:24:59]         drop ships spec : rev compiled_ddr3800_x8_1lane_1rank_8ee94bc3 id 7ac9a20ddee4db71 (runs/matrix/preset_low-cost-embedded/drop/generated_spec.json)
+[16:24:59]     
+[16:24:59]     [2] spec review (rev compiled_ddr3800_x8_1lane_1rank_8ee94bc3)
+[16:24:59]         --------------------------------------------------------------------
+[16:24:59]         status    : PASS   (0 blocking, 2 advisory)
+[16:24:59]         JEDEC     : 25 pass / 0 fail / 0 skipped
+[16:24:59]         human     : yes -- open decisions listed above
+[16:24:59]     
+[16:24:59]     [3] regenerate integration map, schemas, monitors, SVA, coverage from the drop
+[16:24:59]         --------------------------------------------------------------------
+[16:24:59]         ok   vplan_gen.py             wrote /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/vplan/vplan.json
+[16:24:59]         ok   integration_map_findings.json   wrote 0 finding(s) -> runs/matrix/preset_low-cost-embedded/validation/outbox/i
+[16:24:59]         ok   width_findings.json      0 width mismatch(es) filed
+[16:24:59]         ok   schema_gen.py            wrote Validation/txn/generated/schemas.json
+[16:24:59]         ok   monitor_gen.py             monitors_bind.sv     27 bind statement(s)
+[16:24:59]         ok   sva_gen.py                   3 assertion(s); taxonomy IDs: HOST_001, HOST_002
+[16:24:59]         ok   coverage_gen.py            vplan asks for 49 coverage item(s) across 9 covergroup(s); this generator cove
+[16:24:59]         ok   block_coverage_gen.py      23 generated, 0 skipped, 26 timing points via coverage_gen.py
+[16:24:59]     
+[16:24:59]     [3a] re-grade the accepted models under this spec
+[16:24:59]         --------------------------------------------------------------------
+[16:24:59]     /Users/jacob/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+[16:24:59]       warnings.warn(
+[16:24:59]         ok    addr_decoder                       predictor gate bus_bridge
+[16:24:59]         ok    bank_tracker_scheduler             checker   gate stage_invariant
+[16:24:59]         ok    cmd_gen                            predictor gate bus_bridge
+[16:24:59]         ok    cmd_queue_scheduler                checker   gate stage_invariant
+[16:24:59]         ok    config_regs                        predictor gate register_map
+[16:24:59]         ok    data_path                          predictor gate bus_bridge
+[16:24:59]         ok    path_04_scheduler_bank_loop        checker   gate stage_invariant
+[16:24:59]         ok    path_05_scheduler_refresh_loop     checker   gate stage_invariant
+[16:24:59]         ok    path_08_init_to_cal                checker   gate stage_invariant
+[16:24:59]         ok    path_09_init_to_refresh            checker   gate stage_invariant
+[16:24:59]         ok    path_19_row_conflict               checker   gate stage_invariant
+[16:24:59]         ok    path_20_refresh_preempt            checker   gate stage_invariant
+[16:24:59]         ok    scheduler                          checker   gate stage_invariant
+[16:24:59]         ok    wb_port                            predictor gate bus_bridge
+[16:24:59]         ok    addr_decoder                       twin      gate bus_bridge
+[16:24:59]         ok    bank_tracker_scheduler             twin      gate stage_invariant
+[16:24:59]         ok    cmd_queue_scheduler                twin      gate stage_invariant
+[16:24:59]         ok    config_regs                        twin      gate register_map
+[16:24:59]         ok    data_path                          twin      gate bus_bridge
+[16:24:59]         ok    path_04_scheduler_bank_loop        twin      gate stage_invariant
+[16:24:59]         ok    path_05_scheduler_refresh_loop     twin      gate stage_invariant
+[16:24:59]         ok    path_08_init_to_cal                twin      gate stage_invariant
+[16:24:59]         ok    path_09_init_to_refresh            twin      gate stage_invariant
+[16:24:59]         ok    path_19_row_conflict               twin      gate stage_invariant
+[16:24:59]         ok    path_20_refresh_preempt            twin      gate stage_invariant
+[16:24:59]         ok    scheduler                          twin      gate stage_invariant
+[16:24:59]         ok    wb_port                            twin      gate bus_bridge
+[16:24:59]     
+[16:24:59]     [4] simulate 20 path(s), 4 at a time
+[16:24:59]         --------------------------------------------------------------------
+[16:24:59]         reports -> runs/matrix/preset_low-cost-embedded/validation/reports (kept apart from the shared reports so nothing stale is judged, run-local)
+[16:25:15]         path_01_write_cmd                  PASS
+[16:25:15]         path_02_read_cmd                   PASS
+[16:25:15]         path_03_read_return                PASS
+[16:25:15]         path_04_scheduler_bank_loop        PASS
+[16:25:26]         path_05_scheduler_refresh_loop     PASS
+[16:25:28]         path_07_backpressure               PASS
+[16:25:28]         path_08_init_to_cal                PASS
+[16:25:28]         path_09_init_to_refresh            PASS
+[16:25:33]         path_12_csr_timing_to_scheduling   PASS
+[16:25:38]         path_13_csr_refresh_to_scheduling  PASS
+[16:25:38]         path_14_status_init                PASS
+[16:25:38]         path_15_status_cal                 PASS
+[16:25:40]         path_16_status_refresh             PASS
+[16:25:43]         path_17_full_boot                  PASS
+[16:25:47]         path_18_full_write                 PASS
+[16:25:51]         path_19_row_conflict               PASS
+[16:25:53]         path_20_refresh_preempt            PASS
+[16:25:53]         path_21_wb_port_standalone         PASS
+[16:25:53]         path_22_csr_standalone             PASS
+[16:26:01]         path_23_host_ack_collision         PASS
+[16:26:01]         pass=20 fail=0 error=0
+[16:26:01]     
+[16:26:01]     [4b] formal: skipped (VALIDATION_SKIP_FORMAL)
+[16:26:01]         --------------------------------------------------------------------
+[16:26:01]     
+[16:26:01]     [5] coverage rollup
+[16:26:01]         --------------------------------------------------------------------
+[16:26:20]         design code coverage 79.7%; 34/45 vplan item(s) fully covered (75.6%)
+[16:26:20]     
+[16:26:20]     [5b] second opinions on this run's traces
+[16:26:20]         --------------------------------------------------------------------
+[16:26:20]         addr_decoder                       predictor     11    11        0       0
+[16:26:20]         bank_tracker_scheduler             checker       15    15        0       0
+[16:26:20]         cmd_queue_scheduler                checker       14    14        0       0
+[16:26:20]         config_regs                        predictor     18    18        0       0
+[16:26:20]         data_path                          predictor     10    10        0       0
+[16:26:20]         path_04_scheduler_bank_loop        checker        0     0        0       0
+[16:26:20]         path_05_scheduler_refresh_loop     checker       14    14        0       2
+[16:26:20]         path_08_init_to_cal                checker        5     5        0       0
+[16:26:20]         path_09_init_to_refresh            checker        5     5        0       0
+[16:26:20]         path_19_row_conflict               checker       10    10        0       0
+[16:26:20]         path_20_refresh_preempt            checker       14    14        0       0
+[16:26:20]         scheduler                          checker       14    14        0       0
+[16:26:20]         wb_port                            predictor     11    11        0       0
+[16:26:20]     
+[16:26:20]     [6] findings v2 + retry instructions
+[16:26:20]         --------------------------------------------------------------------
+[16:26:21]         drop 79a005318b27: 0 finding(s), 0 resolved since the previous drop, 0 carried untested
+[16:26:21]         PASS: 0 module(s) with failed checks:
+[16:26:21]     
+[16:26:21]     [7] compare with the previous drop
+[16:26:21]         --------------------------------------------------------------------
+[16:26:21]         FIX  path_05_scheduler_refresh_loop     fail     -> pass
+[16:26:21]         REG  path_07_backpressure               pass     -> pass
+[16:26:21]         FIX  path_18_full_write                 pass     -> pass
+[16:26:21]         FIX  path_20_refresh_preempt            fail     -> pass
+[16:26:21]         FIX  path_23_host_ack_collision         pass     -> pass
+[16:26:21]         fixed=4  regression=1  same=18
+[16:26:21]         vs ef0f141043a1: fixed=4  regression=1  same=18
+[16:26:21]     
+[16:26:21]     [8] snapshot
+[16:26:21]         --------------------------------------------------------------------
+[16:26:21]         snapshot: 23 report(s) -> Validation/reports/drops/79a005318b27
+[16:26:21]     
+[16:26:21]     [9] cockpit
+[16:26:21]         --------------------------------------------------------------------
+[16:26:21]         wrote Validation/reports/dashboard.html
+[16:26:21]     
+[16:26:21]       drop 79a005318b27: 20 pass / 0 fail / 0 error in 1.4 min; log Validation/reports/validate_drop/79a005318b27.log
+[16:26:21] rtl_validation         PASS     PASS; failed modules: none; package: runs/matrix/preset_low-cost-embedded/validation/round_1
+[16:26:21] backend                SKIPPED  --skip-backend
+[16:26:21] COMPLETE (backend skipped): the RTL drop passed validation.
+[16:26:21] state: complete  (runs/matrix/preset_low-cost-embedded/RUN_STATE.json)

@@ -81,13 +81,14 @@ level 2 runs the flow's RTL half on it (generation, gates, our validation;
 formal replays off, they belong to this document's §6). The claim the
 matrix supports is "every Tier-1 value and every pair, structurally, and
 the full RTL half on the corners", not "every spec". Current
-(2026-11-05): 50 specs, 31 pass review (the 19 blocked are five
-compiler/schema defects, Frontend reply addendum 14); presets at level 2:
-3 COMPLETE with 20 of 20 paths and no finding; the 2 ECC presets run all
-20 paths and fail validation on the port's ordering findings (as the golden
-spec does) plus an ECC-specific data-path loss (addenda 15, 18). Level 3,
-the whole flow with the backend, runs from the Backend's machine
-(docs/RUNNING_THE_FLOW.md).
+(2026-11-09): 50 specs, 31 pass review (the 19 blocked are five
+compiler/schema defects, Frontend reply addendum 14); presets at level 2
+on the generators as fixed 2026-11-09 (Frontend reply addendum 20): all
+5 COMPLETE with 20 of 20 paths and no finding (default, balanced,
+low-cost-embedded, high-performance, server-grade). Level 3, the whole
+flow with the backend, runs from the Backend's machine
+(docs/RUNNING_THE_FLOW.md) or from Jacob's Mac (USAGE.md, "Running the
+whole flow on a Mac").
 
 ## 4. Exclusion rules
 

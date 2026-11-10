@@ -1,0 +1,56 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_22_csr_standalone",
+  "strategy": "exact",
+  "verdict": "pass",
+  "timestamp": "2026-11-09T16:25:52.993396",
+  "blocks": [
+    "config_regs"
+  ],
+  "sequence": "Validation/sequences/generated/path_22_csr_standalone_seed1.json",
+  "stimulus_generator": "register_walk",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "79a005318b27",
+    "drop_id": "79a005318b27",
+    "design_id": "06972a119eb2",
+    "blocks_used": [
+      "config_regs"
+    ],
+    "validated_at": "0445be9",
+    "frontend_commits": {
+      "config_regs": "0445be9ec7f36abea11b57c929b9678811a69acb"
+    },
+    "roots": [
+      "runs/matrix/preset_low-cost-embedded/drop"
+    ],
+    "blocks": {
+      "config_regs": {
+        "rtl": "runs/matrix/preset_low-cost-embedded/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/matrix/preset_low-cost-embedded/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "compiled_ddr3800_x8_1lane_1rank_8ee94bc3"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/matrix/preset_low-cost-embedded/drop/generated_spec.json",
+      "revision": "compiled_ddr3800_x8_1lane_1rank_8ee94bc3"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "pass",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=131/131  (131 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    }
+  ],
+  "log": "runs/matrix/preset_low-cost-embedded/validation/reports/path_22_csr_standalone_sim.log",
+  "observed_trace": "runs/matrix/preset_low-cost-embedded/validation/reports/path_22_csr_standalone_observed.jsonl"
+}

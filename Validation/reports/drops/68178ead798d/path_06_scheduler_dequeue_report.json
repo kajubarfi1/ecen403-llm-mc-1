@@ -1,0 +1,115 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_06_scheduler_dequeue",
+  "strategy": "exact",
+  "verdict": "pass",
+  "timestamp": "2026-11-09T18:40:06.476688",
+  "blocks": [
+    "scheduler",
+    "cmd_queue"
+  ],
+  "derived_from": {
+    "host": "path_01_write_cmd",
+    "stage": "cmd_queue+scheduler"
+  },
+  "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json",
+  "stimulus_generator": "random",
+  "stages": [
+    {
+      "stage": "cmd_queue+scheduler",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
+      "scope": "cmd_queue_scheduler",
+      "verdict": "pass",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (334 transactions, no rule broken)",
+      "detail": [],
+      "rule_counts": {}
+    }
+  ],
+  "log": "runs/matrix/preset_server-grade/validation/reports/path_01_write_cmd_sim.log",
+  "observed_trace": "runs/matrix/preset_server-grade/validation/reports/path_01_write_cmd_observed.jsonl",
+  "rtl_drop": {
+    "git_head": "68178ead798d",
+    "drop_id": "68178ead798d",
+    "design_id": "9a05ce107976",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "0445be9",
+    "frontend_commits": {
+      "addr_decoder": "0445be9ec7f36abea11b57c929b9678811a69acb",
+      "bank_tracker": "0445be9ec7f36abea11b57c929b9678811a69acb",
+      "cmd_gen": "0445be9ec7f36abea11b57c929b9678811a69acb",
+      "cmd_queue": "0445be9ec7f36abea11b57c929b9678811a69acb",
+      "config_regs": "0445be9ec7f36abea11b57c929b9678811a69acb",
+      "data_path": "0445be9ec7f36abea11b57c929b9678811a69acb",
+      "refresh_ctrl": "0445be9ec7f36abea11b57c929b9678811a69acb",
+      "scheduler": "0445be9ec7f36abea11b57c929b9678811a69acb",
+      "wb_port": "0445be9ec7f36abea11b57c929b9678811a69acb"
+    },
+    "roots": [
+      "runs/matrix/preset_server-grade/drop"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE2RTL/addr_decoder.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_24196b26"
+      },
+      "bank_tracker": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE2RTL/bank_tracker.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_24196b26"
+      },
+      "cmd_gen": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE3RTL/cmd_gen.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_24196b26"
+      },
+      "cmd_queue": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE3RTL/cmd_queue.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_24196b26"
+      },
+      "config_regs": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_24196b26"
+      },
+      "data_path": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE4RTL/data_path.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_24196b26"
+      },
+      "refresh_ctrl": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_24196b26"
+      },
+      "scheduler": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE3RTL/scheduler.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_24196b26"
+      },
+      "wb_port": {
+        "rtl": "runs/matrix/preset_server-grade/drop/PHASE1RTL/wb_port.sv",
+        "manifest": "runs/matrix/preset_server-grade/drop/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_5lane_1rank_24196b26"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/matrix/preset_server-grade/drop/generated_spec.json",
+      "revision": "compiled_ddr31600_x8_5lane_1rank_24196b26"
+    },
+    "netlists": {}
+  },
+  "coverage_collected": true
+}
