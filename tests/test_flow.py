@@ -1096,6 +1096,29 @@ class TestChildStdoutEncoding(unittest.TestCase):
         self.assertEqual(rc, 0, out)
         self.assertIn("\u2500", out)
 
+    def test_sh_gives_the_child_utf8_file_io_too(self):
+        # the second half of the class: PYTHONIOENCODING covers only the
+        # streams, and phase 2's real crash was Path.write_text() emitting a
+        # U+2192 arrow into addr_decoder.sv
+        d = tempfile.mkdtemp(prefix="flow_enc_")
+        try:
+            target = os.path.join(d, "addr_decoder.sv").replace("\\", "/")
+            code = ("from pathlib import Path;"
+                    "Path(%r).write_text('// row -> bank \u2192 column\\n');"
+                    "print('wrote')" % target)
+            rc, out = flow.sh([sys.executable, "-c", code])
+            self.assertEqual(rc, 0, out)
+            with io.open(target, encoding="utf-8") as f:
+                self.assertIn("\u2192", f.read())
+        finally:
+            shutil.rmtree(d, ignore_errors=True)
+
+    def test_the_child_reports_utf8_as_its_preferred_encoding(self):
+        rc, out = flow.sh([sys.executable, "-c",
+                           "import locale;print(locale.getpreferredencoding(False))"])
+        self.assertEqual(rc, 0, out)
+        self.assertIn("utf-8", out.lower())
+
     def test_box_drawing_in_a_banner_survives(self):
         rc, out = flow.sh([sys.executable, "-c",
                            'print("\u250c" + "\u2500" * 8 + "\u2510")'])

@@ -76,6 +76,7 @@ if (-not $env:USE_DOCKER) { $env:USE_DOCKER = "1" }
 # so a generator could die in its own print() before writing any report.
 # flow.py sets this for its children too; here it also covers tools run
 # directly, e.g. Validation\tools\spec_matrix.py.
+if (-not $env:PYTHONUTF8) { $env:PYTHONUTF8 = "1" }
 if (-not $env:PYTHONIOENCODING) { $env:PYTHONIOENCODING = "utf-8" }
 
 # Report readiness without printing any secret value.
