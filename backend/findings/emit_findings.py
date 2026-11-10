@@ -229,8 +229,23 @@ def timing_finding(design: str, period_ns: float, parsed: Dict[str, Any],
     # crosses a boundary both ends are worth naming: the fix may be either side.
     end_block = resolve_block(end, block_paths)
     start_block = resolve_block(start, block_paths)
-    owner = end_block or design
-    candidates = [owner] + [b for b in (start_block,) if b and b != owner]
+    # Fall through to the startpoint's block before blaming the design. A path
+    # that ENDS at a top-level port has no hierarchical endpoint to resolve --
+    # wb_port_wb_dat_o[28] is a port of the top module, not u_wb_port.something
+    # -- so end_block is None and the owner used to become the design
+    # (TOPRTL/ddr3_controller). That is exactly the module the Frontend's phase
+    # agents do not generate, so the orchestrator's backend-to-frontend edge
+    # routed the finding nowhere and halted: "validation FAILED but names no
+    # module the Frontend generates" (2026-11-10 flow run, WNS -0.964 on
+    # u_wb_port.tag_rd[0] -> wb_port_wb_dat_o[28]).
+    #
+    # The logic to change still lives in a block: the path originates in one,
+    # and an output-port endpoint is where its own output lands. Output ports
+    # are also the most timing-penalised endpoints in this design -- the SDC
+    # budgets 20% of the period to logic outside the block -- so this is the
+    # common case for a top-level timing miss, not an edge case.
+    owner = end_block or start_block or design
+    candidates = [owner] + [b for b in (end_block, start_block) if b and b != owner]
     end_file = (block_paths or {}).get(end_block) or rtl_path
     start_file = (block_paths or {}).get(start_block) or end_file
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
