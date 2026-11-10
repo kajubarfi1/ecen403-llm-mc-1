@@ -188,14 +188,31 @@ class Run:
 
     def save(self):
         self.state["updated_utc"] = _now()
-        with open(self.state_path, "w") as f:
+        with open(self.state_path, "w", encoding="utf-8") as f:
             json.dump(self.state, f, indent=2)
 
     def log(self, msg):
         line = f"[{datetime.now().strftime('%H:%M:%S')}] {msg}"
         if not QUIET:
-            print(line)
-        with open(self.log_path, "a") as f:
+            # a console that cannot encode a character must never end a run
+            try:
+                print(line)
+            except UnicodeEncodeError:
+                try:
+                    print(line.encode("ascii", "replace").decode("ascii"))
+                except Exception:
+                    pass        # the file below is the durable record
+            except Exception:
+                pass            # echoing to a console is a convenience, never
+                                # a reason to end a run mid-build
+        # utf-8 explicitly, and the other half of the sh() encoding fix: sh()
+        # decodes subsystem output with errors="replace", which yields U+FFFD
+        # for any byte the subsystem did not emit as UTF-8 -- and the locale
+        # codec (cp1252 on Windows) cannot ENCODE U+FFFD. Fixing only the read
+        # side moved the crash here: phase 2's banner produced one replacement
+        # char and UnicodeEncodeError ended the run from inside the logger,
+        # after phase 1 had already passed lint and simulation on Olympus.
+        with open(self.log_path, "a", encoding="utf-8", errors="replace") as f:
             f.write(line + "\n")
 
     def record(self, stage, status, detail="", **extra):
@@ -816,7 +833,7 @@ def stage_frontend_regeneration(run, args, package):
     ri = os.path.join(package, "retry_instructions.json")
     phases_json = json.dumps({n: blocks for n, _, _, _, blocks in PHASES})
     pj = os.path.join(package, "phases.json")
-    with open(pj, "w") as f:
+    with open(pj, "w", encoding="utf-8") as f:
         f.write(phases_json)
     rc, txt = sh([PY, TO_ERROR_REPORT, "--retry", ri, "--drop", run.drop, "--phases", pj], log=run.log)
     if rc != 0:
@@ -942,7 +959,7 @@ def _set_core_utilization(bundle, util, run):
     was = cfg.get("CORE_UTILIZATION")
     cfg["CORE_UTILIZATION"] = str(util)
     m["orfs_config"] = cfg
-    with open(mf, "w") as f:
+    with open(mf, "w", encoding="utf-8") as f:
         json.dump(m, f, indent=2)
         f.write("\n")
     run.log(f"    [core-util] CORE_UTILIZATION {was if was else '(packager default)'}"

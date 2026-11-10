@@ -4,6 +4,7 @@ boundary. What is pinned: stage order, where artifacts land, the halts
 (spec review FAIL, missing feedback agent, caps, backend without Docker,
 the not-yet-built final stage), and resume."""
 
+import io
 import json
 import os
 import shutil
@@ -1014,6 +1015,63 @@ class TestCoreUtilization(FlowCase):
             with open(os.path.join(root, b, b + "_manifest.json")) as f:
                 m = json.load(f)
             self.assertNotIn("CORE_UTILIZATION", (m.get("orfs_config") or {}))
+
+
+class TestLogEncoding(unittest.TestCase):
+    """The run log must survive anything a subsystem prints.
+
+    sh() decodes subsystem output with errors="replace", so any byte a
+    subsystem did not emit as UTF-8 arrives as U+FFFD. log() then has to
+    write that. With the locale codec (cp1252 on Windows) it could not, and
+    UnicodeEncodeError ended a run from inside the logger -- after phase 1
+    had already passed lint and simulation on Olympus. Fixing only the read
+    side moved the crash rather than removing it.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp(prefix="flow_log_")
+        flow.QUIET = True
+
+    def tearDown(self):
+        flow.QUIET = False
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_a_replacement_char_does_not_end_the_run(self):
+        run = flow.Run(os.path.join(self.tmp, "run"))
+        run.log("phase 2 banner \ufffd and a box char \u2500")
+        with io.open(run.log_path, encoding="utf-8") as f:
+            txt = f.read()
+        self.assertIn("\ufffd", txt)
+        self.assertIn("\u2500", txt)
+
+    def test_record_with_undecodable_detail_still_saves_state(self):
+        run = flow.Run(os.path.join(self.tmp, "run2"))
+        run.record("rtl_generation", "PASS", "wrote \ufffd.sv")
+        self.assertEqual(run.state["stages"][-1]["status"], "PASS")
+        with io.open(run.state_path, encoding="utf-8") as f:
+            json.load(f)        # must still be valid JSON on disk
+
+    def test_console_failure_does_not_propagate(self):
+        # QUIET off, and a stdout that refuses the character: the run goes on
+        run = flow.Run(os.path.join(self.tmp, "run3"))
+        flow.QUIET = False
+        real = sys.stdout
+
+        class Hostile:
+            def write(self, _):
+                raise UnicodeEncodeError("charmap", "x", 0, 1, "nope")
+
+            def flush(self):
+                pass
+
+        sys.stdout = Hostile()
+        try:
+            run.log("banner \ufffd")
+        finally:
+            sys.stdout = real
+            flow.QUIET = True
+        with io.open(run.log_path, encoding="utf-8") as f:
+            self.assertIn("\ufffd", f.read())
 
 
 if __name__ == "__main__":
