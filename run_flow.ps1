@@ -71,6 +71,13 @@ Import-EnvFile $ValEnv "Validation\setup.env"
 # The backend refuses to run unless this is exactly 1 (it drives ORFS in Docker).
 if (-not $env:USE_DOCKER) { $env:USE_DOCKER = "1" }
 
+# 101 files across Frontend2 and Validation print non-ASCII (check marks,
+# box drawing). Windows stdout defaults to cp1252, which cannot encode them,
+# so a generator could die in its own print() before writing any report.
+# flow.py sets this for its children too; here it also covers tools run
+# directly, e.g. Validation\tools\spec_matrix.py.
+if (-not $env:PYTHONIOENCODING) { $env:PYTHONIOENCODING = "utf-8" }
+
 # Report readiness without printing any secret value.
 function Show-Ready($name, $hint) {
     $v = [Environment]::GetEnvironmentVariable($name)

@@ -1074,5 +1074,34 @@ class TestLogEncoding(unittest.TestCase):
             self.assertIn("\ufffd", f.read())
 
 
+class TestChildStdoutEncoding(unittest.TestCase):
+    """Subsystem output must survive the platform's default stdout codec.
+
+    101 files across Frontend2 and Validation print non-ASCII. On Windows the
+    default stdout codec is cp1252, so addr_decoder_gen.py's `print("  \u2713
+    Valid")` raised UnicodeEncodeError inside the generator -- phase 2 died
+    before writing a report, and the flow could only halt and say "fix by
+    hand". sh() decodes as UTF-8, so the child has to encode as UTF-8.
+    """
+
+    def test_sh_gives_the_child_a_utf8_stdout(self):
+        # a real subprocess, printing the exact character that broke phase 2
+        rc, out = flow.sh([sys.executable, "-c", 'print("  \u2713 Valid")'])
+        self.assertEqual(rc, 0, out)
+        self.assertIn("\u2713", out)
+
+    def test_an_explicit_setting_is_respected(self):
+        env = dict(os.environ, PYTHONIOENCODING="utf-8")
+        rc, out = flow.sh([sys.executable, "-c", 'print("\u2500")'], env=env)
+        self.assertEqual(rc, 0, out)
+        self.assertIn("\u2500", out)
+
+    def test_box_drawing_in_a_banner_survives(self):
+        rc, out = flow.sh([sys.executable, "-c",
+                           'print("\u250c" + "\u2500" * 8 + "\u2510")'])
+        self.assertEqual(rc, 0, out)
+        self.assertIn("\u250c", out)
+
+
 if __name__ == "__main__":
     unittest.main()

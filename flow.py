@@ -248,6 +248,15 @@ def sh(cmd, cwd=None, stdin=None, env=None, log=None, timeout=None):
     # when they exit; unbuffered, the run log and gui/flow_gui.py see them live
     env = dict(env or os.environ)
     env.setdefault("PYTHONUNBUFFERED", "1")
+    # Make the child's stdout UTF-8 instead of the platform default. 101 files
+    # across Frontend2 and Validation print non-ASCII (a U+2713 check mark in
+    # addr_decoder_gen.py line 225, box-drawing elsewhere), and on Windows the
+    # default stdout codec is cp1252, which cannot ENCODE them: phase 2 died in
+    # its own print() before writing a report, so the flow could only halt and
+    # say "fix by hand". sh() already decodes as UTF-8, so this makes the two
+    # halves agree. One line here instead of editing 101 files in two other
+    # subsystems.
+    env.setdefault("PYTHONIOENCODING", "utf-8")
     # encoding/errors are not optional on Windows: text=True alone decodes with
     # the locale codec (cp1252 here), and the backend's own status line contains
     # a U+2192 arrow, so reading stage 6's output died with UnicodeDecodeError
