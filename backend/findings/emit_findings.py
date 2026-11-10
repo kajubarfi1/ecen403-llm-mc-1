@@ -259,7 +259,24 @@ def timing_finding(design: str, period_ns: float, parsed: Dict[str, Any],
         "owner_module": owner,
         "owner_candidates": candidates,
         "severity": SEVERITY_MISSED_TARGET,        # PENDING(2)
-        "confidence": "observed",
+        # Validation's schema: confirmed = "model-free evidence (X on a pin, an
+        # independent assertion) or read at source"; observed = "reported by a
+        # checker or predictor only" (findings_schema_v2.json).
+        #
+        # An STA setup miss is neither a checker nor a predictor. OpenSTA
+        # measures the routed netlist with extracted parasitics (SPEF) -- the
+        # implementation itself, not a model of it -- which is the detector
+        # recorded two lines up: sta:opensta:setup. By that definition this is
+        # model-free evidence, so "observed" was simply the wrong label.
+        #
+        # It is also load-bearing, not cosmetic. The Frontend's phase agents
+        # auto-patch only when confidence == "confirmed"
+        # (phase{N}_validation_agent.py: _load_external_findings), and declined
+        # this finding on 2026-11-10 with "only 'observed' findings (a
+        # predictor's word, not model-free evidence)". Their gate is right; our
+        # label was wrong, and mislabelling it meant no backend timing finding
+        # could ever reach a repair agent unattended.
+        "confidence": "confirmed",
         "title": f"{owner}: does not close timing at {period_ns} ns",
         "requirement": f"{owner} must close timing at the clock period of {period_ns} ns "
                        f"({round(1000.0 / period_ns)} MHz)",
