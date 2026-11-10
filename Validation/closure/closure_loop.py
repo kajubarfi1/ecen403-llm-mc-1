@@ -50,7 +50,14 @@ def _py(cmd):
     """Run our own tools with THIS interpreter, never whatever `python3` is
     first on PATH: a venv invoked by absolute path otherwise loses its
     packages in every subprocess (Frontend handoff 2026-10-15, 2a)."""
-    return re.sub(r"^python3 ", sys.executable + " ", cmd) if isinstance(cmd, str) else cmd
+    # The replacement must be a FUNCTION, not a string: on Windows
+    # sys.executable is C:\\...\\python.exe, and re.sub processes escapes in a
+    # string replacement, so "\\U" in C:\\Users raised
+    #   re.PatternError: bad escape \\U at position 2
+    # and took every stage that shells out to our own tools with it. A
+    # callable replacement is substituted literally.
+    return (re.sub(r"^python3 ", lambda _m: sys.executable + " ", cmd)
+            if isinstance(cmd, str) else cmd)
 
 sys.path.insert(0, os.path.join(ROOT, "Validation", "agents"))
 sys.path.insert(0, os.path.join(ROOT, "Validation", "coverage"))
