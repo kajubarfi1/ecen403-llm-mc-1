@@ -179,9 +179,53 @@ def orfs_stage_of(fname):
     return {"1": "synth", "2": "floorplan", "3": "place", "4": "cts", "6": "finish"}.get(major)
 
 
+# Reading a file must never stop ORFS writing one. On Windows a plain open()
+# leaves a handle without FILE_SHARE_DELETE, and while it is held nobody can
+# rename or delete that file -- so this page, polling an in-progress step log,
+# can make the build itself fail:
+#
+#   mv: cannot move '.../5_2_route.tmp.log' to '.../5_2_route.log':
+#       Permission denied
+#   make[1]: *** [Makefile:549: do-5_2_route] Error 1
+#
+# which is how the 2026-11-12 run died after detailed routing had already
+# finished clean (0 DRC, 0 antenna). ORFS writes every step to <step>.tmp.log
+# and renames it on completion, so the collision window is exactly the moment
+# a step ends -- the moment the page most wants to read. Open with every share
+# flag set, so a reader is invisible to the writer. POSIX renames over open
+# files happily and needs none of this.
+if sys.platform == "win32":
+    import ctypes
+    import msvcrt
+    from ctypes import wintypes
+
+    _GENERIC_READ = 0x80000000
+    _SHARE_ALL = 0x01 | 0x02 | 0x04          # READ | WRITE | DELETE
+    _OPEN_EXISTING = 3
+    _INVALID_HANDLE = ctypes.c_void_p(-1).value
+    _CreateFileW = ctypes.windll.kernel32.CreateFileW
+    _CreateFileW.argtypes = [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD,
+                             wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD,
+                             wintypes.HANDLE]
+    _CreateFileW.restype = wintypes.HANDLE
+
+    def open_shared(path):
+        """Open for reading without blocking the writer's rename or delete."""
+        h = _CreateFileW(str(path), _GENERIC_READ, _SHARE_ALL, None,
+                         _OPEN_EXISTING, 0, None)
+        if not h or h == _INVALID_HANDLE:
+            raise OSError(ctypes.get_last_error(), "cannot open", str(path))
+        # the fd takes ownership of the handle; closing the file closes it
+        fd = msvcrt.open_osfhandle(h, os.O_RDONLY | getattr(os, "O_BINARY", 0))
+        return os.fdopen(fd, "rb")
+else:
+    def open_shared(path):
+        return open(path, "rb")
+
+
 def read_tail(path, nbytes=65536):
     try:
-        with open(path, "rb") as f:
+        with open_shared(path) as f:
             f.seek(0, os.SEEK_END)
             size = f.tell()
             f.seek(max(0, size - nbytes))
@@ -905,7 +949,13 @@ class Watcher:
         # the last backend invocation in flow.log
         start_i = None
         for i, (t, body) in enumerate(log):
-            if body.startswith("$ ") and "backend/agents/pipeline.py" in body:
+            # flow.py echoes the command with the platform's own separator, so
+            # on Windows this line reads backend\agents\pipeline.py and a
+            # forward-slash test never matches: start_i stays None and the
+            # whole backend card sits at "pending" for the entire build, with
+            # no step detail and no time estimate (2026-11-12, first Windows
+            # GUI run). Compare with separators normalised either way.
+            if body.startswith("$ ") and "backend/agents/pipeline.py" in body.replace("\\", "/"):
                 start_i = i
         if start_i is None:
             rec = [s for s in state.get("stages", []) if s["stage"] == "backend"]
@@ -1007,8 +1057,10 @@ class Watcher:
                         bk["orfs"]["cells"] = cells
                     try:
                         bk["last_write"] = max(os.path.getmtime(f) for f in glob.glob(os.path.join(design_dir, "*.log")))
-                    except ValueError:
+                    except ValueError:      # no logs yet
                         pass
+                    except OSError:         # one vanished between glob and stat
+                        pass                # (ORFS renames its .tmp logs mid-step)
                 else:
                     # no step logs to read: a time-based estimate across ORFS steps
                     bk["orfs"]["estimated"] = True
