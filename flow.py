@@ -679,6 +679,9 @@ def stage_rtl_validation(run, args, partial=False, tag=None):
         env["VALIDATION_SKIP_FORMAL"] = "1"
     partial = partial or bool(getattr(args, "phases", None))
     cmd = [PY, VALIDATE_DROP] + (["--partial"] if partial else [])
+    # the constrained-random seeds validate_drop runs after the directed
+    # suite (its stage 4a); 0 turns them off for a quick loop
+    cmd += ["--random-seeds", str(getattr(args, "random_seeds", 4))]
     rc, txt = sh(cmd, cwd=ROOT, env=env, log=run.log, timeout=4 * 3600)
     _copy_current(run, dest)
     hand = os.path.join(dest, "HANDOFF.json")
@@ -1429,8 +1432,12 @@ def plan(args):
           + (f"phase {ph} pipeline(s) only (stdin: spec, <run>/drop); no top-level assembly, backend skipped"
              if ph else "phase1..4 pipelines (stdin: spec, <run>/drop) + generate_top.py")
           + ("  [validate --partial after each phase]" if args.validate_per_phase else ""))
+    rs = getattr(args, "random_seeds", 4)
     print(f"  4 rtl_validation        Validation  validate_drop.py on <run>/drop against the shipped spec"
           f"  -> <run>/validation/round_N/  (cap {args.max_rtl_rounds} rounds)")
+    print(f"     constrained-random   " + (f"random_v2 x {rs} seed(s) on 6 paths after the directed suite; "
+                                            f"coverage merged, exclusions applied (--random-seeds)"
+                                            if rs > 0 else "SKIPPED (--random-seeds 0)"))
     print(f"  4b formal (opt-in)      Validation  "
           + (f"run_formal.py --path {getattr(args, 'formal_path', None) or 'path_01_write_cmd'}"
              f" --time {getattr(args, 'formal_time', None) or '20m'}  (informational; never halts)"
@@ -1492,6 +1499,11 @@ def main() -> int:
                          "backend are skipped")
     ap.add_argument("--validate-per-phase", action="store_true",
                     help="run a partial validation after each Frontend phase, not only at the end")
+    ap.add_argument("--random-seeds", type=int, default=4, metavar="N",
+                    help="constrained-random (random_v2) seeds per path that validate_drop runs "
+                         "on its six traffic paths after the directed suite (default 4: 24 runs, a "
+                         "few minutes). Their failures are findings like any other; their coverage "
+                         "is merged with the directed runs. 0 turns them off")
     ap.add_argument("--formal", action="store_true",
                     help="after rtl_validation passes, run JasperGold formal proof (run_formal.py) "
                          "on one command path (--formal-path, default path_01_write_cmd). Opt-in, "

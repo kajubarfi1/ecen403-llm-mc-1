@@ -5,7 +5,7 @@
   "drop": "43f6cb8f0641",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "spec_id": "00d082c3f72d1b34",
-  "generated_utc": "2026-11-11T20:08:03.192122Z",
+  "generated_utc": "2026-11-12T17:44:45.185847Z",
   "failed_modules": [],
   "retry_instructions": {},
   "resolved_since_previous_drop": [],
@@ -55,6 +55,55 @@
       "path_23_host_ack_collision"
     ],
     "paths_blocked": {},
-    "note": "Complete run: every runnable path simulated on this drop."
+    "note": "Complete run: every runnable path simulated on this drop.",
+    "random_runs": {
+      "generator": "random_v2",
+      "seeds": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "drives": 400,
+      "paths": [
+        "path_03_read_return",
+        "path_04_scheduler_bank_loop",
+        "path_07_backpressure",
+        "path_18_full_write",
+        "path_19_row_conflict",
+        "path_20_refresh_preempt"
+      ],
+      "tag": "crv2_s<seed>",
+      "runs": {
+        "path_03_read_return_s1": "PASS",
+        "path_03_read_return_s2": "PASS",
+        "path_03_read_return_s3": "PASS",
+        "path_03_read_return_s4": "PASS",
+        "path_04_scheduler_bank_loop_s1": "PASS",
+        "path_04_scheduler_bank_loop_s2": "PASS",
+        "path_04_scheduler_bank_loop_s3": "PASS",
+        "path_04_scheduler_bank_loop_s4": "PASS",
+        "path_07_backpressure_s1": "PASS",
+        "path_07_backpressure_s2": "PASS",
+        "path_07_backpressure_s3": "PASS",
+        "path_07_backpressure_s4": "PASS",
+        "path_18_full_write_s1": "PASS",
+        "path_18_full_write_s2": "PASS",
+        "path_18_full_write_s3": "PASS",
+        "path_18_full_write_s4": "PASS",
+        "path_19_row_conflict_s1": "PASS",
+        "path_19_row_conflict_s2": "PASS",
+        "path_19_row_conflict_s3": "PASS",
+        "path_19_row_conflict_s4": "PASS",
+        "path_20_refresh_preempt_s1": "PASS",
+        "path_20_refresh_preempt_s2": "PASS",
+        "path_20_refresh_preempt_s3": "PASS",
+        "path_20_refresh_preempt_s4": "PASS"
+      },
+      "pass": 24,
+      "fail": 0,
+      "not_run": [],
+      "reports": "Validation/reports/paths/random"
+    }
   }
 }

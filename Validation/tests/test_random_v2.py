@@ -73,3 +73,33 @@ class RandomV2(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestStormPhase(unittest.TestCase):
+    """A storm phase sends 2 x queue depth requests to one address with no
+    idle between them, write first (2026-11-12: the per-entry conflict
+    matrix of cmd_queue is only reachable this way)."""
+
+    def test_storm_repeats_one_address_without_idle(self):
+        RV = V
+        spec, schemas, catalog = load()
+        depth = int(spec["controller_architecture"].get("command_queue_depth", 16))
+        found = False
+        for seed in range(1, 12):
+            seq = RV.generate(spec, schemas, catalog, "wb_port", seed=seed, drives=400)
+            if "storm" not in seq["_provenance"]["phases"]:
+                continue
+            # the longest run of consecutive drives to one address, no idle between
+            best, run, last = 0, 0, None
+            for st in seq["steps"]:
+                if st["op"] != "drive":
+                    run, last = 0, None
+                    continue
+                a = st["fields"].get("addr", st["fields"].get("address"))
+                run = run + 1 if a == last else 1
+                last = a
+                best = max(best, run)
+            self.assertGreaterEqual(best, min(2 * depth, 8))
+            found = True
+            break
+        self.assertTrue(found, "no seed in 1..11 drew a storm phase")

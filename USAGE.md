@@ -476,6 +476,7 @@ python3 flow.py [design input] [options]
 | `--backend-mode <mode>` | Physical design depth: `contract` (seconds), `synth` (minutes), `build` (about one hour, including sign-off) or `full` (`build` plus optimization) |
 | `--phases <N[,N]>` | Generate only the specified RTL phases, for partial checks. Physical design is skipped |
 | `--validate-per-phase` | Validate after each RTL phase as well as at the end |
+| `--random-seeds <N>` | Constrained-random seeds per traffic path that RTL validation runs after the directed suite (default 4: 24 runs; 0 skips them) |
 | `--max-rtl-rounds <N>` | Maximum automatic RTL correction attempts (default: 4) |
 | `--max-backend-rounds <N>` | Maximum physical design correction attempts (default: 2) |
 | `--run-dir <path>` | Directory for this run's output |
@@ -523,6 +524,14 @@ docker cp /tmp/orfs_install/. orfs-build:/OpenROAD-flow-scripts/tools/install/
 docker exec orfs-build bash -c "./build_openroad.sh --no_init --local --openroad_only --threads 6 --openroad-args -no-gui"   # ~13 h on 6 cores
 docker exec orfs-build bash -c "apt-get update -qq && apt-get install -y -qq klayout"   # the dev image's KLayout build leaves no binary
 docker exec orfs-build bash -c "rm -rf /root/.cache/bazel-repository-cache tools/OpenROAD tools/yosys tools/kepler-formal"   # the image needs flow/ and tools/install only
+# ORFS f34d4d9 (2026-11-09) ships a Makefile bug: line 512 says
+#   $(RESULTS_DIR)/2_floorplan.sdc: $(RESULTS_DIR)/2_1_floorplan.odb
+# but the copy rule above it needs 2_1_floorplan.sdc, which no rule produces, so
+# every build stops after synthesis with "No rule to make target .../2_1_floorplan.sdc".
+# Fix the line to name 2_1_floorplan.sdc in the checkout AND inside the container
+# before committing (sed below; a committed image is patched the same way with
+# docker run / sed / docker commit, done 2026-11-12).
+docker exec orfs-build sed -i 's|^\$(RESULTS_DIR)/2_floorplan.sdc: \$(RESULTS_DIR)/2_1_floorplan.odb$|$(RESULTS_DIR)/2_1_floorplan.sdc: $(RESULTS_DIR)/2_1_floorplan.odb|' flow/Makefile
 docker commit orfs-build openroad/orfs:arm64-local
 docker run --rm openroad/orfs:arm64-local bash -c "/OpenROAD-flow-scripts/tools/install/OpenROAD/bin/openroad -help | head -1; klayout -v"
 python3 -m pip install --user jsonschema paramiko anthropic langgraph langchain-core
@@ -625,7 +634,16 @@ python3 Validation/tools/validate_drop.py --paths path_01_write_cmd path_22_csr_
 
 The nine steps print as they run: resolve the drop, review the spec, regenerate
 the environment, re-grade the models, simulate, roll up coverage, emit
-findings, compare with the previous drop, refresh the dashboard. Each path's
+findings, compare with the previous drop, refresh the dashboard. After the
+directed paths (step 4) the same run simulates constrained-random seeds on the
+six traffic paths (step 4a: `random_v2`, 4 seeds x 6 paths x 400 host requests
+by default, `--random-seeds N`, 0 to skip; reports under
+`reports/paths/random/<path>_s<seed>/`). A seed that fails files its finding
+like a directed run, with the seed in the reproduction command; their coverage
+databases merge with the directed ones in step 5, which then applies the
+signoff's approved exclusion rules against the spec under judgement and prints
+both numbers (`88.4 % measured / 95.7 % adjusted` on the golden drop; the 20
+directed paths alone measure 81 %, and 72 % on a 4-lane preset). Each path's
 report carries, after its stage checkers, a `(conservation)` row (every
 transaction a block was handed produced the one it owes downstream by the end
 of the run; the rules are the `conservation` section of

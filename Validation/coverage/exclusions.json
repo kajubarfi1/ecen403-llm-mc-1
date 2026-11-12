@@ -340,6 +340,96 @@
       "approved_by": "Jacob Zatopek",
       "approved_utc": "2026-10-29T16:58:31.243700+00:00",
       "decision_note": "Approved 2026-10-29 after the uncovered-item review of the four blocks under 90 %."
+    },
+    {
+      "id": "X-020",
+      "code": "E-DEAD",
+      "instance": "u_cmd_queue",
+      "signals": [
+        "conf",
+        "older"
+      ],
+      "bits": {
+        "diagonal": true
+      },
+      "reason": "conf[s][s] and older[s][s] are constant 0: both rows are written only on enqueue into free_slot, conf[free_slot] <= enq_conf with enq_conf[j] = mem_valid[j] && ..., and older[free_slot] <= mem_valid, and free_slot is by construction a slot with mem_valid == 0 (the first invalid slot, free_found). An entry is never its own older or conflicting request. 16 + 16 bits; the off-diagonal bits are reachable and are what the random_v2 same-address storm phase drives.",
+      "spec_ref": "cmd_queue.sv: enq_conf, free_slot, the enqueue block (constant-propagation argument, cited per SIGNOFF section 4 E-DEAD)",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-11-12T17:48:00.286897+00:00",
+      "decision_note": "Approved 2026-11-12 (Jacob Zatopek) after the uncovered-item review of cmd_queue and data_path on drop 43f6cb8f0641: both blocks at 100 % block and expression, the remainder toggle bits with the cited reason each. X-023/024 note: the 32-bit wait wires are a generator sizing choice; narrowing them in the Phase 4 generator would retire these two entries."
+    },
+    {
+      "id": "X-021",
+      "code": "E-SPEC",
+      "instance": "u_data_path",
+      "signals": [
+        "wr_pend_wait"
+      ],
+      "bits": {
+        "above_max": "ceil(timing_model.CWL_cycles / clocking_model.clock_ratio_ddr_to_controller) - 1",
+        "width": 4
+      },
+      "reason": "Per-entry saturating countdown loaded with wr_wait_init = ceil(CWL/clock_ratio) + 1 - 2 (1 for CWL = 8 at 4:1); a 4-bit field sized for any CWL. Same argument as X-012 (wr_lat_ctr), per pending-queue entry.",
+      "spec_ref": "timing_model.CWL_cycles; clocking_model.clock_ratio_ddr_to_controller",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-11-12T17:48:00.286897+00:00",
+      "decision_note": "Approved 2026-11-12 (Jacob Zatopek) after the uncovered-item review of cmd_queue and data_path on drop 43f6cb8f0641: both blocks at 100 % block and expression, the remainder toggle bits with the cited reason each. X-023/024 note: the 32-bit wait wires are a generator sizing choice; narrowing them in the Phase 4 generator would retire these two entries."
+    },
+    {
+      "id": "X-022",
+      "code": "E-SPEC",
+      "instance": "u_data_path",
+      "signals": [
+        "rd_pend_wait"
+      ],
+      "bits": {
+        "above_max": "ceil(timing_model.CL_cycles / clocking_model.clock_ratio_ddr_to_controller) - 1",
+        "width": 4
+      },
+      "reason": "Per-entry saturating countdown loaded with rd_wait_init = ceil(CL/clock_ratio) + 1 - 2 (2 for CL = 11 at 4:1); a 4-bit field sized for any CL. Same argument as X-011 (rd_lat_ctr), per pending-queue entry.",
+      "spec_ref": "timing_model.CL_cycles; clocking_model.clock_ratio_ddr_to_controller",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-11-12T17:48:00.286897+00:00",
+      "decision_note": "Approved 2026-11-12 (Jacob Zatopek) after the uncovered-item review of cmd_queue and data_path on drop 43f6cb8f0641: both blocks at 100 % block and expression, the remainder toggle bits with the cited reason each. X-023/024 note: the 32-bit wait wires are a generator sizing choice; narrowing them in the Phase 4 generator would retire these two entries."
+    },
+    {
+      "id": "X-023",
+      "code": "E-SPEC",
+      "instance": "u_data_path",
+      "signals": [
+        "wr_wait_cycles"
+      ],
+      "bits": {
+        "above_max": "ceil(timing_model.CWL_cycles / clocking_model.clock_ratio_ddr_to_controller) + 1",
+        "width": 32
+      },
+      "reason": "32-bit wire holding ceil(CWL/clock_ratio) + 1 controller cycles from issue to the first drive cycle (3 for CWL = 8 at 4:1); the spec fixes CWL for the speed grade, so every bit above that value is constant.",
+      "spec_ref": "timing_model.CWL_cycles; clocking_model.clock_ratio_ddr_to_controller",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-11-12T17:48:00.286897+00:00",
+      "decision_note": "Approved 2026-11-12 (Jacob Zatopek) after the uncovered-item review of cmd_queue and data_path on drop 43f6cb8f0641: both blocks at 100 % block and expression, the remainder toggle bits with the cited reason each. X-023/024 note: the 32-bit wait wires are a generator sizing choice; narrowing them in the Phase 4 generator would retire these two entries."
+    },
+    {
+      "id": "X-024",
+      "code": "E-SPEC",
+      "instance": "u_data_path",
+      "signals": [
+        "rd_wait_cycles"
+      ],
+      "bits": {
+        "above_max": "ceil(timing_model.CL_cycles / clocking_model.clock_ratio_ddr_to_controller) + 1",
+        "width": 32
+      },
+      "reason": "32-bit wire holding ceil(CL/clock_ratio) + 1 controller cycles from issue to the first capture cycle (4 for CL = 11 at 4:1); the spec fixes CL for the speed grade, so every bit above that value is constant.",
+      "spec_ref": "timing_model.CL_cycles; clocking_model.clock_ratio_ddr_to_controller",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "approved_utc": "2026-11-12T17:48:00.286897+00:00",
+      "decision_note": "Approved 2026-11-12 (Jacob Zatopek) after the uncovered-item review of cmd_queue and data_path on drop 43f6cb8f0641: both blocks at 100 % block and expression, the remainder toggle bits with the cited reason each. X-023/024 note: the 32-bit wait wires are a generator sizing choice; narrowing them in the Phase 4 generator would retire these two entries."
     }
   ]
 }

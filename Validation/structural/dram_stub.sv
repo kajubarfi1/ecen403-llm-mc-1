@@ -9,7 +9,13 @@
 //   ACT  opens a row per bank (ddr_addr carries the row)
 //   WR   after CWL the data path drives dq for BURST_CTRL_CYC cycles, one
 //        beat per cycle (host_width / channel_width beats, low half first);
-//        the stub stores every beat at {bank, open row, column}
+//        the stub stores every beat at {bank, open row, column}, byte by
+//        byte under the data mask (dm bit set = the byte keeps its old
+//        value; spec data_path_mapping.ddr_dm_polarity = active_high_mask).
+//        Until 2026-11-12 the stub had no dm input and stored the whole
+//        word of a byte-masked write, so a storm of same-address writes
+//        with mixed byte enables read back wrong at the host (random_v2
+//        storm phase, path_18 x4) while the pin-level predictor passed.
 //   RD   ceil(CL / CLK_RATIO) controller cycles after the cycle in which it
 //        samples the RD, the stub drives the stored beats back in order on
 //        dq_i, one per cycle, with dqs_i high for the burst
@@ -40,7 +46,8 @@ module dram_stub #(
     parameter DEPTH   = 16,
     parameter CMD_ACT = 4'b0011,
     parameter CMD_WR  = 4'b0100,
-    parameter CMD_RD  = 4'b0101
+    parameter CMD_RD  = 4'b0101,
+    parameter DM_MASK_LEVEL = 1'b1    // dm value that masks a byte (active_high_mask)
 ) (
     input  logic               clk,
     input  logic               rst_n,
@@ -49,6 +56,7 @@ module dram_stub #(
     input  logic [BANK_W-1:0]  ddr_bank,
     input  logic [DQ_W-1:0]    ddr_dq_o,
     input  logic               ddr_dq_oe,
+    input  logic [DQ_W/8-1:0]  ddr_dm,
     input  logic [7:0]         cfg_CL_nCK,
     input  logic [7:0]         cfg_CWL_nCK,
     output logic [DQ_W-1:0]    ddr_dq_i,
@@ -130,8 +138,10 @@ module dram_stub #(
           end
         end
         if (wcap && widx < BURST_CTRL_CYC) begin
-          wtmp = mem.exists(wkey) ? mem[wkey] : '0;
-          wtmp[widx*DQ_W +: DQ_W] = ddr_dq_o;
+          wtmp = mem.exists(wkey) ? mem[wkey] : unwritten(wkey);
+          for (int b = 0; b < DQ_W/8; b++)
+            if (ddr_dm[b] != DM_MASK_LEVEL)
+              wtmp[widx*DQ_W + b*8 +: 8] = ddr_dq_o[b*8 +: 8];
           mem[wkey] = wtmp;
           widx = widx + 1;
         end

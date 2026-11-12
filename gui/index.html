@@ -768,9 +768,12 @@ function renderValidation() {
   if (repoFallback && !live) {
     note.hidden = false;
     note.textContent = `Showing the repository's checked-in drop (${vdata.drop.drop_id || "?"}): this run has no validation reports yet.`;
-  } else if (vd && vd.coverage && vd.coverage.matches_spec) {
-    const c = vd.coverage;
-    const parts = [c.code_pct != null ? `code coverage ${c.code_pct}%` : "",
+  } else if (vd && ((vd.coverage && vd.coverage.matches_spec) || (vd.random && vd.random.runs.length))) {
+    const c = (vd.coverage && vd.coverage.matches_spec) ? vd.coverage : {};
+    const r = vd.random || { runs: [] };
+    const parts = [
+      r.runs.length ? `random: ${r.pass}/${r.runs.length} seeds pass${r.fail ? ` (${r.fail} fail)` : ""}` : "",
+      c.code_pct != null ? `code coverage ${c.code_pct}% measured${c.adjusted_pct != null ? ` · ${c.adjusted_pct}% adjusted (${c.excluded_bits} bits under ${c.exclusions_approved} approved exclusions)` : ""}` : "",
       c.covered != null ? `${c.covered}/${c.vplan_items} vplan items covered${c.unreachable ? ` (${c.unreachable} unreachable by spec)` : ""}` : ""].filter(Boolean);
     note.hidden = !parts.length;
     note.textContent = parts.join(" · ");

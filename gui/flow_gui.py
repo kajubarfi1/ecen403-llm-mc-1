@@ -446,6 +446,20 @@ def validation_detail(run_dir, max_detail=8):
         rep = load_json(f)
         if rep and rep.get("path"):
             out["paths"].append(_path_entry(rep, max_detail))
+    # the constrained-random seeds validate_drop ran after the directed suite
+    # (its stage 4a): <reports>/random/<path>_s<seed>/<path>_report.json
+    rnd = {"runs": [], "pass": 0, "fail": 0, "other": 0}
+    for f in sorted(glob.glob(os.path.join(rep_dir, "random", "*", "*_report.json"))):
+        rep = load_json(f)
+        if not rep or not rep.get("path"):
+            continue
+        m = re.search(r"_s(\d+)$", os.path.basename(os.path.dirname(f)))
+        v = rep.get("verdict")
+        rnd["runs"].append({"name": rep["path"], "seed": int(m.group(1)) if m else None, "verdict": v,
+                            "stimulus": rep.get("stimulus_generator"),
+                            "failed_stages": [st.get("stage") for st in rep.get("stages", []) if st.get("verdict") == "fail"]})
+        rnd["pass" if v == "pass" else "fail" if v == "fail" else "other"] += 1
+    out["random"] = rnd
     pk = load_json(os.path.join(outbox, "findings_v2.json")) or {}
     hand = load_json(os.path.join(outbox, "HANDOFF.json")) or {}
     ds = load_json(os.path.join(outbox, "DROP_STATUS.json")) or {}
@@ -514,6 +528,14 @@ def validation_detail(run_dir, max_detail=8):
                            "covered": summ.get("covered") if isinstance(summ, dict) else None,
                            "unreachable": summ.get("unreachable_by_spec") if isinstance(summ, dict) else None,
                            "code_pct": pct, "summary": summ if isinstance(summ, dict) else {}}
+        # adjusted under the signoff's approved exclusion rules, when the
+        # rules were derived under the same spec (apply_exclusions.py)
+        excl = load_json(os.path.join(SHARED_REPORTS, "coverage_exclusions.json")) or {}
+        dz = excl.get("design") or {}
+        if dz and (excl.get("derived_under") or {}).get("spec_revision") == cov.get("spec_revision"):
+            out["coverage"]["adjusted_pct"] = dz.get("adjusted_percent")
+            out["coverage"]["excluded_bits"] = dz.get("excluded_approved")
+            out["coverage"]["exclusions_approved"] = dz.get("approved_exclusions")
     out["summary"] = {"pass": sum(1 for p in out["paths"] if p["verdict"] == "pass"),
                       "fail": sum(1 for p in out["paths"] if p["verdict"] == "fail"),
                       "other": sum(1 for p in out["paths"] if p["verdict"] not in ("pass", "fail")),

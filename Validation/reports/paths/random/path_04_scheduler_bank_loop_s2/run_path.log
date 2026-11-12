@@ -1,0 +1,66 @@
+  stimulus: random_v2 on wb_port
+crv2_hit_heavy_seed2: 494 step(s) (400 drive, 93 idle covering 339 cycle(s)), targets ['VP_TIME_001', 'VP_TIME_002', 'VP_TIME_003', 'VP_TIME_004', 'VP_TIME_005', 'VP_TIME_007', 'VP_TIME_008', 'VP_TIME_009', 'VP_TIME_010', 'VP_TIME_011', 'VP_TIME_012', 'VP_FLOW_001']  (driver stall bound 968 cycles, spec-derived)
+  wrote Validation/sequences/generated/runs/crv2_s2/path_04_scheduler_bank_loop/seq_driver.sv
+wrote Validation/sequences/generated/runs/crv2_s2/path_04_scheduler_bank_loop/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
+  (no stage decomposition: trailing block(s) ['bank_tracker'] produce no stream — the chain has no way to observe what they did — the path-level checker carries this path)
+
+Path    : path_04_scheduler_bank_loop  [invariant]
+Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
+Window  : 400 cycles settle after driver
+Stages  : 
+
+Running: xrun ... -top chain_harness  (56 file(s))
+  log -> Validation/reports/paths/random/path_04_scheduler_bank_loop_s2/path_04_scheduler_bank_loop_sim.log
+5402 transaction(s)
+    cfg_refresh.reset        1
+    cfg_timing.reset         1
+    cq_deq.dequeue           400
+    cq_deq.reset             1
+    cq_enq.enqueue           400
+    cq_enq.reset             1
+    csr.reset                1
+    csr_rsp.reset            1
+    csr_sts.reset            1
+    csr_sts_level.reset      1
+    csr_sts_level.state      6
+    ddr_cmd.command          587
+    ddr_cmd.reset            1
+    ddr_rd_beat.reset        1
+    ddr_wr_beat.beat         800
+    ddr_wr_beat.reset        1
+    dp_cmd.reset             1
+    dp_cmd.write             400
+    dp_rd_rsp.reset          1
+    dp_wr.reset              1
+    dp_wr.write              400
+    refresh_ack.ack          3
+    refresh_ack.reset        1
+    refresh_level.reset      1
+    refresh_level.state      6
+    refresh_req.request      3
+    refresh_req.reset        1
+    req.request              400
+    req.reset                1
+    sched_cmd.command        587
+    sched_cmd.reset          1
+    sched_deq.grant          400
+    sched_deq.reset          1
+    sched_in.command         587
+    sched_in.reset           1
+    wb.reset                 1
+    wb.write                 400
+    wb_rsp.reset             1
+  time span: 0 .. 15698000
+wrote 5402 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/paths/random/path_04_scheduler_bank_loop_s2/path_04_scheduler_bank_loop_observed.jsonl
+
+==================================================================
+  (path-level)                 [invariant ]  PASS
+      scope=path_04_scheduler_bank_loop  strategy=invariant  status=pass  (5402 transactions, no rule broken)
+  (conservation)               [conservation]  PASS
+      scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable
+  (address order)              [address_order]  PASS
+      scope=(address order)  strategy=address_order  status=pass  rules=1 checked=400 unpaired=0 violations=0
+==================================================================
+
+  path verdict : PASS
+  report -> Validation/reports/paths/random/path_04_scheduler_bank_loop_s2/path_04_scheduler_bank_loop_report.json

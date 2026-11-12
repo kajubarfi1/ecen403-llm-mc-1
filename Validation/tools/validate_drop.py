@@ -33,6 +33,7 @@ import glob
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -59,6 +60,17 @@ PATH_DEFS = os.path.join(ROOT, "Validation", "spec", "path_definitions.json")
 REPORTS = os.path.join(ROOT, "Validation", "reports", "paths")
 DROPS = os.path.join(ROOT, "Validation", "reports", "drops")
 LOGS = os.path.join(ROOT, "Validation", "reports", "validate_drop")
+
+# Constrained-random companions to the directed suite (stage 4a): the six
+# paths whose checkers see the queue, scheduler and data path under traffic
+# the directed sequences never shape (closure/random_v2.py: address locality
+# from the spec's geometry, back-pressure bursts, minimum-spacing pacing,
+# read/write pairs to one address). Seeds 1..N take the N locality profiles
+# in turn (profile = seed mod 4). The 20 directed paths alone measured 81.4 %
+# code coverage on the golden drop and 72.1 % on a 4-lane preset; 24 of
+# these runs lifted the golden drop to 86.1 % (2026-11-11/12).
+RANDOM_PATHS = ["path_03_read_return", "path_04_scheduler_bank_loop", "path_07_backpressure",
+                "path_18_full_write", "path_19_row_conflict", "path_20_refresh_preempt"]
 
 
 # the outbox this run writes: the shared one for the repo's own drop, a
@@ -206,6 +218,13 @@ def main() -> int:
                     help="do not re-prove formal paths whose proofs predate this design")
     ap.add_argument("--formal-time", default="20m",
                     help="JasperGold prove time limit per re-proved path (default 20m)")
+    ap.add_argument("--random-seeds", type=int,
+                    default=int(os.environ.get("VALIDATION_RANDOM_SEEDS", "4")),
+                    help="constrained-random (random_v2) seeds per path, on the paths in "
+                         "--random-paths, after the directed suite (stage 4a); 0 disables. "
+                         "Default 4, or VALIDATION_RANDOM_SEEDS")
+    ap.add_argument("--random-paths", nargs="*", default=RANDOM_PATHS)
+    ap.add_argument("--random-drives", type=int, default=400, help="host requests per random run")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -224,6 +243,10 @@ def main() -> int:
         print(f"drop {head}: {len(paths)} runnable path(s), {args.jobs} at a time")
         for p in paths:
             print("   ", p)
+        rp = [p for p in args.random_paths if p in paths]
+        if args.random_seeds > 0 and rp:
+            print(f"  then random_v2 on {len(rp)} path(s) x seeds 1..{args.random_seeds}, "
+                  f"{args.random_drives} requests each: {', '.join(rp)}")
         return 0
 
     # 1. resolve ---------------------------------------------------------------
@@ -560,7 +583,7 @@ def main() -> int:
     if report_dir != REPORTS:
         os.makedirs(report_dir, exist_ok=True)
         for f in glob.glob(os.path.join(report_dir, "*")):
-            os.remove(f)
+            shutil.rmtree(f) if os.path.isdir(f) else os.remove(f)
         print(f"    reports -> {os.path.relpath(report_dir, ROOT)} (kept apart from "
               f"the shared reports so nothing stale is judged"
               + (", run-local" if run_local else "") + ")")
@@ -686,13 +709,98 @@ def main() -> int:
                        "paths_run": list(paths), "paths_blocked": {},
                        "note": "Complete run: every runnable path simulated on this drop."}
 
+    # 4a. constrained-random ---------------------------------------------------
+    # The same paths, the same checkers, other stimulus: random_v2 seeds on
+    # the six paths that reach the queue, scheduler and data path. Reports
+    # live under <reports>/random/<path>_s<seed>/, apart from the directed
+    # report of the path; emit_findings reads them with the directed ones,
+    # so a seed that fails files its finding and the handoff says FAIL, and
+    # the coverage merge (stage 5) takes their databases with the rest. A
+    # seed that did not simulate is not a verdict: it is left out of
+    # coverage and reported, and does not halt the drop (the directed suite
+    # is the gate). Skipped on a partial drop. On 2026-11-11 this batch found
+    # a data_path read defect and two harness defects the 20 directed paths
+    # never reached (SEMESTER_PLAN).
+    rand_root = os.path.join(report_dir, "random")
+    random_runs = None
+    if not args.skip_sim:
+        shutil.rmtree(rand_root, ignore_errors=True)   # never judge another drop's seeds
+    if args.skip_sim:
+        rand_jobs = []
+        for d in sorted(glob.glob(os.path.join(rand_root, "*_s*"))):
+            m = re.match(r"^(path_\d+_\w+?)_s(\d+)$", os.path.basename(d))
+            if m and m.group(1) in paths:
+                rand_jobs.append((m.group(1), int(m.group(2))))
+    else:
+        rand_paths = [p for p in args.random_paths if p in paths and verdicts.get(p) in ("PASS", "FAIL")]
+        rand_jobs = ([(p, s) for s in range(1, args.random_seeds + 1) for p in rand_paths]
+                     if args.random_seeds > 0 and not partial and not nothing_runs else [])
+    if rand_jobs:
+        seeds = sorted({s for _, s in rand_jobs})
+        rand_paths = sorted({p for p, _ in rand_jobs})
+        banner("4a", f"{'re-judge' if args.skip_sim else 'simulate'} constrained-random: "
+                     f"{len(rand_paths)} path(s) x {len(seeds)} seed(s), {args.random_drives} requests each, "
+                     f"{args.jobs} at a time")
+
+        def run_rand(job):
+            p, s = job
+            rd = os.path.join(rand_root, f"{p}_s{s}")
+            os.makedirs(rd, exist_ok=True)
+            cmd = (f"python3 Validation/tools/run_path.py --path {p} --stimulus random_v2 "
+                   f"--seed {s} --drives {args.random_drives} --tag crv2_s{s} "
+                   f"--report-dir {rd} --timeout {args.timeout}"
+                   + (" --judge-only" if args.skip_sim else ""))
+            rc, out = sh(cmd, None, check=False, timeout=args.timeout + 300)
+            with open(os.path.join(rd, "run_path.log"), "w") as f:
+                f.write(out)
+            m = re.search(r"path verdict : (\w+)", out)
+            return p, s, (m.group(1) if m else f"rc={rc}")
+
+        rverd = {}
+        with concurrent.futures.ThreadPoolExecutor(1 if args.skip_sim else max(1, args.jobs)) as ex:
+            for p, s, v in ex.map(run_rand, rand_jobs):
+                rverd[(p, s)] = v
+        retry = [k for k, v in rverd.items() if v not in ("PASS", "FAIL")]
+        if retry and not args.skip_sim:
+            print(f"    retrying {len(retry)} random run(s) that did not simulate")
+            with concurrent.futures.ThreadPoolExecutor(max(1, args.jobs)) as ex:
+                for p, s, v in ex.map(run_rand, retry):
+                    rverd[(p, s)] = v
+        for p in rand_paths:
+            print(f"    {p:34} " + "  ".join(f"s{s}:{rverd.get((p, s), '-')}" for s in seeds))
+        r_pass = sum(1 for v in rverd.values() if v == "PASS")
+        r_fail = sum(1 for v in rverd.values() if v == "FAIL")
+        not_run = sorted(f"{p}_s{s}" for (p, s), v in rverd.items() if v not in ("PASS", "FAIL"))
+        print(f"    random pass={r_pass} fail={r_fail} error={len(not_run)}")
+        for k in not_run:        # no verdict: nothing of it may be judged or merged
+            shutil.rmtree(os.path.join(rand_root, k), ignore_errors=True)
+        if not_run:
+            print(f"    {len(not_run)} random run(s) without a verdict were removed: "
+                  f"{', '.join(not_run)} (not a verdict on the drop; the directed suite is the gate)")
+        random_runs = {"generator": "random_v2", "seeds": seeds, "drives": args.random_drives,
+                       "paths": rand_paths, "tag": "crv2_s<seed>",
+                       "runs": {f"{p}_s{s}": v for (p, s), v in sorted(rverd.items())},
+                       "pass": r_pass, "fail": r_fail, "not_run": not_run,
+                       "reports": os.path.relpath(rand_root, ROOT)}
+    elif args.skip_sim:
+        banner("4a", "constrained-random: no random traces to re-judge")
+    elif args.random_seeds <= 0:
+        banner("4a", "constrained-random: skipped (--random-seeds 0)")
+    elif partial or nothing_runs:
+        banner("4a", "constrained-random: skipped (partial drop)")
+    else:
+        banner("4a", "constrained-random: no eligible path simulated")
+    if drop_status is not None and random_runs is not None:
+        drop_status["random_runs"] = random_runs
+
     # 4b. formal ---------------------------------------------------------------
     # A proof is about a design. A path that has ever been proved and has no
     # JasperGold report that applies to THIS design (same drop, same design
     # id, or same blocks) is re-proved here with the options its last report
     # used, so a design change never leaves `awaiting_formal` findings for a
     # person to remember (two on 4bf921ce1833, Frontend handoff 2026-10-15).
-    sim_failed = any(v != "PASS" for v in verdicts.values()) if not args.skip_sim else False
+    sim_failed = ((any(v != "PASS" for v in verdicts.values()) or bool((random_runs or {}).get("fail")))
+                  if not args.skip_sim else False)
     if os.environ.get("VALIDATION_SKIP_FORMAL") and not args.skip_formal:
         # a sweep (spec_matrix.py) judges generation and simulation per spec;
         # the replays belong to the golden sign-off and would cost an hour each
@@ -736,8 +844,31 @@ def main() -> int:
         cov = [l.strip() for l in out.splitlines() if "vplan item(s) fully covered" in l]
         print(f"    design code coverage {tot.group(2) if tot else '?'}; "
               + (cov[0] if cov else "rollup output in the log"))
+        cov_line = f"code coverage {tot.group(2)} measured" if tot else None
+        # Adjusted coverage: the signoff's exclusion RULES (coverage/
+        # exclusions.json, SIGNOFF section 4), derived against the spec under
+        # judgement by apply_exclusions.py over this merge's per-instance
+        # uncovered-item reports. Measured stays the number the simulator
+        # gave; adjusted is what the approved rules leave reachable. Until
+        # 2026-11-12 this was a by-hand step on the golden spec only, so a
+        # preset's run quoted 72 % with no adjusted figure beside it.
+        if tot:
+            insts = " ".join(f"u_{b}" for b in present)
+            rc, out = sh(f"python3 Validation/coverage/measure_coverage.py --uncovered {insts}",
+                         log, check=False, timeout=900)
+            rc2, out2 = sh("python3 Validation/coverage/apply_exclusions.py", log, check=False, timeout=300)
+            adj = next((l.strip() for l in out2.splitlines() if l.strip().startswith("DESIGN TOTAL")), None)
+            if adj and rc == 0 and rc2 == 0:
+                print("    " + adj)
+                m2 = re.search(r"/ ([\d.]+%) adjusted \((\d+) toggle bits under (\d+) approved", adj)
+                if m2:
+                    cov_line += f" / {m2.group(1)} adjusted ({m2.group(3)} approved exclusions)"
+            else:
+                print("    adjusted coverage: not computed (uncovered report or apply_exclusions "
+                      "did not complete; see the log)")
     else:
         banner(5, "coverage rollup: skipped")
+        cov_line = None
 
     # 5b. second opinions -------------------------------------------------------
     # Every primary model's twin replays the same traces. A rule both models
@@ -816,6 +947,10 @@ def main() -> int:
     print(f"\n  drop {head}{' (partial)' if partial else ''}: {n_pass} pass / "
           f"{n_fail} fail / {n_err} error"
           + (f" / {len(blocked)} blocked" if blocked else "")
+          + (f"; random {random_runs['pass']}/{random_runs['pass'] + random_runs['fail']} pass"
+             + (f" ({len(random_runs['not_run'])} not run)" if random_runs['not_run'] else "")
+             if random_runs else "")
+          + (f"; {cov_line}" if cov_line else "")
           + f" in {(time.time() - t0) / 60:.1f} min; log {os.path.relpath(log, ROOT)}")
     return 0 if n_err == 0 and not nothing_runs else 1
 

@@ -292,3 +292,34 @@ class CompileErrorFinding(unittest.TestCase):
         self.assertEqual([a["line"] for a in f["anchor"]], [178, 179])
         self.assertEqual(f["paths"], ["path_01_write_cmd", "path_02_read_cmd"])
         self.assertIn("undeclared", f["actual"])
+
+
+class TestRandomSeedReports(unittest.TestCase):
+    """validate_drop's constrained-random seeds (stage 4a) report under
+    <reports>/random/<path>_s<seed>/; the emitter reads them with the
+    directed reports and gives their findings the seed's own reproduction
+    command (2026-11-12)."""
+
+    def test_random_subdir_reports_are_read_with_the_directed_ones(self):
+        import json, tempfile, glob
+        d = tempfile.mkdtemp()
+        with open(os.path.join(d, "path_03_read_return_report.json"), "w") as f:
+            json.dump({"path": "path_03_read_return", "verdict": "pass", "stages": []}, f)
+        os.makedirs(os.path.join(d, "random", "path_03_read_return_s5"))
+        with open(os.path.join(d, "random", "path_03_read_return_s5", "path_03_read_return_report.json"), "w") as f:
+            json.dump({"path": "path_03_read_return", "verdict": "fail", "stages": []}, f)
+        found = sorted(glob.glob(os.path.join(d, "*_report.json"))) + \
+            sorted(glob.glob(os.path.join(d, "random", "*", "*_report.json")))
+        self.assertEqual(len(found), 2, "the emitter's two globs see the directed report and the seed's")
+
+    def test_repro_names_the_seed_and_tag(self):
+        rep = {"path": "path_03_read_return", "stimulus_generator": "random_v2",
+               "sequence": "Validation/sequences/generated/runs/crv2_s5/path_03_read_return/path_03_read_return_seed5.json"}
+        cmd = EF._repro_command(rep)
+        self.assertIn("--stimulus random_v2", cmd)
+        self.assertIn("--seed 5", cmd)
+        self.assertIn("--tag crv2_s5", cmd)
+        self.assertEqual(EF._repro_work_dir(rep), "Validation/sequences/generated/runs/crv2_s5/path_03_read_return")
+        base = {"path": "path_01_write_cmd", "sequence": "Validation/sequences/generated/path_01_write_cmd_seed1.json"}
+        self.assertEqual(EF._repro_command(base), "python3 Validation/tools/run_path.py --path path_01_write_cmd")
+        self.assertEqual(EF._repro_work_dir(base), "Validation/sequences/generated/runs/path_01_write_cmd")

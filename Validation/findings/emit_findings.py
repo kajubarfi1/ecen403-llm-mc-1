@@ -654,6 +654,41 @@ def history_for(check_id, detector, snaps, current_head):
 
 # --------------------------------------------------------------------------
 
+def _repro_tag_seed(rep):
+    """(tag, seed) of a tagged run from the sequence path run_path recorded
+    (Validation/sequences/generated/runs/<tag>/<path>/<path>_seed<N>.json);
+    (None, None) for the baseline directed run."""
+    seq = rep.get("sequence") or ""
+    m_tag = re.search(r"/generated/runs/([^/]+)/[^/]+/[^/]+$", seq.replace("\\", "/"))
+    m_seed = re.search(r"_seed(\d+)\.json$", seq)
+    return (m_tag.group(1) if m_tag else None, int(m_seed.group(1)) if m_seed else None)
+
+
+def _repro_command(rep):
+    """The command that reproduces this report's run: the baseline directed
+    run, or the tagged constrained-random seed with its generator, seed and
+    request count (counted from the sequence file when it is still there)."""
+    cmd = f"python3 Validation/tools/run_path.py --path {rep['path']}"
+    tag, seed = _repro_tag_seed(rep)
+    gen = rep.get("stimulus_generator")
+    if not tag or seed is None:
+        return cmd
+    cmd += f" --stimulus {gen}" if gen in ("random", "random_v2", "register_walk", "status_poll", "refresh_stress",
+                                            "burst", "write_read", "wb_burst", "saturate", "ack_collision") else ""
+    cmd += f" --seed {seed}"
+    seq = load(os.path.join(ROOT, rep["sequence"]), {}) if rep.get("sequence") else {}
+    n = sum(1 for st in seq.get("steps", []) if st.get("op") == "drive")
+    if n:
+        cmd += f" --drives {n}"
+    return cmd + f" --tag {tag} --report-dir <dir>"
+
+
+def _repro_work_dir(rep):
+    tag, _ = _repro_tag_seed(rep)
+    return (f"Validation/sequences/generated/runs/{tag}/{rep['path']}" if tag
+            else f"Validation/sequences/generated/runs/{rep['path']}")
+
+
 def emit(reports_dir, out_dir=None, drop_status=None):
     """drop_status: validate_drop --partial's record of what the drop
     provides and which paths were blocked. On a partial drop, findings
@@ -667,6 +702,12 @@ def emit(reports_dir, out_dir=None, drop_status=None):
     schemas = load(SCHEMAS, {"interfaces": {}})["interfaces"]
     spec = load(SPEC, {})
     reps = [load(f) for f in sorted(glob.glob(os.path.join(reports_dir, "*_report.json")))]
+    # The constrained-random seeds of the same paths (validate_drop stage 4a,
+    # <reports>/random/<path>_s<seed>/) are evidence on the path exactly as
+    # the directed run is: same blocks, same checkers, other stimulus. A
+    # seed that fails files the finding the directed run would have, with
+    # that seed's own reproduction command (2026-11-12).
+    reps += [load(f) for f in sorted(glob.glob(os.path.join(reports_dir, "random", "*", "*_report.json")))]
     reps = [r for r in reps if r]
     head = (drop_status or {}).get("drop") or next(
         (r.get("rtl_drop", {}).get("git_head") for r in reps
@@ -708,9 +749,9 @@ def emit(reports_dir, out_dir=None, drop_status=None):
                     "paths": [], "occurrences": 0,
                     "repro": {
                         "path": rep["path"],
-                        "command": f"python3 Validation/tools/run_path.py --path {rep['path']}",
+                        "command": _repro_command(rep),
                         "sequence": rep.get("sequence"),
-                        "work_dir": f"Validation/sequences/generated/runs/{rep['path']}",
+                        "work_dir": _repro_work_dir(rep),
                         "log": rep.get("log"), "trace": rep.get("observed_trace"),
                         "first_failure": {"seq": ev.get("seq"), "line": ev["line"]},
                     },

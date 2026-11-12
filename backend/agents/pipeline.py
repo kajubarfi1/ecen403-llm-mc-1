@@ -458,6 +458,18 @@ def runner_node(state: PipelineState) -> PipelineState:
             "error_message": None, "messages": [msg],
         }
 
+    # ORFS's Makefile copies the SDC into $(RESULTS_DIR) with no rule that
+    # creates that directory first; only synth.sh (the canonicalize step)
+    # mkdirs it. Under `make -jN` the copy and the canonicalize start together,
+    # the copy loses, and the whole flow dies in its first second with
+    # "cp: cannot create regular file 'results/<platform>/<design>/base/
+    # 1_2_yosys.sdc': No such file or directory" (ORFS f34d4d9, MAKE_JOBS=4,
+    # 2026-11-12). The results/logs/reports trees are bind-mounted from the
+    # host, so creating the directories here, before make runs, closes the
+    # race for both the Docker and the native path.
+    for sub in ("results", "logs", "reports"):
+        (orfs_dir_path / "flow" / sub / platform / results_name / "base").mkdir(parents=True, exist_ok=True)
+
     run_started = time.time()
     try:
         proc = subprocess.run(cmd, capture_output=True, text=True,

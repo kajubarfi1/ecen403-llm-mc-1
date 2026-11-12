@@ -1,10 +1,10 @@
-TOOL:	xrun	24.03-s013: Started on Nov 11, 2026 at 14:07:01 CST
-*WARNING* X Window Display Initialization failure
-*WARNING* (DISPLAY "")
+TOOL:	xrun	24.03-s013: Started on Nov 12, 2026 at 11:42:05 CST
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xrun: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
 xrun: 24.03-s013: (c) Copyright 1995-2025 Cadence Design Systems, Inc.
+*WARNING* X Window Display Initialization failure
+*WARNING* (DISPLAY "")
 xrun: *N,CLEAN: Removing existing directory ./xcelium.d.
 DEFINE std       ./STD
 |
@@ -664,8 +664,8 @@ xmvlog_cg: *W,DLCPTH (/opt/coe/cadence/XCELIUM240/tools/inca/files/cdsvhdl.lib,1
 SOFTINCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
 |
 xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environment variable ''.
-		worklib.dram_stub:sv <0x4774e261>
-			streams:   3, words:  7271
+		worklib.dram_stub:sv <0x63b4caa0>
+			streams:   3, words:  7537
 		worklib.wb_port_order_sva:sv <0x6e686d24>
 			streams:  28, words: 17718
 		worklib.wb_rsp_monitor:sv <0x5838d66f>
@@ -734,8 +734,8 @@ xmvlog_cg: *W,DLCVAR (/home/ugrads/j/jacobz/cds.lib,1): cds.lib Invalid environm
 			streams:   2, words:  1259
 		worklib.seq_driver:sv <0x4d753be0>
 			streams:   9, words: 17419
-		worklib.chain_harness:sv <0x138c4f12>
-			streams: 250, words: 67693
+		worklib.chain_harness:sv <0x51b0df04>
+			streams: 251, words: 67791
 		worklib.bank_tracker:sv <0x3e6ffdeb>
 			streams:  37, words: 49233
 		worklib.config_regs:sv <0x622138bf>
@@ -766,14 +766,14 @@ xmelab: *W,CGPIDF: Covergroup "per_instance" option , by default, is set as 0.
 	Design hierarchy summary:
 		                       Instances  Unique
 		Modules:                      45      45
-		Registers:                 1,027   1,048
+		Registers:                 1,028   1,049
 		Scalar wires:                304       -
-		Vectored wires:              362       -
+		Vectored wires:              363       -
 		Named events:                 34      34
 		Always blocks:               398     391
 		Initial blocks:               94      94
 		Cont. assignments:           156     224
-		Pseudo assignments:          305       -
+		Pseudo assignments:          306       -
 		Assertions:                   53      53
 		Covergroup Instances:          0      11
 		Compilation units:             1       1
@@ -5566,7 +5566,7 @@ TXN ddr_cmd command t=39044000 addr=0 bank=0 cmd=1
 TXN csr_sts_level state t=39048000 bist_done=0 bist_fail=0 bist_fail_addr=0 cal_done=0 cal_fail=0 ecc_ce_count=0 init_done=0 ref_pending=0 self_refresh=0
 HARNESS_DONE
 Simulation complete via $finish(1) at time 45067500 PS + 0
-./chain_harness.sv:459     $finish;
+./chain_harness.sv:460     $finish;
 xcelium> exit
 xmsim: *W,CGDEFN: Default name "bank_tracker_fcov#(32'h00000001).cg_scheduler_inst" will be generated for covergroup instance "chain_harness.u_bank_tracker.u_bank_tracker_fcov.cg_scheduler_inst@3_1" as the name of the covergroup instance is not specified explicitly: ./bank_tracker_fcov.sv, 34.
 xmsim: *W,CGDEFN: Default name "cmd_gen_coverage.cg_timing_inst" will be generated for covergroup instance "chain_harness.u_cmd_gen.u_cmd_gen_cov.cg_timing_inst@4_1" as the name of the covergroup instance is not specified explicitly: ./cmd_gen_coverage.sv, 378.
@@ -5588,6 +5588,6 @@ coverage setup:
   Coverage database dumped with the set_code_fine_grained_merging command during elaboration.
 
 coverage files:
-  model(design data) :  ./cov_work/scope/icc_7cfe975b_4ba5f548.ucm
-  data               :  ./cov_work/scope/path_07_backpressure/icc_7cfe975b_4ba5f548.ucd
-TOOL:	xrun	24.03-s013: Exiting on Nov 11, 2026 at 14:07:04 CST  (total: 00:00:03)
+  model(design data) :  ./cov_work/scope/icc_61708197_57f772aa.ucm
+  data               :  ./cov_work/scope/path_07_backpressure/icc_61708197_57f772aa.ucd
+TOOL:	xrun	24.03-s013: Exiting on Nov 12, 2026 at 11:42:07 CST  (total: 00:00:02)

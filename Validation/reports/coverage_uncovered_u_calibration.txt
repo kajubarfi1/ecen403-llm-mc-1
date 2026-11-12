@@ -1,0 +1,146 @@
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<> User: jacobz
+
+Host: n01-zeus.olympus.ece.tamu.edu
+
+Report date: Thu 12 Nov 2026 11:52:23 CST
+
+Report options: -detail -metrics block:expression:toggle -out /home/ugrads/j/jacobz/cov_uncov_u_calibration.txt -inst chain_harness.u_calibration -uncovered -source on -overwrite
+
+Coverage database path: /home/ugrads/j/jacobz/cov_merged_paths
+
+Coverage model files: /home/ugrads/j/jacobz/cov_merged_paths/icc_2b5aabad_6bc0dc82.ucm
+
+Coverage data files: /home/ugrads/j/jacobz/cov_merged_paths/icc_2b5aabad_6bc0dc82.ucd
+
+CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_conf.ccf
+    // Xcelium coverage configuration for the DDR3 validation subsystem.
+    //
+    // Fed to xrun via:  -coverage A -covoverwrite -covfile <this file>
+    
+    // --- What to collect -------------------------------------------------------
+    select_coverage -all
+    select_functional                       // covergroups: the vplan's 42 items
+    
+    // --- What NOT to count -----------------------------------------------------
+    // Testbench code is not the design. With everything selected, the harness,
+    // the generated driver, the passive monitors and the DRAM stub all land in
+    // the headline number and dilute it (22.4% reported vs ~25% design-only on
+    // the first merged sweep). Code coverage of a monitor says nothing about the
+    // controller. Covergroup modules (*_coverage) are deliberately NOT excluded:
+    // they carry the vplan's functional coverage.
+    deselect_coverage -all -module chain_harness
+    deselect_coverage -all -module *_txn_harness
+    deselect_coverage -all -module seq_driver
+    deselect_coverage -all -module dram_stub
+    deselect_coverage -all -module *_monitor
+    deselect_coverage -all -module *_tb
+    // Covergroup carriers: drop their CODE coverage only. '-all' would also
+    // drop functional coverage and silence the very covergroups they exist
+    // to hold (which is exactly what happened on the first try: 0% on every
+    // new coverpoint while the design merged fine).
+    deselect_coverage -block -expr -toggle -fsm -module *_fcov
+    
+    // --- Covergroups -----------------------------------------------------------
+    set_covergroup -new_instance_reporting  // per-instance scoping and naming
+    set_optimize -prune_covergroup
+    
+    // --- Block / statement / branch --------------------------------------------
+    // The course disables implicit and explicit block scoring and relies on
+    // statement + branch instead; keeping that identical for comparability.
+    set_implicit_block_scoring -off
+    set_explicit_block_scoring -off
+    set_statement_scoring
+    set_branch_scoring
+    set_code_fine_grained_merging
+    
+    // --- Expression ------------------------------------------------------------
+    set_expr_scoring -max_expr_terms 2048
+    set_expr_coverable_operators -bitwise -relational -reduction -logical_not
+    set_expr_coverable_statements -all
+    set_optimize -top_expr_non_scorable
+    
+    // --- Toggle ----------------------------------------------------------------
+    set_toggle_includez
+    set_toggle_scoring -sv_enum
+    set_toggle_scoring -sv_mda 16 -regeot
+    
+    // --- FSM -------------------------------------------------------------------
+    // Matters for this design: init_fsm and calibration are the autonomous blocks
+    // behind the five deferred paths, and the spec's INIT_001/INIT_002 failure
+    // categories are ordering properties over their states.
+    set_fsm_scoring -hold_transition on
+    
+    // --- Misc ------------------------------------------------------------------
+    set_parameterized_module_coverage
+    set_libcell_scoring -enable_vy
+    set_subprogram_scoring -all -svpackage
+    set_refinement_resilience
+    
+
+
+Coverage database date: Thu 12 Nov 2026 11:49:54 CST
+
+*** There were no refinement files applied ***
+
+ <>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Coverage Table Legend
+---------------------
+  EXCL       excluded using refinement rule
+  P-EXCL     excluded from parent
+  U-EXCL     excluded and unreachable by IEV
+  T-EXCL     excluded from type
+  S-EXCL     smart excluded using refinement rule
+  EXCL(S)    smart indirect excluded
+  EMPTY      all children are excluded
+  CONST      marked constant during simulation
+  IGN        marked ignored during simulation
+  UNG        marked ungradeable during simulation
+  DES        marked deselected during simulation
+  UNR        marked unreachable by IEV
+  UNG-Expr   expression marked ungradeable during simulation
+  UNG-Toggle toggle marked ungradeable during simulation
+
+
+Uncovered Block Detail Report, Instance Based
+=============================================
+
+Uncovered Expression Detail Report, Instance Based
+==================================================
+
+Expression coverage Table Legend
+---------------------
+  -      don't care
+  e      event for event-or expressions
+  O (odd), E (even), B (both), X (not scored),
+         I (marked ignore) for parity trees
+  Y (covered), N (not covered), C (constant), 
+  P (one or more inputs for this bit have been padded) for vector scoring, 
+  d=== , b=== shows which bit differs in vector scoring 
+  rval   Resulting value of the expression for coverage purposes given
+         the input values
+  <-n->  Shows the n-th term composition
+
+
+Uncovered Toggle Detail Report, Instance Based
+==============================================
+
+Instance name: chain_harness.u_calibration
+Type name: calibration#(32'h00000011,32'h0001f400,32'h00000010)
+File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_08_init_to_cal/calibration.sv
+Number of uncovered signal bits: 6 of 26
+Number of unreachable signal bits: 0
+Number of signal bits partially toggled(rise): 5 of 26
+Number of signal bits partially toggled(fall): 0 of 26
+
+Hit(Full)  Hit(Rise)  Hit(Fall)  Signal                    
+-----------------------------------------------------------
+0          1          0          rst_n                     
+0          1          0          init_done                 
+0          1          0          cal_done                  
+0          0          0          cal_fail                  
+0          1          0          cal_done_r                
+0          1          0          zqcs_ctr[16]              
+

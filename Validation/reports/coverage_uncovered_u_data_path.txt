@@ -3,15 +3,15 @@
 
 Host: n01-zeus.olympus.ece.tamu.edu
 
-Report date: Wed 11 Nov 2026 14:13:43 CST
+Report date: Thu 12 Nov 2026 11:52:23 CST
 
 Report options: -detail -metrics block:expression:toggle -out /home/ugrads/j/jacobz/cov_uncov_u_data_path.txt -inst chain_harness.u_data_path -uncovered -source on -overwrite
 
-Coverage database path: /home/ugrads/j/jacobz/cov_merged_crv2_nov11_fix
+Coverage database path: /home/ugrads/j/jacobz/cov_merged_paths
 
-Coverage model files: /home/ugrads/j/jacobz/cov_merged_crv2_nov11_fix/icc_6badd542_312cbb60.ucm
+Coverage model files: /home/ugrads/j/jacobz/cov_merged_paths/icc_2b5aabad_6bc0dc82.ucm
 
-Coverage data files: /home/ugrads/j/jacobz/cov_merged_crv2_nov11_fix/icc_6badd542_312cbb60.ucd
+Coverage data files: /home/ugrads/j/jacobz/cov_merged_paths/icc_2b5aabad_6bc0dc82.ucd
 
 CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_conf.ccf
     // Xcelium coverage configuration for the DDR3 validation subsystem.
@@ -79,7 +79,7 @@ CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_
     
 
 
-Coverage database date: Wed 11 Nov 2026 14:06:43 CST
+Coverage database date: Thu 12 Nov 2026 11:49:54 CST
 
 *** There were no refinement files applied ***
 
@@ -108,20 +108,21 @@ Uncovered Block Detail Report, Instance Based
 =============================================
 
 Instance name: chain_harness.u_data_path
-Type name: data_path#(32'h00000020,32'h00000010,32'h00000002,32'h00000004,32'h00000004,32'h00000008,32'h00000004,32'h00000002,32'h00000002,32'h00000010,32'h00000004,32'h00000003,32'h00000002,2)
+Type name: data_path#(32'h00000020,32'h00000020,32'h00000004,32'h00000004,32'h00000004,32'h00000008,32'h00000004,32'h00000002,32'h00000001,32'h00000010,32'h00000004,32'h00000003,32'h00000002,4)
 File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/data_path.sv
-Number of uncovered blocks: 3 of 123
+Number of uncovered blocks: 4 of 123
 Number of unreachable blocks: 0
-Number of uncovered branches: 3 of 91
+Number of uncovered branches: 4 of 91
 Number of unreachable branches: 0
-Number of uncovered statements: 10 of 138
+Number of uncovered statements: 6 of 138
 Number of unreachable statements: 0
 
 Count  Block #Stmt Line  Kind                 Origin Source Code                    
 ------------------------------------------------------------------------------------
-0      23    6     238   true part of    *    238    if (!wr_pend_empty && !wr_empty && wr_head_due_r) begin 
 0      26    2     257   true part of    *    257    if (cfg_CWL_nCK <= CLK_RATIO[7:0]) begin 
+0      36    1     304   false part of   *    280    wr_burst_ctr <= wr_burst_ctr + 1'b1; 
 0      98    2     575   true part of    *    575    if (cfg_CL_nCK <= CLK_RATIO[7:0]) begin 
+0      108   1     626   false part of   *    597    rd_burst_ctr <= rd_burst_ctr + 1'b1; 
 
 (*) indicates a branch
 
@@ -143,25 +144,30 @@ Expression coverage Table Legend
 
 
 Instance name: chain_harness.u_data_path
-Type name: data_path#(32'h00000020,32'h00000010,32'h00000002,32'h00000004,32'h00000004,32'h00000008,32'h00000004,32'h00000002,32'h00000002,32'h00000010,32'h00000004,32'h00000003,32'h00000002,2)
+Type name: data_path#(32'h00000020,32'h00000020,32'h00000004,32'h00000004,32'h00000004,32'h00000008,32'h00000004,32'h00000002,32'h00000001,32'h00000010,32'h00000004,32'h00000003,32'h00000002,4)
 File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/data_path.sv
-Number of uncovered expressions: 14 of 191
+Number of uncovered expressions: 20 of 191
 Number of unreachable expressions: 0
 
 index  | grade         | line   | expression                                         
 -------------------------------------------------------------------------------------
 5.1    | 50.00% (1/2)  | 192    | wr_pend_count == RD_FIFO_DEPTH[FIFO_PTR_W:0]       
 8.1    | 75.00% (3/4)  | 197    | (cmd_wr_valid && (! wr_pend_full)) && (! wr_bypass) 
-16.1   | 75.00% (3/4)  | 238    | ((! wr_pend_empty) && (! wr_empty)) && wr_head_due_r 
 17.1   | 50.00% (1/2)  | 257    | cfg_CWL_nCK <= CLK_RATIO[7:0]                      
+19.1   | 50.00% (1/2)  | 280    | wr_burst_ctr == (WORD_BEATS[1:0] - 1'b1)           
 20.1   | 75.00% (3/4)  | 289    | ((! wr_pend_empty) && (! wr_empty)) && (wr_pend_wait[wr_pend_rptr[(FIFO_PTR_W - 1):0]] <= 4'd1) 
 20.2   | 50.00% (1/2)  | 290    | (wr_pend_wait[wr_pend_rptr[(FIFO_PTR_W - 1):0]] <= 4'd1) 
-21.1   | 76.92% (10/13) | 325    | ((wr_state == WR_IDLE) && ((((! wr_pend_empty) && (! wr_empty)) && wr_head_due_r) || wr_bypass)) || (((((wr_state == WR_DRIVE) && (wr_burst_ctr == (WORD_BEATS[1:0] - 1'b1))) && (! wr_pend_empty)) && (! wr_empty)) && (wr_pend_wait[wr_pend_rptr[(FIFO_PTR_W - 1):0]] <= 4'd1)) 
+21.1   | 69.23% (9/13) | 325    | ((wr_state == WR_IDLE) && ((((! wr_pend_empty) && (! wr_empty)) && wr_head_due_r) || wr_bypass)) || (((((wr_state == WR_DRIVE) && (wr_burst_ctr == (WORD_BEATS[1:0] - 1'b1))) && (! wr_pend_empty)) && (! wr_empty)) && (wr_pend_wait[wr_pend_rptr[(FIFO_PTR_W - 1):0]] <= 4'd1)) 
+21.4   | 50.00% (1/2)  | 325    | (wr_burst_ctr == (WORD_BEATS[1:0] - 1'b1))         
 21.5   | 50.00% (1/2)  | 326    | (wr_pend_wait[wr_pend_rptr[(FIFO_PTR_W - 1):0]] <= 4'd1) 
+33.1   | 50.00% (1/2)  | 414    | wr_burst_ctr == wb[1:0]                            
+36.1   | 50.00% (1/2)  | 426    | wr_burst_ctr == wb[1:0]                            
 42.1   | 50.00% (1/2)  | 521    | rd_pend_count == RD_FIFO_DEPTH[FIFO_PTR_W:0]       
 45.1   | 75.00% (3/4)  | 525    | (cmd_rd_valid && (! rd_pend_full)) && (! rd_bypass) 
-53.1   | 66.67% (2/3)  | 564    | (! rd_pend_empty) && (rd_pend_wait[rd_pend_rptr[(FIFO_PTR_W - 1):0]] == 4'd0) 
 54.1   | 50.00% (1/2)  | 575    | cfg_CL_nCK <= CLK_RATIO[7:0]                       
+56.1   | 50.00% (1/2)  | 597    | rd_burst_ctr == (WORD_BEATS[1:0] - 1'b1)           
+60.1   | 66.67% (2/3)  | 664    | rd_capture_valid && (rd_burst_ctr == (WORD_BEATS[1:0] - 1'b1)) 
+60.2   | 50.00% (1/2)  | 664    | (rd_burst_ctr == (WORD_BEATS[1:0] - 1'b1))         
 
 index: 5.1 grade: 50.00% (1/2) line: 192 source: wire                  wr_pend_full  = (wr_pend_count == RD_FIFO_DEPTH[FIFO_PTR_W:0]);
 
@@ -181,15 +187,6 @@ index     | hit   | rval | <1> <2> <3>
 ---------------------------------------
 8.1.3     | 0     | 0    | -   1   -   
 
-index: 16.1 grade: 75.00% (3/4) line: 238 source: if (!wr_pend_empty && !wr_empty && wr_head_due_r) begin
-
-((! wr_pend_empty) && (! wr_empty)) && wr_head_due_r
-    <-----1----->        <--2--->      <-----3----->
-
-index     | hit   | rval | <1> <2> <3> 
----------------------------------------
-16.1.1    | 0     | 1    | 0   0   1   
-
 index: 17.1 grade: 50.00% (1/2) line: 257 source: if (cfg_CWL_nCK <= CLK_RATIO[7:0]) begin
 
 cfg_CWL_nCK <= CLK_RATIO[7:0]
@@ -198,6 +195,15 @@ cfg_CWL_nCK <= CLK_RATIO[7:0]
 index     | hit   | <1>   <2>   
 -------------------------------- '<='
 17.1.2    | 0     | lhs <= rhs  
+
+index: 19.1 grade: 50.00% (1/2) line: 280 source: if (wr_burst_ctr == WORD_BEATS[1:0] - 1'b1) begin
+
+wr_burst_ctr == (WORD_BEATS[1:0] - 1'b1)
+<----1----->    <----------2----------->
+
+index     | hit   | <1>   <2>   
+-------------------------------- '=='
+19.1.2    | 0     | lhs != rhs  
 
 index: 20.1 grade: 75.00% (3/4) line: 289 source: if (!wr_pend_empty && !wr_empty &&
 
@@ -217,16 +223,26 @@ index     | hit   | <4>   <5>
 -------------------------------- '<='
 20.2.1    | 0     | lhs > rhs   
 
-index: 21.1 grade: 76.92% (10/13) line: 325 source: || ((wr_state == WR_DRIVE) && (wr_burst_ctr == WORD_BEATS[1:0] - 1'b1) &&
+index: 21.1 grade: 69.23% (9/13) line: 325 source: || ((wr_state == WR_DRIVE) && (wr_burst_ctr == WORD_BEATS[1:0] - 1'b1) &&
 
 ((wr_state == WR_IDLE) && ((((! wr_pend_empty) && (! wr_empty)) && wr_head_due_r) || wr_bypass)) || (((((wr_state == WR_DRIVE) && (wr_burst_ctr == (WORD_BEATS[1:0] - 1'b1))) && (! wr_pend_empty)) && (! wr_empty)) && (wr_pend_wait[wr_pend_rptr[(FIFO_PTR_W - 1):0]] <= 4'd1))
  <---------1--------->          <-----2----->        <--3--->      <-----4----->     <---5--->          <---------6---------->    <-------------------7-------------------->                                            <--------------------------8--------------------------->
 
 index     | hit   | rval | <1> <2> <3> <4> <5> <6> <7> <8> 
 -----------------------------------------------------------
-21.1.3    | 0     | 1    | 1   0   0   1   -   -   -   -   
 21.1.4    | 0     | 0    | -   -   -   0   0   -   -   0   
+21.1.5    | 0     | 0    | -   -   -   0   0   -   0   -   
 21.1.6    | 0     | 0    | 0   -   -   -   -   -   -   0   
+21.1.8    | 0     | 0    | 0   -   -   -   -   -   0   -   
+
+index: 21.4 grade: 50.00% (1/2) line: 325 source: || ((wr_state == WR_DRIVE) && (wr_burst_ctr == WORD_BEATS[1:0] - 1'b1) &&
+
+(wr_burst_ctr == (WORD_BEATS[1:0] - 1'b1))
+ <----13---->    <----------14---------->
+
+index     | hit   | <13>  <14>  
+-------------------------------- '=='
+21.4.2    | 0     | lhs != rhs  
 
 index: 21.5 grade: 50.00% (1/2) line: 326 source: !wr_pend_empty && !wr_empty && (wr_pend_wait[wr_pend_rptr[FIFO_PTR_W-1:0]] <= 4'd1));
 
@@ -236,6 +252,24 @@ index: 21.5 grade: 50.00% (1/2) line: 326 source: !wr_pend_empty && !wr_empty &&
 index     | hit   | <15>  <16>  
 -------------------------------- '<='
 21.5.1    | 0     | lhs > rhs   
+
+index: 33.1 grade: 50.00% (1/2) line: 414 source: if (wr_burst_ctr == wb[1:0])
+
+wr_burst_ctr == wb[1:0]
+<----1----->    <--2-->
+
+index     | hit   | <1>   <2>   
+-------------------------------- '=='
+33.1.2    | 0     | lhs != rhs  
+
+index: 36.1 grade: 50.00% (1/2) line: 426 source: if (wr_burst_ctr == wb[1:0])
+
+wr_burst_ctr == wb[1:0]
+<----1----->    <--2-->
+
+index     | hit   | <1>   <2>   
+-------------------------------- '=='
+36.1.2    | 0     | lhs != rhs  
 
 index: 42.1 grade: 50.00% (1/2) line: 521 source: wire                  rd_pend_full  = (rd_pend_count == RD_FIFO_DEPTH[FIFO_PTR_W:0]);
 
@@ -255,15 +289,6 @@ index     | hit   | rval | <1> <2> <3>
 ---------------------------------------
 45.1.3    | 0     | 0    | -   1   -   
 
-index: 53.1 grade: 66.67% (2/3) line: 564 source: if (!rd_pend_empty &&
-
-(! rd_pend_empty) && (rd_pend_wait[rd_pend_rptr[(FIFO_PTR_W - 1):0]] == 4'd0)
-   <-----1----->      <---------------------2---------------------->
-
-index     | hit   | rval | <1> <2> 
------------------------------------
-53.1.2    | 0     | 0    | -   1   
-
 index: 54.1 grade: 50.00% (1/2) line: 575 source: if (cfg_CL_nCK <= CLK_RATIO[7:0]) begin
 
 cfg_CL_nCK <= CLK_RATIO[7:0]
@@ -273,19 +298,46 @@ index     | hit   | <1>   <2>
 -------------------------------- '<='
 54.1.2    | 0     | lhs <= rhs  
 
+index: 56.1 grade: 50.00% (1/2) line: 597 source: if (rd_burst_ctr == WORD_BEATS[1:0] - 1'b1) begin
+
+rd_burst_ctr == (WORD_BEATS[1:0] - 1'b1)
+<----1----->    <----------2----------->
+
+index     | hit   | <1>   <2>   
+-------------------------------- '=='
+56.1.2    | 0     | lhs != rhs  
+
+index: 60.1 grade: 66.67% (2/3) line: 664 source: wire rd_word_complete = rd_capture_valid && (rd_burst_ctr == WORD_BEATS[1:0] - 1'b1);
+
+rd_capture_valid && (rd_burst_ctr == (WORD_BEATS[1:0] - 1'b1))
+<------1------->    <-------------------2-------------------->
+
+index     | hit   | <1> <2> 
+---------------------------- '&&'
+60.1.2    | 0     | -   0   
+
+index: 60.2 grade: 50.00% (1/2) line: 664 source: wire rd_word_complete = rd_capture_valid && (rd_burst_ctr == WORD_BEATS[1:0] - 1'b1);
+
+(rd_burst_ctr == (WORD_BEATS[1:0] - 1'b1))
+ <----3----->    <----------4----------->
+
+index     | hit   | <3>   <4>   
+-------------------------------- '=='
+60.2.2    | 0     | lhs != rhs  
+
 
 Uncovered Toggle Detail Report, Instance Based
 ==============================================
 
 Instance name: chain_harness.u_data_path
-Type name: data_path#(32'h00000020,32'h00000010,32'h00000002,32'h00000004,32'h00000004,32'h00000008,32'h00000004,32'h00000002,32'h00000002,32'h00000010,32'h00000004,32'h00000003,32'h00000002,2)
+Type name: data_path#(32'h00000020,32'h00000020,32'h00000004,32'h00000004,32'h00000004,32'h00000008,32'h00000004,32'h00000002,32'h00000001,32'h00000010,32'h00000004,32'h00000003,32'h00000002,4)
 File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/data_path.sv
-Number of uncovered toggles: 170 of 684
+Number of uncovered toggles: 170 of 720
 Number of unreachable toggles: 0
-Number of uncovered signal bits: 170 of 678
+Number of uncovered signal bits: 170 of 714
 Number of unreachable signal bits: 0
-Number of signal bits partially toggled(rise): 5 of 678
-Number of signal bits partially toggled(fall): 2 of 678
+Number of signal bits partially toggled(rise): 5 of 714
+Number of signal bits partially toggled(fall): 2 of 714
 Number of uncovered enum toggles: 0 of 6
 Number of unreachable enum toggles: 0
 
@@ -300,6 +352,7 @@ Hit(Full)  Hit(Rise)  Hit(Fall)  Signal
 0          0          0          wr_lat_ctr[2]             
 0          0          0          wr_lat_ctr[1]             
 0          0          0          wr_burst_ctr[1]           
+0          0          0          wr_burst_ctr[0]           
 0          0          0          wr_wait_cycles[31]        
 0          0          0          wr_wait_cycles[30]        
 0          0          0          wr_wait_cycles[29]        
@@ -380,7 +433,6 @@ Hit(Full)  Hit(Rise)  Hit(Fall)  Signal
 0          0          0          wr_pend_count[4]          
 0          0          0          wr_pend_count[3]          
 0          0          0          wr_pend_count[2]          
-0          0          0          wr_pend_count[1]          
 0          0          0          wr_pend_full              
 0          0          0          wr_pend_head_wait_next[3] 
 0          0          0          wr_pend_head_wait_next[2] 
@@ -392,6 +444,7 @@ Hit(Full)  Hit(Rise)  Hit(Fall)  Signal
 0          0          0          rd_lat_ctr[3]             
 0          0          0          rd_lat_ctr[2]             
 0          0          0          rd_burst_ctr[1]           
+0          0          0          rd_burst_ctr[0]           
 0          0          0          rd_wait_cycles[31]        
 0          0          0          rd_wait_cycles[30]        
 0          0          0          rd_wait_cycles[29]        
@@ -455,7 +508,6 @@ Hit(Full)  Hit(Rise)  Hit(Fall)  Signal
 0          0          0          rd_pend_count[4]          
 0          0          0          rd_pend_count[3]          
 0          0          0          rd_pend_count[2]          
-0          0          0          rd_pend_count[1]          
 0          0          0          rd_pend_full              
 0          0          0          rd_count[4]               
 0          0          0          rd_count[3]               

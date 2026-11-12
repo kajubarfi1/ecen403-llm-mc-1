@@ -62,9 +62,39 @@ def matches(excl, inst, sig, idx):
     if sig not in excl["signals"]:
         return False
     bits = excl.get("bits", "all")
+    if bits == "diagonal":               # sig[i][i] of a square matrix
+        return len(idx) >= 2 and idx[0] == idx[1]
     if bits == "all" or not idx:
         return True
     return idx[-1] in bits
+
+
+def design_total(code_cov, instances):
+    """The design-wide pair the signoff quotes: measured = covered / total
+    over every module, adjusted = covered / (total - approved exclusions),
+    the exclusions summed from the per-instance entries. A module without
+    an uncovered-items report excludes nothing (its measured number stands);
+    it is listed so the reader sees which blocks the rules were applied to."""
+    cov = tot = exc = 0
+    applied, not_applied = [], []
+    for mod, m in sorted(code_cov.items()):
+        c, t = m.get("covered"), m.get("total")
+        if c is None or not t:
+            continue
+        cov += c
+        tot += t
+        e = instances.get(f"u_{mod}")
+        if e is None:
+            not_applied.append(mod)
+        else:
+            exc += e.get("excluded_approved", 0)
+            applied.append(mod)
+    if not tot:
+        return None
+    return {"covered": cov, "total": tot, "excluded_approved": exc,
+            "measured_percent": round(100.0 * cov / tot, 1),
+            "adjusted_percent": round(100.0 * cov / max(tot - exc, 1), 1),
+            "instances_applied": applied, "instances_without_uncovered_report": not_applied}
 
 
 def main() -> int:
@@ -119,6 +149,9 @@ def main() -> int:
                                   "approved_by": e.get("approved_by"), "matched_bits": counts[e["id"]],
                                   "rule": {"signals": e["signals"], "bits": e.get("bits", "all")},
                                   "derived": {"signals": r["signals"], "bits": r["bits"]}})
+    out["design"] = design_total(code_cov, out["instances"])
+    if out["design"]:
+        out["design"]["approved_exclusions"] = sum(1 for e in doc["exclusions"] if e.get("approved_by"))
     with open(os.path.join(REPORTS, "coverage_exclusions.json"), "w") as f:
         json.dump(out, f, indent=2)
     print(f"  {'instance':14} {'uncov':>6} {'appr':>5} {'prop':>5} {'measured':>9} {'adjusted':>9} {'if approved':>12}")
@@ -128,9 +161,17 @@ def main() -> int:
               f"{str(e.get('adjusted_if_proposed_approved_percent', '')):>12}")
     for x in out["exclusions"]:
         b = x["derived"]["bits"]
-        bl = "all" if b == "all" else (f"[{b[0]}..{b[-1]}]" if b and b == list(range(b[0], b[-1] + 1)) else str(b))
+        bl = (b if b in ("all", "diagonal")
+              else (f"[{b[0]}..{b[-1]}]" if b and b == list(range(b[0], b[-1] + 1)) else str(b)))
         print(f"  {x['id']} {x['code']:8} {x['status']:9} matched {x['matched_bits']}  bits {bl} "
               f"({len(x['derived']['signals'])} signal(s))")
+    d = out["design"]
+    if d:
+        print(f"  DESIGN TOTAL {d['measured_percent']}% measured / {d['adjusted_percent']}% adjusted "
+              f"({d['excluded_approved']} toggle bits under {d['approved_exclusions']} approved exclusions; "
+              f"{d['covered']}/{d['total']} items"
+              + (f"; no uncovered report for {', '.join(d['instances_without_uncovered_report'])}"
+                 if d['instances_without_uncovered_report'] else "") + ")")
     print(f"  wrote {os.path.relpath(os.path.join(REPORTS, 'coverage_exclusions.json'), ROOT)}")
     return 0
 

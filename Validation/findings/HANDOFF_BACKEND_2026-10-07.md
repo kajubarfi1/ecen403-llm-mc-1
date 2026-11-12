@@ -59,3 +59,49 @@ one exists.
 `contract` / `synth` / `build` / `full` is the right shape for an orchestrator.
 `flow.py` runs `build` by default today; a `--backend-mode` option mapping to
 yours is a one-line addition when you want it driven.
+
+## 5. Addendum (2026-11-12): ORFS parallel-make race, fixed in `runner_node`
+
+The first full `flow.py --gui` run on the Mac died in the backend's first
+second: `cp: cannot create regular file 'results/sky130hd/ddr3_controller/
+base/1_2_yosys.sdc': No such file or directory`, make exit 2. ORFS
+(f34d4d9) has no rule that creates `$(RESULTS_DIR)`; only `synth.sh`
+(the canonicalize step) mkdirs it, and under `MAKE_JOBS=4` the SDC copy
+starts at the same time and loses whenever the results tree is fresh.
+`runner_node` now creates `flow/{results,logs,reports}/<platform>/
+<results_name>/base` on the host before running make (both the Docker and
+the native path; the trees are bind mounts). Verified with `--mode synth`
+on addr_decoder into a fresh tree, exit 0.
+
+Two things seen on the way, for you: (1) the repair agent's iteration-1
+fix for this error appended `DESIGN_NICKNAME = TOPRTL` to config.mk. That
+moves every ORFS output to `results/sky130hd/TOPRTL/`, which the runner
+never reads (`results_name` is DESIGN_NAME), so had make then succeeded,
+an hour of ORFS would have ended in "not found gds". A nickname override is
+never a valid repair while the runner derives its paths from DESIGN_NAME.
+(2) Iteration 2's Claude call failed to parse (`Extra data: line 3 column
+1`) and fell back to the heuristic — the response had text after the JSON
+object; a tolerant extractor (first balanced `{...}`) would have kept the
+model's answer.
+
+## 6. Addendum (2026-11-12, evening): ORFS f34d4d9 floorplan rule, and the repair agent again
+
+Second full run on the Mac: synthesis completed, then `make: *** No rule
+to make target 'results/sky130hd/ddr3_controller/base/2_1_floorplan.sdc',
+needed by '.../2_floorplan.sdc'`. ORFS at f34d4d9 (2026-11-09) has the
+dependency written against the copy's target instead of its source
+(Makefile line 512). Patched in Jacob's checkout and in the
+`openroad/orfs:arm64-local` image; the published amd64 image you run on
+Windows is older and may not carry the bug, but check `grep -n
+'2_1_floorplan.sdc: ' flow/Makefile` before updating ORFS.
+
+The repair agent's two iterations on this error: (1) `FLOORPLAN_SDC =
+results/.../1_2_yosys.sdc` appended to config.mk, which would have fed
+the synthesis SDC to floorplan had make got that far; (2) `DESIGN_NAME =
+ddr3_controller`, a no-op. Neither touches a missing make rule, which no
+config.mk change can supply. Two runs, four repairs, none valid: the
+classifier files anything with "yosys" in the log as `synthesis_error`
+and the LLM then invents a config.mk variable. A missing-rule or
+missing-file error from make should be classified `toolchain_error`,
+unfixable, and reported with the make line, so the run halts in a second
+instead of after two more synthesis passes.

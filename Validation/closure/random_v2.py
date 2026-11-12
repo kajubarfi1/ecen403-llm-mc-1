@@ -22,7 +22,12 @@ STRUCTURE derived from the spec:
     burst starts against empty banks;
   * read/write shaping — write-then-read and read-then-write to the same
     address (tWTR, read-to-write turnaround), same-row read pairs (tCCD),
-    write-then-conflict (tWR before precharge).
+    write-then-conflict (tWR before precharge);
+  * same-address storms — a burst of 2 x command_queue_depth writes and
+    reads to ONE address with no idle, so every queued entry is a RAW/WAR/
+    WAW hazard behind every older one (the queue's per-entry conflict
+    matrix fills; pairs alone, as in rw_pairs, set two bits of it at a
+    time and left 189 of 240 reachable bits untoggled, 2026-11-12).
 
 Same step format and validation as every other sequence, so the identical
 driver, harness, assertions and rollup run it.
@@ -148,9 +153,17 @@ def generate(spec, schemas, catalog, scope, seed=1, drives=400, only_kinds=None,
     n = 0
     phases = []
     while n < drives:
-        phase = rng.choice(["burst", "paced", "paced", "rw_pairs", "drain"])
+        phase = rng.choice(["burst", "paced", "paced", "rw_pairs", "storm", "drain"])
         phases.append(phase)
-        if phase == "burst":
+        if phase == "storm" and "write" in kinds:
+            # one address, write first so every later request hazards on it
+            a = next_addr()
+            for k in range(min(2 * depth, drives - n)):
+                kind = "write" if k == 0 or "read" not in kinds else rng.choice(["write", "read"])
+                steps.append({"op": "drive", "iface": iface, "kind": kind,
+                              "fields": fields_for(kind, a)})
+                n += 1
+        elif phase == "burst" or phase == "storm":
             for _ in range(min(2 * depth, drives - n)):
                 kind = rng.choice(kind_names)
                 steps.append({"op": "drive", "iface": iface, "kind": kind,
@@ -186,7 +199,7 @@ def generate(spec, schemas, catalog, scope, seed=1, drives=400, only_kinds=None,
                       f"{w_hit}/{w_conf}/{w_bank}/{w_rand}), seed {seed}: {n} host requests over "
                       f"{len(phases)} phases (bursts of {2 * depth} with no idle against a "
                       f"{depth}-deep queue, paced runs at 0-3 idle cycles, read/write pairs to one "
-                      f"address, drains). Address locality derived from memory_geometry "
+                      f"address, same-address storms of {2 * depth}, drains). Address locality derived from memory_geometry "
                       f"({amap.row_bits} row / {amap.bank_bits} bank / {amap.col_upper}+{amap.burst_off} column bits). "
                       f"Generated without reading coverage."),
         "steps": steps,

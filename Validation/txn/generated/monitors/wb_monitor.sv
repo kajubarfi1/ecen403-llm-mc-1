@@ -4,7 +4,7 @@
 //
 // Interface : wb   (Host Wishbone request stream into wb_port)
 // Block     : wb_port
-// Manifest  : Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json
+// Manifest  : runs/20261112-114757-interactive/drop/PHASE1RTL/wb_port_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //
@@ -19,7 +19,7 @@ module wb_monitor #(
 ) (
     input  logic clk,
     input  logic rst_n,
-    input  logic [28:0] wb_adr_i,
+    input  logic [30:0] wb_adr_i,
     input  logic [1:0] wb_bte_i,
     input  logic [2:0] wb_cti_i,
     input  logic wb_cyc_i,

@@ -3,15 +3,15 @@
 
 Host: n01-zeus.olympus.ece.tamu.edu
 
-Report date: Wed 11 Nov 2026 14:13:43 CST
+Report date: Thu 12 Nov 2026 11:52:23 CST
 
 Report options: -detail -metrics block:expression:toggle -out /home/ugrads/j/jacobz/cov_uncov_u_scheduler.txt -inst chain_harness.u_scheduler -uncovered -source on -overwrite
 
-Coverage database path: /home/ugrads/j/jacobz/cov_merged_crv2_nov11_fix
+Coverage database path: /home/ugrads/j/jacobz/cov_merged_paths
 
-Coverage model files: /home/ugrads/j/jacobz/cov_merged_crv2_nov11_fix/icc_6badd542_312cbb60.ucm
+Coverage model files: /home/ugrads/j/jacobz/cov_merged_paths/icc_2b5aabad_6bc0dc82.ucm
 
-Coverage data files: /home/ugrads/j/jacobz/cov_merged_crv2_nov11_fix/icc_6badd542_312cbb60.ucd
+Coverage data files: /home/ugrads/j/jacobz/cov_merged_paths/icc_2b5aabad_6bc0dc82.ucd
 
 CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_conf.ccf
     // Xcelium coverage configuration for the DDR3 validation subsystem.
@@ -79,7 +79,7 @@ CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_
     
 
 
-Coverage database date: Wed 11 Nov 2026 14:06:43 CST
+Coverage database date: Thu 12 Nov 2026 11:49:54 CST
 
 *** There were no refinement files applied ***
 
@@ -107,6 +107,23 @@ Coverage Table Legend
 Uncovered Block Detail Report, Instance Based
 =============================================
 
+Instance name: chain_harness.u_scheduler
+Type name: scheduler#(32'h00000020,32'h00000005,32'h00000010,32'h0000000a,32'h00000003,32'h00000008,32'h00000004,32'h00000001,4'h0,4'h1,4'h2,4'h3,4'h4,4'h5)
+File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/scheduler.sv
+Number of uncovered blocks: 2 of 467
+Number of unreachable blocks: 0
+Number of uncovered branches: 2 of 439
+Number of unreachable branches: 0
+Number of uncovered statements: 1 of 168
+Number of unreachable statements: 0
+
+Count  Block #Stmt Line  Kind                 Origin Source Code                    
+------------------------------------------------------------------------------------
+0      362   0     495   ternary 3 true  *    495    assign t3_type_L1[15] = eligible3[30] ? (act_cond_pre[30] ? CMD_PRE : CMD_ACT) : (act_cond_pre[31] ? CMD_PRE : CMD_ACT); 
+0      455   1     640   true part of    *    639    cas_spacing_ctr <= cas_spacing_ctr - 1'b1; 
+
+(*) indicates a branch
+
 Uncovered Expression Detail Report, Instance Based
 ==================================================
 
@@ -125,9 +142,9 @@ Expression coverage Table Legend
 
 
 Instance name: chain_harness.u_scheduler
-Type name: scheduler#(32'h00000010,32'h00000004,32'h0000000f,32'h0000000a,32'h00000003,32'h00000008,32'h00000004,32'h00000002,4'h0,4'h1,4'h2,4'h3,4'h4,4'h5)
+Type name: scheduler#(32'h00000020,32'h00000005,32'h00000010,32'h0000000a,32'h00000003,32'h00000008,32'h00000004,32'h00000001,4'h0,4'h1,4'h2,4'h3,4'h4,4'h5)
 File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/scheduler.sv
-Number of uncovered expressions: 3 of 263
+Number of uncovered expressions: 6 of 359
 Number of unreachable expressions: 0
 
 index  | grade         | line   | expression                                         
@@ -135,6 +152,9 @@ index  | grade         | line   | expression
 4.1    | 50.00% (1/2)  | 162    | cmd_type != CMD_NOP                                
 9.1    | 50.00% (1/2)  | 171    | d1_type != CMD_NOP                                 
 14.1   | 50.00% (1/2)  | 182    | sel_type_r != CMD_NOP                              
+19.1   | 50.00% (1/2)  | 211    | cas_spacing_ctr != 0                               
+23.1   | 90.00% (9/10) | 250    | ((((is_row_hit[i] && (! recently_granted)) && (! cas_spacing_active)) && (! inflight_state[b])) && (! inflight_ref)) && (q_we[i] ? bank_wr_allowed[b] : (bank_rd_allowed[b] && (! inflight_wr))) 
+102.1  | 50.00% (1/2)  | 639    | cas_spacing_ctr != 0                               
 
 index: 4.1 grade: 50.00% (1/2) line: 162 source: else if (cmd_type != CMD_NOP) begin
 
@@ -163,21 +183,112 @@ index     | hit   | <1>   <2>
 -------------------------------- '!='
 14.1.1    | 0     | lhs == rhs  
 
+index: 19.1 grade: 50.00% (1/2) line: 211 source: wire        cas_spacing_active = (cas_spacing_ctr != 0);
+
+cas_spacing_ctr != 0
+<------1------>    <2>
+
+index     | hit   | <1>   <2>   
+-------------------------------- '!='
+19.1.2    | 0     | lhs != rhs  
+
+index: 23.1 grade: 90.00% (9/10) line: 250 source: !inflight_state[b] && !inflight_ref &&
+
+((((is_row_hit[i] && (! recently_granted)) && (! cas_spacing_active)) && (! inflight_state[b])) && (! inflight_ref)) && (q_we[i] ? bank_wr_allowed[b] : (bank_rd_allowed[b] && (! inflight_wr)))
+    <-----1----->       <------2------->         <-------3-------->         <-------4------->         <----5----->       <--6-->   <-------7-------->    <-------8-------->       <----9---->
+
+index     | hit   | rval | <1> <2> <3> <4> <5> <6> <7> <8> <9> 
+---------------------------------------------------------------
+23.1.8    | 0     | 0    | -   -   1   -   -   -   -   -   -   
+
+index: 102.1 grade: 50.00% (1/2) line: 639 source: else if (cas_spacing_ctr != 0)
+
+cas_spacing_ctr != 0
+<------1------>    <2>
+
+index     | hit   | <1>   <2>   
+-------------------------------- '!='
+102.1.2   | 0     | lhs != rhs  
+
 
 Uncovered Toggle Detail Report, Instance Based
 ==============================================
 
 Instance name: chain_harness.u_scheduler
-Type name: scheduler#(32'h00000010,32'h00000004,32'h0000000f,32'h0000000a,32'h00000003,32'h00000008,32'h00000004,32'h00000002,4'h0,4'h1,4'h2,4'h3,4'h4,4'h5)
+Type name: scheduler#(32'h00000020,32'h00000005,32'h00000010,32'h0000000a,32'h00000003,32'h00000008,32'h00000004,32'h00000001,4'h0,4'h1,4'h2,4'h3,4'h4,4'h5)
 File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/scheduler.sv
-Number of uncovered signal bits: 211 of 1258
+Number of uncovered signal bits: 497 of 2343
 Number of unreachable signal bits: 0
-Number of signal bits partially toggled(rise): 1 of 1258
-Number of signal bits partially toggled(fall): 0 of 1258
+Number of signal bits partially toggled(rise): 28 of 2343
+Number of signal bits partially toggled(fall): 0 of 2343
 
 Hit(Full)  Hit(Rise)  Hit(Fall)  Signal                    
 -----------------------------------------------------------
 0          1          0          rst_n                     
+0          1          0          q_row[31][3]              
+0          1          0          q_row[31][5]              
+0          1          0          q_row[31][9]              
+0          1          0          q_row[31][12]             
+0          1          0          q_row[31][13]             
+0          1          0          q_row[30][3]              
+0          1          0          q_row[30][5]              
+0          1          0          q_row[30][9]              
+0          1          0          q_row[30][12]             
+0          1          0          q_row[30][13]             
+0          1          0          q_row[29][3]              
+0          1          0          q_row[29][9]              
+0          1          0          q_row[29][12]             
+0          0          0          q_col[31][0]              
+0          0          0          q_col[31][1]              
+0          0          0          q_col[31][2]              
+0          1          0          q_col[31][5]              
+0          0          0          q_col[30][0]              
+0          0          0          q_col[30][1]              
+0          0          0          q_col[30][2]              
+0          1          0          q_col[30][5]              
+0          0          0          q_col[29][0]              
+0          0          0          q_col[29][1]              
+0          0          0          q_col[29][2]              
+0          1          0          q_col[29][5]              
+0          0          0          q_col[28][0]              
+0          0          0          q_col[28][1]              
+0          0          0          q_col[28][2]              
+0          0          0          q_col[27][0]              
+0          0          0          q_col[27][1]              
+0          0          0          q_col[27][2]              
+0          0          0          q_col[26][0]              
+0          0          0          q_col[26][1]              
+0          0          0          q_col[26][2]              
+0          0          0          q_col[25][0]              
+0          0          0          q_col[25][1]              
+0          0          0          q_col[25][2]              
+0          0          0          q_col[24][0]              
+0          0          0          q_col[24][1]              
+0          0          0          q_col[24][2]              
+0          0          0          q_col[23][0]              
+0          0          0          q_col[23][1]              
+0          0          0          q_col[23][2]              
+0          0          0          q_col[22][0]              
+0          0          0          q_col[22][1]              
+0          0          0          q_col[22][2]              
+0          0          0          q_col[21][0]              
+0          0          0          q_col[21][1]              
+0          0          0          q_col[21][2]              
+0          0          0          q_col[20][0]              
+0          0          0          q_col[20][1]              
+0          0          0          q_col[20][2]              
+0          0          0          q_col[19][0]              
+0          0          0          q_col[19][1]              
+0          0          0          q_col[19][2]              
+0          0          0          q_col[18][0]              
+0          0          0          q_col[18][1]              
+0          0          0          q_col[18][2]              
+0          0          0          q_col[17][0]              
+0          0          0          q_col[17][1]              
+0          0          0          q_col[17][2]              
+0          0          0          q_col[16][0]              
+0          0          0          q_col[16][1]              
+0          0          0          q_col[16][2]              
 0          0          0          q_col[15][0]              
 0          0          0          q_col[15][1]              
 0          0          0          q_col[15][2]              
@@ -226,6 +337,17 @@ Hit(Full)  Hit(Rise)  Hit(Fall)  Signal
 0          0          0          q_col[0][0]               
 0          0          0          q_col[0][1]               
 0          0          0          q_col[0][2]               
+0          1          0          q_bank[31][0]             
+0          1          0          q_bank[31][2]             
+0          1          0          q_bank[30][0]             
+0          1          0          q_bank[29][0]             
+0          1          0          q_bank[29][2]             
+0          1          0          q_bank[26][0]             
+0          1          0          q_we[31]                  
+0          1          0          q_aux[31][1]              
+0          1          0          q_aux[31][2]              
+0          1          0          q_aux[30][0]              
+0          1          0          q_aux[30][2]              
 0          0          0          cmd_type[3]               
 0          0          0          cmd_col[2]                
 0          0          0          cmd_col[1]                
@@ -239,31 +361,98 @@ Hit(Full)  Hit(Rise)  Hit(Fall)  Signal
 0          0          0          cas_spacing_ctr[3]        
 0          0          0          cas_spacing_ctr[2]        
 0          0          0          cas_spacing_ctr[1]        
+0          0          0          cas_spacing_ctr[0]        
+0          0          0          cas_spacing_active        
 0          0          0          sel_type[3]               
+0          0          0          act_cond_pre[31]          
+0          0          0          t2_idx_L1[15][1]          
+0          0          0          t2_idx_L1[15][2]          
+0          0          0          t2_idx_L1[15][3]          
+0          0          0          t2_idx_L1[15][4]          
+0          0          0          t2_idx_L1[14][1]          
+0          0          0          t2_idx_L1[14][2]          
+0          0          0          t2_idx_L1[14][3]          
+0          0          0          t2_idx_L1[14][4]          
+0          0          0          t2_idx_L1[13][1]          
+0          0          0          t2_idx_L1[13][2]          
+0          0          0          t2_idx_L1[13][3]          
+0          0          0          t2_idx_L1[13][4]          
+0          0          0          t2_idx_L1[12][1]          
+0          0          0          t2_idx_L1[12][2]          
+0          0          0          t2_idx_L1[12][3]          
+0          0          0          t2_idx_L1[12][4]          
+0          0          0          t2_idx_L1[11][1]          
+0          0          0          t2_idx_L1[11][2]          
+0          0          0          t2_idx_L1[11][3]          
+0          0          0          t2_idx_L1[11][4]          
+0          0          0          t2_idx_L1[10][1]          
+0          0          0          t2_idx_L1[10][2]          
+0          0          0          t2_idx_L1[10][3]          
+0          0          0          t2_idx_L1[10][4]          
+0          0          0          t2_idx_L1[9][1]           
+0          0          0          t2_idx_L1[9][2]           
+0          0          0          t2_idx_L1[9][3]           
+0          0          0          t2_idx_L1[9][4]           
+0          0          0          t2_idx_L1[8][1]           
+0          0          0          t2_idx_L1[8][2]           
+0          0          0          t2_idx_L1[8][3]           
+0          0          0          t2_idx_L1[8][4]           
 0          0          0          t2_idx_L1[7][1]           
 0          0          0          t2_idx_L1[7][2]           
 0          0          0          t2_idx_L1[7][3]           
+0          0          0          t2_idx_L1[7][4]           
 0          0          0          t2_idx_L1[6][1]           
 0          0          0          t2_idx_L1[6][2]           
 0          0          0          t2_idx_L1[6][3]           
+0          0          0          t2_idx_L1[6][4]           
 0          0          0          t2_idx_L1[5][1]           
 0          0          0          t2_idx_L1[5][2]           
 0          0          0          t2_idx_L1[5][3]           
+0          0          0          t2_idx_L1[5][4]           
 0          0          0          t2_idx_L1[4][1]           
 0          0          0          t2_idx_L1[4][2]           
 0          0          0          t2_idx_L1[4][3]           
+0          0          0          t2_idx_L1[4][4]           
 0          0          0          t2_idx_L1[3][1]           
 0          0          0          t2_idx_L1[3][2]           
 0          0          0          t2_idx_L1[3][3]           
+0          0          0          t2_idx_L1[3][4]           
 0          0          0          t2_idx_L1[2][1]           
 0          0          0          t2_idx_L1[2][2]           
 0          0          0          t2_idx_L1[2][3]           
+0          0          0          t2_idx_L1[2][4]           
 0          0          0          t2_idx_L1[1][1]           
 0          0          0          t2_idx_L1[1][2]           
 0          0          0          t2_idx_L1[1][3]           
+0          0          0          t2_idx_L1[1][4]           
 0          0          0          t2_idx_L1[0][1]           
 0          0          0          t2_idx_L1[0][2]           
 0          0          0          t2_idx_L1[0][3]           
+0          0          0          t2_idx_L1[0][4]           
+0          0          0          t2_type_L1[15][1]         
+0          0          0          t2_type_L1[15][2]         
+0          0          0          t2_type_L1[15][3]         
+0          0          0          t2_type_L1[14][1]         
+0          0          0          t2_type_L1[14][2]         
+0          0          0          t2_type_L1[14][3]         
+0          0          0          t2_type_L1[13][1]         
+0          0          0          t2_type_L1[13][2]         
+0          0          0          t2_type_L1[13][3]         
+0          0          0          t2_type_L1[12][1]         
+0          0          0          t2_type_L1[12][2]         
+0          0          0          t2_type_L1[12][3]         
+0          0          0          t2_type_L1[11][1]         
+0          0          0          t2_type_L1[11][2]         
+0          0          0          t2_type_L1[11][3]         
+0          0          0          t2_type_L1[10][1]         
+0          0          0          t2_type_L1[10][2]         
+0          0          0          t2_type_L1[10][3]         
+0          0          0          t2_type_L1[9][1]          
+0          0          0          t2_type_L1[9][2]          
+0          0          0          t2_type_L1[9][3]          
+0          0          0          t2_type_L1[8][1]          
+0          0          0          t2_type_L1[8][2]          
+0          0          0          t2_type_L1[8][3]          
 0          0          0          t2_type_L1[7][1]          
 0          0          0          t2_type_L1[7][2]          
 0          0          0          t2_type_L1[7][3]          
@@ -288,14 +477,42 @@ Hit(Full)  Hit(Rise)  Hit(Fall)  Signal
 0          0          0          t2_type_L1[0][1]          
 0          0          0          t2_type_L1[0][2]          
 0          0          0          t2_type_L1[0][3]          
+0          0          0          t2_idx_L2[7][2]           
+0          0          0          t2_idx_L2[7][3]           
+0          0          0          t2_idx_L2[7][4]           
+0          0          0          t2_idx_L2[6][2]           
+0          0          0          t2_idx_L2[6][3]           
+0          0          0          t2_idx_L2[6][4]           
+0          0          0          t2_idx_L2[5][2]           
+0          0          0          t2_idx_L2[5][3]           
+0          0          0          t2_idx_L2[5][4]           
+0          0          0          t2_idx_L2[4][2]           
+0          0          0          t2_idx_L2[4][3]           
+0          0          0          t2_idx_L2[4][4]           
 0          0          0          t2_idx_L2[3][2]           
 0          0          0          t2_idx_L2[3][3]           
+0          0          0          t2_idx_L2[3][4]           
 0          0          0          t2_idx_L2[2][2]           
 0          0          0          t2_idx_L2[2][3]           
+0          0          0          t2_idx_L2[2][4]           
 0          0          0          t2_idx_L2[1][2]           
 0          0          0          t2_idx_L2[1][3]           
+0          0          0          t2_idx_L2[1][4]           
 0          0          0          t2_idx_L2[0][2]           
 0          0          0          t2_idx_L2[0][3]           
+0          0          0          t2_idx_L2[0][4]           
+0          0          0          t2_type_L2[7][1]          
+0          0          0          t2_type_L2[7][2]          
+0          0          0          t2_type_L2[7][3]          
+0          0          0          t2_type_L2[6][1]          
+0          0          0          t2_type_L2[6][2]          
+0          0          0          t2_type_L2[6][3]          
+0          0          0          t2_type_L2[5][1]          
+0          0          0          t2_type_L2[5][2]          
+0          0          0          t2_type_L2[5][3]          
+0          0          0          t2_type_L2[4][1]          
+0          0          0          t2_type_L2[4][2]          
+0          0          0          t2_type_L2[4][3]          
 0          0          0          t2_type_L2[3][1]          
 0          0          0          t2_type_L2[3][2]          
 0          0          0          t2_type_L2[3][3]          
@@ -308,44 +525,120 @@ Hit(Full)  Hit(Rise)  Hit(Fall)  Signal
 0          0          0          t2_type_L2[0][1]          
 0          0          0          t2_type_L2[0][2]          
 0          0          0          t2_type_L2[0][3]          
+0          0          0          t2_idx_L3[3][3]           
+0          0          0          t2_idx_L3[3][4]           
+0          0          0          t2_idx_L3[2][3]           
+0          0          0          t2_idx_L3[2][4]           
 0          0          0          t2_idx_L3[1][3]           
+0          0          0          t2_idx_L3[1][4]           
 0          0          0          t2_idx_L3[0][3]           
+0          0          0          t2_idx_L3[0][4]           
+0          0          0          t2_type_L3[3][1]          
+0          0          0          t2_type_L3[3][2]          
+0          0          0          t2_type_L3[3][3]          
+0          0          0          t2_type_L3[2][1]          
+0          0          0          t2_type_L3[2][2]          
+0          0          0          t2_type_L3[2][3]          
 0          0          0          t2_type_L3[1][1]          
 0          0          0          t2_type_L3[1][2]          
 0          0          0          t2_type_L3[1][3]          
 0          0          0          t2_type_L3[0][1]          
 0          0          0          t2_type_L3[0][2]          
 0          0          0          t2_type_L3[0][3]          
+0          0          0          t2_idx_L4[1][4]           
+0          0          0          t2_idx_L4[0][4]           
+0          0          0          t2_type_L4[1][1]          
+0          0          0          t2_type_L4[1][2]          
+0          0          0          t2_type_L4[1][3]          
 0          0          0          t2_type_L4[0][1]          
 0          0          0          t2_type_L4[0][2]          
 0          0          0          t2_type_L4[0][3]          
+0          0          0          t2_type_L5[0][1]          
+0          0          0          t2_type_L5[0][2]          
+0          0          0          t2_type_L5[0][3]          
 0          0          0          t2_type[3]                
 0          0          0          t2_type[2]                
 0          0          0          t2_type[1]                
+0          0          0          t3_idx_L1[15][1]          
+0          0          0          t3_idx_L1[15][2]          
+0          0          0          t3_idx_L1[15][3]          
+0          0          0          t3_idx_L1[15][4]          
+0          0          0          t3_idx_L1[14][1]          
+0          0          0          t3_idx_L1[14][2]          
+0          0          0          t3_idx_L1[14][3]          
+0          0          0          t3_idx_L1[14][4]          
+0          0          0          t3_idx_L1[13][1]          
+0          0          0          t3_idx_L1[13][2]          
+0          0          0          t3_idx_L1[13][3]          
+0          0          0          t3_idx_L1[13][4]          
+0          0          0          t3_idx_L1[12][1]          
+0          0          0          t3_idx_L1[12][2]          
+0          0          0          t3_idx_L1[12][3]          
+0          0          0          t3_idx_L1[12][4]          
+0          0          0          t3_idx_L1[11][1]          
+0          0          0          t3_idx_L1[11][2]          
+0          0          0          t3_idx_L1[11][3]          
+0          0          0          t3_idx_L1[11][4]          
+0          0          0          t3_idx_L1[10][1]          
+0          0          0          t3_idx_L1[10][2]          
+0          0          0          t3_idx_L1[10][3]          
+0          0          0          t3_idx_L1[10][4]          
+0          0          0          t3_idx_L1[9][1]           
+0          0          0          t3_idx_L1[9][2]           
+0          0          0          t3_idx_L1[9][3]           
+0          0          0          t3_idx_L1[9][4]           
+0          0          0          t3_idx_L1[8][1]           
+0          0          0          t3_idx_L1[8][2]           
+0          0          0          t3_idx_L1[8][3]           
+0          0          0          t3_idx_L1[8][4]           
 0          0          0          t3_idx_L1[7][1]           
 0          0          0          t3_idx_L1[7][2]           
 0          0          0          t3_idx_L1[7][3]           
+0          0          0          t3_idx_L1[7][4]           
 0          0          0          t3_idx_L1[6][1]           
 0          0          0          t3_idx_L1[6][2]           
 0          0          0          t3_idx_L1[6][3]           
+0          0          0          t3_idx_L1[6][4]           
 0          0          0          t3_idx_L1[5][1]           
 0          0          0          t3_idx_L1[5][2]           
 0          0          0          t3_idx_L1[5][3]           
+0          0          0          t3_idx_L1[5][4]           
 0          0          0          t3_idx_L1[4][1]           
 0          0          0          t3_idx_L1[4][2]           
 0          0          0          t3_idx_L1[4][3]           
+0          0          0          t3_idx_L1[4][4]           
 0          0          0          t3_idx_L1[3][1]           
 0          0          0          t3_idx_L1[3][2]           
 0          0          0          t3_idx_L1[3][3]           
+0          0          0          t3_idx_L1[3][4]           
 0          0          0          t3_idx_L1[2][1]           
 0          0          0          t3_idx_L1[2][2]           
 0          0          0          t3_idx_L1[2][3]           
+0          0          0          t3_idx_L1[2][4]           
 0          0          0          t3_idx_L1[1][1]           
 0          0          0          t3_idx_L1[1][2]           
 0          0          0          t3_idx_L1[1][3]           
+0          0          0          t3_idx_L1[1][4]           
 0          0          0          t3_idx_L1[0][1]           
 0          0          0          t3_idx_L1[0][2]           
 0          0          0          t3_idx_L1[0][3]           
+0          0          0          t3_idx_L1[0][4]           
+0          0          0          t3_type_L1[15][1]         
+0          0          0          t3_type_L1[15][3]         
+0          0          0          t3_type_L1[14][1]         
+0          0          0          t3_type_L1[14][3]         
+0          0          0          t3_type_L1[13][1]         
+0          0          0          t3_type_L1[13][3]         
+0          0          0          t3_type_L1[12][1]         
+0          0          0          t3_type_L1[12][3]         
+0          0          0          t3_type_L1[11][1]         
+0          0          0          t3_type_L1[11][3]         
+0          0          0          t3_type_L1[10][1]         
+0          0          0          t3_type_L1[10][3]         
+0          0          0          t3_type_L1[9][1]          
+0          0          0          t3_type_L1[9][3]          
+0          0          0          t3_type_L1[8][1]          
+0          0          0          t3_type_L1[8][3]          
 0          0          0          t3_type_L1[7][1]          
 0          0          0          t3_type_L1[7][3]          
 0          0          0          t3_type_L1[6][1]          
@@ -362,14 +655,38 @@ Hit(Full)  Hit(Rise)  Hit(Fall)  Signal
 0          0          0          t3_type_L1[1][3]          
 0          0          0          t3_type_L1[0][1]          
 0          0          0          t3_type_L1[0][3]          
+0          0          0          t3_idx_L2[7][2]           
+0          0          0          t3_idx_L2[7][3]           
+0          0          0          t3_idx_L2[7][4]           
+0          0          0          t3_idx_L2[6][2]           
+0          0          0          t3_idx_L2[6][3]           
+0          0          0          t3_idx_L2[6][4]           
+0          0          0          t3_idx_L2[5][2]           
+0          0          0          t3_idx_L2[5][3]           
+0          0          0          t3_idx_L2[5][4]           
+0          0          0          t3_idx_L2[4][2]           
+0          0          0          t3_idx_L2[4][3]           
+0          0          0          t3_idx_L2[4][4]           
 0          0          0          t3_idx_L2[3][2]           
 0          0          0          t3_idx_L2[3][3]           
+0          0          0          t3_idx_L2[3][4]           
 0          0          0          t3_idx_L2[2][2]           
 0          0          0          t3_idx_L2[2][3]           
+0          0          0          t3_idx_L2[2][4]           
 0          0          0          t3_idx_L2[1][2]           
 0          0          0          t3_idx_L2[1][3]           
+0          0          0          t3_idx_L2[1][4]           
 0          0          0          t3_idx_L2[0][2]           
 0          0          0          t3_idx_L2[0][3]           
+0          0          0          t3_idx_L2[0][4]           
+0          0          0          t3_type_L2[7][1]          
+0          0          0          t3_type_L2[7][3]          
+0          0          0          t3_type_L2[6][1]          
+0          0          0          t3_type_L2[6][3]          
+0          0          0          t3_type_L2[5][1]          
+0          0          0          t3_type_L2[5][3]          
+0          0          0          t3_type_L2[4][1]          
+0          0          0          t3_type_L2[4][3]          
 0          0          0          t3_type_L2[3][1]          
 0          0          0          t3_type_L2[3][3]          
 0          0          0          t3_type_L2[2][1]          
@@ -378,14 +695,30 @@ Hit(Full)  Hit(Rise)  Hit(Fall)  Signal
 0          0          0          t3_type_L2[1][3]          
 0          0          0          t3_type_L2[0][1]          
 0          0          0          t3_type_L2[0][3]          
+0          0          0          t3_idx_L3[3][3]           
+0          0          0          t3_idx_L3[3][4]           
+0          0          0          t3_idx_L3[2][3]           
+0          0          0          t3_idx_L3[2][4]           
 0          0          0          t3_idx_L3[1][3]           
+0          0          0          t3_idx_L3[1][4]           
 0          0          0          t3_idx_L3[0][3]           
+0          0          0          t3_idx_L3[0][4]           
+0          0          0          t3_type_L3[3][1]          
+0          0          0          t3_type_L3[3][3]          
+0          0          0          t3_type_L3[2][1]          
+0          0          0          t3_type_L3[2][3]          
 0          0          0          t3_type_L3[1][1]          
 0          0          0          t3_type_L3[1][3]          
 0          0          0          t3_type_L3[0][1]          
 0          0          0          t3_type_L3[0][3]          
+0          0          0          t3_idx_L4[1][4]           
+0          0          0          t3_idx_L4[0][4]           
+0          0          0          t3_type_L4[1][1]          
+0          0          0          t3_type_L4[1][3]          
 0          0          0          t3_type_L4[0][1]          
 0          0          0          t3_type_L4[0][3]          
+0          0          0          t3_type_L5[0][1]          
+0          0          0          t3_type_L5[0][3]          
 0          0          0          t3_type[3]                
 0          0          0          t3_type[1]                
 

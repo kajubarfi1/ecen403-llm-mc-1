@@ -1,53 +1,93 @@
 {
   "$schema": "validation-coverage-exclusions-report/2",
   "instances": {
+    "u_addr_decoder": {
+      "uncovered_toggle_bits": 4,
+      "excluded_approved": 0,
+      "excluded_proposed": 0,
+      "measured_percent": 93.4,
+      "adjusted_percent": 93.4,
+      "adjusted_if_proposed_approved_percent": 93.4
+    },
     "u_bank_tracker": {
       "uncovered_toggle_bits": 199,
       "excluded_approved": 198,
       "excluded_proposed": 0,
-      "measured_percent": 80.8,
-      "adjusted_percent": 99.6,
-      "adjusted_if_proposed_approved_percent": 99.6
+      "measured_percent": 81.1,
+      "adjusted_percent": 99.7,
+      "adjusted_if_proposed_approved_percent": 99.7
+    },
+    "u_calibration": {
+      "uncovered_toggle_bits": 6,
+      "excluded_approved": 1,
+      "excluded_proposed": 0,
+      "measured_percent": 89.8,
+      "adjusted_percent": 91.4,
+      "adjusted_if_proposed_approved_percent": 91.4
+    },
+    "u_cmd_gen": {
+      "uncovered_toggle_bits": 9,
+      "excluded_approved": 1,
+      "excluded_proposed": 0,
+      "measured_percent": 92.4,
+      "adjusted_percent": 93.2,
+      "adjusted_if_proposed_approved_percent": 93.2
     },
     "u_cmd_queue": {
-      "uncovered_toggle_bits": 321,
-      "excluded_approved": 100,
+      "uncovered_toggle_bits": 328,
+      "excluded_approved": 260,
       "excluded_proposed": 0,
-      "measured_percent": 82.7,
-      "adjusted_percent": 87.0,
-      "adjusted_if_proposed_approved_percent": 87.0
+      "measured_percent": 93.4,
+      "adjusted_percent": 98.6,
+      "adjusted_if_proposed_approved_percent": 98.6
     },
     "u_config_regs": {
-      "uncovered_toggle_bits": 129,
-      "excluded_approved": 120,
+      "uncovered_toggle_bits": 125,
+      "excluded_approved": 116,
       "excluded_proposed": 0,
-      "measured_percent": 85.1,
+      "measured_percent": 85.5,
       "adjusted_percent": 98.0,
       "adjusted_if_proposed_approved_percent": 98.0
     },
     "u_data_path": {
       "uncovered_toggle_bits": 170,
-      "excluded_approved": 16,
+      "excluded_approved": 153,
       "excluded_proposed": 0,
-      "measured_percent": 66.5,
-      "adjusted_percent": 67.6,
-      "adjusted_if_proposed_approved_percent": 67.6
+      "measured_percent": 81.6,
+      "adjusted_percent": 95.2,
+      "adjusted_if_proposed_approved_percent": 95.2
     },
-    "u_scheduler": {
-      "uncovered_toggle_bits": 211,
-      "excluded_approved": 52,
-      "excluded_proposed": 0,
-      "measured_percent": 88.1,
-      "adjusted_percent": 90.7,
-      "adjusted_if_proposed_approved_percent": 90.7
-    },
-    "u_wb_port": {
-      "uncovered_toggle_bits": 79,
+    "u_init_fsm": {
+      "uncovered_toggle_bits": 15,
       "excluded_approved": 1,
       "excluded_proposed": 0,
-      "measured_percent": 75.0,
-      "adjusted_percent": 75.0,
-      "adjusted_if_proposed_approved_percent": 75.0
+      "measured_percent": 87.1,
+      "adjusted_percent": 87.6,
+      "adjusted_if_proposed_approved_percent": 87.6
+    },
+    "u_refresh_ctrl": {
+      "uncovered_toggle_bits": 10,
+      "excluded_approved": 1,
+      "excluded_proposed": 0,
+      "measured_percent": 93.5,
+      "adjusted_percent": 94.0,
+      "adjusted_if_proposed_approved_percent": 94.0
+    },
+    "u_scheduler": {
+      "uncovered_toggle_bits": 497,
+      "excluded_approved": 100,
+      "excluded_proposed": 0,
+      "measured_percent": 84.1,
+      "adjusted_percent": 86.8,
+      "adjusted_if_proposed_approved_percent": 86.8
+    },
+    "u_wb_port": {
+      "uncovered_toggle_bits": 66,
+      "excluded_approved": 1,
+      "excluded_proposed": 0,
+      "measured_percent": 94.6,
+      "adjusted_percent": 94.7,
+      "adjusted_if_proposed_approved_percent": 94.7
     }
   },
   "exclusions": [
@@ -57,7 +97,7 @@
       "status": "approved",
       "approved_by": "Jacob Zatopek",
       "matched_bits": {
-        "approved": 99,
+        "approved": 195,
         "proposed": 0
       },
       "rule": {
@@ -89,7 +129,7 @@
       "status": "approved",
       "approved_by": "Jacob Zatopek",
       "matched_bits": {
-        "approved": 51,
+        "approved": 99,
         "proposed": 0
       },
       "rule": {
@@ -119,7 +159,7 @@
       "status": "approved",
       "approved_by": "Jacob Zatopek",
       "matched_bits": {
-        "approved": 6,
+        "approved": 10,
         "proposed": 0
       },
       "rule": {
@@ -417,7 +457,7 @@
       "status": "approved",
       "approved_by": "Jacob Zatopek",
       "matched_bits": {
-        "approved": 2,
+        "approved": 4,
         "proposed": 0
       },
       "rule": {
@@ -436,6 +476,7 @@
           "wr_burst_ctr"
         ],
         "bits": [
+          0,
           1
         ]
       }
@@ -596,7 +637,7 @@
       "status": "approved",
       "approved_by": "Jacob Zatopek",
       "matched_bits": {
-        "approved": 6,
+        "approved": 2,
         "proposed": 0
       },
       "rule": {
@@ -614,8 +655,6 @@
           "reg_bist_addr_end"
         ],
         "bits": [
-          29,
-          30,
           31
         ]
       }
@@ -679,10 +718,226 @@
         ],
         "bits": "all"
       }
+    },
+    {
+      "id": "X-020",
+      "code": "E-DEAD",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 64,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "conf",
+          "older"
+        ],
+        "bits": {
+          "diagonal": true
+        }
+      },
+      "derived": {
+        "signals": [
+          "conf",
+          "older"
+        ],
+        "bits": "diagonal"
+      }
+    },
+    {
+      "id": "X-021",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 48,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "wr_pend_wait"
+        ],
+        "bits": {
+          "above_max": "ceil(timing_model.CWL_cycles / clocking_model.clock_ratio_ddr_to_controller) - 1",
+          "width": 4
+        }
+      },
+      "derived": {
+        "signals": [
+          "wr_pend_wait"
+        ],
+        "bits": [
+          1,
+          2,
+          3
+        ]
+      }
+    },
+    {
+      "id": "X-022",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 32,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "rd_pend_wait"
+        ],
+        "bits": {
+          "above_max": "ceil(timing_model.CL_cycles / clocking_model.clock_ratio_ddr_to_controller) - 1",
+          "width": 4
+        }
+      },
+      "derived": {
+        "signals": [
+          "rd_pend_wait"
+        ],
+        "bits": [
+          2,
+          3
+        ]
+      }
+    },
+    {
+      "id": "X-023",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 28,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "wr_wait_cycles"
+        ],
+        "bits": {
+          "above_max": "ceil(timing_model.CWL_cycles / clocking_model.clock_ratio_ddr_to_controller) + 1",
+          "width": 32
+        }
+      },
+      "derived": {
+        "signals": [
+          "wr_wait_cycles"
+        ],
+        "bits": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ]
+      }
+    },
+    {
+      "id": "X-024",
+      "code": "E-SPEC",
+      "status": "approved",
+      "approved_by": "Jacob Zatopek",
+      "matched_bits": {
+        "approved": 27,
+        "proposed": 0
+      },
+      "rule": {
+        "signals": [
+          "rd_wait_cycles"
+        ],
+        "bits": {
+          "above_max": "ceil(timing_model.CL_cycles / clocking_model.clock_ratio_ddr_to_controller) + 1",
+          "width": 32
+        }
+      },
+      "derived": {
+        "signals": [
+          "rd_wait_cycles"
+        ],
+        "bits": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ]
+      }
     }
   ],
   "derived_under": {
-    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
-    "spec_design_id": "ddr3_mc_core_v2"
+    "spec_revision": "compiled_ddr31600_x8_4lane_1rank_f3a1a17b",
+    "spec_design_id": "ddr3_mc_1600_x8_4lane_1rank"
+  },
+  "design": {
+    "covered": 11528,
+    "total": 13014,
+    "excluded_approved": 832,
+    "measured_percent": 88.6,
+    "adjusted_percent": 94.6,
+    "instances_applied": [
+      "addr_decoder",
+      "bank_tracker",
+      "calibration",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "init_fsm",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "instances_without_uncovered_report": [],
+    "approved_exclusions": 24
   }
 }

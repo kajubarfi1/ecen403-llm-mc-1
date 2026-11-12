@@ -58,7 +58,7 @@
       "instance": "u_dram",
       "source": "Validation/structural/dram_stub.sv",
       "when_block": "data_path",
-      "$why": "Something must sit on the far side of the DDR pins or every read returns the tied-off bus. A behavioral DRAM: ACT opens rows, WR stores every beat of the burst, RD replies ceil(CL / clock ratio) controller cycles after it samples the command (JEDEC-derived, never tuned to the design's own capture window; 2026-10-15). Testbench component \u2014 nothing judges the design against it.",
+      "$why": "Something must sit on the far side of the DDR pins or every read returns the tied-off bus. A behavioral DRAM: ACT opens rows, WR stores every beat of the burst, RD replies ceil(CL / clock ratio) controller cycles after it samples the command (JEDEC-derived, never tuned to the design's own capture window; 2026-10-15). Testbench component \u2014 nothing judges the design against it. 2026-11-12: the stub takes the data mask too (ddr_dm, one bit per byte of the beat, spec data_path_mapping.ddr_dm_polarity = active_high_mask: a set bit leaves the byte as it was). Without it a byte-masked write stored the whole word and every same-address storm of random_v2 read back the masked bytes wrong at the host while the pin-level predictor passed -- a harness miss, not RTL.",
       "params": {
         "DQ_W": "@spec:data_path_mapping.ddr_channel_width_bits",
         "BURST_CTRL_CYC": "@spec:data_path_mapping.host_width_bits / data_path_mapping.ddr_channel_width_bits",
@@ -73,7 +73,8 @@
         "ddr_dq_o": "data_path.ddr_dq_o",
         "ddr_dq_oe": "data_path.ddr_dq_oe",
         "cfg_CL_nCK": "config_regs.cfg_CL_nCK",
-        "cfg_CWL_nCK": "config_regs.cfg_CWL_nCK"
+        "cfg_CWL_nCK": "config_regs.cfg_CWL_nCK",
+        "ddr_dm": "data_path.ddr_dm_o"
       },
       "outputs": {
         "ddr_dq_i": "data_path.ddr_dq_i",

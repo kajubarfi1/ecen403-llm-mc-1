@@ -144,6 +144,15 @@ regenerates those phases and validates again. `status: PASS` with no `failed_mod
 every path that could run passed; look at `DROP_STATUS.json` for what could
 not run yet.
 
+A finding may come from a constrained-random seed rather than the directed
+run of the path (validate_drop stage 4a, since 2026-11-12): same path, same
+checkers, other stimulus. Its `repro.command` then names the generator,
+seed and tag (`run_path.py --path P --stimulus random_v2 --seed S --drives D
+--tag crv2_sS --report-dir <dir>`) and `repro.work_dir` the tagged work
+directory; `DROP_STATUS.json` lists every seed's verdict under
+`random_runs`. A seed that did not simulate is removed and listed in
+`random_runs.not_run`; it is not a verdict and never blocks the drop.
+
 Archive of every result: `Validation/findings/outbox/<spec_revision>/<drop_id>/`
 (same files). `outbox/<spec_revision>/latest` names the newest `drop_id`
 for that revision.

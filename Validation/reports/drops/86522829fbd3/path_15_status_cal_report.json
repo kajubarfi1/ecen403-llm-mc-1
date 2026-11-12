@@ -1,0 +1,80 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_15_status_cal",
+  "strategy": "composed",
+  "verdict": "pass",
+  "timestamp": "2026-11-12T11:50:10.325666",
+  "blocks": [
+    "calibration",
+    "config_regs",
+    "init_fsm"
+  ],
+  "sequence": "Validation/sequences/generated/path_15_status_cal_seed1.json",
+  "stimulus_generator": "status_poll",
+  "autonomous": false,
+  "window_cycles": 64,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "86522829fbd3",
+    "drop_id": "86522829fbd3",
+    "design_id": "39586a15eaf2",
+    "blocks_used": [
+      "calibration",
+      "config_regs",
+      "init_fsm"
+    ],
+    "validated_at": "c65e8fe",
+    "frontend_commits": {
+      "calibration": "c65e8fecadb49709a11ece37e8a3db957a452841",
+      "config_regs": "c65e8fecadb49709a11ece37e8a3db957a452841",
+      "init_fsm": "c65e8fecadb49709a11ece37e8a3db957a452841"
+    },
+    "roots": [
+      "runs/20261112-114757-interactive/drop"
+    ],
+    "blocks": {
+      "calibration": {
+        "rtl": "runs/20261112-114757-interactive/drop/PHASE2RTL/calibration.sv",
+        "manifest": "runs/20261112-114757-interactive/drop/PHASE2RTL/calibration_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_4lane_1rank_f3a1a17b"
+      },
+      "config_regs": {
+        "rtl": "runs/20261112-114757-interactive/drop/PHASE1RTL/config_regs.sv",
+        "manifest": "runs/20261112-114757-interactive/drop/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_4lane_1rank_f3a1a17b"
+      },
+      "init_fsm": {
+        "rtl": "runs/20261112-114757-interactive/drop/PHASE1RTL/init_fsm.sv",
+        "manifest": "runs/20261112-114757-interactive/drop/PHASE1RTL/init_fsm_manifest.json",
+        "spec_revision": "compiled_ddr31600_x8_4lane_1rank_f3a1a17b"
+      }
+    },
+    "shipped_spec": {
+      "path": "runs/20261112-114757-interactive/drop/generated_spec.json",
+      "revision": "compiled_ddr31600_x8_4lane_1rank_f3a1a17b"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "calibration",
+      "kind": "autonomous",
+      "model": null,
+      "scope": "calibration",
+      "verdict": "sva",
+      "note": "time-driven stage; pacing owned by SVA; no assertion fired"
+    },
+    {
+      "stage": "config_regs",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/config_regs_predictor.py",
+      "scope": "config_regs",
+      "verdict": "pass",
+      "summary": "scope=config_regs  strategy=exact  status=pass  matched=180/180  (180 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    }
+  ],
+  "log": "runs/20261112-114757-interactive/validation/reports/path_15_status_cal_sim.log",
+  "observed_trace": "runs/20261112-114757-interactive/validation/reports/path_15_status_cal_observed.jsonl"
+}

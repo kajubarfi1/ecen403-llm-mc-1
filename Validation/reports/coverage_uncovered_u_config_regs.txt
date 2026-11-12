@@ -3,15 +3,15 @@
 
 Host: n01-zeus.olympus.ece.tamu.edu
 
-Report date: Wed 11 Nov 2026 14:13:43 CST
+Report date: Thu 12 Nov 2026 11:52:23 CST
 
 Report options: -detail -metrics block:expression:toggle -out /home/ugrads/j/jacobz/cov_uncov_u_config_regs.txt -inst chain_harness.u_config_regs -uncovered -source on -overwrite
 
-Coverage database path: /home/ugrads/j/jacobz/cov_merged_crv2_nov11_fix
+Coverage database path: /home/ugrads/j/jacobz/cov_merged_paths
 
-Coverage model files: /home/ugrads/j/jacobz/cov_merged_crv2_nov11_fix/icc_6badd542_312cbb60.ucm
+Coverage model files: /home/ugrads/j/jacobz/cov_merged_paths/icc_2b5aabad_6bc0dc82.ucm
 
-Coverage data files: /home/ugrads/j/jacobz/cov_merged_crv2_nov11_fix/icc_6badd542_312cbb60.ucd
+Coverage data files: /home/ugrads/j/jacobz/cov_merged_paths/icc_2b5aabad_6bc0dc82.ucd
 
 CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_conf.ccf
     // Xcelium coverage configuration for the DDR3 validation subsystem.
@@ -79,7 +79,7 @@ CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_
     
 
 
-Coverage database date: Wed 11 Nov 2026 14:06:43 CST
+Coverage database date: Thu 12 Nov 2026 11:49:54 CST
 
 *** There were no refinement files applied ***
 
@@ -151,8 +151,8 @@ index  | grade         | line   | expression
 -------------------------------------------------------------------------------------
 19.1   | 66.67% (2/3)  | 120    | (csr_dat_i & 32'h000001ff) | (reg_refresh_config & 32'hfffffe00) 
 22.1   | 66.67% (2/3)  | 126    | (csr_dat_i & 32'h0000000f) | (reg_bist_config & 32'hfffffff0) 
-25.1   | 66.67% (2/3)  | 132    | (csr_dat_i & 32'h1fffffff) | (reg_bist_addr_start & 32'he0000000) 
-28.1   | 66.67% (2/3)  | 138    | (csr_dat_i & 32'h1fffffff) | (reg_bist_addr_end & 32'he0000000) 
+25.1   | 66.67% (2/3)  | 132    | (csr_dat_i & 32'h7fffffff) | (reg_bist_addr_start & 32'h80000000) 
+28.1   | 66.67% (2/3)  | 138    | (csr_dat_i & 32'h7fffffff) | (reg_bist_addr_end & 32'h80000000) 
 31.1   | 66.67% (2/3)  | 144    | (csr_dat_i & 32'h000000ff) | (reg_ctrl_config & 32'hffffff00) 
 
 index: 19.1 grade: 66.67% (2/3) line: 120 source: reg_refresh_config <= (csr_dat_i & 32'h000001FF) | (reg_refresh_config & 32'hFFFFFE00);  // reserved bits pinned
@@ -173,18 +173,18 @@ index     | hit   | rval | <1> <3>
 -----------------------------------
 22.1.3    | 0     | 0    | 0   0   
 
-index: 25.1 grade: 66.67% (2/3) line: 132 source: reg_bist_addr_start <= (csr_dat_i & 32'h1FFFFFFF) | (reg_bist_addr_start & 32'hE0000000);  // reserved bits pinned
+index: 25.1 grade: 66.67% (2/3) line: 132 source: reg_bist_addr_start <= (csr_dat_i & 32'h7FFFFFFF) | (reg_bist_addr_start & 32'h80000000);  // reserved bits pinned
 
-(csr_dat_i & 32'h1fffffff) | (reg_bist_addr_start & 32'he0000000)
+(csr_dat_i & 32'h7fffffff) | (reg_bist_addr_start & 32'h80000000)
  <---1--->                    <--------3-------->
 
 index     | hit   | rval | <1> <3> 
 -----------------------------------
 25.1.3    | 0     | 0    | 0   0   
 
-index: 28.1 grade: 66.67% (2/3) line: 138 source: reg_bist_addr_end <= (csr_dat_i & 32'h1FFFFFFF) | (reg_bist_addr_end & 32'hE0000000);  // reserved bits pinned
+index: 28.1 grade: 66.67% (2/3) line: 138 source: reg_bist_addr_end <= (csr_dat_i & 32'h7FFFFFFF) | (reg_bist_addr_end & 32'h80000000);  // reserved bits pinned
 
-(csr_dat_i & 32'h1fffffff) | (reg_bist_addr_end & 32'he0000000)
+(csr_dat_i & 32'h7fffffff) | (reg_bist_addr_end & 32'h80000000)
  <---1--->                    <-------3------->
 
 index     | hit   | rval | <1> <3> 
@@ -207,7 +207,7 @@ Uncovered Toggle Detail Report, Instance Based
 Instance name: chain_harness.u_config_regs
 Type name: config_regs#(32'h00000008,32'h00000020,8'h00,8'h04,8'h08,8'h0c,8'h10,8'h14,8'h18,8'h1c,8'h20,8'h24,8'h28)
 File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/config_regs.sv
-Number of uncovered signal bits: 129 of 661
+Number of uncovered signal bits: 125 of 661
 Number of unreachable signal bits: 0
 Number of signal bits partially toggled(rise): 8 of 661
 Number of signal bits partially toggled(fall): 1 of 661
@@ -311,11 +311,7 @@ Hit(Full)  Hit(Rise)  Hit(Fall)  Signal
 0          0          0          reg_bist_config[5]        
 0          0          0          reg_bist_config[4]        
 0          0          0          reg_bist_addr_start[31]   
-0          0          0          reg_bist_addr_start[30]   
-0          0          0          reg_bist_addr_start[29]   
 0          0          0          reg_bist_addr_end[31]     
-0          0          0          reg_bist_addr_end[30]     
-0          0          0          reg_bist_addr_end[29]     
 0          0          0          reg_ctrl_config[31]       
 0          0          0          reg_ctrl_config[30]       
 0          0          0          reg_ctrl_config[29]       

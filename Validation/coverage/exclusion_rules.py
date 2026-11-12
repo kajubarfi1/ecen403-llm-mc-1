@@ -19,6 +19,8 @@ and the exclusion would hide them. The approval therefore covers the rule.
     {"reserved_of": "REGISTER"}        the register map's 'reserved' field range
     {"address_bits_unused": true}      word-stride low bits and the bits above
                                        the highest mapped offset
+    {"diagonal": true}                 the [i][i] bits of a square per-entry
+                                       matrix (an entry's relation to itself)
 `signals` is a list, or {"undriven_inputs_of": "<block>", "plus": [...]}:
 the block's manifest inputs that the integration map neither connects nor
 ties (E-ABSENT), plus named registers those inputs alone can set.
@@ -100,6 +102,8 @@ def resolve_bits(rule, spec):
             if f.get("name") == "reserved" and f.get("access", "RO") == "RO":
                 bits += _field_range(f)
         return sorted(bits)
+    if rule.get("diagonal"):
+        return "diagonal"
     if rule.get("address_bits_unused"):
         rm = spec["csr_register_map"]
         stride = int(rm.get("data_width_bits", 32)) // 8

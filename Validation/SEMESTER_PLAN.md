@@ -1251,6 +1251,75 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   engine's symmetric `<= 1` chaining (unexercised: no 3-cycle WR gaps in
   these seeds); the stub has no DM input.
 
+- *2026-11-12 — first full GUI run on the Mac; the backend died in its
+  first second.* Jacob's interactive run (compiled DDR3-1600 x8 4-lane
+  spec): spec review, RTL, validation 20/20 (72.1 % code coverage: the 20
+  directed paths alone on a non-golden spec, no random batch, no
+  exclusions), then `backend FAILED at finish (Runner exit_code=2)` after
+  one second. ORFS's Makefile copies the SDC into `$(RESULTS_DIR)` with no
+  rule creating that directory; only synth.sh (canonicalize) mkdirs it, so
+  under `MAKE_JOBS=4` the copy raced it and lost on a fresh results tree
+  (`cp: cannot create regular file 'results/sky130hd/ddr3_controller/base/
+  1_2_yosys.sdc'`). The repair agent then "fixed" it by appending
+  `DESIGN_NICKNAME = TOPRTL` to config.mk, which moves every result to a
+  directory the runner never reads (results_name is DESIGN_NAME) — a
+  harmful heuristic, noted for Dawson. Fix: `runner_node` in
+  `backend/agents/pipeline.py` creates results/logs/reports/<platform>/
+  <design>/base on the host before `make` (the trees are bind-mounted).
+  Verified: synth mode on this run's addr_decoder into a fresh results
+  tree with -j4, exit 0, `1_2_yosys.sdc` and `1_synth.odb` written.
+
+- *2026-11-12, afternoon — the random batch and the exclusions belong to
+  every run, not to a by-hand session on the golden spec.* Jacob's 4-lane
+  run quoted 72.1 % because validate_drop measured the 20 directed paths
+  alone. Now: stage 4a runs random_v2 on the six traffic paths (4 seeds x
+  400 requests, `--random-seeds`, ~1 min at 4 jobs) with reports under
+  `reports/paths/random/<path>_s<seed>/`; emit_findings reads them with the
+  directed reports and writes the seed into the repro command, so a seed
+  that fails routes to the Frontend like any path; stage 5 writes the
+  uncovered-item reports of every present block and runs
+  `apply_exclusions.py` (now with a design-wide line), so measured and
+  adjusted are printed side by side; `flow.py --random-seeds N` passes it
+  through and the GUI's validation card shows seeds and both numbers.
+  Golden drop 43f6cb8f0641, first full run: 20/20 + 24/24, 85.7 % / 90.9 %
+  in 3.2 min. The uncovered reports of the two blocks under their bar
+  were then read: both 100 % block and expression; cmd_queue's remainder
+  was 229 bits of its per-entry `conf`/`older` matrices (32 diagonal,
+  constant 0 by construction: an entry is never its own older request)
+  and data_path's the per-entry CWL/CL countdowns and the 32-bit wait
+  wires above what the spec loads. So (1) random_v2 gained a same-address
+  storm phase (2 x depth writes/reads to one address, no idle: every
+  entry hazards on every older one) and (2) five exclusions were filed as
+  PROPOSED, awaiting Jacob (X-020 E-DEAD diagonal, a new `{"diagonal":
+  true}` rule; X-021..024 E-SPEC above_max). The storm lifted cmd_queue
+  84.1 -> 93.5 (over its bar) and the design to 88.4 % measured / 93.8 %
+  adjusted (95.7 if the five are approved; data_path 81.5 -> 95.5 then),
+  and failed all four path_18 seeds: a full write, then a byte-masked
+  write to the same address, then a read returned the masked write's
+  whole word. The pin-level predictor passed, so the stub, which had no
+  data-mask input, stored every byte. `dram_stub.sv` takes `ddr_dm` now
+  (byte kept where the mask bit is set, active_high_mask) via
+  `integration_overrides.json`; third run: 20/20 directed, 24/24 random,
+  88.4 % / 93.8 % in 2.9 min, handoff PASS, no RTL change. Jacob approved
+  the five exclusions the same evening: 88.4 % measured / 95.7 % adjusted,
+  cmd_queue 100.0 and data_path 95.5 adjusted, every block over its bar.
+
+- *2026-11-12, evening — second GUI run, backend down again, this time
+  ORFS itself.* Synthesis finished (68 s) and make stopped: "No rule to
+  make target results/.../2_1_floorplan.sdc, needed by 2_floorplan.sdc".
+  The checkout (f34d4d9, 11-09, the merge named fix-make-issue) declares
+  `2_floorplan.sdc: 2_1_floorplan.odb` where it means `2_1_floorplan.sdc:
+  2_1_floorplan.odb` (the floorplan step writes both files; the copy rule
+  wants the .sdc), so nothing produces the prerequisite. A dry run with
+  the one-line rule added plans the whole floorplan. Patched line 512 in
+  the checkout (Makefile.orig-f34d4d9 kept beside it) and in the arm64
+  image (docker commit, same tag); USAGE's recipe carries the sed. The
+  repair agent again applied two harmful "fixes" on the way:
+  FLOORPLAN_SDC pointed at the synthesis SDC and DESIGN_NAME re-set to
+  what it already was; both stripped from config.mk (the packager
+  rewrites it per run anyway). Not an RTL or flow defect: the toolchain's
+  own Makefile.
+
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the
 schema generator's default root and `faults/fault_catalog.json` now point

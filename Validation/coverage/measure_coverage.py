@@ -45,7 +45,10 @@ OUT_JSON = os.path.join(ROOT, "Validation", "reports", "coverage_code.json")
 # the agent connects: `~` -> the real $HOME), so nothing here names a person.
 DEFAULT_RUNS = ["~/vmanager_session/*/cov_work/scope/*",
                 "~/cadence_agent_work/cov_work/scope/*",
-                "~/cadence_agent_work/runs/*/cov_work/scope/*"]
+                "~/cadence_agent_work/runs/*/cov_work/scope/*",
+                # validate_drop's constrained-random seeds (stage 4a) run
+                # tagged, one level deeper: runs/crv2_s<seed>/<path>/
+                "~/cadence_agent_work/runs/crv2_s*/*/cov_work/scope/*"]
 
 
 def _home(agent):

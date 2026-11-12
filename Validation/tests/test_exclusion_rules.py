@@ -42,6 +42,9 @@ class Rules(unittest.TestCase):
         other["csr_register_map"]["registers"].append({"name": "X", "offset": "0x40", "fields": []})
         self.assertEqual(XR.resolve_bits({"address_bits_unused": True}, other), [0, 1, 7])
 
+    def test_diagonal_of_a_square_matrix(self):
+        self.assertEqual(XR.resolve_bits({"diagonal": True}, SPEC), "diagonal")
+
     def test_literal_bit_lists_are_rejected(self):
         with self.assertRaises(XR.RuleError):
             XR.resolve_bits([4, 5, 6, 7], SPEC)
@@ -50,7 +53,7 @@ class Rules(unittest.TestCase):
         for e in EXCL["exclusions"]:
             r = XR.resolve(e, SPEC)
             self.assertTrue(r["signals"], e["id"])
-            self.assertTrue(r["bits"] == "all" or isinstance(r["bits"], list), e["id"])
+            self.assertTrue(r["bits"] in ("all", "diagonal") or isinstance(r["bits"], list), e["id"])
 
     def test_undriven_inputs_skip_connected_tied_and_boundary_ports(self):
         imap = {"connections": [{"from": "init_fsm.init_done", "to": "config_regs.sts_init_done"}],

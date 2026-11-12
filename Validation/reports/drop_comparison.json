@@ -1,15 +1,15 @@
 {
   "$schema": "validation-drop-comparison/1",
   "a": {
-    "dir": "Validation/reports/drops/e4794e87a8c1",
-    "drop_head": "e4794e87a8c1"
-  },
-  "b": {
-    "dir": "Validation/reports/paths",
+    "dir": "Validation/reports/drops/43f6cb8f0641",
     "drop_head": "43f6cb8f0641"
   },
+  "b": {
+    "dir": "runs/20261112-114757-interactive/validation/reports",
+    "drop_head": "86522829fbd3"
+  },
   "strict": false,
-  "generated_utc": "2026-11-11T20:08:03.252875Z",
+  "generated_utc": "2026-11-12T17:52:25.954735Z",
   "rows": [
     {
       "path": "path_01_write_cmd",
@@ -27,13 +27,20 @@
     },
     {
       "path": "path_02_read_cmd",
-      "kind": "same",
-      "new": {},
+      "kind": "changed",
+      "new": {
+        "illegal:cp_tccd_spacing": 19
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {},
+      "matched_up": {
+        "matched:cmd_gen": [
+          138,
+          147
+        ]
+      },
       "verdict": [
         "pass",
         "pass"
@@ -97,13 +104,24 @@
     },
     {
       "path": "path_07_backpressure",
-      "kind": "same",
-      "new": {},
+      "kind": "changed",
+      "new": {
+        "illegal:cp_tccd_spacing": 7
+      },
       "gone": {},
       "grew": {},
       "shrank": {},
       "matched_down": {},
-      "matched_up": {},
+      "matched_up": {
+        "matched:addr_decoder": [
+          242,
+          252
+        ],
+        "matched:wb_port": [
+          354,
+          367
+        ]
+      },
       "verdict": [
         "pass",
         "pass"
@@ -251,12 +269,21 @@
     },
     {
       "path": "path_18_full_write",
-      "kind": "same",
+      "kind": "regression",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
+      "matched_down": {
+        "matched:cmd_gen": [
+          66,
+          64
+        ],
+        "matched:data_path": [
+          36,
+          24
+        ]
+      },
       "matched_up": {},
       "verdict": [
         "pass",
@@ -279,12 +306,17 @@
     },
     {
       "path": "path_20_refresh_preempt",
-      "kind": "same",
+      "kind": "regression",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
+      "matched_down": {
+        "matched:cmd_gen": [
+          1850,
+          1815
+        ]
+      },
       "matched_up": {},
       "verdict": [
         "pass",
@@ -321,12 +353,21 @@
     },
     {
       "path": "path_23_host_ack_collision",
-      "kind": "same",
+      "kind": "regression",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {},
+      "matched_down": {
+        "matched:data_path": [
+          127,
+          83
+        ],
+        "matched:wb_port": [
+          128,
+          125
+        ]
+      },
       "matched_up": {},
       "verdict": [
         "pass",

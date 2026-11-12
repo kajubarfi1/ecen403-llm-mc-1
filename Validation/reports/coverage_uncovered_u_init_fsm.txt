@@ -1,0 +1,222 @@
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<> User: jacobz
+
+Host: n01-zeus.olympus.ece.tamu.edu
+
+Report date: Thu 12 Nov 2026 11:52:23 CST
+
+Report options: -detail -metrics block:expression:toggle -out /home/ugrads/j/jacobz/cov_uncov_u_init_fsm.txt -inst chain_harness.u_init_fsm -uncovered -source on -overwrite
+
+Coverage database path: /home/ugrads/j/jacobz/cov_merged_paths
+
+Coverage model files: /home/ugrads/j/jacobz/cov_merged_paths/icc_2b5aabad_6bc0dc82.ucm
+
+Coverage data files: /home/ugrads/j/jacobz/cov_merged_paths/icc_2b5aabad_6bc0dc82.ucd
+
+CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_conf.ccf
+    // Xcelium coverage configuration for the DDR3 validation subsystem.
+    //
+    // Fed to xrun via:  -coverage A -covoverwrite -covfile <this file>
+    
+    // --- What to collect -------------------------------------------------------
+    select_coverage -all
+    select_functional                       // covergroups: the vplan's 42 items
+    
+    // --- What NOT to count -----------------------------------------------------
+    // Testbench code is not the design. With everything selected, the harness,
+    // the generated driver, the passive monitors and the DRAM stub all land in
+    // the headline number and dilute it (22.4% reported vs ~25% design-only on
+    // the first merged sweep). Code coverage of a monitor says nothing about the
+    // controller. Covergroup modules (*_coverage) are deliberately NOT excluded:
+    // they carry the vplan's functional coverage.
+    deselect_coverage -all -module chain_harness
+    deselect_coverage -all -module *_txn_harness
+    deselect_coverage -all -module seq_driver
+    deselect_coverage -all -module dram_stub
+    deselect_coverage -all -module *_monitor
+    deselect_coverage -all -module *_tb
+    // Covergroup carriers: drop their CODE coverage only. '-all' would also
+    // drop functional coverage and silence the very covergroups they exist
+    // to hold (which is exactly what happened on the first try: 0% on every
+    // new coverpoint while the design merged fine).
+    deselect_coverage -block -expr -toggle -fsm -module *_fcov
+    
+    // --- Covergroups -----------------------------------------------------------
+    set_covergroup -new_instance_reporting  // per-instance scoping and naming
+    set_optimize -prune_covergroup
+    
+    // --- Block / statement / branch --------------------------------------------
+    // The course disables implicit and explicit block scoring and relies on
+    // statement + branch instead; keeping that identical for comparability.
+    set_implicit_block_scoring -off
+    set_explicit_block_scoring -off
+    set_statement_scoring
+    set_branch_scoring
+    set_code_fine_grained_merging
+    
+    // --- Expression ------------------------------------------------------------
+    set_expr_scoring -max_expr_terms 2048
+    set_expr_coverable_operators -bitwise -relational -reduction -logical_not
+    set_expr_coverable_statements -all
+    set_optimize -top_expr_non_scorable
+    
+    // --- Toggle ----------------------------------------------------------------
+    set_toggle_includez
+    set_toggle_scoring -sv_enum
+    set_toggle_scoring -sv_mda 16 -regeot
+    
+    // --- FSM -------------------------------------------------------------------
+    // Matters for this design: init_fsm and calibration are the autonomous blocks
+    // behind the five deferred paths, and the spec's INIT_001/INIT_002 failure
+    // categories are ordering properties over their states.
+    set_fsm_scoring -hold_transition on
+    
+    // --- Misc ------------------------------------------------------------------
+    set_parameterized_module_coverage
+    set_libcell_scoring -enable_vy
+    set_subprogram_scoring -all -svpackage
+    set_refinement_resilience
+    
+
+
+Coverage database date: Thu 12 Nov 2026 11:49:54 CST
+
+*** There were no refinement files applied ***
+
+ <>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Coverage Table Legend
+---------------------
+  EXCL       excluded using refinement rule
+  P-EXCL     excluded from parent
+  U-EXCL     excluded and unreachable by IEV
+  T-EXCL     excluded from type
+  S-EXCL     smart excluded using refinement rule
+  EXCL(S)    smart indirect excluded
+  EMPTY      all children are excluded
+  CONST      marked constant during simulation
+  IGN        marked ignored during simulation
+  UNG        marked ungradeable during simulation
+  DES        marked deselected during simulation
+  UNR        marked unreachable by IEV
+  UNG-Expr   expression marked ungradeable during simulation
+  UNG-Toggle toggle marked ungradeable during simulation
+
+
+Uncovered Block Detail Report, Instance Based
+=============================================
+
+Instance name: chain_harness.u_init_fsm
+Type name: init_fsm#(16,3,17,32'h00009c40,32'h000186a0,32'h0000003e,32'h00000080,32'h00000001,32'h00000003,16'h1d34,16'h0004,16'h0218,16'h0000,16'h0400,4'h0,4'h6,4'h7)
+File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_08_init_to_cal/init_fsm.sv
+Number of uncovered blocks: 4 of 48
+Number of unreachable blocks: 0
+Number of uncovered branches: 4 of 44
+Number of unreachable branches: 0
+Number of uncovered statements: 0 of 50
+Number of unreachable statements: 0
+
+Count  Block #Stmt Line  Kind                 Origin Source Code                    
+------------------------------------------------------------------------------------
+0      12    0     74    ternary 1 false *    74     S_IDLE:       next_state = enable ? S_RESET_LOW : S_IDLE; 
+0      25    0     79    ternary 1 false *    79     S_MRD_WAIT1:  next_state = (wait_cnt == WAIT_MRD-1)   ? S_MR3       : S_MRD_WAIT1; 
+0      29    0     81    ternary 1 false *    81     S_MRD_WAIT2:  next_state = (wait_cnt == WAIT_MRD-1)   ? S_MR1       : S_MRD_WAIT2; 
+0      33    0     83    ternary 1 false *    83     S_MRD_WAIT3:  next_state = (wait_cnt == WAIT_MRD-1)   ? S_MR0       : S_MRD_WAIT3; 
+
+(*) indicates a branch
+
+Uncovered Expression Detail Report, Instance Based
+==================================================
+
+Expression coverage Table Legend
+---------------------
+  -      don't care
+  e      event for event-or expressions
+  O (odd), E (even), B (both), X (not scored),
+         I (marked ignore) for parity trees
+  Y (covered), N (not covered), C (constant), 
+  P (one or more inputs for this bit have been padded) for vector scoring, 
+  d=== , b=== shows which bit differs in vector scoring 
+  rval   Resulting value of the expression for coverage purposes given
+         the input values
+  <-n->  Shows the n-th term composition
+
+
+Instance name: chain_harness.u_init_fsm
+Type name: init_fsm#(16,3,17,32'h00009c40,32'h000186a0,32'h0000003e,32'h00000080,32'h00000001,32'h00000003,16'h1d34,16'h0004,16'h0218,16'h0000,16'h0400,4'h0,4'h6,4'h7)
+File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_08_init_to_cal/init_fsm.sv
+Number of uncovered expressions: 3 of 41
+Number of unreachable expressions: 0
+
+index  | grade         | line   | expression                                         
+-------------------------------------------------------------------------------------
+7.1    | 50.00% (1/2)  | 79     | (wait_cnt == (WAIT_MRD - 1))                       
+8.1    | 50.00% (1/2)  | 81     | (wait_cnt == (WAIT_MRD - 1))                       
+9.1    | 50.00% (1/2)  | 83     | (wait_cnt == (WAIT_MRD - 1))                       
+
+index: 7.1 grade: 50.00% (1/2) line: 79 source: S_MRD_WAIT1:  next_state = (wait_cnt == WAIT_MRD-1)   ? S_MR3       : S_MRD_WAIT1;
+
+(wait_cnt == (WAIT_MRD - 1))
+ <--1--->    <-----2------>
+
+index     | hit   | <1>   <2>   
+-------------------------------- '=='
+7.1.2     | 0     | lhs != rhs  
+
+index: 8.1 grade: 50.00% (1/2) line: 81 source: S_MRD_WAIT2:  next_state = (wait_cnt == WAIT_MRD-1)   ? S_MR1       : S_MRD_WAIT2;
+
+(wait_cnt == (WAIT_MRD - 1))
+ <--1--->    <-----2------>
+
+index     | hit   | <1>   <2>   
+-------------------------------- '=='
+8.1.2     | 0     | lhs != rhs  
+
+index: 9.1 grade: 50.00% (1/2) line: 83 source: S_MRD_WAIT3:  next_state = (wait_cnt == WAIT_MRD-1)   ? S_MR0       : S_MRD_WAIT3;
+
+(wait_cnt == (WAIT_MRD - 1))
+ <--1--->    <-----2------>
+
+index     | hit   | <1>   <2>   
+-------------------------------- '=='
+9.1.2     | 0     | lhs != rhs  
+
+
+Uncovered Toggle Detail Report, Instance Based
+==============================================
+
+Instance name: chain_harness.u_init_fsm
+Type name: init_fsm#(16,3,17,32'h00009c40,32'h000186a0,32'h0000003e,32'h00000080,32'h00000001,32'h00000003,16'h1d34,16'h0004,16'h0218,16'h0000,16'h0400,4'h0,4'h6,4'h7)
+File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_08_init_to_cal/init_fsm.sv
+Number of uncovered toggles: 16 of 82
+Number of unreachable toggles: 0
+Number of uncovered signal bits: 15 of 52
+Number of unreachable signal bits: 0
+Number of signal bits partially toggled(rise): 4 of 52
+Number of signal bits partially toggled(fall): 0 of 52
+Number of uncovered enum toggles: 1 of 30
+Number of unreachable enum toggles: 0
+
+Hit(Full)  Hit(Rise)  Hit(Fall)  Signal                    
+-----------------------------------------------------------
+0          1          0          rst_n                     
+0          0          0          enable                    
+0          1          0          init_done                 
+0          0          0          init_fail                 
+0          0          0          init_cmd[3]               
+0          0          0          init_addr[15]             
+0          0          0          init_addr[14]             
+0          0          0          init_addr[13]             
+0          0          0          init_addr[7]              
+0          0          0          init_addr[6]              
+0          0          0          init_addr[1]              
+0          0          0          init_addr[0]              
+0          0          0          init_bank[2]              
+0          1          0          init_cke                  
+0          1          0          init_reset_n              
+ 
+Hit        Value      Enum                      
+------------------------------------------------
+0          S_IDLE     next_state                
+

@@ -67,11 +67,15 @@ host port was driven as the spec describes it (pipelined bursts, `wb_burst`
 and `saturate`); that stimulus also found two defects (reply addendum 9).
 Functional: 33/45 covered, 11 unreachable by spec, 1 partial
 (`cg_refresh.cp_ref_002_exercised`, covered on 10-27, lost while the port
-drops half the pipelined traffic; it returns with the wb_port fix). Latest (2026-11-11, drop 43f6cb8f0641, 20 directed paths + 24
-random_v2 runs, `reports/crv2/nov11_fix/`): design 86.1 % measured /
-91.2 % adjusted; wb_port 93.3, scheduler 88.1, cmd_queue 84.1, data_path
-81.5, bank_tracker 80.8 (99.6 adjusted); functional 35/45 covered, 10
-unreachable by spec.
+drops half the pipelined traffic; it returns with the wb_port fix). Latest (2026-11-12, drop 43f6cb8f0641, one `validate_drop.py` run: 20
+directed paths + 24 random_v2 seeds, stage 4a, storm phase included):
+design 88.4 % measured / 95.7 % adjusted under the 24 approved exclusions
+of section 4; wb_port 94.4, cmd_queue 93.5 (100.0 adjusted), scheduler
+88.1 (90.7), config_regs 85.1 (98.0), data_path 81.5 (95.5), bank_tracker
+80.8 (99.6); every block over its per-block bar adjusted; functional 35/45
+covered, 10 unreachable by spec. The random seeds and the adjusted figure
+are part of every run since 2026-11-12, so a preset's number is the same
+kind of number as the golden spec's.
 
 ## 3b. Beyond the golden spec: the spec matrix
 
@@ -137,6 +141,26 @@ currently drops, and the port's stall path under a full tag FIFO.
 | E-ABSENT | an input of a present block that no block in this design drives (the integration map lists no source and no tie), so the logic it feeds cannot change until that block exists; its CSR access semantics are still judged | config_regs BIST/ECC/self-refresh status inputs (2026-10-29) |
 
 Not allowed: "hard to hit", "would need a longer run", "not in this phase".
+
+Five more approved 2026-11-12 (Jacob Zatopek, from the uncovered-item
+review of the two blocks under their per-block bar, both at 100 % block and
+expression coverage; 167 bits on drop 43f6cb8f0641): X-020, E-DEAD, the diagonal of cmd_queue's per-entry
+`conf` and `older` matrices (32 bits; an entry is never its own older or
+conflicting request, since both rows are written only into `free_slot`,
+which `free_found` guarantees invalid, so `enq_conf[free_slot]` and
+`mem_valid[free_slot]` are 0 by construction; the `{"diagonal": true}` rule
+of `exclusion_rules.py`); X-021/022, E-SPEC, the per-entry CWL/CL countdowns
+of data_path's pending queues above what the spec's CWL and CL load (48 +
+32 bits, the X-011/012 argument per entry); X-023/024, E-SPEC, the 32-bit
+wait-cycle wires above ceil(CWL/ratio) + 1 and ceil(CL/ratio) + 1 (28 + 27
+bits; a generator sizing choice, and narrowing the wires in the Phase 4
+generator would retire the two entries). Adjusted after them: design
+95.7 % (88.4 measured); cmd_queue 100.0, data_path 95.5, every block over
+its per-block bar. Since 2026-11-12
+`validate_drop.py` applies the rules itself at the end of every rollup
+(stage 5: uncovered-item reports for every present block, then
+`apply_exclusions.py`, against the spec under judgement), so a preset's
+run carries its adjusted figure beside the measured one.
 
 ## 5. Waiver policy
 
