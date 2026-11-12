@@ -89,6 +89,16 @@ button:hover, select:hover { border-color: var(--faint); }
 .chip-card { overflow: hidden; }
 .chip-stage { position: relative; aspect-ratio: 1 / 1; width: 100%; background: radial-gradient(circle at 50% 45%, #121a2b, #070a10 75%); }
 .chip-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity .6s; }
+/* The real layout OpenROAD rendered for each ORFS step, two stacked so a
+   new frame crossfades into the last one instead of flicking over. */
+.chip-stage img.real { position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: contain; opacity: 0; transition: opacity 1s ease; pointer-events: none; }
+.chip-stage img.real.on { opacity: 1; }
+/* Once a real frame is up the procedural chip stops being the picture and
+   becomes the "still working" overlay: --ghost is raised only while a step
+   is actually running, so a long hold (detailed routing runs 25+ min on one
+   frame) still has something moving over the real layout. */
+.chip-stage.real canvas.struct { opacity: var(--ghost, 0); }
 .chip-caption { position: absolute; left: 14px; bottom: 12px; right: 14px; display: flex; justify-content: space-between;
   align-items: flex-end; gap: 8px; pointer-events: none; }
 .phase-tag { background: #0a0d14cc; border: 1px solid var(--line); backdrop-filter: blur(4px);
@@ -299,13 +309,15 @@ button.sm:hover { border-color: var(--accent); }
     <div class="card chip-card">
       <div class="card-head"><h2>Layout</h2><span class="meta" id="chip-meta"></span></div>
       <div class="chip-stage" id="chip-stage">
-        <canvas id="c-floor"></canvas>
-        <canvas id="c-synth"></canvas>
-        <canvas id="c-cells"></canvas>
-        <canvas id="c-grt"></canvas>
-        <canvas id="c-cts"></canvas>
-        <canvas id="c-route"></canvas>
-        <canvas id="c-finish"></canvas>
+        <img class="real" id="real-a" alt="">
+        <img class="real" id="real-b" alt="">
+        <canvas class="struct" id="c-floor"></canvas>
+        <canvas class="struct" id="c-synth"></canvas>
+        <canvas class="struct" id="c-cells"></canvas>
+        <canvas class="struct" id="c-grt"></canvas>
+        <canvas class="struct" id="c-cts"></canvas>
+        <canvas class="struct" id="c-route"></canvas>
+        <canvas class="struct" id="c-finish"></canvas>
         <canvas id="c-over"></canvas>
         <div class="chip-caption">
           <div class="phase-tag" id="phase-tag">Waiting for a run…</div>
@@ -1084,6 +1096,8 @@ const chip = (() => {
   const target = { ...disp };
   const ORDER = ["rtl", "synth", "floorplan", "place", "cts", "grt", "route", "finish", "signoff", "sta"];
   let blockState = {}, result = null, active = null, lastFloorSig = "", lastFinish = -1, replayT = 0;
+  // real per-step frames (gui/chip_render.py); empty when Docker is absent
+  let realFrames = [], realShown = null, realTop = false, stepDetail = "";
 
   function resize() {
     const r = $("chip-stage").getBoundingClientRect();
@@ -1285,7 +1299,12 @@ const chip = (() => {
   }
 
   function drawBlocks(ctx, t) {
-    // block outlines + labels, on the overlay so they stay readable
+    // block outlines + labels, on the overlay so they stay readable.
+    // Not over a real frame: these rectangles are a treemap of cell counts,
+    // so their POSITIONS are invented. Printing "scheduler" across a corner
+    // of the actual layout would claim the block sits there, which nothing
+    // in the treemap knows. Areas are real, places are not.
+    if (realShown) return;
     const routeDim = 1 - disp.route * 0.55;
     for (const b of model.blocks) {
       const st = blockState[b.phase] || "pending";
@@ -1503,13 +1522,42 @@ const chip = (() => {
     drawOver(t);
   }
 
+  // Show the newest rendered frame. The incoming image is loaded before it
+  // is faded up, so a half-decoded PNG never appears over a good one.
+  function showFrame(fr, runId) {
+    if (!fr) return;
+    if (realShown === fr.file) return;
+    const next = $(realTop ? "real-a" : "real-b");
+    const prev = $(realTop ? "real-b" : "real-a");
+    const url = `/api/frame?run=${encodeURIComponent(runId)}&name=${encodeURIComponent(fr.file)}`;
+    const img = new Image();
+    img.onload = () => {
+      next.src = url;
+      next.classList.add("on");
+      prev.classList.remove("on");
+      realTop = !realTop;
+      realShown = fr.file;
+      $("chip-stage").classList.add("real");
+    };
+    img.onerror = () => {};     // keep whatever is on screen
+    img.src = url;
+  }
+
   function setTag() {
     const names = { synth: "Synthesizing gates", floorplan: "Floorplanning: rows, pins, power grid", place: "Placing standard cells",
       cts: "Building the clock tree", grt: "Global routing: congestion map", route: "Detailed routing: metal + vias",
       finish: "Fill + seal ring → GDSII", signoff: "DRC / LVS sign-off scan", sta: "Static timing check",
       intake: "Backend intake check", packager: "Packaging for ORFS" };
     let html;
-    if (active) html = `<b>${names[active] || active}</b> · ${Math.round(target[active] * 100 || 0)}%`;
+    if (active) {
+      html = `<b>${names[active] || active}</b> · ${Math.round(target[active] * 100 || 0)}%`;
+      // the step's own words (router iteration and violation count, and so
+      // on) -- during a long hold this is the only thing that moves, and it
+      // is the tool talking, not an animation
+      if (stepDetail) html += ` · ${esc(stepDetail)}`;
+      const shown = realFrames.find((f) => f.file === realShown);
+      if (shown && shown.step !== active) html += ` · showing ${esc(shown.label.toLowerCase())}`;
+    }
     else if (result === "pass") html = `<b>GDSII ready</b> · signed off`;
     else if (result === "fail") html = `<b style="color:var(--fail)">Backend failed</b>`;
     else if (data && data.current) html = `<b>${esc(labelOf(data.current.key))}</b> · ${data.current.key === "rtl_generation" ? "blocks appear as RTL is generated" : "waiting for backend"}`;
@@ -1540,11 +1588,31 @@ const chip = (() => {
       active = bk.current_step;
       result = bk.result || (d.run && d.run.status === "halted" && bk.started ? "halt" : null);
       const cells = bk.orfs.cells;
+      const by2 = Object.fromEntries(bk.steps.map((s) => [s.key, s]));
+      stepDetail = (active && by2[active] && by2[active].detail) || "";
+
+      // real layout frames, newest wins
+      realFrames = bk.orfs.frames || [];
+      if (realFrames.length && d.run) showFrame(realFrames[realFrames.length - 1], d.run.id);
+      if (!realFrames.length) { $("chip-stage").classList.remove("real"); realShown = null; }
+      // the procedural chip survives as a motion cue over the real one,
+      // and only while a step is running
+      $("chip-stage").style.setProperty("--ghost", active ? 0.18 : 0);
+
+      const real = realFrames.length > 0;
       $("chip-meta").textContent = `${bk.orfs.design || "ddr3_controller"} · ${d.platform}` +
-        (cells ? ` · ${cells.toLocaleString()} cells` : "") + " · illustrative, sized by block cell counts";
+        (cells ? ` · ${cells.toLocaleString()} cells` : "") +
+        (real ? ` · real layout, ${realFrames.length} step frame${realFrames.length > 1 ? "s" : ""}`
+              : " · illustrative, sized by block cell counts");
       setTag();
     },
-    reset() { for (const k of Object.keys(disp)) disp[k] = 0; this._pass = null; },
+    reset() {
+      for (const k of Object.keys(disp)) disp[k] = 0;
+      this._pass = null;
+      realFrames = []; realShown = null;
+      for (const id of ["real-a", "real-b"]) { $(id).classList.remove("on"); $(id).removeAttribute("src"); }
+      $("chip-stage").classList.remove("real");
+    },
     replay() { for (const k of Object.keys(disp)) if (k !== "rtl") disp[k] = 0; replayT = performance.now(); },
   };
 })();

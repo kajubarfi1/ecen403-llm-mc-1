@@ -54,6 +54,11 @@ from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
+try:                      # real per-step layout frames; optional
+    import chip_render
+except ImportError:       # page still works, it just draws the procedural chip
+    chip_render = None
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 
@@ -611,7 +616,8 @@ def validation_file(run_dir, path, what, nbytes=120000):
 
 
 class Watcher:
-    def __init__(self, runs_root, run=None, orfs_dir=None, platform=None):
+    def __init__(self, runs_root, run=None, orfs_dir=None, platform=None,
+                 chip_frames=True):
         self.runs_root = runs_root
         self.fixed_run = run
         self.orfs_dir = orfs_dir or os.environ.get("ORFS_DIR") or env_file_value("ORFS_DIR")
@@ -619,6 +625,26 @@ class Watcher:
             self.orfs_dir = None
         self.platform = platform or os.environ.get("PLATFORM") or env_file_value("PLATFORM") or "sky130hd"
         self.orfs_seconds = {}   # (run, round) -> measured seconds of a finished ORFS pass
+        self.chip_frames = chip_frames and chip_render is not None
+        self._frames = {}        # run_dir -> ChipFrames, one renderer per run
+
+    def frames_for(self, run_dir):
+        """The frame renderer for one run, made on first use. Frames live in
+        the run directory, so they are archived and cleaned with it."""
+        if not (self.chip_frames and self.orfs_dir and run_dir):
+            return None
+        fr = self._frames.get(run_dir)
+        if fr is None:
+            fr = chip_render.ChipFrames(self.orfs_dir, self.platform,
+                                        os.path.join(run_dir, "chipframes"))
+            self._frames[run_dir] = fr
+        return fr
+
+    def frame_file(self, run_id, name):
+        """Resolve a frame URL to a file on disk (None if it is not one)."""
+        run_dir = self.resolve_run(run_id)
+        fr = self._frames.get(run_dir) if run_dir else None
+        return fr.frame_path(name) if fr else None
 
     def list_runs(self):
         out = []
@@ -1055,6 +1081,19 @@ class Watcher:
                     cells = synth_cells(self.orfs_dir, self.platform, design)
                     if cells:
                         bk["orfs"]["cells"] = cells
+                    # Real layout frames: ORFS leaves a complete .odb on the
+                    # host after every step, so the build can be watched in
+                    # the design itself rather than in a drawing of it. The
+                    # renders happen on a background thread -- poll() only
+                    # queues what is new and returns what has finished.
+                    fr = self.frames_for(run_dir)
+                    if fr is not None:
+                        try:
+                            bk["orfs"]["frames"] = fr.poll(design, p_start)
+                            if fr.last_error:
+                                bk["orfs"]["frame_error"] = fr.last_error
+                        except Exception as e:   # a frame is never worth a 500
+                            bk["orfs"]["frame_error"] = f"{type(e).__name__}: {e}"
                     try:
                         bk["last_write"] = max(os.path.getmtime(f) for f in glob.glob(os.path.join(design_dir, "*.log")))
                     except ValueError:      # no logs yet
@@ -1193,6 +1232,19 @@ def make_handler(watcher, terminal=None, token="", off_reason=""):
                     return self._json(500, {"error": f"{type(e).__name__}: {e}"})
                 st["terminal"] = terminal.state() if terminal else {"available": False, "reason": off_reason}
                 return self._json(200, st)
+            if u.path == "/api/frame":
+                p = watcher.frame_file((q.get("run") or [None])[0],
+                                       (q.get("name") or [""])[0])
+                if not p:
+                    return self._send(404, "no such frame", "text/plain")
+                with open(p, "rb") as f:
+                    body = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "image/png")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.end_headers()
+                return self.wfile.write(body)
             if u.path == "/api/validation":
                 try:
                     return self._json(200, watcher.validation((q.get("run") or [None])[0]))
@@ -1301,6 +1353,9 @@ def main():
     ap.add_argument("--platform", help="ORFS platform (default: PLATFORM or sky130hd)")
     ap.add_argument("--port", type=int, default=8765)
     ap.add_argument("--no-browser", action="store_true")
+    ap.add_argument("--no-chip-frames", action="store_true",
+                    help="do not render the real layout per ORFS step (the chip card "
+                         "then draws the procedural illustration only)")
     ap.add_argument("--demo", action="store_true", help="simulate a whole run, no ORFS needed")
     ap.add_argument("--demo-minutes", type=float, default=4.0, help="length of the simulated run")
     ap.add_argument("--no-terminal", action="store_true",
@@ -1315,14 +1370,21 @@ def main():
         import demo_run
         sim = demo_run.Demo(minutes=args.demo_minutes)
         threading.Thread(target=sim.run, daemon=True).start()
-        watcher = Watcher(sim.runs_root, run=sim.run_dir, orfs_dir=sim.orfs_dir, platform="sky130hd")
+        # no chip frames in the demo: its ORFS tree is a simulation with no
+        # real .odb to render, and the renderer would only reach for Docker
+        watcher = Watcher(sim.runs_root, run=sim.run_dir, orfs_dir=sim.orfs_dir,
+                          platform="sky130hd", chip_frames=False)
         print(f"demo run in {sim.root}")
     else:
         run = os.path.abspath(args.run) if args.run else None
         watcher = Watcher(os.path.abspath(args.runs_root), run=run,
-                          orfs_dir=args.orfs_dir, platform=args.platform)
+                          orfs_dir=args.orfs_dir, platform=args.platform,
+                          chip_frames=not args.no_chip_frames)
         if not watcher.orfs_dir:
             print("note: ORFS_DIR not found; backend steps will be estimated from elapsed time")
+        elif watcher.chip_frames:
+            print("chip frames: rendering the real layout per ORFS step "
+                  "(--no-chip-frames to draw the illustration only)")
         if not args.no_terminal:
             terminal = flow_terminal.FlowTerminal(ROOT)
     off = ("demo mode: the page only watches the simulated run" if args.demo else
