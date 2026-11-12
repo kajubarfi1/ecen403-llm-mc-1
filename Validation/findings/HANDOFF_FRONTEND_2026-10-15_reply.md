@@ -1348,9 +1348,13 @@ Against 2a18a7929dce that resolves all six findings of addendum 19 (the
 tag reuse, the same-address reorder and its HOSTMEM line, the lost
 responses, HOST_002, the missing wb_rsp) with nothing new behind them;
 the three intermediate drops (e322c9ab238a, 2867a40acc70, 85cf24c69ba7)
-are in `Validation/reports/drops/` if you want the steps. The three
-formal rows (PROTO_001, TIMING_008, HOST_001) are `awaiting_formal` until
-the replays run on this design; nothing in simulation contradicts them.
+are in `Validation/reports/drops/` if you want the steps. Formal
+replayed on it the next morning (60 min, no abstraction): TIMING_008,
+HOST_001 and, new, PROTO_002 proven; REF_001 bounded-proven at 2 984; no
+counterexample anywhere. PROTO_001 is undetermined at bound 53 (it was
+proven at 60 min on 56ca186bf893; the queue's conflict and age matrices
+deepen the state space), so it is the one row still `awaiting_formal`, and
+HOST_002 is undetermined at 53 as well.
 
 **The five presets, same evening**: `spec_matrix.py --level 2` on the fixed
 generators, fresh run directories, every preset through all four phases
@@ -1373,3 +1377,55 @@ with `aux_width`), so the five presets regenerate with the fixes the next
 time the flow runs them. The ECC presets' "write words never accepted /
 WR commands drive no data" losses should be re-read against this drop
 first; they had the shape of the tag reuse.
+
+## Addendum 21 (2026-11-11): one more data_path edit in your generator, under the same permission — a read burst that follows a one-cycle bubble
+
+Constrained-random stimulus (`Validation/closure/random_v2.py`, 24 runs on
+drop e4794e87a8c1) found one defect the directed paths never reach. It is
+a one-line change in `Frontend2/scripts/Phase4/data_path_gen.py`, commented
+in place; `PHASE4RTL/data_path.sv` and its manifest were regenerated from
+it and `TOPRTL` rebuilt with `generate_top.py` (Verilator lint PASS, 0
+errors, the same 19 pre-existing warnings). Your `data_path_tb.sv` passes
+on the regenerated RTL (29/29, xrun on Olympus). The resulting drop is
+43f6cb8f0641: 20/20 paths, 24/24 random runs, no simulation finding.
+
+### data_path_gen.py — chain into the next queued read only when its countdown is exactly 0
+
+At a burst's last beat the read engine chains straight into the next
+queued read when `rd_pend_wait[head] <= 1`. A countdown of 1 at that
+cycle means the next read was issued three controller cycles after this
+one, so its first beat is two cycles away, with one idle cycle between the
+bursts. Chaining then put the engine in RD_CAPTURE one cycle early: it
+captured the idle bubble as beat 0 and the real beat 0 as beat 1, and the
+response came out as `beat0 << 16` with zeros below (path_03 under
+random_v2 seeds 5-8: 4 of 400 responses, exactly the 4 read pairs spaced
+3 cycles apart; the directed paths never space reads closer than 30). The
+condition is now `== 0`: a countdown of 0 seen this cycle means beat 0 is
+on dq next cycle, the same contract RD_IDLE's own check uses, so
+back-to-back bursts (countdown 0 at the last beat) still chain with no
+lost cycle, and the bubble case goes through RD_IDLE, which captures it
+exactly on time. The old comment's claim that RD_IDLE's path is a cycle
+late was not borne out by the trace.
+
+### For you to look at, not changed
+
+The write engine has the same `<= 1` chaining test (`wr_pend_wait`, the
+WR_DRIVE last-beat branch and the `wr_pop` term that goes with it). By the
+same reasoning it would start the next write burst one cycle early when two
+writes are three cycles apart, which a real DRAM would sample as CWL-1; our
+DRAM stub keys beats to commands rather than to CWL, so it cannot see that.
+No random seed happened to issue writes 3 cycles apart (this run's WR-WR
+gaps were 2 cycles or 8+), so it is unproven; it is yours to judge.
+
+### On our side, found by the same runs
+
+The DRAM stub detected a write burst only on the rising edge of dq_oe, so
+the second of two back-to-back write bursts (two WRs tCCD apart, which your
+write engine correctly drives with no idle cycle) was swallowed and every
+later write landed under the key of the WR before it; and the host-memory
+checker compared a read against the host's writes as of the response, not
+as of the read's acceptance, so a read issued just before a write to the
+same address expected the write's data. Both fixed (`dram_stub.sv`,
+`txn/host_memory.py`); neither was an RTL defect. The host-memory checker
+now also compares only the bytes the host has written, since the stub has
+no data-mask input and stores every byte of a partial write.

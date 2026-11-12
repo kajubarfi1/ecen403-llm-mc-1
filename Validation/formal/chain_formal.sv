@@ -84,6 +84,7 @@ module chain_formal (
   logic [9:0] cmd_queue__entry_col [16];
   logic [2:0] cmd_queue__entry_bank [16];
   logic [0:0] cmd_queue__entry_we [16];
+  logic [15:0] cmd_queue__entry_urgent;
   logic [3:0] cmd_queue__entry_aux [16];
   logic cmd_queue__queue_full;
   logic cmd_queue__queue_empty;
@@ -146,6 +147,7 @@ module chain_formal (
   logic [31:0] wb_port__wb_dat_o;
   logic wb_port__wb_stall_o;
   logic wb_port__wb_err_o;
+  logic wb_port__rd_ack;
 
   assign tie__config_regs__csr_cyc_i = '0;
   assign tie__config_regs__csr_stb_i = '0;
@@ -257,6 +259,7 @@ module chain_formal (
     .entry_col(cmd_queue__entry_col),
     .entry_bank(cmd_queue__entry_bank),
     .entry_we(cmd_queue__entry_we),
+    .entry_urgent(cmd_queue__entry_urgent),
     .entry_aux(cmd_queue__entry_aux),
     .queue_full(cmd_queue__queue_full),
     .queue_empty(cmd_queue__queue_empty),
@@ -324,6 +327,7 @@ module chain_formal (
     .wr_data_valid(xg__data_path__wr_data_valid),
     .wr_data(wb_port__req_wdata),
     .wr_mask(wb_port__req_wmask),
+    .wr_data_aux(wb_port__req_aux),
     .wr_data_ready(data_path__wr_data_ready),
     .rd_rsp_valid(data_path__rd_rsp_valid),
     .rd_rsp_data(data_path__rd_rsp_data),
@@ -362,6 +366,7 @@ module chain_formal (
     .q_bank(cmd_queue__entry_bank),
     .q_we(cmd_queue__entry_we),
     .q_aux(cmd_queue__entry_aux),
+    .q_urgent(cmd_queue__entry_urgent),
     .bank_is_active(bank_tracker__bank_is_active),
     .bank_open_row(bank_tracker__bank_open_row),
     .bank_act_allowed(bank_tracker__bank_act_allowed),
@@ -402,10 +407,12 @@ module chain_formal (
     .req_wdata(wb_port__req_wdata),
     .req_wmask(wb_port__req_wmask),
     .req_aux(wb_port__req_aux),
+    .rd_ack(wb_port__rd_ack),
     .req_ready(cmd_queue__enq_ready),
     .rsp_valid(data_path__rd_rsp_valid),
     .rsp_rdata(data_path__rd_rsp_data),
-    .rsp_aux(data_path__rd_rsp_aux)
+    .rsp_aux(data_path__rd_rsp_aux),
+    .wr_data_ready(data_path__wr_data_ready)
   );
 
 endmodule

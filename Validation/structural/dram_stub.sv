@@ -114,8 +114,14 @@ module dram_stub #(
 
       // a write burst: beat k is on dq during the k-th cycle of dq_oe.
       // The burst belongs to the oldest WR whose data has not started.
+      // A burst starts on the first cycle of dq_oe OR, when the data
+      // path chains two writes with no idle cycle between them (two WRs
+      // tCCD apart), on the cycle after the previous burst's last beat
+      // (2026-11-11: the edge-only test swallowed the second burst of
+      // every back-to-back pair under random_v2, and from then on every
+      // write landed under the key of the WR before it).
       if (ddr_dq_oe) begin
-        if (!oe_q) begin
+        if (!oe_q || widx >= BURST_CTRL_CYC) begin
           widx = 0;
           wcap = (wq_head != wq_tail);
           if (wcap) begin

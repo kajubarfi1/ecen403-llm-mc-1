@@ -1,0 +1,228 @@
+{
+  "$schema": "validation-path-run/1",
+  "path": "path_18_full_write",
+  "strategy": "composed",
+  "verdict": "fail",
+  "timestamp": "2026-11-11T13:44:04.582093",
+  "blocks": [
+    "addr_decoder",
+    "bank_tracker",
+    "cmd_gen",
+    "cmd_queue",
+    "config_regs",
+    "data_path",
+    "refresh_ctrl",
+    "scheduler",
+    "wb_port"
+  ],
+  "sequence": "Validation/sequences/generated/runs/crv2_s7/path_18_full_write/path_18_full_write_seed7.json",
+  "stimulus_generator": "random_v2",
+  "autonomous": false,
+  "window_cycles": 2000,
+  "coverage_collected": true,
+  "rtl_drop": {
+    "git_head": "e4794e87a8c1",
+    "drop_id": "e4794e87a8c1",
+    "design_id": "ae80be01ac4f",
+    "blocks_used": [
+      "addr_decoder",
+      "bank_tracker",
+      "cmd_gen",
+      "cmd_queue",
+      "config_regs",
+      "data_path",
+      "refresh_ctrl",
+      "scheduler",
+      "wb_port"
+    ],
+    "validated_at": "5010207",
+    "frontend_commits": {
+      "addr_decoder": "f37ce49d323151a6118ae7765aa766918c816383",
+      "bank_tracker": "f37ce49d323151a6118ae7765aa766918c816383",
+      "cmd_gen": "f37ce49d323151a6118ae7765aa766918c816383",
+      "cmd_queue": "3338b7ec2707d5b85fe8840f3f99dc6a6b8657f5",
+      "config_regs": "ab167d9b1ee95d1da1c7860174bb00ed983b4bcc",
+      "data_path": "3338b7ec2707d5b85fe8840f3f99dc6a6b8657f5",
+      "refresh_ctrl": "f37ce49d323151a6118ae7765aa766918c816383",
+      "scheduler": "3338b7ec2707d5b85fe8840f3f99dc6a6b8657f5",
+      "wb_port": "3338b7ec2707d5b85fe8840f3f99dc6a6b8657f5"
+    },
+    "roots": [
+      "Frontend2/OutputFolders"
+    ],
+    "blocks": {
+      "addr_decoder": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/addr_decoder.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/addr_decoder_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "bank_tracker": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/bank_tracker_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_gen": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_gen_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "cmd_queue": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/cmd_queue_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "config_regs": {
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/config_regs.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/config_regs_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "data_path": {
+        "rtl": "Frontend2/OutputFolders/PHASE4RTL/data_path.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "refresh_ctrl": {
+        "rtl": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE2RTL/refresh_ctrl_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "scheduler": {
+        "rtl": "Frontend2/OutputFolders/PHASE3RTL/scheduler.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE3RTL/scheduler_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "wb_port": {
+        "rtl": "Frontend2/OutputFolders/PHASE1RTL/wb_port.sv",
+        "manifest": "Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      }
+    },
+    "shipped_spec": {
+      "path": "Frontend2/OutputFolders/generated_spec.json",
+      "revision": "golden_ddr3_1600k_x8_2lane_1rank"
+    },
+    "netlists": {}
+  },
+  "stages": [
+    {
+      "stage": "wb_port",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/wb_port_predictor.py",
+      "scope": "wb_port",
+      "verdict": "pass",
+      "summary": "scope=wb_port  strategy=exact  status=pass  matched=596/596  WAIVED=195 field comparison(s)  (596 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "addr_decoder",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/addr_decoder_predictor.py",
+      "scope": "addr_decoder",
+      "verdict": "pass",
+      "summary": "scope=addr_decoder  strategy=exact  status=pass  matched=401/401  (401 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "cmd_queue+scheduler",
+      "kind": "invariant",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_queue_scheduler_checker.py",
+      "scope": "cmd_queue_scheduler",
+      "verdict": "pass",
+      "summary": "scope=cmd_queue_scheduler  strategy=invariant  status=pass  (6740 transactions, no rule broken)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "cmd_gen",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/cmd_gen_predictor.py",
+      "scope": "cmd_gen",
+      "verdict": "pass",
+      "summary": "scope=cmd_gen  strategy=exact  status=pass  matched=958/958  (958 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "data_path",
+      "kind": "exact",
+      "model": "/Users/jacob/Capstone/ecen403-llm-mc-1/Validation/predictors/data_path_predictor.py",
+      "scope": "data_path",
+      "verdict": "pass",
+      "summary": "scope=data_path  strategy=exact  status=pass  matched=607/607  (607 output transaction(s) matched)",
+      "detail": [],
+      "rule_counts": {}
+    },
+    {
+      "stage": "(conservation)",
+      "kind": "conservation",
+      "scope": "(conservation)",
+      "model": null,
+      "verdict": "pass",
+      "summary": "scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable",
+      "detail": []
+    },
+    {
+      "stage": "(host memory)",
+      "kind": "host_memory",
+      "scope": "(host memory)",
+      "model": null,
+      "verdict": "fail",
+      "summary": "scope=(host memory)  strategy=host_memory  status=fail  checked=41 skipped_unwritten=154 mismatches=40 outstanding_at_end=0",
+      "detail": [
+        "HOSTMEM wb_rsp[18] addr=0xd7c80e0 expected=0xf88ede10 observed=0x35a2ff8f read accepted t=5418000 answered t=5604000",
+        "HOSTMEM wb_rsp[19] addr=0xd7c80f0 expected=0x52d31e1b observed=0x35a2ff87 read accepted t=5628000 answered t=5684000",
+        "HOSTMEM wb_rsp[20] addr=0xd7c8100 expected=0xa7f0c99e observed=0x35adff7f read accepted t=5708000 answered t=5924000",
+        "HOSTMEM wb_rsp[21] addr=0xed20640 expected=0x3b996870 observed=0xe597fcdf read accepted t=5948000 answered t=6274000",
+        "HOSTMEM wb_rsp[29] addr=0x1abca0d0 expected=0xef82d1a3 observed=0x35a3ff97 read accepted t=7148000 answered t=7389000",
+        "HOSTMEM wb_rsp[32] addr=0x116f7490 expected=0x3853003d observed=0x4d817db7 read accepted t=7738000 answered t=8064000",
+        "HOSTMEM wb_rsp[33] addr=0x116f74a0 expected=0x3d376642 observed=0x4d807daf read accepted t=8093000 answered t=8149000",
+        "HOSTMEM wb_rsp[34] addr=0x1d7ef450 expected=0xf7ba38b6 observed=0x7d877dd7 read accepted t=8173000 answered t=8584000",
+        "HOSTMEM wb_rsp[35] addr=0xbc376e0 expected=0xcd000000 observed=0xcd927c8f read accepted t=8608000 answered t=9059000",
+        "HOSTMEM wb_rsp[36] addr=0xbc376f0 expected=0xae9c0000 observed=0xcd927c87 read accepted t=9088000 answered t=9144000",
+        "HOSTMEM wb_rsp[37] addr=0xaca5cd8 expected=0x1202952f observed=0xed837d97 read accepted t=9093000 answered t=9224000",
+        "HOSTMEM wb_rsp[38] addr=0xaca5ce0 expected=0x980050 observed=0xed827d8f read accepted t=9253000 answered t=9554000",
+        "HOSTMEM wb_rsp[39] addr=0xaca5cf0 expected=0x6b86290b observed=0xed827d87 read accepted t=9258000 answered t=9564000",
+        "HOSTMEM wb_rsp[40] addr=0xaca5d00 expected=0x6ba99d01 observed=0xed8d7d7f read accepted t=9593000 answered t=9834000",
+        "HOSTMEM wb_rsp[41] addr=0x11345cf0 expected=0x7711b757 observed=0x2d827d87 read accepted t=9863000 answered t=10304000",
+        "HOSTMEM wb_rsp[73] addr=0xc5bebc0 expected=0x4479c000 observed=0xddbb7e1f read accepted t=17748000 answered t=18419000",
+        "HOSTMEM wb_rsp[129] addr=0x129af5e0 expected=0xa100 observed=0xfd8a7d0f read accepted t=27843000 answered t=28189000",
+        "HOSTMEM wb_rsp[130] addr=0xc0b33d0 expected=0xb8f38d1b observed=0xc5bbfe17 read accepted t=28208000 answered t=28664000",
+        "HOSTMEM wb_rsp[131] addr=0xe511700 expected=0x3f0a483a observed=0x859dfc7f read accepted t=28218000 answered t=28674000",
+        "HOSTMEM wb_rsp[132] addr=0xc0b3250 expected=0xd9db4cf9 observed=0xc5b7fed7 read accepted t=28698000 answered t=28899000",
+        "HOSTMEM wb_rsp[133] addr=0xc0b3260 expected=0xdf9b07 observed=0xc5b6fecf read accepted t=28918000 answered t=29179000",
+        "HOSTMEM wb_rsp[134] addr=0xb4a05d0 expected=0xb301f4f0 observed=0xe58bfd17 read accepted t=28923000 answered t=29184000",
+        "HOSTMEM wb_rsp[136] addr=0x64094b0 expected=0x8500cc0e observed=0xb580fda7 read accepted t=29213000 answered t=29664000",
+        "HOSTMEM wb_rsp[137] addr=0x64094c0 expected=0xae5a8a83 observed=0xb583fd9f read accepted t=29238000 answered t=29674000",
+        "HOSTMEM wb_rsp[138] addr=0x9b92ea0 expected=0xd4287253 observed=0x8590fcaf read accepted t=29698000 answered t=29834000",
+        "HOSTMEM wb_rsp[139] addr=0x2c7bb40 expected=0x42ddd793 observed=0x55bffe5f read accepted t=29703000 answered t=29879000",
+        "HOSTMEM wb_rsp[140] addr=0x2c7bb50 expected=0x69611b94 observed=0x55bffe57 read accepted t=29718000 answered t=30159000",
+        "HOSTMEM wb_rsp[142] addr=0x68e3ec0 expected=0xaaa1de16 observed=0x6593fc9f read accepted t=30193000 answered t=30709000",
+        "HOSTMEM wb_rsp[143] addr=0x68e3ed0 expected=0xe553ef86 observed=0x6593fc97 read accepted t=30728000 answered t=30784000",
+        "HOSTMEM wb_rsp[155] addr=0xd0e7090 expected=0x72d69b79 observed=0x6da17fb7 read accepted t=33413000 answered t=33764000",
+        "HOSTMEM wb_rsp[156] addr=0xd0e70a0 expected=0xb5c500 observed=0x6da07faf read accepted t=33423000 answered t=33774000",
+        "HOSTMEM wb_rsp[157] addr=0x141e4550 expected=0x54049b7 observed=0x6d8f7d57 read accepted t=33803000 answered t=33934000",
+        "HOSTMEM wb_rsp[158] addr=0x16268430 expected=0x195700c8 observed=0x7584fde7 read accepted t=33808000 answered t=34169000",
+        "HOSTMEM wb_rsp[160] addr=0x5b364d0 expected=0xb8484ea9 observed=0xcd837d97 read accepted t=34203000 answered t=34814000",
+        "HOSTMEM wb_rsp[161] addr=0x5b364e0 expected=0xb0b63694 observed=0xcd827d8f read accepted t=34833000 answered t=34889000",
+        "HOSTMEM wb_rsp[181] addr=0x1a41ffe0 expected=0x1700a600 observed=0x9d9a7c0f read accepted t=38223000 answered t=38414000",
+        "HOSTMEM wb_rsp[182] addr=0x15663b70 expected=0xae000000 observed=0xae54dd71 read accepted t=38443000 answered t=38919000",
+        "HOSTMEM wb_rsp[185] addr=0x1bd89570 expected=0x8877dd0b observed=0xb58efd47 read accepted t=38958000 answered t=39559000",
+        "HOSTMEM wb_rsp[186] addr=0x1bd89580 expected=0xb5000100 observed=0x8877dd0b (the data the host wrote at 0x1bd89570) read accepted t=39588000 answered t=39834000",
+        "HOSTMEM wb_rsp[187] addr=0x162686f0 expected=0x98a61c0d observed=0x7592fc87 read accepted t=39598000 answered t=39959000"
+      ]
+    },
+    {
+      "stage": "(address order)",
+      "kind": "address_order",
+      "scope": "(address order)",
+      "model": null,
+      "verdict": "pass",
+      "summary": "scope=(address order)  strategy=address_order  status=pass  rules=1 checked=401 unpaired=0 violations=0",
+      "detail": []
+    }
+  ],
+  "log": "Validation/reports/crv2/nov11/path_18_full_write_s7/path_18_full_write_sim.log",
+  "observed_trace": "Validation/reports/crv2/nov11/path_18_full_write_s7/path_18_full_write_observed.jsonl"
+}

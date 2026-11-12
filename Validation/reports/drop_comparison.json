@@ -1,15 +1,15 @@
 {
   "$schema": "validation-drop-comparison/1",
   "a": {
-    "dir": "Validation/reports/drops/298f5fb01c28",
-    "drop_head": "298f5fb01c28"
+    "dir": "Validation/reports/drops/e4794e87a8c1",
+    "drop_head": "e4794e87a8c1"
   },
   "b": {
-    "dir": "runs/matrix/preset_server-grade/validation/reports",
-    "drop_head": "68178ead798d"
+    "dir": "Validation/reports/paths",
+    "drop_head": "43f6cb8f0641"
   },
   "strict": false,
-  "generated_utc": "2026-11-10T00:41:35.267226Z",
+  "generated_utc": "2026-11-11T20:08:03.252875Z",
   "rows": [
     {
       "path": "path_01_write_cmd",
@@ -27,10 +27,8 @@
     },
     {
       "path": "path_02_read_cmd",
-      "kind": "regression",
-      "new": {
-        "illegal:cp_tccd_spacing": 19
-      },
+      "kind": "same",
+      "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
@@ -99,23 +97,12 @@
     },
     {
       "path": "path_07_backpressure",
-      "kind": "regression",
-      "new": {
-        "illegal:cp_tccd_spacing": 7
-      },
+      "kind": "same",
+      "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {
-        "matched:addr_decoder": [
-          253,
-          252
-        ],
-        "matched:wb_port": [
-          369,
-          367
-        ]
-      },
+      "matched_down": {},
       "matched_up": {},
       "verdict": [
         "pass",
@@ -264,17 +251,12 @@
     },
     {
       "path": "path_18_full_write",
-      "kind": "regression",
+      "kind": "same",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {
-        "matched:data_path": [
-          36,
-          24
-        ]
-      },
+      "matched_down": {},
       "matched_up": {},
       "verdict": [
         "pass",
@@ -339,21 +321,12 @@
     },
     {
       "path": "path_23_host_ack_collision",
-      "kind": "regression",
+      "kind": "same",
       "new": {},
       "gone": {},
       "grew": {},
       "shrank": {},
-      "matched_down": {
-        "matched:data_path": [
-          127,
-          83
-        ],
-        "matched:wb_port": [
-          128,
-          125
-        ]
-      },
+      "matched_down": {},
       "matched_up": {},
       "verdict": [
         "pass",

@@ -1216,6 +1216,40 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   jsonschema, `backend/agents/.env`; sky130 models already on Olympus;
   `flow.py --dry-run` reports every stage ready (USAGE.md, "Running the
   whole flow on a Mac").
+- *2026-11-10 — formal on e4794e87a8c1; the arm64 toolchain.* 60-minute
+  replay on the command path: TIMING_008, HOST_001 and PROTO_002 proven,
+  REF_001 bounded-proven at 2 984, no counterexample; PROTO_001 and
+  HOST_002 undetermined at 53 (the queue's new matrices deepen the state
+  space; PROTO_001 was proven at 60 min on 56ca). One row awaiting. The
+  published openroad/orfs image is x86-64 and its OpenROAD uses AVX,
+  which Rosetta cannot run, so the toolchain is being built natively for
+  arm64 in Colima from the ORFS checkout: dev image done; the OpenROAD
+  build needed two aarch64 fixes (char-vs-EOF in the DEF/LEF parsers
+  under -Werror; a Qt source file built for moc missing <cstdlib>). The
+  Colima VM lost DNS overnight and cost one two-hour attempt.
+
+- *2026-11-11 — coverage for the final deck, and what random_v2 found on
+  the way.* Directed rerun on e4794e87a8c1: 20/20, 81.4 % code coverage.
+  The five presets' level-2 runs sat at 72.1-82.4 %, so the golden spec
+  stays the one measured. 24 random_v2 runs (path_19/04/07 x seeds 1-4,
+  path_18/20/03 x seeds 5-8, 400 requests each, `reports/crv2/nov11/`)
+  merged with the directed runs: 85.6 % raw, 90.7 % adjusted
+  (`apply_exclusions.py`, 19 approved rules). Eight random runs failed.
+  path_03 x4: a read whose burst follows the previous one after a
+  one-cycle bubble came back as beat0<<16 — the data_path engine chained
+  into the next queued read on a countdown of <=1, one cycle early
+  (exactly the 4 RD-RD gaps of 3 cycles). Fixed in `data_path_gen.py`
+  (`== 0`) under Jacob's instruction, RTL regenerated, TOPRTL rebuilt
+  (lint PASS), her data_path bench 29/29; drop 43f6cb8f0641. path_18 x4:
+  two of ours — the DRAM stub swallowed the second of two back-to-back
+  write bursts (edge-only burst detect), and `host_memory.py` judged a
+  read against writes accepted after it (and whole words after partial
+  writes the stub stores unmasked); both fixed, the four traces re-judged
+  PASS. Fixed drop: 20/20 directed, 24/24 random, 86.1 % raw / 91.2 %
+  adjusted (`reports/crv2/nov11_fix/`; data_path 81.5, wb_port 93.3,
+  cmd_queue 84.1, bank_tracker 80.8 raw). Addendum 21. Open: the write
+  engine's symmetric `<= 1` chaining (unexercised: no 3-cycle WR gaps in
+  these seeds); the stub has no DM input.
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

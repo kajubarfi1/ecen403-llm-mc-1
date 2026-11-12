@@ -221,6 +221,43 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .path-chip.pass .dot { background: var(--pass); } .path-chip.pass { color: var(--pass); }
 .path-chip.fail .dot { background: var(--fail); } .path-chip.fail { color: var(--fail); border-color: #f8717155; background: #f8717112; }
 .path-chip .nm { overflow: hidden; text-overflow: ellipsis; }
+.path-chip { cursor: pointer; }
+.path-chip.sel { outline: 1px solid var(--accent); outline-offset: 1px; }
+.path-chip.other .dot { background: var(--accent-2); }
+
+/* validation detail: one path's stage checkers, findings, formal */
+.val-note { margin: 0 16px 8px; font-size: 11.5px; color: var(--muted); }
+.val-detail { margin: 0 16px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); overflow: hidden; }
+.val-detail .hd { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 8px 10px; border-bottom: 1px solid var(--line); font-size: 12.5px; }
+.val-detail .hd .nm { font-weight: 650; font-family: var(--mono); font-size: 12px; }
+.val-detail .hd .meta { font-size: 11px; }
+.val-detail .hd .spacer { flex: 1; }
+button.sm { font-size: 11px; padding: 3px 9px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--text); cursor: pointer; }
+button.sm:hover { border-color: var(--accent); }
+.stage-tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.stage-tbl td, .stage-tbl th { padding: 5px 10px; border-top: 1px solid var(--line); text-align: left; vertical-align: top; }
+.stage-tbl th { color: var(--muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: .4px; border-top: 0; }
+.stage-tbl .st { font-family: var(--mono); font-size: 11.5px; white-space: nowrap; }
+.v-pass { color: var(--pass); } .v-fail { color: var(--fail); } .v-other { color: var(--muted); }
+.stage-tbl .sum { color: var(--muted); font-size: 11.5px; word-break: break-word; }
+.stage-tbl .det { font-family: var(--mono); font-size: 11px; color: var(--fail); white-space: pre-wrap; margin-top: 3px; line-height: 1.4; }
+.subhead { padding: 8px 16px 6px; font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; display: flex; gap: 8px; align-items: baseline; }
+.subhead .r { margin-left: auto; text-transform: none; letter-spacing: 0; font-size: 11.5px; }
+.findings { padding: 0 16px 10px; display: flex; flex-direction: column; gap: 6px; }
+.finding { border: 1px solid var(--line); border-radius: 8px; background: var(--panel-2); padding: 7px 10px; font-size: 12.5px; cursor: pointer; }
+.finding.critical { border-color: #f8717166; } .finding.major { border-color: #fbbf2455; } .finding.awaiting_formal { border-color: #7c9cff44; }
+.finding .row1 { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.finding .sev { font-size: 10px; text-transform: uppercase; letter-spacing: .4px; padding: 1px 6px; border-radius: 999px; border: 1px solid currentColor; }
+.finding .sev.critical { color: var(--fail); } .finding .sev.major { color: var(--halt); } .finding .sev.minor { color: var(--muted); }
+.finding .own { font-weight: 650; } .finding .chk { font-family: var(--mono); font-size: 11.5px; }
+.finding .meta2 { color: var(--muted); margin-left: auto; font-size: 11px; white-space: nowrap; }
+.finding .body { display: none; margin-top: 6px; font-size: 11.5px; color: var(--muted); white-space: pre-wrap; font-family: var(--mono); line-height: 1.45; }
+.finding.open .body { display: block; }
+.formal-chips { display: flex; flex-wrap: wrap; gap: 5px; padding: 0 16px 14px; }
+.fchip { font-family: var(--mono); font-size: 11px; padding: 3px 7px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel-2); color: var(--muted); }
+.fchip.proven, .fchip.bounded_proven, .fchip.covered { color: var(--pass); border-color: #4ade8055; }
+.fchip.cex { color: var(--fail); border-color: #f8717166; }
+.fchip.undetermined, .fchip.bounded_vacuous, .fchip.proven_vacuous { color: var(--halt); border-color: #fbbf2444; }
 
 .banner.loop { background: #c86bff14; border: 1px solid #c86bff55; color: #ecd3ff; animation: loopglow 1.8s ease-in-out infinite; }
 @keyframes loopglow { 0%,100% { box-shadow: 0 0 0 0 #c86bff00; } 50% { box-shadow: 0 0 0 4px #c86bff22; } }
@@ -311,7 +348,13 @@ button:disabled { opacity: .45; cursor: not-allowed; }
       <div class="card-head"><h2>Validation · System paths</h2><span class="meta" id="val-meta"></span></div>
       <div id="val-banner"></div>
       <div class="tiles" id="val-tiles"></div>
+      <div class="val-note" id="val-note" hidden></div>
       <div class="pathgrid" id="val-paths"></div>
+      <div id="val-detail"></div>
+      <div class="subhead" id="val-findings-head" hidden>Findings <span class="r" id="val-rounds"></span></div>
+      <div class="findings" id="val-findings"></div>
+      <div class="subhead" id="val-formal-head" hidden>Formal <span class="r" id="val-formal-meta"></span></div>
+      <div class="formal-chips" id="val-formal"></div>
     </div>
   </section>
 
@@ -319,6 +362,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
     <div class="card-head">
       <button class="tab" data-tab="term" id="tab-term">Terminal</button>
       <button class="tab" data-tab="log" id="tab-log">flow.log</button>
+      <button class="tab" data-tab="test" id="tab-test">Path log</button>
       <span class="meta" id="log-meta"></span><div class="spacer"></div>
       <label class="chk" id="follow-wrap"><input type="checkbox" id="follow-log" checked> follow</label>
     </div>
@@ -343,6 +387,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
       <div id="term"></div>
     </div>
     <div id="pane-log"><div class="log" id="log"></div></div>
+    <div id="pane-test" hidden><div class="log" id="testlog"><span class="t"></span> <span>Pick a path above, then "Sim log", "Trace" or "Report".</span></div></div>
   </section>
 </div>
 
@@ -376,6 +421,7 @@ function mulberry32(a) {
 
 // ---------------------------------------------------------------- state
 let data = null, selected = null, follow = true, serverSkew = 0, failCount = 0;
+let vdata = null, selPath = null, openFindings = new Set();
 const params = new URLSearchParams(location.search);
 if (params.get("run")) { selected = params.get("run"); follow = false; }
 
@@ -384,11 +430,14 @@ async function poll() {
   clearTimeout(pollTimer);
   try {
     const q = selected && !follow ? `?run=${encodeURIComponent(selected)}` : "";
-    const r = await fetch(`/api/status${q}`, { cache: "no-store" });
+    const [r, rv] = await Promise.all([
+      fetch(`/api/status${q}`, { cache: "no-store" }),
+      fetch(`/api/validation${q}`, { cache: "no-store" }).catch(() => null)]);
     const j = await r.json();
     if (j.error) throw new Error(j.error);
     serverSkew = j.now - Date.now() / 1000;
     data = j; failCount = 0;
+    try { const jv = rv ? await rv.json() : null; if (jv && !jv.error) vdata = jv; } catch (e) {}
     render();
   } catch (e) {
     failCount++;
@@ -687,9 +736,26 @@ function renderFrontend() {
 function renderValidation() {
   const v = data.validation;
   if (!v) return;
-  $("val-meta").textContent = v.round ? `round ${v.round}` : "";
-  const s = v.summary || {};
-  const tiles = [
+  // Reports on disk (vdata) carry every stage checker and the lines it failed
+  // on; the live log (v) only knows pass/fail per path while a round runs.
+  // A run's own reports win; the repository's checked-in drop is shown, and
+  // said to be, when the run has none yet.
+  const vd = vdata && (vdata.source === "run" || !data.run) ? vdata : null;
+  const repoFallback = vdata && vdata.source === "repo" && data.run;
+  const live = v.result === "active";
+  const paths = vd && !live ? vd.paths.map((p) => ({ name: p.name, status: p.verdict === "pass" ? "pass" : p.verdict === "fail" ? "fail" : "other" }))
+    : (v.paths || []);
+  const s = vd && !live ? vd.summary : (v.summary || {});
+  $("val-meta").textContent = [v.round ? `round ${v.round}` : "", vd && vd.drop.drop_id ? `drop ${vd.drop.drop_id}` : ""].filter(Boolean).join(" · ");
+  const fm = vd && vd.formal;
+  const fProven = fm ? (fm.counts.proven || 0) + (fm.counts.bounded_proven || 0) : null;
+  const fTotal = fm ? fm.results.filter((r) => r.status !== "covered").length : null;
+  const tiles = vd && !live ? [
+    ["Pass", s.pass ?? "—", s.pass ? "good" : ""],
+    ["Fail", s.fail ?? "—", s.fail ? "bad" : ""],
+    ["Findings", s.findings_open ?? "—", s.findings_open ? "bad" : s.findings_open === 0 ? "good" : ""],
+    ["Formal", fm ? `${fProven}/${fTotal}` : "—", fm ? (fm.counts.cex ? "bad" : "") : ""],
+  ] : [
     ["Pass", s.pass ?? "—", s.pass ? "good" : ""],
     ["Fail", s.fail ?? "—", s.fail ? "bad" : ""],
     ["Error", s.error ?? "—", s.error ? "bad" : ""],
@@ -698,10 +764,26 @@ function renderValidation() {
   $("val-tiles").innerHTML = tiles.map(([k, val, c]) =>
     `<div class="tile"><div class="k">${k}</div><div class="v ${c}">${esc(val)}</div></div>`).join("");
 
-  $("val-paths").innerHTML = (v.paths || []).length
-    ? v.paths.map((p) => `<div class="path-chip ${p.status}" title="${esc(p.name)}">
+  const note = $("val-note");
+  if (repoFallback && !live) {
+    note.hidden = false;
+    note.textContent = `Showing the repository's checked-in drop (${vdata.drop.drop_id || "?"}): this run has no validation reports yet.`;
+  } else if (vd && vd.coverage && vd.coverage.matches_spec) {
+    const c = vd.coverage;
+    const parts = [c.code_pct != null ? `code coverage ${c.code_pct}%` : "",
+      c.covered != null ? `${c.covered}/${c.vplan_items} vplan items covered${c.unreachable ? ` (${c.unreachable} unreachable by spec)` : ""}` : ""].filter(Boolean);
+    note.hidden = !parts.length;
+    note.textContent = parts.join(" · ");
+  } else note.hidden = true;
+
+  if (selPath && !paths.some((p) => p.name === selPath)) selPath = null;
+  $("val-paths").innerHTML = paths.length
+    ? paths.map((p) => `<div class="path-chip ${p.status} ${p.name === selPath ? "sel" : ""}" data-path="${esc(p.name)}" title="${esc(p.name)}">
         <span class="dot"></span><span class="nm">${esc(p.name.replace(/^path_\d+_/, ""))}</span></div>`).join("")
-    : `<div class="empty" style="padding:16px 0">${v.result === "active" ? "Running…" : "No validation run yet."}</div>`;
+    : `<div class="empty" style="padding:16px 0">${live ? "Running…" : "No validation run yet."}</div>`;
+  $("val-paths").querySelectorAll(".path-chip").forEach((el) => el.addEventListener("click", () => {
+    selPath = selPath === el.dataset.path ? null : el.dataset.path; renderValidation();
+  }));
 
   let banner = "";
   if (v.result === "fail" && (v.failed_modules || []).length) {
@@ -712,6 +794,92 @@ function renderValidation() {
     banner = `<div class="banner pass">All system paths passed.</div>`;
   }
   $("val-banner").innerHTML = banner;
+
+  renderPathDetail(vd && !live ? vd : null);
+  renderFindings(vd && !live ? vd : null);
+  renderFormal(vd && !live ? vd : null);
+}
+
+const vcls = (verdict) => verdict === "pass" ? "v-pass" : verdict === "fail" ? "v-fail" : "v-other";
+
+function renderPathDetail(vd) {
+  const el = $("val-detail");
+  const p = vd && selPath ? vd.paths.find((x) => x.name === selPath) : null;
+  if (!p) { el.innerHTML = ""; return; }
+  const hd = `<div class="hd"><span class="nm">${esc(p.name)}</span>
+      <span class="${vcls(p.verdict)}">${esc((p.verdict || "?").toUpperCase())}</span>
+      <span class="meta">${esc(p.strategy || "")}${p.autonomous ? " · autonomous" : p.stimulus ? " · " + esc(p.stimulus) : ""}${p.window_cycles ? " · " + p.window_cycles + " cycles" : ""}</span>
+      <span class="meta">${esc((p.blocks || []).join(", "))}</span><span class="spacer"></span>
+      ${p.has_log ? `<button class="sm" data-what="log">Sim log</button>` : ""}
+      ${p.has_trace ? `<button class="sm" data-what="trace">Trace</button>` : ""}
+      <button class="sm" data-what="report">Report</button></div>`;
+  const rows = p.stages.map((st) => `<tr>
+      <td class="st">${esc(st.stage)}</td><td class="st ${vcls(st.verdict)}">${esc(st.verdict || "")}</td>
+      <td class="st">${esc(st.kind || "")}</td>
+      <td class="sum">${esc(st.summary || "")}${st.detail.length ? `<div class="det">${esc(st.detail.join("\n"))}${st.detail_total > st.detail.length ? `\n… ${st.detail_total - st.detail.length} more (see Report)` : ""}</div>` : ""}</td></tr>`).join("");
+  el.innerHTML = `<div class="val-detail">${hd}<table class="stage-tbl"><thead><tr><th>Stage</th><th>Verdict</th><th>Check</th><th>Result</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  el.querySelectorAll("button.sm").forEach((b) => b.addEventListener("click", () => openPathArtifact(p.name, b.dataset.what)));
+}
+
+async function openPathArtifact(path, what) {
+  const q = selected && !follow ? `&run=${encodeURIComponent(selected)}` : "";
+  const out = $("testlog");
+  out.innerHTML = `<span>loading ${esc(what)} for ${esc(path)}…</span>`;
+  window.showTab && window.showTab("test", true);
+  try {
+    const r = await fetch(`/api/validation/path?path=${encodeURIComponent(path)}&what=${what}${q}`, { cache: "no-store" });
+    const j = await r.json();
+    if (j.error) throw new Error(j.error);
+    if (what === "report") {
+      out.innerHTML = `<span class="cmd">${esc(path)}_report.json</span>\n` + esc(JSON.stringify(j.json, null, 2));
+    } else {
+      const lines = (j.text || "").split("\n").map((line) => {
+        let cls = "";
+        if (/ASRTST|DRIVER_STALL|MISMATCH|CONSERVE|HOSTMEM|ADDRORDER|\bFAIL\b|\*E,/.test(line)) cls = "bad";
+        else if (/\bPASS\b|status=pass/.test(line)) cls = "ok";
+        else if (/\*W,|WARN/.test(line)) cls = "warn";
+        else if (line.startsWith("TXN ")) cls = "bk";
+        return `<span class="${cls}">${esc(line)}</span>`;
+      });
+      out.innerHTML = `<span class="cmd">${esc(j.file)}${j.truncated ? ` (last ${Math.round(j.text.length / 1024)} KB of ${Math.round(j.size / 1024)} KB)` : ""}</span>\n` + lines.join("\n");
+    }
+    out.scrollTop = what === "report" ? 0 : out.scrollHeight;
+  } catch (e) { out.innerHTML = `<span class="bad">${esc(String(e))}</span>`; }
+}
+
+function renderFindings(vd) {
+  const head = $("val-findings-head"), list = $("val-findings");
+  if (!vd) { head.hidden = true; list.innerHTML = ""; return; }
+  head.hidden = false;
+  const rounds = vd.rounds || [];
+  $("val-rounds").textContent = rounds.length
+    ? rounds.map((r) => `round ${r.round}: ${r.status || "?"}${r.findings ? `, ${r.findings} finding${r.findings > 1 ? "s" : ""}` : ""}${r.failed_modules.length ? ` (${r.failed_modules.join(", ")})` : ""}`).join(" → ")
+    : (vd.drop.generated_utc ? `package ${vd.drop.generated_utc.slice(0, 16).replace("T", " ")}` : "");
+  if (!vd.findings.length) {
+    list.innerHTML = `<div class="val-note" style="margin:0 0 6px">No open findings${vd.resolved.length ? ` · ${vd.resolved.length} resolved since the previous drop` : ""}.</div>`;
+    return;
+  }
+  list.innerHTML = vd.findings.map((f) => `<div class="finding ${esc(f.severity || "")} ${f.status === "awaiting_formal" ? "awaiting_formal" : ""} ${openFindings.has(f.id) ? "open" : ""}" data-id="${esc(f.id)}">
+      <div class="row1"><span class="sev ${esc(f.severity || "")}">${esc(f.severity || "?")}</span>
+        <span class="own">${esc(f.owner || "")}</span><span class="chk">${esc(f.check_id || "")}</span>
+        <span class="meta2">${esc(f.status || "")}${f.occurrences ? ` · ×${f.occurrences}` : ""}${f.paths.length ? ` · ${f.paths.map((p) => p.replace(/^path_\d+_/, "")).join(", ")}` : ""}</span></div>
+      <div class="body">${esc([f.requirement ? "requirement: " + f.requirement : "", f.expected && f.expected !== f.requirement ? "expected:    " + f.expected : "", f.actual ? "actual:      " + f.actual : "",
+        f.detector ? "detector:    " + f.detector : "", f.taxonomy ? "taxonomy:    " + f.taxonomy : "", f.spec_ref ? "spec:        " + f.spec_ref : "",
+        f.candidates.length > 1 ? "candidates:  " + f.candidates.join(", ") : ""].filter(Boolean).join("\n"))}</div></div>`).join("");
+  list.querySelectorAll(".finding").forEach((el) => el.addEventListener("click", () => {
+    const id = el.dataset.id; openFindings.has(id) ? openFindings.delete(id) : openFindings.add(id); el.classList.toggle("open");
+  }));
+}
+
+function renderFormal(vd) {
+  const head = $("val-formal-head"), el = $("val-formal");
+  const fm = vd && vd.formal;
+  if (!fm) { head.hidden = true; el.innerHTML = ""; return; }
+  head.hidden = false;
+  const c = fm.counts;
+  $("val-formal-meta").textContent = `${fm.path} · ${fm.time_limit || ""} · ${Object.entries(c).map(([k, n]) => `${n} ${k.replace(/_/g, " ")}`).join(", ")}${fm.abstractions.length ? " · abstracted" : ""}`;
+  el.innerHTML = fm.results.filter((r) => r.status !== "covered").map((r) =>
+    `<span class="fchip ${esc(r.status || "")}" title="${esc(`${r.status} · bound ${r.bound} · ${r.engine || ""} ${r.time || ""}`)}">${esc(r.name.replace(/^a_/, ""))}${r.status === "proven" ? "" : " " + esc(String(r.bound || ""))}</span>`).join("");
 }
 
 const labelOf = (k) => (data.stages.find((s) => s.key === k) || { label: k }).label;
@@ -812,15 +980,19 @@ const term = (() => {
   function show(tab, remember) {
     $("pane-term").hidden = tab !== "term";
     $("pane-log").hidden = tab !== "log";
+    $("pane-test").hidden = tab !== "test";
     $("follow-wrap").hidden = tab !== "log";
     $("tab-term").classList.toggle("on", tab === "term");
     $("tab-log").classList.toggle("on", tab === "log");
+    $("tab-test").classList.toggle("on", tab === "test");
     if (remember) { chosenTab = tab; try { localStorage.setItem("flowgui.tab", tab); } catch (e) {} }
     if (tab === "term") { resized(); xt && xt.focus(); }
   }
   try { chosenTab = localStorage.getItem("flowgui.tab"); } catch (e) {}
   $("tab-term").addEventListener("click", () => show("term", true));
   $("tab-log").addEventListener("click", () => show("log", true));
+  $("tab-test").addEventListener("click", () => show("test", true));
+  window.showTab = show;
   window.addEventListener("resize", () => { clearTimeout(window._trz); window._trz = setTimeout(resized, 120); });
 
   $("term-start").addEventListener("click", async () => {

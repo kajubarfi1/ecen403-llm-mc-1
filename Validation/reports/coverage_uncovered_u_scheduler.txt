@@ -1,17 +1,17 @@
 <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 <> User: jacobz
 
-Host: n02-hera.olympus.ece.tamu.edu
+Host: n01-zeus.olympus.ece.tamu.edu
 
-Report date: Wed 04 Nov 2026 18:31:39 CST
+Report date: Wed 11 Nov 2026 14:13:43 CST
 
-Report options: -detail -metrics block:expression:toggle:fsm -out /home/ugrads/j/jacobz/cov_uncov_u_scheduler.txt -inst chain_harness.u_scheduler -uncovered -source on -overwrite
+Report options: -detail -metrics block:expression:toggle -out /home/ugrads/j/jacobz/cov_uncov_u_scheduler.txt -inst chain_harness.u_scheduler -uncovered -source on -overwrite
 
-Coverage database path: /home/ugrads/j/jacobz/cov_merged_paths
+Coverage database path: /home/ugrads/j/jacobz/cov_merged_crv2_nov11_fix
 
-Coverage model files: /home/ugrads/j/jacobz/cov_merged_paths/icc_250ddfbf_45ac7fd6.ucm
+Coverage model files: /home/ugrads/j/jacobz/cov_merged_crv2_nov11_fix/icc_6badd542_312cbb60.ucm
 
-Coverage data files: /home/ugrads/j/jacobz/cov_merged_paths/icc_250ddfbf_45ac7fd6.ucd
+Coverage data files: /home/ugrads/j/jacobz/cov_merged_crv2_nov11_fix/icc_6badd542_312cbb60.ucd
 
 CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_conf.ccf
     // Xcelium coverage configuration for the DDR3 validation subsystem.
@@ -79,7 +79,7 @@ CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_
     
 
 
-Coverage database date: Wed 04 Nov 2026 18:29:31 CST
+Coverage database date: Wed 11 Nov 2026 14:06:43 CST
 
 *** There were no refinement files applied ***
 
@@ -127,16 +127,16 @@ Expression coverage Table Legend
 Instance name: chain_harness.u_scheduler
 Type name: scheduler#(32'h00000010,32'h00000004,32'h0000000f,32'h0000000a,32'h00000003,32'h00000008,32'h00000004,32'h00000002,4'h0,4'h1,4'h2,4'h3,4'h4,4'h5)
 File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/scheduler.sv
-Number of uncovered expressions: 3 of 253
+Number of uncovered expressions: 3 of 263
 Number of unreachable expressions: 0
 
 index  | grade         | line   | expression                                         
 -------------------------------------------------------------------------------------
-4.1    | 50.00% (1/2)  | 161    | cmd_type != CMD_NOP                                
-9.1    | 50.00% (1/2)  | 170    | d1_type != CMD_NOP                                 
-14.1   | 50.00% (1/2)  | 181    | sel_type_r != CMD_NOP                              
+4.1    | 50.00% (1/2)  | 162    | cmd_type != CMD_NOP                                
+9.1    | 50.00% (1/2)  | 171    | d1_type != CMD_NOP                                 
+14.1   | 50.00% (1/2)  | 182    | sel_type_r != CMD_NOP                              
 
-index: 4.1 grade: 50.00% (1/2) line: 161 source: else if (cmd_type != CMD_NOP) begin
+index: 4.1 grade: 50.00% (1/2) line: 162 source: else if (cmd_type != CMD_NOP) begin
 
 cmd_type != CMD_NOP
 <--1--->    <--2-->
@@ -145,7 +145,7 @@ index     | hit   | <1>   <2>
 -------------------------------- '!='
 4.1.1     | 0     | lhs == rhs  
 
-index: 9.1 grade: 50.00% (1/2) line: 170 source: else if (d1_type != CMD_NOP) begin
+index: 9.1 grade: 50.00% (1/2) line: 171 source: else if (d1_type != CMD_NOP) begin
 
 d1_type != CMD_NOP
 <--1-->    <--2-->
@@ -154,7 +154,7 @@ index     | hit   | <1>   <2>
 -------------------------------- '!='
 9.1.1     | 0     | lhs == rhs  
 
-index: 14.1 grade: 50.00% (1/2) line: 181 source: else if (sel_type_r != CMD_NOP) begin
+index: 14.1 grade: 50.00% (1/2) line: 182 source: else if (sel_type_r != CMD_NOP) begin
 
 sel_type_r != CMD_NOP
 <---1---->    <--2-->
@@ -170,73 +170,29 @@ Uncovered Toggle Detail Report, Instance Based
 Instance name: chain_harness.u_scheduler
 Type name: scheduler#(32'h00000010,32'h00000004,32'h0000000f,32'h0000000a,32'h00000003,32'h00000008,32'h00000004,32'h00000002,4'h0,4'h1,4'h2,4'h3,4'h4,4'h5)
 File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/scheduler.sv
-Number of uncovered signal bits: 262 of 1237
+Number of uncovered signal bits: 211 of 1258
 Number of unreachable signal bits: 0
-Number of signal bits partially toggled(rise): 51 of 1237
-Number of signal bits partially toggled(fall): 0 of 1237
+Number of signal bits partially toggled(rise): 1 of 1258
+Number of signal bits partially toggled(fall): 0 of 1258
 
 Hit(Full)  Hit(Rise)  Hit(Fall)  Signal                    
 -----------------------------------------------------------
 0          1          0          rst_n                     
-0          1          0          q_row[15][2]              
-0          1          0          q_row[15][3]              
-0          1          0          q_row[15][5]              
-0          1          0          q_row[15][6]              
-0          1          0          q_row[15][7]              
-0          1          0          q_row[15][8]              
-0          1          0          q_row[15][10]             
-0          1          0          q_row[15][12]             
-0          1          0          q_row[14][0]              
-0          1          0          q_row[14][1]              
-0          1          0          q_row[14][2]              
-0          1          0          q_row[14][3]              
-0          1          0          q_row[14][6]              
-0          1          0          q_row[14][7]              
-0          1          0          q_row[14][8]              
-0          1          0          q_row[14][9]              
-0          1          0          q_row[14][11]             
-0          0          0          q_row[14][12]             
-0          1          0          q_row[13][0]              
-0          1          0          q_row[13][1]              
-0          1          0          q_row[13][5]              
-0          1          0          q_row[13][7]              
-0          1          0          q_row[13][8]              
-0          1          0          q_row[13][9]              
-0          1          0          q_row[13][12]             
-0          1          0          q_row[13][13]             
-0          1          0          q_row[13][14]             
-0          1          0          q_row[12][0]              
-0          1          0          q_row[12][10]             
-0          1          0          q_row[11][1]              
 0          0          0          q_col[15][0]              
 0          0          0          q_col[15][1]              
 0          0          0          q_col[15][2]              
-0          1          0          q_col[15][3]              
-0          1          0          q_col[15][6]              
-0          1          0          q_col[15][7]              
 0          0          0          q_col[14][0]              
 0          0          0          q_col[14][1]              
 0          0          0          q_col[14][2]              
-0          1          0          q_col[14][3]              
-0          1          0          q_col[14][5]              
-0          1          0          q_col[14][7]              
 0          0          0          q_col[13][0]              
 0          0          0          q_col[13][1]              
 0          0          0          q_col[13][2]              
-0          1          0          q_col[13][3]              
-0          1          0          q_col[13][6]              
-0          1          0          q_col[13][8]              
-0          1          0          q_col[13][9]              
 0          0          0          q_col[12][0]              
 0          0          0          q_col[12][1]              
 0          0          0          q_col[12][2]              
-0          1          0          q_col[12][3]              
-0          1          0          q_col[12][6]              
-0          1          0          q_col[12][9]              
 0          0          0          q_col[11][0]              
 0          0          0          q_col[11][1]              
 0          0          0          q_col[11][2]              
-0          1          0          q_col[11][7]              
 0          0          0          q_col[10][0]              
 0          0          0          q_col[10][1]              
 0          0          0          q_col[10][2]              
@@ -270,13 +226,6 @@ Hit(Full)  Hit(Rise)  Hit(Fall)  Signal
 0          0          0          q_col[0][0]               
 0          0          0          q_col[0][1]               
 0          0          0          q_col[0][2]               
-0          1          0          q_bank[15][2]             
-0          1          0          q_bank[14][0]             
-0          1          0          q_bank[14][2]             
-0          1          0          q_aux[15][2]              
-0          1          0          q_aux[14][0]              
-0          1          0          q_aux[13][1]              
-0          1          0          q_aux[12][0]              
 0          0          0          cmd_type[3]               
 0          0          0          cmd_col[2]                
 0          0          0          cmd_col[1]                
@@ -439,7 +388,4 @@ Hit(Full)  Hit(Rise)  Hit(Fall)  Signal
 0          0          0          t3_type_L4[0][3]          
 0          0          0          t3_type[3]                
 0          0          0          t3_type[1]                
-
-Uncovered Fsm Detail Report, Instance Based
-===========================================
 

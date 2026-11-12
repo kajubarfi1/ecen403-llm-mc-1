@@ -1,0 +1,75 @@
+  stimulus: random_v2 on wb_port
+crv2_conflict_heavy_seed5: 572 step(s) (400 drive, 171 idle covering 818 cycle(s)), targets ['VP_TIME_001', 'VP_TIME_002', 'VP_TIME_003', 'VP_TIME_004', 'VP_TIME_005', 'VP_TIME_007', 'VP_TIME_008', 'VP_TIME_009', 'VP_TIME_010', 'VP_TIME_011', 'VP_TIME_012', 'VP_FLOW_001']  (driver stall bound 968 cycles, spec-derived)
+  wrote Validation/sequences/generated/runs/crv2_s5/path_03_read_return/seq_driver.sv
+wrote Validation/sequences/generated/runs/crv2_s5/path_03_read_return/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
+
+Path    : path_03_read_return  [composed]
+Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
+Window  : 400 cycles settle after driver
+Stages  : data_path(exact); wb_port(exact)
+
+Running: xrun ... -top chain_harness  (56 file(s))
+  log -> Validation/reports/crv2/nov11/path_03_read_return_s5/path_03_read_return_sim.log
+7112 transaction(s)
+    cfg_refresh.reset        1
+    cfg_timing.reset         1
+    cq_deq.dequeue           400
+    cq_deq.reset             1
+    cq_enq.enqueue           400
+    cq_enq.reset             1
+    csr.reset                1
+    csr_rsp.reset            1
+    csr_sts.reset            1
+    csr_sts_level.reset      1
+    csr_sts_level.state      16
+    ddr_cmd.command          1014
+    ddr_cmd.reset            1
+    ddr_rd_beat.beat         800
+    ddr_rd_beat.reset        1
+    ddr_wr_beat.reset        1
+    dp_cmd.read              400
+    dp_cmd.reset             1
+    dp_rd_rsp.reset          1
+    dp_rd_rsp.response       400
+    dp_wr.reset              1
+    refresh_ack.ack          8
+    refresh_ack.reset        1
+    refresh_level.reset      1
+    refresh_level.state      16
+    refresh_req.request      7
+    refresh_req.reset        1
+    req.request              400
+    req.reset                1
+    sched_cmd.command        1014
+    sched_cmd.reset          1
+    sched_deq.grant          400
+    sched_deq.reset          1
+    sched_in.command         1014
+    sched_in.reset           1
+    wb.read                  400
+    wb.reset                 1
+    wb_rsp.read_data         400
+    wb_rsp.reset             1
+  time span: 0 .. 54998000
+wrote 7112 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/crv2/nov11/path_03_read_return_s5/path_03_read_return_observed.jsonl
+
+==================================================================
+  data_path                    [exact     ]  FAIL
+      scope=data_path  strategy=exact  status=fail  matched=396/400  value=4
+      scope=data_path  strategy=exact  status=fail  matched=396/400  value=4
+        dp_rd_rsp[42] value: predicted [dp_rd_rsp.response aux=0xc data=0x9d807daf] but observed [dp_rd_rsp.response aux=0xc data=0x7daf0000]
+        dp_rd_rsp[155] value: predicted [dp_rd_rsp.response aux=0x3 data=0xed857dff] but observed [dp_rd_rsp.response aux=0x3 data=0x7dff0000]
+        dp_rd_rsp[217] value: predicted [dp_rd_rsp.response aux=0xe data=0xb586fdc7] but observed [dp_rd_rsp.response aux=0xe data=0xfdc70000]
+        dp_rd_rsp[223] value: predicted [dp_rd_rsp.response aux=0xd data=0xa588fd2f] but observed [dp_rd_rsp.response aux=0xd data=0xfd2f0000]
+  wb_port                      [exact     ]  PASS
+      scope=wb_port  strategy=exact  status=pass  matched=800/800  WAIVED=400 field comparison(s)  (800 output transaction(s) 
+  (conservation)               [conservation]  PASS
+      scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable
+  (address order)              [address_order]  PASS
+      scope=(address order)  strategy=address_order  status=pass  rules=1 checked=400 unpaired=0 violations=0
+==================================================================
+
+  path verdict : FAIL
+  report -> Validation/reports/crv2/nov11/path_03_read_return_s5/path_03_read_return_report.json
+
+--- stderr ---

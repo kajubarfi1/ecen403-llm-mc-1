@@ -370,6 +370,17 @@ The backend step detail comes from OpenROAD's own step logs under
 `ORFS_DIR` (read from `backend/agents/.env`). Without them the page still
 works, but estimates the backend steps from elapsed time.
 
+The **Validation** card shows the system path suite as the flow runs it and,
+once `validate_drop.py` has written its reports (`runs/<run>/validation/`),
+everything they hold: click a path to see each stage checker's verdict and
+the lines it failed on, then **Sim log**, **Trace** or **Report** to open
+that path's simulation log, observed transactions or full report in the
+**Path log** tab. Below the paths are the findings package (click a finding
+for its requirement, expected and actual, detector and spec reference), the
+round history, the formal replay for the drop when one exists (one chip per
+assertion with its proof status and bound), and the coverage line. A run
+that has no reports yet shows the repository's checked-in drop and says so.
+
 Opened with `python3 gui/flow_gui.py`, the page also has a **Terminal** tab
 that runs `flow.py` itself: type the arguments (or pick Interactive, Golden
 spec, Dry run or Resume), press Start run, and use it like a terminal. Spec
@@ -490,10 +501,30 @@ mkdir -p ~/.docker/cli-plugins && ln -sfn "$(brew --prefix)/opt/docker-buildx/bi
 colima start --cpu 6 --memory 12 --disk 60 --vm-type vz --vz-rosetta
 git clone --depth 1 https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts.git ~/Capstone/OpenROAD-flow-scripts
 cd ~/Capstone/OpenROAD-flow-scripts && git submodule update --init --recursive --depth 1
-./etc/DockerHelper.sh create -target=dev        # Ubuntu 26.04 + build deps
-./etc/DockerHelper.sh create -target=builder    # compiles yosys, OpenROAD, kepler-formal
-docker tag openroad/flow-ubuntu26.04-builder:$(./etc/DockerTag.sh -dev) openroad/orfs:arm64-local
-docker run --rm openroad/orfs:arm64-local bash -c "/OpenROAD-flow-scripts/tools/install/OpenROAD/bin/openroad -version"
+./etc/DockerHelper.sh create -target=dev        # Ubuntu 26.04 + build deps (~2 h: KLayout compiles)
+# The helper's builder step fails here ("no match for platform in manifest":
+# Docker Hub has an amd64 image of the same name, so BuildKit resolves the FROM
+# there), and a Docker build loses the whole 13-hour OpenROAD compile on any
+# failure. So: materialise the yosys/kepler stage, then compile OpenROAD in a
+# persistent container with the Bazel cache on a volume, and commit the result.
+T=$(./etc/DockerTag.sh -dev)
+docker tag openroad/flow-ubuntu26.04-dev:$T local/orfs-dev:$T
+docker buildx build --pull=false --load --target orfs-tools --file docker/Dockerfile.builder \
+  --tag local/orfs-tools:$T --build-arg numThreads=6 --build-arg fromImage=local/orfs-dev:$T .
+# aarch64 fixes in tools/OpenROAD: `int fc;` (was char, compared with EOF) at
+# src/odb/src/def/def/def_keywords.cpp:531 and src/odb/src/lef/lef/lef_keywords.cpp:691;
+# tools/OpenROAD/user.bazelrc: `build --config=no-werror` plus
+# `build --per_file_copt=.*qsimd\.cpp@-include,cstdlib` (and --host_per_file_copt)
+docker volume create orfs-bazel
+docker run -d --name orfs-build -v orfs-bazel:/root/.cache/bazel -w /OpenROAD-flow-scripts local/orfs-dev:$T sleep infinity
+tar --exclude=.git -cf - . | docker exec -i orfs-build tar -xf - -C /OpenROAD-flow-scripts
+docker create --name t local/orfs-tools:$T && docker cp t:/OpenROAD-flow-scripts/tools/install /tmp/orfs_install && docker rm t
+docker cp /tmp/orfs_install/. orfs-build:/OpenROAD-flow-scripts/tools/install/
+docker exec orfs-build bash -c "./build_openroad.sh --no_init --local --openroad_only --threads 6 --openroad-args -no-gui"   # ~13 h on 6 cores
+docker exec orfs-build bash -c "apt-get update -qq && apt-get install -y -qq klayout"   # the dev image's KLayout build leaves no binary
+docker exec orfs-build bash -c "rm -rf /root/.cache/bazel-repository-cache tools/OpenROAD tools/yosys tools/kepler-formal"   # the image needs flow/ and tools/install only
+docker commit orfs-build openroad/orfs:arm64-local
+docker run --rm openroad/orfs:arm64-local bash -c "/OpenROAD-flow-scripts/tools/install/OpenROAD/bin/openroad -help | head -1; klayout -v"
 python3 -m pip install --user jsonschema paramiko anthropic langgraph langchain-core
 ```
 
@@ -506,7 +537,10 @@ files, so nothing is duplicated. The sky130 gate models for stage 8 must be
 on Olympus once (`python3 Validation/tools/install_sky130_models.py --check`).
 
 `colima start` is needed after each reboot (or `brew services start colima`
-to start it at login). Check readiness, then run:
+to start it at login). If a container can no longer resolve names (the VM
+lost DNS overnight once, 2026-11-10, and a two-hour image build failed on
+its last download), `colima restart` restores it; check with
+`docker run --rm alpine wget -qO- https://github.com | head -c 20`. Check readiness, then run:
 
 ```bash
 set -a; . Validation/setup.env; set +a

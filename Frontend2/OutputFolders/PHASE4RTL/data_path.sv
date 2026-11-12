@@ -597,19 +597,24 @@ module data_path #(
                     if (rd_burst_ctr == WORD_BEATS[1:0] - 1'b1) begin
                         // Last beat. A real DRAM doesn't pause between back-
                         // to-back bursts, so if the next queued read's countdown
-                        // has already reached 0 or will by the very next cycle,
-                        // chain straight into its capture instead of detouring
-                        // through RD_IDLE -- a detour costs a cycle neither
-                        // RD_IDLE's own check nor this read's countdown accounts
-                        // for, which would silently capture the FOLLOWING
-                        // read's beat 1 as if it were this one's, the same
-                        // wrong-data shape addendum 10 reported. <=1, not ==0,
-                        // looks one cycle ahead of RD_IDLE's own (unshifted)
-                        // check since this decision is made the cycle before the
-                        // transition lands, same as every other state change
-                        // here.
+                        // has already reached 0, chain straight into its capture
+                        // instead of detouring through RD_IDLE -- a detour costs
+                        // a cycle neither RD_IDLE's own check nor this read's
+                        // countdown accounts for, which would silently capture
+                        // the FOLLOWING read's beat 1 as if it were this one's,
+                        // the same wrong-data shape addendum 10 reported.
+                        // Exactly ==0, not <=1 (Validation, 2026-11-11): a
+                        // countdown of 0 seen on this cycle means beat 0 is on
+                        // dq NEXT cycle, the same contract RD_IDLE's check uses
+                        // (wait==0 seen -> capture next cycle). A countdown of 1
+                        // means the next read was issued three cycles after this
+                        // one, so a one-cycle bubble separates the bursts;
+                        // chaining then captured the idle bubble as beat 0 and
+                        // the real beat 0 as beat 1 (random_v2 seeds 5-8 on
+                        // path_03: 4 of 400 responses came back as beat0<<16).
+                        // RD_IDLE handles the bubble case exactly on time.
                         if (!rd_pend_empty &&
-                            (rd_pend_wait[rd_pend_rptr[FIFO_PTR_W-1:0]] <= 4'd1)) begin
+                            (rd_pend_wait[rd_pend_rptr[FIFO_PTR_W-1:0]] == 4'd0)) begin
                             rd_aux_r     <= rd_pend_aux[rd_pend_rptr[FIFO_PTR_W-1:0]];
                             rd_pend_rptr <= rd_pend_rptr + 1'b1;
                             rd_state     <= RD_CAPTURE;

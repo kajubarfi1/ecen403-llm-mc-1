@@ -67,7 +67,11 @@ host port was driven as the spec describes it (pipelined bursts, `wb_burst`
 and `saturate`); that stimulus also found two defects (reply addendum 9).
 Functional: 33/45 covered, 11 unreachable by spec, 1 partial
 (`cg_refresh.cp_ref_002_exercised`, covered on 10-27, lost while the port
-drops half the pipelined traffic; it returns with the wb_port fix).
+drops half the pipelined traffic; it returns with the wb_port fix). Latest (2026-11-11, drop 43f6cb8f0641, 20 directed paths + 24
+random_v2 runs, `reports/crv2/nov11_fix/`): design 86.1 % measured /
+91.2 % adjusted; wb_port 93.3, scheduler 88.1, cmd_queue 84.1, data_path
+81.5, bank_tracker 80.8 (99.6 adjusted); functional 35/45 covered, 10
+unreachable by spec.
 
 ## 3b. Beyond the golden spec: the spec matrix
 
@@ -285,9 +289,20 @@ open simulation finding, after the three 2a18a7929dce defects (in-flight
 write-tag reuse, same-address reorder, ack-tracker overflow) were fixed in
 the Frontend generators with Lehana's permission (handoff addendum 20) and a
 scheduler age bound added so the port's new back-pressure is bounded.
-Formal: PROTO_001, TIMING_008, HOST_001 awaiting replays on this design.
+Formal (e4794e87a8c1, 2026-11-10, 60 min, path_01 chain, no abstraction):
+12 proven at infinite bound (TIMING_001-009, 011 except as below, PROTO_002,
+REF_002, HOST_001 itself), REF_001 bounded-proven at 2 984 (bar 368: counts
+as proven for signoff), no counterexample, 5 undetermined: tREFI at 14 044
+(as always), TIMING_011 at 54, HOST_001_progress at 1 738 (its bound is
+1 738 on this design, so this is the engine running out of time at the bar,
+not a violation), and the two order rules PROTO_001 and HOST_002 at 53. The
+queue's new conflict and age matrices deepen the state space PROTO_001 has
+to cross (it was proven at 60 min on 56ca186bf893), so it is the one row
+still `awaiting_formal`; a longer run or a cut on the age counters is the
+next step. TIMING_008 and HOST_001, the other two rows the design change
+had reopened, are proven.
 
-Current (56ca186bf893, 2026-11-04, balanced priority tree, 4-bit deadlines,
+Previous (56ca186bf893, 2026-11-04, balanced priority tree, 4-bit deadlines,
 pending-ack counter in the port; 20 min each, fetched after the waiting SSH
 session died):
 - concrete: 10 proven at infinite bound (TIMING_001-009, 011 except as

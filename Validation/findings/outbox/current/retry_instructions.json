@@ -2,39 +2,18 @@
   "$schema": "validation-retry-instructions/1",
   "status": "PASS",
   "pipeline": "validation",
-  "drop": "e4794e87a8c1",
+  "drop": "43f6cb8f0641",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "spec_id": "00d082c3f72d1b34",
-  "generated_utc": "2026-11-09T21:39:04.816388Z",
+  "generated_utc": "2026-11-11T20:08:03.192122Z",
   "failed_modules": [],
   "retry_instructions": {},
-  "resolved_since_previous_drop": [
-    {
-      "schema": "validation-findings/2",
-      "id": "scheduler/SCHED_001",
-      "kind": "rtl_defect",
-      "check_id": "SCHED_001",
-      "taxonomy_id": "SCHED_001",
-      "owner_module": "scheduler",
-      "severity": "critical",
-      "title": "scheduler: SCHED_001",
-      "paths": [
-        "path_01_write_cmd",
-        "path_06_scheduler_dequeue",
-        "path_19_row_conflict"
-      ],
-      "status": "resolved",
-      "resolved_in": "e4794e87a8c1",
-      "last_seen": "85cf24c69ba7",
-      "first_seen": "85cf24c69ba7",
-      "note": "open in drop 85cf24c69ba7, not raised by drop e4794e87a8c1"
-    }
-  ],
+  "resolved_since_previous_drop": [],
   "requires_human_review": false,
   "source": "Validation/findings/emit_findings.py -> retry_adapter.py",
   "drop_status": {
     "$schema": "validation-drop-status/1",
-    "drop": "e4794e87a8c1",
+    "drop": "43f6cb8f0641",
     "partial": false,
     "blocks_present": [
       "addr_decoder",

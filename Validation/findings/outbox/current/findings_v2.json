@@ -1,9 +1,9 @@
 {
   "schema": "validation-findings/2",
-  "drop": "e4794e87a8c1",
+  "drop": "43f6cb8f0641",
   "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
   "spec_id": "00d082c3f72d1b34",
-  "generated_utc": "2026-11-09T21:39:04.786940Z",
+  "generated_utc": "2026-11-11T20:08:03.166863Z",
   "reports": "Validation/reports/paths",
   "finding_count": 3,
   "findings": [
@@ -38,7 +38,7 @@
           "signal": "bank_rd_allowed"
         }
       ],
-      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 183 PRE bank 1 (A10=0), cycle 184 RD bank 1 col 0. The generated PROTO_001 tracker (row-open state from the observed ACT/PRE stream) shows bank 1 closed when the READ is issued. Never observed in simulation (no path stimulus reaches this interleaving); the scheduler or its bank_tracker gating lets a CAS follow its own precharge. Likely the same root as the open scheduler re-grant defect (commands are also held for 2-3 consecutive cycles in the trace, i.e. re-issued). [found on drop 1fea117; awaiting formal re-prove on e4794e87a8c1]",
+      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 183 PRE bank 1 (A10=0), cycle 184 RD bank 1 col 0. The generated PROTO_001 tracker (row-open state from the observed ACT/PRE stream) shows bank 1 closed when the READ is issued. Never observed in simulation (no path stimulus reaches this interleaving); the scheduler or its bank_tracker gating lets a CAS follow its own precharge. Likely the same root as the open scheduler re-grant defect (commands are also held for 2-3 consecutive cycles in the trace, i.e. re-issued). [found on drop 1fea117; awaiting formal re-prove on 43f6cb8f0641]",
       "paths": [
         "formal:chain_formal"
       ],
@@ -49,12 +49,12 @@
         "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
       },
       "drop": {
-        "git_head": "e4794e87a8c1",
+        "git_head": "43f6cb8f0641",
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "introduced_in": null,
       "first_seen": "1fea117",
-      "last_seen": "e4794e87a8c1",
+      "last_seen": "43f6cb8f0641",
       "resolved_in": null,
       "status": "awaiting_formal",
       "related_manual_findings": [
@@ -92,7 +92,7 @@
           "signal": "precharge decision"
         }
       ],
-      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 173 WR bank 4, cycle 174 PRE bank 4. tWR = 15 ns = 3 controller cycles, so 2 cycles must separate the last write beat from the precharge. Not observed in simulation. bank_tracker's write-recovery timer (cfg_tWR_nCK) does not gate bank_pre_allowed for the cycle after a write, or the scheduler ignores it on the row-conflict path. [found on drop 1fea117; awaiting formal re-prove on e4794e87a8c1]",
+      "mechanism": "JasperGold counterexample, 136 cycles from reset under a protocol-legal host: cycle 173 WR bank 4, cycle 174 PRE bank 4. tWR = 15 ns = 3 controller cycles, so 2 cycles must separate the last write beat from the precharge. Not observed in simulation. bank_tracker's write-recovery timer (cfg_tWR_nCK) does not gate bank_pre_allowed for the cycle after a write, or the scheduler ignores it on the row-conflict path. [found on drop 1fea117; awaiting formal re-prove on 43f6cb8f0641]",
       "paths": [
         "formal:chain_formal"
       ],
@@ -103,12 +103,12 @@
         "assumptions": "none beyond CSR/status tie-offs; host Wishbone inputs free and, in the trace, protocol-legal"
       },
       "drop": {
-        "git_head": "e4794e87a8c1",
+        "git_head": "43f6cb8f0641",
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "introduced_in": null,
       "first_seen": "1fea117",
-      "last_seen": "e4794e87a8c1",
+      "last_seen": "43f6cb8f0641",
       "resolved_in": null,
       "status": "awaiting_formal",
       "related_manual_findings": [
@@ -150,7 +150,7 @@
           "line": 155
         }
       ],
-      "mechanism": "JasperGold counterexample 24 cycles from reset, engine L, no abstraction (cover c_HOST_001, a write beat accepted, reached at cycle 1). wb_port.sv: wr_ack_r <= wb_beat & wb_we_i (the write acknowledge, one cycle after the beat) and assign wb_ack_o = wr_ack_r | rd_ack with rd_ack = rsp_valid. A read response arriving the cycle after a write beat is accepted gives one wb_ack_o pulse for two completions; the host counts one acknowledge, waits for the other forever (a pipelined master) or mis-attributes the read data to the write (a classic one). Any legal host reaches it: issue a read, then present a write beat the cycle before the read data returns. Not seen in simulation on 2026-10-28 only because no sequence placed a write beat on that cycle (243 pipelined beats on path_07). SIMULATION WITNESS (2026-10-29, path_23_host_ack_collision, ack_collision.py): a read to an open row and a write beat accepted 41 cycles later (gap d = 40) -- the write acknowledge and the read response fall in the same cycle at t = 35.37 us; a_HOST_001 fires once, every request and response is conserved, and the host handshake stage counts 1 of 79 beats never acknowledged: the one ack pulse the two completions shared. [found on drop 99f72da45a32; awaiting formal re-prove on e4794e87a8c1]",
+      "mechanism": "JasperGold counterexample 24 cycles from reset, engine L, no abstraction (cover c_HOST_001, a write beat accepted, reached at cycle 1). wb_port.sv: wr_ack_r <= wb_beat & wb_we_i (the write acknowledge, one cycle after the beat) and assign wb_ack_o = wr_ack_r | rd_ack with rd_ack = rsp_valid. A read response arriving the cycle after a write beat is accepted gives one wb_ack_o pulse for two completions; the host counts one acknowledge, waits for the other forever (a pipelined master) or mis-attributes the read data to the write (a classic one). Any legal host reaches it: issue a read, then present a write beat the cycle before the read data returns. Not seen in simulation on 2026-10-28 only because no sequence placed a write beat on that cycle (243 pipelined beats on path_07). SIMULATION WITNESS (2026-10-29, path_23_host_ack_collision, ack_collision.py): a read to an open row and a write beat accepted 41 cycles later (gap d = 40) -- the write acknowledge and the read response fall in the same cycle at t = 35.37 us; a_HOST_001 fires once, every request and response is conserved, and the host handshake stage counts 1 of 79 beats never acknowledged: the one ack pulse the two completions shared. [found on drop 99f72da45a32; awaiting formal re-prove on 43f6cb8f0641]",
       "paths": [
         "formal:chain_formal"
       ],
@@ -162,12 +162,12 @@
         "simulation": "python3 Validation/tools/run_path.py --path path_23_host_ack_collision"
       },
       "drop": {
-        "git_head": "e4794e87a8c1",
+        "git_head": "43f6cb8f0641",
         "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
       },
       "introduced_in": null,
       "first_seen": "99f72da45a32",
-      "last_seen": "e4794e87a8c1",
+      "last_seen": "43f6cb8f0641",
       "resolved_in": null,
       "status": "awaiting_formal",
       "related_manual_findings": [
@@ -175,31 +175,10 @@
       ]
     }
   ],
-  "resolved": [
-    {
-      "schema": "validation-findings/2",
-      "id": "scheduler/SCHED_001",
-      "kind": "rtl_defect",
-      "check_id": "SCHED_001",
-      "taxonomy_id": "SCHED_001",
-      "owner_module": "scheduler",
-      "severity": "critical",
-      "title": "scheduler: SCHED_001",
-      "paths": [
-        "path_01_write_cmd",
-        "path_06_scheduler_dequeue",
-        "path_19_row_conflict"
-      ],
-      "status": "resolved",
-      "resolved_in": "e4794e87a8c1",
-      "last_seen": "85cf24c69ba7",
-      "first_seen": "85cf24c69ba7",
-      "note": "open in drop 85cf24c69ba7, not raised by drop e4794e87a8c1"
-    }
-  ],
+  "resolved": [],
   "drop_status": {
     "$schema": "validation-drop-status/1",
-    "drop": "e4794e87a8c1",
+    "drop": "43f6cb8f0641",
     "partial": false,
     "blocks_present": [
       "addr_decoder",

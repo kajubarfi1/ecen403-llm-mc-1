@@ -1,0 +1,88 @@
+  stimulus: random_v2 on wb_port
+crv2_bank_spread_seed8: 527 step(s) (400 drive, 126 idle covering 449 cycle(s)), targets ['VP_TIME_001', 'VP_TIME_002', 'VP_TIME_003', 'VP_TIME_004', 'VP_TIME_005', 'VP_TIME_007', 'VP_TIME_008', 'VP_TIME_009', 'VP_TIME_010', 'VP_TIME_011', 'VP_TIME_012', 'VP_FLOW_001']  (driver stall bound 968 cycles, spec-derived)
+  wrote Validation/sequences/generated/runs/crv2_s8/path_18_full_write/seq_driver.sv
+wrote Validation/sequences/generated/runs/crv2_s8/path_18_full_write/chain_harness.sv  (9 block(s): addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port)
+
+Path    : path_18_full_write  [composed]
+Blocks  : addr_decoder, bank_tracker, cmd_gen, cmd_queue, config_regs, data_path, refresh_ctrl, scheduler, wb_port
+Window  : 2000 cycles settle after driver
+Stages  : wb_port(exact); addr_decoder(exact); cmd_queue+scheduler(invariant); cmd_gen(exact); data_path(exact)
+
+Running: xrun ... -top chain_harness  (56 file(s))
+  log -> Validation/reports/crv2/nov11/path_18_full_write_s8/path_18_full_write_sim.log
+6496 transaction(s)
+    cfg_refresh.reset        1
+    cfg_timing.reset         1
+    cq_deq.dequeue           404
+    cq_deq.reset             1
+    cq_enq.enqueue           404
+    cq_enq.reset             1
+    csr.reset                1
+    csr_rsp.reset            1
+    csr_sts.reset            1
+    csr_sts_level.reset      1
+    csr_sts_level.state      10
+    ddr_cmd.command          871
+    ddr_cmd.reset            1
+    ddr_rd_beat.beat         390
+    ddr_rd_beat.reset        1
+    ddr_wr_beat.beat         418
+    ddr_wr_beat.reset        1
+    dp_cmd.read              195
+    dp_cmd.reset             1
+    dp_cmd.write             209
+    dp_rd_rsp.reset          1
+    dp_rd_rsp.response       195
+    dp_wr.reset              1
+    dp_wr.write              209
+    refresh_ack.ack          5
+    refresh_ack.reset        1
+    refresh_level.reset      1
+    refresh_level.state      10
+    refresh_req.request      4
+    refresh_req.reset        1
+    req.request              404
+    req.reset                1
+    sched_cmd.command        871
+    sched_cmd.reset          1
+    sched_deq.grant          404
+    sched_deq.reset          1
+    sched_in.command         871
+    sched_in.reset           1
+    wb.read                  195
+    wb.reset                 1
+    wb.write                 209
+    wb_rsp.read_data         195
+    wb_rsp.reset             1
+  time span: 0 .. 31248000
+wrote 6496 transaction(s) -> /Users/jacob/Capstone/ecen403-llm-mc-1/Validation/reports/crv2/nov11/path_18_full_write_s8/path_18_full_write_observed.jsonl
+
+==================================================================
+  wb_port                      [exact     ]  PASS
+      scope=wb_port  strategy=exact  status=pass  matched=599/599  WAIVED=195 field comparison(s)  (599 output transaction(s) 
+  addr_decoder                 [exact     ]  PASS
+      scope=addr_decoder  strategy=exact  status=pass  matched=404/404  (404 output transaction(s) matched)
+  cmd_queue+scheduler          [invariant ]  PASS
+      scope=cmd_queue_scheduler  strategy=invariant  status=pass  (6496 transactions, no rule broken)
+  cmd_gen                      [exact     ]  PASS
+      scope=cmd_gen  strategy=exact  status=pass  matched=871/871  (871 output transaction(s) matched)
+  data_path                    [exact     ]  PASS
+      scope=data_path  strategy=exact  status=pass  matched=613/613  (613 output transaction(s) matched)
+  (conservation)               [conservation]  PASS
+      scope=(conservation)  strategy=conservation  status=pass  rules=6 checked, 0 broken, 0 not applicable
+  (host memory)                [host_memory]  FAIL
+      scope=(host memory)  strategy=host_memory  status=fail  checked=35 skipped_unwritten=160 mismatches=35 outstanding_at_en
+      HOSTMEM wb_rsp[96] addr=0x97a5410 expected=0xb50093 observed=0xed857df7 read accepted t=12593000 answered t=12779000
+      HOSTMEM wb_rsp[97] addr=0x1f6dfc60 expected=0xe40000 observed=0x1d867dcf read accepted t=12613000 answered t=12969000
+      HOSTMEM wb_rsp[98] addr=0x1f6dfc70 expected=0x81c186b9 observed=0x1d867dc7 read accepted t=12793000 answered t=12979000
+      HOSTMEM wb_rsp[99] addr=0x14ef9ee0 expected=0xe22d17fa observed=0x5592fc8f read accepted t=12813000 answered t=13019000
+      HOSTMEM wb_rsp[100] addr=0x14ef9860 expected=0x2be25ac2 observed=0x55a6ffcf read accepted t=12818000 answered t=13029000
+      HOSTMEM wb_rsp[101] addr=0x14ef9870 expected=0xc2ecbfb4 observed=0x55a6ffc7 read accepted t=13023000 answered t=13289000
+  (address order)              [address_order]  PASS
+      scope=(address order)  strategy=address_order  status=pass  rules=1 checked=404 unpaired=0 violations=0
+==================================================================
+
+  path verdict : FAIL
+  report -> Validation/reports/crv2/nov11/path_18_full_write_s8/path_18_full_write_report.json
+
+--- stderr ---

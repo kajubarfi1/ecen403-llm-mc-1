@@ -4,7 +4,7 @@
 //
 // Interface : ddr_wr_beat   (Write data beats driven toward the DDR PHY while the data output enable is asserted.)
 // Block     : data_path
-// Manifest  : runs/matrix/preset_server-grade/drop/PHASE4RTL/data_path_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE4RTL/data_path_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //
@@ -19,8 +19,8 @@ module ddr_wr_beat_monitor #(
 ) (
     input  logic clk,
     input  logic rst_n,
-    input  logic [3:0] ddr_dm_o,
-    input  logic [31:0] ddr_dq_o,
+    input  logic [1:0] ddr_dm_o,
+    input  logic [15:0] ddr_dq_o,
     input  logic ddr_dq_oe
 );
 

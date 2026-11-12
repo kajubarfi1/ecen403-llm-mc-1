@@ -9,6 +9,14 @@ the longest stage. Nothing here changes a run; it only reads:
   runs/<id>/flow.log                live command output (backend markers)
   runs/<id>/backend/pipeline_final_report_*.json   backend result
   $ORFS_DIR/flow/logs/<platform>/<design>/base/*.log   ORFS per-step logs
+  runs/<id>/validation/reports/*_report.json       every system path's verdict,
+                                                   its stage checkers and the
+                                                   lines they failed on
+  runs/<id>/validation/outbox/current/*.json       the findings package
+  runs/<id>/validation/round_N/                    the package of each round
+  Validation/reports/formal/jg_*_<drop>.json       the formal replay, if any
+  Validation/reports/coverage_rollup.json          coverage, when it is this
+                                                   drop's spec
 
 The backend runs ORFS with its output captured, so nothing reaches flow.log
 for the hour ORFS takes. The ORFS step logs are written to the host through
@@ -390,6 +398,152 @@ def orfs_progress(log_dir, since, now, expected_total, running):
 # the status a page polls
 # --------------------------------------------------------------------------
 
+# --------------------------------------------------------------------------
+# validation detail: what validate_drop.py left behind
+# --------------------------------------------------------------------------
+
+SHARED_REPORTS = os.path.join(ROOT, "Validation", "reports")
+SHARED_OUTBOX = os.path.join(ROOT, "Validation", "findings", "outbox")
+
+
+def validation_roots(run_dir):
+    """(reports_dir, outbox_dir, source) for a run: its own validation/ when
+    the flow ran validate_drop there, else the repository's shared reports
+    and outbox (the checked-in drop), so the page always has something to
+    show. The page labels the source."""
+    if run_dir:
+        rep_dir = os.path.join(run_dir, "validation", "reports")
+        if glob.glob(os.path.join(rep_dir, "*_report.json")):
+            return rep_dir, os.path.join(run_dir, "validation", "outbox", "current"), "run"
+    return os.path.join(SHARED_REPORTS, "paths"), os.path.join(SHARED_OUTBOX, "current"), "repo"
+
+
+def _path_entry(rep, max_detail):
+    stages = []
+    for st in rep.get("stages", []):
+        stages.append({"stage": st.get("stage"), "kind": st.get("kind"), "verdict": st.get("verdict"),
+                       "summary": (st.get("summary") or "")[:400],
+                       "detail": [d[:300] for d in (st.get("detail") or [])[:max_detail]],
+                       "detail_total": len(st.get("detail") or []),
+                       "rule_counts": st.get("rule_counts") or {}})
+    return {"name": rep.get("path"), "verdict": rep.get("verdict"), "strategy": rep.get("strategy"),
+            "blocks": rep.get("blocks") or [], "timestamp": rep.get("timestamp"),
+            "window_cycles": rep.get("window_cycles"), "autonomous": rep.get("autonomous"),
+            "stimulus": rep.get("stimulus_generator"), "stages": stages,
+            "failed_stages": [st["stage"] for st in stages if st["verdict"] == "fail"],
+            "has_log": bool(rep.get("log")), "has_trace": bool(rep.get("observed_trace"))}
+
+
+def validation_detail(run_dir, max_detail=8):
+    """Everything the page shows under Validation: every path's report
+    (verdict, each stage checker's verdict and the lines it failed on), the
+    findings package, the round history, the formal replay for this drop and
+    the coverage rollup when it belongs to this spec. Reads only."""
+    rep_dir, outbox, source = validation_roots(run_dir)
+    out = {"source": source, "reports_dir": os.path.relpath(rep_dir, ROOT), "paths": [],
+           "findings": [], "resolved": [], "drop": {}, "rounds": [], "formal": None, "coverage": None}
+    for f in sorted(glob.glob(os.path.join(rep_dir, "*_report.json"))):
+        rep = load_json(f)
+        if rep and rep.get("path"):
+            out["paths"].append(_path_entry(rep, max_detail))
+    pk = load_json(os.path.join(outbox, "findings_v2.json")) or {}
+    hand = load_json(os.path.join(outbox, "HANDOFF.json")) or {}
+    ds = load_json(os.path.join(outbox, "DROP_STATUS.json")) or {}
+    out["drop"] = {"drop_id": hand.get("drop_id") or pk.get("drop"), "design_id": hand.get("design_id"),
+                   "spec_revision": hand.get("spec_revision") or pk.get("spec_revision"),
+                   "status": hand.get("status"), "failed_modules": hand.get("failed_modules") or [],
+                   "generated_utc": pk.get("generated_utc") or hand.get("generated_utc"),
+                   "partial": ds.get("partial"), "paths_blocked": ds.get("paths_blocked") or []}
+    for fd in pk.get("findings") or []:
+        out["findings"].append({
+            "id": fd.get("id"), "check_id": fd.get("check_id"), "owner": fd.get("owner_module"),
+            "candidates": fd.get("owner_candidates") or [], "severity": fd.get("severity"),
+            "status": fd.get("status"), "confidence": fd.get("confidence"),
+            "taxonomy": fd.get("taxonomy_id"), "occurrences": fd.get("occurrences"),
+            "paths": sorted(set(fd.get("paths") or [])), "title": fd.get("title"),
+            "requirement": (fd.get("requirement") or "")[:400],
+            "expected": (str(fd.get("expected") or ""))[:400], "actual": (str(fd.get("actual") or ""))[:400],
+            "detector": fd.get("detector"), "spec_ref": fd.get("spec_ref")})
+    out["resolved"] = [{"id": r.get("id") if isinstance(r, dict) else str(r)} for r in (pk.get("resolved") or [])][:40]
+    # rounds: the package the flow filed after each validation round
+    if run_dir:
+        for d in sorted(glob.glob(os.path.join(run_dir, "validation", "round_*"))):
+            m = re.search(r"round_(\d+)$", d)
+            h = load_json(os.path.join(d, "HANDOFF.json")) or {}
+            fv = load_json(os.path.join(d, "findings_v2.json")) or {}
+            out["rounds"].append({"round": int(m.group(1)) if m else None, "status": h.get("status"),
+                                  "failed_modules": h.get("failed_modules") or [],
+                                  "findings": len([x for x in (fv.get("findings") or [])
+                                                   if x.get("status") not in ("awaiting_formal",)]),
+                                  "awaiting_formal": len([x for x in (fv.get("findings") or [])
+                                                          if x.get("status") == "awaiting_formal"]),
+                                  "drop_id": h.get("drop_id")})
+    # formal: the newest report for this drop (by drop id, else design id)
+    drop, design = out["drop"].get("drop_id"), out["drop"].get("design_id")
+    cands = []
+    for f in glob.glob(os.path.join(SHARED_REPORTS, "formal", "jg_*.json")):
+        j = load_json(f) or {}
+        if drop and j.get("drop") == drop or design and j.get("design_id") == design:
+            cands.append((j.get("generated_utc") or "", f, j))
+    if cands:
+        _, f, j = max(cands)
+        res = j.get("results") or []
+        counts = {}
+        for r in res:
+            counts[r.get("status")] = counts.get(r.get("status"), 0) + 1
+        out["formal"] = {"file": os.path.relpath(f, ROOT), "path": j.get("path"), "tool": j.get("tool"),
+                         "generated_utc": j.get("generated_utc"), "time_limit": j.get("prove_time_limit"),
+                         "abstractions": j.get("abstractions") or [], "counts": counts,
+                         "results": [{"name": r.get("short") or r.get("property"), "status": r.get("status"),
+                                      "bound": r.get("bound"), "engine": r.get("engine"), "time": r.get("time")}
+                                     for r in res]}
+    cov = load_json(os.path.join(SHARED_REPORTS, "coverage_rollup.json")) or {}
+    if cov:
+        summ = cov.get("summary") or {}
+        code = load_json(os.path.join(SHARED_REPORTS, "coverage_code.json")) or {}
+        tot = code.get("design_total") if isinstance(code.get("design_total"), dict) else {}
+        pct = None
+        for k in ("percent", "overall_pct", "pct", "overall", "coverage_pct"):
+            if isinstance(tot.get(k), (int, float)):
+                pct = round(float(tot[k]), 1)
+                break
+        out["coverage"] = {"spec_revision": cov.get("spec_revision"), "generated_utc": cov.get("generated_utc"),
+                           "matches_spec": bool(out["drop"].get("spec_revision")) and
+                                           cov.get("spec_revision") == out["drop"].get("spec_revision"),
+                           "vplan_items": cov.get("vplan_items"), "coverpoints": cov.get("coverpoints_measured"),
+                           "covered": summ.get("covered") if isinstance(summ, dict) else None,
+                           "unreachable": summ.get("unreachable_by_spec") if isinstance(summ, dict) else None,
+                           "code_pct": pct, "summary": summ if isinstance(summ, dict) else {}}
+    out["summary"] = {"pass": sum(1 for p in out["paths"] if p["verdict"] == "pass"),
+                      "fail": sum(1 for p in out["paths"] if p["verdict"] == "fail"),
+                      "other": sum(1 for p in out["paths"] if p["verdict"] not in ("pass", "fail")),
+                      "total": len(out["paths"]),
+                      "findings_open": sum(1 for f in out["findings"] if f["status"] not in ("awaiting_formal", "resolved")),
+                      "awaiting_formal": sum(1 for f in out["findings"] if f["status"] == "awaiting_formal")}
+    return out
+
+
+def validation_file(run_dir, path, what, nbytes=120000):
+    """One path's artifact: its report (JSON), the tail of its simulation
+    log, or the tail of its observed transaction trace."""
+    rep_dir, _outbox, source = validation_roots(run_dir)
+    path = os.path.basename(path or "")
+    if not re.match(r"^path_\d+_[a-z0-9_]+$", path):
+        return None
+    if what == "report":
+        rep = load_json(os.path.join(rep_dir, f"{path}_report.json"))
+        return {"path": path, "what": what, "source": source, "json": rep} if rep else None
+    fname = f"{path}_sim.log" if what == "log" else f"{path}_observed.jsonl" if what == "trace" else None
+    if not fname:
+        return None
+    full = os.path.join(rep_dir, fname)
+    if not os.path.exists(full):
+        return None
+    size = os.path.getsize(full)
+    return {"path": path, "what": what, "source": source, "file": os.path.relpath(full, ROOT),
+            "size": size, "truncated": size > nbytes, "text": read_tail(full, nbytes)}
+
+
 class Watcher:
     def __init__(self, runs_root, run=None, orfs_dir=None, platform=None):
         self.runs_root = runs_root
@@ -422,6 +576,15 @@ class Watcher:
             return self.fixed_run
         runs = self.list_runs()
         return os.path.join(self.runs_root, runs[0]["id"]) if runs else None
+
+    def validation(self, run_id=None):
+        run_dir = self.resolve_run(run_id)
+        d = validation_detail(run_dir)
+        d["run"] = os.path.basename(run_dir) if run_dir else None
+        return d
+
+    def validation_file(self, run_id, path, what):
+        return validation_file(self.resolve_run(run_id), path, what)
 
     def block_cells(self):
         d = load_json(os.path.join(ROOT, "backend", "outputs", "NETLISTS.json")) or {}
@@ -956,6 +1119,18 @@ def make_handler(watcher, terminal=None, token="", off_reason=""):
                     return self._json(500, {"error": f"{type(e).__name__}: {e}"})
                 st["terminal"] = terminal.state() if terminal else {"available": False, "reason": off_reason}
                 return self._json(200, st)
+            if u.path == "/api/validation":
+                try:
+                    return self._json(200, watcher.validation((q.get("run") or [None])[0]))
+                except Exception as e:
+                    return self._json(500, {"error": f"{type(e).__name__}: {e}"})
+            if u.path == "/api/validation/path":
+                try:
+                    d = watcher.validation_file((q.get("run") or [None])[0], (q.get("path") or [""])[0],
+                                                (q.get("what") or ["report"])[0])
+                except Exception as e:
+                    return self._json(500, {"error": f"{type(e).__name__}: {e}"})
+                return self._json(200, d) if d else self._json(404, {"error": "no such path artifact"})
             if u.path == "/api/term/stream":
                 if not (terminal and self._token_ok(q)):
                     return self._send(403, "forbidden", "text/plain")

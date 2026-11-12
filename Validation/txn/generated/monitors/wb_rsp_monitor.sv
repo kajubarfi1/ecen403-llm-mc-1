@@ -4,7 +4,7 @@
 //
 // Interface : wb_rsp   (Host Wishbone response stream out of wb_port)
 // Block     : wb_port
-// Manifest  : runs/matrix/preset_server-grade/drop/PHASE1RTL/wb_port_manifest.json
+// Manifest  : Frontend2/OutputFolders/PHASE1RTL/wb_port_manifest.json
 // Emits     : one TXN line per completed transaction, consumed by
 //             Validation/txn/trace_extract.py -> observed.jsonl -> scoreboard.
 //
@@ -20,7 +20,7 @@ module wb_rsp_monitor #(
     input  logic clk,
     input  logic rst_n,
     input  logic rd_ack,
-    input  logic [30:0] wb_adr_i,
+    input  logic [28:0] wb_adr_i,
     input  logic wb_cyc_i,
     input  logic [31:0] wb_dat_o,
     input  logic wb_stall_o,
@@ -35,8 +35,8 @@ module wb_rsp_monitor #(
     $display("TXN wb_rsp reset t=%0t", $time);
   end
 
-  logic [30:0] wb_rsp_pend_addr [$];   // captured at pending.push
-  logic [30:0] wb_rsp_pend_addr_v;
+  logic [28:0] wb_rsp_pend_addr [$];   // captured at pending.push
+  logic [28:0] wb_rsp_pend_addr_v;
 
   // pending.push: wb_cyc_i && wb_stb_i && !wb_stall_o && !wb_we_i
   always @(posedge clk) begin
