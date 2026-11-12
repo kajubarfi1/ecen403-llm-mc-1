@@ -200,6 +200,50 @@ FMAX_CONVERGED_NS     = 0.01
 MAX_REPAIR_ITERATIONS = 2     # Max repair attempts before giving up
 MAX_POWER_ITERATIONS  = 3     # Max power-optimization iterations
 
+# The only config.mk variables repair_node may write. Repair's remit is the
+# closed set of fixes named in its own docstring -- synthesis frontend,
+# floorplan utilization and margin, placement density, clock period -- and
+# every one of them is a PPA or tool-selection knob. A proposal outside that
+# set is the model improvising, and on 2026-11-12 it improvised three times
+# in one day against two ORFS Makefile bugs that no setting could have
+# repaired: DESIGN_NICKNAME = TOPRTL (which moves every result into a
+# directory runner_node never reads, since results_name follows DESIGN_NAME),
+# FLOORPLAN_SDC pointed at the synthesis SDC, and DESIGN_NAME re-set to the
+# value it already held. All three had to be stripped out by hand (Validation
+# SEMESTER_PLAN, 2026-11-12, morning and evening runs). Identity and path
+# variables belong to packager_node, which rewrites config.mk per run, so a
+# repair that edits them is either overwritten or -- as DESIGN_NICKNAME was --
+# survives and silently redirects the build. Extend this set deliberately,
+# and only for a failure a config.mk variable genuinely repairs.
+REPAIR_ALLOWED_MK_VARS = frozenset({
+    "SYNTH_HDL_FRONTEND",                 # unpacked_array_port
+    "CORE_UTILIZATION", "CORE_MARGIN",    # pdn_too_small
+    "CORE_ASPECT_RATIO",
+    "PLACE_DENSITY",                      # routing_congestion
+    "CLOCK_PERIOD",                       # timing_too_tight
+})
+
+# Faults in the toolchain itself: make cannot build a target because an ORFS
+# rule is wrong, or because a directory nothing creates is missing. No
+# config.mk variable repairs any of them, but the log reads enough like a
+# flow failure that the classifier answers with one and the runner rebuilds
+# a design that was never at fault. The morning run of 2026-11-12 died in
+# its first second on a copy into a results directory only synth.sh mkdirs;
+# the evening run stopped after synthesis on a dependency ORFS declares
+# against the wrong file (f34d4d9 writes "2_floorplan.sdc: 2_1_floorplan.odb"
+# where it means "2_1_floorplan.sdc:"). Both spent a repair iteration, and
+# both got a harmful config.mk edit, before escalating. Decide these from
+# the log before asking the model anything, the same way the watchdog
+# timeout below is decided from the exit code.
+TOOLCHAIN_FAULT_PATTERNS = [
+    (r"No rule to make target",
+     "ORFS declares a prerequisite that no rule in its Makefile produces"),
+    (r"cp: cannot create regular file .*No such file or directory",
+     "ORFS copied a file into a results directory that no rule creates"),
+    (r"make(?:\[\d+\])?: \*\*\* No targets specified",
+     "make was invoked with no target it recognizes"),
+]
+
 # STA sign-off threshold: WNS must be >= this value to pass (soft fail below)
 STA_WNS_THRESHOLD_NS = 0.0
 # OpenSTA reports slack as 1e+39 when there is nothing to time (no clock, or no
@@ -2161,6 +2205,12 @@ def repair_node(state: PipelineState) -> PipelineState:
       - timing_too_tight     : relax CLOCK_PERIOD by 20%
       - unknown              : log and escalate (no fix applied)
 
+    Two faults are decided here and never reach the classifier, because for
+    both of them every answer it can give is wrong: a watchdog timeout (from
+    the exit code) and a fault in the toolchain itself (TOOLCHAIN_FAULT_
+    PATTERNS). Whatever the classifier does return, only the variables in
+    REPAIR_ALLOWED_MK_VARS are written to config.mk; see that set for why.
+
     Max MAX_REPAIR_ITERATIONS attempts before passing through to reporter.
     """
     runner_result   = state.get("runner_result") or {}
@@ -2195,7 +2245,16 @@ def repair_node(state: PipelineState) -> PipelineState:
         "  fixable: true or false\n"
         "  fix_description: one sentence explaining what you will change\n"
         "  config_mk_changes: object mapping make variable names to new string values "
-        "(empty {} if no changes needed or not fixable)"
+        "(empty {} if no changes needed or not fixable)\n"
+        "\n"
+        "You may set ONLY these config.mk variables: "
+        + ", ".join(sorted(REPAIR_ALLOWED_MK_VARS)) + ". Any other variable is "
+        "discarded unapplied. In particular the design's identity and path "
+        "variables (DESIGN_NAME, DESIGN_NICKNAME, FLOORPLAN_SDC, VERILOG_FILES, "
+        "SDC_FILE, RESULTS_DIR) are written per run by the packager and are never "
+        "the cause of a flow failure. If the log shows make itself failing -- a "
+        "missing rule, a failed copy into a results directory -- that is a fault "
+        "in the toolchain, not the design: answer fixable=false."
     )
 
     user = f"""
@@ -2234,6 +2293,32 @@ Log tail (last 6000 chars):
             "messages": [msg],
         }
 
+    # A fault in the toolchain is not a design defect either, and unlike the
+    # timeout it arrives with a log that reads like one. Left to the
+    # classifier it comes back as congestion or tight timing, so the runner
+    # relaxes a knob and rebuilds a design that was never the problem --
+    # twice on 2026-11-12. Check the log before spending an API call, a
+    # repair iteration, or another build on it.
+    for _pattern, _explanation in TOOLCHAIN_FAULT_PATTERNS:
+        if re.search(_pattern, log_tail, re.IGNORECASE):
+            msg = (f"[repair] toolchain fault, not a design error: {_explanation}. "
+                   f"No config.mk change repairs this; escalating.")
+            print(msg)
+            return {
+                **state,
+                "repair_iteration": repair_iteration,
+                "repair_history": repair_history + [{
+                    "iteration":    repair_iteration,
+                    "error_class":  "infrastructure_toolchain",
+                    "fixable":      False,
+                    "fix_applied":  {},
+                    "fix_desc":     _explanation,
+                }],
+                "current_node": "repair", "pipeline_status": "FAIL",
+                "error_message": f"ORFS toolchain fault: {_explanation}",
+                "messages": [msg],
+            }
+
     if api_key:
         try:
             raw = call_claude(api_key, model, system, user, max_tokens=500)
@@ -2254,6 +2339,22 @@ Log tail (last 6000 chars):
     if fix_desc:
         print(f"[repair] Fix: {fix_desc}")
 
+    # Keep only what repair owns. A proposal that reaches outside
+    # REPAIR_ALLOWED_MK_VARS is improvising, and what it reaches for is
+    # reliably the identity and path variables the packager writes. Rejected
+    # keys are recorded, so the next iteration's prompt shows the model that
+    # its last answer was discarded rather than applied and found wanting.
+    rejected = {k: v for k, v in mk_changes.items() if k not in REPAIR_ALLOWED_MK_VARS}
+    if rejected:
+        mk_changes = {k: v for k, v in mk_changes.items() if k in REPAIR_ALLOWED_MK_VARS}
+        print(f"[repair] refused {len(rejected)} change(s) outside repair's remit: "
+              + ", ".join(f"{k}={v}" for k, v in sorted(rejected.items())))
+        if not mk_changes:
+            fixable  = False
+            fix_desc = ("Proposal set only variables repair does not own ("
+                        + ", ".join(sorted(rejected)) + "); nothing applied.")
+            print("[repair] nothing left to apply - treating as not fixable.")
+
     # Apply config.mk changes if fixable
     if fixable and mk_changes and config_mk_path.exists():
         _apply_repair_to_config_mk(config_mk_path, mk_changes)
@@ -2265,6 +2366,7 @@ Log tail (last 6000 chars):
         "error_class":  error_class,
         "fixable":      fixable,
         "fix_applied":  mk_changes if fixable else {},
+        "fix_rejected": rejected,
         "fix_desc":     fix_desc,
     })
 
