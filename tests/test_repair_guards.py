@@ -73,6 +73,13 @@ make: *** No rule to make target 'results/sky130hd/ddr3_controller/base/2_1_floo
  needed by 'results/sky130hd/ddr3_controller/base/2_floorplan.sdc'.  Stop.
 """
 
+LOG_MV_RENAME = """
+[INFO DRT-0199] Number of violations = 0.
+mv: cannot move './logs/sky130hd/ddr3_controller/base/5_2_route.tmp.log' to './logs/sky130hd/ddr3_controller/base/5_2_route.log': Permission denied
+make[1]: *** [Makefile:549: do-5_2_route] Error 1
+make: *** [Makefile:549: results/sky130hd/ddr3_controller/base/5_2_route.odb] Error 2
+"""
+
 LOG_CONGESTION = """
 [WARNING GRT-0101] Global routing finished with congestion.
 [ERROR DRT-0255] Routing congestion too high to converge.
@@ -154,6 +161,18 @@ class RepairGuards(unittest.TestCase):
         out = self._run(LOG_FLOORPLAN_RULE)
         self.assertNotEqual("REPAIR_RETRY", out["pipeline_status"])
         self.assertEqual("reporter", P.route_after_repair(out))
+
+    def test_a_failed_rename_is_not_a_design_error(self):
+        """2026-11-12: routing finished clean (0 violations) and make died
+        renaming its own log, because the GUI held the file open. Nothing
+        about the design was wrong."""
+        self._answer('{"error_class":"routing_congestion","fixable":true,'
+                     '"fix_description":"density","config_mk_changes":{"PLACE_DENSITY":"0.50"}}')
+        out = self._run(LOG_MV_RENAME)
+        self.assertEqual([], self.calls)
+        self.assertEqual("FAIL", out["pipeline_status"])
+        self.assertEqual("infrastructure_toolchain", out["repair_history"][-1]["error_class"])
+        self.assertNotIn("0.50", self.mk())
 
     # -- the allowlist --------------------------------------------------------
 

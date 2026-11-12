@@ -242,6 +242,13 @@ TOOLCHAIN_FAULT_PATTERNS = [
      "ORFS copied a file into a results directory that no rule creates"),
     (r"make(?:\[\d+\])?: \*\*\* No targets specified",
      "make was invoked with no target it recognizes"),
+    # 2026-11-12: detailed routing finished clean (0 DRC, 0 antenna) and make
+    # died renaming its own log, because the flow GUI was holding the file
+    # open -- on Windows a reader without FILE_SHARE_DELETE blocks a rename.
+    # Fixed at the reader (gui/flow_gui.py:open_shared), but any such failure
+    # is still the filesystem talking, never the design.
+    (r"mv: cannot (?:move|stat) .*(?:Permission denied|No such file)",
+     "ORFS could not rename a step's own log or result file"),
 ]
 
 # STA sign-off threshold: WNS must be >= this value to pass (soft fail below)
