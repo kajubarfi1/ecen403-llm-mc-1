@@ -96,6 +96,9 @@ class Fake:
                            "clock_period_ns": 5.0,
                            "orfs_config": {"SYNTH_ARGS": "-nofsm"}}, f)
             return 0, ""
+        if name == "seed_into_drop.py":
+            self.planted = cmd[cmd.index("--fault") + 1]
+            return 0, "planted M05 in drop/PHASE2RTL/refresh_ctrl.sv\n  block refresh_ctrl: never requested\n"
         if name == "validate_drop.py":
             status = self.validation.pop(0) if self.validation else "PASS"
             if status == "STOP":
@@ -679,6 +682,28 @@ class TestRevalidate(FlowCase):
         self.assertEqual(names.count("phase1_validation_agent.py"), 1)
         self.assertEqual(run2.state["rounds"]["rtl_total"], 3)
         self.assertEqual(run2.state["rounds"]["rtl"], 0, "a pass resets the cap counter")
+
+
+    def test_plant_fails_fixes_and_passes(self):
+        """--plant M05 on a finished run: the fault is planted once, validation
+        runs again and fails, the agent fixes, the next round passes."""
+        self._agent(1)
+        rc, run = self.go(Fake(self.run_dir), phases="1")
+        self.assertEqual(run.state["status"], "complete")
+        fake = Fake(self.run_dir, validation=["FAIL", "PASS"])
+        flow.sh = fake
+        a = self.args(phases="1", plant="M05")
+        run2 = flow.Run(self.run_dir)
+        rc = flow.run_flow(run2, a)
+        self.assertEqual(rc, 0, run2.state["halt"])
+        names = [c[0] for c in fake.calls]
+        self.assertEqual(names.count("seed_into_drop.py"), 1)
+        self.assertEqual(fake.planted, "M05")
+        self.assertLess(names.index("seed_into_drop.py"), names.index("validate_drop.py"))
+        self.assertEqual(names.count("validate_drop.py"), 2)
+        self.assertEqual(names.count("phase1_validation_agent.py"), 1)
+        self.assertEqual([s["status"] for s in run2.state["stages"] if s["stage"] == "fault_planted"], ["PASS"])
+        self.assertIsNone(a.plant, "one-shot: a later resume must not plant again")
 
 
 class TestInteractive(FlowCase):

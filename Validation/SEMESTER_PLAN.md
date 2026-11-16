@@ -1318,7 +1318,44 @@ something right); 13 are silent-only (never seen to fire outside the gate),
   FLOORPLAN_SDC pointed at the synthesis SDC and DESIGN_NAME re-set to
   what it already was; both stripped from config.mk (the packager
   rewrites it per run anyway). Not an RTL or flow defect: the toolchain's
-  own Makefile.
+  own Makefile. Third run (a fresh spec, drop fe6048875ca5), same class
+  one stage further down: "No rule to make target .../5_1_grt.sdc, needed
+  by 5_route.sdc" (global_route.tcl writes it; the Makefile never says
+  so). Every SDC the Makefile names was then checked against the scripts
+  that write one: 1_synth, 3_place, 4_cts and 6_final have their rule,
+  2_1_floorplan and 5_1_grt did not. Both patched in the checkout and the
+  image; `make -n` on the run's config now plans every step through
+  do-gds with no "No rule" line, which is the check USAGE's recipe asks
+  for before a first build.
+
+- *2026-11-12, late afternoon — the first GDS on the Mac, and the sign-off
+  that rebuilt the flow under itself.* Resumed golden run
+  (20261112-132301): synthesis to GDS in 15 minutes on the arm64 image,
+  runner exit 0, utilisation 43.5 %, WNS -0.66 ns / TNS -27 ns at the
+  5 ns target (on Dawson's x86 ORFS the same utilisation setting met
+  200 MHz by 0.02 ns: tool-version variance, and a sign-off STA FAIL to
+  expect next). Then `[validator] DRC NOT VERIFIED: CDL generation failed
+  (rc=-9)`: the sign-off's `make 6_final.cdl` decided placement onward
+  was out of date and re-ran it (cdl.log is a detailed-route log), and
+  the 900 s CDL timeout killed it mid-route. The runner's guard against
+  exactly that looked for yosys/openroad/klayout on the dry-run lines,
+  and this ORFS wraps every step as `bash -c '... make ... $@' --
+  do-<step>`, so it saw nothing. Fix in `signoff_runner.py`: the CDL make
+  runs with `-o 6_final.v -o 6_final.odb` (assumed up to date, so only
+  cdl.tcl can run), the guard also matches `-- do-` lines and is recorded
+  rather than fatal, since `assert_gds_is_current` is the provenance
+  check that matters. Why make thought the tree stale is not settled
+  (2_floorplan.sdc's copy carried an older time than its source after a
+  -j4 build); with `-o` it cannot matter for the sign-off. `-o` was not
+  enough either (the killed rebuild had left 5_1_grt.odb newer than the
+  routed design, and make re-ran detailed route again under the CDL
+  timeout), so the CDL now goes through a one-rule makefile of ours
+  (`cdl_only.mk`, loaded after ORFS's Makefile for its variables): make
+  has no graph to walk and the CDL takes 0.7 s. Standalone sign-off on
+  the 13:42 GDS in the arm64 image: **DRC PASS, LVS PASS, pin audit
+  PASS** (LVS after blackboxing ha_4, whose vendor GDS and CDL disagree
+  on device count; added to `signoff/lvs/blackbox_cells.txt`). The first
+  layout signed off on the Mac; STA at 5 ns still -0.66 ns.
 
 **Drop switch (2026-09-24).** From now on RTL drops come from
 `Frontend2/OutputFolders` (Jacob). `spec/rtl_drop.json` roots, the

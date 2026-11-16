@@ -105,3 +105,29 @@ and the LLM then invents a config.mk variable. A missing-rule or
 missing-file error from make should be classified `toolchain_error`,
 unfixable, and reported with the make line, so the run halts in a second
 instead of after two more synthesis passes.
+
+Addendum to section 6 (later the same day): the routing stage has the same
+omission (`5_1_grt.sdc`, written by global_route.tcl, declared nowhere). A
+whole-graph dry run (`make -n DESIGN_CONFIG=...`) now plans through do-gds
+with no "No rule" line; the two patched lines are 512 and 648 of the f34d4d9
+Makefile. If you move the Windows side to this ORFS commit, apply both.
+
+## 7. Addendum (2026-11-12, late): the sign-off's CDL step rebuilt the flow
+
+First Mac run to reach your validator: ORFS exit 0, GDS written, then
+`DRC NOT VERIFIED: CDL generation failed (rc=-9)`. `make 6_final.cdl`
+re-ran placement through routing (make judged them stale) and the 900 s
+CDL timeout killed it mid detailed-route; the dry-run guard in
+`signoff_runner.py` matched nothing because f34d4d9's `UNSET_AND_MAKE`
+wrapper hides the tool names (`bash -c '... make ... $@' -- do-<step>`).
+Patched: `make -o <6_final.v> -o <6_final.odb> ... 6_final.cdl` so only
+cdl.tcl can run; the guard also matches ` -- do-` and is recorded
+(`cdl_make_would_rebuild`) instead of raising, since
+`assert_gds_is_current` already ties the GDS to the netlist. The same
+`-o` form is worth using anywhere the validator calls make on a finished
+tree.
+
+Also for you: this ORFS gives WNS -0.66 ns at 5 ns on the golden top with
+CORE_UTILIZATION 35 (your x86 build met it by 0.02 ns), so expect the STA
+check to FAIL and route to the Frontend; a floorplan or clock-target
+setting, not an RTL change, is the likely remedy.

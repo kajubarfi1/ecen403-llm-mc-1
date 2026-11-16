@@ -79,7 +79,7 @@ class RefreshCtrlGenerator:
     # ==================================================================
     def generate_rtl(self) -> str:
         p = self.p
-        return f"""// refresh_ctrl.sv -- tREFI interval counter, postpone tracking,
+        rtl = f"""// refresh_ctrl.sv -- tREFI interval counter, postpone tracking,
 // urgent-threshold escalation, refresh starvation detection.
 module refresh_ctrl #(
     parameter REFI_CTR_W = {p['REFI_CTR_W']},
@@ -186,6 +186,17 @@ module refresh_ctrl #(
 
 endmodule
 """
+        # Self-check: the wrap-case tick pulse (the only driver that ever
+        # raises refi_tick) must be present verbatim in the generated text.
+        # If a future edit to this f-string silently drops/flips that
+        # assignment, refi_tick is permanently stuck low, postpone_cnt never
+        # increments, and the controller can never request a refresh --
+        # catch that here instead of in a cluster simulation.
+        assert "refi_tick <= 1'b1;" in rtl, (
+            "refresh_ctrl_gen: generated RTL is missing the refi_tick wrap-case "
+            "assertion (refi_tick <= 1'b1;) -- refresh requests would never fire"
+        )
+        return rtl
 
     # ==================================================================
     # Manifest (unchanged from the original)

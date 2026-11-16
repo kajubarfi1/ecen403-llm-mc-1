@@ -482,6 +482,7 @@ python3 flow.py [design input] [options]
 | `--run-dir <path>` | Directory for this run's output |
 | `--resume <path>` | Resume a halted run |
 | `--revalidate` | With `--resume`, revalidate RTL that changed since the last validation |
+| `--plant <FAULT>` | Feedback-loop demonstration: plant a catalogued fault (`Validation/faults/fault_catalog.json`, e.g. `M05`) into the run's RTL copy and validate again, so validation fails, the phase agent fixes it and the next round passes. Typically `--resume <run> --plant M05` on a finished run |
 
 For the complete list of options, run `python3 flow.py --help`.
 
@@ -532,6 +533,10 @@ docker exec orfs-build bash -c "rm -rf /root/.cache/bazel-repository-cache tools
 # before committing (sed below; a committed image is patched the same way with
 # docker run / sed / docker commit, done 2026-11-12).
 docker exec orfs-build sed -i 's|^\$(RESULTS_DIR)/2_floorplan.sdc: \$(RESULTS_DIR)/2_1_floorplan.odb$|$(RESULTS_DIR)/2_1_floorplan.sdc: $(RESULTS_DIR)/2_1_floorplan.odb|' flow/Makefile
+# ... and the same omission for the routing SDC (global_route.tcl writes 5_1_grt.sdc;
+# nothing declares it, so `make` stops after CTS with "No rule to make target .../5_1_grt.sdc"):
+docker exec orfs-build sed -i 's|^\$(eval \$(call do-copy,5_route,5_1_grt.sdc,,.sdc))$|&\n$(RESULTS_DIR)/5_1_grt.sdc: $(RESULTS_DIR)/5_1_grt.odb|' flow/Makefile
+# Check the whole graph before the first build: `make -n DESIGN_CONFIG=... | grep "No rule"` must print nothing.
 docker commit orfs-build openroad/orfs:arm64-local
 docker run --rm openroad/orfs:arm64-local bash -c "/OpenROAD-flow-scripts/tools/install/OpenROAD/bin/openroad -help | head -1; klayout -v"
 python3 -m pip install --user jsonschema paramiko anthropic langgraph langchain-core

@@ -1,17 +1,17 @@
 <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 <> User: jacobz
 
-Host: n01-zeus.olympus.ece.tamu.edu
+Host: n03-poseidon.olympus.ece.tamu.edu
 
-Report date: Thu 12 Nov 2026 11:52:23 CST
+Report date: Sun 15 Nov 2026 19:36:29 CST
 
 Report options: -detail -metrics block:expression:toggle -out /home/ugrads/j/jacobz/cov_uncov_u_init_fsm.txt -inst chain_harness.u_init_fsm -uncovered -source on -overwrite
 
 Coverage database path: /home/ugrads/j/jacobz/cov_merged_paths
 
-Coverage model files: /home/ugrads/j/jacobz/cov_merged_paths/icc_2b5aabad_6bc0dc82.ucm
+Coverage model files: /home/ugrads/j/jacobz/cov_merged_paths/icc_120c4431_60624260.ucm
 
-Coverage data files: /home/ugrads/j/jacobz/cov_merged_paths/icc_2b5aabad_6bc0dc82.ucd
+Coverage data files: /home/ugrads/j/jacobz/cov_merged_paths/icc_120c4431_60624260.ucd
 
 CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_conf.ccf
     // Xcelium coverage configuration for the DDR3 validation subsystem.
@@ -79,7 +79,7 @@ CCF files:  /home/ugrads/j/jacobz/cadence_agent_work/runs/path_01_write_cmd/cov_
     
 
 
-Coverage database date: Thu 12 Nov 2026 11:49:54 CST
+Coverage database date: Sun 15 Nov 2026 19:32:42 CST
 
 *** There were no refinement files applied ***
 
@@ -108,7 +108,7 @@ Uncovered Block Detail Report, Instance Based
 =============================================
 
 Instance name: chain_harness.u_init_fsm
-Type name: init_fsm#(16,3,17,32'h00009c40,32'h000186a0,32'h0000003e,32'h00000080,32'h00000001,32'h00000003,16'h1d34,16'h0004,16'h0218,16'h0000,16'h0400,4'h0,4'h6,4'h7)
+Type name: init_fsm#(15,3,17,32'h00009c40,32'h000186a0,32'h00000022,32'h00000080,32'h00000001,32'h00000003,15'h1d34,15'h0004,15'h0218,15'h0000,15'h0400,4'h0,4'h6,4'h7)
 File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_08_init_to_cal/init_fsm.sv
 Number of uncovered blocks: 4 of 48
 Number of unreachable blocks: 0
@@ -144,7 +144,7 @@ Expression coverage Table Legend
 
 
 Instance name: chain_harness.u_init_fsm
-Type name: init_fsm#(16,3,17,32'h00009c40,32'h000186a0,32'h0000003e,32'h00000080,32'h00000001,32'h00000003,16'h1d34,16'h0004,16'h0218,16'h0000,16'h0400,4'h0,4'h6,4'h7)
+Type name: init_fsm#(15,3,17,32'h00009c40,32'h000186a0,32'h00000022,32'h00000080,32'h00000001,32'h00000003,15'h1d34,15'h0004,15'h0218,15'h0000,15'h0400,4'h0,4'h6,4'h7)
 File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_08_init_to_cal/init_fsm.sv
 Number of uncovered expressions: 3 of 41
 Number of unreachable expressions: 0
@@ -187,14 +187,14 @@ Uncovered Toggle Detail Report, Instance Based
 ==============================================
 
 Instance name: chain_harness.u_init_fsm
-Type name: init_fsm#(16,3,17,32'h00009c40,32'h000186a0,32'h0000003e,32'h00000080,32'h00000001,32'h00000003,16'h1d34,16'h0004,16'h0218,16'h0000,16'h0400,4'h0,4'h6,4'h7)
+Type name: init_fsm#(15,3,17,32'h00009c40,32'h000186a0,32'h00000022,32'h00000080,32'h00000001,32'h00000003,15'h1d34,15'h0004,15'h0218,15'h0000,15'h0400,4'h0,4'h6,4'h7)
 File name: /home/ugrads/j/jacobz/cadence_agent_work/runs/path_08_init_to_cal/init_fsm.sv
-Number of uncovered toggles: 16 of 82
+Number of uncovered toggles: 15 of 81
 Number of unreachable toggles: 0
-Number of uncovered signal bits: 15 of 52
+Number of uncovered signal bits: 14 of 51
 Number of unreachable signal bits: 0
-Number of signal bits partially toggled(rise): 4 of 52
-Number of signal bits partially toggled(fall): 0 of 52
+Number of signal bits partially toggled(rise): 4 of 51
+Number of signal bits partially toggled(fall): 0 of 51
 Number of uncovered enum toggles: 1 of 30
 Number of unreachable enum toggles: 0
 
@@ -205,7 +205,6 @@ Hit(Full)  Hit(Rise)  Hit(Fall)  Signal
 0          1          0          init_done                 
 0          0          0          init_fail                 
 0          0          0          init_cmd[3]               
-0          0          0          init_addr[15]             
 0          0          0          init_addr[14]             
 0          0          0          init_addr[13]             
 0          0          0          init_addr[7]              

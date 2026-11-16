@@ -124,6 +124,7 @@ PHASES = [(1, "Phase1", "phase1_pipeline.py", "PHASE1RTL", ["init_fsm", "config_
 VALIDATION = os.path.join(ROOT, "Validation")
 SPEC_STAGE = os.path.join(VALIDATION, "spec", "validate_spec_stage.py")
 VALIDATE_DROP = os.path.join(VALIDATION, "tools", "validate_drop.py")
+SEED_INTO_DROP = os.path.join(VALIDATION, "tools", "seed_into_drop.py")
 RUN_FORMAL = os.path.join(VALIDATION, "tools", "run_formal.py")
 FORMAL_REPORTS = os.path.join(VALIDATION, "reports", "formal")
 OUTBOX_CURRENT = os.path.join(VALIDATION, "findings", "outbox", "current")
@@ -1355,8 +1356,29 @@ def run_flow(run, args):
         if rc:
             return rc
 
-    # validation <-> frontend loop
+    # --plant FAULT: the feedback-loop demonstration. One catalogued defect
+    # (Validation/faults/fault_catalog.json, its right fix known in advance)
+    # is planted into this run's RTL copy, never a generator, and the drop
+    # is validated again: it must FAIL, the phase agent must fix it, and
+    # the next round must PASS with nobody involved. One-shot: the fault is
+    # planted once per invocation and recorded, so a later --resume does
+    # not plant it again.
     revalidate = bool(getattr(args, "revalidate", False))
+    fault = getattr(args, "plant", None)
+    if fault:
+        if not st.get("drop"):
+            return run.halt("fault_planted", "no drop to plant into yet")
+        rc, txt = sh([PY, SEED_INTO_DROP, "--run", run.dir, "--fault", fault], cwd=ROOT, log=run.log)
+        if rc != 0:
+            return run.halt("fault_planted", f"seed_into_drop.py --fault {fault} exited {rc}: "
+                            + (txt.strip().splitlines() or ["no output"])[-1])
+        what = next((l.strip() for l in txt.splitlines() if l.strip().startswith("block ")), fault)
+        run.record("fault_planted", "PASS", f"{fault} planted into the drop ({what}); validating again",
+                   fault=fault)
+        args.plant = None
+        revalidate = True
+
+    # validation <-> frontend loop
     while True:
         last = [s for s in st["stages"] if s["stage"] == "rtl_validation"]
         if (last and last[-1]["status"] == "PASS" and last[-1]["utc"] > _stage_utc(st, "rtl_generation")
@@ -1433,6 +1455,9 @@ def plan(args):
              if ph else "phase1..4 pipelines (stdin: spec, <run>/drop) + generate_top.py")
           + ("  [validate --partial after each phase]" if args.validate_per_phase else ""))
     rs = getattr(args, "random_seeds", 4)
+    if getattr(args, "plant", None):
+        print(f"  3b fault_planted        Validation  seed_into_drop.py --fault {args.plant} into <run>/drop; "
+              f"validation must FAIL, the phase agent fix it, the next round PASS")
     print(f"  4 rtl_validation        Validation  validate_drop.py on <run>/drop against the shipped spec"
           f"  -> <run>/validation/round_N/  (cap {args.max_rtl_rounds} rounds)")
     print(f"     constrained-random   " + (f"random_v2 x {rs} seed(s) on 6 paths after the directed suite; "
@@ -1534,6 +1559,11 @@ def main() -> int:
                          "validation path exists yet. Adds roughly an hour (11 blocks, 2 "
                          "workers). Non-fatal: a block that misses timing standalone still "
                          "yields a netlist, and the top-level build remains the sign-off")
+    ap.add_argument("--plant", metavar="FAULT",
+                    help="feedback-loop demonstration: plant this catalogued fault (Validation/faults/"
+                         "fault_catalog.json id or prefix, e.g. M05) into the run's RTL copy and validate "
+                         "again, so the drop fails, the phase agent fixes it and the next round passes. "
+                         "With --resume on a finished run, or on a fresh run after its first clean round")
     ap.add_argument("--revalidate", action="store_true",
                     help="with --resume: validate the drop again even though the last "
                          "validation passed (the drop changed under the run)")

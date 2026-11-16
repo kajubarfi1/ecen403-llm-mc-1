@@ -5,17 +5,17 @@
       "uncovered_toggle_bits": 4,
       "excluded_approved": 0,
       "excluded_proposed": 0,
-      "measured_percent": 93.4,
-      "adjusted_percent": 93.4,
-      "adjusted_if_proposed_approved_percent": 93.4
+      "measured_percent": 93.1,
+      "adjusted_percent": 93.1,
+      "adjusted_if_proposed_approved_percent": 93.1
     },
     "u_bank_tracker": {
       "uncovered_toggle_bits": 199,
       "excluded_approved": 198,
       "excluded_proposed": 0,
-      "measured_percent": 81.1,
-      "adjusted_percent": 99.7,
-      "adjusted_if_proposed_approved_percent": 99.7
+      "measured_percent": 80.8,
+      "adjusted_percent": 99.6,
+      "adjusted_if_proposed_approved_percent": 99.6
     },
     "u_calibration": {
       "uncovered_toggle_bits": 6,
@@ -29,41 +29,41 @@
       "uncovered_toggle_bits": 9,
       "excluded_approved": 1,
       "excluded_proposed": 0,
-      "measured_percent": 92.4,
-      "adjusted_percent": 93.2,
-      "adjusted_if_proposed_approved_percent": 93.2
+      "measured_percent": 92.2,
+      "adjusted_percent": 93.0,
+      "adjusted_if_proposed_approved_percent": 93.0
     },
     "u_cmd_queue": {
-      "uncovered_toggle_bits": 328,
-      "excluded_approved": 260,
+      "uncovered_toggle_bits": 132,
+      "excluded_approved": 132,
       "excluded_proposed": 0,
-      "measured_percent": 93.4,
-      "adjusted_percent": 98.6,
-      "adjusted_if_proposed_approved_percent": 98.6
+      "measured_percent": 93.5,
+      "adjusted_percent": 100.0,
+      "adjusted_if_proposed_approved_percent": 100.0
     },
     "u_config_regs": {
-      "uncovered_toggle_bits": 125,
-      "excluded_approved": 116,
+      "uncovered_toggle_bits": 129,
+      "excluded_approved": 120,
       "excluded_proposed": 0,
-      "measured_percent": 85.5,
+      "measured_percent": 85.1,
       "adjusted_percent": 98.0,
       "adjusted_if_proposed_approved_percent": 98.0
     },
     "u_data_path": {
       "uncovered_toggle_bits": 170,
-      "excluded_approved": 153,
+      "excluded_approved": 151,
       "excluded_proposed": 0,
-      "measured_percent": 81.6,
-      "adjusted_percent": 95.2,
-      "adjusted_if_proposed_approved_percent": 95.2
+      "measured_percent": 82.3,
+      "adjusted_percent": 95.7,
+      "adjusted_if_proposed_approved_percent": 95.7
     },
     "u_init_fsm": {
-      "uncovered_toggle_bits": 15,
+      "uncovered_toggle_bits": 14,
       "excluded_approved": 1,
       "excluded_proposed": 0,
-      "measured_percent": 87.1,
-      "adjusted_percent": 87.6,
-      "adjusted_if_proposed_approved_percent": 87.6
+      "measured_percent": 87.6,
+      "adjusted_percent": 88.0,
+      "adjusted_if_proposed_approved_percent": 88.0
     },
     "u_refresh_ctrl": {
       "uncovered_toggle_bits": 10,
@@ -74,12 +74,12 @@
       "adjusted_if_proposed_approved_percent": 94.0
     },
     "u_scheduler": {
-      "uncovered_toggle_bits": 497,
-      "excluded_approved": 100,
+      "uncovered_toggle_bits": 211,
+      "excluded_approved": 52,
       "excluded_proposed": 0,
-      "measured_percent": 84.1,
-      "adjusted_percent": 86.8,
-      "adjusted_if_proposed_approved_percent": 86.8
+      "measured_percent": 88.1,
+      "adjusted_percent": 90.7,
+      "adjusted_if_proposed_approved_percent": 90.7
     },
     "u_wb_port": {
       "uncovered_toggle_bits": 66,
@@ -97,7 +97,7 @@
       "status": "approved",
       "approved_by": "Jacob Zatopek",
       "matched_bits": {
-        "approved": 195,
+        "approved": 99,
         "proposed": 0
       },
       "rule": {
@@ -129,7 +129,7 @@
       "status": "approved",
       "approved_by": "Jacob Zatopek",
       "matched_bits": {
-        "approved": 99,
+        "approved": 51,
         "proposed": 0
       },
       "rule": {
@@ -457,7 +457,7 @@
       "status": "approved",
       "approved_by": "Jacob Zatopek",
       "matched_bits": {
-        "approved": 4,
+        "approved": 2,
         "proposed": 0
       },
       "rule": {
@@ -476,7 +476,6 @@
           "wr_burst_ctr"
         ],
         "bits": [
-          0,
           1
         ]
       }
@@ -637,7 +636,7 @@
       "status": "approved",
       "approved_by": "Jacob Zatopek",
       "matched_bits": {
-        "approved": 2,
+        "approved": 6,
         "proposed": 0
       },
       "rule": {
@@ -655,6 +654,8 @@
           "reg_bist_addr_end"
         ],
         "bits": [
+          29,
+          30,
           31
         ]
       }
@@ -725,7 +726,7 @@
       "status": "approved",
       "approved_by": "Jacob Zatopek",
       "matched_bits": {
-        "approved": 64,
+        "approved": 32,
         "proposed": 0
       },
       "rule": {
@@ -915,15 +916,15 @@
     }
   ],
   "derived_under": {
-    "spec_revision": "compiled_ddr31600_x8_4lane_1rank_f3a1a17b",
-    "spec_design_id": "ddr3_mc_1600_x8_4lane_1rank"
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+    "spec_design_id": "ddr3_mc_core_v2"
   },
   "design": {
-    "covered": 11528,
-    "total": 13014,
-    "excluded_approved": 832,
-    "measured_percent": 88.6,
-    "adjusted_percent": 94.6,
+    "covered": 7693,
+    "total": 8689,
+    "excluded_approved": 658,
+    "measured_percent": 88.5,
+    "adjusted_percent": 95.8,
     "instances_applied": [
       "addr_decoder",
       "bank_tracker",

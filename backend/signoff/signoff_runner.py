@@ -137,16 +137,38 @@ def signoff(a, res: dict) -> None:
     # 0. Provenance: is this GDS the one the current netlist describes?
     res["freshness"] = assert_gds_is_current(base, gds)
 
-    # 1. Reference CDL from the final netlist, through make, refusing any upstream rebuild
+    # 1. Reference CDL from the final netlist, through make, with every upstream
+    # result declared up to date (`-o 6_final.v`: the CDL rule's only
+    # prerequisite), so make can only run cdl.tcl. Until 2026-11-12 the call
+    # was unguarded in practice: ORFS f34d4d9 wraps every step as
+    # `bash -c '... make ... $@' -- do-<step>`, so the dry-run guard below,
+    # which looked for yosys/openroad/klayout on the line, saw nothing, and
+    # make rebuilt placement through routing under the 900 s CDL timeout
+    # and was killed mid-route (the first full run on the Mac, drop
+    # fe6048875ca5). The provenance that matters is assert_gds_is_current
+    # above (odb -> def -> v -> gds, all from one pass); make's own view of
+    # staleness is recorded, never acted on.
     cfg, target = f"designs/{p}/{d}/config.mk", str(cdl.relative_to(flow))
     rc, dry, _ = run(["make", "-n", f"DESIGN_CONFIG={cfg}", target], out / "cdl_dryrun.log", 300, flow)
     if rc != 0:
         raise StepError(f"make dry-run for the CDL failed (rc={rc}); see cdl_dryrun.log")
-    rebuild = [l for l in dry.splitlines() if re.search(r"yosys|openroad|klayout", l) and "cdl.tcl" not in l]
+    rebuild = [l for l in dry.splitlines()
+               if (re.search(r"yosys|openroad|klayout", l) or re.search(r" -- do-[0-9]", l)) and "cdl.tcl" not in l]
     if rebuild:
-        raise StepError(f"refusing to generate the CDL: make would re-run {len(rebuild)} upstream flow "
-                        f"step(s), so the results look stale; see cdl_dryrun.log")
-    rc, _, _ = run(["make", f"DESIGN_CONFIG={cfg}", target], out / "cdl.log", 900, flow)
+        print(f"[signoff] make considers {len(rebuild)} upstream step(s) out of date (see cdl_dryrun.log); "
+              f"the CDL is written from the existing 6_final.v, which the freshness check above ties to the GDS")
+        res["cdl_make_would_rebuild"] = len(rebuild)
+    # The CDL is written by ORFS's own recipe but through a one-rule makefile
+    # of ours, so make has no graph to walk: `-o 6_final.v` was not enough
+    # (a global-route result left newer than the routed design by the killed
+    # rebuild still made make re-run detailed route under the CDL timeout,
+    # 2026-11-12). Loading the Makefile first gives the recipe every ORFS
+    # variable; the target depends on nothing.
+    only = out / "cdl_only.mk"
+    only.write_text("cdl_only:\n\t$(RUN_CMD) --log $(abspath $(LOG_DIR)/6_cdl.log) --tee -- "
+                    "$(OPENROAD_CMD) $(SCRIPTS_DIR)/cdl.tcl\n")
+    rc, _, _ = run(["make", "-f", "Makefile", "-f", str(only), f"DESIGN_CONFIG={cfg}", "cdl_only"],
+                   out / "cdl.log", 900, flow)
     if rc != 0 or not cdl.exists():
         raise StepError(f"CDL generation failed (rc={rc}); see cdl.log")
 

@@ -1,0 +1,166 @@
+{
+  "schema": "validation-findings/2",
+  "drop": {
+    "drop_id": "47b02c451dd9",
+    "spec_id": "00d082c3f72d1b34",
+    "git_head": "92b05f7",
+    "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+  },
+  "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank",
+  "generated_utc": "2026-11-16T01:53:23+00:00",
+  "producer": "backend",
+  "finding_count": 1,
+  "findings": [
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/TIMING/wb_port_wb_stall_o",
+      "kind": "timing_defect",
+      "check_id": "TIMING/wb_port_wb_stall_o",
+      "taxonomy_id": "TIMING_001",
+      "detectors": [
+        "sta:opensta:setup"
+      ],
+      "owner_module": "data_path",
+      "owner_candidates": [
+        "data_path"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "data_path: does not close timing at 5.0 ns",
+      "requirement": "data_path must close timing at the clock period of 5.0 ns (200 MHz)",
+      "spec_ref": "clocking_model.controller_clock_period_ns",
+      "expected": "slack >= 0 ns at a 5.0 ns period",
+      "actual": "WNS -0.670 ns, TNS -79.230 ns, Fmax 176.37 MHz",
+      "detector": "sta:opensta:setup",
+      "anchor": [
+        {
+          "file": "runs/golden_full/drop/TOPRTL/ddr3_controller.sv",
+          "signal": "wb_port_wb_stall_o",
+          "role": "endpoint"
+        },
+        {
+          "file": "runs/golden_full/drop/PHASE4RTL/data_path.sv",
+          "instance": "u_data_path",
+          "signal": "wr_rptr",
+          "bit": 0,
+          "role": "startpoint"
+        }
+      ],
+      "mechanism": null,
+      "paths": [],
+      "occurrences": 2,
+      "suggested_fix": null,
+      "evidence": {
+        "observed_in": "TOPRTL",
+        "worst_path": {
+          "startpoint": "u_data_path.wr_rptr[0]$_DFFE_PN0P_",
+          "startpoint_kind": "rising edge-triggered flip-flop clocked by core_clk",
+          "endpoint": "wb_port_wb_stall_o",
+          "slack_ns": -0.67,
+          "logic_levels": 24,
+          "buffers": 16,
+          "arrival_ns": 4.67,
+          "required_ns": 4.0,
+          "path_group": "core_clk"
+        },
+        "wns_ns": -0.67,
+        "tns_ns": -79.23,
+        "failing_paths_reported": 2,
+        "spread": "many endpoints failing, not a single outlier"
+      },
+      "repro": {
+        "command": "pipeline_batch.py --bundle_dirs /Users/jacob/Capstone/ecen403-llm-mc-1/runs/golden_full/drop/TOPRTL"
+      },
+      "drop": {
+        "drop_id": "47b02c451dd9",
+        "spec_id": "00d082c3f72d1b34",
+        "git_head": "92b05f7",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "47b02c451dd9",
+      "last_seen": "47b02c451dd9",
+      "resolved_in": null,
+      "status": "open",
+      "generated_utc": "2026-11-16T01:53:23+00:00",
+      "related_manual_findings": []
+    }
+  ],
+  "resolved": [
+    {
+      "schema": "validation-findings/2",
+      "id": "data_path/TIMING/wb_port_wb_dat_o",
+      "kind": "timing_defect",
+      "check_id": "TIMING/wb_port_wb_dat_o",
+      "taxonomy_id": "TIMING_001",
+      "detectors": [
+        "sta:opensta:setup"
+      ],
+      "owner_module": "data_path",
+      "owner_candidates": [
+        "data_path"
+      ],
+      "severity": "critical",
+      "confidence": "confirmed",
+      "title": "data_path: does not close timing at 5.0 ns",
+      "requirement": "data_path must close timing at the clock period of 5.0 ns (200 MHz)",
+      "spec_ref": "clocking_model.controller_clock_period_ns",
+      "expected": "slack >= 0 ns at a 5.0 ns period",
+      "actual": "WNS -0.660 ns, TNS -26.970 ns, Fmax 176.68 MHz",
+      "detector": "sta:opensta:setup",
+      "anchor": [
+        {
+          "file": "runs/golden_full/drop/TOPRTL/ddr3_controller.sv",
+          "signal": "wb_port_wb_dat_o",
+          "bit": 5,
+          "role": "endpoint"
+        },
+        {
+          "file": "runs/golden_full/drop/PHASE4RTL/data_path.sv",
+          "instance": "u_data_path",
+          "signal": "rd_rptr",
+          "bit": 0,
+          "role": "startpoint"
+        }
+      ],
+      "mechanism": null,
+      "paths": [],
+      "occurrences": 2,
+      "suggested_fix": null,
+      "evidence": {
+        "observed_in": "TOPRTL",
+        "worst_path": {
+          "startpoint": "u_data_path.rd_rptr[0]$_DFFE_PN0N_",
+          "startpoint_kind": "rising edge-triggered flip-flop clocked by core_clk",
+          "endpoint": "wb_port_wb_dat_o[5]",
+          "slack_ns": -0.66,
+          "logic_levels": 22,
+          "buffers": 14,
+          "arrival_ns": 4.66,
+          "required_ns": 4.0,
+          "path_group": "core_clk"
+        },
+        "wns_ns": -0.66,
+        "tns_ns": -26.97,
+        "failing_paths_reported": 2,
+        "spread": "many endpoints failing, not a single outlier"
+      },
+      "repro": {
+        "command": "pipeline_batch.py --bundle_dirs /Users/jacob/Capstone/ecen403-llm-mc-1/runs/golden_full/drop/TOPRTL"
+      },
+      "drop": {
+        "drop_id": "8d6ddc513376",
+        "spec_id": "00d082c3f72d1b34",
+        "git_head": "92b05f7",
+        "spec_revision": "golden_ddr3_1600k_x8_2lane_1rank"
+      },
+      "introduced_in": null,
+      "first_seen": "8d6ddc513376",
+      "last_seen": "8d6ddc513376",
+      "resolved_in": "47b02c451dd9",
+      "status": "resolved",
+      "generated_utc": "2026-11-16T01:25:02+00:00",
+      "related_manual_findings": []
+    }
+  ]
+}
