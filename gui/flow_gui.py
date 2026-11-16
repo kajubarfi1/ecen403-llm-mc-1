@@ -54,6 +54,11 @@ from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
+try:                      # real per-step layout frames; optional
+    import chip_render
+except ImportError:       # page still works, it just draws the procedural chip
+    chip_render = None
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 
@@ -179,9 +184,53 @@ def orfs_stage_of(fname):
     return {"1": "synth", "2": "floorplan", "3": "place", "4": "cts", "6": "finish"}.get(major)
 
 
+# Reading a file must never stop ORFS writing one. On Windows a plain open()
+# leaves a handle without FILE_SHARE_DELETE, and while it is held nobody can
+# rename or delete that file -- so this page, polling an in-progress step log,
+# can make the build itself fail:
+#
+#   mv: cannot move '.../5_2_route.tmp.log' to '.../5_2_route.log':
+#       Permission denied
+#   make[1]: *** [Makefile:549: do-5_2_route] Error 1
+#
+# which is how the 2026-11-12 run died after detailed routing had already
+# finished clean (0 DRC, 0 antenna). ORFS writes every step to <step>.tmp.log
+# and renames it on completion, so the collision window is exactly the moment
+# a step ends -- the moment the page most wants to read. Open with every share
+# flag set, so a reader is invisible to the writer. POSIX renames over open
+# files happily and needs none of this.
+if sys.platform == "win32":
+    import ctypes
+    import msvcrt
+    from ctypes import wintypes
+
+    _GENERIC_READ = 0x80000000
+    _SHARE_ALL = 0x01 | 0x02 | 0x04          # READ | WRITE | DELETE
+    _OPEN_EXISTING = 3
+    _INVALID_HANDLE = ctypes.c_void_p(-1).value
+    _CreateFileW = ctypes.windll.kernel32.CreateFileW
+    _CreateFileW.argtypes = [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD,
+                             wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD,
+                             wintypes.HANDLE]
+    _CreateFileW.restype = wintypes.HANDLE
+
+    def open_shared(path):
+        """Open for reading without blocking the writer's rename or delete."""
+        h = _CreateFileW(str(path), _GENERIC_READ, _SHARE_ALL, None,
+                         _OPEN_EXISTING, 0, None)
+        if not h or h == _INVALID_HANDLE:
+            raise OSError(ctypes.get_last_error(), "cannot open", str(path))
+        # the fd takes ownership of the handle; closing the file closes it
+        fd = msvcrt.open_osfhandle(h, os.O_RDONLY | getattr(os, "O_BINARY", 0))
+        return os.fdopen(fd, "rb")
+else:
+    def open_shared(path):
+        return open(path, "rb")
+
+
 def read_tail(path, nbytes=65536):
     try:
-        with open(path, "rb") as f:
+        with open_shared(path) as f:
             f.seek(0, os.SEEK_END)
             size = f.tell()
             f.seek(max(0, size - nbytes))
@@ -567,7 +616,8 @@ def validation_file(run_dir, path, what, nbytes=120000):
 
 
 class Watcher:
-    def __init__(self, runs_root, run=None, orfs_dir=None, platform=None):
+    def __init__(self, runs_root, run=None, orfs_dir=None, platform=None,
+                 chip_frames=True):
         self.runs_root = runs_root
         self.fixed_run = run
         self.orfs_dir = orfs_dir or os.environ.get("ORFS_DIR") or env_file_value("ORFS_DIR")
@@ -575,6 +625,26 @@ class Watcher:
             self.orfs_dir = None
         self.platform = platform or os.environ.get("PLATFORM") or env_file_value("PLATFORM") or "sky130hd"
         self.orfs_seconds = {}   # (run, round) -> measured seconds of a finished ORFS pass
+        self.chip_frames = chip_frames and chip_render is not None
+        self._frames = {}        # run_dir -> ChipFrames, one renderer per run
+
+    def frames_for(self, run_dir):
+        """The frame renderer for one run, made on first use. Frames live in
+        the run directory, so they are archived and cleaned with it."""
+        if not (self.chip_frames and self.orfs_dir and run_dir):
+            return None
+        fr = self._frames.get(run_dir)
+        if fr is None:
+            fr = chip_render.ChipFrames(self.orfs_dir, self.platform,
+                                        os.path.join(run_dir, "chipframes"))
+            self._frames[run_dir] = fr
+        return fr
+
+    def frame_file(self, run_id, name):
+        """Resolve a frame URL to a file on disk (None if it is not one)."""
+        run_dir = self.resolve_run(run_id)
+        fr = self._frames.get(run_dir) if run_dir else None
+        return fr.frame_path(name) if fr else None
 
     def list_runs(self):
         out = []
@@ -905,7 +975,13 @@ class Watcher:
         # the last backend invocation in flow.log
         start_i = None
         for i, (t, body) in enumerate(log):
-            if body.startswith("$ ") and "backend/agents/pipeline.py" in body:
+            # flow.py echoes the command with the platform's own separator, so
+            # on Windows this line reads backend\agents\pipeline.py and a
+            # forward-slash test never matches: start_i stays None and the
+            # whole backend card sits at "pending" for the entire build, with
+            # no step detail and no time estimate (2026-11-12, first Windows
+            # GUI run). Compare with separators normalised either way.
+            if body.startswith("$ ") and "backend/agents/pipeline.py" in body.replace("\\", "/"):
                 start_i = i
         if start_i is None:
             rec = [s for s in state.get("stages", []) if s["stage"] == "backend"]
@@ -1005,10 +1081,25 @@ class Watcher:
                     cells = synth_cells(self.orfs_dir, self.platform, design)
                     if cells:
                         bk["orfs"]["cells"] = cells
+                    # Real layout frames: ORFS leaves a complete .odb on the
+                    # host after every step, so the build can be watched in
+                    # the design itself rather than in a drawing of it. The
+                    # renders happen on a background thread -- poll() only
+                    # queues what is new and returns what has finished.
+                    fr = self.frames_for(run_dir)
+                    if fr is not None:
+                        try:
+                            bk["orfs"]["frames"] = fr.poll(design, p_start)
+                            if fr.last_error:
+                                bk["orfs"]["frame_error"] = fr.last_error
+                        except Exception as e:   # a frame is never worth a 500
+                            bk["orfs"]["frame_error"] = f"{type(e).__name__}: {e}"
                     try:
                         bk["last_write"] = max(os.path.getmtime(f) for f in glob.glob(os.path.join(design_dir, "*.log")))
-                    except ValueError:
+                    except ValueError:      # no logs yet
                         pass
+                    except OSError:         # one vanished between glob and stat
+                        pass                # (ORFS renames its .tmp logs mid-step)
                 else:
                     # no step logs to read: a time-based estimate across ORFS steps
                     bk["orfs"]["estimated"] = True
@@ -1141,6 +1232,19 @@ def make_handler(watcher, terminal=None, token="", off_reason=""):
                     return self._json(500, {"error": f"{type(e).__name__}: {e}"})
                 st["terminal"] = terminal.state() if terminal else {"available": False, "reason": off_reason}
                 return self._json(200, st)
+            if u.path == "/api/frame":
+                p = watcher.frame_file((q.get("run") or [None])[0],
+                                       (q.get("name") or [""])[0])
+                if not p:
+                    return self._send(404, "no such frame", "text/plain")
+                with open(p, "rb") as f:
+                    body = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "image/png")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.end_headers()
+                return self.wfile.write(body)
             if u.path == "/api/validation":
                 try:
                     return self._json(200, watcher.validation((q.get("run") or [None])[0]))
@@ -1249,6 +1353,9 @@ def main():
     ap.add_argument("--platform", help="ORFS platform (default: PLATFORM or sky130hd)")
     ap.add_argument("--port", type=int, default=8765)
     ap.add_argument("--no-browser", action="store_true")
+    ap.add_argument("--no-chip-frames", action="store_true",
+                    help="do not render the real layout per ORFS step (the chip card "
+                         "then draws the procedural illustration only)")
     ap.add_argument("--demo", action="store_true", help="simulate a whole run, no ORFS needed")
     ap.add_argument("--demo-minutes", type=float, default=4.0, help="length of the simulated run")
     ap.add_argument("--no-terminal", action="store_true",
@@ -1263,14 +1370,21 @@ def main():
         import demo_run
         sim = demo_run.Demo(minutes=args.demo_minutes)
         threading.Thread(target=sim.run, daemon=True).start()
-        watcher = Watcher(sim.runs_root, run=sim.run_dir, orfs_dir=sim.orfs_dir, platform="sky130hd")
+        # no chip frames in the demo: its ORFS tree is a simulation with no
+        # real .odb to render, and the renderer would only reach for Docker
+        watcher = Watcher(sim.runs_root, run=sim.run_dir, orfs_dir=sim.orfs_dir,
+                          platform="sky130hd", chip_frames=False)
         print(f"demo run in {sim.root}")
     else:
         run = os.path.abspath(args.run) if args.run else None
         watcher = Watcher(os.path.abspath(args.runs_root), run=run,
-                          orfs_dir=args.orfs_dir, platform=args.platform)
+                          orfs_dir=args.orfs_dir, platform=args.platform,
+                          chip_frames=not args.no_chip_frames)
         if not watcher.orfs_dir:
             print("note: ORFS_DIR not found; backend steps will be estimated from elapsed time")
+        elif watcher.chip_frames:
+            print("chip frames: rendering the real layout per ORFS step "
+                  "(--no-chip-frames to draw the illustration only)")
         if not args.no_terminal:
             terminal = flow_terminal.FlowTerminal(ROOT)
     off = ("demo mode: the page only watches the simulated run" if args.demo else
