@@ -1175,5 +1175,61 @@ class TestFormalSwitch(FlowCase):
         self.assertNotIn("VALIDATION_SKIP_FORMAL", env)
 
 
+
+class ClockPeriodOverride(FlowCase):
+    """--clock-period-ns reaches the backend, and only when asked for."""
+
+    def _backend_argv(self, period):
+        """Run the whole flow with the standard Fake, and return the argv it
+        built for the backend pipeline."""
+        seen = []
+        os.environ["USE_DOCKER"] = "1"      # or the backend stage never runs
+        fake = Fake(self.run_dir)
+        real_call = fake.__call__
+
+        def spy(cmd, cwd=None, stdin=None, env=None, log=None, timeout=None):
+            argv = list(cmd) if isinstance(cmd, (list, tuple)) else [cmd]
+            # the backend pipeline, not the Frontend's phase<N>_pipeline.py
+            if any(str(x).endswith(os.path.join("agents", "pipeline.py")) for x in argv):
+                seen.append(argv)
+            return real_call(cmd, cwd, stdin, env, log, timeout)
+        self.go(spy, clock_period_ns=period)
+        return seen
+
+    def test_the_period_reaches_the_backend(self):
+        cmds = self._backend_argv(10.0)
+        self.assertTrue(cmds, "backend pipeline was never invoked")
+        argv = cmds[0]
+        self.assertIn("--clock_period_ns", argv)
+        self.assertEqual("10.0", argv[argv.index("--clock_period_ns") + 1])
+
+    def test_nothing_is_passed_when_it_is_not_asked_for(self):
+        cmds = self._backend_argv(None)
+        self.assertTrue(cmds, "backend pipeline was never invoked")
+        self.assertNotIn("--clock_period_ns", cmds[0])
+
+    def test_help_warns_that_it_is_not_a_timing_result(self):
+        import subprocess, sys as _s
+        out = subprocess.run([_s.executable, os.path.join(ROOT, "flow.py"), "--help"],
+                             capture_output=True, text=True, timeout=120).stdout
+        self.assertIn("--clock-period-ns", out)
+        self.assertIn("not", out.lower())
+
+    def test_dry_run_announces_the_override(self):
+        import subprocess, sys as _s
+        out = subprocess.run([_s.executable, os.path.join(ROOT, "flow.py"),
+                              "--preset", "balanced", "--clock-period-ns", "10", "--dry-run"],
+                             capture_output=True, text=True, timeout=300).stdout
+        self.assertIn("OVERRIDE 10.0 ns", out)
+        self.assertIn("100.0 MHz", out)
+
+    def test_dry_run_is_silent_without_it(self):
+        import subprocess, sys as _s
+        out = subprocess.run([_s.executable, os.path.join(ROOT, "flow.py"),
+                              "--preset", "balanced", "--dry-run"],
+                             capture_output=True, text=True, timeout=300).stdout
+        self.assertNotIn("clock period", out)
+        self.assertNotIn("OVERRIDE", out)
+
 if __name__ == "__main__":
     unittest.main()

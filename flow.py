@@ -1112,6 +1112,15 @@ def stage_backend(run, args):
         cmd += ["--spec_id", run.state["spec_id"]]       # the content id (backend accepts it, 2026-10-09)
     if os.path.exists(env_file):
         cmd += ["--env_file", env_file]
+    # An override of the period the spec derives (tCK x clock_ratio). It
+    # constrains the build only -- the RTL, the DDR timing model and every
+    # CSR reset value still belong to the spec's own frequency, so a chip
+    # built this way is NOT the controller the spec describes and its STA
+    # result is not that controller's. For asking what the logic does at
+    # another period without editing the bundle; --preset or --choices
+    # (clock_ratio_ddr_to_controller) are how you actually change the design.
+    if getattr(args, "clock_period_ns", None):
+        cmd += ["--clock_period_ns", str(args.clock_period_ns)]
     # what these netlists are cut from: the drop as it stands now. The final
     # stage refuses netlists whose drop is not the one it judges (a resumed
     # run that regenerated RTL after the backend ran would otherwise judge
@@ -1472,6 +1481,11 @@ def plan(args):
           f"(agents present for phases {have}; others halt)")
     print(f"  6 backend               Backend   {'SKIPPED (--skip-backend)' if args.skip_backend else os.path.relpath(BACKEND_PIPELINE, ROOT) + ' --bundle_dir <run>/drop/TOPRTL --drop_id <id> --spec_revision <rev> --mode ' + (getattr(args, 'backend_mode', None) or 'build')}"
           + ("" if args.skip_backend else f"  (cap {args.max_backend_rounds} rounds; needs USE_DOCKER=1)"))
+    cp = getattr(args, "clock_period_ns", None)
+    if cp:
+        print(f"     clock period         OVERRIDE {cp} ns ({1000.0 / cp:.1f} MHz) instead of the "
+              f"spec's derived period -- constrains the build only; the RTL and DDR timing "
+              f"model are still the spec's, so this is not that controller's timing result")
     cu = getattr(args, "core_utilization", 0)
     print("     core utilisation     "
           + (f"CORE_UTILIZATION {cu} into drop/TOPRTL manifest.orfs_config "
@@ -1524,6 +1538,14 @@ def main() -> int:
                          "backend are skipped")
     ap.add_argument("--validate-per-phase", action="store_true",
                     help="run a partial validation after each Frontend phase, not only at the end")
+    ap.add_argument("--clock-period-ns", type=float, default=None, metavar="NS",
+                    help="constrain the backend build to this period instead of the one the "
+                         "spec derives (tCK x clock_ratio). The RTL, the DDR timing model and "
+                         "the CSR reset values still come from the spec, so the result is NOT "
+                         "the controller the spec describes -- use it to ask what the logic "
+                         "does at another period, not to report timing closure. To change the "
+                         "design's own frequency use --preset or --choices "
+                         "(clock_ratio_ddr_to_controller)")
     ap.add_argument("--random-seeds", type=int, default=4, metavar="N",
                     help="constrained-random (random_v2) seeds per path that validate_drop runs "
                          "on its six traffic paths after the directed suite (default 4: 24 runs, a "
