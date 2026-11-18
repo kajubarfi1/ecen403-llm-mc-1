@@ -223,5 +223,91 @@ class SharedReads(unittest.TestCase):
         import flow_gui
         self.assertEqual("", flow_gui.read_tail(os.path.join(self.tmp, "nope.log")))
 
+
+class FailureIsLegible(unittest.TestCase):
+    """Frames fail silently by design -- the page keeps the illustration --
+    so the reason has to be findable when someone asks why there are none
+    (2026-11-18: a Mac rendered zero frames and nothing said why)."""
+
+    class P:
+        def __init__(self, err="", out=""):
+            self.stderr, self.stdout = err, out
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp(prefix="chiperr-")
+        self.addCleanup(lambda: __import__("shutil").rmtree(self.tmp, ignore_errors=True))
+        self.c = cr.ChipFrames("/nowhere", "sky130hd", self.tmp,
+                               image="openroad/orfs:arm64-local")
+
+    def test_a_missing_image_names_the_image_and_the_variable(self):
+        e = self.c._explain(self.P("Unable to find image 'openroad/orfs:x' locally"))
+        self.assertIn("arm64-local", e)
+        self.assertIn("ORFS_DOCKER_IMAGE", e)
+
+    def test_an_openroad_without_a_gui_says_so(self):
+        """Built with -no-gui, gui::save_image simply is not there."""
+        e = self.c._explain(self.P('invalid command name "gui::show"'))
+        self.assertIn("-no-gui", e)
+        self.assertIn("GUI", e)
+
+    def test_a_stopped_daemon_says_so(self):
+        e = self.c._explain(self.P("Cannot connect to the Docker daemon at unix:///var/run/docker.sock"))
+        self.assertIn("Docker is not running", e)
+
+    def test_an_unknown_failure_still_returns_the_output(self):
+        e = self.c._explain(self.P("some novel disaster"))
+        self.assertIn("novel disaster", e)
+
+    def test_no_output_at_all_is_still_an_explanation(self):
+        self.assertTrue(self.c._explain(self.P()))
+
+
+class ImageSelection(unittest.TestCase):
+
+    def test_watcher_passes_the_configured_image(self):
+        import flow_gui
+        tmp = tempfile.mkdtemp(prefix="chipimg-")
+        self.addCleanup(lambda: __import__("shutil").rmtree(tmp, ignore_errors=True))
+        old = os.environ.get("ORFS_DOCKER_IMAGE")
+        os.environ["ORFS_DOCKER_IMAGE"] = "openroad/orfs:arm64-local"
+        self.addCleanup(lambda: os.environ.pop("ORFS_DOCKER_IMAGE", None)
+                        if old is None else os.environ.__setitem__("ORFS_DOCKER_IMAGE", old))
+        w = flow_gui.Watcher(tmp, orfs_dir=tmp)
+        fr = w.frames_for(tmp)
+        self.assertIsNotNone(fr, "renderer should exist when orfs_dir is set")
+        self.assertEqual("openroad/orfs:arm64-local", fr.image)
+
+
+class DockerProbeIsCached(unittest.TestCase):
+    """One renderer is built per run directory, and `docker info` against a
+    busy daemon takes its full timeout. Probing once per instance made a
+    35-second suite take 19 minutes (2026-11-18)."""
+
+    def setUp(self):
+        self.calls = []
+        self._real = cr.subprocess.run
+        self._ok = cr._DOCKER_OK
+        cr._DOCKER_OK = None
+        self.addCleanup(lambda: setattr(cr, "_DOCKER_OK", self._ok))
+        self.addCleanup(lambda: setattr(cr.subprocess, "run", self._real))
+
+        class R:
+            returncode = 0
+
+        def fake(cmd, **kw):
+            self.calls.append(cmd)
+            return R()
+        cr.subprocess.run = fake
+
+    def test_the_daemon_is_probed_once_per_process(self):
+        for _ in range(5):
+            cr.docker_available()
+        self.assertEqual(1, len(self.calls), f"probed {len(self.calls)} times")
+
+    def test_recheck_forces_a_fresh_probe(self):
+        cr.docker_available()
+        cr.docker_available(recheck=True)
+        self.assertEqual(2, len(self.calls))
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -77,14 +77,29 @@ def _docker_path(p):
     return os.path.abspath(p).replace("\\", "/")
 
 
-def docker_available():
-    if not shutil.which("docker"):
-        return False
-    try:
-        return subprocess.run(["docker", "info"], capture_output=True,
-                              timeout=20).returncode == 0
-    except Exception:
-        return False
+# The answer is a property of the machine, not of a run, and `docker info`
+# against a busy or stopped daemon can take its full timeout. One renderer is
+# made per run directory, so without this cache a page watching several runs
+# pays that repeatedly, and a test suite that builds many Watchers pays it
+# once per Watcher (2026-11-18: a 35-second suite took 19 minutes).
+_DOCKER_OK = None
+_DOCKER_LOCK = threading.Lock()
+
+
+def docker_available(recheck=False):
+    global _DOCKER_OK
+    with _DOCKER_LOCK:
+        if _DOCKER_OK is not None and not recheck:
+            return _DOCKER_OK
+        if not shutil.which("docker"):
+            _DOCKER_OK = False
+            return False
+        try:
+            _DOCKER_OK = subprocess.run(["docker", "info"], capture_output=True,
+                                        timeout=20).returncode == 0
+        except Exception:
+            _DOCKER_OK = False
+        return _DOCKER_OK
 
 
 class ChipFrames:
@@ -231,7 +246,8 @@ class ChipFrames:
                 pass
         path = os.path.join(self.out_dir, out_name)
         if proc.returncode != 0 or not os.path.exists(path):
-            self.last_error = (proc.stderr or proc.stdout or "render failed").strip()[-300:]
+            self.last_error = self._explain(proc)
+            print(f"[chip] frame {stem} failed: {self.last_error}")
             return
         if os.path.getsize(path) < 1024:
             # fit collapsed, or the step has nothing to draw: not a frame
@@ -244,6 +260,27 @@ class ChipFrames:
         with self.lock:
             self.done[stem] = {"stem": stem, "file": out_name, "label": label,
                                "step": step, "mtime": mt, "render_s": round(time.time() - t0, 1)}
+
+    def _explain(self, proc):
+        """Turn a failed render into something a person can act on. These
+        frames fail silently by design -- the page just keeps the procedural
+        chip -- so the reason has to be legible when someone goes looking
+        (2026-11-18: a Mac saw no frames at all and nothing said why)."""
+        out = ((proc.stderr or "") + "\n" + (proc.stdout or "")).strip()
+        low = out.lower()
+        if "unable to find image" in low or "manifest unknown" in low or "no such image" in low:
+            return (f"ORFS image {self.image!r} not found. The renderer uses "
+                    f"ORFS_DOCKER_IMAGE, the same image the backend builds with; "
+                    f"set it to the image that exists on this machine.")
+        if "gui::" in low and ("invalid command" in low or "unknown command" in low):
+            return ("this OpenROAD was built without GUI support (-no-gui), so "
+                    "gui::save_image does not exist. Real layout frames need a "
+                    "GUI-enabled OpenROAD; the page keeps the illustration.")
+        if "no space left" in low:
+            return "no disk space left for frames"
+        if "cannot connect to the docker daemon" in low or "docker daemon" in low:
+            return "Docker is not running"
+        return out[-300:] or "render failed with no output"
 
     # -- serving --------------------------------------------------------------
 

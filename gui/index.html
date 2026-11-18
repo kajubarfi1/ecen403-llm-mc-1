@@ -1600,10 +1600,16 @@ const chip = (() => {
       $("chip-stage").style.setProperty("--ghost", active ? 0.18 : 0);
 
       const real = realFrames.length > 0;
+      // When the real frames are missing, say so here rather than just
+      // quietly drawing the illustration -- a Mac rendered none at all and
+      // the page gave no hint why (2026-11-18). Full reason on hover.
+      const err = !real && bk.orfs.frame_error ? bk.orfs.frame_error : "";
       $("chip-meta").textContent = `${bk.orfs.design || "ddr3_controller"} · ${d.platform}` +
         (cells ? ` · ${cells.toLocaleString()} cells` : "") +
         (real ? ` · real layout, ${realFrames.length} step frame${realFrames.length > 1 ? "s" : ""}`
-              : " · illustrative, sized by block cell counts");
+              : " · illustrative, sized by block cell counts") +
+        (err ? ` · no layout frames: ${err.split(".")[0]}` : "");
+      $("chip-meta").title = err || "";
       setTag();
     },
     reset() {

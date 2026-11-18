@@ -635,8 +635,18 @@ class Watcher:
             return None
         fr = self._frames.get(run_dir)
         if fr is None:
+            # The ORFS image is per-machine: the backend reads ORFS_DOCKER_IMAGE
+            # and so must this, or the renderer runs a container from an image
+            # that is not there. Jacob's Mac build is openroad/orfs:arm64-local
+            # (USAGE, "Running the whole flow on a Mac"), and hardcoding
+            # openroad/orfs:latest made the frames fail silently there
+            # (2026-11-18). Same precedence the rest of this file uses.
+            image = (os.environ.get("ORFS_DOCKER_IMAGE")
+                     or env_file_value("ORFS_DOCKER_IMAGE")
+                     or "openroad/orfs:latest")
             fr = chip_render.ChipFrames(self.orfs_dir, self.platform,
-                                        os.path.join(run_dir, "chipframes"))
+                                        os.path.join(run_dir, "chipframes"),
+                                        image=image)
             self._frames[run_dir] = fr
         return fr
 
